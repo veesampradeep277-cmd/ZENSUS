@@ -1,0 +1,2727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENSUS — Django Lesson 14: Building REST APIs</title>
+
+<style>
+:root{
+  --blue:#2563eb;
+  --blue-dark:#1d4ed8;
+  --blue-light:#eff6ff;
+  --blue-soft:#dbeafe;
+  --blue-border:#bfdbfe;
+  --text:#10213f;
+  --text-light:#5f6f86;
+  --muted:#8b9ab0;
+  --bg:#f7faff;
+  --white:#fff;
+  --border:#dce6f2;
+  --green:#16a34a;
+  --green-light:#f0fdf4;
+  --orange:#f59e0b;
+  --orange-light:#fffbeb;
+  --red:#dc2626;
+  --red-light:#fef2f2;
+  --purple:#7c3aed;
+  --shadow:0 12px 35px rgba(37,99,235,.08);
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  font-family:Inter,Segoe UI,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.7;
+}
+
+.progress{
+  position:fixed;
+  top:0;
+  left:0;
+  height:4px;
+  width:0;
+  background:var(--blue);
+  z-index:9999;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+  position:fixed;
+  left:0;
+  top:0;
+  width:280px;
+  height:100vh;
+  background:#fff;
+  border-right:1px solid var(--border);
+  padding:24px 18px;
+  overflow-y:auto;
+  z-index:1000;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:25px;
+  padding:5px 8px;
+}
+
+.logo{
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  background:linear-gradient(135deg,var(--blue),#60a5fa);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  font-size:17px;
+}
+
+.brand h2{
+  font-size:20px;
+}
+
+.brand small{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+  letter-spacing:1px;
+}
+
+.lesson-label{
+  margin:0 8px 12px;
+  font-size:11px;
+  color:var(--muted);
+  font-weight:800;
+  letter-spacing:1.4px;
+}
+
+.nav{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.nav a{
+  text-decoration:none;
+  color:var(--text-light);
+  padding:9px 12px;
+  border-radius:9px;
+  font-size:13px;
+  transition:.2s;
+}
+
+.nav a:hover,
+.nav a.active{
+  background:var(--blue-light);
+  color:var(--blue);
+  font-weight:700;
+}
+
+/* MAIN */
+
+.main{
+  margin-left:280px;
+  padding:55px 6%;
+  max-width:1500px;
+}
+
+/* HERO */
+
+.hero{
+  background:linear-gradient(135deg,#eff6ff,#ffffff);
+  border:1px solid var(--blue-border);
+  border-radius:25px;
+  padding:42px;
+  box-shadow:var(--shadow);
+  position:relative;
+  overflow:hidden;
+}
+
+.hero:after{
+  content:"";
+  position:absolute;
+  width:250px;
+  height:250px;
+  border-radius:50%;
+  background:rgba(37,99,235,.08);
+  right:-80px;
+  top:-100px;
+}
+
+.badges{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:18px;
+}
+
+.badge{
+  padding:5px 10px;
+  border-radius:20px;
+  background:#fff;
+  border:1px solid var(--blue-border);
+  color:var(--blue);
+  font-size:12px;
+  font-weight:700;
+}
+
+.hero h1{
+  font-size:clamp(30px,5vw,52px);
+  line-height:1.15;
+  margin-bottom:14px;
+}
+
+.hero p{
+  color:var(--text-light);
+  max-width:900px;
+  font-size:17px;
+}
+
+/* SEARCH */
+
+.search-box{
+  margin:25px 0;
+}
+
+.search-box input{
+  width:100%;
+  border:1px solid var(--border);
+  background:#fff;
+  padding:15px 18px;
+  border-radius:13px;
+  outline:none;
+  font-size:14px;
+  box-shadow:var(--shadow);
+}
+
+.search-box input:focus{
+  border-color:var(--blue);
+}
+
+/* SECTIONS */
+
+section{
+  margin-top:65px;
+  scroll-margin-top:30px;
+}
+
+.section-title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:15px;
+}
+
+.number{
+  width:35px;
+  height:35px;
+  border-radius:10px;
+  background:var(--blue);
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  font-size:14px;
+}
+
+h2{
+  font-size:28px;
+}
+
+h3{
+  margin:18px 0 9px;
+  font-size:19px;
+}
+
+p{
+  color:var(--text-light);
+  margin:9px 0;
+}
+
+/* CARDS */
+
+.card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:25px;
+  box-shadow:var(--shadow);
+  margin-top:18px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:18px;
+}
+
+.grid3{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+
+.info-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:21px;
+  transition:.25s;
+}
+
+.info-card:hover{
+  transform:translateY(-4px);
+  border-color:var(--blue-border);
+  box-shadow:var(--shadow);
+}
+
+.icon{
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:12px;
+  background:var(--blue-light);
+  color:var(--blue);
+  font-weight:800;
+  margin-bottom:12px;
+}
+
+/* CODE */
+
+.code{
+  position:relative;
+  background:#0f172a;
+  color:#dbeafe;
+  border-radius:15px;
+  padding:22px;
+  margin-top:15px;
+  overflow:auto;
+  font-family:Consolas,Monaco,monospace;
+  font-size:13px;
+  line-height:1.7;
+}
+
+.code button{
+  position:absolute;
+  top:10px;
+  right:10px;
+  border:1px solid #334155;
+  background:#1e293b;
+  color:#fff;
+  padding:6px 10px;
+  border-radius:7px;
+  cursor:pointer;
+  font-size:11px;
+}
+
+.code button:hover{
+  background:#334155;
+}
+
+/* NOTES */
+
+.note{
+  padding:17px 20px;
+  border-radius:13px;
+  margin-top:18px;
+  border-left:4px solid var(--blue);
+  background:var(--blue-light);
+}
+
+.warning{
+  background:var(--orange-light);
+  border-left-color:var(--orange);
+}
+
+.success{
+  background:var(--green-light);
+  border-left-color:var(--green);
+}
+
+.danger{
+  background:var(--red-light);
+  border-left-color:var(--red);
+}
+
+/* FLOW */
+
+.flow{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:10px;
+  margin:25px 0;
+}
+
+.flow-box{
+  min-width:145px;
+  text-align:center;
+  background:#fff;
+  border:1px solid var(--blue-border);
+  border-radius:15px;
+  padding:18px 12px;
+  box-shadow:var(--shadow);
+  animation:float 3s ease-in-out infinite;
+}
+
+.flow-box:nth-child(2){animation-delay:.25s}
+.flow-box:nth-child(3){animation-delay:.5s}
+.flow-box:nth-child(4){animation-delay:.75s}
+.flow-box:nth-child(5){animation-delay:1s}
+
+.arrow{
+  color:var(--blue);
+  font-size:22px;
+  font-weight:bold;
+}
+
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-5px)}
+}
+
+/* ENDPOINT */
+
+.endpoint{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px 16px;
+  border:1px solid var(--border);
+  background:#fff;
+  border-radius:12px;
+  margin:9px 0;
+}
+
+.method{
+  min-width:70px;
+  text-align:center;
+  padding:5px 9px;
+  border-radius:7px;
+  background:var(--blue);
+  color:white;
+  font-size:11px;
+  font-weight:800;
+}
+
+.method.post{
+  background:var(--green);
+}
+
+.method.put{
+  background:var(--orange);
+}
+
+.method.patch{
+  background:#7c3aed;
+}
+
+.method.delete{
+  background:var(--red);
+}
+
+.endpoint code{
+  color:var(--text);
+  font-weight:600;
+}
+
+/* API TERMINAL */
+
+.api-terminal{
+  background:#0f172a;
+  border-radius:17px;
+  overflow:hidden;
+  margin-top:20px;
+  box-shadow:0 15px 35px rgba(15,23,42,.12);
+}
+
+.terminal-top{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:12px 16px;
+  background:#1e293b;
+}
+
+.dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:#64748b;
+}
+
+.terminal-body{
+  padding:22px;
+  color:#dbeafe;
+  font-family:Consolas,monospace;
+  font-size:13px;
+  line-height:1.8;
+  overflow:auto;
+}
+
+/* STATUS */
+
+.status{
+  display:inline-block;
+  padding:5px 10px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:800;
+  background:var(--green-light);
+  color:var(--green);
+}
+
+/* TABLE */
+
+.table-wrap{
+  overflow-x:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:18px;
+  background:#fff;
+}
+
+th,td{
+  padding:13px;
+  border:1px solid var(--border);
+  text-align:left;
+  font-size:13px;
+}
+
+th{
+  background:var(--blue-light);
+  color:var(--blue-dark);
+}
+
+/* JSON */
+
+.json-box{
+  background:#0f172a;
+  color:#dbeafe;
+  padding:20px;
+  border-radius:15px;
+  overflow:auto;
+  font-family:Consolas,monospace;
+  font-size:13px;
+  line-height:1.7;
+  margin-top:15px;
+}
+
+/* CHECKLIST */
+
+.checklist{
+  list-style:none;
+  margin-top:12px;
+}
+
+.checklist li{
+  padding:9px 0;
+  border-bottom:1px dashed var(--border);
+}
+
+.checklist li:before{
+  content:"✓";
+  color:var(--green);
+  font-weight:900;
+  margin-right:10px;
+}
+
+/* QUIZ */
+
+.quiz{
+  border:1px solid var(--blue-border);
+  background:#fff;
+  padding:25px;
+  border-radius:17px;
+  margin-top:18px;
+}
+
+.option{
+  display:block;
+  border:1px solid var(--border);
+  padding:12px 15px;
+  border-radius:10px;
+  margin:8px 0;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.option:hover{
+  border-color:var(--blue);
+  background:var(--blue-light);
+}
+
+.option.correct{
+  background:var(--green-light);
+  border-color:var(--green);
+}
+
+.option.wrong{
+  background:var(--red-light);
+  border-color:var(--red);
+}
+
+.quiz-result{
+  margin-top:12px;
+  font-weight:700;
+}
+
+/* REVEAL */
+
+.reveal{
+  opacity:0;
+  transform:translateY(20px);
+  transition:.7s;
+}
+
+.reveal.visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* NEXT */
+
+.next{
+  margin-top:80px;
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  flex-wrap:wrap;
+}
+
+.next-btn{
+  padding:13px 18px;
+  border-radius:10px;
+  text-decoration:none;
+  border:1px solid var(--blue-border);
+  color:var(--blue);
+  background:white;
+  font-weight:700;
+}
+
+.next-btn.primary{
+  color:#fff;
+  background:var(--blue);
+}
+
+.footer{
+  margin-top:80px;
+  padding:35px;
+  text-align:center;
+  border-top:1px solid var(--border);
+  color:var(--muted);
+}
+
+/* RESPONSIVE */
+
+@media(max-width:900px){
+
+  .sidebar{
+    width:220px;
+  }
+
+  .main{
+    margin-left:220px;
+    padding:35px 4%;
+  }
+
+  .grid,
+  .grid3{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:650px){
+
+  .sidebar{
+    position:relative;
+    width:100%;
+    height:auto;
+    border-right:0;
+    border-bottom:1px solid var(--border);
+  }
+
+  .nav{
+    max-height:280px;
+    overflow-y:auto;
+  }
+
+  .main{
+    margin-left:0;
+    padding:25px 16px;
+  }
+
+  .hero{
+    padding:28px 22px;
+  }
+
+  .flow{
+    flex-direction:column;
+  }
+
+  .arrow{
+    transform:rotate(90deg);
+  }
+
+  .endpoint{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="progress" id="progress"></div>
+
+<aside class="sidebar">
+
+  <div class="brand">
+    <div class="logo">Z</div>
+
+    <div>
+      <h2>ZENSUS</h2>
+      <small>LEARNING PLATFORM</small>
+    </div>
+  </div>
+
+  <div class="lesson-label">
+    LESSON 14 / 15
+  </div>
+
+  <nav class="nav">
+    <a href="#overview">Overview</a>
+    <a href="#architecture">API Architecture</a>
+    <a href="#setup">Project Setup</a>
+    <a href="#model">Create Model</a>
+    <a href="#serializer">Create Serializer</a>
+    <a href="#listapi">List & Create API</a>
+    <a href="#detailapi">Detail API</a>
+    <a href="#crud">CRUD Operations</a>
+    <a href="#validation">Validation</a>
+    <a href="#status">Status Codes</a>
+    <a href="#urls">API URLs</a>
+    <a href="#database">Database Flow</a>
+    <a href="#testing">Testing API</a>
+    <a href="#frontend">Frontend Connection</a>
+    <a href="#security">API Security</a>
+    <a href="#practice">Mini Project</a>
+    <a href="#mistakes">Common Mistakes</a>
+    <a href="#quiz">Quiz</a>
+    <a href="#takeaway">Takeaway</a>
+  </nav>
+
+</aside>
+
+
+<main class="main">
+
+<header class="hero reveal" id="overview">
+
+  <div class="badges">
+    <span class="badge">LESSON 14 OF 15</span>
+    <span class="badge">BUILDING REST APIs</span>
+    <span class="badge">DJANGO REST FRAMEWORK</span>
+    <span class="badge">CRUD</span>
+  </div>
+
+  <h1>Building REST APIs</h1>
+
+  <p>
+    Move from understanding Django REST Framework to building a complete
+    working REST API with models, serializers, API views, CRUD operations,
+    validation, URLs, status codes and frontend communication.
+  </p>
+
+</header>
+
+
+<div class="search-box">
+  <input
+    type="text"
+    id="searchInput"
+    placeholder="Search this lesson... e.g. CRUD, Serializer, POST, Validation"
+  >
+</div>
+
+
+<!-- 01 -->
+
+<section id="architecture" class="reveal">
+
+  <div class="section-title">
+    <div class="number">01</div>
+    <h2>REST API Architecture</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      In a real application, the frontend and backend are often separate
+      applications.
+    </p>
+
+    <div class="flow">
+
+      <div class="flow-box">
+        <strong>React</strong>
+        <br>
+        <small>Frontend</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>HTTP</strong>
+        <br>
+        <small>Request</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>Django API</strong>
+        <br>
+        <small>Backend</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>Database</strong>
+        <br>
+        <small>PostgreSQL / SQLite</small>
+      </div>
+
+    </div>
+
+    <div class="flow">
+
+      <div class="flow-box">
+        <strong>JSON</strong>
+        <br>
+        <small>Response</small>
+      </div>
+
+      <div class="arrow">←</div>
+
+      <div class="flow-box">
+        <strong>Serializer</strong>
+        <br>
+        <small>Convert</small>
+      </div>
+
+      <div class="arrow">←</div>
+
+      <div class="flow-box">
+        <strong>API View</strong>
+        <br>
+        <small>Logic</small>
+      </div>
+
+    </div>
+
+    <div class="note">
+      <strong>Important:</strong>
+      The API acts as the communication layer between the frontend and backend.
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 02 -->
+
+<section id="setup" class="reveal">
+
+  <div class="section-title">
+    <div class="number">02</div>
+    <h2>Project Setup</h2>
+  </div>
+
+  <div class="card">
+
+    <h3>Install Django REST Framework</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>pip install djangorestframework</pre>
+
+    </div>
+
+    <h3>Create the API application</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>python manage.py startapp students</pre>
+
+    </div>
+
+    <h3>Add the apps</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>INSTALLED_APPS = [
+
+    ...
+
+    "rest_framework",
+    "students",
+
+]</pre>
+
+    </div>
+
+    <h3>Recommended structure</h3>
+
+    <div class="code">
+
+<pre>zensus_api/
+│
+├── manage.py
+│
+├── zensus_api/
+│   ├── settings.py
+│   ├── urls.py
+│   └── ...
+│
+└── students/
+    ├── models.py
+    ├── serializers.py
+    ├── views.py
+    ├── urls.py
+    ├── admin.py
+    └── migrations/</pre>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 03 -->
+
+<section id="model" class="reveal">
+
+  <div class="section-title">
+    <div class="number">03</div>
+    <h2>Create the Model</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      Our API will manage students. First create a Django model.
+    </p>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>from django.db import models
+
+
+class Student(models.Model):
+
+    name = models.CharField(
+        max_length=100
+    )
+
+    email = models.EmailField(
+        unique=True
+    )
+
+    age = models.IntegerField()
+
+    course = models.CharField(
+        max_length=100
+    )
+
+    active = models.BooleanField(
+        default=True
+    )
+
+    def __str__(self):
+        return self.name</pre>
+
+    </div>
+
+    <h3>Run migrations</h3>
+
+    <div class="code">
+
+<pre>python manage.py makemigrations
+python manage.py migrate</pre>
+
+    </div>
+
+    <div class="note success">
+      The model represents the database structure that our REST API will work with.
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 04 -->
+
+<section id="serializer" class="reveal">
+
+  <div class="section-title">
+    <div class="number">04</div>
+    <h2>Create the Serializer</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      The serializer converts model objects into API data and validates
+      incoming data.
+    </p>
+
+    <h3>students/serializers.py</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>from rest_framework import serializers
+from .models import Student
+
+
+class StudentSerializer(
+    serializers.ModelSerializer
+):
+
+    class Meta:
+
+        model = Student
+
+        fields = [
+            "id",
+            "name",
+            "email",
+            "age",
+            "course",
+            "active"
+        ]</pre>
+
+    </div>
+
+    <div class="flow">
+
+      <div class="flow-box">
+        <strong>Student Object</strong>
+        <br>
+        <small>Django Model</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>Serializer</strong>
+        <br>
+        <small>Convert</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>JSON</strong>
+        <br>
+        <small>API Data</small>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 05 -->
+
+<section id="listapi" class="reveal">
+
+  <div class="section-title">
+    <div class="number">05</div>
+    <h2>Build the List & Create API</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      The first endpoint will support:
+    </p>
+
+    <div class="endpoint">
+      <span class="method">GET</span>
+      <code>/api/students/</code>
+      <span>List students</span>
+    </div>
+
+    <div class="endpoint">
+      <span class="method post">POST</span>
+      <code>/api/students/</code>
+      <span>Create student</span>
+    </div>
+
+    <h3>students/views.py</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+from .models import Student
+from .serializers import StudentSerializer
+
+
+class StudentListCreateAPIView(APIView):
+
+    def get(self, request):
+
+        students = Student.objects.all()
+
+        serializer = StudentSerializer(
+            students,
+            many=True
+        )
+
+        return Response(
+            serializer.data
+        )
+
+
+    def post(self, request):
+
+        serializer = StudentSerializer(
+            data=request.data
+        )
+
+        if serializer.is_valid():
+
+            serializer.save()
+
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )</pre>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 06 -->
+
+<section id="detailapi" class="reveal">
+
+  <div class="section-title">
+    <div class="number">06</div>
+    <h2>Build the Detail API</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      A list endpoint works with the collection. A detail endpoint works with
+      one specific student.
+    </p>
+
+    <div class="endpoint">
+      <span class="method">GET</span>
+      <code>/api/students/1/</code>
+      <span>Get one student</span>
+    </div>
+
+    <div class="endpoint">
+      <span class="method put">PUT</span>
+      <code>/api/students/1/</code>
+      <span>Replace student</span>
+    </div>
+
+    <div class="endpoint">
+      <span class="method patch">PATCH</span>
+      <code>/api/students/1/</code>
+      <span>Partially update student</span>
+    </div>
+
+    <div class="endpoint">
+      <span class="method delete">DELETE</span>
+      <code>/api/students/1/</code>
+      <span>Delete student</span>
+    </div>
+
+    <h3>Student Detail API</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>class StudentDetailAPIView(APIView):
+
+    def get_object(self, pk):
+
+        try:
+            return Student.objects.get(pk=pk)
+
+        except Student.DoesNotExist:
+
+            return None
+
+
+    def get(self, request, pk):
+
+        student = self.get_object(pk)
+
+        if student is None:
+
+            return Response(
+                {"error": "Student not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = StudentSerializer(student)
+
+        return Response(
+            serializer.data
+        )
+
+
+    def put(self, request, pk):
+
+        student = self.get_object(pk)
+
+        if student is None:
+
+            return Response(
+                {"error": "Student not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = StudentSerializer(
+            student,
+            data=request.data
+        )
+
+        if serializer.is_valid():
+
+            serializer.save()
+
+            return Response(
+                serializer.data
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+    def patch(self, request, pk):
+
+        student = self.get_object(pk)
+
+        if student is None:
+
+            return Response(
+                {"error": "Student not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = StudentSerializer(
+            student,
+            data=request.data,
+            partial=True
+        )
+
+        if serializer.is_valid():
+
+            serializer.save()
+
+            return Response(
+                serializer.data
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+    def delete(self, request, pk):
+
+        student = self.get_object(pk)
+
+        if student is None:
+
+            return Response(
+                {"error": "Student not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        student.delete()
+
+        return Response(
+            status=status.HTTP_204_NO_CONTENT
+        )</pre>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 07 -->
+
+<section id="crud" class="reveal">
+
+  <div class="section-title">
+    <div class="number">07</div>
+    <h2>Understanding CRUD</h2>
+  </div>
+
+  <div class="card">
+
+    <div class="grid">
+
+      <div class="info-card">
+        <div class="icon">C</div>
+        <h3>Create</h3>
+        <p>
+          Use POST to create a new student.
+        </p>
+        <code>POST /api/students/</code>
+      </div>
+
+      <div class="info-card">
+        <div class="icon">R</div>
+        <h3>Read</h3>
+        <p>
+          Use GET to retrieve students.
+        </p>
+        <code>GET /api/students/</code>
+      </div>
+
+      <div class="info-card">
+        <div class="icon">U</div>
+        <h3>Update</h3>
+        <p>
+          Use PUT or PATCH to update a student.
+        </p>
+        <code>PATCH /api/students/1/</code>
+      </div>
+
+      <div class="info-card">
+        <div class="icon">D</div>
+        <h3>Delete</h3>
+        <p>
+          Use DELETE to remove a student.
+        </p>
+        <code>DELETE /api/students/1/</code>
+      </div>
+
+    </div>
+
+    <h3>CRUD Map</h3>
+
+    <div class="table-wrap">
+
+      <table>
+
+        <tr>
+          <th>Action</th>
+          <th>Method</th>
+          <th>Endpoint</th>
+          <th>Purpose</th>
+        </tr>
+
+        <tr>
+          <td>Create</td>
+          <td>POST</td>
+          <td>/api/students/</td>
+          <td>Create student</td>
+        </tr>
+
+        <tr>
+          <td>Read All</td>
+          <td>GET</td>
+          <td>/api/students/</td>
+          <td>Get all students</td>
+        </tr>
+
+        <tr>
+          <td>Read One</td>
+          <td>GET</td>
+          <td>/api/students/1/</td>
+          <td>Get one student</td>
+        </tr>
+
+        <tr>
+          <td>Update</td>
+          <td>PUT</td>
+          <td>/api/students/1/</td>
+          <td>Replace data</td>
+        </tr>
+
+        <tr>
+          <td>Partial Update</td>
+          <td>PATCH</td>
+          <td>/api/students/1/</td>
+          <td>Update selected fields</td>
+        </tr>
+
+        <tr>
+          <td>Delete</td>
+          <td>DELETE</td>
+          <td>/api/students/1/</td>
+          <td>Remove student</td>
+        </tr>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 08 -->
+
+<section id="validation" class="reveal">
+
+  <div class="section-title">
+    <div class="number">08</div>
+    <h2>API Validation</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      Validation prevents incorrect data from entering the database.
+    </p>
+
+    <h3>Field Validation</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>class StudentSerializer(
+    serializers.ModelSerializer
+):
+
+    class Meta:
+
+        model = Student
+
+        fields = [
+            "id",
+            "name",
+            "email",
+            "age",
+            "course",
+            "active"
+        ]
+
+
+    def validate_age(self, value):
+
+        if value &lt; 16:
+
+            raise serializers.ValidationError(
+                "Student must be at least 16 years old."
+            )
+
+        return value</pre>
+
+    </div>
+
+    <h3>Object-Level Validation</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>def validate(self, data):
+
+    if (
+        data["course"] == "Django"
+        and data["age"] &lt; 16
+    ):
+
+        raise serializers.ValidationError(
+            "Invalid student data."
+        )
+
+    return data</pre>
+
+    </div>
+
+    <div class="note warning">
+      Never assume that frontend validation alone is enough.
+      Backend validation is important because API requests can come from
+      many different clients.
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 09 -->
+
+<section id="status" class="reveal">
+
+  <div class="section-title">
+    <div class="number">09</div>
+    <h2>Status Codes</h2>
+  </div>
+
+  <div class="card">
+
+    <div class="grid3">
+
+      <div class="info-card">
+        <div class="icon">200</div>
+        <h3>OK</h3>
+        <p>Successful request.</p>
+      </div>
+
+      <div class="info-card">
+        <div class="icon">201</div>
+        <h3>Created</h3>
+        <p>New resource created.</p>
+      </div>
+
+      <div class="info-card">
+        <div class="icon">204</div>
+        <h3>No Content</h3>
+        <p>Successful deletion or empty response.</p>
+      </div>
+
+      <div class="info-card">
+        <div class="icon">400</div>
+        <h3>Bad Request</h3>
+        <p>Invalid request data.</p>
+      </div>
+
+      <div class="info-card">
+        <div class="icon">401</div>
+        <h3>Unauthorized</h3>
+        <p>Authentication is required.</p>
+      </div>
+
+      <div class="info-card">
+        <div class="icon">403</div>
+        <h3>Forbidden</h3>
+        <p>Request is not permitted.</p>
+      </div>
+
+      <div class="info-card">
+        <div class="icon">404</div>
+        <h3>Not Found</h3>
+        <p>Resource does not exist.</p>
+      </div>
+
+      <div class="info-card">
+        <div class="icon">500</div>
+        <h3>Server Error</h3>
+        <p>Unexpected backend error.</p>
+      </div>
+
+    </div>
+
+    <h3>Using DRF Status Constants</h3>
+
+    <div class="code">
+
+<pre>from rest_framework import status
+
+return Response(
+    {"message": "Student created"},
+    status=status.HTTP_201_CREATED
+)</pre>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 10 -->
+
+<section id="urls" class="reveal">
+
+  <div class="section-title">
+    <div class="number">10</div>
+    <h2>Connect the API URLs</h2>
+  </div>
+
+  <div class="card">
+
+    <h3>students/urls.py</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>from django.urls import path
+
+from .views import (
+    StudentListCreateAPIView,
+    StudentDetailAPIView
+)
+
+
+urlpatterns = [
+
+    path(
+        "students/",
+        StudentListCreateAPIView.as_view(),
+        name="student-list-create"
+    ),
+
+    path(
+        "students/&lt;int:pk&gt;/",
+        StudentDetailAPIView.as_view(),
+        name="student-detail"
+    ),
+
+]</pre>
+
+    </div>
+
+    <h3>Project urls.py</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>from django.contrib import admin
+from django.urls import include, path
+
+
+urlpatterns = [
+
+    path(
+        "admin/",
+        admin.site.urls
+    ),
+
+    path(
+        "api/",
+        include("students.urls")
+    ),
+
+]</pre>
+
+    </div>
+
+    <div class="api-terminal">
+
+      <div class="terminal-top">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+
+      <div class="terminal-body">
+
+        GET &nbsp;&nbsp;&nbsp; /api/students/
+        <br>
+        GET &nbsp;&nbsp;&nbsp; /api/students/1/
+        <br>
+        POST &nbsp;&nbsp; /api/students/
+        <br>
+        PUT &nbsp;&nbsp;&nbsp; /api/students/1/
+        <br>
+        PATCH &nbsp; /api/students/1/
+        <br>
+        DELETE &nbsp;/api/students/1/
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 11 -->
+
+<section id="database" class="reveal">
+
+  <div class="section-title">
+    <div class="number">11</div>
+    <h2>Database Flow</h2>
+  </div>
+
+  <div class="card">
+
+    <div class="flow">
+
+      <div class="flow-box">
+        <strong>Client</strong>
+        <br>
+        <small>POST JSON</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>APIView</strong>
+        <br>
+        <small>Receive</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>Serializer</strong>
+        <br>
+        <small>Validate</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>Model</strong>
+        <br>
+        <small>Save</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>Database</strong>
+        <br>
+        <small>Store</small>
+      </div>
+
+    </div>
+
+    <div class="flow">
+
+      <div class="flow-box">
+        <strong>Database</strong>
+        <br>
+        <small>Stored Data</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>Model</strong>
+        <br>
+        <small>Query</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>Serializer</strong>
+        <br>
+        <small>Convert</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>JSON</strong>
+        <br>
+        <small>Response</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>Client</strong>
+        <br>
+        <small>Display</small>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 12 -->
+
+<section id="testing" class="reveal">
+
+  <div class="section-title">
+    <div class="number">12</div>
+    <h2>Testing the REST API</h2>
+  </div>
+
+  <div class="card">
+
+    <h3>Start the server</h3>
+
+    <div class="code">
+
+<pre>python manage.py runserver</pre>
+
+    </div>
+
+    <h3>GET — List Students</h3>
+
+    <div class="api-terminal">
+
+      <div class="terminal-top">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+
+      <div class="terminal-body">
+
+        GET http://127.0.0.1:8000/api/students/
+
+        <br><br>
+
+        Status:
+        <span class="status">200 OK</span>
+
+        <br><br>
+
+<pre>[
+    {
+        "id": 1,
+        "name": "Pradeep",
+        "email": "pradeep@example.com",
+        "age": 21,
+        "course": "Django",
+        "active": true
+    }
+]</pre>
+
+      </div>
+
+    </div>
+
+    <h3>POST — Create Student</h3>
+
+    <div class="json-box">
+
+<pre>{
+    "name": "Anu",
+    "email": "anu@example.com",
+    "age": 20,
+    "course": "Django",
+    "active": true
+}</pre>
+
+    </div>
+
+    <p>
+      A successful creation should return the created object and normally use
+      HTTP status <strong>201 Created</strong>.
+    </p>
+
+  </div>
+
+</section>
+
+
+<!-- 13 -->
+
+<section id="frontend" class="reveal">
+
+  <div class="section-title">
+    <div class="number">13</div>
+    <h2>Connecting a Frontend</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      A React or JavaScript frontend can call the Django API using
+      <code>fetch()</code>.
+    </p>
+
+    <h3>GET Example</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>fetch(
+    "http://127.0.0.1:8000/api/students/"
+)
+.then(response => response.json())
+.then(data => {
+
+    console.log(data);
+
+});</pre>
+
+    </div>
+
+    <h3>POST Example</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>fetch(
+    "http://127.0.0.1:8000/api/students/",
+    {
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            name: "Pradeep",
+            email: "pradeep@example.com",
+            age: 21,
+            course: "Django",
+            active: true
+        })
+    }
+)
+.then(response => response.json())
+.then(data => {
+
+    console.log(data);
+
+});</pre>
+
+    </div>
+
+    <div class="note">
+      When frontend and backend run on different origins during development,
+      you may also need to configure CORS appropriately on the backend.
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 14 -->
+
+<section id="security" class="reveal">
+
+  <div class="section-title">
+    <div class="number">14</div>
+    <h2>API Security</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      A working API is not automatically a secure API.
+      Production APIs need authentication, permissions and careful validation.
+    </p>
+
+    <div class="grid3">
+
+      <div class="info-card">
+        <div class="icon">AUTH</div>
+        <h3>Authentication</h3>
+        <p>
+          Determine who is making the request.
+        </p>
+      </div>
+
+      <div class="info-card">
+        <div class="icon">PERM</div>
+        <h3>Permissions</h3>
+        <p>
+          Determine what the authenticated user can do.
+        </p>
+      </div>
+
+      <div class="info-card">
+        <div class="icon">VALID</div>
+        <h3>Validation</h3>
+        <p>
+          Reject invalid or unsafe input.
+        </p>
+      </div>
+
+      <div class="info-card">
+        <div class="icon">HTTPS</div>
+        <h3>HTTPS</h3>
+        <p>
+          Protect data while it travels between client and server.
+        </p>
+      </div>
+
+      <div class="info-card">
+        <div class="icon">LIMIT</div>
+        <h3>Throttling</h3>
+        <p>
+          Limit request rates when appropriate.
+        </p>
+      </div>
+
+      <div class="info-card">
+        <div class="icon">DATA</div>
+        <h3>Minimal Data</h3>
+        <p>
+          Return only the data the client actually needs.
+        </p>
+      </div>
+
+    </div>
+
+    <div class="note warning">
+      Do not place passwords, secret keys or private credentials directly
+      inside API responses.
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 15 -->
+
+<section id="practice" class="reveal">
+
+  <div class="section-title">
+    <div class="number">15</div>
+    <h2>Mini Project — ZENSUS Student REST API</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      Build a complete student management API.
+    </p>
+
+    <h3>Required Endpoints</h3>
+
+    <div class="endpoint">
+      <span class="method">GET</span>
+      <code>/api/students/</code>
+      <span>List all students</span>
+    </div>
+
+    <div class="endpoint">
+      <span class="method post">POST</span>
+      <code>/api/students/</code>
+      <span>Create a student</span>
+    </div>
+
+    <div class="endpoint">
+      <span class="method">GET</span>
+      <code>/api/students/1/</code>
+      <span>Get one student</span>
+    </div>
+
+    <div class="endpoint">
+      <span class="method put">PUT</span>
+      <code>/api/students/1/</code>
+      <span>Replace a student</span>
+    </div>
+
+    <div class="endpoint">
+      <span class="method patch">PATCH</span>
+      <code>/api/students/1/</code>
+      <span>Partially update</span>
+    </div>
+
+    <div class="endpoint">
+      <span class="method delete">DELETE</span>
+      <code>/api/students/1/</code>
+      <span>Delete student</span>
+    </div>
+
+    <h3>Project Checklist</h3>
+
+    <ul class="checklist">
+
+      <li>Create Django project.</li>
+
+      <li>Create students app.</li>
+
+      <li>Install Django REST Framework.</li>
+
+      <li>Add DRF and students to INSTALLED_APPS.</li>
+
+      <li>Create Student model.</li>
+
+      <li>Run migrations.</li>
+
+      <li>Create StudentSerializer.</li>
+
+      <li>Create list/create API view.</li>
+
+      <li>Create detail API view.</li>
+
+      <li>Configure API URLs.</li>
+
+      <li>Test GET, POST, PUT, PATCH and DELETE.</li>
+
+      <li>Add serializer validation.</li>
+
+      <li>Connect a frontend using fetch().</li>
+
+    </ul>
+
+  </div>
+
+</section>
+
+
+<!-- 16 -->
+
+<section id="mistakes" class="reveal">
+
+  <div class="section-title">
+    <div class="number">16</div>
+    <h2>Common Mistakes</h2>
+  </div>
+
+  <div class="grid">
+
+    <div class="info-card">
+      <div class="icon">01</div>
+      <h3>Forgot to Migrate</h3>
+      <p>
+        Run makemigrations and migrate after changing models.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <div class="icon">02</div>
+      <h3>Wrong URL</h3>
+      <p>
+        Check project urls.py and application urls.py.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <div class="icon">03</div>
+      <h3>Missing many=True</h3>
+      <p>
+        When serializing multiple model objects, use many=True.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <div class="icon">04</div>
+      <h3>Skipping Validation</h3>
+      <p>
+        Check serializer.is_valid() before saving incoming data.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <div class="icon">05</div>
+      <h3>Wrong Method</h3>
+      <p>
+        Match the client operation with the appropriate HTTP method.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <div class="icon">06</div>
+      <h3>No Error Handling</h3>
+      <p>
+        Return meaningful HTTP status codes for failed requests.
+      </p>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 17 -->
+
+<section id="quiz" class="reveal">
+
+  <div class="section-title">
+    <div class="number">17</div>
+    <h2>Quick Knowledge Check</h2>
+  </div>
+
+
+  <div class="quiz">
+
+    <h3>Question 1</h3>
+
+    <p>
+      Which method is normally used to create a new resource?
+    </p>
+
+    <div class="option" onclick="answer(this,true)">
+      A. POST
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      B. GET
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      C. DELETE
+    </div>
+
+    <div class="quiz-result"></div>
+
+  </div>
+
+
+  <div class="quiz">
+
+    <h3>Question 2</h3>
+
+    <p>
+      Why do we use a serializer?
+    </p>
+
+    <div class="option" onclick="answer(this,true)">
+      A. To convert and validate API data
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      B. To start the server
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      C. To create CSS
+    </div>
+
+    <div class="quiz-result"></div>
+
+  </div>
+
+
+  <div class="quiz">
+
+    <h3>Question 3</h3>
+
+    <p>
+      Which method is commonly used for partial updates?
+    </p>
+
+    <div class="option" onclick="answer(this,false)">
+      A. GET
+    </div>
+
+    <div class="option" onclick="answer(this,true)">
+      B. PATCH
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      C. DELETE
+    </div>
+
+    <div class="quiz-result"></div>
+
+  </div>
+
+
+  <div class="quiz">
+
+    <h3>Question 4</h3>
+
+    <p>
+      What status code normally indicates successful resource creation?
+    </p>
+
+    <div class="option" onclick="answer(this,false)">
+      A. 404
+    </div>
+
+    <div class="option" onclick="answer(this,true)">
+      B. 201
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      C. 500
+    </div>
+
+    <div class="quiz-result"></div>
+
+  </div>
+
+
+  <div class="quiz">
+
+    <h3>Question 5</h3>
+
+    <p>
+      Which endpoint represents one specific student?
+    </p>
+
+    <div class="option" onclick="answer(this,false)">
+      A. /api/students/
+    </div>
+
+    <div class="option" onclick="answer(this,true)">
+      B. /api/students/1/
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      C. /api/student-list/
+    </div>
+
+    <div class="quiz-result"></div>
+
+  </div>
+
+
+  <div class="quiz">
+
+    <h3>Question 6</h3>
+
+    <p>
+      What should happen before serializer.save()?
+    </p>
+
+    <div class="option" onclick="answer(this,true)">
+      A. serializer.is_valid()
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      B. serializer.delete()
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      C. serializer.start()
+    </div>
+
+    <div class="quiz-result"></div>
+
+  </div>
+
+</section>
+
+
+<!-- 18 -->
+
+<section id="takeaway" class="reveal">
+
+  <div class="section-title">
+    <div class="number">18</div>
+    <h2>Lesson Takeaway</h2>
+  </div>
+
+  <div class="card">
+
+    <ul class="checklist">
+
+      <li>
+        A REST API exposes backend resources through HTTP endpoints.
+      </li>
+
+      <li>
+        Django models represent the database data.
+      </li>
+
+      <li>
+        Serializers convert and validate API data.
+      </li>
+
+      <li>
+        API views process HTTP requests.
+      </li>
+
+      <li>
+        GET reads data.
+      </li>
+
+      <li>
+        POST creates data.
+      </li>
+
+      <li>
+        PUT replaces data.
+      </li>
+
+      <li>
+        PATCH partially updates data.
+      </li>
+
+      <li>
+        DELETE removes data.
+      </li>
+
+      <li>
+        HTTP status codes communicate the result of a request.
+      </li>
+
+      <li>
+        Backend validation is essential for reliable APIs.
+      </li>
+
+      <li>
+        A Django REST API can be consumed by React, mobile apps and other clients.
+      </li>
+
+    </ul>
+
+    <div class="note success">
+
+      <strong>The complete architecture:</strong>
+
+      <br><br>
+
+      Client
+      →
+      URL
+      →
+      API View
+      →
+      Serializer
+      →
+      Model
+      →
+      Database
+      →
+      Serializer
+      →
+      JSON Response
+      →
+      Client
+
+    </div>
+
+    <div class="note">
+
+      <strong>Next lesson:</strong>
+      Django Mini Projects & Deployment — Lesson 15.
+      You will bring the Django concepts together into practical projects
+      and learn how to prepare a Django application for deployment.
+    </div>
+
+  </div>
+
+</section>
+
+
+<div class="next">
+
+  <a class="next-btn" href="#overview">
+    ↑ Back to Top
+  </a>
+
+  <a class="next-btn primary" href="#takeaway">
+    Complete Lesson 14 ✓
+  </a>
+
+</div>
+
+
+<footer class="footer">
+
+  <strong>ZENSUS</strong>
+  — Django Course · Lesson 14 of 15
+
+  <br>
+
+  Building REST APIs
+
+</footer>
+
+</main>
+
+
+<script>
+
+/* Progress */
+
+window.addEventListener("scroll",function(){
+
+  const scrollTop =
+    document.documentElement.scrollTop ||
+    document.body.scrollTop;
+
+  const height =
+    document.documentElement.scrollHeight -
+    document.documentElement.clientHeight;
+
+  const progress =
+    height > 0
+      ? (scrollTop / height) * 100
+      : 0;
+
+  document.getElementById("progress").style.width =
+    progress + "%";
+
+});
+
+
+/* Copy Code */
+
+function copyCode(button){
+
+  const code =
+    button.parentElement.querySelector("pre").innerText;
+
+  if(navigator.clipboard){
+
+    navigator.clipboard.writeText(code)
+    .then(function(){
+
+      copied(button);
+
+    })
+    .catch(function(){
+
+      fallbackCopy(code,button);
+
+    });
+
+  }else{
+
+    fallbackCopy(code,button);
+
+  }
+
+}
+
+
+function fallbackCopy(code,button){
+
+  const area =
+    document.createElement("textarea");
+
+  area.value = code;
+
+  document.body.appendChild(area);
+
+  area.select();
+
+  document.execCommand("copy");
+
+  area.remove();
+
+  copied(button);
+
+}
+
+
+function copied(button){
+
+  const oldText =
+    button.innerText;
+
+  button.innerText =
+    "Copied!";
+
+  setTimeout(function(){
+
+    button.innerText =
+      oldText;
+
+  },1500);
+
+}
+
+
+/* Quiz */
+
+function answer(option,correct){
+
+  const quiz =
+    option.closest(".quiz");
+
+  const options =
+    quiz.querySelectorAll(".option");
+
+  options.forEach(function(item){
+
+    item.style.pointerEvents =
+      "none";
+
+  });
+
+  const result =
+    quiz.querySelector(".quiz-result");
+
+  if(correct){
+
+    option.classList.add("correct");
+
+    result.textContent =
+      "✓ Correct! Well done.";
+
+    result.style.color =
+      "#16a34a";
+
+  }else{
+
+    option.classList.add("wrong");
+
+    result.textContent =
+      "✗ Not quite. Review this section.";
+
+    result.style.color =
+      "#dc2626";
+
+  }
+
+}
+
+
+/* Search */
+
+const searchInput =
+  document.getElementById("searchInput");
+
+searchInput.addEventListener("input",function(){
+
+  const query =
+    this.value.toLowerCase().trim();
+
+  const sections =
+    document.querySelectorAll("section");
+
+  sections.forEach(function(section){
+
+    if(!query){
+
+      section.style.display = "";
+
+      return;
+
+    }
+
+    const text =
+      section.innerText.toLowerCase();
+
+    section.style.display =
+      text.includes(query)
+        ? ""
+        : "none";
+
+  });
+
+});
+
+
+/* Scroll Reveal */
+
+const revealObserver =
+  new IntersectionObserver(function(entries){
+
+    entries.forEach(function(entry){
+
+      if(entry.isIntersecting){
+
+        entry.target.classList.add("visible");
+
+      }
+
+    });
+
+  },{
+    threshold:.08
+  });
+
+
+document.querySelectorAll(".reveal")
+.forEach(function(element){
+
+  revealObserver.observe(element);
+
+});
+
+
+/* Active Navigation */
+
+const navLinks =
+  document.querySelectorAll(".nav a");
+
+const sections =
+  document.querySelectorAll("section");
+
+const navObserver =
+  new IntersectionObserver(function(entries){
+
+    entries.forEach(function(entry){
+
+      if(entry.isIntersecting){
+
+        navLinks.forEach(function(link){
+
+          link.classList.remove("active");
+
+          if(
+            link.getAttribute("href") ===
+            "#" + entry.target.id
+          ){
+
+            link.classList.add("active");
+
+          }
+
+        });
+
+      }
+
+    });
+
+  },{
+    rootMargin:"-20% 0px -70% 0px"
+  });
+
+
+sections.forEach(function(section){
+
+  navObserver.observe(section);
+
+});
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+
+<html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>ZENSUS React — Lesson 41: Todo Application</title>
+
+<style> *{ margin:0; padding:0; box-sizing:border-box; } :root{ --bg:#f6f8fc; --panel:#ffffff; --soft:#f8fafc; --border:#e5e7eb; --text:#111827; --muted:#64748b; --primary:#4f46e5; --primary-soft:#eef2ff; --green:#16a34a; --green-soft:#ecfdf5; --red:#dc2626; --red-soft:#fef2f2; --orange:#ea580c; --orange-soft:#fff7ed; --blue:#2563eb; --blue-soft:#eff6ff; --shadow:0 12px 35px rgba(15,23,42,.07); } html{ scroll-behavior:smooth; } body{ font-family:Inter,Segoe UI,Arial,sans-serif; background:var(--bg); color:var(--text); line-height:1.7; } header{ height:64px; position:sticky; top:0; z-index:1000; background:rgba(255,255,255,.95); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; padding:0 28px; } .logo{ display:flex; align-items:center; gap:10px; font-weight:800; } .logo-box{ width:34px; height:34px; border-radius:10px; background:var(--primary); color:white; display:grid; place-items:center; } .lesson{ font-size:13px; color:var(--muted); } .layout{ display:grid; grid-template-columns:270px 1fr; } .sidebar{ position:sticky; top:64px; height:calc(100vh - 64px); overflow:auto; background:white; border-right:1px solid var(--border); padding:24px 16px; } .sidebar-title{ font-size:11px; color:#94a3b8; font-weight:800; letter-spacing:1px; margin:0 10px 12px; } .sidebar a{ display:block; text-decoration:none; color:#64748b; font-size:13px; padding:9px 12px; border-radius:9px; margin:3px 0; transition:.2s; } .sidebar a:hover, .sidebar a.active{ background:var(--primary-soft); color:var(--primary); font-weight:700; } .content{ width:100%; max-width:1180px; margin:auto; padding:45px 40px 100px; } .hero{ background:white; border:1px solid var(--border); border-radius:26px; padding:55px; box-shadow:var(--shadow); position:relative; overflow:hidden; margin-bottom:30px; } .hero:after{ content:""; position:absolute; width:280px; height:280px; border-radius:50%; background:var(--primary-soft); right:-130px; top:-130px; } .eyebrow{ position:relative; color:var(--primary); font-weight:800; font-size:12px; letter-spacing:1.5px; } .hero h1{ position:relative; font-size:clamp(40px,6vw,68px); line-height:1.05; letter-spacing:-2px; margin:12px 0 20px; } .hero h1 span{ background-image:linear-gradient(90deg,#6366f1,#8b5cf6); background-clip:text; -webkit-background-clip:text; color:transparent; -webkit-text-fill-color:transparent; } .hero p{ position:relative; max-width:800px; color:var(--muted); font-size:17px; } section{ scroll-margin-top:90px; margin-top:30px; } .card{ background:white; border:1px solid var(--border); border-radius:18px; padding:30px; box-shadow:0 8px 25px rgba(15,23,42,.04); } h2{ font-size:29px; margin-bottom:10px; } h3{ font-size:19px; margin-bottom:7px; } .intro{ color:var(--muted); margin-bottom:22px; } .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; } .grid2{ display:grid; grid-template-columns:repeat(2,1fr); gap:18px; } .info{ background:var(--soft); border:1px solid var(--border); border-radius:15px; padding:20px; } .icon{ width:42px; height:42px; border-radius:11px; background:var(--primary-soft); color:var(--primary); display:grid; place-items:center; font-weight:900; margin-bottom:13px; } .info p{ color:var(--muted); font-size:14px; } .arch{ display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:10px; margin:28px 0; } .arch-box{ padding:17px 20px; border-radius:13px; border:1px solid #c7d2fe; background:var(--primary-soft); color:#3730a3; font-weight:800; text-align:center; animation:float 3s ease-in-out infinite; } .arch-box:nth-child(2){animation-delay:.2s} .arch-box:nth-child(3){animation-delay:.4s} .arch-box:nth-child(4){animation-delay:.6s} .arch-box:nth-child(5){animation-delay:.8s} .arrow{ color:#94a3b8; font-size:22px; font-weight:900; } @keyframes float{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} } .tree{ background:#0f172a; color:#e2e8f0; border-radius:16px; padding:24px; overflow:auto; font-family:"Cascadia Code",Consolas,monospace; font-size:13px; line-height:1.9; } .folder{ color:#93c5fd; } .file{ color:#cbd5e1; } .code{ background:#0b1120; border-radius:16px; overflow:hidden; margin:18px 0; border:1px solid #1e293b; } .code-head{ background:#111827; color:#94a3b8; padding:10px 16px; font-size:12px; display:flex; justify-content:space-between; } pre{ padding:20px; overflow:auto; color:#e2e8f0; font-family:"Cascadia Code",Consolas,monospace; font-size:13px; line-height:1.8; } .callout{ padding:18px; border-radius:14px; margin:20px 0; border:1px solid; } .callout strong{ display:block; margin-bottom:4px; } .tip{ background:var(--green-soft); border-color:#bbf7d0; } .warning{ background:var(--orange-soft); border-color:#fed7aa; } .info-box{ background:var(--blue-soft); border-color:#bfdbfe; } /* TODO DEMO */ .demo{ background:#eef2ff; border:1px solid #c7d2fe; border-radius:22px; padding:25px; margin-top:25px; } .todo-app{ max-width:700px; margin:auto; background:white; border-radius:18px; border:1px solid var(--border); box-shadow:var(--shadow); overflow:hidden; } .todo-header{ padding:24px; border-bottom:1px solid var(--border); } .todo-header h3{ margin-bottom:3px; } .todo-header p{ color:var(--muted); font-size:13px; } .todo-input{ display:flex; gap:8px; margin-top:17px; } .todo-input input{ flex:1; border:1px solid var(--border); border-radius:10px; padding:12px 14px; outline:none; font-size:14px; } .todo-input input:focus{ border-color:#818cf8; box-shadow:0 0 0 3px #eef2ff; } .btn{ border:0; border-radius:10px; padding:11px 16px; cursor:pointer; font-weight:700; } .btn-primary{ background:var(--primary); color:white; } .todo-controls{ padding:15px 24px; display:flex; gap:8px; border-bottom:1px solid var(--border); } .filter{ background:#f8fafc; color:#64748b; } .filter.active{ background:var(--primary-soft); color:var(--primary); } .todo-list{ padding:10px 24px 24px; } .todo-item{ display:flex; align-items:center; gap:12px; padding:14px 4px; border-bottom:1px solid #f1f5f9; } .todo-check{ width:20px; height:20px; cursor:pointer; } .todo-text{ flex:1; font-size:14px; } .todo-text.completed{ text-decoration:line-through; color:#94a3b8; } .todo-actions{ display:flex; gap:6px; } .todo-actions button{ border:0; background:#f8fafc; color:#64748b; border-radius:8px; padding:6px 9px; cursor:pointer; } .todo-actions button:hover{ background:var(--primary-soft); color:var(--primary); } .todo-actions .delete:hover{ background:var(--red-soft); color:var(--red); } .empty{ text-align:center; padding:30px; color:#94a3b8; } .stats{ padding:0 24px 22px; color:var(--muted); font-size:12px; } /* CHECKLIST */ .checklist{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; } .check{ display:flex; gap:10px; background:var(--soft); border:1px solid var(--border); border-radius:12px; padding:14px; } .check-icon{ color:var(--green); font-weight:900; } /* QUIZ */ .quiz{ border:1px solid var(--border); border-radius:14px; padding:20px; margin:14px 0; } .quiz button{ border:0; margin-top:10px; background:var(--primary-soft); color:var(--primary); padding:8px 12px; border-radius:8px; font-weight:700; cursor:pointer; } .answer{ display:none; background:var(--green-soft); color:#166534; padding:12px; border-radius:9px; margin-top:12px; font-size:14px; } .reveal{ opacity:0; transform:translateY(20px); transition:.7s ease; } .reveal.show{ opacity:1; transform:translateY(0); } .final{ background:#111827; color:white; border-radius:22px; padding:35px; margin-top:30px; } .final p{ color:#cbd5e1; } @media(max-width:1000px){ .layout{ grid-template-columns:220px 1fr; } .grid{ grid-template-columns:1fr 1fr; } } @media(max-width:760px){ header{ padding:0 16px; } .sidebar{ display:none; } .layout{ display:block; } .content{ padding:25px 16px 70px; } .hero{ padding:32px 22px; } .grid, .grid2, .checklist{ grid-template-columns:1fr; } .card{ padding:22px; } .todo-input{ flex-direction:column; } .todo-controls{ overflow:auto; } } </style>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="logo"> <div class="logo-box">Z</div> <span>ZENSUS REACT</span> </div>
+
+<div class="lesson">PHASE 6 • LESSON 41</div>
+
+</header>
+
+<div class="layout">
+
+<aside class="sidebar">
+
+<div class="sidebar-title">PROJECT</div>
+
+<a href="#overview">Project Overview</a>
+<a href="#requirements">Requirements</a>
+<a href="#ui">UI Structure</a>
+<a href="#planning">Component Planning</a>
+<a href="#state">State Management</a>
+<a href="#add">Add Todo</a>
+<a href="#delete">Delete Todo</a>
+<a href="#complete">Complete Todo</a>
+<a href="#edit">Edit Todo</a>
+<a href="#filter">Filter Todos</a>
+<a href="#storage">Local Storage</a>
+<a href="#responsive">Responsive UI</a>
+<a href="#testing">Final Testing</a>
+<a href="#quiz">Quick Quiz</a>
+
+</aside>
+
+<main class="content">
+
+<!-- HERO -->
+
+<div class="hero reveal" id="overview">
+
+<div class="eyebrow">PHASE 6 • PROJECTS • LESSON 41</div>
+
+<h1>Mini Project — <span>Todo Application</span></h1>
+
+<p> In this project, we will build a complete Todo application using React. You will combine components, state management, event handling, conditional rendering, lists, localStorage and responsive UI into one practical project. </p>
+
+</div>
+
+<!-- REQUIREMENTS -->
+
+<section id="requirements" class="reveal">
+
+<div class="card">
+
+<h2>1. Project Requirements</h2>
+
+<p class="intro"> Before writing code, define exactly what the application must do. This is how professional development begins. </p>
+
+<div class="grid">
+
+<div class="info"> <div class="icon">+</div> <h3>Add Todo</h3> <p>Users can create a new task from the input field.</p> </div>
+
+<div class="info"> <div class="icon">✓</div> <h3>Complete Todo</h3> <p>Users can mark tasks as completed or active.</p> </div>
+
+<div class="info"> <div class="icon">×</div> <h3>Delete Todo</h3> <p>Users can permanently remove a task.</p> </div>
+
+<div class="info"> <div class="icon">E</div> <h3>Edit Todo</h3> <p>Users can modify an existing task.</p> </div>
+
+<div class="info"> <div class="icon">F</div> <h3>Filter</h3> <p>Users can view all, active or completed tasks.</p> </div>
+
+<div class="info"> <div class="icon">S</div> <h3>Persistence</h3> <p>Tasks remain available after refreshing the browser.</p> </div>
+
+</div>
+
+<div class="callout info-box">
+
+<strong>Project Goal</strong>
+
+By the end of this project, you should understand how several React concepts
+work together inside a real application rather than in isolated examples.
+
+</div>
+
+</div>
+
+</section>
+
+<!-- UI -->
+
+<section id="ui" class="reveal">
+
+<div class="card">
+
+<h2>2. UI Structure</h2>
+
+<p class="intro"> The interface can be divided into several predictable regions. </p>
+
+<div class="arch">
+
+<div class="arch-box">Header</div> <div class="arrow">→</div> <div class="arch-box">Input</div> <div class="arrow">→</div> <div class="arch-box">Filters</div> <div class="arrow">→</div> <div class="arch-box">Todo List</div> <div class="arrow">→</div> <div class="arch-box">Stats</div>
+
+</div>
+
+<h3>Application Layout</h3>
+
+<div class="tree">
+
+<span class="folder">TodoApp</span>
+<br>
+├── <span class="folder">Header</span>
+<br>
+├── <span class="folder">TodoForm</span>
+<br>
+│  └── Input + Add Button
+<br>
+├── <span class="folder">TodoFilters</span>
+<br>
+│  ├── All
+<br>
+│  ├── Active
+<br>
+│  └── Completed
+<br>
+├── <span class="folder">TodoList</span>
+<br>
+│  └── <span class="folder">TodoItem</span>
+<br>
+└── <span class="folder">TodoStats</span>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- COMPONENT PLANNING -->
+
+<section id="planning" class="reveal">
+
+<div class="card">
+
+<h2>3. Component Planning</h2>
+
+<p class="intro"> Before implementing the project, identify which components should exist. </p>
+
+<div class="grid2">
+
+<div class="info">
+
+<h3>TodoApp</h3>
+
+<p> Owns application-level state and coordinates the major child components. </p>
+
+</div>
+
+<div class="info">
+
+<h3>TodoForm</h3>
+
+<p> Handles input and the add-todo interaction. </p>
+
+</div>
+
+<div class="info">
+
+<h3>TodoFilters</h3>
+
+<p> Allows the user to choose the current filter. </p>
+
+</div>
+
+<div class="info">
+
+<h3>TodoList</h3>
+
+<p> Receives the visible todos and renders TodoItem components. </p>
+
+</div>
+
+<div class="info">
+
+<h3>TodoItem</h3>
+
+<p> Displays one todo and exposes complete, edit and delete actions. </p>
+
+</div>
+
+<div class="info">
+
+<h3>TodoStats</h3>
+
+<p> Displays the number of remaining and completed tasks. </p>
+
+</div>
+
+</div>
+
+<div class="callout tip">
+
+<strong>Important Architecture Idea</strong>
+
+A component does not need to own every piece of state it displays.
+State should normally live in the closest common owner that needs to coordinate it.
+
+</div>
+
+</div>
+
+</section>
+
+<!-- STATE -->
+
+<section id="state" class="reveal">
+
+<div class="card">
+
+<h2>4. State Management</h2>
+
+<p class="intro"> Our application needs state for todos and the current filter. </p>
+
+<div class="code">
+
+<div class="code-head"> <span>Todo State</span> <span>App.jsx</span> </div>
+
+<pre><code>const [todos, setTodos] = useState([]); const [filter, setFilter] = useState("all");</code></pre>
+
+</div>
+
+<h3>Todo Data Model</h3>
+
+<div class="code">
+
+<div class="code-head"> <span>Todo Object</span> <span>JavaScript</span> </div>
+
+<pre><code>{ id: crypto.randomUUID(), text: "Learn React", completed: false }</code></pre>
+
+</div>
+
+<div class="callout info-box">
+
+<strong>Why an ID?</strong>
+
+Each todo needs a stable identifier so React can correctly track list items
+and the application can update or delete the correct task.
+
+</div>
+
+<h3>State Flow</h3>
+
+<div class="arch">
+
+<div class="arch-box">User Action</div> <div class="arrow">→</div> <div class="arch-box">Event Handler</div> <div class="arrow">→</div> <div class="arch-box">setTodos()</div> <div class="arrow">→</div> <div class="arch-box">Render</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- ADD -->
+
+<section id="add" class="reveal">
+
+<div class="card">
+
+<h2>5. Add Todo</h2>
+
+<p class="intro"> Adding a todo follows a simple controlled-input workflow. </p>
+
+<div class="arch">
+
+<div class="arch-box">Type Text</div> <div class="arrow">→</div> <div class="arch-box">Submit</div> <div class="arrow">→</div> <div class="arch-box">Create Object</div> <div class="arrow">→</div> <div class="arch-box">Update State</div>
+
+</div>
+
+<div class="code">
+
+<div class="code-head"> <span>Add Todo Logic</span> <span>App.jsx</span> </div>
+
+<pre><code>function addTodo(text) { const trimmedText = text.trim(); if (!trimmedText) { return; } const newTodo = { id: crypto.randomUUID(), text: trimmedText, completed: false }; setTodos(currentTodos => [ ...currentTodos, newTodo ]); }</code></pre>
+
+</div>
+
+<div class="callout warning">
+
+<strong>Common Mistake</strong>
+
+Do not directly mutate the existing todos array.
+
+Prefer creating a new array with the new item.
+
+</div>
+
+</div>
+
+</section>
+
+<!-- DELETE -->
+
+<section id="delete" class="reveal">
+
+<div class="card">
+
+<h2>6. Delete Todo</h2>
+
+<p class="intro"> Deletion removes the todo whose ID matches the requested item. </p>
+
+<div class="code">
+
+<div class="code-head"> <span>Delete Logic</span> <span>App.jsx</span> </div>
+
+<pre><code>function deleteTodo(id) { setTodos(currentTodos => currentTodos.filter(todo => todo.id !== id ) ); }</code></pre>
+
+</div>
+
+<div class="callout tip">
+
+<strong>Why filter()?</strong>
+
+filter() creates a new array containing only the items that satisfy the condition.
+The matching ID is therefore excluded.
+
+</div>
+
+</div>
+
+</section>
+
+<!-- COMPLETE -->
+
+<section id="complete" class="reveal">
+
+<div class="card">
+
+<h2>7. Complete Todo</h2>
+
+<p class="intro"> Completing a todo changes its completed state without changing the other fields. </p>
+
+<div class="code">
+
+<div class="code-head"> <span>Toggle Completion</span> <span>App.jsx</span> </div>
+
+<pre><code>function toggleTodo(id) { setTodos(currentTodos => currentTodos.map(todo => { if (todo.id === id) { return { ...todo, completed: !todo.completed }; } return todo; }) ); }</code></pre>
+
+</div>
+
+<div class="callout info-box">
+
+<strong>map() vs filter()</strong>
+
+Use map() when you need to transform an item while keeping the collection.
+Use filter() when you need to remove items.
+
+</div>
+
+</div>
+
+</section>
+
+<!-- EDIT -->
+
+<section id="edit" class="reveal">
+
+<div class="card">
+
+<h2>8. Edit Todo</h2>
+
+<p class="intro"> Editing updates only the selected todo. </p>
+
+<div class="code">
+
+<div class="code-head"> <span>Edit Logic</span> <span>App.jsx</span> </div>
+
+<pre><code>function editTodo(id, newText) { const trimmedText = newText.trim(); if (!trimmedText) { return; } setTodos(currentTodos => currentTodos.map(todo => todo.id === id ? { ...todo, text: trimmedText } : todo ) ); }</code></pre>
+
+</div>
+
+<h3>Professional Edit Flow</h3>
+
+<div class="arch">
+
+<div class="arch-box">Edit Click</div> <div class="arrow">→</div> <div class="arch-box">Input Mode</div> <div class="arrow">→</div> <div class="arch-box">Save</div> <div class="arrow">→</div> <div class="arch-box">Update State</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- FILTER -->
+
+<section id="filter" class="reveal">
+
+<div class="card">
+
+<h2>9. Filter Todos</h2>
+
+<p class="intro"> Filtering should normally derive the visible list from the original todo state. </p>
+
+<div class="code">
+
+<div class="code-head"> <span>Filtered Todos</span> <span>App.jsx</span> </div>
+
+<pre><code>const filteredTodos = todos.filter(todo => { if (filter === "active") { return !todo.completed; } if (filter === "completed") { return todo.completed; } return true; });</code></pre>
+
+</div>
+
+<div class="grid">
+
+<div class="info"> <div class="icon">ALL</div> <h3>All</h3> <p>Shows every todo.</p> </div>
+
+<div class="info"> <div class="icon">A</div> <h3>Active</h3> <p>Shows incomplete todos.</p> </div>
+
+<div class="info"> <div class="icon">C</div> <h3>Completed</h3> <p>Shows completed todos.</p> </div>
+
+</div>
+
+<div class="callout tip">
+
+<strong>Important State Principle</strong>
+
+Do not create separate state such as allTodos, activeTodos and completedTodos
+unless there is a specific reason. These values can be derived from the main todos state.
+
+</div>
+
+</div>
+
+</section>
+
+<!-- STORAGE -->
+
+<section id="storage" class="reveal">
+
+<div class="card">
+
+<h2>10. Local Storage</h2>
+
+<p class="intro"> React state normally disappears when the page is refreshed. localStorage allows this project to persist todos in the browser. </p>
+
+<div class="arch">
+
+<div class="arch-box">React State</div> <div class="arrow">→</div> <div class="arch-box">JSON.stringify()</div> <div class="arrow">→</div> <div class="arch-box">localStorage</div>
+
+</div>
+
+<h3>Saving Todos</h3>
+
+<div class="code">
+
+<div class="code-head"> <span>Persist State</span> <span>App.jsx</span> </div>
+
+<pre><code>useEffect(() => { localStorage.setItem( "zensus-todos", JSON.stringify(todos) ); }, [todos]);</code></pre>
+
+</div>
+
+<h3>Loading Todos</h3>
+
+<div class="code">
+
+<div class="code-head"> <span>Initial State</span> <span>App.jsx</span> </div>
+
+<pre><code>const [todos, setTodos] = useState(() => { const saved = localStorage.getItem("zensus-todos"); return saved ? JSON.parse(saved) : []; });</code></pre>
+
+</div>
+
+<div class="callout warning">
+
+<strong>Important</strong>
+
+localStorage stores strings, not JavaScript arrays or objects.
+That is why JSON.stringify() is used when saving and JSON.parse() when reading.
+
+Also remember that browser storage is not a secure place for passwords,
+private keys or other secrets.
+
+</div>
+
+</div>
+
+</section>
+
+<!-- WORKING DEMO -->
+
+<section class="reveal">
+
+<div class="card">
+
+<h2>11. Interactive Project Demo</h2>
+
+<p class="intro"> Try the Todo application below. This demonstrates the final project behavior using the same concepts discussed throughout the lesson. </p>
+
+<div class="demo">
+
+<div class="todo-app">
+
+<div class="todo-header">
+
+<h3>ZENSUS Todo</h3>
+
+<p>Build your task list and keep your progress.</p>
+
+<div class="todo-input">
+
+<input id="todoInput" type="text" placeholder="What do you need to do?" autocomplete="off" />
+
+<button
+class="btn btn-primary"
+onclick="addDemoTodo()"
+
+
+
+
+Add Todo
+</button>
+
+</div>
+
+</div>
+
+<div class="todo-controls">
+
+<button
+class="btn filter active"
+data-filter="all"
+onclick="setDemoFilter('all')"
+
+
+
+
+All
+</button>
+
+<button
+class="btn filter"
+data-filter="active"
+onclick="setDemoFilter('active')"
+
+
+
+
+Active
+</button>
+
+<button
+class="btn filter"
+data-filter="completed"
+onclick="setDemoFilter('completed')"
+
+
+
+
+Completed
+</button>
+
+</div>
+
+<div class="todo-list" id="todoList" ></div>
+
+<div class="stats" id="todoStats" ></div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- RESPONSIVE -->
+
+<section id="responsive" class="reveal">
+
+<div class="card">
+
+<h2>12. Responsive UI</h2>
+
+<p class="intro"> The Todo application should remain usable across desktop, tablet and mobile screens. </p>
+
+<div class="grid">
+
+<div class="info"> <div class="icon">D</div> <h3>Desktop</h3> <p>Use a centered application card with comfortable spacing.</p> </div>
+
+<div class="info"> <div class="icon">T</div> <h3>Tablet</h3> <p>Reduce surrounding padding while keeping controls accessible.</p> </div>
+
+<div class="info"> <div class="icon">M</div> <h3>Mobile</h3> <p>Stack the input and button and allow filter controls to scroll horizontally.</p> </div>
+
+</div>
+
+<div class="code">
+
+<div class="code-head"> <span>Responsive Example</span> <span>CSS</span> </div>
+
+<pre><code>@media (max-width: 760px) { .todo-input { flex-direction: column; } .todo-app { width: 100%; } }</code></pre>
+
+</div>
+
+<div class="callout tip">
+
+<strong>UX Rule</strong>
+
+Responsive design is not only about making elements smaller.
+Controls should remain readable, clickable and easy to operate.
+
+</div>
+
+</div>
+
+</section>
+
+<!-- COMPLETE ARCHITECTURE -->
+
+<section class="reveal">
+
+<div class="card">
+
+<h2>13. Complete Project Structure</h2>
+
+<p class="intro"> A scalable version of this project can be organized into focused files. </p>
+
+<div class="tree">
+
+<span class="folder">src/</span>
+<br>
+├── <span class="file">App.jsx</span>
+<br>
+├── <span class="folder">components/</span>
+<br>
+│  ├── <span class="file">TodoForm.jsx</span>
+<br>
+│  ├── <span class="file">TodoFilters.jsx</span>
+<br>
+│  ├── <span class="file">TodoList.jsx</span>
+<br>
+│  ├── <span class="file">TodoItem.jsx</span>
+<br>
+│  └── <span class="file">TodoStats.jsx</span>
+<br>
+├── <span class="folder">hooks/</span>
+<br>
+│  └── <span class="file">useTodos.js</span>
+<br>
+├── <span class="folder">utils/</span>
+<br>
+│  └── <span class="file">todoStorage.js</span>
+<br>
+├── <span class="file">main.jsx</span>
+<br>
+└── <span class="file">index.css</span>
+
+</div>
+
+<div class="callout info-box">
+
+<strong>Project Evolution</strong>
+
+For a small learning project, keeping everything in App.jsx can make the concepts
+easier to understand. As the application grows, move responsibilities into
+components, hooks and utilities when the separation genuinely improves the code.
+
+</div>
+
+</div>
+
+</section>
+
+<!-- TESTING -->
+
+<section id="testing" class="reveal">
+
+<div class="card">
+
+<h2>14. Final Testing</h2>
+
+<p class="intro"> A project is not finished simply because the main feature works. Test the important user flows. </p>
+
+<div class="checklist">
+
+<div class="check"> <span class="check-icon">✓</span> <span>Can a user add a valid todo?</span> </div>
+
+<div class="check"> <span class="check-icon">✓</span> <span>Does an empty todo get rejected?</span> </div>
+
+<div class="check"> <span class="check-icon">✓</span> <span>Can a todo be completed?</span> </div>
+
+<div class="check"> <span class="check-icon">✓</span> <span>Can a completed todo become active again?</span> </div>
+
+<div class="check"> <span class="check-icon">✓</span> <span>Can a todo be edited?</span> </div>
+
+<div class="check"> <span class="check-icon">✓</span> <span>Can a todo be deleted?</span> </div>
+
+<div class="check"> <span class="check-icon">✓</span> <span>Do All, Active and Completed filters work?</span> </div>
+
+<div class="check"> <span class="check-icon">✓</span> <span>Do todos survive a page refresh?</span> </div>
+
+<div class="check"> <span class="check-icon">✓</span> <span>Does the UI work on mobile?</span> </div>
+
+<div class="check"> <span class="check-icon">✓</span> <span>Does the empty state appear correctly?</span> </div>
+
+</div>
+
+<h3 style="margin-top:28px;">Testing Flow</h3>
+
+<div class="arch">
+
+<div class="arch-box">Add</div> <div class="arrow">→</div> <div class="arch-box">Complete</div> <div class="arrow">→</div> <div class="arch-box">Edit</div> <div class="arrow">→</div> <div class="arch-box">Filter</div> <div class="arrow">→</div> <div class="arch-box">Refresh</div>
+
+</div>
+
+<div class="callout warning">
+
+<strong>Production Thinking</strong>
+
+Test normal behavior, empty states, invalid input, repeated clicks,
+refresh persistence and responsive layouts—not just the happy path.
+
+</div>
+
+</div>
+
+</section>
+
+<!-- FINAL -->
+
+<section class="reveal">
+
+<div class="final">
+
+<h2>What You Built</h2>
+
+<p> You have now combined many React fundamentals into one application: </p>
+
+<br>
+
+<p> <strong>Components</strong> → UI structure<br> <strong>Props</strong> → Component communication<br> <strong>State</strong> → Application data<br> <strong>Events</strong> → User interaction<br> <strong>map()</strong> → Rendering lists<br> <strong>filter()</strong> → Removing and filtering data<br> <strong>Conditional rendering</strong> → Dynamic UI<br> <strong>useEffect()</strong> → Persistence synchronization<br> <strong>localStorage</strong> → Browser persistence<br> <strong>Responsive CSS</strong> → Multi-device UI </p>
+
+<br>
+
+<p> This is the transition from learning React concepts individually to thinking like a React application developer. </p>
+
+</div>
+
+</section>
+
+<!-- QUIZ -->
+
+<section id="quiz" class="reveal">
+
+<div class="card">
+
+<h2>15. Quick Quiz</h2>
+
+<p class="intro"> Check your understanding of the Todo project. </p>
+
+<div class="quiz">
+
+<strong>1. Why does each todo need a unique ID?</strong>
+
+<br>
+
+<button onclick="toggleAnswer(1)"> Show Answer </button>
+
+<div class="answer" id="answer1"> A stable ID lets the application identify and update or delete the correct todo and provides a stable key when rendering the list. </div>
+
+</div>
+
+<div class="quiz">
+
+<strong>2. Which array method is useful for removing a todo by ID?</strong>
+
+<br>
+
+<button onclick="toggleAnswer(2)"> Show Answer </button>
+
+<div class="answer" id="answer2"> filter() can create a new array that excludes the todo with the matching ID. </div>
+
+</div>
+
+<div class="quiz">
+
+<strong>3. Which array method is useful for toggling the completed property?</strong>
+
+<br>
+
+<button onclick="toggleAnswer(3)"> Show Answer </button>
+
+<div class="answer" id="answer3"> map() can create a new array while replacing only the matching todo. </div>
+
+</div>
+
+<div class="quiz">
+
+<strong>4. Why is JSON.stringify() used with localStorage?</strong>
+
+<br>
+
+<button onclick="toggleAnswer(4)"> Show Answer </button>
+
+<div class="answer" id="answer4"> localStorage stores string values, so JavaScript objects or arrays must be serialized into a string before storing them. </div>
+
+</div>
+
+<div class="quiz">
+
+<strong>5. Why should filtered todos usually be derived instead of stored separately?</strong>
+
+<br>
+
+<button onclick="toggleAnswer(5)"> Show Answer </button>
+
+<div class="answer" id="answer5"> The filtered list can be calculated from the source todos and current filter, which avoids maintaining duplicate state that can become inconsistent. </div>
+
+</div>
+
+<div class="quiz">
+
+<strong>6. What is one important thing to test after implementing localStorage?</strong>
+
+<br>
+
+<button onclick="toggleAnswer(6)"> Show Answer </button>
+
+<div class="answer" id="answer6"> Refresh the page and verify that previously saved todos are restored correctly. </div>
+
+</div>
+
+</div>
+
+</section>
+
+</main> </div>
+
+<script> /* ========================= REVEAL ANIMATIONS ========================= */ const observer = new IntersectionObserver( entries => { entries.forEach(entry => { if(entry.isIntersecting){ entry.target.classList.add("show"); } }); }, { threshold:.08 } ); document.querySelectorAll(".reveal").forEach(el => { observer.observe(el); }); /* ========================= QUIZ ========================= */ function toggleAnswer(number){ const answer = document.getElementById("answer" + number); if(answer.style.display === "block"){ answer.style.display = "none"; }else{ answer.style.display = "block"; } } /* ========================= TODO DEMO ========================= */ let demoTodos = []; let demoFilter = "all"; /* Load */ try{ const saved = localStorage.getItem("zensus-demo-todos"); if(saved){ demoTodos = JSON.parse(saved); } }catch(error){ demoTodos = []; } /* Save */ function saveDemoTodos(){ try{ localStorage.setItem( "zensus-demo-todos", JSON.stringify(demoTodos) ); }catch(error){ console.warn("Storage unavailable"); } } /* Add */ function addDemoTodo(){ const input = document.getElementById("todoInput"); const text = input.value.trim(); if(!text){ input.focus(); return; } demoTodos.push({ id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(), text:text, completed:false }); input.value = ""; saveDemoTodos(); renderDemoTodos(); input.focus(); } /* Toggle */ function toggleDemoTodo(id){ demoTodos = demoTodos.map(todo => { if(todo.id === id){ return { ...todo, completed:!todo.completed }; } return todo; }); saveDemoTodos(); renderDemoTodos(); } /* Delete */ function deleteDemoTodo(id){ demoTodos = demoTodos.filter(todo => todo.id !== id ); saveDemoTodos(); renderDemoTodos(); } /* Edit */ function editDemoTodo(id){ const todo = demoTodos.find(item => item.id === id ); if(!todo){ return; } const newText = prompt("Edit your todo:", todo.text); if(newText === null){ return; } const trimmed = newText.trim(); if(!trimmed){ return; } demoTodos = demoTodos.map(item => { if(item.id === id){ return { ...item, text:trimmed }; } return item; }); saveDemoTodos(); renderDemoTodos(); } /* Filter */ function setDemoFilter(filter){ demoFilter = filter; document .querySelectorAll(".filter") .forEach(button => { button.classList.toggle( "active", button.dataset.filter === filter ); }); renderDemoTodos(); } /* Render */ function renderDemoTodos(){ const list = document.getElementById("todoList"); const stats = document.getElementById("todoStats"); let visibleTodos = demoTodos; if(demoFilter === "active"){ visibleTodos = demoTodos.filter(todo => !todo.completed ); } if(demoFilter === "completed"){ visibleTodos = demoTodos.filter(todo => todo.completed ); } if(visibleTodos.length === 0){ list.innerHTML = ` <div class="empty"> No todos to display. </div> `; }else{ list.innerHTML = visibleTodos.map(todo => ` <div class="todo-item"> <input class="todo-check" type="checkbox" ${todo.completed ? "checked" : ""} onchange="toggleDemoTodo('${todo.id}')" > <div class="todo-text ${todo.completed ? "completed" : ""}" > ${escapeHTML(todo.text)} </div> <div class="todo-actions"> <button onclick="editDemoTodo('${todo.id}')" > Edit </button> <button class="delete" onclick="deleteDemoTodo('${todo.id}')" > Delete </button> </div> </div> `).join(""); } const remaining = demoTodos.filter(todo => !todo.completed ).length; const completed = demoTodos.filter(todo => todo.completed ).length; stats.textContent = `${remaining} active • ${completed} completed • ${demoTodos.length} total`; } /* Escape user text before inserting into innerHTML */ function escapeHTML(value){ const div = document.createElement("div"); div.textContent = value; return div.innerHTML; } /* Enter key */ document .getElementById("todoInput") .addEventListener("keydown", event => { if(event.key === "Enter"){ addDemoTodo(); } }); /* Initial render */ renderDemoTodos(); /* ========================= ACTIVE SIDEBAR ========================= */ const sections = document.querySelectorAll( "section[id], .hero[id]" ); const links = document.querySelectorAll( ".sidebar a" ); window.addEventListener( "scroll", () => { let current = ""; sections.forEach(section => { const top = section.getBoundingClientRect().top; if(top <= 130){ current = section.id; } }); links.forEach(link => { link.classList.remove("active"); if( link.getAttribute("href") === "#" + current ){ link.classList.add("active"); } }); } ); </script>
+
+</body> </html>

@@ -1,0 +1,4660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS | JavaScript Events</title>
+
+<style>
+/* =========================================================
+   ZENSUS JAVASCRIPT LESSON 12
+   EVENTS
+   ========================================================= */
+
+:root {
+    --primary: #4f46e5;
+    --primary-dark: #3730a3;
+    --secondary: #7c3aed;
+    --accent: #06b6d4;
+
+    --bg: #f6f8fc;
+    --surface: #ffffff;
+    --surface-soft: #f8fafc;
+
+    --text: #172033;
+    --muted: #667085;
+    --border: #e6e9f0;
+
+    --success: #16a34a;
+    --warning: #d97706;
+    --danger: #dc2626;
+
+    --shadow-sm: 0 4px 14px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 12px 35px rgba(15, 23, 42, 0.09);
+
+    --sidebar-width: 270px;
+    --topbar-height: 70px;
+
+    --radius: 18px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+        BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+}
+
+/* =========================
+   SCROLLBAR
+   ========================= */
+
+::-webkit-scrollbar {
+    width: 9px;
+}
+
+::-webkit-scrollbar-track {
+    background: #eef1f7;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #b8bfd0;
+    border-radius: 20px;
+}
+
+/* =========================
+   PROGRESS BAR
+   ========================= */
+
+.progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 4px;
+    width: 0%;
+    background: linear-gradient(
+        90deg,
+        var(--primary),
+        var(--secondary),
+        var(--accent)
+    );
+    z-index: 9999;
+}
+
+/* =========================
+   SIDEBAR
+   ========================= */
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+
+    width: var(--sidebar-width);
+
+    background: var(--surface);
+
+    border-right: 1px solid var(--border);
+
+    overflow-y: auto;
+
+    z-index: 1000;
+
+    padding: 22px 16px;
+}
+
+.logo {
+    padding: 8px 12px 22px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+}
+
+.logo-title {
+    font-size: 25px;
+    font-weight: 900;
+
+    background: linear-gradient(
+        90deg,
+        var(--primary),
+        var(--secondary)
+    );
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    color: transparent;
+}
+
+.logo-subtitle {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+.course-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+
+    color: var(--muted);
+
+    margin: 18px 12px 9px;
+}
+
+.lesson-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.lesson-nav a {
+    text-decoration: none;
+    color: #596273;
+
+    padding: 10px 12px;
+
+    border-radius: 11px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    transition: 0.25s ease;
+}
+
+.lesson-nav a:hover {
+    background: #f0f2ff;
+    color: var(--primary);
+    transform: translateX(3px);
+}
+
+.lesson-nav a.active {
+    background: #eef0ff;
+    color: var(--primary);
+
+    border-left: 3px solid var(--primary);
+}
+
+/* =========================
+   MAIN
+   ========================= */
+
+.main {
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+}
+
+/* =========================
+   TOPBAR
+   ========================= */
+
+.topbar {
+    height: var(--topbar-height);
+
+    background: rgba(255,255,255,0.94);
+
+    backdrop-filter: blur(14px);
+
+    border-bottom: 1px solid var(--border);
+
+    position: sticky;
+    top: 0;
+
+    z-index: 900;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 35px;
+}
+
+.breadcrumb {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.breadcrumb strong {
+    color: var(--text);
+}
+
+.lesson-badge {
+    padding: 7px 12px;
+
+    border-radius: 999px;
+
+    background: #eef0ff;
+    color: var(--primary);
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+/* =========================
+   CONTENT
+   ========================= */
+
+.content {
+    max-width: 1180px;
+    margin: auto;
+
+    padding: 50px 34px 100px;
+}
+
+.section {
+    margin-top: 45px;
+    scroll-margin-top: 90px;
+}
+
+.section-title {
+    font-size: 27px;
+    line-height: 1.2;
+
+    margin-bottom: 10px;
+
+    letter-spacing: -0.5px;
+}
+
+.section-subtitle {
+    color: var(--muted);
+    max-width: 800px;
+
+    margin-bottom: 24px;
+}
+
+/* =========================
+   HERO
+   ========================= */
+
+.hero {
+    position: relative;
+
+    overflow: hidden;
+
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: 28px;
+
+    padding: 48px;
+
+    box-shadow: var(--shadow-md);
+}
+
+.hero::before {
+    content: "";
+
+    position: absolute;
+
+    width: 260px;
+    height: 260px;
+
+    border-radius: 50%;
+
+    background: rgba(79,70,229,0.08);
+
+    right: -90px;
+    top: -90px;
+}
+
+.hero-label {
+    display: inline-flex;
+
+    padding: 7px 13px;
+
+    background: #eef0ff;
+
+    color: var(--primary);
+
+    border-radius: 999px;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    margin-bottom: 17px;
+}
+
+.hero h1 {
+    font-size: clamp(35px, 5vw, 58px);
+
+    line-height: 1.05;
+
+    letter-spacing: -2px;
+
+    max-width: 850px;
+}
+
+.hero h1 span {
+    color: var(--primary);
+}
+
+.hero p {
+    max-width: 780px;
+
+    color: var(--muted);
+
+    font-size: 17px;
+
+    margin-top: 20px;
+}
+
+.hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    margin-top: 27px;
+}
+
+.meta-chip {
+    padding: 8px 12px;
+
+    border: 1px solid var(--border);
+
+    background: var(--surface-soft);
+
+    border-radius: 999px;
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+/* =========================
+   OBJECTIVES
+   ========================= */
+
+.objectives {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 16px;
+
+    margin-top: 25px;
+}
+
+.objective-card {
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius);
+
+    padding: 22px;
+
+    box-shadow: var(--shadow-sm);
+
+    transition: 0.3s ease;
+}
+
+.objective-card:hover {
+    transform: translateY(-5px);
+
+    box-shadow: var(--shadow-md);
+}
+
+.objective-number {
+    width: 35px;
+    height: 35px;
+
+    border-radius: 10px;
+
+    background: #eef0ff;
+
+    color: var(--primary);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-weight: 900;
+
+    margin-bottom: 15px;
+}
+
+.objective-card h3 {
+    font-size: 16px;
+    margin-bottom: 7px;
+}
+
+.objective-card p {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* =========================
+   CARDS
+   ========================= */
+
+.card-grid {
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 18px;
+}
+
+.card {
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius);
+
+    padding: 25px;
+
+    box-shadow: var(--shadow-sm);
+}
+
+.card h3 {
+    margin-bottom: 10px;
+}
+
+.card p {
+    color: var(--muted);
+}
+
+.card ul {
+    margin: 13px 0 0 20px;
+
+    color: var(--muted);
+}
+
+.card li {
+    margin: 5px 0;
+}
+
+/* =========================
+   CODE
+   ========================= */
+
+.code-box {
+    margin-top: 18px;
+
+    border-radius: 14px;
+
+    overflow: hidden;
+
+    background: #0d1117;
+
+    border: 1px solid #202938;
+
+    box-shadow: 0 12px 25px rgba(0,0,0,0.12);
+}
+
+.code-header {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 10px 15px;
+
+    background: #161b22;
+
+    color: #9da7b3;
+
+    font-size: 12px;
+
+    border-bottom: 1px solid #252d38;
+}
+
+.copy-btn {
+    border: none;
+
+    background: #242b35;
+
+    color: #e6edf3;
+
+    padding: 5px 9px;
+
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    font-size: 11px;
+}
+
+pre {
+    margin: 0;
+
+    padding: 20px;
+
+    overflow-x: auto;
+
+    color: #e6edf3;
+
+    font-family:
+        "Cascadia Code",
+        "Consolas",
+        "Courier New",
+        monospace;
+
+    font-size: 13px;
+
+    line-height: 1.7;
+
+    white-space: pre;
+}
+
+/* =========================
+   CALLOUTS
+   ========================= */
+
+.callout {
+    padding: 18px 20px;
+
+    border-radius: 14px;
+
+    margin-top: 18px;
+
+    border: 1px solid var(--border);
+
+    background: #fafbff;
+}
+
+.callout strong {
+    display: block;
+
+    margin-bottom: 5px;
+}
+
+.callout p {
+    color: var(--muted);
+}
+
+.callout.success {
+    border-left: 4px solid var(--success);
+}
+
+.callout.warning {
+    border-left: 4px solid var(--warning);
+}
+
+.callout.danger {
+    border-left: 4px solid var(--danger);
+}
+
+.callout.info {
+    border-left: 4px solid var(--primary);
+}
+
+/* =========================
+   TABLE
+   ========================= */
+
+.table-wrapper {
+    overflow-x: auto;
+
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: 16px;
+
+    box-shadow: var(--shadow-sm);
+}
+
+table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    min-width: 650px;
+}
+
+th,
+td {
+    text-align: left;
+
+    padding: 14px 16px;
+
+    border-bottom: 1px solid var(--border);
+
+    font-size: 13px;
+}
+
+th {
+    background: #f8f9fc;
+
+    color: var(--text);
+
+    font-weight: 800;
+}
+
+td {
+    color: var(--muted);
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+/* =========================
+   BUTTONS
+   ========================= */
+
+.btn {
+    border: none;
+
+    padding: 11px 16px;
+
+    border-radius: 10px;
+
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition: 0.25s ease;
+
+    font-size: 13px;
+}
+
+.btn-primary {
+    background: var(--primary);
+
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+
+    transform: translateY(-2px);
+}
+
+.btn-soft {
+    background: #eef0ff;
+
+    color: var(--primary);
+}
+
+.btn-soft:hover {
+    background: #e1e4ff;
+}
+
+/* =========================
+   FLOWCHART
+   ========================= */
+
+.flow {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    margin-top: 25px;
+}
+
+.flow-node {
+    padding: 14px 20px;
+
+    border-radius: 13px;
+
+    background: var(--surface);
+
+    border: 2px solid #dfe3f0;
+
+    box-shadow: var(--shadow-sm);
+
+    font-weight: 800;
+
+    font-size: 13px;
+
+    animation: floatNode 3s ease-in-out infinite;
+}
+
+.flow-node:nth-child(2) {
+    animation-delay: .3s;
+}
+
+.flow-node:nth-child(3) {
+    animation-delay: .6s;
+}
+
+.flow-node:nth-child(4) {
+    animation-delay: .9s;
+}
+
+.flow-node:nth-child(5) {
+    animation-delay: 1.2s;
+}
+
+.flow-arrow {
+    color: var(--primary);
+
+    font-size: 22px;
+
+    font-weight: 900;
+}
+
+@keyframes floatNode {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+/* =========================
+   EVENT VISUALIZER
+   ========================= */
+
+.event-visualizer {
+    background: #10151d;
+
+    border-radius: 20px;
+
+    padding: 25px;
+
+    color: white;
+
+    overflow: hidden;
+}
+
+.visualizer-stage {
+    min-height: 270px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    position: relative;
+}
+
+.event-box {
+    width: 230px;
+    height: 150px;
+
+    border: 2px dashed #697586;
+
+    border-radius: 16px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+    cursor: pointer;
+
+    transition: .3s;
+}
+
+.event-box:hover {
+    border-color: #818cf8;
+}
+
+.event-box.active {
+    transform: scale(1.05);
+
+    border-color: #22c55e;
+
+    box-shadow:
+        0 0 0 8px rgba(34,197,94,.1),
+        0 0 35px rgba(34,197,94,.25);
+}
+
+.event-pulse {
+    position: absolute;
+
+    width: 20px;
+    height: 20px;
+
+    border-radius: 50%;
+
+    background: #818cf8;
+
+    opacity: 0;
+}
+
+.event-pulse.animate {
+    animation: pulseEvent 1s ease;
+}
+
+@keyframes pulseEvent {
+    0% {
+        opacity: 1;
+        transform: scale(.3);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(8);
+    }
+}
+
+.event-log {
+    margin-top: 18px;
+
+    background: #0b0f14;
+
+    border-radius: 12px;
+
+    padding: 14px;
+
+    min-height: 90px;
+
+    font-family: monospace;
+
+    font-size: 12px;
+
+    color: #c9d1d9;
+}
+
+/* =========================
+   EVENT TYPE GRID
+   ========================= */
+
+.event-types {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 15px;
+}
+
+.event-type {
+    padding: 18px;
+
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: 15px;
+
+    transition: .25s;
+}
+
+.event-type:hover {
+    transform: translateY(-4px);
+
+    border-color: #cdd2ff;
+}
+
+.event-icon {
+    font-size: 24px;
+
+    margin-bottom: 8px;
+}
+
+.event-type h4 {
+    margin-bottom: 5px;
+}
+
+.event-type p {
+    color: var(--muted);
+
+    font-size: 13px;
+}
+
+/* =========================
+   LAB
+   ========================= */
+
+.lab {
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: 20px;
+
+    padding: 25px;
+
+    box-shadow: var(--shadow-sm);
+
+    margin-top: 20px;
+}
+
+.lab-title {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 17px;
+}
+
+.lab-badge {
+    background: #eef0ff;
+
+    color: var(--primary);
+
+    padding: 5px 9px;
+
+    border-radius: 7px;
+
+    font-size: 10px;
+
+    font-weight: 900;
+
+    text-transform: uppercase;
+}
+
+.input-row {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    margin-bottom: 15px;
+}
+
+input,
+textarea,
+select {
+    width: 100%;
+
+    padding: 11px 13px;
+
+    border: 1px solid #d9dee9;
+
+    border-radius: 10px;
+
+    background: white;
+
+    color: var(--text);
+
+    outline: none;
+
+    font-family: inherit;
+
+    transition: .2s;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--primary);
+
+    box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+}
+
+.input-row input,
+.input-row select {
+    flex: 1;
+
+    min-width: 180px;
+}
+
+.output {
+    padding: 15px;
+
+    border-radius: 12px;
+
+    background: #f7f8fc;
+
+    border: 1px solid var(--border);
+
+    min-height: 55px;
+
+    color: var(--text);
+
+    font-size: 13px;
+}
+
+.output strong {
+    color: var(--primary);
+}
+
+/* =========================
+   PROPAGATION
+   ========================= */
+
+.propagation {
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 25px;
+
+    background: #f8f9fd;
+
+    border-radius: 18px;
+
+    border: 1px solid var(--border);
+}
+
+.prop-layer {
+    width: min(90%, 600px);
+
+    padding: 18px;
+
+    text-align: center;
+
+    border: 2px solid #dce1ee;
+
+    border-radius: 15px;
+
+    cursor: pointer;
+
+    font-weight: 800;
+
+    transition: .3s;
+}
+
+.prop-layer:hover {
+    transform: scale(1.02);
+}
+
+.prop-layer.highlight {
+    border-color: var(--primary);
+
+    background: #eef0ff;
+
+    color: var(--primary);
+
+    box-shadow: 0 8px 20px rgba(79,70,229,.12);
+}
+
+.prop-child {
+    width: min(80%, 430px);
+}
+
+/* =========================
+   FORM DEMO
+   ========================= */
+
+.form-demo {
+    max-width: 620px;
+
+    margin: auto;
+
+    background: #fafbff;
+
+    padding: 22px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 16px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+
+    margin-bottom: 6px;
+
+    font-size: 13px;
+
+    font-weight: 800;
+}
+
+.validation-message {
+    font-size: 12px;
+
+    margin-top: 5px;
+
+    color: var(--danger);
+}
+
+.form-success {
+    padding: 12px;
+
+    border-radius: 10px;
+
+    background: #ecfdf3;
+
+    color: #15803d;
+
+    margin-top: 12px;
+
+    display: none;
+
+    font-size: 13px;
+
+    font-weight: 700;
+}
+
+/* =========================
+   QUIZ
+   ========================= */
+
+.quiz-card {
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: 17px;
+
+    padding: 22px;
+
+    margin-bottom: 15px;
+
+    box-shadow: var(--shadow-sm);
+}
+
+.quiz-question {
+    font-weight: 800;
+
+    margin-bottom: 13px;
+}
+
+.quiz-options {
+    display: grid;
+
+    gap: 8px;
+}
+
+.quiz-option {
+    padding: 10px 13px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    background: white;
+
+    transition: .2s;
+
+    font-size: 13px;
+}
+
+.quiz-option:hover {
+    border-color: var(--primary);
+
+    background: #f8f8ff;
+}
+
+.quiz-option.correct {
+    border-color: var(--success);
+
+    background: #ecfdf3;
+
+    color: #15803d;
+}
+
+.quiz-option.wrong {
+    border-color: var(--danger);
+
+    background: #fef2f2;
+
+    color: #b91c1c;
+}
+
+.quiz-result {
+    font-weight: 800;
+
+    color: var(--primary);
+
+    margin-top: 15px;
+}
+
+/* =========================
+   CHECKLIST
+   ========================= */
+
+.checklist {
+    display: grid;
+
+    gap: 10px;
+}
+
+.check-item {
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 13px 15px;
+
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: 12px;
+}
+
+.check-item input {
+    width: auto;
+}
+
+.check-item label {
+    cursor: pointer;
+
+    font-size: 13px;
+
+    color: var(--muted);
+}
+
+.check-progress {
+    margin-bottom: 18px;
+
+    font-weight: 800;
+
+    color: var(--primary);
+}
+
+/* =========================
+   INTERVIEW
+   ========================= */
+
+.interview-item {
+    border: 1px solid var(--border);
+
+    border-radius: 13px;
+
+    margin-bottom: 10px;
+
+    overflow: hidden;
+
+    background: var(--surface);
+}
+
+.interview-question {
+    width: 100%;
+
+    border: none;
+
+    background: transparent;
+
+    padding: 16px;
+
+    text-align: left;
+
+    font-weight: 800;
+
+    cursor: pointer;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    color: var(--text);
+}
+
+.interview-answer {
+    display: none;
+
+    padding: 0 16px 16px;
+
+    color: var(--muted);
+
+    font-size: 13px;
+}
+
+/* =========================
+   MISTAKES
+   ========================= */
+
+.mistake-grid {
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 15px;
+}
+
+.mistake {
+    padding: 19px;
+
+    border-radius: 14px;
+
+    border: 1px solid #f0d5d5;
+
+    background: #fffafa;
+}
+
+.mistake h4 {
+    color: var(--danger);
+
+    margin-bottom: 6px;
+}
+
+.mistake p {
+    color: var(--muted);
+
+    font-size: 13px;
+}
+
+/* =========================
+   FOOTER
+   ========================= */
+
+.lesson-footer {
+    margin-top: 65px;
+
+    padding: 35px;
+
+    border-radius: 22px;
+
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    text-align: center;
+}
+
+.lesson-footer h2 {
+    margin-bottom: 8px;
+}
+
+.lesson-footer p {
+    color: var(--muted);
+}
+
+/* =========================
+   MOBILE MENU
+   ========================= */
+
+.menu-btn {
+    display: none;
+
+    border: none;
+
+    background: #eef0ff;
+
+    color: var(--primary);
+
+    padding: 9px 11px;
+
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    font-size: 18px;
+}
+
+/* =========================
+   REVEAL
+   ========================= */
+
+.reveal {
+    opacity: 1;
+    transform: none;
+}
+
+.js-enabled .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+
+    transition:
+        opacity .65s ease,
+        transform .65s ease;
+}
+
+.js-enabled .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 1000px) {
+
+    .objectives {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .event-types {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 800px) {
+
+    .sidebar {
+        transform: translateX(-100%);
+
+        transition: .3s ease;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .main {
+        margin-left: 0;
+    }
+
+    .menu-btn {
+        display: block;
+    }
+
+    .topbar {
+        padding: 0 18px;
+    }
+
+    .content {
+        padding: 35px 18px 70px;
+    }
+
+    .hero {
+        padding: 32px 23px;
+    }
+
+    .hero h1 {
+        letter-spacing: -1px;
+    }
+
+    .card-grid,
+    .mistake-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .objectives,
+    .event-types {
+        grid-template-columns: 1fr;
+    }
+
+    .hero {
+        border-radius: 20px;
+    }
+
+    .section-title {
+        font-size: 23px;
+    }
+
+    .flow-arrow {
+        transform: rotate(90deg);
+    }
+
+    .visualizer-stage {
+        min-height: 220px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- ======================================================
+     SIDEBAR
+     ====================================================== -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="logo">
+        <div class="logo-title">ZENSUS</div>
+        <div class="logo-subtitle">Learn • Build • Master</div>
+    </div>
+
+    <div class="course-label">JavaScript Course</div>
+
+    <nav class="lesson-nav">
+
+        <a href="#hero">Lesson 12 Overview</a>
+
+        <a href="#fundamentals">Event Fundamentals</a>
+
+        <a href="#listener">addEventListener()</a>
+
+        <a href="#event-types">Event Types</a>
+
+        <a href="#mouse">Mouse Events</a>
+
+        <a href="#keyboard">Keyboard Events</a>
+
+        <a href="#form-events">Form Events</a>
+
+        <a href="#event-object">Event Object</a>
+
+        <a href="#prevent">preventDefault()</a>
+
+        <a href="#propagation">Bubbling & Capturing</a>
+
+        <a href="#delegation">Event Delegation</a>
+
+        <a href="#visualizer">Event Visualizer</a>
+
+        <a href="#labs">Interactive Labs</a>
+
+        <a href="#mistakes">Common Mistakes</a>
+
+        <a href="#exam">Exam Preparation</a>
+
+        <a href="#interview">Interview Questions</a>
+
+        <a href="#quiz">Quiz</a>
+
+        <a href="#practice">Coding Practice</a>
+
+        <a href="#project">Mini Project</a>
+
+        <a href="#checklist">Checklist</a>
+
+        <a href="#revision">Rapid Revision</a>
+
+    </nav>
+
+</aside>
+
+<!-- ======================================================
+     MAIN
+     ====================================================== -->
+
+<main class="main">
+
+    <header class="topbar">
+
+        <div style="display:flex;align-items:center;gap:12px;">
+
+            <button class="menu-btn" id="menuBtn">
+                ☰
+            </button>
+
+            <div class="breadcrumb">
+                JavaScript / <strong>Events</strong>
+            </div>
+
+        </div>
+
+        <div class="lesson-badge">
+            JS • LESSON 12
+        </div>
+
+    </header>
+
+    <div class="content">
+
+        <!-- ==================================================
+             HERO
+             ================================================== -->
+
+        <section class="hero reveal" id="hero">
+
+            <div class="hero-label">
+                JAVASCRIPT • LESSON 12
+            </div>
+
+            <h1>
+                JavaScript <span>Events</span>
+            </h1>
+
+            <p>
+                Learn how JavaScript reacts to clicks, keyboard actions,
+                mouse movement, form submissions, user input and other
+                browser activities — and how events connect the DOM to
+                real interactive websites.
+            </p>
+
+            <div class="hero-meta">
+
+                <span class="meta-chip">
+                    🎯 Beginner → Advanced
+                </span>
+
+                <span class="meta-chip">
+                    ⚡ Interactive Labs
+                </span>
+
+                <span class="meta-chip">
+                    🧠 Interview Ready
+                </span>
+
+                <span class="meta-chip">
+                    🧪 Practical Projects
+                </span>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             OBJECTIVES
+             ================================================== -->
+
+        <section class="section reveal">
+
+            <h2 class="section-title">
+                What You Will Learn
+            </h2>
+
+            <p class="section-subtitle">
+                By the end of this lesson, you should be able to build
+                interactive web pages that respond intelligently to users.
+            </p>
+
+            <div class="objectives">
+
+                <div class="objective-card">
+                    <div class="objective-number">01</div>
+                    <h3>Event Fundamentals</h3>
+                    <p>
+                        Understand what events are and how browsers
+                        generate them.
+                    </p>
+                </div>
+
+                <div class="objective-card">
+                    <div class="objective-number">02</div>
+                    <h3>Event Listeners</h3>
+                    <p>
+                        Use addEventListener() to connect actions
+                        with functions.
+                    </p>
+                </div>
+
+                <div class="objective-card">
+                    <div class="objective-number">03</div>
+                    <h3>Mouse Events</h3>
+                    <p>
+                        Handle click, double-click, mouseenter,
+                        mouseleave and more.
+                    </p>
+                </div>
+
+                <div class="objective-card">
+                    <div class="objective-number">04</div>
+                    <h3>Keyboard Events</h3>
+                    <p>
+                        Work with keydown, keyup and keyboard shortcuts.
+                    </p>
+                </div>
+
+                <div class="objective-card">
+                    <div class="objective-number">05</div>
+                    <h3>Forms & Input</h3>
+                    <p>
+                        React to input, change, focus, blur and submit.
+                    </p>
+                </div>
+
+                <div class="objective-card">
+                    <div class="objective-number">06</div>
+                    <h3>Event Propagation</h3>
+                    <p>
+                        Understand bubbling, capturing and delegation.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             FUNDAMENTALS
+             ================================================== -->
+
+        <section class="section reveal" id="fundamentals">
+
+            <h2 class="section-title">
+                1. What Is an Event?
+            </h2>
+
+            <p class="section-subtitle">
+                An event is something that happens in the browser and can
+                trigger JavaScript code.
+            </p>
+
+            <div class="card">
+
+                <h3>Think of a website like a responsive system</h3>
+
+                <p>
+                    The user performs an action → the browser detects it →
+                    JavaScript receives an event → your function executes →
+                    the page changes.
+                </p>
+
+                <div class="flow">
+
+                    <div class="flow-node">
+                        👤 User Action
+                    </div>
+
+                    <div class="flow-arrow">→</div>
+
+                    <div class="flow-node">
+                        🌐 Browser
+                    </div>
+
+                    <div class="flow-arrow">→</div>
+
+                    <div class="flow-node">
+                        ⚡ Event
+                    </div>
+
+                    <div class="flow-arrow">→</div>
+
+                    <div class="flow-node">
+                        🧠 JavaScript
+                    </div>
+
+                    <div class="flow-arrow">→</div>
+
+                    <div class="flow-node">
+                        🎨 UI Update
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card-grid" style="margin-top:18px;">
+
+                <div class="card">
+
+                    <h3>Examples of events</h3>
+
+                    <ul>
+                        <li>User clicks a button.</li>
+                        <li>User presses a keyboard key.</li>
+                        <li>User moves the mouse.</li>
+                        <li>User enters text into an input.</li>
+                        <li>User submits a form.</li>
+                        <li>An element receives focus.</li>
+                        <li>The page finishes loading.</li>
+                    </ul>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Real-world analogy</h3>
+
+                    <p>
+                        Imagine a doorbell.
+                    </p>
+
+                    <p style="margin-top:10px;">
+                        Pressing the button is the
+                        <strong>event</strong>.
+                    </p>
+
+                    <p>
+                        The bell ringing is the
+                        <strong>event handler</strong>.
+                    </p>
+
+                    <p>
+                        JavaScript works in a similar way:
+                    </p>
+
+                    <p style="margin-top:10px;">
+                        <strong>Action → Event → Handler → Result</strong>
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             ADD EVENT LISTENER
+             ================================================== -->
+
+        <section class="section reveal" id="listener">
+
+            <h2 class="section-title">
+                2. addEventListener()
+            </h2>
+
+            <p class="section-subtitle">
+                The modern and recommended way to attach event behavior
+                to elements.
+            </p>
+
+            <div class="card">
+
+                <h3>Basic syntax</h3>
+
+                <div class="code-box">
+
+                    <div class="code-header">
+                        <span>JavaScript</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+
+<pre>element.addEventListener("event", function() {
+    // code to execute
+});</pre>
+
+                </div>
+
+                <div class="code-box">
+
+                    <div class="code-header">
+                        <span>Example</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+
+<pre>const button = document.querySelector("#myButton");
+
+button.addEventListener("click", function() {
+    console.log("Button clicked!");
+});</pre>
+
+                </div>
+
+            </div>
+
+            <div class="callout info">
+
+                <strong>Why use addEventListener()?</strong>
+
+                <p>
+                    It keeps JavaScript separate from HTML, allows multiple
+                    listeners for the same event and provides options for
+                    advanced event handling.
+                </p>
+
+            </div>
+
+            <div class="code-box">
+
+                <div class="code-header">
+                    <span>Multiple listeners</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre>button.addEventListener("click", function() {
+    console.log("First listener");
+});
+
+button.addEventListener("click", function() {
+    console.log("Second listener");
+});</pre>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             EVENT TYPES
+             ================================================== -->
+
+        <section class="section reveal" id="event-types">
+
+            <h2 class="section-title">
+                3. Important JavaScript Event Types
+            </h2>
+
+            <p class="section-subtitle">
+                Events are grouped according to the type of interaction
+                or browser activity.
+            </p>
+
+            <div class="event-types">
+
+                <div class="event-type">
+                    <div class="event-icon">🖱️</div>
+                    <h4>Mouse</h4>
+                    <p>
+                        click, dblclick, mousedown, mouseup,
+                        mouseenter, mouseleave, mousemove
+                    </p>
+                </div>
+
+                <div class="event-type">
+                    <div class="event-icon">⌨️</div>
+                    <h4>Keyboard</h4>
+                    <p>
+                        keydown, keyup
+                    </p>
+                </div>
+
+                <div class="event-type">
+                    <div class="event-icon">📝</div>
+                    <h4>Form</h4>
+                    <p>
+                        submit, reset, input, change
+                    </p>
+                </div>
+
+                <div class="event-type">
+                    <div class="event-icon">🎯</div>
+                    <h4>Focus</h4>
+                    <p>
+                        focus, blur, focusin, focusout
+                    </p>
+                </div>
+
+                <div class="event-type">
+                    <div class="event-icon">🌐</div>
+                    <h4>Window</h4>
+                    <p>
+                        load, resize, scroll
+                    </p>
+                </div>
+
+                <div class="event-type">
+                    <div class="event-icon">👆</div>
+                    <h4>Pointer</h4>
+                    <p>
+                        pointerdown, pointerup,
+                        pointermove, pointerenter
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             MOUSE
+             ================================================== -->
+
+        <section class="section reveal" id="mouse">
+
+            <h2 class="section-title">
+                4. Mouse Events
+            </h2>
+
+            <p class="section-subtitle">
+                Mouse events allow your page to react to pointer interaction.
+            </p>
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Event</th>
+                            <th>Meaning</th>
+                            <th>Typical Use</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>click</td>
+                            <td>Element is clicked</td>
+                            <td>Buttons</td>
+                        </tr>
+
+                        <tr>
+                            <td>dblclick</td>
+                            <td>Double click occurs</td>
+                            <td>Editing / zooming</td>
+                        </tr>
+
+                        <tr>
+                            <td>mousedown</td>
+                            <td>Mouse button is pressed</td>
+                            <td>Drag systems</td>
+                        </tr>
+
+                        <tr>
+                            <td>mouseup</td>
+                            <td>Mouse button is released</td>
+                            <td>Drag systems</td>
+                        </tr>
+
+                        <tr>
+                            <td>mouseenter</td>
+                            <td>Pointer enters element</td>
+                            <td>Hover effects</td>
+                        </tr>
+
+                        <tr>
+                            <td>mouseleave</td>
+                            <td>Pointer leaves element</td>
+                            <td>Tooltips</td>
+                        </tr>
+
+                        <tr>
+                            <td>mousemove</td>
+                            <td>Pointer moves</td>
+                            <td>Drawing / tracking</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="code-box">
+
+                <div class="code-header">
+                    <span>Mouse example</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre>const card = document.querySelector(".card");
+
+card.addEventListener("mouseenter", () => {
+    console.log("Mouse entered");
+});
+
+card.addEventListener("mouseleave", () => {
+    console.log("Mouse left");
+});
+
+card.addEventListener("click", () => {
+    console.log("Card clicked");
+});</pre>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             KEYBOARD
+             ================================================== -->
+
+        <section class="section reveal" id="keyboard">
+
+            <h2 class="section-title">
+                5. Keyboard Events
+            </h2>
+
+            <p class="section-subtitle">
+                Keyboard events are essential for search boxes, games,
+                forms, shortcuts and accessibility.
+            </p>
+
+            <div class="card-grid">
+
+                <div class="card">
+
+                    <h3>keydown</h3>
+
+                    <p>
+                        Fires when a key is pressed down.
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>keyup</h3>
+
+                    <p>
+                        Fires when a key is released.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="code-box">
+
+                <div class="code-header">
+                    <span>Keyboard example</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre>document.addEventListener("keydown", (event) => {
+
+    console.log("Key:", event.key);
+
+    if (event.key === "Enter") {
+        console.log("Enter pressed");
+    }
+
+});</pre>
+
+            </div>
+
+            <div class="callout warning">
+
+                <strong>event.key vs event.code</strong>
+
+                <p>
+                    <strong>event.key</strong> describes the character or
+                    key value, while <strong>event.code</strong> describes
+                    the physical keyboard key.
+                </p>
+
+            </div>
+
+            <div class="code-box">
+
+                <div class="code-header">
+                    <span>Keyboard shortcut</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre>document.addEventListener("keydown", (event) => {
+
+    if (event.ctrlKey && event.key.toLowerCase() === "s") {
+
+        event.preventDefault();
+
+        console.log("Custom save shortcut");
+
+    }
+
+});</pre>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             FORM EVENTS
+             ================================================== -->
+
+        <section class="section reveal" id="form-events">
+
+            <h2 class="section-title">
+                6. Form & Input Events
+            </h2>
+
+            <p class="section-subtitle">
+                Forms are one of the most important real-world uses of
+                JavaScript events.
+            </p>
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Event</th>
+                            <th>When it fires</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>input</td>
+                            <td>Whenever the value changes during typing</td>
+                        </tr>
+
+                        <tr>
+                            <td>change</td>
+                            <td>Value is committed/changed</td>
+                        </tr>
+
+                        <tr>
+                            <td>focus</td>
+                            <td>Element receives focus</td>
+                        </tr>
+
+                        <tr>
+                            <td>blur</td>
+                            <td>Element loses focus</td>
+                        </tr>
+
+                        <tr>
+                            <td>submit</td>
+                            <td>Form is submitted</td>
+                        </tr>
+
+                        <tr>
+                            <td>reset</td>
+                            <td>Form is reset</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="code-box">
+
+                <div class="code-header">
+                    <span>Live input</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre>const input = document.querySelector("#username");
+
+input.addEventListener("input", (event) => {
+
+    console.log(event.target.value);
+
+});</pre>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             EVENT OBJECT
+             ================================================== -->
+
+        <section class="section reveal" id="event-object">
+
+            <h2 class="section-title">
+                7. The Event Object
+            </h2>
+
+            <p class="section-subtitle">
+                Every event listener can receive an event object containing
+                useful information about what happened.
+            </p>
+
+            <div class="code-box">
+
+                <div class="code-header">
+                    <span>Event object</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre>button.addEventListener("click", (event) => {
+
+    console.log(event);
+
+});</pre>
+
+            </div>
+
+            <div class="card-grid" style="margin-top:18px;">
+
+                <div class="card">
+
+                    <h3>event.target</h3>
+
+                    <p>
+                        The element where the event originated.
+                    </p>
+
+                    <div class="code-box">
+
+<pre>button.addEventListener("click", (event) => {
+    console.log(event.target);
+});</pre>
+
+                    </div>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>event.currentTarget</h3>
+
+                    <p>
+                        The element whose listener is currently running.
+                    </p>
+
+                    <div class="code-box">
+
+<pre>button.addEventListener("click", (event) => {
+    console.log(event.currentTarget);
+});</pre>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="callout info">
+
+                <strong>Important interview concept</strong>
+
+                <p>
+                    <strong>target</strong> and
+                    <strong>currentTarget</strong> can be different
+                    when event propagation is involved.
+                </p>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             PREVENT DEFAULT
+             ================================================== -->
+
+        <section class="section reveal" id="prevent">
+
+            <h2 class="section-title">
+                8. preventDefault()
+            </h2>
+
+            <p class="section-subtitle">
+                Some browser actions happen automatically. You can cancel
+                the default action when your application needs custom behavior.
+            </p>
+
+            <div class="code-box">
+
+                <div class="code-header">
+                    <span>Prevent form submission</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre>form.addEventListener("submit", (event) => {
+
+    event.preventDefault();
+
+    console.log("Browser submission stopped");
+
+});</pre>
+
+            </div>
+
+            <div class="card-grid" style="margin-top:18px;">
+
+                <div class="card">
+
+                    <h3>Common uses</h3>
+
+                    <ul>
+                        <li>Custom form validation</li>
+                        <li>Single-page applications</li>
+                        <li>Custom links</li>
+                        <li>Drag-and-drop behavior</li>
+                        <li>Keyboard shortcuts</li>
+                    </ul>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Remember</h3>
+
+                    <p>
+                        <strong>preventDefault()</strong> stops the browser's
+                        default action.
+                    </p>
+
+                    <p style="margin-top:10px;">
+                        It does not automatically stop event propagation.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             PROPAGATION
+             ================================================== -->
+
+        <section class="section reveal" id="propagation">
+
+            <h2 class="section-title">
+                9. Event Bubbling & Capturing
+            </h2>
+
+            <p class="section-subtitle">
+                Events do not simply stay inside the element where they occur.
+                They travel through the DOM event path.
+            </p>
+
+            <div class="card">
+
+                <h3>Event propagation has three conceptual phases</h3>
+
+                <div class="flow">
+
+                    <div class="flow-node">
+                        1. Capturing
+                    </div>
+
+                    <div class="flow-arrow">→</div>
+
+                    <div class="flow-node">
+                        2. Target
+                    </div>
+
+                    <div class="flow-arrow">→</div>
+
+                    <div class="flow-node">
+                        3. Bubbling
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="propagation" style="margin-top:20px;">
+
+                <div class="prop-layer" id="propOuter">
+                    OUTER ELEMENT
+
+                    <div
+                        class="prop-layer prop-child"
+                        id="propMiddle"
+                    >
+                        MIDDLE ELEMENT
+
+                        <div
+                            class="prop-layer prop-child"
+                            id="propInner"
+                        >
+                            CLICK ME
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <button class="btn btn-primary" id="clearPropagation">
+                    Clear Log
+                </button>
+
+                <div class="output" id="propLog">
+                    Click the inner box to observe propagation.
+                </div>
+
+            </div>
+
+            <div class="card-grid" style="margin-top:20px;">
+
+                <div class="card">
+
+                    <h3>Event Bubbling</h3>
+
+                    <p>
+                        The event moves from the target upward through
+                        ancestor elements.
+                    </p>
+
+                    <div class="code-box">
+
+<pre>parent.addEventListener("click", () => {
+    console.log("Parent");
+});</pre>
+
+                    </div>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Event Capturing</h3>
+
+                    <p>
+                        A listener can run during the capturing phase
+                        before the event reaches the target.
+                    </p>
+
+                    <div class="code-box">
+
+<pre>parent.addEventListener(
+    "click",
+    () => {
+        console.log("Capturing");
+    },
+    true
+);</pre>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="callout warning">
+
+                <strong>stopPropagation()</strong>
+
+                <p>
+                    Use <strong>event.stopPropagation()</strong> when you
+                    intentionally need to stop an event from continuing
+                    through the propagation path.
+                </p>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             EVENT DELEGATION
+             ================================================== -->
+
+        <section class="section reveal" id="delegation">
+
+            <h2 class="section-title">
+                10. Event Delegation
+            </h2>
+
+            <p class="section-subtitle">
+                Event delegation uses event bubbling to handle events from
+                many child elements using one listener on a parent.
+            </p>
+
+            <div class="card">
+
+                <h3>Without delegation</h3>
+
+                <div class="code-box">
+
+<pre>items.forEach(item => {
+
+    item.addEventListener("click", () => {
+        console.log("Clicked");
+    });
+
+});</pre>
+
+                </div>
+
+                <h3 style="margin-top:20px;">
+                    With delegation
+                </h3>
+
+                <div class="code-box">
+
+<pre>list.addEventListener("click", (event) => {
+
+    if (event.target.matches(".item")) {
+        console.log("Clicked:", event.target.textContent);
+    }
+
+});</pre>
+
+                </div>
+
+            </div>
+
+            <div class="callout success">
+
+                <strong>Why is delegation useful?</strong>
+
+                <p>
+                    It can reduce the number of listeners and is especially
+                    useful for dynamic lists where elements are added later.
+                </p>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             VISUALIZER
+             ================================================== -->
+
+        <section class="section reveal" id="visualizer">
+
+            <h2 class="section-title">
+                11. Interactive Event Visualizer
+            </h2>
+
+            <p class="section-subtitle">
+                Click the element below and watch the event system react.
+            </p>
+
+            <div class="event-visualizer">
+
+                <div class="visualizer-stage">
+
+                    <div class="event-pulse" id="eventPulse"></div>
+
+                    <div class="event-box" id="eventBox">
+
+                        <div>
+                            <strong>CLICK ME</strong>
+
+                            <div style="font-size:12px;color:#9da7b3;margin-top:5px;">
+                                Event target
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="event-log" id="eventLog">
+                    Waiting for an event...
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             LABS
+             ================================================== -->
+
+        <section class="section reveal" id="labs">
+
+            <h2 class="section-title">
+                12. Interactive Event Labs
+            </h2>
+
+            <p class="section-subtitle">
+                Don't just read events — experiment with them.
+            </p>
+
+            <!-- LAB 1 -->
+
+            <div class="lab">
+
+                <div class="lab-title">
+                    <span class="lab-badge">Lab 01</span>
+
+                    <h3>Live Input Event</h3>
+                </div>
+
+                <input
+                    type="text"
+                    id="liveInput"
+                    placeholder="Start typing..."
+                >
+
+                <div class="output" id="liveOutput" style="margin-top:12px;">
+                    Type something above.
+                </div>
+
+            </div>
+
+            <!-- LAB 2 -->
+
+            <div class="lab">
+
+                <div class="lab-title">
+                    <span class="lab-badge">Lab 02</span>
+
+                    <h3>Mouse Event Detector</h3>
+                </div>
+
+                <button class="btn btn-primary" id="mouseLabButton">
+                    Interact With Me
+                </button>
+
+                <div class="output" id="mouseOutput" style="margin-top:12px;">
+                    Waiting...
+                </div>
+
+            </div>
+
+            <!-- LAB 3 -->
+
+            <div class="lab">
+
+                <div class="lab-title">
+                    <span class="lab-badge">Lab 03</span>
+
+                    <h3>Keyboard Event Detector</h3>
+                </div>
+
+                <input
+                    type="text"
+                    id="keyboardInput"
+                    placeholder="Press any key..."
+                >
+
+                <div class="output" id="keyboardOutput" style="margin-top:12px;">
+                    Waiting for keyboard input...
+                </div>
+
+            </div>
+
+            <!-- LAB 4 -->
+
+            <div class="lab">
+
+                <div class="lab-title">
+                    <span class="lab-badge">Lab 04</span>
+
+                    <h3>Event Delegation Lab</h3>
+                </div>
+
+                <div
+                    id="delegationList"
+                    style="
+                        display:grid;
+                        grid-template-columns:repeat(2,1fr);
+                        gap:10px;
+                    "
+                >
+
+                    <button class="btn btn-soft delegate-item">
+                        HTML
+                    </button>
+
+                    <button class="btn btn-soft delegate-item">
+                        CSS
+                    </button>
+
+                    <button class="btn btn-soft delegate-item">
+                        JavaScript
+                    </button>
+
+                    <button class="btn btn-soft delegate-item">
+                        DOM
+                    </button>
+
+                    <button class="btn btn-soft delegate-item">
+                        Events
+                    </button>
+
+                    <button class="btn btn-soft delegate-item">
+                        React
+                    </button>
+
+                </div>
+
+                <div class="output" id="delegationOutput" style="margin-top:12px;">
+                    Click any item.
+                </div>
+
+            </div>
+
+            <!-- LAB 5 -->
+
+            <div class="lab">
+
+                <div class="lab-title">
+                    <span class="lab-badge">Lab 05</span>
+
+                    <h3>Keyboard Shortcut Lab</h3>
+                </div>
+
+                <div class="output">
+                    Press
+                    <strong>Ctrl + Enter</strong>
+                    anywhere on this page to trigger the demo.
+                </div>
+
+                <div class="output" id="shortcutOutput" style="margin-top:12px;">
+                    Shortcut waiting...
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             FORM VALIDATION
+             ================================================== -->
+
+        <section class="section reveal" id="form-demo">
+
+            <h2 class="section-title">
+                13. Real-World Form Event System
+            </h2>
+
+            <p class="section-subtitle">
+                A common application pattern: listen for submit,
+                validate the input and provide feedback.
+            </p>
+
+            <div class="form-demo">
+
+                <form id="signupForm">
+
+                    <div class="form-group">
+
+                        <label for="nameInput">
+                            Full Name
+                        </label>
+
+                        <input
+                            id="nameInput"
+                            type="text"
+                            placeholder="Enter your name"
+                        >
+
+                        <div
+                            class="validation-message"
+                            id="nameError"
+                        ></div>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="emailInput">
+                            Email
+                        </label>
+
+                        <input
+                            id="emailInput"
+                            type="email"
+                            placeholder="you@example.com"
+                        >
+
+                        <div
+                            class="validation-message"
+                            id="emailError"
+                        ></div>
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Create Account
+                    </button>
+
+                    <div
+                        class="form-success"
+                        id="formSuccess"
+                    >
+                        ✓ Form submitted successfully!
+                    </div>
+
+                </form>
+
+            </div>
+
+            <div class="code-box">
+
+                <div class="code-header">
+                    <span>Typical form event pattern</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre>form.addEventListener("submit", (event) => {
+
+    event.preventDefault();
+
+    const name = nameInput.value.trim();
+    const email = emailInput.value.trim();
+
+    if (!name || !email) {
+        return;
+    }
+
+    console.log("Form is valid");
+
+});</pre>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             THIS
+             ================================================== -->
+
+        <section class="section reveal">
+
+            <h2 class="section-title">
+                14. Understanding <code>this</code> in Event Handlers
+            </h2>
+
+            <div class="card">
+
+                <p>
+                    In a traditional event listener function,
+                    <strong>this</strong> commonly refers to the element
+                    on which the listener was registered.
+                </p>
+
+                <div class="code-box">
+
+<pre>button.addEventListener("click", function() {
+
+    console.log(this);
+
+});</pre>
+
+                </div>
+
+                <p style="margin-top:15px;">
+                    Arrow functions do not create their own
+                    <strong>this</strong>.
+                </p>
+
+                <div class="code-box">
+
+<pre>button.addEventListener("click", () => {
+
+    console.log(this);
+
+});</pre>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             COMMON MISTAKES
+             ================================================== -->
+
+        <section class="section reveal" id="mistakes">
+
+            <h2 class="section-title">
+                15. Common Mistakes
+            </h2>
+
+            <div class="mistake-grid">
+
+                <div class="mistake">
+
+                    <h4>❌ Calling the function immediately</h4>
+
+                    <p>
+                        Avoid:
+                    </p>
+
+                    <div class="code-box">
+
+<pre>button.addEventListener(
+    "click",
+    showMessage()
+);</pre>
+
+                    </div>
+
+                    <p style="margin-top:8px;">
+                        Prefer:
+                    </p>
+
+                    <div class="code-box">
+
+<pre>button.addEventListener(
+    "click",
+    showMessage
+);</pre>
+
+                    </div>
+
+                </div>
+
+                <div class="mistake">
+
+                    <h4>❌ Using the wrong event name</h4>
+
+                    <p>
+                        Event names are specific. For example,
+                        <strong>click</strong> is correct, not
+                        <strong>onclick</strong> when using
+                        addEventListener().
+                    </p>
+
+                </div>
+
+                <div class="mistake">
+
+                    <h4>❌ Forgetting preventDefault()</h4>
+
+                    <p>
+                        Forms may reload or navigate when their default
+                        behavior is not intentionally controlled.
+                    </p>
+
+                </div>
+
+                <div class="mistake">
+
+                    <h4>❌ Confusing target and currentTarget</h4>
+
+                    <p>
+                        This becomes especially important with nested
+                        elements and event delegation.
+                    </p>
+
+                </div>
+
+                <div class="mistake">
+
+                    <h4>❌ Adding too many listeners</h4>
+
+                    <p>
+                        For large dynamic lists, consider event delegation.
+                    </p>
+
+                </div>
+
+                <div class="mistake">
+
+                    <h4>❌ Ignoring keyboard accessibility</h4>
+
+                    <p>
+                        Interactive interfaces should not depend only on
+                        mouse events.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             PERFORMANCE
+             ================================================== -->
+
+        <section class="section reveal">
+
+            <h2 class="section-title">
+                16. Event Performance & Best Practices
+            </h2>
+
+            <div class="card-grid">
+
+                <div class="card">
+
+                    <h3>Use event delegation</h3>
+
+                    <p>
+                        Useful for large or dynamically changing lists.
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Do not overuse mousemove</h3>
+
+                    <p>
+                        mousemove can fire many times. Expensive work should
+                        be minimized or throttled when necessary.
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Keep handlers focused</h3>
+
+                    <p>
+                        Event handlers should perform a clear task instead
+                        of becoming huge blocks of application logic.
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Think about accessibility</h3>
+
+                    <p>
+                        Use semantic HTML and ensure keyboard users can
+                        operate important controls.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             EXAM
+             ================================================== -->
+
+        <section class="section reveal" id="exam">
+
+            <h2 class="section-title">
+                17. Exam Preparation
+            </h2>
+
+            <div class="card-grid">
+
+                <div class="card">
+
+                    <h3>5-Mark Question</h3>
+
+                    <p style="margin-top:10px;">
+                        <strong>
+                            Explain JavaScript events and event listeners.
+                        </strong>
+                    </p>
+
+                    <p style="margin-top:12px;">
+                        An event is an action or occurrence detected by the
+                        browser. JavaScript can respond to events using event
+                        handlers. The recommended method is
+                        addEventListener(), which connects an event type
+                        with a callback function.
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>10-Mark Question</h3>
+
+                    <p style="margin-top:10px;">
+                        <strong>
+                            Explain event handling in JavaScript with examples.
+                        </strong>
+                    </p>
+
+                    <p style="margin-top:12px;">
+                        Include event types, addEventListener(),
+                        event object, target, preventDefault(),
+                        bubbling, capturing and event delegation.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             INTERVIEW
+             ================================================== -->
+
+        <section class="section reveal" id="interview">
+
+            <h2 class="section-title">
+                18. Interview Questions
+            </h2>
+
+            <div class="interview-item">
+
+                <button class="interview-question">
+                    What is an event in JavaScript?
+                    <span>+</span>
+                </button>
+
+                <div class="interview-answer">
+                    An event represents an action or occurrence that
+                    JavaScript can respond to, such as a click, key press,
+                    input change or form submission.
+                </div>
+
+            </div>
+
+            <div class="interview-item">
+
+                <button class="interview-question">
+                    Why use addEventListener()?
+                    <span>+</span>
+                </button>
+
+                <div class="interview-answer">
+                    It provides a clean way to attach event handlers,
+                    supports multiple listeners and provides options for
+                    capturing and other advanced behavior.
+                </div>
+
+            </div>
+
+            <div class="interview-item">
+
+                <button class="interview-question">
+                    What is event bubbling?
+                    <span>+</span>
+                </button>
+
+                <div class="interview-answer">
+                    Bubbling is the phase where an event moves from the
+                    target element upward through its ancestor elements.
+                </div>
+
+            </div>
+
+            <div class="interview-item">
+
+                <button class="interview-question">
+                    What is event delegation?
+                    <span>+</span>
+                </button>
+
+                <div class="interview-answer">
+                    Event delegation attaches a listener to a parent and
+                    uses bubbling to handle events originating from its
+                    child elements.
+                </div>
+
+            </div>
+
+            <div class="interview-item">
+
+                <button class="interview-question">
+                    Difference between target and currentTarget?
+                    <span>+</span>
+                </button>
+
+                <div class="interview-answer">
+                    target is the element where the event originated.
+                    currentTarget is the element whose listener is currently
+                    executing.
+                </div>
+
+            </div>
+
+            <div class="interview-item">
+
+                <button class="interview-question">
+                    What does preventDefault() do?
+                    <span>+</span>
+                </button>
+
+                <div class="interview-answer">
+                    It prevents the browser's default action associated with
+                    the event. It does not automatically stop propagation.
+                </div>
+
+            </div>
+
+            <div class="interview-item">
+
+                <button class="interview-question">
+                    What does stopPropagation() do?
+                    <span>+</span>
+                </button>
+
+                <div class="interview-answer">
+                    It stops the event from continuing through the remaining
+                    propagation path.
+                </div>
+
+            </div>
+
+            <div class="interview-item">
+
+                <button class="interview-question">
+                    Difference between input and change?
+                    <span>+</span>
+                </button>
+
+                <div class="interview-answer">
+                    The input event generally fires as the value changes
+                    during user editing, while change fires when a value
+                    change is committed according to the control's behavior.
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             QUIZ
+             ================================================== -->
+
+        <section class="section reveal" id="quiz">
+
+            <h2 class="section-title">
+                19. Test Your Knowledge
+            </h2>
+
+            <p class="section-subtitle">
+                Select an answer for each question.
+            </p>
+
+            <div id="quizContainer">
+
+                <div class="quiz-card">
+
+                    <div class="quiz-question">
+                        1. Which method is commonly used to attach an event listener?
+                    </div>
+
+                    <div class="quiz-options">
+
+                        <div class="quiz-option" data-correct="false">
+                            addEvent()
+                        </div>
+
+                        <div class="quiz-option" data-correct="true">
+                            addEventListener()
+                        </div>
+
+                        <div class="quiz-option" data-correct="false">
+                            listenEvent()
+                        </div>
+
+                        <div class="quiz-option" data-correct="false">
+                            attachEventListener()
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="quiz-card">
+
+                    <div class="quiz-question">
+                        2. Which event occurs when a button is clicked?
+                    </div>
+
+                    <div class="quiz-options">
+
+                        <div class="quiz-option" data-correct="true">
+                            click
+                        </div>
+
+                        <div class="quiz-option" data-correct="false">
+                            press
+                        </div>
+
+                        <div class="quiz-option" data-correct="false">
+                            tapClick
+                        </div>
+
+                        <div class="quiz-option" data-correct="false">
+                            button
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="quiz-card">
+
+                    <div class="quiz-question">
+                        3. Which property identifies the event origin element?
+                    </div>
+
+                    <div class="quiz-options">
+
+                        <div class="quiz-option" data-correct="false">
+                            currentTarget
+                        </div>
+
+                        <div class="quiz-option" data-correct="true">
+                            target
+                        </div>
+
+                        <div class="quiz-option" data-correct="false">
+                            origin
+                        </div>
+
+                        <div class="quiz-option" data-correct="false">
+                            source
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="quiz-card">
+
+                    <div class="quiz-question">
+                        4. Which method prevents a browser's default action?
+                    </div>
+
+                    <div class="quiz-options">
+
+                        <div class="quiz-option" data-correct="true">
+                            preventDefault()
+                        </div>
+
+                        <div class="quiz-option" data-correct="false">
+                            stopDefault()
+                        </div>
+
+                        <div class="quiz-option" data-correct="false">
+                            preventBrowser()
+                        </div>
+
+                        <div class="quiz-option" data-correct="false">
+                            cancelBrowser()
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="quiz-card">
+
+                    <div class="quiz-question">
+                        5. Which event fires while a user types into an input?
+                    </div>
+
+                    <div class="quiz-options">
+
+                        <div class="quiz-option" data-correct="false">
+                            typing
+                        </div>
+
+                        <div class="quiz-option" data-correct="true">
+                            input
+                        </div>
+
+                        <div class="quiz-option" data-correct="false">
+                            write
+                        </div>
+
+                        <div class="quiz-option" data-correct="false">
+                            text
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="quiz-card">
+
+                    <div class="quiz-question">
+                        6. What is event delegation based heavily on?
+                    </div>
+
+                    <div class="quiz-options">
+
+                        <div class="quiz-option" data-correct="true">
+                            Event bubbling
+                        </div>
+
+                        <div class="quiz-option" data-correct="false">
+                            CSS inheritance
+                        </div>
+
+                        <div class="quiz-option" data-correct="false">
+                            Array sorting
+                        </div>
+
+                        <div class="quiz-option" data-correct="false">
+                            Template literals
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="quiz-card">
+
+                    <div class="quiz-question">
+                        7. Which event is commonly used when a key is pressed down?
+                    </div>
+
+                    <div class="quiz-options">
+
+                        <div class="quiz-option" data-correct="false">
+                            keyboard
+                        </div>
+
+                        <div class="quiz-option" data-correct="true">
+                            keydown
+                        </div>
+
+                        <div class="quiz-option" data-correct="false">
+                            keypressing
+                        </div>
+
+                        <div class="quiz-option" data-correct="false">
+                            pressdown
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="quiz-card">
+
+                    <div class="quiz-question">
+                        8. Which method stops propagation?
+                    </div>
+
+                    <div class="quiz-options">
+
+                        <div class="quiz-option" data-correct="false">
+                            stopEvent()
+                        </div>
+
+                        <div class="quiz-option" data-correct="true">
+                            stopPropagation()
+                        </div>
+
+                        <div class="quiz-option" data-correct="false">
+                            preventPropagation()
+                        </div>
+
+                        <div class="quiz-option" data-correct="false">
+                            cancelEvent()
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="quiz-result" id="quizResult">
+                Score: 0 / 8
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             PRACTICE
+             ================================================== -->
+
+        <section class="section reveal" id="practice">
+
+            <h2 class="section-title">
+                20. Coding Practice
+            </h2>
+
+            <div class="card-grid">
+
+                <div class="card">
+                    <h3>Easy</h3>
+                    <ul>
+                        <li>Create a button that changes text on click.</li>
+                        <li>Display the pressed keyboard key.</li>
+                        <li>Create a live character counter.</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>Easy → Medium</h3>
+                    <ul>
+                        <li>Build a dark/light mode button.</li>
+                        <li>Validate an email using submit event.</li>
+                        <li>Create a click counter.</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>Medium</h3>
+                    <ul>
+                        <li>Build a keyboard shortcut system.</li>
+                        <li>Create a delegated todo list.</li>
+                        <li>Build a modal using events.</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>Advanced</h3>
+                    <ul>
+                        <li>Create drag-and-drop functionality.</li>
+                        <li>Build a custom dropdown.</li>
+                        <li>Create an event-driven quiz application.</li>
+                    </ul>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             MINI PROJECT
+             ================================================== -->
+
+        <section class="section reveal" id="project">
+
+            <h2 class="section-title">
+                21. Mini Project — ZENSUS Interactive Task Board
+            </h2>
+
+            <p class="section-subtitle">
+                Combine DOM manipulation and event handling into one
+                practical application.
+            </p>
+
+            <div class="card">
+
+                <h3>Project Requirements</h3>
+
+                <ul>
+
+                    <li>
+                        Add new tasks.
+                    </li>
+
+                    <li>
+                        Mark tasks as completed.
+                    </li>
+
+                    <li>
+                        Delete tasks.
+                    </li>
+
+                    <li>
+                        Use event delegation.
+                    </li>
+
+                    <li>
+                        Prevent empty task submission.
+                    </li>
+
+                    <li>
+                        Display task count.
+                    </li>
+
+                    <li>
+                        Store tasks using localStorage.
+                    </li>
+
+                </ul>
+
+            </div>
+
+            <div class="code-box">
+
+                <div class="code-header">
+                    <span>Core architecture</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre>form.addEventListener("submit", addTask);
+
+taskList.addEventListener("click", (event) => {
+
+    if (event.target.matches(".delete")) {
+        deleteTask(event);
+    }
+
+    if (event.target.matches(".complete")) {
+        completeTask(event);
+    }
+
+});</pre>
+
+            </div>
+
+            <div class="callout success">
+
+                <strong>
+                    What this project teaches
+                </strong>
+
+                <p>
+                    DOM selection + DOM manipulation + events +
+                    event delegation + forms + validation +
+                    localStorage.
+                </p>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             CHECKLIST
+             ================================================== -->
+
+        <section class="section reveal" id="checklist">
+
+            <h2 class="section-title">
+                22. Lesson Completion Checklist
+            </h2>
+
+            <div class="check-progress" id="checkProgress">
+                0 / 12 completed
+            </div>
+
+            <div class="checklist">
+
+                <div class="check-item">
+                    <input type="checkbox" id="c1">
+                    <label for="c1">
+                        I understand what a JavaScript event is.
+                    </label>
+                </div>
+
+                <div class="check-item">
+                    <input type="checkbox" id="c2">
+                    <label for="c2">
+                        I can use addEventListener().
+                    </label>
+                </div>
+
+                <div class="check-item">
+                    <input type="checkbox" id="c3">
+                    <label for="c3">
+                        I understand mouse events.
+                    </label>
+                </div>
+
+                <div class="check-item">
+                    <input type="checkbox" id="c4">
+                    <label for="c4">
+                        I understand keyboard events.
+                    </label>
+                </div>
+
+                <div class="check-item">
+                    <input type="checkbox" id="c5">
+                    <label for="c5">
+                        I can handle form submission.
+                    </label>
+                </div>
+
+                <div class="check-item">
+                    <input type="checkbox" id="c6">
+                    <label for="c6">
+                        I understand the event object.
+                    </label>
+                </div>
+
+                <div class="check-item">
+                    <input type="checkbox" id="c7">
+                    <label for="c7">
+                        I know target and currentTarget.
+                    </label>
+                </div>
+
+                <div class="check-item">
+                    <input type="checkbox" id="c8">
+                    <label for="c8">
+                        I understand preventDefault().
+                    </label>
+                </div>
+
+                <div class="check-item">
+                    <input type="checkbox" id="c9">
+                    <label for="c9">
+                        I understand event bubbling.
+                    </label>
+                </div>
+
+                <div class="check-item">
+                    <input type="checkbox" id="c10">
+                    <label for="c10">
+                        I understand event delegation.
+                    </label>
+                </div>
+
+                <div class="check-item">
+                    <input type="checkbox" id="c11">
+                    <label for="c11">
+                        I completed the interactive labs.
+                    </label>
+                </div>
+
+                <div class="check-item">
+                    <input type="checkbox" id="c12">
+                    <label for="c12">
+                        I can build an event-driven mini project.
+                    </label>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             RAPID REVISION
+             ================================================== -->
+
+        <section class="section reveal" id="revision">
+
+            <h2 class="section-title">
+                23. Rapid Revision
+            </h2>
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Concept</th>
+                            <th>Remember</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Event</td>
+                            <td>An action or occurrence detected by the browser.</td>
+                        </tr>
+
+                        <tr>
+                            <td>addEventListener()</td>
+                            <td>Attaches a function to an event.</td>
+                        </tr>
+
+                        <tr>
+                            <td>event.target</td>
+                            <td>Original event target.</td>
+                        </tr>
+
+                        <tr>
+                            <td>event.currentTarget</td>
+                            <td>Element whose listener is running.</td>
+                        </tr>
+
+                        <tr>
+                            <td>preventDefault()</td>
+                            <td>Stops the browser's default action.</td>
+                        </tr>
+
+                        <tr>
+                            <td>stopPropagation()</td>
+                            <td>Stops event propagation.</td>
+                        </tr>
+
+                        <tr>
+                            <td>Bubbling</td>
+                            <td>Target → ancestors.</td>
+                        </tr>
+
+                        <tr>
+                            <td>Capturing</td>
+                            <td>Ancestors → target.</td>
+                        </tr>
+
+                        <tr>
+                            <td>Delegation</td>
+                            <td>Parent listener handles child events.</td>
+                        </tr>
+
+                        <tr>
+                            <td>keydown</td>
+                            <td>Keyboard key pressed down.</td>
+                        </tr>
+
+                        <tr>
+                            <td>keyup</td>
+                            <td>Keyboard key released.</td>
+                        </tr>
+
+                        <tr>
+                            <td>input</td>
+                            <td>Value changes during editing.</td>
+                        </tr>
+
+                        <tr>
+                            <td>submit</td>
+                            <td>Form submission event.</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             FINAL FLOW
+             ================================================== -->
+
+        <section class="section reveal">
+
+            <h2 class="section-title">
+                The ZENSUS Event Mental Model
+            </h2>
+
+            <div class="card">
+
+                <div class="flow">
+
+                    <div class="flow-node">
+                        👤 Action
+                    </div>
+
+                    <div class="flow-arrow">→</div>
+
+                    <div class="flow-node">
+                        ⚡ Event
+                    </div>
+
+                    <div class="flow-arrow">→</div>
+
+                    <div class="flow-node">
+                        🎯 Target
+                    </div>
+
+                    <div class="flow-arrow">→</div>
+
+                    <div class="flow-node">
+                        🧠 Handler
+                    </div>
+
+                    <div class="flow-arrow">→</div>
+
+                    <div class="flow-node">
+                        🌳 Propagation
+                    </div>
+
+                    <div class="flow-arrow">→</div>
+
+                    <div class="flow-node">
+                        🎨 UI Update
+                    </div>
+
+                </div>
+
+                <div class="callout info" style="margin-top:25px;">
+
+                    <strong>
+                        Master this chain.
+                    </strong>
+
+                    <p>
+                        Once you understand
+                        <strong>Action → Event → Handler → DOM Update</strong>,
+                        you have the foundation required to build interactive
+                        JavaScript applications.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================================
+             FOOTER
+             ================================================== -->
+
+        <footer class="lesson-footer">
+
+            <h2>
+                🎉 Lesson 12 Complete
+            </h2>
+
+            <p>
+                You now understand how JavaScript listens, reacts and
+                responds to users through events.
+            </p>
+
+            <p style="margin-top:10px;">
+                <strong>
+                    Next → DOM & Events → Building Interactive Web Applications
+                </strong>
+            </p>
+
+        </footer>
+
+    </div>
+
+</main>
+
+<!-- ======================================================
+     JAVASCRIPT
+     ====================================================== -->
+
+<script>
+
+/* =========================================================
+   ENABLE REVEAL ANIMATIONS
+   ========================================================= */
+
+document.documentElement.classList.add("js-enabled");
+
+
+/* =========================================================
+   MOBILE SIDEBAR
+   ========================================================= */
+
+const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.getElementById("sidebar");
+
+menuBtn.addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+});
+
+
+document.querySelectorAll(".lesson-nav a").forEach(link => {
+
+    link.addEventListener("click", () => {
+        sidebar.classList.remove("open");
+    });
+
+});
+
+
+/* =========================================================
+   SCROLL PROGRESS
+   ========================================================= */
+
+const progressBar = document.getElementById("progressBar");
+
+window.addEventListener("scroll", () => {
+
+    const scrollTop = window.scrollY;
+
+    const documentHeight =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+
+    const percentage =
+        documentHeight > 0
+            ? (scrollTop / documentHeight) * 100
+            : 0;
+
+    progressBar.style.width = percentage + "%";
+
+});
+
+
+/* =========================================================
+   REVEAL ANIMATION
+   ========================================================= */
+
+const revealElements =
+    document.querySelectorAll(".reveal");
+
+const observer = new IntersectionObserver(
+    entries => {
+
+        entries.forEach(entry => {
+
+            if (entry.isIntersecting) {
+
+                entry.target.classList.add("visible");
+
+                observer.unobserve(entry.target);
+
+            }
+
+        });
+
+    },
+    {
+        threshold: 0.12
+    }
+);
+
+revealElements.forEach(element => {
+    observer.observe(element);
+});
+
+
+/* =========================================================
+   COPY BUTTONS
+   ========================================================= */
+
+document.querySelectorAll(".copy-btn").forEach(button => {
+
+    button.addEventListener("click", async () => {
+
+        const code =
+            button.closest(".code-box").querySelector("pre").innerText;
+
+        try {
+
+            await navigator.clipboard.writeText(code);
+
+            const oldText = button.textContent;
+
+            button.textContent = "Copied!";
+
+            setTimeout(() => {
+                button.textContent = oldText;
+            }, 1200);
+
+        } catch (error) {
+
+            button.textContent = "Copy failed";
+
+            setTimeout(() => {
+                button.textContent = "Copy";
+            }, 1200);
+
+        }
+
+    });
+
+});
+
+
+/* =========================================================
+   EVENT VISUALIZER
+   ========================================================= */
+
+const eventBox = document.getElementById("eventBox");
+const eventPulse = document.getElementById("eventPulse");
+const eventLog = document.getElementById("eventLog");
+
+let eventCounter = 0;
+
+eventBox.addEventListener("click", event => {
+
+    eventCounter++;
+
+    eventBox.classList.add("active");
+
+    eventPulse.classList.remove("animate");
+
+    void eventPulse.offsetWidth;
+
+    eventPulse.classList.add("animate");
+
+    eventLog.innerHTML = `
+        Event #${eventCounter}<br>
+        type: ${event.type}<br>
+        target: ${event.target.tagName.toLowerCase()}<br>
+        currentTarget: ${event.currentTarget.id}<br>
+        time: ${new Date().toLocaleTimeString()}
+    `;
+
+    setTimeout(() => {
+        eventBox.classList.remove("active");
+    }, 500);
+
+});
+
+
+/* =========================================================
+   LIVE INPUT LAB
+   ========================================================= */
+
+const liveInput = document.getElementById("liveInput");
+const liveOutput = document.getElementById("liveOutput");
+
+liveInput.addEventListener("input", event => {
+
+    const value = event.target.value;
+
+    if (!value) {
+
+        liveOutput.textContent =
+            "Type something above.";
+
+        return;
+    }
+
+    liveOutput.textContent =
+        `You typed: "${value}" | Characters: ${value.length}`;
+
+});
+
+
+/* =========================================================
+   MOUSE LAB
+   ========================================================= */
+
+const mouseLabButton =
+    document.getElementById("mouseLabButton");
+
+const mouseOutput =
+    document.getElementById("mouseOutput");
+
+mouseLabButton.addEventListener("click", () => {
+
+    mouseOutput.textContent =
+        "CLICK event detected.";
+
+});
+
+mouseLabButton.addEventListener("mouseenter", () => {
+
+    mouseOutput.textContent =
+        "MOUSEENTER event detected.";
+
+});
+
+mouseLabButton.addEventListener("mouseleave", () => {
+
+    mouseOutput.textContent =
+        "MOUSELEAVE event detected.";
+
+});
+
+mouseLabButton.addEventListener("dblclick", () => {
+
+    mouseOutput.textContent =
+        "DOUBLE CLICK detected.";
+
+});
+
+
+/* =========================================================
+   KEYBOARD LAB
+   ========================================================= */
+
+const keyboardInput =
+    document.getElementById("keyboardInput");
+
+const keyboardOutput =
+    document.getElementById("keyboardOutput");
+
+keyboardInput.addEventListener("keydown", event => {
+
+    keyboardOutput.textContent =
+        `keydown → key: ${event.key} | code: ${event.code}`;
+
+});
+
+keyboardInput.addEventListener("keyup", event => {
+
+    keyboardOutput.textContent =
+        `keyup → key released: ${event.key}`;
+
+});
+
+
+/* =========================================================
+   EVENT DELEGATION LAB
+   ========================================================= */
+
+const delegationList =
+    document.getElementById("delegationList");
+
+const delegationOutput =
+    document.getElementById("delegationOutput");
+
+delegationList.addEventListener("click", event => {
+
+    const item =
+        event.target.closest(".delegate-item");
+
+    if (!item) {
+        return;
+    }
+
+    delegationOutput.textContent =
+        `Event delegated from item: ${item.textContent.trim()}`;
+
+});
+
+
+/* =========================================================
+   KEYBOARD SHORTCUT
+   ========================================================= */
+
+const shortcutOutput =
+    document.getElementById("shortcutOutput");
+
+document.addEventListener("keydown", event => {
+
+    if (event.ctrlKey && event.key === "Enter") {
+
+        shortcutOutput.textContent =
+            "✓ Ctrl + Enter detected! Custom shortcut executed.";
+
+    }
+
+});
+
+
+/* =========================================================
+   PROPAGATION DEMO
+   ========================================================= */
+
+const propOuter =
+    document.getElementById("propOuter");
+
+const propMiddle =
+    document.getElementById("propMiddle");
+
+const propInner =
+    document.getElementById("propInner");
+
+const propLog =
+    document.getElementById("propLog");
+
+function addPropagationListener(element, name) {
+
+    element.addEventListener("click", event => {
+
+        element.classList.add("highlight");
+
+        setTimeout(() => {
+            element.classList.remove("highlight");
+        }, 500);
+
+        const current =
+            propLog.textContent;
+
+        const message =
+            `${name} received event → target: ${event.target.id}`;
+
+        if (
+            current.includes("Click the inner")
+        ) {
+
+            propLog.textContent =
+                message;
+
+        } else {
+
+            propLog.textContent =
+                current + "\n" + message;
+
+        }
+
+    });
+
+}
+
+addPropagationListener(propOuter, "OUTER");
+addPropagationListener(propMiddle, "MIDDLE");
+addPropagationListener(propInner, "INNER");
+
+
+document
+    .getElementById("clearPropagation")
+    .addEventListener("click", event => {
+
+        event.stopPropagation();
+
+        propLog.textContent =
+            "Propagation log cleared.";
+
+    });
+
+
+/* =========================================================
+   FORM VALIDATION
+   ========================================================= */
+
+const signupForm =
+    document.getElementById("signupForm");
+
+const nameInput =
+    document.getElementById("nameInput");
+
+const emailInput =
+    document.getElementById("emailInput");
+
+const nameError =
+    document.getElementById("nameError");
+
+const emailError =
+    document.getElementById("emailError");
+
+const formSuccess =
+    document.getElementById("formSuccess");
+
+
+signupForm.addEventListener("submit", event => {
+
+    event.preventDefault();
+
+    nameError.textContent = "";
+    emailError.textContent = "";
+
+    formSuccess.style.display = "none";
+
+    let valid = true;
+
+    const name =
+        nameInput.value.trim();
+
+    const email =
+        emailInput.value.trim();
+
+    if (!name) {
+
+        nameError.textContent =
+            "Please enter your name.";
+
+        valid = false;
+
+    }
+
+    if (!email) {
+
+        emailError.textContent =
+            "Please enter your email.";
+
+        valid = false;
+
+    } else if (!email.includes("@")) {
+
+        emailError.textContent =
+            "Please enter a valid email.";
+
+        valid = false;
+
+    }
+
+    if (valid) {
+
+        formSuccess.style.display = "block";
+
+    }
+
+});
+
+
+/* =========================================================
+   FOCUS / BLUR DEMO
+   ========================================================= */
+
+nameInput.addEventListener("focus", () => {
+
+    nameInput.style.background =
+        "#f8f8ff";
+
+});
+
+nameInput.addEventListener("blur", () => {
+
+    nameInput.style.background =
+        "white";
+
+});
+
+
+/* =========================================================
+   INTERVIEW ACCORDION
+   ========================================================= */
+
+document
+    .querySelectorAll(".interview-question")
+    .forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            const answer =
+                button.nextElementSibling;
+
+            const icon =
+                button.querySelector("span");
+
+            if (
+                answer.style.display === "block"
+            ) {
+
+                answer.style.display = "none";
+
+                icon.textContent = "+";
+
+            } else {
+
+                answer.style.display = "block";
+
+                icon.textContent = "−";
+
+            }
+
+        });
+
+    });
+
+
+/* =========================================================
+   QUIZ SYSTEM
+   ========================================================= */
+
+const quizOptions =
+    document.querySelectorAll(".quiz-option");
+
+const quizResult =
+    document.getElementById("quizResult");
+
+let quizScore = 0;
+
+const answeredQuestions =
+    new Set();
+
+quizOptions.forEach(option => {
+
+    option.addEventListener("click", () => {
+
+        const card =
+            option.closest(".quiz-card");
+
+        const options =
+            card.querySelectorAll(".quiz-option");
+
+        if (
+            card.dataset.answered === "true"
+        ) {
+            return;
+        }
+
+        card.dataset.answered = "true";
+
+        const isCorrect =
+            option.dataset.correct === "true";
+
+        options.forEach(item => {
+
+            if (
+                item.dataset.correct === "true"
+            ) {
+                item.classList.add("correct");
+            }
+
+        });
+
+        if (isCorrect) {
+
+            option.classList.add("correct");
+
+            quizScore++;
+
+        } else {
+
+            option.classList.add("wrong");
+
+        }
+
+        quizResult.textContent =
+            `Score: ${quizScore} / 8`;
+
+    });
+
+});
+
+
+/* =========================================================
+   CHECKLIST LOCAL STORAGE
+   ========================================================= */
+
+const checklistKey =
+    "zensus-js-lesson12-checklist";
+
+const checklist =
+    document.querySelectorAll(
+        '.check-item input[type="checkbox"]'
+    );
+
+const checkProgress =
+    document.getElementById("checkProgress");
+
+
+function updateChecklist() {
+
+    let completed = 0;
+
+    checklist.forEach((checkbox, index) => {
+
+        if (checkbox.checked) {
+
+            completed++;
+
+        }
+
+        localStorage.setItem(
+            `${checklistKey}-${index}`,
+            checkbox.checked
+        );
+
+    });
+
+    checkProgress.textContent =
+        `${completed} / ${checklist.length} completed`;
+
+}
+
+
+checklist.forEach((checkbox, index) => {
+
+    const saved =
+        localStorage.getItem(
+            `${checklistKey}-${index}`
+        );
+
+    if (saved === "true") {
+        checkbox.checked = true;
+    }
+
+    checkbox.addEventListener(
+        "change",
+        updateChecklist
+    );
+
+});
+
+updateChecklist();
+
+
+/* =========================================================
+   ACTIVE SIDEBAR SECTION
+   ========================================================= */
+
+const sections =
+    document.querySelectorAll(
+        "section[id]"
+    );
+
+const navLinks =
+    document.querySelectorAll(
+        ".lesson-nav a"
+    );
+
+const sectionObserver =
+    new IntersectionObserver(
+        entries => {
+
+            entries.forEach(entry => {
+
+                if (entry.isIntersecting) {
+
+                    navLinks.forEach(link => {
+
+                        link.classList.remove("active");
+
+                    });
+
+                    const active =
+                        document.querySelector(
+                            `.lesson-nav a[href="#${entry.target.id}"]`
+                        );
+
+                    if (active) {
+
+                        active.classList.add("active");
+
+                    }
+
+                }
+
+            });
+
+        },
+        {
+            rootMargin: "-20% 0px -65% 0px"
+        }
+    );
+
+sections.forEach(section => {
+    sectionObserver.observe(section);
+});
+
+
+/* =========================================================
+   INITIAL LOG
+   ========================================================= */
+
+console.log(
+    "ZENSUS JavaScript Lesson 12 — Events loaded successfully."
+);
+
+</script>
+
+</body>
+</html>

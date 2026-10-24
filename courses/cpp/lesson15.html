@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENSUS | Lesson 15 — STL Masterclass</title>
+
+<style>
+:root{
+    --primary:#2563eb;
+    --primary-dark:#1d4ed8;
+    --secondary:#7c3aed;
+    --success:#059669;
+    --warning:#d97706;
+    --danger:#dc2626;
+    --bg:#f7f9fc;
+    --surface:#ffffff;
+    --surface-2:#f1f5f9;
+    --text:#0f172a;
+    --muted:#64748b;
+    --border:#e2e8f0;
+    --sidebar:#0f172a;
+    --sidebar-text:#cbd5e1;
+    --code:#0b1220;
+    --code-text:#e2e8f0;
+    --shadow:0 10px 30px rgba(15,23,42,.07);
+    --radius:18px;
+}
+*{box-sizing:border-box;scroll-behavior:smooth}
+body{
+    margin:0;
+    font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.7;
+}
+a{text-decoration:none;color:inherit}
+button,input,select{font:inherit}
+.sidebar{
+    position:fixed;left:0;top:0;bottom:0;width:280px;background:var(--sidebar);
+    color:white;padding:22px 16px;z-index:1000;overflow-y:auto;
+}
+.brand{display:flex;align-items:center;gap:12px;padding:5px 10px 22px;border-bottom:1px solid #263247}
+.brand-logo{
+    width:42px;height:42px;border-radius:12px;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--primary),var(--secondary));font-weight:900;font-size:19px;
+}
+.brand strong{display:block;font-size:18px}.brand small{color:#94a3b8}
+.nav-title{text-transform:uppercase;font-size:11px;letter-spacing:1.2px;color:#64748b;margin:24px 10px 8px}
+.nav a{
+    display:flex;gap:10px;align-items:center;padding:10px 12px;margin:3px 0;
+    border-radius:10px;color:var(--sidebar-text);font-size:14px;transition:.2s;
+}
+.nav a:hover,.nav a.active{background:#1e293b;color:white}
+.nav a.active{box-shadow:inset 3px 0 var(--primary)}
+.main{margin-left:280px;min-height:100vh}
+.topbar{
+    position:sticky;top:0;height:72px;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);z-index:900;display:flex;align-items:center;
+    justify-content:space-between;padding:0 34px;
+}
+.progress-wrap{position:absolute;left:0;bottom:-1px;width:100%;height:3px;background:transparent}
+#progress{height:100%;width:0;background:linear-gradient(90deg,var(--primary),var(--secondary))}
+.menu-btn{display:none;border:0;background:var(--surface-2);border-radius:10px;padding:9px;cursor:pointer}
+.top-label{font-size:13px;color:var(--muted)}.top-label strong{color:var(--text)}
+.container{max-width:1200px;margin:auto;padding:38px 34px 70px}
+.hero{
+    background:var(--surface);border:1px solid var(--border);border-radius:28px;padding:46px;
+    box-shadow:var(--shadow);display:grid;grid-template-columns:1.15fr .85fr;gap:35px;align-items:center;
+}
+.eyebrow{
+    display:inline-flex;align-items:center;gap:7px;background:#eff6ff;color:var(--primary);
+    border:1px solid #dbeafe;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:800;
+}
+.hero h1{font-size:clamp(36px,5vw,62px);line-height:1.05;margin:17px 0 14px;letter-spacing:-2px}
+.hero h1 span{color:var(--primary);font-weight:900}
+.hero p{color:var(--muted);font-size:17px;max-width:720px}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}
+.badge{padding:7px 11px;border-radius:999px;background:var(--surface-2);font-size:12px;font-weight:800;color:#475569}
+.hero-code{background:var(--code);border-radius:18px;padding:20px;box-shadow:0 16px 30px rgba(2,6,23,.18);overflow:auto}
+.window{display:flex;gap:6px;margin-bottom:16px}.dot{width:9px;height:9px;border-radius:50%;background:#64748b}
+pre{margin:0;white-space:pre-wrap;overflow:auto}
+code,.code-box code,.hero-code code{font-family:"Cascadia Code","Fira Code",Consolas,monospace}
+.hero-code pre,.hero-code code{color:var(--code-text);font-size:13px}
+section{margin-top:38px}.section-head{margin-bottom:18px}
+.section-head h2{font-size:29px;margin:0 0 5px;letter-spacing:-.6px}
+.section-head p{margin:0;color:var(--muted)}
+.card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:25px;box-shadow:var(--shadow);
+}
+.grid{display:grid;gap:18px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.objectives{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.objective{padding:17px;border:1px solid var(--border);border-radius:15px;background:var(--surface)}
+.objective b{display:block;margin-bottom:5px}.objective span{font-size:13px;color:var(--muted)}
+.callout{border-left:4px solid var(--primary);background:#eff6ff;padding:15px 18px;border-radius:10px;margin:16px 0}
+.callout.warn{border-color:var(--warning);background:#fff7ed}.callout.good{border-color:var(--success);background:#ecfdf5}
+.code-box{background:var(--code);border-radius:14px;padding:18px;margin:15px 0;overflow:auto}
+.code-box pre,.code-box code{color:var(--code-text);font-size:13px;line-height:1.65}
+.code-title{color:#94a3b8;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:9px}
+.tag{display:inline-block;padding:4px 8px;border-radius:7px;background:#eef2ff;color:#4338ca;font-size:11px;font-weight:800;margin:2px}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+th,td{border:1px solid var(--border);padding:11px;text-align:left;vertical-align:top}
+th{background:var(--surface-2)}
+.tree{display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px}
+.node{
+    padding:11px 18px;border:2px solid #bfdbfe;background:#eff6ff;border-radius:12px;
+    font-weight:800;position:relative;animation:float 3s ease-in-out infinite;
+}
+.node.purple{background:#f5f3ff;border-color:#ddd6fe}
+.node.green{background:#ecfdf5;border-color:#a7f3d0}
+.connector{width:2px;height:25px;background:#94a3b8}
+.branch{display:flex;gap:35px;justify-content:center;flex-wrap:wrap}
+@keyframes float{50%{transform:translateY(-4px)}}
+.flow{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:20px 0}
+.flow-item{padding:12px 16px;background:white;border:1px solid var(--border);border-radius:12px;font-weight:800}
+.arrow{font-size:22px;color:var(--primary)}
+.anim-box{min-height:170px;display:grid;place-items:center;background:linear-gradient(180deg,#f8fafc,#eef2ff);border:1px solid var(--border);border-radius:18px;overflow:hidden}
+.vector-lab{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:20px}
+.cell{
+    min-width:55px;height:55px;border-radius:10px;background:#fff;border:2px solid #cbd5e1;
+    display:grid;place-items:center;font-weight:800;transition:.35s;
+}
+.cell.active{transform:translateY(-12px);border-color:var(--primary);box-shadow:0 8px 18px rgba(37,99,235,.2)}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
+.btn{
+    border:0;border-radius:10px;padding:10px 15px;background:var(--primary);color:white;font-weight:800;cursor:pointer;
+}
+.btn.secondary{background:#e2e8f0;color:#0f172a}.btn:hover{filter:brightness(.96)}
+.output{margin-top:13px;background:#0f172a;color:#dbeafe;border-radius:12px;padding:14px;min-height:46px;font-family:Consolas,monospace;font-size:13px}
+.timeline{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.timeline div{padding:15px;border:1px solid var(--border);border-radius:13px;text-align:center;background:#fff}
+.timeline strong{display:block;color:var(--primary)}
+.quiz-question{font-weight:800;margin-bottom:10px}.option{
+    display:block;width:100%;text-align:left;border:1px solid var(--border);background:#fff;
+    padding:10px 12px;border-radius:9px;margin:7px 0;cursor:pointer;
+}
+.option.correct{border-color:#10b981;background:#ecfdf5}.option.wrong{border-color:#ef4444;background:#fef2f2}
+.answer{display:none;margin-top:9px;font-size:13px;color:var(--success);font-weight:700}
+.accordion{border:1px solid var(--border);border-radius:12px;margin:9px 0;overflow:hidden}
+.acc-q{padding:14px 16px;background:#fff;cursor:pointer;font-weight:800;display:flex;justify-content:space-between}
+.acc-a{display:none;padding:14px 16px;border-top:1px solid var(--border);color:var(--muted)}
+.checklist label{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.checklist input{margin-top:6px;accent-color:var(--primary)}
+.mini{font-size:13px;color:var(--muted)}
+footer{text-align:center;color:var(--muted);padding:35px}
+.reveal{opacity:0;transform:translateY(18px);transition:.7s ease}.reveal.show{opacity:1;transform:none}
+.kbd{font-family:Consolas,monospace;background:#e2e8f0;padding:2px 6px;border-radius:5px;font-size:12px}
+@media(max-width:1050px){
+    .hero{grid-template-columns:1fr}.objectives{grid-template-columns:repeat(2,1fr)}.grid-4{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:800px){
+    .sidebar{transform:translateX(-100%);transition:.25s}.sidebar.open{transform:none}
+    .main{margin-left:0}.menu-btn{display:block}.topbar{padding:0 18px}.container{padding:25px 17px 50px}
+    .hero{padding:28px 22px}.grid-2,.grid-3{grid-template-columns:1fr}.timeline{grid-template-columns:1fr 1fr}
+}
+@media(max-width:520px){
+    .objectives,.grid-4,.timeline{grid-template-columns:1fr}.hero h1{font-size:40px}
+}
+@media(prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar" id="sidebar">
+    <div class="brand">
+        <div class="brand-logo">Z</div>
+        <div><strong>ZENSUS</strong><small>C++ Mastery</small></div>
+    </div>
+
+    <div class="nav-title">Lesson 15</div>
+    <nav class="nav">
+        <a href="#top" class="active">⌂ Overview</a>
+        <a href="#why">Why STL?</a>
+        <a href="#architecture">STL Architecture</a>
+        <a href="#containers">Containers</a>
+        <a href="#sequence">Sequence Containers</a>
+        <a href="#associative">Associative Containers</a>
+        <a href="#unordered">Unordered Containers</a>
+        <a href="#adapters">Container Adapters</a>
+        <a href="#iterators">Iterators</a>
+        <a href="#algorithms">Algorithms</a>
+        <a href="#functional">Lambda & Functional</a>
+        <a href="#strings">Strings & Utilities</a>
+        <a href="#labs">Interactive Labs</a>
+        <a href="#patterns">STL Patterns</a>
+        <a href="#mistakes">Mistakes</a>
+        <a href="#exam">Exam Prep</a>
+        <a href="#interview">Interview</a>
+        <a href="#quiz">Quiz</a>
+        <a href="#practice">Practice</a>
+        <a href="#checklist">Checklist</a>
+    </nav>
+</aside>
+
+<main class="main" id="top">
+<header class="topbar">
+    <button class="menu-btn" id="menuBtn">☰</button>
+    <div class="top-label">C++ • <strong>Lesson 15: STL Masterclass</strong></div>
+    <div class="top-label">Beginner → Interview</div>
+    <div class="progress-wrap"><div id="progress"></div></div>
+</header>
+
+<div class="container">
+
+<section class="hero reveal">
+    <div>
+        <span class="eyebrow">⚡ LESSON 15 • STANDARD TEMPLATE LIBRARY</span>
+        <h1>Master <span>STL</span> in C++</h1>
+        <p>
+            Learn the Standard Template Library from the fundamentals of containers,
+            iterators and algorithms to maps, sets, priority queues, lambdas and
+            interview-ready problem-solving patterns.
+        </p>
+        <div class="badges">
+            <span class="badge">Containers</span>
+            <span class="badge">Iterators</span>
+            <span class="badge">Algorithms</span>
+            <span class="badge">Lambda</span>
+            <span class="badge">Interview Ready</span>
+        </div>
+    </div>
+
+    <div class="hero-code">
+        <div class="window"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
+        <pre><code>#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; a = {5, 2, 9, 1, 5};
+
+    sort(a.begin(), a.end());
+
+    for (int x : a)
+        cout &lt;&lt; x &lt;&lt; ' ';
+
+    return 0;
+}</code></pre>
+    </div>
+</section>
+
+<section class="reveal">
+<div class="section-head"><h2>🎯 What you will master</h2><p>By the end of this lesson, STL should become a problem-solving toolkit rather than a list of syntax.</p></div>
+<div class="objectives">
+    <div class="objective"><b>01 • Containers</b><span>vector, deque, list, set, map, unordered_map, stack, queue and priority_queue.</span></div>
+    <div class="objective"><b>02 • Iterators</b><span>begin, end, reverse iterators, iterator operations and range-based loops.</span></div>
+    <div class="objective"><b>03 • Algorithms</b><span>sort, binary_search, lower_bound, upper_bound, reverse, find, count and more.</span></div>
+    <div class="objective"><b>04 • Interviews</b><span>Complexities, STL patterns, custom comparators, lambdas and real coding problems.</span></div>
+</div>
+</section>
+
+<section id="why" class="reveal">
+<div class="section-head"><h2>1. What is STL?</h2><p>The Standard Template Library is one of the most important parts of modern C++.</p></div>
+<div class="card">
+<p><strong>STL = Standard Template Library.</strong> It provides reusable, generic components for storing data and performing common operations efficiently.</p>
+<div class="callout good"><strong>Think of STL as a ready-made toolbox:</strong> instead of manually implementing a dynamic array, stack, queue, sorting algorithm or balanced search tree, you can use well-tested library components.</div>
+<div class="grid grid-3">
+    <div><span class="tag">Containers</span><p>Store collections of objects.</p></div>
+    <div><span class="tag">Algorithms</span><p>Operate on ranges of elements.</p></div>
+    <div><span class="tag">Iterators</span><p>Connect containers and algorithms.</p></div>
+</div>
+</div>
+</section>
+
+<section id="architecture" class="reveal">
+<div class="section-head"><h2>2. STL Architecture</h2><p>The central idea: containers hold data, iterators describe ranges, algorithms process those ranges.</p></div>
+<div class="card">
+<div class="flow">
+    <div class="flow-item">Container<br><small>stores data</small></div>
+    <div class="arrow">→</div>
+    <div class="flow-item">Iterator<br><small>points into range</small></div>
+    <div class="arrow">→</div>
+    <div class="flow-item">Algorithm<br><small>processes range</small></div>
+    <div class="arrow">→</div>
+    <div class="flow-item">Result</div>
+</div>
+<div class="code-box">
+<div class="code-title">The classic STL pattern</div>
+<pre><code>vector&lt;int&gt; a = {4, 1, 7, 2};
+
+sort(a.begin(), a.end());
+
+for (auto it = a.begin(); it != a.end(); ++it) {
+    cout &lt;&lt; *it &lt;&lt; ' ';
+}</code></pre>
+</div>
+<p><strong>Important:</strong> <span class="kbd">a.begin()</span> points to the first element and <span class="kbd">a.end()</span> points one position past the last element. The range <span class="kbd">[begin, end)</span> includes the first iterator but excludes the end iterator.</p>
+</div>
+</section>
+
+<section id="containers" class="reveal">
+<div class="section-head"><h2>3. STL Containers</h2><p>Choose the container based on the operation you need, not simply because it is popular.</p></div>
+<div class="card">
+<table>
+<tr><th>Family</th><th>Containers</th><th>Typical use</th></tr>
+<tr><td>Sequence</td><td>array, vector, deque, list, forward_list</td><td>Ordered collections</td></tr>
+<tr><td>Associative</td><td>set, multiset, map, multimap</td><td>Sorted keys / ordered lookup</td></tr>
+<tr><td>Unordered</td><td>unordered_set, unordered_multiset, unordered_map, unordered_multimap</td><td>Average O(1) hash lookup</td></tr>
+<tr><td>Adapters</td><td>stack, queue, priority_queue</td><td>Restricted interfaces for common data structures</td></tr>
+</table>
+<div class="callout warn"><strong>Interview rule:</strong> never say “unordered_map is always O(1).” Its lookup is average-case O(1), while the worst case can be O(n).</div>
+</div>
+</section>
+
+<section id="sequence" class="reveal">
+<div class="section-head"><h2>4. Sequence Containers</h2><p>These containers represent elements in a sequence.</p></div>
+<div class="grid grid-2">
+<div class="card">
+<h3>📦 vector — dynamic array</h3>
+<p><strong>Best default choice for most array-like problems.</strong> Contiguous storage, fast random access and efficient insertion at the end.</p>
+<div class="code-box"><pre><code>vector&lt;int&gt; v = {10, 20, 30};
+
+v.push_back(40);
+v.pop_back();
+
+cout &lt;&lt; v[1];
+cout &lt;&lt; v.size();</code></pre></div>
+<p class="mini">Random access: O(1) • push_back: amortized O(1) • insertion/erase in middle: O(n).</p>
+</div>
+
+<div class="card">
+<h3>🧱 array — fixed-size array</h3>
+<p><strong>std::array</strong> wraps a fixed-size array with STL-friendly methods.</p>
+<div class="code-box"><pre><code>array&lt;int, 4&gt; a = {4, 2, 8, 1};
+
+sort(a.begin(), a.end());
+
+cout &lt;&lt; a.front();
+cout &lt;&lt; a.back();</code></pre></div>
+<p class="mini">Size is fixed at compile time; contiguous storage; random access O(1).</p>
+</div>
+
+<div class="card">
+<h3>↔️ deque — double-ended queue</h3>
+<p>Supports efficient insertion and removal at both ends.</p>
+<div class="code-box"><pre><code>deque&lt;int&gt; d;
+
+d.push_front(10);
+d.push_back(20);
+d.pop_front();
+d.pop_back();</code></pre></div>
+<p class="mini">Random access is O(1); front/back insertion and removal are efficient.</p>
+</div>
+
+<div class="card">
+<h3>🔗 list — doubly linked list</h3>
+<p>Useful when frequent insertion/erasure at known positions matters more than random access.</p>
+<div class="code-box"><pre><code>list&lt;int&gt; l = {1, 2, 4};
+
+auto it = next(l.begin(), 2);
+l.insert(it, 3);
+
+l.remove(2);</code></pre></div>
+<p class="mini">No random access; insertion/erase at a known iterator is O(1).</p>
+</div>
+</div>
+
+<div class="card" style="margin-top:18px">
+<h3>⚖️ vector vs deque vs list</h3>
+<table>
+<tr><th>Property</th><th>vector</th><th>deque</th><th>list</th></tr>
+<tr><td>Random access</td><td>O(1)</td><td>O(1)</td><td>No</td></tr>
+<tr><td>Memory layout</td><td>Contiguous</td><td>Segmented</td><td>Node-based</td></tr>
+<tr><td>Fast front insertion</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Fast back insertion</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Cache friendliness</td><td>Excellent</td><td>Good</td><td>Usually poorer</td></tr>
+</table>
+<div class="callout">For most competitive programming and interview array problems, start with <strong>vector</strong> unless the problem clearly demands another structure.</div>
+</div>
+</section>
+
+<section id="associative" class="reveal">
+<div class="section-head"><h2>5. Ordered Associative Containers</h2><p>These containers maintain elements according to an ordering, typically implemented with balanced trees.</p></div>
+<div class="grid grid-2">
+<div class="card">
+<h3>🌳 set</h3>
+<p>Stores unique keys in sorted order.</p>
+<div class="code-box"><pre><code>set&lt;int&gt; s = {5, 2, 5, 1};
+
+s.insert(4);
+s.erase(2);
+
+if (s.count(4))
+    cout &lt;&lt; "Found";</code></pre></div>
+<p class="mini">insert/find/erase: O(log n). Duplicate values are ignored.</p>
+</div>
+<div class="card">
+<h3>🌳 multiset</h3>
+<p>Stores sorted keys and allows duplicates.</p>
+<div class="code-box"><pre><code>multiset&lt;int&gt; ms = {2, 2, 4, 1};
+
+cout &lt;&lt; ms.count(2);</code></pre></div>
+<p class="mini">Useful when sorted duplicates matter.</p>
+</div>
+<div class="card">
+<h3>🗺️ map</h3>
+<p>Stores unique keys mapped to values, sorted by key.</p>
+<div class="code-box"><pre><code>map&lt;string, int&gt; marks;
+
+marks["Alice"] = 92;
+marks["Bob"] = 85;
+
+cout &lt;&lt; marks["Alice"];</code></pre></div>
+<p class="mini">find/insert/erase: O(log n). Keys are unique.</p>
+</div>
+<div class="card">
+<h3>🗺️ multimap</h3>
+<p>Allows multiple entries with the same key.</p>
+<div class="code-box"><pre><code>multimap&lt;string, int&gt; mm;
+
+mm.insert({"CSE", 91});
+mm.insert({"CSE", 88});</code></pre></div>
+<p class="mini">Use when one key can have multiple associated values.</p>
+</div>
+</div>
+</section>
+
+<section id="unordered" class="reveal">
+<div class="section-head"><h2>6. Unordered Containers</h2><p>Hash-based containers prioritize fast average-case lookup rather than sorted order.</p></div>
+<div class="card">
+<div class="grid grid-2">
+<div>
+<h3>unordered_map</h3>
+<div class="code-box"><pre><code>unordered_map&lt;int, int&gt; freq;
+
+for (int x : a)
+    freq[x]++;
+
+cout &lt;&lt; freq[5];</code></pre></div>
+</div>
+<div>
+<h3>unordered_set</h3>
+<div class="code-box"><pre><code>unordered_set&lt;int&gt; seen;
+
+seen.insert(10);
+
+if (seen.count(10))
+    cout &lt;&lt; "Present";</code></pre></div>
+</div>
+</div>
+<table>
+<tr><th>Container</th><th>Order</th><th>Typical lookup</th><th>Duplicates?</th></tr>
+<tr><td>set</td><td>Sorted</td><td>O(log n)</td><td>No</td></tr>
+<tr><td>unordered_set</td><td>No sorted order</td><td>Average O(1)</td><td>No</td></tr>
+<tr><td>map</td><td>Sorted by key</td><td>O(log n)</td><td>Keys no</td></tr>
+<tr><td>unordered_map</td><td>No sorted order</td><td>Average O(1)</td><td>Keys no</td></tr>
+</table>
+</div>
+</section>
+
+<section id="adapters" class="reveal">
+<div class="section-head"><h2>7. Container Adapters</h2><p>Adapters provide a restricted interface built on an underlying container.</p></div>
+<div class="grid grid-3">
+<div class="card">
+<h3>🥞 stack</h3>
+<p>LIFO — Last In, First Out.</p>
+<div class="code-box"><pre><code>stack&lt;int&gt; st;
+
+st.push(10);
+st.push(20);
+
+cout &lt;&lt; st.top();
+st.pop();</code></pre></div>
+</div>
+<div class="card">
+<h3>🚶 queue</h3>
+<p>FIFO — First In, First Out.</p>
+<div class="code-box"><pre><code>queue&lt;int&gt; q;
+
+q.push(10);
+q.push(20);
+
+cout &lt;&lt; q.front();
+q.pop();</code></pre></div>
+</div>
+<div class="card">
+<h3>🏆 priority_queue</h3>
+<p>Returns the highest-priority element at the top. Default is a max-heap.</p>
+<div class="code-box"><pre><code>priority_queue&lt;int&gt; pq;
+
+pq.push(5);
+pq.push(20);
+pq.push(10);
+
+cout &lt;&lt; pq.top(); // 20</code></pre></div>
+</div>
+</div>
+
+<div class="card" style="margin-top:18px">
+<h3>Min-heap with priority_queue</h3>
+<div class="code-box"><pre><code>priority_queue&lt;int, vector&lt;int&gt;, greater&lt;int&gt;&gt; minHeap;
+
+minHeap.push(30);
+minHeap.push(10);
+minHeap.push(20);
+
+cout &lt;&lt; minHeap.top(); // 10</code></pre></div>
+</div>
+</section>
+
+<section id="iterators" class="reveal">
+<div class="section-head"><h2>8. Iterators</h2><p>Iterators provide a generalized way to traverse container elements.</p></div>
+<div class="card">
+<div class="grid grid-2">
+<div>
+<h3>Basic iterator</h3>
+<div class="code-box"><pre><code>vector&lt;int&gt; v = {10, 20, 30};
+
+for (auto it = v.begin(); it != v.end(); ++it) {
+    cout &lt;&lt; *it &lt;&lt; ' ';
+}</code></pre></div>
+</div>
+<div>
+<h3>Reverse iterator</h3>
+<div class="code-box"><pre><code>for (auto it = v.rbegin(); it != v.rend(); ++it) {
+    cout &lt;&lt; *it &lt;&lt; ' ';
+}</code></pre></div>
+</div>
+</div>
+<table>
+<tr><th>Expression</th><th>Meaning</th></tr>
+<tr><td>begin()</td><td>Iterator to first element</td></tr>
+<tr><td>end()</td><td>One-past-last iterator</td></tr>
+<tr><td>rbegin()</td><td>Reverse iterator at last element</td></tr>
+<tr><td>rend()</td><td>Reverse one-past range boundary</td></tr>
+<tr><td>cbegin()</td><td>Const iterator to beginning</td></tr>
+<tr><td>cend()</td><td>Const iterator to end</td></tr>
+</table>
+<div class="callout"><strong>Modern C++:</strong> prefer range-based <span class="kbd">for</span> loops when you only need to visit elements.</div>
+</div>
+</section>
+
+<section id="algorithms" class="reveal">
+<div class="section-head"><h2>9. STL Algorithms — Your Interview Superpower</h2><p>Most algorithms operate on iterator ranges such as [begin, end).</p></div>
+<div class="grid grid-2">
+<div class="card">
+<h3>🔃 sort</h3>
+<div class="code-box"><pre><code>sort(v.begin(), v.end());
+
+sort(v.begin(), v.end(), greater&lt;int&gt;());</code></pre></div>
+<p>Average/worst complexity for std::sort is O(n log n).</p>
+</div>
+<div class="card">
+<h3>🔎 find</h3>
+<div class="code-box"><pre><code>auto it = find(v.begin(), v.end(), 10);
+
+if (it != v.end())
+    cout &lt;&lt; "Found";</code></pre></div>
+<p>For a vector, linear search: O(n).</p>
+</div>
+<div class="card">
+<h3>📊 count</h3>
+<div class="code-box"><pre><code>int c = count(v.begin(), v.end(), 5);</code></pre></div>
+<p>Counts matching values in O(n).</p>
+</div>
+<div class="card">
+<h3>🔁 reverse</h3>
+<div class="code-box"><pre><code>reverse(v.begin(), v.end());</code></pre></div>
+<p>Reverses a range in O(n).</p>
+</div>
+<div class="card">
+<h3>🎯 min/max</h3>
+<div class="code-box"><pre><code>cout &lt;&lt; *min_element(v.begin(), v.end());
+cout &lt;&lt; *max_element(v.begin(), v.end());</code></pre></div>
+<p>Linear scan: O(n).</p>
+</div>
+<div class="card">
+<h3>➕ accumulate</h3>
+<div class="code-box"><pre><code>#include &lt;numeric&gt;
+
+long long sum =
+    accumulate(v.begin(), v.end(), 0LL);</code></pre></div>
+<p>Common for sums and folds: O(n).</p>
+</div>
+</div>
+
+<div class="card" style="margin-top:18px">
+<h3>⭐ Must-know algorithm family</h3>
+<table>
+<tr><th>Algorithm</th><th>Purpose</th></tr>
+<tr><td>sort</td><td>Sort range</td></tr>
+<tr><td>stable_sort</td><td>Stable sorting</td></tr>
+<tr><td>find / find_if</td><td>Search for value / condition</td></tr>
+<tr><td>count / count_if</td><td>Count matches / conditions</td></tr>
+<tr><td>all_of / any_of / none_of</td><td>Check predicates</td></tr>
+<tr><td>reverse</td><td>Reverse range</td></tr>
+<tr><td>rotate</td><td>Rotate elements</td></tr>
+<tr><td>unique</td><td>Move consecutive duplicates to the end; usually followed by erase</td></tr>
+<tr><td>binary_search</td><td>Boolean binary search on sorted range</td></tr>
+<tr><td>lower_bound</td><td>First position not less than value</td></tr>
+<tr><td>upper_bound</td><td>First position greater than value</td></tr>
+<tr><td>next_permutation</td><td>Generate next lexicographical permutation</td></tr>
+</table>
+</div>
+</section>
+
+<section id="functional" class="reveal">
+<div class="section-head"><h2>10. Lambda Functions & Custom Comparators</h2><p>Lambdas make STL algorithms dramatically more flexible.</p></div>
+<div class="card">
+<h3>Lambda anatomy</h3>
+<div class="code-box"><pre><code>auto square = [](int x) {
+    return x * x;
+};
+
+cout &lt;&lt; square(5);</code></pre></div>
+<p><strong>General form:</strong> <span class="kbd">[capture](parameters) -&gt; return_type { body }</span>. The return type is often deduced.</p>
+
+<h3>Sort in descending order</h3>
+<div class="code-box"><pre><code>sort(v.begin(), v.end(), [](int a, int b) {
+    return a &gt; b;
+});</code></pre></div>
+
+<h3>Sort pairs by second value</h3>
+<div class="code-box"><pre><code>vector&lt;pair&lt;int,int&gt;&gt; v = {
+    {1, 50}, {2, 20}, {3, 40}
+};
+
+sort(v.begin(), v.end(), [](const auto&amp; a, const auto&amp; b) {
+    return a.second &lt; b.second;
+});</code></pre></div>
+
+<div class="callout warn"><strong>Comparator rule:</strong> return true when the first argument should come before the second according to your ordering. Do not write a comparator that violates strict weak ordering.</div>
+</div>
+</section>
+
+<section id="strings" class="reveal">
+<div class="section-head"><h2>11. Strings & Useful Utilities</h2><p>STL also gives you powerful tools around strings and general-purpose utilities.</p></div>
+<div class="grid grid-2">
+<div class="card">
+<h3>std::string</h3>
+<div class="code-box"><pre><code>string s = "ZENSUS";
+
+cout &lt;&lt; s.size();
+cout &lt;&lt; s[0];
+
+s += " C++";
+reverse(s.begin(), s.end());</code></pre></div>
+</div>
+<div class="card">
+<h3>pair</h3>
+<div class="code-box"><pre><code>pair&lt;int, string&gt; p = {101, "Pradeep"};
+
+cout &lt;&lt; p.first;
+cout &lt;&lt; p.second;</code></pre></div>
+</div>
+<div class="card">
+<h3>tuple</h3>
+<div class="code-box"><pre><code>tuple&lt;int, string, double&gt; t =
+    {101, "CSE", 8.63};
+
+cout &lt;&lt; get&lt;0&gt;(t);</code></pre></div>
+</div>
+<div class="card">
+<h3>numeric utilities</h3>
+<div class="code-box"><pre><code>#include &lt;numeric&gt;
+
+int g = gcd(24, 36);
+int l = lcm(12, 18);</code></pre></div>
+<p class="mini">Available in modern C++ with the appropriate header.</p>
+</div>
+</div>
+</section>
+
+<section id="labs" class="reveal">
+<div class="section-head"><h2>12. Interactive STL Labs</h2><p>These labs simulate STL behavior directly in your browser.</p></div>
+
+<div class="grid grid-2">
+<div class="card">
+<h3>🧪 Vector Visualizer</h3>
+<p class="mini">Watch push_back, pop_back and sorting conceptually.</p>
+<div id="vectorLab" class="vector-lab"></div>
+<div class="controls">
+<button class="btn" onclick="vectorPush()">push_back()</button>
+<button class="btn secondary" onclick="vectorPop()">pop_back()</button>
+<button class="btn secondary" onclick="vectorSort()">sort()</button>
+<button class="btn secondary" onclick="vectorReset()">Reset</button>
+</div>
+<div id="vectorOutput" class="output">vector&lt;int&gt; ready.</div>
+</div>
+
+<div class="card">
+<h3>🏆 Priority Queue Visualizer</h3>
+<p class="mini">Default priority_queue behaves like a max-heap.</p>
+<div id="heapLab" class="vector-lab"></div>
+<div class="controls">
+<button class="btn" onclick="heapPush()">Insert</button>
+<button class="btn secondary" onclick="heapPop()">pop()</button>
+<button class="btn secondary" onclick="heapReset()">Reset</button>
+</div>
+<div id="heapOutput" class="output">Top = highest value.</div>
+</div>
+</div>
+
+<div class="card" style="margin-top:18px">
+<h3>🔍 lower_bound / upper_bound visual idea</h3>
+<p>For a sorted range <strong>[1, 2, 2, 2, 5, 8]</strong> and target <strong>2</strong>:</p>
+<div class="vector-lab" id="boundLab"></div>
+<div class="callout good"><strong>lower_bound(2)</strong> → first position whose value is ≥ 2. <strong>upper_bound(2)</strong> → first position whose value is &gt; 2.</div>
+</div>
+</section>
+
+<section id="patterns" class="reveal">
+<div class="section-head"><h2>13. High-Value STL Problem-Solving Patterns</h2><p>These patterns appear repeatedly in coding tests and interviews.</p></div>
+<div class="grid grid-2">
+<div class="card">
+<h3>Pattern 1 — Frequency map</h3>
+<div class="code-box"><pre><code>unordered_map&lt;int,int&gt; freq;
+
+for (int x : a)
+    freq[x]++;</code></pre></div>
+<p>Use for frequency counting, duplicates and occurrence problems.</p>
+</div>
+<div class="card">
+<h3>Pattern 2 — Sort + two pointers</h3>
+<div class="code-box"><pre><code>sort(a.begin(), a.end());
+
+int l = 0, r = (int)a.size() - 1;
+
+while (l &lt; r) {
+    // two-pointer logic
+}</code></pre></div>
+</div>
+<div class="card">
+<h3>Pattern 3 — Binary search bounds</h3>
+<div class="code-box"><pre><code>sort(a.begin(), a.end());
+
+auto first = lower_bound(a.begin(), a.end(), x);
+auto after = upper_bound(a.begin(), a.end(), x);
+
+int frequency = after - first;</code></pre></div>
+</div>
+<div class="card">
+<h3>Pattern 4 — Custom heap</h3>
+<div class="code-box"><pre><code>using P = pair&lt;int,int&gt;;
+
+priority_queue&lt;
+    P,
+    vector&lt;P&gt;,
+    greater&lt;P&gt;
+&gt; pq;</code></pre></div>
+</div>
+<div class="card">
+<h3>Pattern 5 — Remove duplicates</h3>
+<div class="code-box"><pre><code>sort(a.begin(), a.end());
+
+a.erase(
+    unique(a.begin(), a.end()),
+    a.end()
+);</code></pre></div>
+<p class="mini">unique does not erase elements from the container by itself.</p>
+</div>
+<div class="card">
+<h3>Pattern 6 — Set for uniqueness</h3>
+<div class="code-box"><pre><code>unordered_set&lt;int&gt; seen;
+
+for (int x : a) {
+    if (seen.count(x)) {
+        // duplicate
+    }
+    seen.insert(x);
+}</code></pre></div>
+</div>
+</div>
+</section>
+
+<section class="reveal">
+<div class="section-head"><h2>14. STL Complexity Cheat Sheet</h2><p>Know the common complexities before interviews.</p></div>
+<div class="card">
+<table>
+<tr><th>Operation</th><th>vector</th><th>set/map</th><th>unordered_map/set</th></tr>
+<tr><td>Access by index</td><td>O(1)</td><td>—</td><td>—</td></tr>
+<tr><td>Search</td><td>O(n)</td><td>O(log n)</td><td>Average O(1)</td></tr>
+<tr><td>Insert</td><td>Usually O(1) at end amortized</td><td>O(log n)</td><td>Average O(1)</td></tr>
+<tr><td>Erase by iterator</td><td>O(n) due to shifting after position</td><td>O(1) amortized node unlink plus iterator finding already done</td><td>Average O(1) after finding iterator</td></tr>
+<tr><td>Sort</td><td>O(n log n)</td><td>Already ordered</td><td>Not ordered</td></tr>
+</table>
+<div class="callout">Exact complexity can depend on the operation and implementation details. In interviews, state the standard/common complexity and the assumptions.</div>
+</div>
+</section>
+
+<section class="reveal">
+<div class="section-head"><h2>15. STL Flow — Choosing the Right Tool</h2></div>
+<div class="card">
+<div class="anim-box">
+<div class="flow">
+    <div class="flow-item">Need ordered sequence?</div><div class="arrow">→</div>
+    <div class="flow-item">vector</div>
+    <div class="arrow">→</div>
+    <div class="flow-item">Need sorted unique keys?</div>
+    <div class="arrow">→</div>
+    <div class="flow-item">set / map</div>
+</div>
+</div>
+<div class="timeline" style="margin-top:18px">
+<div><strong>Array-like</strong>vector</div>
+<div><strong>Unique</strong>set</div>
+<div><strong>Frequency</strong>unordered_map</div>
+<div><strong>LIFO</strong>stack</div>
+<div><strong>Highest priority</strong>priority_queue</div>
+</div>
+</div>
+</section>
+
+<section id="mistakes" class="reveal">
+<div class="section-head"><h2>16. Common STL Mistakes</h2><p>These errors appear frequently in beginner code and interviews.</p></div>
+<div class="grid grid-2">
+<div class="card"><h3>❌ Using [] to test map existence</h3><p><span class="kbd">m[key]</span> can insert a missing key for maps and unordered_maps.</p><div class="code-box"><pre><code>// Better for checking:
+if (m.find(key) != m.end()) {
+    // exists
+}</code></pre></div></div>
+<div class="card"><h3>❌ Dereferencing end()</h3><p><span class="kbd">end()</span> is not an element. Never dereference it.</p></div>
+<div class="card"><h3>❌ Forgetting sort before binary search</h3><p>Algorithms such as lower_bound and upper_bound require a sorted range in their normal use.</p></div>
+<div class="card"><h3>❌ Thinking unique removes everything</h3><p><span class="kbd">unique()</span> rearranges consecutive duplicates toward the end; pair it with erase when you need a smaller vector.</p></div>
+<div class="card"><h3>❌ Assuming unordered containers preserve order</h3><p>Do not rely on iteration order of unordered_map/unordered_set.</p></div>
+<div class="card"><h3>❌ Invalidating iterators</h3><p>Some container modifications invalidate iterators. Learn the invalidation rules before keeping iterators across insertions/erasures.</p></div>
+</div>
+</section>
+
+<section id="exam" class="reveal">
+<div class="section-head"><h2>17. Exam Preparation</h2><p>Use these ready-to-write structures for 5 and 10 marks.</p></div>
+<div class="grid grid-2">
+<div class="card">
+<h3>5-Mark Answer — STL</h3>
+<p><strong>Definition:</strong> STL is a collection of generic, reusable C++ components.</p>
+<p><strong>Main components:</strong> containers, iterators and algorithms.</p>
+<p><strong>Examples:</strong> vector, list, set, map, stack, queue and priority_queue.</p>
+<p><strong>Advantages:</strong> reusable code, efficiency, generic programming, tested implementations and reduced development time.</p>
+</div>
+<div class="card">
+<h3>10-Mark Answer — STL</h3>
+<p>Write: definition → architecture → container classification → iterators → algorithms → example program → advantages → conclusion.</p>
+<div class="code-box"><pre><code>#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; a = {5, 1, 4, 2, 3};
+
+    sort(a.begin(), a.end());
+
+    for (int x : a)
+        cout &lt;&lt; x &lt;&lt; " ";
+
+    return 0;
+}</code></pre></div>
+</div>
+</div>
+</section>
+
+<section id="interview" class="reveal">
+<div class="section-head"><h2>18. Interview Questions</h2><p>Click each question to reveal the answer.</p></div>
+<div class="card">
+<div class="accordion"><div class="acc-q">Why is vector usually preferred over list? <span>+</span></div><div class="acc-a">vector provides contiguous storage, O(1) indexing and generally excellent cache locality. list is useful when frequent insertion/erasure at known iterators is the actual requirement.</div></div>
+<div class="accordion"><div class="acc-q">set vs unordered_set? <span>+</span></div><div class="acc-a">set keeps keys sorted and typically offers O(log n) operations. unordered_set uses hashing and offers average O(1) lookup, without sorted order.</div></div>
+<div class="accordion"><div class="acc-q">map vs unordered_map? <span>+</span></div><div class="acc-a">map maintains keys in sorted order and typically uses O(log n) operations. unordered_map uses hashing with average O(1) lookup but no sorted order.</div></div>
+<div class="accordion"><div class="acc-q">What is an iterator? <span>+</span></div><div class="acc-a">An iterator is an object used to traverse or refer to positions in a container range. STL algorithms use iterators to work generically across many containers.</div></div>
+<div class="accordion"><div class="acc-q">What is the difference between lower_bound and upper_bound? <span>+</span></div><div class="acc-a">lower_bound returns the first position whose value is not less than x. upper_bound returns the first position whose value is greater than x.</div></div>
+<div class="accordion"><div class="acc-q">What is a lambda? <span>+</span></div><div class="acc-a">A lambda is an anonymous function expression that can be created locally, optionally capturing surrounding variables, and is commonly used as an STL algorithm predicate or comparator.</div></div>
+<div class="accordion"><div class="acc-q">What is a priority_queue by default? <span>+</span></div><div class="acc-a">A max-heap: the largest element according to the comparator is at the top by default.</div></div>
+<div class="accordion"><div class="acc-q">What does [begin, end) mean? <span>+</span></div><div class="acc-a">It is a half-open range that includes begin and excludes end. This convention makes empty ranges natural and simplifies range composition.</div></div>
+</div>
+</section>
+
+<section id="quiz" class="reveal">
+<div class="section-head"><h2>19. Quick Quiz</h2><p>Test your STL fundamentals.</p></div>
+<div class="grid grid-2">
+<div class="card quiz">
+<div class="quiz-question">1. Which container provides O(1) random access?</div>
+<button class="option" data-correct="true">vector</button>
+<button class="option">set</button>
+<button class="option">list</button>
+<div class="answer">✓ Correct — vector provides constant-time indexing.</div>
+</div>
+<div class="card quiz">
+<div class="quiz-question">2. What is the default priority_queue?</div>
+<button class="option">Min-heap</button>
+<button class="option" data-correct="true">Max-heap</button>
+<button class="option">FIFO queue</button>
+<div class="answer">✓ Correct — the largest element is at top by default.</div>
+</div>
+<div class="card quiz">
+<div class="quiz-question">3. Which container stores unique sorted keys?</div>
+<button class="option">unordered_map</button>
+<button class="option">multiset</button>
+<button class="option" data-correct="true">set</button>
+<div class="answer">✓ Correct — set stores unique keys in sorted order.</div>
+</div>
+<div class="card quiz">
+<div class="quiz-question">4. lower_bound(x) finds:</div>
+<button class="option" data-correct="true">First element >= x</button>
+<button class="option">First element > x</button>
+<button class="option">Last element == x</button>
+<div class="answer">✓ Correct.</div>
+</div>
+</div>
+</section>
+
+<section id="practice" class="reveal">
+<div class="section-head"><h2>20. Coding Practice — STL Challenge Set</h2><p>Progress from basic library usage to interview-level combinations.</p></div>
+<div class="grid grid-3">
+<div class="card"><span class="tag">Easy</span><h3>Frequency Counter</h3><p>Given an array, print the frequency of every distinct element.</p></div>
+<div class="card"><span class="tag">Easy</span><h3>Remove Duplicates</h3><p>Remove duplicates from a vector and print sorted unique values.</p></div>
+<div class="card"><span class="tag">Easy</span><h3>Min & Max</h3><p>Use STL algorithms to find minimum and maximum.</p></div>
+<div class="card"><span class="tag">Medium</span><h3>Top K Elements</h3><p>Use priority_queue to find the K largest elements.</p></div>
+<div class="card"><span class="tag">Medium</span><h3>Pair Sorting</h3><p>Sort pairs by second value and use a tie-breaker on first.</p></div>
+<div class="card"><span class="tag">Medium</span><h3>Range Frequency</h3><p>Use lower_bound and upper_bound to count occurrences in a sorted array.</p></div>
+<div class="card"><span class="tag">Hard</span><h3>Sliding Window Maximum</h3><p>Use deque to maintain candidates for the maximum of every window.</p></div>
+<div class="card"><span class="tag">Hard</span><h3>Running Median</h3><p>Use two priority queues to maintain the median dynamically.</p></div>
+<div class="card"><span class="tag">Hard</span><h3>Task Scheduler</h3><p>Combine frequency maps and a priority queue to schedule tasks.</p></div>
+</div>
+
+<div class="card" style="margin-top:18px">
+<h3>🚀 Mini Project — Student Result Analyzer</h3>
+<p>Build a console program that stores student marks, calculates statistics, ranks students and identifies top performers.</p>
+<div class="code-box"><pre><code>struct Student {
+    string name;
+    vector&lt;int&gt; marks;
+
+    double average() const {
+        if (marks.empty()) return 0;
+        return accumulate(marks.begin(), marks.end(), 0.0)
+             / marks.size();
+    }
+};
+
+vector&lt;Student&gt; students;
+
+sort(students.begin(), students.end(),
+     [](const Student&amp; a, const Student&amp; b) {
+         return a.average() &gt; b.average();
+     });</code></pre></div>
+<p><strong>Upgrade:</strong> add a map for subject-wise statistics and a priority_queue for top performers.</p>
+</div>
+</section>
+
+<section class="reveal">
+<div class="section-head"><h2>21. STL Mental Model</h2></div>
+<div class="card">
+<div class="tree">
+    <div class="node">STL</div>
+    <div class="connector"></div>
+    <div class="branch">
+        <div>
+            <div class="node purple">Containers</div><div class="connector"></div>
+            <div class="branch"><div class="node">vector</div><div class="node">set</div><div class="node">map</div></div>
+        </div>
+        <div>
+            <div class="node green">Algorithms</div><div class="connector"></div>
+            <div class="branch"><div class="node">sort</div><div class="node">find</div><div class="node">bounds</div></div>
+        </div>
+        <div>
+            <div class="node">Iterators</div><div class="connector"></div>
+            <div class="branch"><div class="node">begin</div><div class="node">end</div><div class="node">reverse</div></div>
+        </div>
+    </div>
+</div>
+</div>
+</section>
+
+<section id="checklist" class="reveal">
+<div class="section-head"><h2>22. Completion Checklist</h2><p>Your progress is saved in this browser.</p></div>
+<div class="card checklist">
+<label><input type="checkbox" data-key="stl1"> I understand STL and its three core ideas.</label>
+<label><input type="checkbox" data-key="stl2"> I can use vector, array and deque.</label>
+<label><input type="checkbox" data-key="stl3"> I understand list and when it is useful.</label>
+<label><input type="checkbox" data-key="stl4"> I can use set, multiset, map and multimap.</label>
+<label><input type="checkbox" data-key="stl5"> I understand unordered_map and unordered_set.</label>
+<label><input type="checkbox" data-key="stl6"> I can use stack, queue and priority_queue.</label>
+<label><input type="checkbox" data-key="stl7"> I understand iterators and [begin, end).</label>
+<label><input type="checkbox" data-key="stl8"> I can use sort, find, count, reverse and accumulate.</label>
+<label><input type="checkbox" data-key="stl9"> I can use lower_bound and upper_bound.</label>
+<label><input type="checkbox" data-key="stl10"> I can write lambda comparators.</label>
+<label><input type="checkbox" data-key="stl11"> I know common STL complexities.</label>
+<label><input type="checkbox" data-key="stl12"> I can combine STL tools to solve coding problems.</label>
+</div>
+</section>
+
+<section class="reveal">
+<div class="section-head"><h2>🎓 Rapid Revision</h2></div>
+<div class="card">
+<p><strong>vector</strong> → dynamic contiguous array.</p>
+<p><strong>set</strong> → sorted unique keys.</p>
+<p><strong>map</strong> → sorted unique keys with values.</p>
+<p><strong>unordered_map</strong> → hash table, average O(1) lookup.</p>
+<p><strong>stack</strong> → LIFO.</p>
+<p><strong>queue</strong> → FIFO.</p>
+<p><strong>priority_queue</strong> → heap-based priority access.</p>
+<p><strong>iterator</strong> → generalized position/range traversal mechanism.</p>
+<p><strong>algorithm</strong> → reusable operation over ranges.</p>
+<p><strong>lambda</strong> → anonymous function expression, excellent for custom predicates/comparators.</p>
+<p><strong>lower_bound</strong> → first position with value ≥ x in a sorted range.</p>
+<p><strong>upper_bound</strong> → first position with value &gt; x in a sorted range.</p>
+</div>
+</section>
+
+<footer>
+    <strong>ZENSUS • C++ Mastery</strong><br>
+    Lesson 15 — STL Masterclass<br>
+    <span class="mini">Next: Advanced C++ / Problem-Solving with STL</span>
+</footer>
+
+</div>
+</main>
+
+<script>
+const sidebar=document.getElementById("sidebar");
+document.getElementById("menuBtn").addEventListener("click",()=>sidebar.classList.toggle("open"));
+
+window.addEventListener("scroll",()=>{
+    const h=document.documentElement.scrollHeight-window.innerHeight;
+    document.getElementById("progress").style.width=(h>0?(window.scrollY/h)*100:0)+"%";
+});
+
+const observer=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add("show")});
+},{threshold:.08});
+document.querySelectorAll(".reveal").forEach(el=>observer.observe(el));
+
+const links=[...document.querySelectorAll(".nav a")];
+const sections=[...document.querySelectorAll("section[id]")];
+window.addEventListener("scroll",()=>{
+    let current="top";
+    sections.forEach(s=>{
+        if(window.scrollY >= s.offsetTop-130) current=s.id;
+    });
+    links.forEach(a=>a.classList.toggle("active",a.getAttribute("href")==="#"+current));
+});
+
+document.querySelectorAll(".accordion").forEach(acc=>{
+    const q=acc.querySelector(".acc-q");
+    const a=acc.querySelector(".acc-a");
+    q.addEventListener("click",()=>{
+        const open=a.style.display==="block";
+        document.querySelectorAll(".acc-a").forEach(x=>x.style.display="none");
+        a.style.display=open?"none":"block";
+    });
+});
+
+document.querySelectorAll(".quiz .option").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+        const quiz=btn.closest(".quiz");
+        quiz.querySelectorAll(".option").forEach(x=>x.disabled=true);
+        if(btn.dataset.correct==="true"){
+            btn.classList.add("correct");
+            quiz.querySelector(".answer").style.display="block";
+        }else{
+            btn.classList.add("wrong");
+            const correct=quiz.querySelector('[data-correct="true"]');
+            correct.classList.add("correct");
+            quiz.querySelector(".answer").style.display="block";
+        }
+    });
+});
+
+document.querySelectorAll(".checklist input").forEach(box=>{
+    const key=box.dataset.key;
+    box.checked=localStorage.getItem(key)==="1";
+    box.addEventListener("change",()=>localStorage.setItem(key,box.checked?"1":"0"));
+});
+
+let vector=[5,2,9,1,5];
+function renderVector(){
+    const lab=document.getElementById("vectorLab");
+    lab.innerHTML="";
+    vector.forEach((x,i)=>{
+        const d=document.createElement("div");
+        d.className="cell";
+        d.textContent=x;
+        if(i===vector.length-1)d.classList.add("active");
+        lab.appendChild(d);
+    });
+}
+function vectorPush(){
+    vector.push(Math.floor(Math.random()*90)+10);
+    renderVector();
+    document.getElementById("vectorOutput").textContent="push_back(): element added at the end. size = "+vector.length;
+}
+function vectorPop(){
+    if(vector.length)vector.pop();
+    renderVector();
+    document.getElementById("vectorOutput").textContent="pop_back(): last element removed. size = "+vector.length;
+}
+function vectorSort(){
+    vector.sort((a,b)=>a-b);
+    renderVector();
+    document.getElementById("vectorOutput").textContent="sort(): vector arranged in ascending order.";
+}
+function vectorReset(){
+    vector=[5,2,9,1,5];renderVector();
+    document.getElementById("vectorOutput").textContent="vector<int> reset.";
+}
+renderVector();
+
+let heap=[30,10,50,20];
+function renderHeap(){
+    const lab=document.getElementById("heapLab");
+    lab.innerHTML="";
+    [...heap].sort((a,b)=>b-a).forEach((x,i)=>{
+        const d=document.createElement("div");
+        d.className="cell"+(i===0?" active":"");
+        d.textContent=x;
+        lab.appendChild(d);
+    });
+}
+function heapPush(){
+    heap.push(Math.floor(Math.random()*90)+1);
+    renderHeap();
+    document.getElementById("heapOutput").textContent="push(): top = "+Math.max(...heap);
+}
+function heapPop(){
+    if(heap.length){
+        const top=Math.max(...heap);
+        heap.splice(heap.indexOf(top),1);
+    }
+    renderHeap();
+    document.getElementById("heapOutput").textContent=heap.length?"pop(): top = "+Math.max(...heap):"Heap is empty.";
+}
+function heapReset(){heap=[30,10,50,20];renderHeap();document.getElementById("heapOutput").textContent="Max-heap reset."}
+renderHeap();
+
+const bounds=[1,2,2,2,5,8];
+const bl=document.getElementById("boundLab");
+bounds.forEach((x,i)=>{
+    const d=document.createElement("div");
+    d.className="cell";
+    d.textContent=x;
+    if(i===1||i===4)d.classList.add("active");
+    bl.appendChild(d);
+});
+</script>
+
+</body>
+</html>

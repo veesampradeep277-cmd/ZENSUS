@@ -1,0 +1,3408 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS React — Lesson 14: React Hooks</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+    --bg:#f7f8fc;
+    --surface:#ffffff;
+    --soft:#f0f2f7;
+    --text:#172033;
+    --muted:#667085;
+    --primary:#635bff;
+    --primary-soft:#eeecff;
+    --border:#e1e5ed;
+    --green:#16a34a;
+    --red:#dc2626;
+    --orange:#ea580c;
+    --blue:#2563eb;
+    --dark:#10131c;
+    --dark2:#1a1f2c;
+    --dark3:#30384a;
+    --shadow:0 12px 35px rgba(30,40,70,.08);
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+.topbar{
+    height:68px;
+    position:sticky;
+    top:0;
+    z-index:100;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:0 30px;
+
+    background:rgba(255,255,255,.96);
+    backdrop-filter:blur(14px);
+
+    border-bottom:1px solid var(--border);
+}
+
+.logo{
+    font-size:23px;
+    font-weight:900;
+    letter-spacing:-1px;
+}
+
+.logo span{
+    color:var(--primary);
+}
+
+.badge{
+    padding:7px 14px;
+    border-radius:30px;
+    background:var(--primary-soft);
+    color:var(--primary);
+    font-size:12px;
+    font-weight:850;
+}
+
+.layout{
+    max-width:1500px;
+    margin:auto;
+
+    display:grid;
+    grid-template-columns:270px minmax(0,1fr);
+}
+
+.sidebar{
+    position:sticky;
+    top:68px;
+    height:calc(100vh - 68px);
+
+    overflow-y:auto;
+
+    padding:27px 17px;
+
+    background:#fff;
+    border-right:1px solid var(--border);
+}
+
+.sidebar-title{
+    margin-bottom:14px;
+    color:#8a93a5;
+    font-size:11px;
+    font-weight:850;
+    letter-spacing:1.4px;
+    text-transform:uppercase;
+}
+
+.sidebar a{
+    display:block;
+
+    padding:9px 12px;
+    margin:3px 0;
+
+    border-radius:9px;
+
+    color:#596579;
+    text-decoration:none;
+    font-size:13.5px;
+
+    transition:.2s;
+}
+
+.sidebar a:hover{
+    color:var(--primary);
+    background:var(--primary-soft);
+}
+
+.sidebar a.active{
+    color:var(--primary);
+    background:var(--primary-soft);
+    font-weight:750;
+}
+
+main{
+    max-width:1050px;
+    width:100%;
+
+    margin:auto;
+    padding:55px 50px 100px;
+}
+
+.hero{
+    position:relative;
+    overflow:hidden;
+
+    padding:58px;
+    margin-bottom:60px;
+
+    border-radius:27px;
+
+    color:white;
+
+    background:
+        linear-gradient(
+            135deg,
+            #111522,
+            #302957
+        );
+
+    box-shadow:
+        0 25px 70px rgba(35,30,80,.18);
+}
+
+.hero::before{
+    content:"";
+
+    position:absolute;
+
+    width:400px;
+    height:400px;
+
+    right:-190px;
+    top:-210px;
+
+    border-radius:50%;
+
+    background:#635bff;
+    opacity:.22;
+
+    animation:orb 7s ease-in-out infinite;
+}
+
+.hero::after{
+    content:"";
+
+    position:absolute;
+
+    width:260px;
+    height:260px;
+
+    left:-120px;
+    bottom:-190px;
+
+    border-radius:50%;
+
+    background:#a78bfa;
+    opacity:.15;
+
+    animation:orb 8s ease-in-out infinite reverse;
+}
+
+.hero-content{
+    position:relative;
+    z-index:2;
+}
+
+.eyebrow{
+    margin-bottom:14px;
+
+    color:#bcb7ff;
+
+    font-size:11px;
+    font-weight:850;
+    letter-spacing:2px;
+    text-transform:uppercase;
+}
+
+.hero h1{
+    margin-bottom:20px;
+
+    font-size:clamp(38px,5vw,60px);
+    line-height:1.04;
+    letter-spacing:-2.5px;
+}
+
+.hero h1 span{
+    color:#aaa3ff;
+}
+
+.hero p{
+    max-width:820px;
+
+    color:#d9dbe7;
+    font-size:17px;
+}
+
+@keyframes orb{
+    0%,100%{
+        transform:translate(0,0);
+    }
+
+    50%{
+        transform:translate(18px,14px);
+    }
+}
+
+.section{
+    margin-bottom:75px;
+    scroll-margin-top:90px;
+}
+
+.section h2{
+    margin-bottom:15px;
+
+    font-size:32px;
+    line-height:1.2;
+    letter-spacing:-1.2px;
+}
+
+.section h3{
+    margin:29px 0 10px;
+    font-size:21px;
+}
+
+.section p{
+    margin:10px 0;
+    color:var(--muted);
+}
+
+ul{
+    margin:15px 0 15px 22px;
+    color:var(--muted);
+}
+
+li{
+    margin:5px 0;
+}
+
+code{
+    padding:2px 6px;
+    border-radius:5px;
+
+    background:#eff1f5;
+
+    color:#b42318;
+
+    font-family:Consolas,monospace;
+}
+
+pre{
+    margin:19px 0;
+
+    padding:24px;
+
+    overflow:auto;
+
+    border-radius:15px;
+
+    background:var(--dark);
+    color:#e7e9ef;
+
+    font-family:Consolas,"Courier New",monospace;
+    font-size:14px;
+    line-height:1.7;
+
+    box-shadow:0 14px 35px rgba(0,0,0,.12);
+}
+
+.info,
+.highlight,
+.success,
+.warning,
+.danger{
+    margin:22px 0;
+    padding:18px 20px;
+    border-radius:11px;
+}
+
+.info{
+    background:#fafbfc;
+    border:1px solid var(--border);
+}
+
+.highlight{
+    background:#f1efff;
+    border-left:4px solid var(--primary);
+}
+
+.success{
+    background:#ecfdf3;
+    border-left:4px solid var(--green);
+}
+
+.warning{
+    background:#fff7ed;
+    border-left:4px solid var(--orange);
+}
+
+.danger{
+    background:#fff5f5;
+    border-left:4px solid var(--red);
+}
+
+
+/* HOOK MAP */
+
+.hook-map{
+    margin:30px 0;
+    padding:30px;
+
+    border-radius:20px;
+
+    background:var(--dark);
+    color:white;
+}
+
+.map-title{
+    margin-bottom:25px;
+
+    color:#929bad;
+
+    font-size:11px;
+    font-weight:850;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+}
+
+.hook-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+}
+
+.hook-card{
+    padding:20px;
+
+    border:1px solid #343c50;
+    border-radius:14px;
+
+    background:var(--dark2);
+
+    transition:.3s;
+}
+
+.hook-card:hover{
+    transform:translateY(-5px);
+    border-color:#7770ff;
+}
+
+.hook-name{
+    display:inline-block;
+
+    margin-bottom:7px;
+    padding:4px 9px;
+
+    border-radius:6px;
+
+    background:#2c3150;
+
+    color:#aaa3ff;
+
+    font-family:Consolas,monospace;
+    font-weight:900;
+}
+
+.hook-card p{
+    color:#aeb5c5;
+    font-size:13px;
+}
+
+
+/* FLOW */
+
+.flow-box{
+    margin:28px 0;
+    padding:28px;
+
+    border-radius:19px;
+
+    background:var(--dark);
+    color:white;
+
+    overflow:hidden;
+}
+
+.flow{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-wrap:wrap;
+
+    gap:11px;
+}
+
+.node{
+    min-width:125px;
+
+    padding:16px;
+
+    text-align:center;
+
+    border:1px solid #343c50;
+    border-radius:13px;
+
+    background:var(--dark2);
+
+    transition:.3s;
+}
+
+.node.active{
+    animation:pulse 1.8s infinite;
+}
+
+.node small{
+    display:block;
+    margin-top:4px;
+    color:#8993a9;
+    font-size:11px;
+}
+
+.arrow{
+    color:#aaa3ff;
+    font-size:24px;
+    font-weight:800;
+}
+
+@keyframes pulse{
+    0%,100%{
+        transform:translateY(0);
+        box-shadow:0 0 0 rgba(99,91,255,0);
+    }
+
+    50%{
+        transform:translateY(-5px);
+        box-shadow:0 0 28px rgba(99,91,255,.35);
+    }
+}
+
+
+/* HOOK TABLE */
+
+.hook-table{
+    width:100%;
+    border-collapse:collapse;
+
+    margin:25px 0;
+
+    background:white;
+
+    border:1px solid var(--border);
+}
+
+.hook-table th{
+    padding:14px;
+
+    text-align:left;
+
+    background:#f1f3f7;
+
+    border-bottom:1px solid var(--border);
+}
+
+.hook-table td{
+    padding:13px;
+
+    border-bottom:1px solid var(--border);
+
+    color:var(--muted);
+}
+
+.hook-table td:first-child{
+    color:var(--primary);
+    font-family:Consolas,monospace;
+    font-weight:800;
+}
+
+
+/* RULES */
+
+.rules{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+
+    gap:18px;
+
+    margin:25px 0;
+}
+
+.rule{
+    padding:23px;
+
+    border-radius:16px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+
+    transition:.25s;
+}
+
+.rule:hover{
+    transform:translateY(-4px);
+}
+
+.rule-icon{
+    font-size:28px;
+    margin-bottom:8px;
+}
+
+.rule h3{
+    margin:0 0 7px;
+}
+
+
+/* DEMO */
+
+.playground{
+    margin:28px 0;
+    padding:27px;
+
+    border-radius:19px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+}
+
+.demo-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+
+    margin:15px 0;
+}
+
+.demo-value{
+    min-width:80px;
+
+    padding:10px 15px;
+
+    border-radius:9px;
+
+    background:#f1f3f7;
+
+    font-family:Consolas,monospace;
+    text-align:center;
+}
+
+.btn{
+    padding:10px 17px;
+
+    border:1px solid var(--border);
+    border-radius:9px;
+
+    background:#fafbfc;
+
+    cursor:pointer;
+
+    font-weight:750;
+
+    transition:.2s;
+}
+
+.btn:hover{
+    border-color:var(--primary);
+    background:#f3f1ff;
+}
+
+.btn.primary{
+    color:white;
+    background:var(--primary);
+    border-color:var(--primary);
+}
+
+
+/* DEPENDENCY VISUAL */
+
+.dependency{
+    display:grid;
+
+    grid-template-columns:1fr auto 1fr;
+
+    align-items:center;
+
+    gap:16px;
+
+    margin:28px 0;
+}
+
+.dep-card{
+    padding:22px;
+
+    border-radius:16px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+}
+
+.dep-arrow{
+    font-size:30px;
+    color:var(--primary);
+}
+
+
+/* COMPARISON */
+
+.compare{
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:18px;
+
+    margin:25px 0;
+}
+
+.compare-card{
+    padding:24px;
+
+    border-radius:17px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+}
+
+.compare-card h3{
+    margin-top:0;
+}
+
+
+/* CUSTOM HOOK */
+
+.custom-flow{
+    display:grid;
+
+    grid-template-columns:
+        repeat(5,1fr);
+
+    gap:10px;
+
+    margin:28px 0;
+}
+
+.custom-node{
+    padding:18px 10px;
+
+    border-radius:13px;
+
+    text-align:center;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+
+    font-size:13px;
+}
+
+.custom-node strong{
+    display:block;
+
+    color:var(--primary);
+
+    margin-bottom:4px;
+}
+
+
+/* MISTAKES */
+
+.mistakes{
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:18px;
+}
+
+.mistake{
+    padding:22px;
+
+    border-radius:15px;
+
+    background:white;
+
+    border:1px solid var(--border);
+}
+
+.mistake h3{
+    margin:0 0 9px;
+
+    color:var(--red);
+
+    font-size:17px;
+}
+
+
+/* QUIZ */
+
+.quiz{
+    margin:18px 0;
+
+    padding:25px;
+
+    border-radius:17px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+}
+
+.question{
+    margin-bottom:14px;
+    font-weight:800;
+}
+
+.option{
+    width:100%;
+
+    display:block;
+
+    margin:7px 0;
+
+    padding:11px 14px;
+
+    text-align:left;
+
+    border:1px solid var(--border);
+    border-radius:9px;
+
+    background:#fafbfc;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.option:hover{
+    border-color:var(--primary);
+    background:#f4f2ff;
+}
+
+.option.correct{
+    color:#166534;
+    background:#ecfdf3;
+    border-color:#86efac;
+}
+
+.option.wrong{
+    color:#991b1b;
+    background:#fef2f2;
+    border-color:#fca5a5;
+}
+
+.quiz-result{
+    margin-top:10px;
+    font-weight:750;
+}
+
+
+/* FOOTER */
+
+.footer{
+    padding-top:30px;
+
+    border-top:1px solid var(--border);
+
+    color:#7b8497;
+
+    text-align:center;
+}
+
+
+/* RESPONSIVE */
+
+@media(max-width:950px){
+
+    .layout{
+        grid-template-columns:1fr;
+    }
+
+    .sidebar{
+        display:none;
+    }
+
+    main{
+        padding:35px 20px 80px;
+    }
+
+    .hook-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .rules,
+    .mistakes,
+    .compare,
+    .dependency{
+        grid-template-columns:1fr;
+    }
+
+    .custom-flow{
+        grid-template-columns:1fr 1fr;
+    }
+}
+
+@media(max-width:600px){
+
+    .topbar{
+        padding:0 16px;
+    }
+
+    .badge{
+        display:none;
+    }
+
+    .hero{
+        padding:37px 25px;
+    }
+
+    .section h2{
+        font-size:27px;
+    }
+
+    .hook-grid{
+        grid-template-columns:1fr;
+    }
+
+    .custom-flow{
+        grid-template-columns:1fr;
+    }
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<header class="topbar">
+
+<div class="logo">
+ZEN<span>SUS</span>
+</div>
+
+<div class="badge">
+REACT • LESSON 14
+</div>
+
+</header>
+
+
+<div class="layout">
+
+
+<aside class="sidebar">
+
+<div class="sidebar-title">
+React Hooks
+</div>
+
+<a href="#what" class="active">What are Hooks?</a>
+
+<a href="#why">Why Hooks?</a>
+
+<a href="#rules">Rules of Hooks</a>
+
+<a href="#state">useState</a>
+
+<a href="#effect">useEffect</a>
+
+<a href="#context">useContext</a>
+
+<a href="#reducer">useReducer</a>
+
+<a href="#ref">useRef</a>
+
+<a href="#memo">useMemo</a>
+
+<a href="#callback">useCallback</a>
+
+<a href="#custom">Custom Hooks</a>
+
+<a href="#composition">Hook Composition</a>
+
+<a href="#dependencies">Hook Dependencies</a>
+
+<a href="#mistakes">Common Mistakes</a>
+
+<a href="#quiz">Quick Quiz</a>
+
+</aside>
+
+
+<main>
+
+
+<!-- HERO -->
+
+<section class="hero">
+
+<div class="hero-content">
+
+<div class="eyebrow">
+ZENSUS React Course • Lesson 14
+</div>
+
+<h1>
+React <span>Hooks</span>
+</h1>
+
+<p>
+A complete guide to the Hooks system — from useState and useEffect
+to Context, Reducer, Refs, Memoization and Custom Hooks.
+Learn not only how Hooks work, but when they should and should not
+be used.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- WHAT -->
+
+<section class="section" id="what">
+
+<h2>01. What are Hooks?</h2>
+
+<p>
+Hooks are special React functions that let function components use
+React features such as state, Effects, context, refs and performance
+optimizations.
+</p>
+
+<p>
+Before Hooks were introduced, many stateful or lifecycle-related
+patterns commonly relied on class components. Hooks made it possible
+to organize these capabilities inside function components.
+</p>
+
+
+<div class="hook-map">
+
+<div class="map-title">
+THE REACT HOOKS TOOLBOX
+</div>
+
+<div class="hook-grid">
+
+<div class="hook-card">
+
+<div class="hook-name">
+useState
+</div>
+
+<p>
+Stores component state.
+</p>
+
+</div>
+
+<div class="hook-card">
+
+<div class="hook-name">
+useEffect
+</div>
+
+<p>
+Synchronizes with external systems.
+</p>
+
+</div>
+
+<div class="hook-card">
+
+<div class="hook-name">
+useContext
+</div>
+
+<p>
+Reads context without prop drilling.
+</p>
+
+</div>
+
+<div class="hook-card">
+
+<div class="hook-name">
+useReducer
+</div>
+
+<p>
+Manages complex state transitions.
+</p>
+
+</div>
+
+<div class="hook-card">
+
+<div class="hook-name">
+useRef
+</div>
+
+<p>
+Stores mutable values and references DOM nodes.
+</p>
+
+</div>
+
+<div class="hook-card">
+
+<div class="hook-name">
+useMemo
+</div>
+
+<p>
+Caches a calculated value.
+</p>
+
+</div>
+
+<div class="hook-card">
+
+<div class="hook-name">
+useCallback
+</div>
+
+<p>
+Caches a function reference.
+</p>
+
+</div>
+
+<div class="hook-card">
+
+<div class="hook-name">
+Custom Hooks
+</div>
+
+<p>
+Reuse stateful logic across components.
+</p>
+
+</div>
+
+<div class="hook-card">
+
+<div class="hook-name">
+Composition
+</div>
+
+<p>
+Combine Hooks to build reusable behavior.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- WHY -->
+
+<section class="section" id="why">
+
+<h2>02. Why Hooks?</h2>
+
+<p>
+Hooks allow related behavior to stay together inside function
+components and make reusable stateful logic easier to extract.
+</p>
+
+
+<div class="compare">
+
+<div class="compare-card">
+
+<h3>Without reusable Hook logic</h3>
+
+<ul>
+
+<li>Repeated state logic</li>
+
+<li>Repeated Effects</li>
+
+<li>Repeated event handling</li>
+
+<li>Logic becomes harder to share</li>
+
+</ul>
+
+</div>
+
+
+<div class="compare-card">
+
+<h3>With Hooks</h3>
+
+<ul>
+
+<li>State can live in function components</li>
+
+<li>Effects can synchronize external systems</li>
+
+<li>Reusable logic can become Custom Hooks</li>
+
+<li>Related behavior can be organized together</li>
+
+</ul>
+
+</div>
+
+</div>
+
+
+<div class="highlight">
+
+<strong>Important:</strong>
+
+<p>
+Hooks are not a replacement for every React feature. They are a
+mechanism for using and composing React capabilities inside function
+components.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- RULES -->
+
+<section class="section" id="rules">
+
+<h2>03. Rules of Hooks</h2>
+
+<p>
+Hooks follow strict rules. These rules allow React to associate Hook
+calls with the correct component state across renders.
+</p>
+
+
+<div class="rules">
+
+<div class="rule">
+
+<div class="rule-icon">
+1️⃣
+</div>
+
+<h3>Call Hooks at the Top Level</h3>
+
+<p>
+Do not call Hooks inside loops, conditions, nested functions or
+arbitrary blocks.
+</p>
+
+</div>
+
+
+<div class="rule">
+
+<div class="rule-icon">
+2️⃣
+</div>
+
+<h3>Only Call Hooks from React Functions</h3>
+
+<p>
+Call Hooks from React function components or Custom Hooks.
+</p>
+
+</div>
+
+</div>
+
+
+<h3>❌ Incorrect</h3>
+
+<pre>
+function Profile({ isLoggedIn }){
+
+    if(isLoggedIn){
+
+        const [name, setName] =
+            useState("");
+
+    }
+
+    return &lt;div&gt;Profile&lt;/div&gt;;
+}
+</pre>
+
+
+<h3>✅ Correct</h3>
+
+<pre>
+function Profile({ isLoggedIn }){
+
+    const [name, setName] =
+        useState("");
+
+    if(!isLoggedIn){
+
+        return &lt;p&gt;
+            Please login
+        &lt;/p&gt;;
+
+    }
+
+    return &lt;h1&gt;
+        {name}
+    &lt;/h1&gt;;
+}
+</pre>
+
+
+<div class="danger">
+
+<strong>Why?</strong>
+
+<p>
+React relies on the consistent order of Hook calls between renders.
+Changing that order can cause React to associate state with the wrong
+Hook.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- STATE -->
+
+<section class="section" id="state">
+
+<h2>04. useState</h2>
+
+<p>
+<code>useState</code> allows a component to store information that can
+change over time and trigger a re-render when updated.
+</p>
+
+<pre>
+const [count, setCount] =
+    useState(0);
+</pre>
+
+
+<div class="flow-box">
+
+<div class="map-title">
+USESTATE FLOW
+</div>
+
+<div class="flow">
+
+<div class="node">
+Initial State
+<small>0</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node active">
+setCount()
+<small>update</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Re-render
+<small>component runs</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node active">
+New UI
+<small>count changed</small>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="playground">
+
+<h3 style="margin-top:0;">
+useState Visualizer
+</h3>
+
+<p>
+Every state update causes React to schedule a new render.
+</p>
+
+<div class="demo-row">
+
+<button
+class="btn primary"
+onclick="changeCounter(-1)"
+>
+−
+</button>
+
+<div
+class="demo-value"
+id="counter"
+>
+0
+</div>
+
+<button
+class="btn primary"
+onclick="changeCounter(1)"
+>
++
+</button>
+
+<button
+class="btn"
+onclick="resetCounter()"
+>
+Reset
+</button>
+
+</div>
+
+</div>
+
+
+<h3>Functional Updates</h3>
+
+<pre>
+setCount(prevCount =>
+    prevCount + 1
+);
+</pre>
+
+<p>
+Use a functional update when the next state depends on the previous
+state, especially when multiple updates may be queued.
+</p>
+
+</section>
+
+
+<!-- EFFECT -->
+
+<section class="section" id="effect">
+
+<h2>05. useEffect</h2>
+
+<p>
+<code>useEffect</code> is used to synchronize a component with an
+external system such as a network connection, browser API, timer,
+subscription or other system outside React's rendering process.
+</p>
+
+<pre>
+useEffect(() => {
+
+    const connection =
+        createConnection();
+
+    connection.connect();
+
+    return () => {
+
+        connection.disconnect();
+
+    };
+
+}, []);
+</pre>
+
+
+<div class="flow-box">
+
+<div class="map-title">
+EFFECT LIFECYCLE
+</div>
+
+<div class="flow">
+
+<div class="node">
+Render
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node active">
+Effect
+<small>synchronize</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+External System
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node active">
+Cleanup
+<small>when needed</small>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="highlight">
+
+<strong>Key idea:</strong>
+
+<p>
+Do not use Effects simply because you want to calculate something
+during rendering. Effects are primarily for synchronizing with
+systems outside React.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- CONTEXT -->
+
+<section class="section" id="context">
+
+<h2>06. useContext</h2>
+
+<p>
+Context allows components to read values provided by a parent without
+passing those values through every intermediate component as props.
+</p>
+
+
+<h3>Creating Context</h3>
+
+<pre>
+import {
+    createContext,
+    useContext
+} from "react";
+
+const ThemeContext =
+    createContext("light");
+</pre>
+
+
+<h3>Providing Context</h3>
+
+<pre>
+function App(){
+
+    return (
+
+        &lt;ThemeContext.Provider
+            value="dark"
+        &gt;
+
+            &lt;Dashboard /&gt;
+
+        &lt;/ThemeContext.Provider&gt;
+
+    );
+}
+</pre>
+
+
+<h3>Reading Context</h3>
+
+<pre>
+function Dashboard(){
+
+    const theme =
+        useContext(ThemeContext);
+
+    return (
+        &lt;p&gt;
+            Current theme:
+            {theme}
+        &lt;/p&gt;
+    );
+}
+</pre>
+
+
+<div class="flow-box">
+
+<div class="map-title">
+CONTEXT FLOW
+</div>
+
+<div class="flow">
+
+<div class="node active">
+Provider
+<small>value</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Component A
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Component B
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node active">
+useContext()
+<small>read value</small>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="warning">
+
+<strong>Context is not automatically global state.</strong>
+
+<p>
+Context provides a way to make values available to a subtree. State
+management still depends on where and how the state is stored.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- REDUCER -->
+
+<section class="section" id="reducer">
+
+<h2>07. useReducer</h2>
+
+<p>
+<code>useReducer</code> is useful when state transitions are more
+complex or when multiple updates are naturally represented as actions.
+</p>
+
+<pre>
+const initialState = {
+    count: 0
+};
+
+function reducer(state, action){
+
+    switch(action.type){
+
+        case "increment":
+
+            return {
+                ...state,
+                count:
+                    state.count + 1
+            };
+
+        case "decrement":
+
+            return {
+                ...state,
+                count:
+                    state.count - 1
+            };
+
+        default:
+
+            return state;
+    }
+
+}
+</pre>
+
+
+<h3>Using the Reducer</h3>
+
+<pre>
+const [state, dispatch] =
+    useReducer(
+        reducer,
+        initialState
+    );
+</pre>
+
+
+<h3>Dispatching an Action</h3>
+
+<pre>
+dispatch({
+    type: "increment"
+});
+</pre>
+
+
+<div class="flow-box">
+
+<div class="map-title">
+REDUCER MENTAL MODEL
+</div>
+
+<div class="flow">
+
+<div class="node">
+UI Event
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node active">
+dispatch(action)
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Reducer
+<small>state + action</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node active">
+New State
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+UI
+</div>
+
+</div>
+
+</div>
+
+
+<div class="highlight">
+
+<strong>Think:</strong>
+
+<p>
+<strong>useState</strong> → simple state updates<br>
+<strong>useReducer</strong> → structured state transitions and actions
+</p>
+
+</div>
+
+</section>
+
+
+<!-- REF -->
+
+<section class="section" id="ref">
+
+<h2>08. useRef</h2>
+
+<p>
+<code>useRef</code> returns a mutable object whose
+<code>current</code> property persists across renders.
+Updating it does not by itself trigger a re-render.
+</p>
+
+<pre>
+const inputRef =
+    useRef(null);
+</pre>
+
+
+<h3>DOM Reference</h3>
+
+<pre>
+function SearchBox(){
+
+    const inputRef =
+        useRef(null);
+
+    function focusInput(){
+
+        inputRef.current.focus();
+
+    }
+
+    return (
+
+        &lt;&gt;
+
+            &lt;input ref={inputRef} /&gt;
+
+            &lt;button
+                onClick={focusInput}
+            &gt;
+                Focus
+            &lt;/button&gt;
+
+        &lt;/&gt;
+
+    );
+}
+</pre>
+
+
+<h3>Mutable Value</h3>
+
+<pre>
+const renderCount =
+    useRef(0);
+
+renderCount.current++;
+</pre>
+
+
+<div class="compare">
+
+<div class="compare-card">
+
+<h3>useState</h3>
+
+<p>
+Changing state schedules a re-render.
+</p>
+
+<pre>
+setValue(newValue);
+</pre>
+
+</div>
+
+
+<div class="compare-card">
+
+<h3>useRef</h3>
+
+<p>
+Changing <code>current</code> does not itself schedule a re-render.
+</p>
+
+<pre>
+ref.current =
+    newValue;
+</pre>
+
+</div>
+
+</div>
+
+
+<div class="success">
+
+<strong>Common useRef uses:</strong>
+
+<ul>
+
+<li>Focusing an input</li>
+
+<li>Referencing a DOM element</li>
+
+<li>Storing an interval ID</li>
+
+<li>Keeping a mutable value between renders</li>
+
+<li>Interacting with browser APIs or imperative libraries</li>
+
+</ul>
+
+</div>
+
+</section>
+
+
+<!-- MEMO -->
+
+<section class="section" id="memo">
+
+<h2>09. useMemo</h2>
+
+<p>
+<code>useMemo</code> lets React cache the result of a calculation between
+renders until its dependencies change.
+</p>
+
+<pre>
+const filteredStudents =
+    useMemo(() => {
+
+        return students.filter(
+            student =>
+                student.course ===
+                selectedCourse
+        );
+
+    }, [
+        students,
+        selectedCourse
+    ]);
+</pre>
+
+
+<div class="dependency">
+
+<div class="dep-card">
+
+<strong>Dependencies unchanged</strong>
+
+<p>
+React can reuse the previously calculated value.
+</p>
+
+</div>
+
+<div class="dep-arrow">
+→
+</div>
+
+<div class="dep-card">
+
+<strong>Dependency changed</strong>
+
+<p>
+React recalculates the memoized value.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="warning">
+
+<strong>Do not memoize everything.</strong>
+
+<p>
+Memoization adds complexity. A calculation should be expensive enough
+or have another clear reason to justify caching it.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- CALLBACK -->
+
+<section class="section" id="callback">
+
+<h2>10. useCallback</h2>
+
+<p>
+<code>useCallback</code> caches a function definition between renders
+until its dependencies change.
+</p>
+
+<pre>
+const handleSelect =
+    useCallback((id) => {
+
+        setSelectedId(id);
+
+    }, []);
+</pre>
+
+
+<h3>Why Function Identity Matters</h3>
+
+<p>
+Every time a component renders, a normal function expression creates a
+new function value.
+</p>
+
+<pre>
+const handleClick = () => {
+    console.log("clicked");
+};
+</pre>
+
+<p>
+When passing callbacks to memoized child components or using a callback
+as a dependency, function identity can matter.
+</p>
+
+
+<div class="compare">
+
+<div class="compare-card">
+
+<h3>useMemo</h3>
+
+<p>
+Caches a calculated <strong>value</strong>.
+</p>
+
+<pre>
+const result =
+    useMemo(
+        calculate,
+        [a,b]
+    );
+</pre>
+
+</div>
+
+
+<div class="compare-card">
+
+<h3>useCallback</h3>
+
+<p>
+Caches a <strong>function</strong>.
+</p>
+
+<pre>
+const fn =
+    useCallback(
+        () => doSomething(),
+        [a]
+    );
+</pre>
+
+</div>
+
+</div>
+
+
+<div class="highlight">
+
+<strong>Memory trick:</strong>
+
+<p>
+<strong>Memo → value</strong><br>
+<strong>Callback → function</strong>
+</p>
+
+</div>
+
+</section>
+
+
+<!-- CUSTOM -->
+
+<section class="section" id="custom">
+
+<h2>11. Custom Hooks</h2>
+
+<p>
+A Custom Hook is a JavaScript function whose name starts with
+<code>use</code> and which can call other Hooks.
+</p>
+
+
+<h3>Example: useOnlineStatus</h3>
+
+<pre>
+import {
+    useEffect,
+    useState
+} from "react";
+
+function useOnlineStatus(){
+
+    const [isOnline, setIsOnline] =
+        useState(
+            navigator.onLine
+        );
+
+    useEffect(() => {
+
+        function handleOnline(){
+            setIsOnline(true);
+        }
+
+        function handleOffline(){
+            setIsOnline(false);
+        }
+
+        window.addEventListener(
+            "online",
+            handleOnline
+        );
+
+        window.addEventListener(
+            "offline",
+            handleOffline
+        );
+
+        return () => {
+
+            window.removeEventListener(
+                "online",
+                handleOnline
+            );
+
+            window.removeEventListener(
+                "offline",
+                handleOffline
+            );
+
+        };
+
+    }, []);
+
+    return isOnline;
+}
+</pre>
+
+
+<h3>Using the Custom Hook</h3>
+
+<pre>
+function Status(){
+
+    const isOnline =
+        useOnlineStatus();
+
+    return (
+
+        &lt;p&gt;
+
+            {isOnline
+                ? "Online"
+                : "Offline"}
+
+        &lt;/p&gt;
+
+    );
+}
+</pre>
+
+
+<div class="custom-flow">
+
+<div class="custom-node">
+
+<strong>Component</strong>
+
+Needs online status
+
+</div>
+
+<div class="custom-node">
+
+<strong>Custom Hook</strong>
+
+useOnlineStatus()
+
+</div>
+
+<div class="custom-node">
+
+<strong>useState</strong>
+
+Stores status
+
+</div>
+
+<div class="custom-node">
+
+<strong>useEffect</strong>
+
+Listens to browser
+
+</div>
+
+<div class="custom-node">
+
+<strong>Result</strong>
+
+Reusable logic
+
+</div>
+
+</div>
+
+
+<div class="success">
+
+<strong>Important:</strong>
+
+<p>
+Custom Hooks share logic, not the same state instance. Each component
+calling a Custom Hook gets its own Hook state unless the Hook connects
+to some shared external source.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- COMPOSITION -->
+
+<section class="section" id="composition">
+
+<h2>12. Hook Composition</h2>
+
+<p>
+Hook composition means combining multiple Hooks to create a reusable
+piece of behavior.
+</p>
+
+
+<h3>Example</h3>
+
+<pre>
+function useSearch(){
+
+    const [query, setQuery] =
+        useState("");
+
+    const [results, setResults] =
+        useState([]);
+
+    useEffect(() => {
+
+        // Fetch or calculate
+        // results here
+
+    }, [query]);
+
+    return {
+        query,
+        setQuery,
+        results
+    };
+}
+</pre>
+
+
+<p>
+The component consuming the Hook does not need to know how the state,
+Effect and data logic are internally organized.
+</p>
+
+<pre>
+function SearchPage(){
+
+    const {
+        query,
+        setQuery,
+        results
+    } = useSearch();
+
+    return (
+        // UI
+    );
+}
+</pre>
+
+
+<div class="flow-box">
+
+<div class="map-title">
+HOOK COMPOSITION
+</div>
+
+<div class="flow">
+
+<div class="node">
+useState
+</div>
+
+<div class="arrow">+</div>
+
+<div class="node">
+useEffect
+</div>
+
+<div class="arrow">+</div>
+
+<div class="node">
+useMemo
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node active">
+Custom Hook
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Component
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- DEPENDENCIES -->
+
+<section class="section" id="dependencies">
+
+<h2>13. Hook Dependencies</h2>
+
+<p>
+Some Hooks accept dependency arrays. Dependencies tell React which
+values the Hook's calculation or Effect depends on.
+</p>
+
+
+<h3>useEffect Dependency Example</h3>
+
+<pre>
+useEffect(() => {
+
+    console.log(
+        "Room changed:",
+        roomId
+    );
+
+}, [roomId]);
+</pre>
+
+
+<div class="dependency">
+
+<div class="dep-card">
+
+<strong>Initial render</strong>
+
+<p>
+The Effect runs after the component commits.
+</p>
+
+</div>
+
+<div class="dep-arrow">
+→
+</div>
+
+<div class="dep-card">
+
+<strong>roomId changes</strong>
+
+<p>
+React runs cleanup from the previous Effect, then runs the new Effect.
+</p>
+
+</div>
+
+</div>
+
+
+<h3>Dependency Array Patterns</h3>
+
+<table class="hook-table">
+
+<tr>
+
+<th>
+Pattern
+</th>
+
+<th>
+Meaning
+</th>
+
+</tr>
+
+<tr>
+
+<td>
+useEffect(fn)
+</td>
+
+<td>
+Runs after every committed render.
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+useEffect(fn, [])
+</td>
+
+<td>
+Runs after the initial commit; in development Strict Mode, React may
+perform an additional setup/cleanup cycle to help detect bugs.
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+useEffect(fn, [value])
+</td>
+
+<td>
+Runs after the initial commit and when value changes.
+</td>
+
+</tr>
+
+</table>
+
+
+<div class="warning">
+
+<strong>Do not treat dependencies as a random performance switch.</strong>
+
+<p>
+The dependency list should reflect the reactive values used by the
+Effect or calculation. If you are fighting the dependency list, first
+reconsider the structure of the code.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- HOOK TABLE -->
+
+<section class="section">
+
+<h2>14. Complete Hooks Comparison</h2>
+
+<table class="hook-table">
+
+<tr>
+
+<th>
+Hook
+</th>
+
+<th>
+Main Purpose
+</th>
+
+<th>
+Think About It As
+</th>
+
+</tr>
+
+<tr>
+
+<td>
+useState
+</td>
+
+<td>
+Component state
+</td>
+
+<td>
+"Data that changes UI"
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+useEffect
+</td>
+
+<td>
+External synchronization
+</td>
+
+<td>
+"Keep React synchronized"
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+useContext
+</td>
+
+<td>
+Read context
+</td>
+
+<td>
+"Read a value from a provider"
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+useReducer
+</td>
+
+<td>
+Complex state transitions
+</td>
+
+<td>
+"State + actions + reducer"
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+useRef
+</td>
+
+<td>
+Mutable value / DOM reference
+</td>
+
+<td>
+"Persistent box"
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+useMemo
+</td>
+
+<td>
+Cache calculation
+</td>
+
+<td>
+"Remember a value"
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+useCallback
+</td>
+
+<td>
+Cache function identity
+</td>
+
+<td>
+"Remember a function"
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+Custom Hook
+</td>
+
+<td>
+Reuse Hook-based logic
+</td>
+
+<td>
+"Extract behavior"
+</td>
+
+</tr>
+
+</table>
+
+</section>
+
+
+<!-- MISTAKES -->
+
+<section class="section" id="mistakes">
+
+<h2>15. Common Hook Mistakes</h2>
+
+<div class="mistakes">
+
+<div class="mistake">
+
+<h3>❌ Calling Hooks inside if</h3>
+
+<p>
+Hook call order must remain consistent between renders.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<h3>❌ Calling Hooks inside loops</h3>
+
+<p>
+Do not dynamically change the order or number of Hook calls.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<h3>❌ Using useEffect for derived data</h3>
+
+<p>
+If a value can be calculated directly from existing props/state during
+render, an Effect may be unnecessary.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<h3>❌ Using useMemo everywhere</h3>
+
+<p>
+Memoization is an optimization, not a default requirement.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<h3>❌ Confusing useRef with state</h3>
+
+<p>
+Changing ref.current does not trigger a re-render.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<h3>❌ Ignoring dependencies</h3>
+
+<p>
+Incorrect dependency handling can create stale values, repeated
+Effects or synchronization bugs.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<h3>❌ Custom Hook with no reusable logic</h3>
+
+<p>
+Do not create Custom Hooks merely to rename a few lines. Extract
+behavior that is meaningfully reusable.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<h3>❌ Treating Context as global everything</h3>
+
+<p>
+Context is a delivery mechanism for values through a component tree,
+not a universal replacement for all state management.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- DECISION -->
+
+<section class="section">
+
+<h2>16. Which Hook Should I Use?</h2>
+
+<div class="flow-box">
+
+<div class="map-title">
+HOOK DECISION GUIDE
+</div>
+
+<div class="flow">
+
+<div class="node">
+Need UI state?
+<small>useState</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Complex transitions?
+<small>useReducer</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Need shared tree value?
+<small>useContext</small>
+</div>
+
+</div>
+
+<br>
+
+<div class="flow">
+
+<div class="node">
+Need DOM / mutable value?
+<small>useRef</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+External system?
+<small>useEffect</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Expensive calculation?
+<small>useMemo</small>
+</div>
+
+</div>
+
+<br>
+
+<div class="flow">
+
+<div class="node">
+Stable callback needed?
+<small>useCallback</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node active">
+Reusable Hook logic?
+<small>Custom Hook</small>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="highlight">
+
+<strong>But remember:</strong>
+
+<p>
+The correct question is not "Which Hook can I use?" but
+<strong>"Do I actually need a Hook here?"</strong>
+</p>
+
+</div>
+
+</section>
+
+
+<!-- MASTER -->
+
+<section class="section">
+
+<h2>17. The Complete Hooks Mental Model</h2>
+
+<div class="flow-box">
+
+<div class="map-title">
+REACT HOOKS ARCHITECTURE
+</div>
+
+<div class="flow">
+
+<div class="node active">
+Component
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+useState
+<small>state</small>
+</div>
+
+<div class="arrow">+</div>
+
+<div class="node">
+useContext
+<small>shared value</small>
+</div>
+
+<div class="arrow">+</div>
+
+<div class="node">
+useReducer
+<small>actions</small>
+</div>
+
+</div>
+
+<br>
+
+<div class="flow">
+
+<div class="node">
+useRef
+<small>mutable ref</small>
+</div>
+
+<div class="arrow">+</div>
+
+<div class="node">
+useEffect
+<small>external systems</small>
+</div>
+
+<div class="arrow">+</div>
+
+<div class="node">
+useMemo
+<small>cached value</small>
+</div>
+
+<div class="arrow">+</div>
+
+<div class="node">
+useCallback
+<small>cached function</small>
+</div>
+
+</div>
+
+<br>
+
+<div class="flow">
+
+<div class="node active">
+Custom Hooks
+<small>compose behavior</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Reusable Logic
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node active">
+React UI
+</div>
+
+</div>
+
+</div>
+
+
+<div class="success">
+
+<strong>ZENSUS Master Formula:</strong>
+
+<p style="
+font-size:20px;
+font-weight:850;
+color:var(--text);
+">
+
+State + Effects + Context + Reducer + Refs
++ Memoization + Custom Hooks
+→ Reusable React Applications
+
+</p>
+
+</div>
+
+</section>
+
+
+<!-- QUIZ -->
+
+<section class="section" id="quiz">
+
+<h2>18. Quick Quiz</h2>
+
+<p>
+Test your understanding of React Hooks.
+</p>
+
+
+<div class="quiz">
+
+<div class="question">
+1. What is the main purpose of Hooks?
+</div>
+
+<button class="option"
+onclick="answer(this,false)">
+A. Replace JavaScript
+</button>
+
+<button class="option"
+onclick="answer(this,true)">
+B. Use React features from function components
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+C. Create CSS animations
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+D. Replace HTML
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+2. Where should Hooks normally be called?
+</div>
+
+<button class="option"
+onclick="answer(this,true)">
+A. At the top level of React functions
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+B. Inside if statements
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+C. Inside loops
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+D. Inside event callbacks
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+3. Which Hook stores component state?
+</div>
+
+<button class="option"
+onclick="answer(this,true)">
+A. useState
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+B. useRef
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+C. useMemo
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+D. useContext
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+4. What is useEffect primarily designed for?
+</div>
+
+<button class="option"
+onclick="answer(this,false)">
+A. Styling components
+</button>
+
+<button class="option"
+onclick="answer(this,true)">
+B. Synchronizing with external systems
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+C. Creating arrays
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+D. Replacing JSX
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+5. Which Hook is useful for complex state transitions?
+</div>
+
+<button class="option"
+onclick="answer(this,false)">
+A. useRef
+</button>
+
+<button class="option"
+onclick="answer(this,true)">
+B. useReducer
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+C. useMemo
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+D. useContext
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+6. What happens when ref.current changes?
+</div>
+
+<button class="option"
+onclick="answer(this,false)">
+A. React always re-renders
+</button>
+
+<button class="option"
+onclick="answer(this,true)">
+B. Changing it does not itself trigger a re-render
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+C. The component unmounts
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+D. Context resets
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+7. What does useMemo cache?
+</div>
+
+<button class="option"
+onclick="answer(this,true)">
+A. A calculated value
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+B. A DOM node only
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+C. A component's HTML file
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+D. A CSS rule
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+8. What does useCallback cache?
+</div>
+
+<button class="option"
+onclick="answer(this,false)">
+A. API data
+</button>
+
+<button class="option"
+onclick="answer(this,true)">
+B. A function definition/reference
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+C. CSS
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+D. HTML
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+9. What is a Custom Hook?
+</div>
+
+<button class="option"
+onclick="answer(this,true)">
+A. A reusable function that can use Hooks
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+B. A CSS class
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+C. A backend API
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+D. A React server
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+10. Which statement is correct?
+</div>
+
+<button class="option"
+onclick="answer(this,false)">
+A. useMemo should always be used
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+B. useRef always causes re-render
+</button>
+
+<button class="option"
+onclick="answer(this,true)">
+C. Hooks should follow the Rules of Hooks
+</button>
+
+<button class="option"
+onclick="answer(this,false)">
+D. Hooks can be called conditionally
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+</section>
+
+
+<div class="footer">
+
+<strong>ZENSUS React Course</strong>
+
+<br>
+
+Learn • Build • Practice • Master
+
+</div>
+
+
+</main>
+
+</div>
+
+
+<script>
+
+
+/* =========================
+   useState VISUALIZER
+========================= */
+
+let counter = 0;
+
+const counterElement =
+    document.getElementById(
+        "counter"
+    );
+
+
+function changeCounter(amount){
+
+    counter += amount;
+
+    counterElement.textContent =
+        counter;
+
+}
+
+
+function resetCounter(){
+
+    counter = 0;
+
+    counterElement.textContent =
+        counter;
+
+}
+
+
+/* =========================
+   QUIZ
+========================= */
+
+function answer(
+    button,
+    correct
+){
+
+    const quiz =
+        button.closest(
+            ".quiz"
+        );
+
+    const options =
+        quiz.querySelectorAll(
+            ".option"
+        );
+
+    const result =
+        quiz.querySelector(
+            ".quiz-result"
+        );
+
+
+    options.forEach(
+        option => {
+
+            option.disabled = true;
+
+        }
+    );
+
+
+    if(correct){
+
+        button.classList.add(
+            "correct"
+        );
+
+        result.textContent =
+            "✓ Correct! Excellent.";
+
+        result.style.color =
+            "#16a34a";
+
+    }else{
+
+        button.classList.add(
+            "wrong"
+        );
+
+        result.textContent =
+            "✗ Not quite. Review this concept.";
+
+        result.style.color =
+            "#dc2626";
+
+
+        options.forEach(
+            option => {
+
+                const action =
+                    option.getAttribute(
+                        "onclick"
+                    );
+
+                if(
+                    action &&
+                    action.includes(
+                        "true"
+                    )
+                ){
+
+                    option.classList.add(
+                        "correct"
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+}
+
+
+/* =========================
+   SIDEBAR ACTIVE STATE
+========================= */
+
+const sections =
+    document.querySelectorAll(
+        ".section"
+    );
+
+const links =
+    document.querySelectorAll(
+        ".sidebar a"
+    );
+
+
+window.addEventListener(
+    "scroll",
+    () => {
+
+        let current = "";
+
+        sections.forEach(
+            section => {
+
+                const top =
+                    section.offsetTop -
+                    130;
+
+                if(
+                    window.scrollY >=
+                    top
+                ){
+
+                    current =
+                        section.getAttribute(
+                            "id"
+                        );
+
+                }
+
+            }
+        );
+
+
+        links.forEach(
+            link => {
+
+                link.classList.remove(
+                    "active"
+                );
+
+                if(
+                    link.getAttribute(
+                        "href"
+                    ) ===
+                    "#" + current
+                ){
+
+                    link.classList.add(
+                        "active"
+                    );
+
+                }
+
+            }
+        );
+
+    }
+);
+
+</script>
+
+</body>
+</html>
+

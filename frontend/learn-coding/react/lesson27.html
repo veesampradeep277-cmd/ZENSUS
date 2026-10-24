@@ -1,0 +1,1804 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS React — Lesson 27: Redux Toolkit</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+    --bg:#f7f8fc;
+    --panel:#ffffff;
+    --panel2:#f1f5f9;
+    --border:#e2e8f0;
+    --text:#172033;
+    --muted:#64748b;
+    --primary:#6366f1;
+    --primary2:#8b5cf6;
+    --green:#10b981;
+    --orange:#f59e0b;
+    --red:#ef4444;
+    --blue:#3b82f6;
+    --code:#111827;
+    --shadow:0 10px 30px rgba(15,23,42,.08);
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.header{
+    position:sticky;
+    top:0;
+    z-index:100;
+    background:rgba(255,255,255,.92);
+    backdrop-filter:blur(15px);
+    border-bottom:1px solid var(--border);
+}
+
+.header-inner{
+    max-width:1250px;
+    margin:auto;
+    padding:15px 25px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.logo{
+    font-size:23px;
+    font-weight:800;
+    letter-spacing:-.5px;
+}
+
+.logo span{
+    color:var(--primary);
+}
+
+.lesson-badge{
+    padding:7px 13px;
+    border-radius:20px;
+    background:#eef2ff;
+    color:#4f46e5;
+    font-size:13px;
+    font-weight:700;
+}
+
+/* =========================
+   LAYOUT
+========================= */
+
+.layout{
+    max-width:1250px;
+    margin:auto;
+    display:grid;
+    grid-template-columns:270px 1fr;
+    gap:30px;
+    padding:30px 25px;
+}
+
+.sidebar{
+    position:sticky;
+    top:85px;
+    height:calc(100vh - 105px);
+    overflow:auto;
+    padding:20px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+    box-shadow:var(--shadow);
+}
+
+.sidebar h3{
+    font-size:14px;
+    margin-bottom:15px;
+}
+
+.sidebar a{
+    display:block;
+    padding:8px 10px;
+    margin:3px 0;
+    border-radius:8px;
+    color:var(--muted);
+    text-decoration:none;
+    font-size:13px;
+    transition:.25s;
+}
+
+.sidebar a:hover{
+    background:#eef2ff;
+    color:var(--primary);
+    transform:translateX(3px);
+}
+
+.content{
+    min-width:0;
+}
+
+/* =========================
+   HERO
+========================= */
+
+.hero{
+    background:
+        radial-gradient(circle at 85% 20%,rgba(99,102,241,.16),transparent 30%),
+        radial-gradient(circle at 20% 80%,rgba(139,92,246,.12),transparent 30%),
+        white;
+    border:1px solid var(--border);
+    border-radius:25px;
+    padding:55px 45px;
+    box-shadow:var(--shadow);
+    margin-bottom:30px;
+    overflow:hidden;
+    position:relative;
+}
+
+.hero-label{
+    color:var(--primary);
+    font-size:14px;
+    font-weight:800;
+    letter-spacing:1px;
+    text-transform:uppercase;
+}
+
+.hero h1{
+    font-size:clamp(34px,5vw,58px);
+    line-height:1.05;
+    margin:12px 0 18px;
+    letter-spacing:-2px;
+}
+
+.hero h1 span {
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero p{
+    max-width:800px;
+    color:var(--muted);
+    font-size:17px;
+}
+
+.progress{
+    margin-top:30px;
+    height:8px;
+    background:#e2e8f0;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.progress div{
+    width:72%;
+    height:100%;
+    background:linear-gradient(90deg,#6366f1,#8b5cf6);
+    animation:progressMove 2s ease;
+}
+
+@keyframes progressMove{
+    from{width:0}
+    to{width:72%}
+}
+
+/* =========================
+   SECTIONS
+========================= */
+
+.section{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:32px;
+    margin-bottom:25px;
+    box-shadow:var(--shadow);
+}
+
+.section h2{
+    font-size:28px;
+    margin-bottom:12px;
+}
+
+.section h3{
+    margin-top:25px;
+    margin-bottom:10px;
+    font-size:20px;
+}
+
+.section p{
+    color:#475569;
+}
+
+.tag{
+    display:inline-block;
+    padding:5px 10px;
+    background:#eef2ff;
+    color:#4f46e5;
+    border-radius:7px;
+    font-size:12px;
+    font-weight:700;
+    margin-bottom:12px;
+}
+
+/* =========================
+   CONCEPT CARDS
+========================= */
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin-top:20px;
+}
+
+.card{
+    padding:20px;
+    background:#f8fafc;
+    border:1px solid var(--border);
+    border-radius:15px;
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 10px 25px rgba(0,0,0,.07);
+}
+
+.card-icon{
+    font-size:28px;
+    margin-bottom:8px;
+}
+
+.card h4{
+    margin-bottom:5px;
+}
+
+.card p{
+    font-size:14px;
+}
+
+/* =========================
+   ARCHITECTURE
+========================= */
+
+.architecture{
+    margin-top:25px;
+    padding:25px;
+    background:#0f172a;
+    border-radius:20px;
+    color:white;
+    overflow:hidden;
+}
+
+.arch-title{
+    text-align:center;
+    color:#c7d2fe;
+    margin-bottom:30px;
+}
+
+.arch-flow{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.arch-box{
+    min-width:135px;
+    text-align:center;
+    padding:18px 15px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.15);
+    background:rgba(255,255,255,.07);
+    position:relative;
+    animation:floatBox 3s ease-in-out infinite;
+}
+
+.arch-box:nth-child(2){animation-delay:.3s}
+.arch-box:nth-child(3){animation-delay:.6s}
+.arch-box:nth-child(4){animation-delay:.9s}
+
+.arch-box strong{
+    display:block;
+    color:#a5b4fc;
+}
+
+.arch-box small{
+    color:#cbd5e1;
+}
+
+.arrow{
+    font-size:25px;
+    color:#818cf8;
+    animation:arrowPulse 1.4s infinite;
+}
+
+@keyframes arrowPulse{
+    50%{transform:translateX(6px);opacity:.5}
+}
+
+@keyframes floatBox{
+    50%{transform:translateY(-7px)}
+}
+
+/* =========================
+   FLOW ANIMATION
+========================= */
+
+.flow-demo{
+    margin-top:25px;
+    padding:25px;
+    background:#f8fafc;
+    border:1px solid var(--border);
+    border-radius:18px;
+}
+
+.flow-track{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    position:relative;
+}
+
+.flow-node{
+    width:130px;
+    padding:15px;
+    background:white;
+    border:2px solid #cbd5e1;
+    border-radius:12px;
+    text-align:center;
+    position:relative;
+    z-index:2;
+}
+
+.flow-node.active{
+    border-color:var(--primary);
+    box-shadow:0 0 0 5px rgba(99,102,241,.1);
+}
+
+.flow-line{
+    flex:1;
+    height:3px;
+    background:#cbd5e1;
+    position:relative;
+    overflow:hidden;
+}
+
+.flow-line::after{
+    content:"";
+    position:absolute;
+    width:35%;
+    height:100%;
+    background:linear-gradient(90deg,transparent,#6366f1,transparent);
+    animation:packet 2s linear infinite;
+}
+
+@keyframes packet{
+    from{left:-40%}
+    to{left:110%}
+}
+
+/* =========================
+   CODE
+========================= */
+
+.code{
+    margin-top:18px;
+    background:var(--code);
+    color:#e5e7eb;
+    padding:22px;
+    border-radius:14px;
+    overflow:auto;
+    font-family:Consolas,monospace;
+    font-size:14px;
+    line-height:1.65;
+    position:relative;
+}
+
+.code-label{
+    position:absolute;
+    right:12px;
+    top:10px;
+    color:#94a3b8;
+    font-size:11px;
+}
+
+.keyword{color:#c084fc}
+.func{color:#60a5fa}
+.string{color:#86efac}
+.comment{color:#64748b}
+
+/* =========================
+   VISUAL PIPELINE
+========================= */
+
+.pipeline{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:12px;
+    margin-top:25px;
+}
+
+.pipeline-item{
+    padding:20px 12px;
+    border-radius:15px;
+    text-align:center;
+    background:#f8fafc;
+    border:1px solid var(--border);
+    position:relative;
+    animation:pipelinePulse 2.5s infinite;
+}
+
+.pipeline-item:nth-child(2){animation-delay:.4s}
+.pipeline-item:nth-child(3){animation-delay:.8s}
+.pipeline-item:nth-child(4){animation-delay:1.2s}
+.pipeline-item:nth-child(5){animation-delay:1.6s}
+
+.pipeline-item strong{
+    display:block;
+    margin-bottom:5px;
+}
+
+.pipeline-item span{
+    font-size:12px;
+    color:var(--muted);
+}
+
+@keyframes pipelinePulse{
+    0%,100%{transform:scale(1)}
+    50%{transform:scale(1.04)}
+}
+
+/* =========================
+   STATE VISUAL
+========================= */
+
+.state-demo{
+    display:flex;
+    justify-content:center;
+    gap:20px;
+    align-items:center;
+    margin:25px 0;
+    flex-wrap:wrap;
+}
+
+.state-box{
+    padding:20px;
+    min-width:180px;
+    text-align:center;
+    border-radius:15px;
+    border:1px solid var(--border);
+    background:#fff;
+}
+
+.state-value{
+    font-size:35px;
+    font-weight:800;
+    color:var(--primary);
+}
+
+.state-buttons button{
+    border:none;
+    padding:10px 15px;
+    border-radius:9px;
+    margin:4px;
+    cursor:pointer;
+    color:white;
+    background:var(--primary);
+    font-weight:600;
+}
+
+.state-buttons button:hover{
+    opacity:.85;
+}
+
+/* =========================
+   ASYNC
+========================= */
+
+.async-demo{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin-top:20px;
+}
+
+.async-card{
+    padding:22px;
+    border-radius:15px;
+    text-align:center;
+    border:1px solid var(--border);
+    background:#f8fafc;
+}
+
+.loader{
+    width:30px;
+    height:30px;
+    border:3px solid #ddd;
+    border-top-color:var(--primary);
+    border-radius:50%;
+    margin:12px auto;
+    animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+    to{transform:rotate(360deg)}
+}
+
+/* =========================
+   FOLDER TREE
+========================= */
+
+.folder{
+    margin-top:20px;
+    background:#0f172a;
+    color:#e2e8f0;
+    border-radius:15px;
+    padding:25px;
+    font-family:Consolas,monospace;
+    line-height:1.9;
+}
+
+.folder .folder-name{
+    color:#93c5fd;
+}
+
+.folder .file{
+    color:#86efac;
+}
+
+/* =========================
+   MISTAKES
+========================= */
+
+.mistakes{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+    margin-top:20px;
+}
+
+.mistake{
+    padding:20px;
+    border-radius:14px;
+    border:1px solid #fecaca;
+    background:#fff7f7;
+}
+
+.mistake strong{
+    color:#dc2626;
+}
+
+/* =========================
+   QUIZ
+========================= */
+
+.quiz{
+    margin-top:20px;
+    padding:25px;
+    background:#f8fafc;
+    border-radius:15px;
+    border:1px solid var(--border);
+}
+
+.quiz-question{
+    font-weight:700;
+    margin-bottom:15px;
+}
+
+.option{
+    padding:12px 15px;
+    margin:8px 0;
+    background:white;
+    border:1px solid var(--border);
+    border-radius:9px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.option:hover{
+    border-color:var(--primary);
+    background:#eef2ff;
+}
+
+.option.correct{
+    background:#ecfdf5;
+    border-color:#10b981;
+}
+
+.option.wrong{
+    background:#fef2f2;
+    border-color:#ef4444;
+}
+
+/* =========================
+   SUMMARY
+========================= */
+
+.summary{
+    background:linear-gradient(135deg,#eef2ff,#faf5ff);
+    border:1px solid #ddd6fe;
+}
+
+.summary ul{
+    padding-left:22px;
+}
+
+.summary li{
+    margin:7px 0;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:950px){
+
+    .layout{
+        grid-template-columns:1fr;
+    }
+
+    .sidebar{
+        position:relative;
+        top:0;
+        height:auto;
+    }
+
+    .cards{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .pipeline{
+        grid-template-columns:1fr 1fr;
+    }
+}
+
+@media(max-width:650px){
+
+    .hero{
+        padding:35px 22px;
+    }
+
+    .section{
+        padding:22px;
+    }
+
+    .cards,
+    .async-demo,
+    .mistakes{
+        grid-template-columns:1fr;
+    }
+
+    .pipeline{
+        grid-template-columns:1fr;
+    }
+
+    .flow-track{
+        flex-direction:column;
+    }
+
+    .flow-line{
+        width:3px;
+        height:35px;
+        flex:none;
+    }
+
+    .flow-line::after{
+        width:100%;
+        height:35%;
+        animation:verticalPacket 2s linear infinite;
+    }
+
+    @keyframes verticalPacket{
+        from{top:-40%}
+        to{top:110%}
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+    <div class="header-inner">
+        <div class="logo">ZEN<span>SUS</span></div>
+        <div class="lesson-badge">React • Lesson 27 / Redux Toolkit</div>
+    </div>
+</header>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+
+<aside class="sidebar">
+
+<h3>Lesson Contents</h3>
+
+<a href="#redux">1. What is Redux?</a>
+<a href="#state">2. State Management</a>
+<a href="#architecture">3. Redux Architecture</a>
+<a href="#store">4. Store</a>
+<a href="#actions">5. Actions</a>
+<a href="#reducers">6. Reducers</a>
+<a href="#dispatch">7. Dispatch</a>
+<a href="#selectors">8. Selectors</a>
+<a href="#toolkit">9. Redux Toolkit</a>
+<a href="#configure">10. configureStore()</a>
+<a href="#slice">11. createSlice()</a>
+<a href="#async">12. createAsyncThunk()</a>
+<a href="#hooks">13. React Redux Hooks</a>
+<a href="#devtools">14. Redux DevTools</a>
+<a href="#folder">15. Folder Structure</a>
+<a href="#mistakes">16. Common Mistakes</a>
+<a href="#quiz">17. Quick Quiz</a>
+
+</aside>
+
+<main class="content">
+
+<!-- HERO -->
+
+<section class="hero">
+
+<div class="hero-label">React Advanced State Management</div>
+
+<h1>Redux <span>Toolkit</span></h1>
+
+<p>
+Learn how professional React applications manage complex global state
+using Redux Toolkit — from Store, Actions and Reducers to createSlice(),
+async operations and Redux DevTools.
+</p>
+
+<div class="progress">
+<div></div>
+</div>
+
+</section>
+
+
+<!-- REDUX -->
+
+<section class="section" id="redux">
+
+<span class="tag">01 — FOUNDATION</span>
+
+<h2>What is Redux?</h2>
+
+<p>
+Redux is a predictable state management library commonly used with React.
+It provides a centralized place called the <b>store</b> where application
+state can be maintained and updated through a predictable flow.
+</p>
+
+<div class="cards">
+
+<div class="card">
+<div class="card-icon">🗄️</div>
+<h4>Centralized State</h4>
+<p>
+Important application state can live in one centralized store instead
+of being scattered across many components.
+</p>
+</div>
+
+<div class="card">
+<div class="card-icon">🔄</div>
+<h4>Predictable Updates</h4>
+<p>
+State changes happen through actions and reducers following a defined
+data flow.
+</p>
+</div>
+
+<div class="card">
+<div class="card-icon">🐛</div>
+<h4>Debuggable</h4>
+<p>
+Redux DevTools can help developers inspect dispatched actions and state
+changes.
+</p>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- STATE MANAGEMENT -->
+
+<section class="section" id="state">
+
+<span class="tag">02 — WHY STATE MANAGEMENT?</span>
+
+<h2>Why Do We Need State Management?</h2>
+
+<p>
+Small applications can often manage state using React's
+<code>useState()</code> and <code>useContext()</code>. As applications
+grow, many components may need access to the same data.
+</p>
+
+<div class="flow-demo">
+
+<div class="flow-track">
+
+<div class="flow-node">
+<strong>Navbar</strong>
+<small>User</small>
+</div>
+
+<div class="flow-line"></div>
+
+<div class="flow-node">
+<strong>Store</strong>
+<small>Global State</small>
+</div>
+
+<div class="flow-line"></div>
+
+<div class="flow-node">
+<strong>Dashboard</strong>
+<small>User Data</small>
+</div>
+
+<div class="flow-line"></div>
+
+<div class="flow-node">
+<strong>Profile</strong>
+<small>User Data</small>
+</div>
+
+</div>
+
+</div>
+
+<h3>Example</h3>
+
+<p>
+Imagine a student platform containing login information, courses,
+notifications, cart items and theme preferences. Multiple unrelated
+components may need the same information.
+</p>
+
+</section>
+
+
+<!-- ARCHITECTURE -->
+
+<section class="section" id="architecture">
+
+<span class="tag">03 — CORE ARCHITECTURE</span>
+
+<h2>Redux Architecture</h2>
+
+<p>
+Redux follows a unidirectional data flow. Components dispatch actions,
+reducers calculate the next state, and the store contains the resulting
+state.
+</p>
+
+<div class="architecture">
+
+<div class="arch-title">
+<h3>Redux Unidirectional Data Flow</h3>
+</div>
+
+<div class="arch-flow">
+
+<div class="arch-box">
+<strong>React UI</strong>
+<small>User Interaction</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="arch-box">
+<strong>Dispatch</strong>
+<small>Send Action</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="arch-box">
+<strong>Reducer</strong>
+<small>Calculate State</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="arch-box">
+<strong>Store</strong>
+<small>Save State</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="arch-box">
+<strong>React UI</strong>
+<small>Re-render</small>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- STORE -->
+
+<section class="section" id="store">
+
+<span class="tag">04 — STORE</span>
+
+<h2>Store</h2>
+
+<p>
+The Redux store is the centralized container that holds the application's
+Redux state.
+</p>
+
+<div class="code">
+<span class="code-label">store.js</span>
+
+<span class="keyword">import</span> { configureStore } <span class="keyword">from</span> <span class="string">'@reduxjs/toolkit'</span>;
+
+<span class="keyword">export const</span> store = <span class="func">configureStore</span>({
+    reducer: {
+        counter: counterReducer
+    }
+});
+</div>
+
+<h3>Think of the Store Like a Central Database</h3>
+
+<p>
+Components don't directly modify the Redux state. They dispatch actions,
+and reducers determine how state should change.
+</p>
+
+</section>
+
+
+<!-- ACTIONS -->
+
+<section class="section" id="actions">
+
+<span class="tag">05 — ACTIONS</span>
+
+<h2>Actions</h2>
+
+<p>
+An action is an object describing something that happened.
+It normally contains a <code>type</code> and may contain additional
+information in <code>payload</code>.
+</p>
+
+<div class="code">
+
+<span class="keyword">const</span> action = {
+    type: <span class="string">'counter/increment'</span>
+};
+
+<span class="keyword">const</span> actionWithPayload = {
+    type: <span class="string">'counter/add'</span>,
+    payload: <span class="string">5</span>
+};
+
+</div>
+
+<p>
+The action does not directly modify the state. It describes the event
+that the reducer should handle.
+</p>
+
+</section>
+
+
+<!-- REDUCERS -->
+
+<section class="section" id="reducers">
+
+<span class="tag">06 — REDUCERS</span>
+
+<h2>Reducers</h2>
+
+<p>
+A reducer determines how the state should change when an action is
+dispatched.
+</p>
+
+<div class="pipeline">
+
+<div class="pipeline-item">
+<strong>Action</strong>
+<span>counter/add</span>
+</div>
+
+<div class="pipeline-item">
+<strong>Reducer</strong>
+<span>Process action</span>
+</div>
+
+<div class="pipeline-item">
+<strong>State</strong>
+<span>New value</span>
+</div>
+
+<div class="pipeline-item">
+<strong>Store</strong>
+<span>Save state</span>
+</div>
+
+<div class="pipeline-item">
+<strong>UI</strong>
+<span>Re-render</span>
+</div>
+
+</div>
+
+<div class="code">
+
+<span class="keyword">function</span> <span class="func">counterReducer</span>(state, action) {
+
+    <span class="keyword">if</span> (action.type === <span class="string">'counter/increment'</span>) {
+        <span class="keyword">return</span> state + <span class="string">1</span>;
+    }
+
+    <span class="keyword">return</span> state;
+}
+
+</div>
+
+</section>
+
+
+<!-- DISPATCH -->
+
+<section class="section" id="dispatch">
+
+<span class="tag">07 — DISPATCH</span>
+
+<h2>Dispatch</h2>
+
+<p>
+Dispatch sends an action to the Redux store.
+</p>
+
+<div class="code">
+
+<span class="func">dispatch</span>({
+    type: <span class="string">'counter/increment'</span>
+});
+
+</div>
+
+<p>
+The flow becomes:
+</p>
+
+<div class="state-demo">
+
+<div class="state-box">
+<div>Button Click</div>
+<strong>+</strong>
+</div>
+
+<div>→</div>
+
+<div class="state-box">
+<div>Dispatch</div>
+<strong>Action</strong>
+</div>
+
+<div>→</div>
+
+<div class="state-box">
+<div>Reducer</div>
+<strong>State</strong>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- SELECTORS -->
+
+<section class="section" id="selectors">
+
+<span class="tag">08 — READING STATE</span>
+
+<h2>Selectors</h2>
+
+<p>
+A selector is a function used to retrieve specific data from Redux state.
+In React Redux, <code>useSelector()</code> allows a component to read
+state from the store.
+</p>
+
+<div class="code">
+
+<span class="keyword">const</span> count = <span class="func">useSelector</span>(
+    state =&gt; state.counter.value
+);
+
+</div>
+
+<h3>Why Selectors?</h3>
+
+<p>
+Instead of giving every component access to the entire state object,
+a component can select only the data it needs.
+</p>
+
+</section>
+
+
+<!-- TOOLKIT -->
+
+<section class="section" id="toolkit">
+
+<span class="tag">09 — MODERN REDUX</span>
+
+<h2>Redux Toolkit</h2>
+
+<p>
+Redux Toolkit is the recommended modern approach for writing Redux logic.
+It provides utilities that reduce boilerplate and simplify common Redux
+patterns.
+</p>
+
+<div class="cards">
+
+<div class="card">
+<div class="card-icon">⚙️</div>
+<h4>configureStore()</h4>
+<p>Creates and configures the Redux store.</p>
+</div>
+
+<div class="card">
+<div class="card-icon">🧩</div>
+<h4>createSlice()</h4>
+<p>Creates reducers and action creators together.</p>
+</div>
+
+<div class="card">
+<div class="card-icon">🌐</div>
+<h4>createAsyncThunk()</h4>
+<p>Helps handle asynchronous logic such as API requests.</p>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- CONFIGURE STORE -->
+
+<section class="section" id="configure">
+
+<span class="tag">10 — STORE CONFIGURATION</span>
+
+<h2><code>configureStore()</code></h2>
+
+<p>
+<code>configureStore()</code> creates the Redux store and provides useful
+development defaults.
+</p>
+
+<div class="code">
+
+<span class="keyword">import</span> { configureStore }
+<span class="keyword">from</span> <span class="string">'@reduxjs/toolkit'</span>;
+
+<span class="keyword">export const</span> store =
+    <span class="func">configureStore</span>({
+        reducer: {
+            counter: counterReducer
+        }
+    });
+
+</div>
+
+<h3>Multiple Slices</h3>
+
+<div class="code">
+
+<span class="keyword">const</span> store = <span class="func">configureStore</span>({
+    reducer: {
+        auth: authReducer,
+        courses: coursesReducer,
+        cart: cartReducer,
+        notifications: notificationReducer
+    }
+});
+
+</div>
+
+</section>
+
+
+<!-- CREATE SLICE -->
+
+<section class="section" id="slice">
+
+<span class="tag">11 — CREATE SLICE</span>
+
+<h2><code>createSlice()</code></h2>
+
+<p>
+One of Redux Toolkit's most important APIs is <code>createSlice()</code>.
+It combines a slice name, initial state and reducer functions.
+It also generates action creators automatically.
+</p>
+
+<div class="architecture">
+
+<div class="arch-title">
+<h3>createSlice() Transformation</h3>
+</div>
+
+<div class="arch-flow">
+
+<div class="arch-box">
+<strong>Initial State</strong>
+<small>value: 0</small>
+</div>
+
+<div class="arrow">+</div>
+
+<div class="arch-box">
+<strong>Reducers</strong>
+<small>increment()</small>
+</div>
+
+<div class="arrow">+</div>
+
+<div class="arch-box">
+<strong>createSlice()</strong>
+<small>Redux Logic</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="arch-box">
+<strong>Actions</strong>
+<small>Generated</small>
+</div>
+
+</div>
+
+</div>
+
+<div class="code">
+
+<span class="keyword">import</span> { createSlice }
+<span class="keyword">from</span> <span class="string">'@reduxjs/toolkit'</span>;
+
+<span class="keyword">const</span> counterSlice = <span class="func">createSlice</span>({
+    name: <span class="string">'counter'</span>,
+
+    initialState: {
+        value: <span class="string">0</span>
+    },
+
+    reducers: {
+
+        <span class="func">increment</span>: state =&gt; {
+            state.value += <span class="string">1</span>;
+        },
+
+        <span class="func">decrement</span>: state =&gt; {
+            state.value -= <span class="string">1</span>;
+        },
+
+        <span class="func">incrementByAmount</span>: (state, action) =&gt; {
+            state.value += action.payload;
+        }
+    }
+});
+
+<span class="keyword">export const</span> {
+    increment,
+    decrement,
+    incrementByAmount
+} = counterSlice.actions;
+
+<span class="keyword">export default</span> counterSlice.reducer;
+
+</div>
+
+<h3>Important Concept</h3>
+
+<p>
+Redux Toolkit uses Immer internally, which allows reducer logic to use
+mutating-looking syntax while producing immutable state updates safely.
+</p>
+
+</section>
+
+
+<!-- ASYNC -->
+
+<section class="section" id="async">
+
+<span class="tag">12 — ASYNC REDUX</span>
+
+<h2><code>createAsyncThunk()</code></h2>
+
+<p>
+Applications frequently need to fetch data from APIs. Redux Toolkit
+provides <code>createAsyncThunk()</code> for common asynchronous workflows.
+</p>
+
+<div class="async-demo">
+
+<div class="async-card">
+<strong>pending</strong>
+<div class="loader"></div>
+<p>Request started</p>
+</div>
+
+<div class="async-card">
+<strong>fulfilled</strong>
+<div style="font-size:30px;margin:12px">✓</div>
+<p>Request succeeded</p>
+</div>
+
+<div class="async-card">
+<strong>rejected</strong>
+<div style="font-size:30px;margin:12px">!</div>
+<p>Request failed</p>
+</div>
+
+</div>
+
+<div class="code">
+
+<span class="keyword">export const</span> fetchUsers =
+    <span class="func">createAsyncThunk</span>(
+        <span class="string">'users/fetchUsers'</span>,
+        <span class="keyword">async</span> () =&gt; {
+
+            <span class="keyword">const</span> response =
+                <span class="keyword">await</span> fetch(
+                    <span class="string">'/api/users'</span>
+                );
+
+            <span class="keyword">return</span> response.json();
+        }
+    );
+
+</div>
+
+<h3>Async State</h3>
+
+<div class="code">
+
+{
+    data: [],
+    status: <span class="string">'idle'</span>,
+    error: <span class="keyword">null</span>
+}
+
+</div>
+
+<p>
+A common application pattern is to represent states such as
+<b>idle</b>, <b>loading</b>, <b>succeeded</b> and <b>failed</b>.
+</p>
+
+</section>
+
+
+<!-- HOOKS -->
+
+<section class="section" id="hooks">
+
+<span class="tag">13 — REACT + REDUX</span>
+
+<h2><code>useSelector()</code> and <code>useDispatch()</code></h2>
+
+<h3>useSelector()</h3>
+
+<p>
+Reads selected data from the Redux store.
+</p>
+
+<div class="code">
+
+<span class="keyword">import</span> { useSelector }
+<span class="keyword">from</span> <span class="string">'react-redux'</span>;
+
+<span class="keyword">const</span> count =
+    <span class="func">useSelector</span>(
+        state =&gt; state.counter.value
+    );
+
+</div>
+
+<h3>useDispatch()</h3>
+
+<p>
+Returns the dispatch function used to send actions.
+</p>
+
+<div class="code">
+
+<span class="keyword">import</span> { useDispatch }
+<span class="keyword">from</span> <span class="string">'react-redux'</span>;
+
+<span class="keyword">const</span> dispatch = <span class="func">useDispatch</span>();
+
+<span class="func">dispatch</span>(increment());
+
+</div>
+
+<div class="flow-demo">
+
+<div class="flow-track">
+
+<div class="flow-node">
+<strong>Button</strong>
+<small>Click</small>
+</div>
+
+<div class="flow-line"></div>
+
+<div class="flow-node">
+<strong>dispatch()</strong>
+<small>Action</small>
+</div>
+
+<div class="flow-line"></div>
+
+<div class="flow-node">
+<strong>Reducer</strong>
+<small>Update</small>
+</div>
+
+<div class="flow-line"></div>
+
+<div class="flow-node">
+<strong>useSelector()</strong>
+<small>Read</small>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- DEVTOOLS -->
+
+<section class="section" id="devtools">
+
+<span class="tag">14 — DEBUGGING</span>
+
+<h2>Redux DevTools</h2>
+
+<p>
+Redux DevTools helps developers inspect Redux actions and state changes
+during development.
+</p>
+
+<div class="cards">
+
+<div class="card">
+<div class="card-icon">🔎</div>
+<h4>Inspect State</h4>
+<p>View the current Redux state.</p>
+</div>
+
+<div class="card">
+<div class="card-icon">📜</div>
+<h4>Action History</h4>
+<p>Inspect dispatched actions.</p>
+</div>
+
+<div class="card">
+<div class="card-icon">⏪</div>
+<h4>Time Travel</h4>
+<p>Development tools can help inspect previous state snapshots.</p>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- FOLDER -->
+
+<section class="section" id="folder">
+
+<span class="tag">15 — PROJECT STRUCTURE</span>
+
+<h2>Redux Folder Structure</h2>
+
+<p>
+A scalable React application can organize Redux logic into feature-based
+folders.
+</p>
+
+<div class="folder">
+
+<span class="folder-name">src/</span><br>
+
+&nbsp;&nbsp;├── <span class="folder-name">app/</span><br>
+&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span class="file">store.js</span><br>
+
+&nbsp;&nbsp;├── <span class="folder-name">features/</span><br>
+&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="folder-name">counter/</span><br>
+&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span class="file">counterSlice.js</span><br>
+
+&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="folder-name">auth/</span><br>
+&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span class="file">authSlice.js</span><br>
+
+&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span class="folder-name">courses/</span><br>
+&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="file">courseSlice.js</span><br>
+
+&nbsp;&nbsp;├── <span class="folder-name">components/</span><br>
+&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span class="file">Navbar.jsx</span><br>
+
+&nbsp;&nbsp;└── <span class="file">main.jsx</span>
+
+</div>
+
+</section>
+
+
+<!-- COMMON MISTAKES -->
+
+<section class="section" id="mistakes">
+
+<span class="tag">16 — DEBUGGING</span>
+
+<h2>Common Redux Mistakes</h2>
+
+<div class="mistakes">
+
+<div class="mistake">
+<strong>❌ Direct State Mutation</strong>
+<p>
+Do not manually mutate Redux state outside the supported reducer logic.
+</p>
+</div>
+
+<div class="mistake">
+<strong>❌ Huge Global State</strong>
+<p>
+Not every piece of local component state needs to be placed in Redux.
+</p>
+</div>
+
+<div class="mistake">
+<strong>❌ Poor Slice Organization</strong>
+<p>
+Group related state and reducers into meaningful feature slices.
+</p>
+</div>
+
+<div class="mistake">
+<strong>❌ Ignoring Async States</strong>
+<p>
+API-driven state should account for loading, success and failure states.
+</p>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- SUMMARY -->
+
+<section class="section summary">
+
+<span class="tag">LESSON SUMMARY</span>
+
+<h2>What You Learned</h2>
+
+<ul>
+<li>What Redux is and why state management is useful.</li>
+<li>Redux Store, State, Actions and Reducers.</li>
+<li>Dispatch and Selectors.</li>
+<li>Redux Toolkit and its advantages.</li>
+<li><code>configureStore()</code>.</li>
+<li><code>createSlice()</code>.</li>
+<li><code>createAsyncThunk()</code>.</li>
+<li><code>useSelector()</code> and <code>useDispatch()</code>.</li>
+<li>Redux DevTools.</li>
+<li>Feature-based Redux folder structure.</li>
+<li>Common Redux mistakes.</li>
+</ul>
+
+</section>
+
+
+<!-- QUIZ -->
+
+<section class="section" id="quiz">
+
+<span class="tag">17 — QUICK QUIZ</span>
+
+<h2>Test Your Knowledge</h2>
+
+<div class="quiz">
+
+<div class="quiz-question">
+1. Which Redux Toolkit API is primarily used to create a Redux store?
+</div>
+
+<div class="option" onclick="answer(this,false)">
+A. createSlice()
+</div>
+
+<div class="option" onclick="answer(this,true)">
+B. configureStore()
+</div>
+
+<div class="option" onclick="answer(this,false)">
+C. useSelector()
+</div>
+
+<div class="option" onclick="answer(this,false)">
+D. createAsyncThunk()
+</div>
+
+</div>
+
+<div class="quiz">
+
+<div class="quiz-question">
+2. Which hook is used to read selected Redux state inside a React component?
+</div>
+
+<div class="option" onclick="answer(this,false)">
+A. useDispatch()
+</div>
+
+<div class="option" onclick="answer(this,true)">
+B. useSelector()
+</div>
+
+<div class="option" onclick="answer(this,false)">
+C. useState()
+</div>
+
+<div class="option" onclick="answer(this,false)">
+D. useReducer()
+</div>
+
+</div>
+
+<div class="quiz">
+
+<div class="quiz-question">
+3. What does createAsyncThunk() help handle?
+</div>
+
+<div class="option" onclick="answer(this,false)">
+A. CSS animations
+</div>
+
+<div class="option" onclick="answer(this,true)">
+B. Asynchronous application logic
+</div>
+
+<div class="option" onclick="answer(this,false)">
+C. JSX compilation
+</div>
+
+<div class="option" onclick="answer(this,false)">
+D. Component styling
+</div>
+
+</div>
+
+</section>
+
+
+<section class="section">
+
+<h2>🚀 Next Step</h2>
+
+<p>
+You now understand the foundation of professional Redux state
+management. The next stage is to build a complete React application
+using multiple slices, API requests, authentication state and persistent
+application data.
+</p>
+
+</section>
+
+</main>
+</div>
+
+
+<script>
+
+function answer(element, correct){
+
+    const parent = element.parentElement;
+
+    parent.querySelectorAll(".option").forEach(option=>{
+        option.classList.remove("correct","wrong");
+    });
+
+    if(correct){
+        element.classList.add("correct");
+    }else{
+        element.classList.add("wrong");
+    }
+}
+
+
+/* =========================
+   INTERSECTION ANIMATION
+========================= */
+
+const sections = document.querySelectorAll(".section");
+
+const observer = new IntersectionObserver(
+    entries=>{
+        entries.forEach(entry=>{
+            if(entry.isIntersecting){
+                entry.target.style.animation =
+                    "sectionIn .6s ease forwards";
+            }
+        });
+    },
+    {threshold:.12}
+);
+
+sections.forEach(section=>{
+    observer.observe(section);
+});
+
+const style = document.createElement("style");
+
+style.innerHTML = `
+@keyframes sectionIn{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+`;
+
+document.head.appendChild(style);
+
+</script>
+
+</body>
+</html>
+

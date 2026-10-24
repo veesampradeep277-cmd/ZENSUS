@@ -1,0 +1,3315 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS React — Lesson 12: Component Lifecycle & Effects</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+    --bg:#f7f8fc;
+    --surface:#fff;
+    --soft:#f1f3f8;
+    --text:#172033;
+    --muted:#667085;
+    --primary:#635bff;
+    --primary-dark:#5148df;
+    --border:#e1e5ed;
+    --green:#16a34a;
+    --red:#dc2626;
+    --orange:#ea580c;
+    --blue:#2563eb;
+    --dark:#10131c;
+    --dark2:#191e2b;
+    --dark3:#2b3344;
+    --shadow:0 12px 35px rgba(30,40,70,.08);
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+.topbar{
+    height:68px;
+
+    position:sticky;
+    top:0;
+    z-index:100;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:0 30px;
+
+    background:rgba(255,255,255,.96);
+    backdrop-filter:blur(14px);
+
+    border-bottom:1px solid var(--border);
+}
+
+.logo{
+    font-size:23px;
+    font-weight:900;
+    letter-spacing:-1px;
+}
+
+.logo span{
+    color:var(--primary);
+}
+
+.badge-top{
+    padding:7px 14px;
+
+    border-radius:30px;
+
+    background:#eeecff;
+    color:var(--primary);
+
+    font-size:12px;
+    font-weight:850;
+}
+
+.layout{
+    max-width:1500px;
+    margin:auto;
+
+    display:grid;
+    grid-template-columns:270px minmax(0,1fr);
+}
+
+.sidebar{
+    position:sticky;
+    top:68px;
+
+    height:calc(100vh - 68px);
+
+    overflow-y:auto;
+
+    padding:27px 17px;
+
+    background:#fff;
+
+    border-right:1px solid var(--border);
+}
+
+.sidebar-title{
+    margin-bottom:14px;
+
+    color:#8a93a5;
+
+    font-size:11px;
+    font-weight:850;
+
+    letter-spacing:1.4px;
+
+    text-transform:uppercase;
+}
+
+.sidebar a{
+    display:block;
+
+    padding:9px 12px;
+
+    margin:3px 0;
+
+    border-radius:9px;
+
+    color:#596579;
+
+    text-decoration:none;
+
+    font-size:13.5px;
+
+    transition:.2s;
+}
+
+.sidebar a:hover{
+    color:var(--primary);
+    background:#f2f0ff;
+}
+
+.sidebar a.active{
+    color:var(--primary);
+    background:#eeecff;
+    font-weight:750;
+}
+
+main{
+    max-width:1020px;
+
+    width:100%;
+
+    margin:auto;
+
+    padding:55px 50px 100px;
+}
+
+.hero{
+    position:relative;
+
+    overflow:hidden;
+
+    padding:58px;
+
+    margin-bottom:60px;
+
+    border-radius:27px;
+
+    color:white;
+
+    background:
+        linear-gradient(
+            135deg,
+            #111522,
+            #302957
+        );
+
+    box-shadow:
+        0 25px 70px rgba(35,30,80,.18);
+}
+
+.hero::before{
+    content:"";
+
+    position:absolute;
+
+    width:390px;
+    height:390px;
+
+    right:-170px;
+    top:-190px;
+
+    border-radius:50%;
+
+    background:#635bff;
+
+    opacity:.23;
+
+    animation:orb 7s ease-in-out infinite;
+}
+
+.hero::after{
+    content:"";
+
+    position:absolute;
+
+    width:250px;
+    height:250px;
+
+    left:-120px;
+    bottom:-180px;
+
+    border-radius:50%;
+
+    background:#a78bfa;
+
+    opacity:.14;
+
+    animation:orb 8s ease-in-out infinite reverse;
+}
+
+@keyframes orb{
+
+    0%,100%{
+        transform:translate(0,0);
+    }
+
+    50%{
+        transform:translate(16px,13px);
+    }
+
+}
+
+.hero-content{
+    position:relative;
+    z-index:2;
+}
+
+.eyebrow{
+    margin-bottom:14px;
+
+    color:#bcb7ff;
+
+    font-size:11px;
+    font-weight:850;
+
+    letter-spacing:2px;
+
+    text-transform:uppercase;
+}
+
+.hero h1{
+    margin-bottom:20px;
+
+    font-size:clamp(38px,5vw,60px);
+
+    line-height:1.04;
+
+    letter-spacing:-2.5px;
+}
+
+.hero h1 span{
+    color:#aaa3ff;
+}
+
+.hero p{
+    max-width:790px;
+
+    color:#d9dbe7;
+
+    font-size:17px;
+}
+
+.section{
+    margin-bottom:75px;
+
+    scroll-margin-top:90px;
+}
+
+.section h2{
+    margin-bottom:15px;
+
+    font-size:32px;
+
+    line-height:1.2;
+
+    letter-spacing:-1.2px;
+}
+
+.section h3{
+    margin:29px 0 10px;
+
+    font-size:21px;
+}
+
+.section p{
+    margin:10px 0;
+
+    color:var(--muted);
+}
+
+ul{
+    margin:15px 0 15px 22px;
+
+    color:var(--muted);
+}
+
+li{
+    margin:5px 0;
+}
+
+code{
+    padding:2px 6px;
+
+    border-radius:5px;
+
+    background:#eff1f5;
+
+    color:#b42318;
+
+    font-family:Consolas,monospace;
+}
+
+pre{
+    margin:19px 0;
+
+    padding:24px;
+
+    overflow:auto;
+
+    border-radius:15px;
+
+    background:var(--dark);
+
+    color:#e7e9ef;
+
+    font-family:Consolas,"Courier New",monospace;
+
+    font-size:14px;
+
+    line-height:1.7;
+
+    box-shadow:0 14px 35px rgba(0,0,0,.12);
+}
+
+.info,
+.highlight,
+.success,
+.warning,
+.danger{
+    margin:22px 0;
+
+    padding:18px 20px;
+
+    border-radius:11px;
+}
+
+.info{
+    background:#fafbfc;
+
+    border:1px solid var(--border);
+}
+
+.highlight{
+    background:#f1efff;
+
+    border-left:4px solid var(--primary);
+}
+
+.success{
+    background:#ecfdf3;
+
+    border-left:4px solid var(--green);
+}
+
+.warning{
+    background:#fff7ed;
+
+    border-left:4px solid var(--orange);
+}
+
+.danger{
+    background:#fff5f5;
+
+    border-left:4px solid var(--red);
+}
+
+
+/* =========================
+   LIFECYCLE FLOW
+========================= */
+
+.visual{
+    margin:28px 0;
+
+    padding:30px;
+
+    overflow:hidden;
+
+    border-radius:20px;
+
+    background:var(--dark);
+
+    color:white;
+}
+
+.visual-title{
+    margin-bottom:23px;
+
+    color:#929bad;
+
+    font-size:11px;
+    font-weight:850;
+
+    letter-spacing:1.5px;
+
+    text-transform:uppercase;
+}
+
+.flow{
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    flex-wrap:wrap;
+
+    gap:12px;
+}
+
+.flow-node{
+    min-width:130px;
+
+    padding:16px;
+
+    text-align:center;
+
+    border:1px solid #343c50;
+
+    border-radius:13px;
+
+    background:var(--dark2);
+
+    transition:.3s;
+}
+
+.flow-node.active{
+    animation:pulse 1.8s infinite;
+}
+
+.flow-node small{
+    display:block;
+
+    margin-top:4px;
+
+    color:#8993a9;
+
+    font-size:11px;
+}
+
+.flow-arrow{
+    color:#aaa3ff;
+
+    font-size:25px;
+
+    font-weight:800;
+}
+
+@keyframes pulse{
+
+    0%,100%{
+        transform:translateY(0);
+
+        box-shadow:
+            0 0 0 rgba(99,91,255,0);
+    }
+
+    50%{
+        transform:translateY(-5px);
+
+        box-shadow:
+            0 0 30px rgba(99,91,255,.38);
+    }
+
+}
+
+
+/* =========================
+   LIFECYCLE CARDS
+========================= */
+
+.lifecycle-grid{
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:18px;
+
+    margin:25px 0;
+}
+
+.lifecycle-card{
+    position:relative;
+
+    padding:25px;
+
+    overflow:hidden;
+
+    border-radius:17px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+
+    transition:.3s;
+}
+
+.lifecycle-card:hover{
+    transform:translateY(-4px);
+
+    box-shadow:
+        0 18px 45px rgba(30,40,70,.11);
+}
+
+.phase-number{
+    margin-bottom:13px;
+
+    color:var(--primary);
+
+    font-family:Consolas,monospace;
+
+    font-size:12px;
+    font-weight:850;
+}
+
+.lifecycle-card h3{
+    margin:0 0 8px;
+}
+
+.lifecycle-card p{
+    font-size:14px;
+}
+
+
+/* =========================
+   SIMULATOR
+========================= */
+
+.playground{
+    margin:27px 0;
+
+    padding:27px;
+
+    border-radius:19px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+}
+
+.demo-controls{
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:10px;
+
+    margin:18px 0;
+}
+
+.btn{
+    padding:10px 17px;
+
+    border:1px solid var(--border);
+
+    border-radius:9px;
+
+    background:#fafbfc;
+
+    cursor:pointer;
+
+    font-weight:750;
+
+    transition:.2s;
+}
+
+.btn:hover{
+    border-color:var(--primary);
+
+    background:#f3f1ff;
+}
+
+.btn.primary{
+    color:white;
+
+    background:var(--primary);
+
+    border-color:var(--primary);
+}
+
+.btn.danger{
+    color:var(--red);
+
+    background:#fff5f5;
+
+    border-color:#fecaca;
+}
+
+.sim-screen{
+    min-height:230px;
+
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    flex-direction:column;
+
+    border-radius:15px;
+
+    background:var(--soft);
+
+    border:2px dashed var(--border);
+
+    text-align:center;
+
+    transition:.4s;
+}
+
+.sim-screen.mounting{
+    background:#ecfdf3;
+
+    border-color:#86efac;
+
+    transform:scale(1.01);
+}
+
+.sim-screen.updating{
+    background:#eff6ff;
+
+    border-color:#93c5fd;
+
+    transform:scale(1.01);
+}
+
+.sim-screen.unmounting{
+    background:#fff5f5;
+
+    border-color:#fca5a5;
+
+    transform:scale(.98);
+}
+
+.sim-icon{
+    margin-bottom:10px;
+
+    font-size:40px;
+}
+
+.sim-status{
+    margin-top:8px;
+
+    color:var(--muted);
+
+    font-family:Consolas,monospace;
+
+    font-size:13px;
+}
+
+
+/* =========================
+   TIMELINE
+========================= */
+
+.timeline{
+    position:relative;
+
+    margin:30px 0;
+
+    padding-left:35px;
+}
+
+.timeline::before{
+    content:"";
+
+    position:absolute;
+
+    left:10px;
+    top:0;
+    bottom:0;
+
+    width:2px;
+
+    background:#dddff0;
+}
+
+.timeline-item{
+    position:relative;
+
+    margin-bottom:25px;
+
+    padding:20px;
+
+    border-radius:14px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+}
+
+.timeline-item::before{
+    content:"";
+
+    position:absolute;
+
+    left:-31px;
+    top:26px;
+
+    width:13px;
+    height:13px;
+
+    border-radius:50%;
+
+    background:var(--primary);
+
+    border:3px solid var(--bg);
+}
+
+.timeline-item h3{
+    margin:0 0 7px;
+
+    font-size:18px;
+}
+
+
+/* =========================
+   DEPENDENCY
+========================= */
+
+.dep-table{
+    width:100%;
+
+    margin:25px 0;
+
+    border-collapse:collapse;
+
+    background:white;
+
+    border-radius:15px;
+
+    overflow:hidden;
+
+    box-shadow:var(--shadow);
+}
+
+.dep-table th,
+.dep-table td{
+    padding:14px 15px;
+
+    border-bottom:1px solid var(--border);
+
+    text-align:left;
+}
+
+.dep-table th{
+    background:#f1f3f7;
+}
+
+.badge{
+    display:inline-block;
+
+    padding:4px 9px;
+
+    border-radius:20px;
+
+    font-size:11px;
+    font-weight:800;
+}
+
+.badge.green{
+    color:#166534;
+    background:#dcfce7;
+}
+
+.badge.blue{
+    color:#1d4ed8;
+    background:#dbeafe;
+}
+
+.badge.orange{
+    color:#9a3412;
+    background:#ffedd5;
+}
+
+
+/* =========================
+   STRICT MODE
+========================= */
+
+.strict-demo{
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:18px;
+
+    margin-top:25px;
+}
+
+.strict-card{
+    padding:23px;
+
+    border-radius:16px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+}
+
+.strict-card h3{
+    margin:0 0 8px;
+}
+
+
+/* =========================
+   CODE COMPARE
+========================= */
+
+.compare{
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:18px;
+}
+
+.compare-card{
+    padding:20px;
+
+    border-radius:15px;
+
+    background:white;
+
+    border:1px solid var(--border);
+}
+
+.compare-card h3{
+    margin:0 0 7px;
+}
+
+
+/* =========================
+   MISTAKES
+========================= */
+
+.mistakes{
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:18px;
+}
+
+.mistake{
+    padding:22px;
+
+    border-radius:15px;
+
+    background:white;
+
+    border:1px solid var(--border);
+}
+
+.mistake h3{
+    margin:0 0 9px;
+
+    color:var(--red);
+
+    font-size:17px;
+}
+
+
+/* =========================
+   QUIZ
+========================= */
+
+.quiz{
+    margin:18px 0;
+
+    padding:25px;
+
+    border-radius:17px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+}
+
+.question{
+    margin-bottom:14px;
+
+    font-weight:800;
+}
+
+.option{
+    width:100%;
+
+    display:block;
+
+    margin:7px 0;
+
+    padding:11px 14px;
+
+    text-align:left;
+
+    border:1px solid var(--border);
+
+    border-radius:9px;
+
+    background:#fafbfc;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.option:hover{
+    border-color:var(--primary);
+
+    background:#f4f2ff;
+}
+
+.option.correct{
+    color:#166534;
+
+    background:#ecfdf3;
+
+    border-color:#86efac;
+}
+
+.option.wrong{
+    color:#991b1b;
+
+    background:#fef2f2;
+
+    border-color:#fca5a5;
+}
+
+.quiz-result{
+    margin-top:10px;
+
+    font-weight:750;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+.footer{
+    padding-top:30px;
+
+    border-top:1px solid var(--border);
+
+    color:#7b8497;
+
+    text-align:center;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:900px){
+
+    .layout{
+        grid-template-columns:1fr;
+    }
+
+    .sidebar{
+        display:none;
+    }
+
+    main{
+        padding:35px 20px 80px;
+    }
+
+    .hero{
+        padding:37px 25px;
+    }
+
+    .lifecycle-grid,
+    .strict-demo,
+    .compare,
+    .mistakes{
+        grid-template-columns:1fr;
+    }
+
+}
+
+@media(max-width:600px){
+
+    .topbar{
+        padding:0 16px;
+    }
+
+    .badge-top{
+        display:none;
+    }
+
+    .section h2{
+        font-size:27px;
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<header class="topbar">
+
+<div class="logo">
+ZEN<span>SUS</span>
+</div>
+
+<div class="badge-top">
+REACT • LESSON 12
+</div>
+
+</header>
+
+
+<div class="layout">
+
+
+<aside class="sidebar">
+
+<div class="sidebar-title">
+Component Lifecycle
+</div>
+
+<a href="#lifecycle" class="active">
+Component Lifecycle
+</a>
+
+<a href="#mounting">
+Mounting
+</a>
+
+<a href="#updating">
+Updating
+</a>
+
+<a href="#unmounting">
+Unmounting
+</a>
+
+<a href="#modern">
+Modern React
+</a>
+
+<a href="#effects">
+Effects & Lifecycle
+</a>
+
+<a href="#cleanup">
+Cleanup
+</a>
+
+<a href="#dependencies">
+Dependency Changes
+</a>
+
+<a href="#mounteffects">
+Mount Effects
+</a>
+
+<a href="#updateeffects">
+Update Effects
+</a>
+
+<a href="#unmountcleanup">
+Unmount Cleanup
+</a>
+
+<a href="#strict">
+Strict Mode
+</a>
+
+<a href="#sync">
+Effect Synchronization
+</a>
+
+<a href="#unnecessary">
+Avoiding Unnecessary Effects
+</a>
+
+<a href="#mistakes">
+Common Mistakes
+</a>
+
+<a href="#quiz">
+Quick Quiz
+</a>
+
+</aside>
+
+
+<main>
+
+
+<!-- HERO -->
+
+<section class="hero">
+
+<div class="hero-content">
+
+<div class="eyebrow">
+ZENSUS React Course • Lesson 12
+</div>
+
+<h1>
+Component <span>Lifecycle</span> & Effects
+</h1>
+
+<p>
+Understand how React components are created, updated and removed,
+how Effects participate in that lifecycle, and why modern React focuses
+on synchronization rather than old class lifecycle terminology.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- LIFECYCLE -->
+
+<section class="section" id="lifecycle">
+
+<h2>01. Component Lifecycle</h2>
+
+<p>
+A React component has a lifetime. It can enter the UI, respond to
+changes, and eventually leave the UI.
+</p>
+
+<div class="visual">
+
+<div class="visual-title">
+MODERN REACT LIFECYCLE
+</div>
+
+<div class="flow">
+
+<div class="flow-node active">
+Mount
+<small>Component appears</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Update
+<small>Props / state change</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Update
+<small>More changes</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+Unmount
+<small>Component removed</small>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="lifecycle-grid">
+
+
+<div class="lifecycle-card">
+
+<div class="phase-number">
+PHASE 01
+</div>
+
+<h3>Mounting</h3>
+
+<p>
+The component is added to the UI for the first time.
+</p>
+
+</div>
+
+
+<div class="lifecycle-card">
+
+<div class="phase-number">
+PHASE 02
+</div>
+
+<h3>Updating</h3>
+
+<p>
+Props or state change, causing React to render the component again.
+</p>
+
+</div>
+
+
+<div class="lifecycle-card">
+
+<div class="phase-number">
+PHASE 03
+</div>
+
+<h3>Unmounting</h3>
+
+<p>
+The component is removed from the UI and its active Effect
+synchronizations are cleaned up.
+</p>
+
+</div>
+
+
+</div>
+
+</section>
+
+
+<!-- MOUNTING -->
+
+<section class="section" id="mounting">
+
+<h2>02. Mounting</h2>
+
+<p>
+Mounting happens when React creates a component instance in the
+render tree and commits its UI to the DOM.
+</p>
+
+<pre>
+function Profile(){
+
+    return (
+        &lt;div&gt;
+            &lt;h2&gt;Pradeep&lt;/h2&gt;
+        &lt;/div&gt;
+    );
+
+}
+</pre>
+
+
+<div class="visual">
+
+<div class="visual-title">
+MOUNTING SEQUENCE
+</div>
+
+<div class="flow">
+
+<div class="flow-node">
+Component
+<small>render</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+React
+<small>commit</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+DOM
+<small>UI appears</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Effect
+<small>if declared</small>
+</div>
+
+</div>
+
+</div>
+
+
+<h3>Mount Effect</h3>
+
+<pre>
+useEffect(() => {
+
+    console.log("Effect setup");
+
+}, []);
+</pre>
+
+<p>
+An empty dependency array means the Effect has no reactive dependencies.
+For a normally mounted component, its setup happens after the initial
+commit and its cleanup runs when the component is removed.
+</p>
+
+</section>
+
+
+<!-- UPDATING -->
+
+<section class="section" id="updating">
+
+<h2>03. Updating</h2>
+
+<p>
+A component updates when its state changes, its parent passes different
+props, or another relevant input causes it to render again.
+</p>
+
+<pre>
+const [count, setCount] =
+    useState(0);
+
+return (
+    &lt;button
+        onClick={() =>
+            setCount(count + 1)
+        }
+    &gt;
+        {count}
+    &lt;/button&gt;
+);
+</pre>
+
+
+<div class="visual">
+
+<div class="visual-title">
+UPDATE SEQUENCE
+</div>
+
+<div class="flow">
+
+<div class="flow-node">
+User Action
+<small>click</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+setState()
+<small>state changes</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Render
+<small>new UI calculation</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+Commit
+<small>DOM update</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Effect
+<small>if dependencies changed</small>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- UNMOUNT -->
+
+<section class="section" id="unmounting">
+
+<h2>04. Unmounting</h2>
+
+<p>
+Unmounting happens when React removes a component from the rendered
+tree.
+</p>
+
+<p>
+For example, conditional rendering can cause a component to disappear.
+</p>
+
+<pre>
+{
+    showProfile &&
+    &lt;Profile /&gt;
+}
+</pre>
+
+
+<div class="playground">
+
+<h3 style="margin-top:0;">
+Lifecycle Simulator
+</h3>
+
+<p>
+Use the controls to visualize mounting, updating and unmounting.
+</p>
+
+<div class="demo-controls">
+
+<button
+class="btn primary"
+onclick="mountComponent()"
+>
+Mount
+</button>
+
+<button
+class="btn"
+onclick="updateComponent()"
+>
+Update
+</button>
+
+<button
+class="btn danger"
+onclick="unmountComponent()"
+>
+Unmount
+</button>
+
+</div>
+
+
+<div
+class="sim-screen"
+id="lifecycleScreen"
+>
+
+<div class="sim-icon">
+⚛️
+</div>
+
+<strong id="simTitle">
+Component is not mounted
+</strong>
+
+<div
+class="sim-status"
+id="simStatus"
+>
+Waiting...
+</div>
+
+</div>
+
+</div>
+
+
+<div class="warning">
+
+<strong>Important:</strong>
+
+<p>
+Unmounting is not the same as hiding an element with CSS. If a component
+remains mounted but is visually hidden, its lifecycle has not ended.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- MODERN -->
+
+<section class="section" id="modern">
+
+<h2>05. Lifecycle in Modern React</h2>
+
+<p>
+Older React tutorials often teach lifecycle methods such as:
+</p>
+
+<ul>
+
+<li><code>componentDidMount()</code></li>
+
+<li><code>componentDidUpdate()</code></li>
+
+<li><code>componentWillUnmount()</code></li>
+
+</ul>
+
+<p>
+Those methods belong to class components. Modern React primarily uses
+function components and Hooks.
+</p>
+
+
+<div class="compare">
+
+
+<div class="compare-card">
+
+<h3>Older Class Model</h3>
+
+<pre>
+componentDidMount()
+
+componentDidUpdate()
+
+componentWillUnmount()
+</pre>
+
+</div>
+
+
+<div class="compare-card">
+
+<h3>Modern Function Model</h3>
+
+<pre>
+useEffect(() => {
+
+    // setup
+
+    return () => {
+
+        // cleanup
+
+    };
+
+}, [dependencies]);
+</pre>
+
+</div>
+
+</div>
+
+
+<div class="highlight">
+
+<strong>Modern React idea:</strong>
+
+<p>
+Instead of thinking "Which lifecycle method should I put this code in?",
+think "What external system does this component need to synchronize
+with, and when should that synchronization change?"
+</p>
+
+</div>
+
+</section>
+
+
+<!-- EFFECTS -->
+
+<section class="section" id="effects">
+
+<h2>06. Effects and Lifecycle</h2>
+
+<p>
+Effects are connected to the lifecycle, but an Effect is not simply a
+collection of lifecycle events.
+</p>
+
+
+<div class="visual">
+
+<div class="visual-title">
+EFFECT + LIFECYCLE
+</div>
+
+<div class="flow">
+
+<div class="flow-node active">
+Mount
+<small>initial commit</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Effect Setup
+<small>synchronize</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Dependency Changes
+<small>if applicable</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+Cleanup
+<small>old synchronization</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+New Setup
+<small>new synchronization</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+Unmount
+<small>final cleanup</small>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="info">
+
+<strong>Key distinction:</strong>
+
+<p>
+A component can render many times without an Effect necessarily
+re-running. Whether an Effect re-runs depends on its dependency array.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- CLEANUP -->
+
+<section class="section" id="cleanup">
+
+<h2>07. Cleanup</h2>
+
+<p>
+Cleanup allows an Effect to stop or reverse the external synchronization
+created by its previous setup.
+</p>
+
+<pre>
+useEffect(() => {
+
+    const connection =
+        connectToServer();
+
+    return () => {
+
+        connection.disconnect();
+
+    };
+
+}, []);
+</pre>
+
+
+<div class="timeline">
+
+<div class="timeline-item">
+
+<h3>① Effect setup</h3>
+
+<p>
+Connection is created.
+</p>
+
+</div>
+
+<div class="timeline-item">
+
+<h3>② Component remains active</h3>
+
+<p>
+The connection continues to be synchronized.
+</p>
+
+</div>
+
+<div class="timeline-item">
+
+<h3>③ Dependency changes or component unmounts</h3>
+
+<p>
+The existing synchronization needs to stop.
+</p>
+
+</div>
+
+<div class="timeline-item">
+
+<h3>④ Cleanup</h3>
+
+<p>
+The connection is disconnected.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="success">
+
+<strong>Typical cleanup operations:</strong>
+
+<ul>
+
+<li><code>clearInterval()</code></li>
+
+<li><code>clearTimeout()</code></li>
+
+<li><code>removeEventListener()</code></li>
+
+<li>unsubscribe from subscriptions</li>
+
+<li>disconnect WebSockets</li>
+
+<li>disconnect external libraries</li>
+
+</ul>
+
+</div>
+
+</section>
+
+
+<!-- DEPENDENCIES -->
+
+<section class="section" id="dependencies">
+
+<h2>08. Dependency Changes</h2>
+
+<p>
+Dependencies determine when an Effect's synchronization needs to be
+re-established.
+</p>
+
+<table class="dep-table">
+
+<tr>
+
+<th>Effect</th>
+
+<th>Behavior</th>
+
+</tr>
+
+<tr>
+
+<td>
+<code>useEffect(fn)</code>
+</td>
+
+<td>
+Runs after every completed render.
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+<code>useEffect(fn, [])</code>
+</td>
+
+<td>
+No reactive dependencies.
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+<code>useEffect(fn, [roomId])</code>
+</td>
+
+<td>
+Runs when <code>roomId</code> changes, in addition to initial setup.
+</td>
+
+</tr>
+
+</table>
+
+
+<h3>Example</h3>
+
+<pre>
+useEffect(() => {
+
+    const connection =
+        connect(roomId);
+
+    return () => {
+
+        connection.disconnect();
+
+    };
+
+}, [roomId]);
+</pre>
+
+
+<div class="visual">
+
+<div class="visual-title">
+DEPENDENCY CHANGE
+</div>
+
+<div class="flow">
+
+<div class="flow-node">
+roomId = 101
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+Setup
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+roomId = 202
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+Cleanup
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+New Setup
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- MOUNT EFFECTS -->
+
+<section class="section" id="mounteffects">
+
+<h2>09. Mount Effects</h2>
+
+<p>
+An Effect with no reactive dependencies is often used when a component
+needs to establish an external synchronization for its lifetime.
+</p>
+
+<pre>
+useEffect(() => {
+
+    const subscription =
+        subscribe();
+
+    return () => {
+
+        subscription.unsubscribe();
+
+    };
+
+}, []);
+</pre>
+
+
+<div class="info">
+
+<strong>Typical examples:</strong>
+
+<ul>
+
+<li>Subscribe when a component becomes active.</li>
+
+<li>Register a browser listener.</li>
+
+<li>Initialize an external integration.</li>
+
+<li>Start an external resource that belongs to the component.</li>
+
+</ul>
+
+</div>
+
+
+<div class="warning">
+
+<strong>Don't overuse <code>[]</code>.</strong>
+
+<p>
+If the Effect actually depends on a changing value, hiding that
+dependency by using <code>[]</code> can produce stale or incorrect
+behavior.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- UPDATE EFFECTS -->
+
+<section class="section" id="updateeffects">
+
+<h2>10. Update Effects</h2>
+
+<p>
+An Effect with dependencies can synchronize again when those dependencies
+change.
+</p>
+
+<pre>
+useEffect(() => {
+
+    document.title =
+        `User ${userId}`;
+
+}, [userId]);
+</pre>
+
+
+<div class="playground">
+
+<h3 style="margin-top:0;">
+Dependency Update Visualizer
+</h3>
+
+<div class="demo-controls">
+
+<button
+class="btn primary"
+onclick="changeUser(1)"
+>
+User 1
+</button>
+
+<button
+class="btn"
+onclick="changeUser(2)"
+>
+User 2
+</button>
+
+<button
+class="btn"
+onclick="changeUser(3)"
+>
+User 3
+</button>
+
+</div>
+
+<div class="sim-screen" id="userScreen">
+
+<div class="sim-icon">
+🔄
+</div>
+
+<strong id="userValue">
+userId = 1
+</strong>
+
+<div
+class="sim-status"
+id="userStatus"
+>
+Effect synchronized
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- UNMOUNT CLEANUP -->
+
+<section class="section" id="unmountcleanup">
+
+<h2>11. Unmount Cleanup</h2>
+
+<p>
+When a component is unmounted, React runs the cleanup for its active
+Effect.
+</p>
+
+<pre>
+useEffect(() => {
+
+    const timer =
+        setInterval(
+            updateClock,
+            1000
+        );
+
+    return () => {
+
+        clearInterval(timer);
+
+    };
+
+}, []);
+</pre>
+
+
+<div class="visual">
+
+<div class="visual-title">
+FINAL COMPONENT LIFECYCLE
+</div>
+
+<div class="flow">
+
+<div class="flow-node">
+Mounted
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+Effect Active
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Unmount
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+Cleanup
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+External Resource Released
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- STRICT MODE -->
+
+<section class="section" id="strict">
+
+<h2>12. Strict Mode</h2>
+
+<p>
+React Strict Mode is a development-only tool that helps identify
+certain problems in React applications.
+</p>
+
+<pre>
+import { StrictMode } from "react";
+
+createRoot(
+    document.getElementById("root")
+).render(
+
+    &lt;StrictMode&gt;
+        &lt;App /&gt;
+    &lt;/StrictMode&gt;
+
+);
+</pre>
+
+
+<div class="strict-demo">
+
+
+<div class="strict-card">
+
+<h3>Development</h3>
+
+<p>
+React may intentionally perform extra setup/cleanup cycles for Effects
+in development to help reveal code that is not resilient to being
+started and stopped correctly.
+</p>
+
+</div>
+
+
+<div class="strict-card">
+
+<h3>Production</h3>
+
+<p>
+This development-only Strict Mode behavior does not mean your
+production application continuously mounts and unmounts components in
+the same way.
+</p>
+
+</div>
+
+
+</div>
+
+
+<div class="warning">
+
+<strong>Important debugging lesson:</strong>
+
+<p>
+If an Effect appears to run twice while developing with Strict Mode,
+don't immediately add a flag to suppress the second run. First make
+the Effect's setup and cleanup correctly mirror each other.
+</p>
+
+</div>
+
+
+<h3>Good synchronization pattern</h3>
+
+<pre>
+useEffect(() => {
+
+    const connection =
+        createConnection();
+
+    connection.connect();
+
+    return () => {
+
+        connection.disconnect();
+
+    };
+
+}, []);
+</pre>
+
+
+<p>
+The cleanup makes the setup reversible, which is exactly what robust
+Effects need.
+</p>
+
+</section>
+
+
+<!-- SYNC -->
+
+<section class="section" id="sync">
+
+<h2>13. Effect Synchronization</h2>
+
+<p>
+The most useful modern mental model is synchronization.
+</p>
+
+
+<div class="visual">
+
+<div class="visual-title">
+SYNCHRONIZE — DON'T MEMORIZE LIFECYCLES
+</div>
+
+<div class="flow">
+
+<div class="flow-node active">
+React State
+<small>roomId = 42</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Effect
+<small>setup</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+External System
+<small>connected to room 42</small>
+</div>
+
+</div>
+
+<br>
+
+<div class="flow">
+
+<div class="flow-node">
+roomId changes
+<small>42 → 99</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+Cleanup
+<small>disconnect 42</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+New Setup
+<small>connect 99</small>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="highlight">
+
+<strong>Think like this:</strong>
+
+<p>
+"The component is currently synchronized with room 42."
+</p>
+
+<p>
+"When roomId becomes 99, stop synchronizing with 42 and start
+synchronizing with 99."
+</p>
+
+</div>
+
+</section>
+
+
+<!-- UNNECESSARY -->
+
+<section class="section" id="unnecessary">
+
+<h2>14. Avoiding Unnecessary Effects</h2>
+
+<p>
+Not every calculation or user interaction requires an Effect.
+</p>
+
+
+<div class="compare">
+
+
+<div class="compare-card">
+
+<h3>❌ Unnecessary Effect</h3>
+
+<pre>
+const [fullName,
+    setFullName] =
+    useState("");
+
+useEffect(() => {
+
+    setFullName(
+        firstName +
+        " " +
+        lastName
+    );
+
+}, [firstName,lastName]);
+</pre>
+
+</div>
+
+
+<div class="compare-card">
+
+<h3>✅ Derived Value</h3>
+
+<pre>
+const fullName =
+    firstName +
+    " " +
+    lastName;
+</pre>
+
+</div>
+
+</div>
+
+
+<h3>Another example</h3>
+
+<pre>
+// ❌ Don't use an Effect
+// for a button click
+
+useEffect(() => {
+
+    saveForm();
+
+}, [submitted]);
+</pre>
+
+<p>
+If the action happens because the user clicked Submit, the event handler
+is usually the appropriate place for the action.
+</p>
+
+<pre>
+// ✅ Event handler
+
+function handleSubmit(){
+
+    saveForm();
+
+}
+</pre>
+
+
+<div class="success">
+
+<strong>Rule:</strong>
+
+<p>
+If the logic is caused by a specific user interaction, start by
+considering an event handler.
+If the logic synchronizes with an external system because the component
+is currently in a particular state, consider an Effect.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- MISTAKES -->
+
+<section class="section" id="mistakes">
+
+<h2>15. Common Lifecycle Mistakes</h2>
+
+<div class="mistakes">
+
+
+<div class="mistake">
+
+<h3>❌ Thinking every render is an update effect</h3>
+
+<p>
+A component can render again without every Effect necessarily needing
+to re-run. Dependencies determine synchronization.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<h3>❌ Forgetting cleanup</h3>
+
+<p>
+Timers, listeners, subscriptions and connections can continue doing
+work after the synchronization should have ended.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<h3>❌ Using empty dependencies incorrectly</h3>
+
+<p>
+Using <code>[]</code> when the Effect reads changing reactive values
+can result in stale behavior.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<h3>❌ Fighting Strict Mode</h3>
+
+<p>
+Don't hide development-only Effect behavior with arbitrary flags.
+Make setup and cleanup correctly mirror each other.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<h3>❌ Treating CSS hiding as unmounting</h3>
+
+<p>
+<code>display:none</code> hides an element but does not necessarily
+remove the React component from the tree.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<h3>❌ Putting event actions into Effects</h3>
+
+<p>
+A button click, form submission or keyboard action often belongs in an
+event handler rather than an Effect.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<h3>❌ Copying old class lifecycle code mentally</h3>
+
+<p>
+Modern React is better understood through rendering, synchronization,
+dependencies and cleanup.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<h3>❌ Assuming cleanup only happens on unmount</h3>
+
+<p>
+Cleanup also happens before an Effect's new setup when its dependencies
+change.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- CHEAT SHEET -->
+
+<section class="section">
+
+<h2>16. Lifecycle Cheat Sheet</h2>
+
+<table class="dep-table">
+
+<tr>
+
+<th>Concept</th>
+
+<th>What it means</th>
+
+</tr>
+
+<tr>
+
+<td>
+Mount
+</td>
+
+<td>
+Component is added to the rendered tree.
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+Update
+</td>
+
+<td>
+Component renders again because relevant inputs changed.
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+Unmount
+</td>
+
+<td>
+Component is removed from the rendered tree.
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+Effect setup
+</td>
+
+<td>
+Starts synchronization with an external system.
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+Dependency change
+</td>
+
+<td>
+Old synchronization may need cleanup and a new setup.
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+Cleanup
+</td>
+
+<td>
+Stops or reverses the previous synchronization.
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+Strict Mode
+</td>
+
+<td>
+Development feature that helps expose Effect/setup/cleanup problems.
+</td>
+
+</tr>
+
+</table>
+
+</section>
+
+
+<!-- MASTER -->
+
+<section class="section">
+
+<h2>17. Master Mental Model</h2>
+
+<div class="visual">
+
+<div class="visual-title">
+ZENSUS MODERN REACT LIFECYCLE
+</div>
+
+<div class="flow">
+
+<div class="flow-node active">
+Render
+<small>calculate UI</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Commit
+<small>update DOM</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+Effect Setup
+<small>synchronize</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Dependency Change
+<small>if any</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+Cleanup
+<small>stop old sync</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+New Setup
+<small>new sync</small>
+</div>
+
+</div>
+
+<br>
+
+<div class="flow">
+
+<div class="flow-node">
+Unmount
+<small>component removed</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+Final Cleanup
+<small>release resources</small>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="success">
+
+<strong>After Lesson 12, you should be able to:</strong>
+
+<ul>
+
+<li>Explain the React component lifecycle.</li>
+
+<li>Explain mounting.</li>
+
+<li>Explain updating.</li>
+
+<li>Explain unmounting.</li>
+
+<li>Understand the modern function-component lifecycle.</li>
+
+<li>Connect Effects with lifecycle behavior.</li>
+
+<li>Explain cleanup.</li>
+
+<li>Understand dependency changes.</li>
+
+<li>Write mount-style Effects correctly.</li>
+
+<li>Write dependency-based Effects.</li>
+
+<li>Explain unmount cleanup.</li>
+
+<li>Understand React Strict Mode.</li>
+
+<li>Think in terms of Effect synchronization.</li>
+
+<li>Recognize unnecessary Effects.</li>
+
+<li>Identify common lifecycle mistakes.</li>
+
+</ul>
+
+</div>
+
+</section>
+
+
+<!-- QUIZ -->
+
+<section class="section" id="quiz">
+
+<h2>18. Quick Quiz</h2>
+
+<p>
+Test your understanding of component lifecycle and Effects.
+</p>
+
+
+<div class="quiz">
+
+<div class="question">
+1. What does mounting mean?
+</div>
+
+<button class="option"
+onclick="quizAnswer(this,true)">
+A. A component is added to the rendered tree
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+B. A component's CSS changes
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+C. A component is deleted
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+D. A browser closes
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+2. What usually causes a component to update?
+</div>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+A. Only CSS changes
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,true)">
+B. Changes to state, props, or other inputs that cause a render
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+C. Only mounting
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+D. Only unmounting
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+3. What does unmounting mean?
+</div>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+A. Component receives new props
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+B. Component renders
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,true)">
+C. Component is removed from the rendered tree
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+D. Component receives CSS
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+4. When can Effect cleanup run?
+</div>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+A. Only during initial rendering
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,true)">
+B. Before a new setup when dependencies change and when the component unmounts
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+C. Only when clicking a button
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+D. Never
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+5. What does [roomId] tell an Effect?
+</div>
+
+<button class="option"
+onclick="quizAnswer(this,true)">
+A. Synchronize again when roomId changes
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+B. Never run the Effect
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+C. Run only during CSS changes
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+D. Delete roomId
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+6. Which is a good cleanup operation?
+</div>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+A. Calling setState repeatedly
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,true)">
+B. clearInterval(timer)
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+C. Rendering JSX
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+D. Creating another timer
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+7. What is Strict Mode primarily useful for?
+</div>
+
+<button class="option"
+onclick="quizAnswer(this,true)">
+A. Helping reveal certain development-time problems
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+B. Making CSS faster
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+C. Replacing state
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+D. Deploying React automatically
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+8. Which statement best describes modern React Effects?
+</div>
+
+<button class="option"
+onclick="quizAnswer(this,true)">
+A. They synchronize components with external systems
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+B. They replace event handlers
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+C. They are required for every render
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+D. They are only for CSS
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+9. Which is often unnecessary?
+</div>
+
+<button class="option"
+onclick="quizAnswer(this,true)">
+A. An Effect that only calculates a derived value
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+B. An Effect that synchronizes a WebSocket
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+C. Cleanup for an event listener
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+D. Cleanup for an interval
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+10. What should happen when a dependency changes?
+</div>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+A. React permanently removes the component
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,true)">
+B. The old Effect synchronization is cleaned up and the new one can be established
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+C. All state is deleted
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+D. The browser reloads
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+</section>
+
+
+<div class="footer">
+
+<strong>ZENSUS React Course</strong>
+
+<br>
+
+Learn • Build • Practice • Master
+
+</div>
+
+
+</main>
+
+</div>
+
+
+<script>
+
+
+/* =========================
+   LIFECYCLE SIMULATOR
+========================= */
+
+const lifecycleScreen =
+    document.getElementById(
+        "lifecycleScreen"
+    );
+
+const simTitle =
+    document.getElementById(
+        "simTitle"
+    );
+
+const simStatus =
+    document.getElementById(
+        "simStatus"
+    );
+
+
+function mountComponent(){
+
+    lifecycleScreen.className =
+        "sim-screen mounting";
+
+    simTitle.textContent =
+        "Component mounted";
+
+    simStatus.textContent =
+        "Render → Commit → Effect setup";
+
+}
+
+
+function updateComponent(){
+
+    lifecycleScreen.className =
+        "sim-screen updating";
+
+    simTitle.textContent =
+        "Component updated";
+
+    simStatus.textContent =
+        "State/props changed → Render → Commit → Effect if dependency changed";
+
+}
+
+
+function unmountComponent(){
+
+    lifecycleScreen.className =
+        "sim-screen unmounting";
+
+    simTitle.textContent =
+        "Component unmounted";
+
+    simStatus.textContent =
+        "Component removed → cleanup runs";
+
+}
+
+
+/* =========================
+   USER DEPENDENCY DEMO
+========================= */
+
+function changeUser(id){
+
+    const screen =
+        document.getElementById(
+            "userScreen"
+        );
+
+    const value =
+        document.getElementById(
+            "userValue"
+        );
+
+    const status =
+        document.getElementById(
+            "userStatus"
+        );
+
+    screen.className =
+        "sim-screen updating";
+
+    value.textContent =
+        "userId = " + id;
+
+    status.textContent =
+        "Dependency changed → cleanup → new Effect synchronization";
+
+}
+
+
+/* =========================
+   QUIZ
+========================= */
+
+function quizAnswer(
+    button,
+    correct
+){
+
+    const quiz =
+        button.closest(
+            ".quiz"
+        );
+
+    const options =
+        quiz.querySelectorAll(
+            ".option"
+        );
+
+    const result =
+        quiz.querySelector(
+            ".quiz-result"
+        );
+
+    options.forEach(
+        option => {
+            option.disabled = true;
+        }
+    );
+
+    if(correct){
+
+        button.classList.add(
+            "correct"
+        );
+
+        result.textContent =
+            "✓ Correct! Excellent.";
+
+        result.style.color =
+            "#16a34a";
+
+    }else{
+
+        button.classList.add(
+            "wrong"
+        );
+
+        result.textContent =
+            "✗ Not quite. Review this concept.";
+
+        result.style.color =
+            "#dc2626";
+
+        options.forEach(
+            option => {
+
+                const action =
+                    option.getAttribute(
+                        "onclick"
+                    );
+
+                if(
+                    action &&
+                    action.includes(
+                        "true"
+                    )
+                ){
+
+                    option.classList.add(
+                        "correct"
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+}
+
+
+/* =========================
+   SIDEBAR ACTIVE STATE
+========================= */
+
+const sections =
+    document.querySelectorAll(
+        ".section"
+    );
+
+const links =
+    document.querySelectorAll(
+        ".sidebar a"
+    );
+
+window.addEventListener(
+    "scroll",
+    () => {
+
+        let current = "";
+
+        sections.forEach(
+            section => {
+
+                const top =
+                    section.offsetTop -
+                    130;
+
+                if(
+                    window.scrollY >=
+                    top
+                ){
+
+                    current =
+                        section.getAttribute(
+                            "id"
+                        );
+
+                }
+
+            }
+        );
+
+        links.forEach(
+            link => {
+
+                link.classList.remove(
+                    "active"
+                );
+
+                if(
+                    link.getAttribute(
+                        "href"
+                    ) ===
+                    "#" + current
+                ){
+
+                    link.classList.add(
+                        "active"
+                    );
+
+                }
+
+            }
+        );
+
+    }
+);
+
+</script>
+
+</body>
+</html>
+```

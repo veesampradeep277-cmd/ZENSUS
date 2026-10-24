@@ -1,0 +1,4664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 14 — Dynamic Memory Allocation in C | ZENSUS</title>
+
+<style>
+/* =========================================================
+   ZENSUS — LESSON 14
+   DYNAMIC MEMORY ALLOCATION IN C
+   Standalone CSS
+========================================================= */
+
+:root{
+    --bg:#f6f8fc;
+    --surface:#ffffff;
+    --surface-2:#f1f4f9;
+    --border:#e2e7f0;
+    --text:#172033;
+    --muted:#667085;
+    --primary:#4f46e5;
+    --primary-dark:#3730a3;
+    --secondary:#7c3aed;
+    --success:#059669;
+    --warning:#d97706;
+    --danger:#dc2626;
+    --info:#0284c7;
+    --shadow:0 12px 35px rgba(30,41,59,.08);
+    --shadow-sm:0 5px 18px rgba(30,41,59,.07);
+    --radius:18px;
+    --radius-sm:12px;
+    --code:#111827;
+    --code-text:#e5e7eb;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    scroll-behavior:smooth;
+}
+
+html{
+    scroll-padding-top:80px;
+}
+
+body{
+    font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+/* ================= TOP BAR ================= */
+
+.topbar{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    height:68px;
+    background:rgba(255,255,255,.94);
+    backdrop-filter:blur(15px);
+    border-bottom:1px solid var(--border);
+    z-index:1000;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 25px;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-weight:800;
+    letter-spacing:.5px;
+}
+
+.logo{
+    width:39px;
+    height:39px;
+    border-radius:12px;
+    background:linear-gradient(135deg,var(--primary),var(--secondary));
+    color:white;
+    display:grid;
+    place-items:center;
+    font-weight:900;
+    box-shadow:0 7px 18px rgba(79,70,229,.25);
+}
+
+.brand small{
+    display:block;
+    color:var(--muted);
+    font-weight:500;
+    font-size:11px;
+}
+
+.top-right{
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+.badge{
+    padding:7px 12px;
+    border-radius:999px;
+    background:#eef2ff;
+    color:var(--primary-dark);
+    font-size:12px;
+    font-weight:700;
+}
+
+.mobile-menu{
+    display:none;
+    border:0;
+    background:var(--surface-2);
+    padding:9px 12px;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar{
+    position:fixed;
+    top:68px;
+    left:0;
+    bottom:0;
+    width:275px;
+    background:#fff;
+    border-right:1px solid var(--border);
+    overflow-y:auto;
+    padding:22px 16px;
+    z-index:900;
+}
+
+.sidebar-title{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1.2px;
+    color:#98a2b3;
+    font-weight:800;
+    margin:12px 10px;
+}
+
+.side-link{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    text-decoration:none;
+    color:#596579;
+    padding:10px 12px;
+    margin:3px 0;
+    border-radius:10px;
+    font-size:13px;
+    transition:.25s;
+}
+
+.side-link:hover{
+    background:#f3f4ff;
+    color:var(--primary);
+    transform:translateX(3px);
+}
+
+.side-link.active{
+    background:#eef2ff;
+    color:var(--primary);
+    font-weight:800;
+}
+
+.progress-box{
+    margin-top:20px;
+    padding:15px;
+    background:#f8faff;
+    border:1px solid var(--border);
+    border-radius:14px;
+}
+
+.progress-label{
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    margin-bottom:8px;
+}
+
+.progress{
+    height:7px;
+    background:#e5e7eb;
+    border-radius:999px;
+    overflow:hidden;
+}
+
+.progress-fill{
+    height:100%;
+    width:93%;
+    background:linear-gradient(90deg,var(--primary),var(--secondary));
+    border-radius:999px;
+}
+
+/* ================= MAIN ================= */
+
+main{
+    margin-left:275px;
+    padding:98px 40px 70px;
+    max-width:1500px;
+}
+
+/* ================= HERO ================= */
+
+.hero{
+    position:relative;
+    overflow:hidden;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:25px;
+    padding:45px;
+    box-shadow:var(--shadow);
+    margin-bottom:28px;
+}
+
+.hero::before{
+    content:"";
+    position:absolute;
+    width:260px;
+    height:260px;
+    right:-100px;
+    top:-100px;
+    border-radius:50%;
+    background:rgba(99,102,241,.08);
+    animation:floatOrb 6s ease-in-out infinite;
+}
+
+.hero::after{
+    content:"";
+    position:absolute;
+    width:180px;
+    height:180px;
+    right:150px;
+    bottom:-100px;
+    border-radius:50%;
+    background:rgba(124,58,237,.06);
+    animation:floatOrb 7s ease-in-out infinite reverse;
+}
+
+@keyframes floatOrb{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(18px)}
+}
+
+.lesson-tag{
+    display:inline-flex;
+    gap:7px;
+    padding:7px 12px;
+    background:#eef2ff;
+    color:var(--primary);
+    border-radius:999px;
+    font-size:12px;
+    font-weight:800;
+    margin-bottom:15px;
+}
+
+.hero h1{
+    font-size:clamp(34px,5vw,58px);
+    line-height:1.08;
+    letter-spacing:-2px;
+    max-width:850px;
+    margin-bottom:18px;
+}
+
+.gradient-text{
+    color:var(--primary);
+}
+
+.hero p{
+    max-width:850px;
+    color:var(--muted);
+    font-size:17px;
+}
+
+.hero-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:25px;
+}
+
+.meta{
+    padding:8px 13px;
+    border:1px solid var(--border);
+    border-radius:999px;
+    background:#fff;
+    font-size:12px;
+    font-weight:700;
+}
+
+/* ================= SECTIONS ================= */
+
+.section{
+    margin:32px 0;
+    scroll-margin-top:85px;
+}
+
+.section-header{
+    margin-bottom:17px;
+}
+
+.section-number{
+    color:var(--primary);
+    font-size:12px;
+    font-weight:900;
+    letter-spacing:1px;
+    text-transform:uppercase;
+}
+
+.section h2{
+    font-size:30px;
+    line-height:1.25;
+    margin-top:3px;
+}
+
+.section-subtitle{
+    color:var(--muted);
+    margin-top:5px;
+}
+
+.card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:25px;
+    box-shadow:var(--shadow-sm);
+    margin-bottom:18px;
+}
+
+.card h3{
+    margin-bottom:10px;
+}
+
+.card p{
+    color:#536071;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:18px;
+}
+
+.grid-3{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:18px;
+}
+
+/* ================= OBJECTIVES ================= */
+
+.objectives{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+}
+
+.objective{
+    padding:18px;
+    border:1px solid var(--border);
+    border-radius:15px;
+    background:#fff;
+    transition:.25s;
+}
+
+.objective:hover{
+    transform:translateY(-4px);
+    box-shadow:var(--shadow-sm);
+}
+
+.objective-icon{
+    font-size:24px;
+    margin-bottom:8px;
+}
+
+.objective strong{
+    display:block;
+    margin-bottom:4px;
+}
+
+.objective span{
+    color:var(--muted);
+    font-size:13px;
+}
+
+/* ================= CODE ================= */
+
+.code-wrap{
+    position:relative;
+    margin:15px 0;
+}
+
+pre{
+    background:var(--code);
+    color:var(--code-text);
+    padding:22px;
+    border-radius:14px;
+    overflow:auto;
+    font-family:"Cascadia Code","Fira Code",Consolas,monospace;
+    font-size:13px;
+    line-height:1.7;
+    border:1px solid #273244;
+}
+
+.copy-btn{
+    position:absolute;
+    top:9px;
+    right:9px;
+    border:1px solid #374151;
+    background:#1f2937;
+    color:#d1d5db;
+    padding:6px 10px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:11px;
+}
+
+.copy-btn:hover{
+    background:#374151;
+}
+
+/* ================= HIGHLIGHT BOX ================= */
+
+.note{
+    border-left:4px solid var(--primary);
+    background:#f5f6ff;
+    padding:16px 18px;
+    border-radius:0 12px 12px 0;
+    margin:15px 0;
+}
+
+.warning{
+    border-left-color:var(--warning);
+    background:#fff8eb;
+}
+
+.danger{
+    border-left-color:var(--danger);
+    background:#fff1f2;
+}
+
+.success{
+    border-left-color:var(--success);
+    background:#ecfdf5;
+}
+
+.note strong{
+    color:var(--text);
+}
+
+/* ================= MEMORY VISUAL ================= */
+
+.memory-stage{
+    background:#111827;
+    border-radius:18px;
+    padding:25px;
+    overflow:hidden;
+    position:relative;
+}
+
+.memory-title{
+    color:#cbd5e1;
+    text-align:center;
+    margin-bottom:20px;
+    font-weight:800;
+}
+
+.memory-layout{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.memory-zone{
+    border:1px solid #334155;
+    border-radius:15px;
+    padding:18px;
+}
+
+.zone-label{
+    color:#94a3b8;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin-bottom:12px;
+}
+
+.stack-zone{
+    min-height:190px;
+}
+
+.heap-zone{
+    min-height:190px;
+}
+
+.stack-box,
+.heap-cell{
+    border:1px solid #475569;
+    border-radius:9px;
+    padding:10px;
+    margin:7px 0;
+    color:#e2e8f0;
+    background:#1e293b;
+    transition:.5s;
+}
+
+.heap-cell{
+    display:inline-flex;
+    width:74px;
+    height:65px;
+    margin:4px;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    font-size:11px;
+}
+
+.heap-cell small{
+    color:#94a3b8;
+}
+
+.heap-cell.allocated{
+    background:#312e81;
+    border-color:#6366f1;
+    animation:allocate .6s ease;
+}
+
+@keyframes allocate{
+    0%{transform:scale(.5);opacity:0}
+    70%{transform:scale(1.08)}
+    100%{transform:scale(1);opacity:1}
+}
+
+.pointer-arrow{
+    color:#a5b4fc;
+    text-align:center;
+    font-weight:900;
+    margin:8px 0;
+}
+
+/* ================= ALLOCATION ANIMATION ================= */
+
+.alloc-demo{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:15px;
+    padding:25px;
+    background:#f8fafc;
+    border:1px solid var(--border);
+    border-radius:16px;
+}
+
+.demo-step{
+    padding:15px 20px;
+    border:1px solid var(--border);
+    background:#fff;
+    border-radius:12px;
+    font-weight:800;
+    text-align:center;
+    min-width:130px;
+}
+
+.demo-arrow{
+    font-size:24px;
+    color:var(--primary);
+    animation:pulseArrow 1.2s infinite;
+}
+
+@keyframes pulseArrow{
+    0%,100%{transform:translateX(0);opacity:.6}
+    50%{transform:translateX(7px);opacity:1}
+}
+
+/* ================= FUNCTION CARDS ================= */
+
+.function-card{
+    position:relative;
+    overflow:hidden;
+}
+
+.function-card::after{
+    content:"";
+    position:absolute;
+    width:80px;
+    height:80px;
+    border-radius:50%;
+    right:-25px;
+    top:-25px;
+    background:rgba(79,70,229,.06);
+}
+
+.function-name{
+    font-family:monospace;
+    display:inline-block;
+    background:#eef2ff;
+    color:var(--primary-dark);
+    padding:5px 9px;
+    border-radius:7px;
+    font-weight:900;
+    margin-bottom:10px;
+}
+
+.function-card ul{
+    padding-left:20px;
+    color:var(--muted);
+    font-size:14px;
+}
+
+/* ================= TABLE ================= */
+
+.table-wrap{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:700px;
+}
+
+th,td{
+    padding:13px 15px;
+    border-bottom:1px solid var(--border);
+    text-align:left;
+    font-size:13px;
+}
+
+th{
+    background:#f8fafc;
+    color:#344054;
+    font-weight:800;
+}
+
+tr:hover td{
+    background:#fafbff;
+}
+
+/* ================= FLOWCHART ================= */
+
+.flowchart{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    padding:20px;
+    background:#f8fafc;
+    border-radius:16px;
+}
+
+.flow-box{
+    width:min(100%,330px);
+    padding:13px 18px;
+    border:2px solid #c7d2fe;
+    background:#fff;
+    border-radius:12px;
+    text-align:center;
+    font-weight:800;
+    color:#3730a3;
+    animation:flowGlow 2.5s infinite;
+}
+
+.flow-box.decision{
+    transform:rotate(45deg);
+    width:135px;
+    height:135px;
+    display:grid;
+    place-items:center;
+    margin:20px;
+}
+
+.flow-box.decision span{
+    transform:rotate(-45deg);
+}
+
+.flow-arrow{
+    color:var(--primary);
+    font-size:25px;
+    animation:downPulse 1.2s infinite;
+}
+
+@keyframes downPulse{
+    0%,100%{transform:translateY(0);opacity:.5}
+    50%{transform:translateY(6px);opacity:1}
+}
+
+@keyframes flowGlow{
+    0%,100%{box-shadow:0 0 0 rgba(79,70,229,0)}
+    50%{box-shadow:0 0 20px rgba(79,70,229,.12)}
+}
+
+/* ================= COMPARISON ================= */
+
+.compare{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+}
+
+.compare-box{
+    padding:22px;
+    border-radius:16px;
+    border:1px solid var(--border);
+}
+
+.compare-box.stack{
+    background:#f8fafc;
+}
+
+.compare-box.heap{
+    background:#f5f3ff;
+    border-color:#ddd6fe;
+}
+
+.compare-box h3{
+    margin-bottom:8px;
+}
+
+/* ================= INTERACTIVE LAB ================= */
+
+.lab{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:25px;
+    box-shadow:var(--shadow-sm);
+}
+
+.lab-controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    margin:18px 0;
+}
+
+.btn{
+    border:0;
+    background:var(--primary);
+    color:#fff;
+    padding:10px 15px;
+    border-radius:10px;
+    font-weight:800;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 7px 15px rgba(79,70,229,.2);
+}
+
+.btn.secondary{
+    background:#eef2ff;
+    color:var(--primary-dark);
+}
+
+.btn.danger{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.lab-memory{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    min-height:100px;
+    padding:18px;
+    background:#111827;
+    border-radius:14px;
+}
+
+.lab-cell{
+    width:80px;
+    height:70px;
+    display:grid;
+    place-items:center;
+    border-radius:10px;
+    border:1px solid #475569;
+    color:#e5e7eb;
+    background:#1e293b;
+    font-size:12px;
+    animation:allocate .4s;
+}
+
+.lab-cell.active{
+    background:#312e81;
+    border-color:#818cf8;
+}
+
+.lab-output{
+    margin-top:15px;
+    padding:13px;
+    border-radius:10px;
+    background:#f8fafc;
+    color:#475467;
+    font-family:monospace;
+    min-height:45px;
+}
+
+/* ================= LEAK DEMO ================= */
+
+.leak-demo{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+}
+
+.leak-box{
+    padding:22px;
+    border:1px solid var(--border);
+    border-radius:16px;
+    text-align:center;
+}
+
+.leak-memory{
+    min-height:100px;
+    background:#111827;
+    border-radius:12px;
+    margin-top:15px;
+    padding:15px;
+    display:flex;
+    justify-content:center;
+    gap:7px;
+}
+
+.leak-cell{
+    width:50px;
+    height:50px;
+    background:#312e81;
+    border:1px solid #818cf8;
+    border-radius:8px;
+    animation:leakPulse 1.5s infinite;
+}
+
+@keyframes leakPulse{
+    0%,100%{opacity:.7}
+    50%{opacity:1}
+}
+
+/* ================= QUIZ ================= */
+
+.quiz{
+    border:1px solid var(--border);
+    border-radius:17px;
+    padding:20px;
+    margin:15px 0;
+    background:#fff;
+}
+
+.quiz-question{
+    font-weight:800;
+    margin-bottom:12px;
+}
+
+.option{
+    display:block;
+    padding:10px 12px;
+    border:1px solid var(--border);
+    border-radius:9px;
+    margin:7px 0;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.option:hover{
+    background:#f7f7ff;
+}
+
+.option.correct{
+    background:#ecfdf3;
+    border-color:#86efac;
+}
+
+.option.wrong{
+    background:#fff1f2;
+    border-color:#fda4af;
+}
+
+.quiz-result{
+    margin-top:10px;
+    font-weight:800;
+}
+
+/* ================= ACCORDION ================= */
+
+.accordion{
+    border:1px solid var(--border);
+    border-radius:13px;
+    overflow:hidden;
+    margin:10px 0;
+}
+
+.acc-head{
+    width:100%;
+    border:0;
+    background:#fff;
+    padding:16px;
+    text-align:left;
+    font-weight:800;
+    cursor:pointer;
+    display:flex;
+    justify-content:space-between;
+}
+
+.acc-body{
+    max-height:0;
+    overflow:hidden;
+    padding:0 16px;
+    background:#fafbff;
+    transition:max-height .35s ease,padding .35s ease;
+}
+
+.acc-body.open{
+    max-height:400px;
+    padding:15px 16px;
+}
+
+/* ================= MISTAKES ================= */
+
+.mistake{
+    display:flex;
+    gap:12px;
+    padding:15px;
+    border:1px solid var(--border);
+    border-radius:13px;
+    margin:10px 0;
+    background:#fff;
+}
+
+.mistake-icon{
+    font-size:22px;
+}
+
+/* ================= PRACTICE ================= */
+
+.practice{
+    border-left:4px solid var(--secondary);
+    background:#faf5ff;
+    padding:18px;
+    border-radius:0 14px 14px 0;
+    margin:10px 0;
+}
+
+.practice strong{
+    display:block;
+    color:#5b21b6;
+}
+
+/* ================= FOOTER ================= */
+
+.footer{
+    text-align:center;
+    padding:40px 10px;
+    color:#98a2b3;
+    border-top:1px solid var(--border);
+    margin-top:60px;
+}
+
+/* ================= REVEAL ================= */
+
+.reveal{
+    opacity:0;
+    transform:translateY(25px);
+    transition:.7s ease;
+}
+
+.reveal.show{
+    opacity:1;
+    transform:translateY(0);
+}
+
+/* ================= BACK TOP ================= */
+
+.back-top{
+    position:fixed;
+    right:22px;
+    bottom:22px;
+    width:43px;
+    height:43px;
+    border:0;
+    border-radius:50%;
+    background:var(--primary);
+    color:#fff;
+    cursor:pointer;
+    display:none;
+    z-index:999;
+    box-shadow:0 8px 20px rgba(79,70,229,.25);
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:1100px){
+    .sidebar{
+        width:230px;
+    }
+
+    main{
+        margin-left:230px;
+        padding-left:25px;
+        padding-right:25px;
+    }
+
+    .objectives{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:800px){
+    .mobile-menu{
+        display:block;
+    }
+
+    .sidebar{
+        transform:translateX(-100%);
+        transition:.3s;
+        width:275px;
+    }
+
+    .sidebar.open{
+        transform:translateX(0);
+    }
+
+    main{
+        margin-left:0;
+        padding:88px 17px 50px;
+    }
+
+    .top-right .badge{
+        display:none;
+    }
+
+    .hero{
+        padding:28px 22px;
+    }
+
+    .grid,
+    .compare,
+    .leak-demo,
+    .memory-layout{
+        grid-template-columns:1fr;
+    }
+
+    .objectives,
+    .grid-3{
+        grid-template-columns:1fr;
+    }
+
+    .hero h1{
+        font-size:38px;
+    }
+}
+
+@media(max-width:500px){
+    .topbar{
+        padding:0 13px;
+    }
+
+    .hero h1{
+        font-size:32px;
+    }
+
+    .section h2{
+        font-size:25px;
+    }
+
+    .card{
+        padding:18px;
+    }
+
+    pre{
+        font-size:11px;
+        padding:16px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ======================================================
+     TOP BAR
+====================================================== -->
+
+<header class="topbar">
+
+    <div class="brand">
+        <div class="logo">Z</div>
+        <div>
+            ZENSUS
+            <small>C Programming • Lesson 14</small>
+        </div>
+    </div>
+
+    <div class="top-right">
+        <span class="badge">Dynamic Memory Allocation</span>
+        <button class="mobile-menu" onclick="toggleSidebar()">☰</button>
+    </div>
+
+</header>
+
+
+<!-- ======================================================
+     SIDEBAR
+====================================================== -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-title">Lesson 14</div>
+
+    <a href="#intro" class="side-link active">🚀 Introduction</a>
+    <a href="#memory" class="side-link">🧠 Memory Model</a>
+    <a href="#heap" class="side-link">📦 Heap Memory</a>
+    <a href="#malloc" class="side-link">🔹 malloc()</a>
+    <a href="#calloc" class="side-link">🔹 calloc()</a>
+    <a href="#realloc" class="side-link">🔄 realloc()</a>
+    <a href="#free" class="side-link">🗑️ free()</a>
+    <a href="#compare" class="side-link">⚖️ Comparison</a>
+    <a href="#pointers" class="side-link">🎯 Pointers + DMA</a>
+    <a href="#arrays" class="side-link">📊 Dynamic Arrays</a>
+    <a href="#strings" class="side-link">🔤 Dynamic Strings</a>
+    <a href="#structures" class="side-link">🏗️ Dynamic Structures</a>
+    <a href="#leaks" class="side-link">⚠️ Memory Leaks</a>
+    <a href="#dangling" class="side-link">💥 Dangling Pointers</a>
+    <a href="#errors" class="side-link">🛡️ Safety</a>
+    <a href="#lab" class="side-link">🧪 Interactive Lab</a>
+    <a href="#examples" class="side-link">💻 Examples</a>
+    <a href="#project" class="side-link">🏆 Mini Project</a>
+    <a href="#mistakes" class="side-link">❌ Mistakes</a>
+    <a href="#interview" class="side-link">🎤 Interview</a>
+    <a href="#quiz" class="side-link">📝 Quiz</a>
+    <a href="#exam" class="side-link">🎓 Exam Prep</a>
+    <a href="#practice" class="side-link">🔥 Practice</a>
+    <a href="#summary" class="side-link">⚡ Revision</a>
+
+    <div class="progress-box">
+        <div class="progress-label">
+            <span>Lesson Progress</span>
+            <strong>93%</strong>
+        </div>
+
+        <div class="progress">
+            <div class="progress-fill"></div>
+        </div>
+    </div>
+
+</aside>
+
+
+<!-- ======================================================
+     MAIN
+====================================================== -->
+
+<main>
+
+<!-- ======================================================
+     HERO
+====================================================== -->
+
+<section class="hero reveal" id="intro">
+
+    <div class="lesson-tag">
+        LESSON 14 • C PROGRAMMING
+    </div>
+
+    <h1>
+        Dynamic Memory
+        <span class="gradient-text">Allocation</span>
+    </h1>
+
+    <p>
+        Learn how C programs dynamically request, resize and release
+        memory at runtime using <strong>malloc(), calloc(), realloc()
+        and free()</strong> — from absolute beginner concepts to
+        interview-level memory management.
+    </p>
+
+    <div class="hero-meta">
+        <span class="meta">Beginner → Advanced</span>
+        <span class="meta">Heap Memory</span>
+        <span class="meta">Pointers</span>
+        <span class="meta">Interview Ready</span>
+        <span class="meta">Lesson 14 / 15</span>
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     OBJECTIVES
+====================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+        <div class="section-number">01 • Learning Objectives</div>
+        <h2>What you will master</h2>
+        <p class="section-subtitle">
+            By the end of this lesson, you should be able to manage memory dynamically and safely.
+        </p>
+    </div>
+
+    <div class="objectives">
+
+        <div class="objective">
+            <div class="objective-icon">🧠</div>
+            <strong>Understand Heap</strong>
+            <span>Learn why runtime memory allocation is required.</span>
+        </div>
+
+        <div class="objective">
+            <div class="objective-icon">📦</div>
+            <strong>malloc()</strong>
+            <span>Allocate uninitialized dynamic memory.</span>
+        </div>
+
+        <div class="objective">
+            <div class="objective-icon">🔢</div>
+            <strong>calloc()</strong>
+            <span>Allocate memory initialized to zero.</span>
+        </div>
+
+        <div class="objective">
+            <div class="objective-icon">🔄</div>
+            <strong>realloc()</strong>
+            <span>Resize an existing allocation.</span>
+        </div>
+
+        <div class="objective">
+            <div class="objective-icon">🗑️</div>
+            <strong>free()</strong>
+            <span>Return dynamically allocated memory.</span>
+        </div>
+
+        <div class="objective">
+            <div class="objective-icon">🛡️</div>
+            <strong>Memory Safety</strong>
+            <span>Avoid leaks, dangling pointers and invalid access.</span>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     WHY DMA
+====================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+        <div class="section-number">02 • The Big Idea</div>
+        <h2>Why do we need Dynamic Memory?</h2>
+    </div>
+
+    <div class="card">
+
+        <p>
+            Traditional arrays have a size that is normally fixed when
+            the array object is created. But real applications often
+            don't know how much memory they will need beforehand.
+        </p>
+
+        <br>
+
+        <div class="compare">
+
+            <div class="compare-box stack">
+
+                <h3>❌ Fixed-size approach</h3>
+
+<pre><code>int marks[100];</code></pre>
+
+                <p>
+                    What if only 5 students exist?
+                    You reserve space for 100.
+                </p>
+
+            </div>
+
+            <div class="compare-box heap">
+
+                <h3>✅ Dynamic approach</h3>
+
+<pre><code>int *marks;
+
+marks = malloc(n * sizeof *marks);</code></pre>
+
+                <p>
+                    Allocate memory according to the actual runtime requirement.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     MEMORY MODEL
+====================================================== -->
+
+<section class="section reveal" id="memory">
+
+    <div class="section-header">
+        <div class="section-number">03 • Memory Fundamentals</div>
+        <h2>Where does memory live?</h2>
+        <p class="section-subtitle">
+            Understanding memory regions makes DMA much easier.
+        </p>
+    </div>
+
+    <div class="card">
+
+        <div class="memory-stage">
+
+            <div class="memory-title">
+                Simplified Process Memory
+            </div>
+
+            <div class="memory-layout">
+
+                <div class="memory-zone stack-zone">
+
+                    <div class="zone-label">
+                        STACK
+                    </div>
+
+                    <div class="stack-box">
+                        int x = 10;
+                    </div>
+
+                    <div class="stack-box">
+                        int arr[5];
+                    </div>
+
+                    <div class="stack-box">
+                        function call data
+                    </div>
+
+                </div>
+
+                <div class="memory-zone heap-zone">
+
+                    <div class="zone-label">
+                        HEAP
+                    </div>
+
+                    <div id="heapCells">
+
+                        <div class="heap-cell">
+                            free
+                            <small>block</small>
+                        </div>
+
+                        <div class="heap-cell">
+                            free
+                            <small>block</small>
+                        </div>
+
+                        <div class="heap-cell">
+                            free
+                            <small>block</small>
+                        </div>
+
+                        <div class="heap-cell">
+                            free
+                            <small>block</small>
+                        </div>
+
+                    </div>
+
+                    <div class="pointer-arrow">
+                        ↑ pointer refers to allocated heap memory
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="note">
+
+        <strong>Important:</strong>
+        The stack and heap are conceptual regions used to explain
+        typical process memory organization. Exact layout is
+        implementation and operating-system dependent.
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     HEAP
+====================================================== -->
+
+<section class="section reveal" id="heap">
+
+    <div class="section-header">
+        <div class="section-number">04 • Heap Memory</div>
+        <h2>What is the Heap?</h2>
+    </div>
+
+    <div class="card">
+
+        <p>
+            The <strong>heap</strong> is the memory area from which
+            dynamic allocation functions obtain storage during program
+            execution.
+        </p>
+
+        <div class="alloc-demo">
+
+            <div class="demo-step">
+                Program
+            </div>
+
+            <div class="demo-arrow">→</div>
+
+            <div class="demo-step">
+                Request memory
+            </div>
+
+            <div class="demo-arrow">→</div>
+
+            <div class="demo-step">
+                Allocator
+            </div>
+
+            <div class="demo-arrow">→</div>
+
+            <div class="demo-step">
+                Heap block
+            </div>
+
+            <div class="demo-arrow">→</div>
+
+            <div class="demo-step">
+                Pointer
+            </div>
+
+        </div>
+
+        <div class="note success">
+
+            <strong>Core idea:</strong>
+            Dynamic memory is accessed through pointers because
+            allocation functions return an address to the allocated storage.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     MALLOC
+====================================================== -->
+
+<section class="section reveal" id="malloc">
+
+    <div class="section-header">
+        <div class="section-number">05 • malloc()</div>
+        <h2>malloc() — Allocate memory at runtime</h2>
+    </div>
+
+    <div class="card">
+
+        <span class="function-name">malloc()</span>
+
+        <p>
+            <strong>malloc</strong> stands for
+            <strong>memory allocation</strong>.
+            It requests a block of memory containing the requested
+            number of bytes.
+        </p>
+
+<pre><code>#include &lt;stdlib.h&gt;
+
+int *p;
+
+p = malloc(5 * sizeof *p);</code></pre>
+
+        <div class="note">
+
+            <strong>Return value:</strong>
+            On success, malloc returns a pointer to the allocated block.
+            On failure, it returns <code>NULL</code>.
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>🎬 malloc() Animation</h3>
+
+        <div class="memory-stage">
+
+            <div class="memory-title">
+                Before malloc()
+            </div>
+
+            <div id="mallocAnimation" style="text-align:center">
+
+                <div style="
+                    display:inline-block;
+                    padding:15px 25px;
+                    border:2px dashed #64748b;
+                    border-radius:12px;
+                    color:#cbd5e1;">
+                    Heap is available
+                </div>
+
+            </div>
+
+        </div>
+
+        <br>
+
+        <button class="btn" onclick="runMallocAnimation()">
+            ▶ Allocate 5 integers
+        </button>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Complete malloc() example</h3>
+
+<div class="code-wrap">
+
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main(void)
+{
+    int n = 5;
+
+    int *p = malloc(n * sizeof *p);
+
+    if (p == NULL)
+    {
+        printf("Memory allocation failed\n");
+        return 1;
+    }
+
+    for (int i = 0; i &lt; n; i++)
+    {
+        p[i] = (i + 1) * 10;
+        printf("%d ", p[i]);
+    }
+
+    free(p);
+
+    return 0;
+}</code></pre>
+
+</div>
+
+        <div class="note warning">
+
+            <strong>Uninitialized memory:</strong>
+            malloc does not initialize the allocated bytes.
+            Reading an element before storing a valid value is a bug.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     CALLOC
+====================================================== -->
+
+<section class="section reveal" id="calloc">
+
+    <div class="section-header">
+        <div class="section-number">06 • calloc()</div>
+        <h2>calloc() — Allocate and initialize</h2>
+    </div>
+
+    <div class="card">
+
+        <span class="function-name">calloc()</span>
+
+        <p>
+            <strong>calloc</strong> allocates space for an array of
+            elements and initializes all allocated bytes to zero.
+        </p>
+
+<pre><code>int *p;
+
+p = calloc(5, sizeof *p);</code></pre>
+
+        <div class="memory-stage">
+
+            <div class="memory-title">
+                calloc(5, sizeof(int))
+            </div>
+
+            <div style="
+                display:flex;
+                justify-content:center;
+                flex-wrap:wrap;
+                gap:8px;">
+
+                <div class="heap-cell allocated">
+                    0
+                    <small>p[0]</small>
+                </div>
+
+                <div class="heap-cell allocated">
+                    0
+                    <small>p[1]</small>
+                </div>
+
+                <div class="heap-cell allocated">
+                    0
+                    <small>p[2]</small>
+                </div>
+
+                <div class="heap-cell allocated">
+                    0
+                    <small>p[3]</small>
+                </div>
+
+                <div class="heap-cell allocated">
+                    0
+                    <small>p[4]</small>
+                </div>
+
+            </div>
+
+        </div>
+
+        <br>
+
+<div class="code-wrap">
+
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main(void)
+{
+    int n = 5;
+
+    int *p = calloc(n, sizeof *p);
+
+    if (p == NULL)
+    {
+        return 1;
+    }
+
+    for (int i = 0; i &lt; n; i++)
+    {
+        printf("%d ", p[i]);
+    }
+
+    free(p);
+
+    return 0;
+}</code></pre>
+
+</div>
+
+    </div>
+
+    <div class="note">
+
+        <strong>malloc vs calloc:</strong>
+        malloc takes the total number of bytes.
+        calloc takes a number of elements and the size of each element.
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     REAL DIFFERENCE
+====================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+        <div class="section-number">07 • malloc vs calloc</div>
+        <h2>Understand the difference visually</h2>
+    </div>
+
+    <div class="card">
+
+        <div class="compare">
+
+            <div class="compare-box">
+
+                <h3>malloc()</h3>
+
+                <div class="memory-stage">
+
+                    <div style="
+                        display:flex;
+                        justify-content:center;
+                        flex-wrap:wrap;">
+
+                        <div class="heap-cell allocated">?</div>
+                        <div class="heap-cell allocated">?</div>
+                        <div class="heap-cell allocated">?</div>
+                        <div class="heap-cell allocated">?</div>
+
+                    </div>
+
+                </div>
+
+                <p>
+                    Memory contents are indeterminate immediately after
+                    successful allocation.
+                </p>
+
+            </div>
+
+            <div class="compare-box">
+
+                <h3>calloc()</h3>
+
+                <div class="memory-stage">
+
+                    <div style="
+                        display:flex;
+                        justify-content:center;
+                        flex-wrap:wrap;">
+
+                        <div class="heap-cell allocated">0</div>
+                        <div class="heap-cell allocated">0</div>
+                        <div class="heap-cell allocated">0</div>
+                        <div class="heap-cell allocated">0</div>
+
+                    </div>
+
+                </div>
+
+                <p>
+                    All allocated bytes are initialized to zero.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     REALLOC
+====================================================== -->
+
+<section class="section reveal" id="realloc">
+
+    <div class="section-header">
+        <div class="section-number">08 • realloc()</div>
+        <h2>realloc() — Resize dynamic memory</h2>
+    </div>
+
+    <div class="card">
+
+        <span class="function-name">realloc()</span>
+
+        <p>
+            <strong>realloc()</strong> changes the size of a previously
+            allocated memory block.
+        </p>
+
+<pre><code>int *temp = realloc(p, newSize * sizeof *p);</code></pre>
+
+        <div class="note warning">
+
+            <strong>Critical rule:</strong>
+            Do not directly overwrite your only pointer with realloc
+            if failure would cause you to lose the original block.
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>🎬 Dynamic resizing animation</h3>
+
+        <div class="memory-stage">
+
+            <div class="memory-title">
+                Initial allocation → resize
+            </div>
+
+            <div id="reallocVisual" style="
+                display:flex;
+                justify-content:center;
+                flex-wrap:wrap;
+                gap:7px;">
+
+                <div class="heap-cell allocated">10</div>
+                <div class="heap-cell allocated">20</div>
+                <div class="heap-cell allocated">30</div>
+
+            </div>
+
+        </div>
+
+        <br>
+
+        <button class="btn" onclick="resizeVisual()">
+            🔄 Resize to 6 elements
+        </button>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Safe realloc pattern</h3>
+
+<div class="code-wrap">
+
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+
+<pre><code>int *temp;
+
+temp = realloc(p, newSize * sizeof *p);
+
+if (temp == NULL)
+{
+    /* Original p is still valid */
+}
+else
+{
+    p = temp;
+}</code></pre>
+
+</div>
+
+        <div class="note success">
+
+            <strong>Why temp?</strong>
+            If realloc fails, the original block remains allocated and
+            the original pointer can still be used or freed.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     REALLOC RULES
+====================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+        <div class="section-number">09 • realloc() Rules</div>
+        <h2>What can happen during realloc?</h2>
+    </div>
+
+    <div class="grid">
+
+        <div class="card">
+
+            <h3>Case 1 — Expand in place</h3>
+
+            <p>
+                The allocator may be able to enlarge the existing block
+                at the same address.
+            </p>
+
+<pre><code>old address
+     ↓
+[10][20][30]
+
+realloc()
+
+     ↓
+
+[10][20][30][40][50]</code></pre>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Case 2 — Move the block</h3>
+
+            <p>
+                The allocator may allocate a new block, copy the old
+                contents, release the old block and return a new address.
+            </p>
+
+<pre><code>OLD
+[10][20][30]
+   ↓
+copy
+   ↓
+NEW
+[10][20][30][40][50]</code></pre>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     FREE
+====================================================== -->
+
+<section class="section reveal" id="free">
+
+    <div class="section-header">
+        <div class="section-number">10 • free()</div>
+        <h2>free() — Release memory</h2>
+    </div>
+
+    <div class="card">
+
+        <span class="function-name">free()</span>
+
+        <p>
+            When dynamically allocated memory is no longer required,
+            return it to the allocator using <strong>free()</strong>.
+        </p>
+
+<pre><code>free(p);</code></pre>
+
+        <div class="alloc-demo">
+
+            <div class="demo-step">
+                Pointer
+                <br>
+                <strong>p</strong>
+            </div>
+
+            <div class="demo-arrow">→</div>
+
+            <div class="demo-step">
+                Heap Block
+                <br>
+                <strong>[ allocated ]</strong>
+            </div>
+
+            <div class="demo-arrow">→</div>
+
+            <div class="demo-step">
+                free(p)
+            </div>
+
+            <div class="demo-arrow">→</div>
+
+            <div class="demo-step">
+                Available
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="note danger">
+
+        <strong>Very important:</strong>
+        After <code>free(p)</code>, the pointer value stored in
+        <code>p</code> should not be dereferenced. A common defensive
+        pattern is <code>free(p); p = NULL;</code> when that pointer
+        variable is no longer needed.
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     MALLOC CALLOC REALLOC FREE FLOW
+====================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+        <div class="section-number">11 • Complete Lifecycle</div>
+        <h2>Dynamic memory lifecycle</h2>
+    </div>
+
+    <div class="card">
+
+        <div class="flowchart">
+
+            <div class="flow-box">
+                Declare pointer
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="flow-box">
+                Request memory
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="flow-box">
+                Check NULL
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="flow-box">
+                Use memory
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="flow-box">
+                Resize if required
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="flow-box">
+                free()
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="flow-box">
+                Set pointer to NULL when appropriate
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     COMPARISON TABLE
+====================================================== -->
+
+<section class="section reveal" id="compare">
+
+    <div class="section-header">
+        <div class="section-number">12 • Comparison</div>
+        <h2>malloc vs calloc vs realloc vs free</h2>
+    </div>
+
+    <div class="card table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Function</th>
+                    <th>Purpose</th>
+                    <th>Arguments</th>
+                    <th>Initialization</th>
+                    <th>Return</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td><strong>malloc()</strong></td>
+                    <td>Allocate memory</td>
+                    <td>Total bytes</td>
+                    <td>Not initialized</td>
+                    <td>Pointer / NULL</td>
+                </tr>
+
+                <tr>
+                    <td><strong>calloc()</strong></td>
+                    <td>Allocate array-like storage</td>
+                    <td>Count + size</td>
+                    <td>All bytes zero</td>
+                    <td>Pointer / NULL</td>
+                </tr>
+
+                <tr>
+                    <td><strong>realloc()</strong></td>
+                    <td>Resize allocation</td>
+                    <td>Pointer + new size</td>
+                    <td>Preserves existing contents up to limits</td>
+                    <td>New pointer / NULL</td>
+                </tr>
+
+                <tr>
+                    <td><strong>free()</strong></td>
+                    <td>Release allocation</td>
+                    <td>Pointer</td>
+                    <td>Not applicable</td>
+                    <td>void</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     POINTERS
+====================================================== -->
+
+<section class="section reveal" id="pointers">
+
+    <div class="section-header">
+        <div class="section-number">13 • Pointers + DMA</div>
+        <h2>Why pointers are essential</h2>
+    </div>
+
+    <div class="card">
+
+        <p>
+            Dynamic allocation functions return addresses.
+            A pointer stores those addresses so the program can access
+            the allocated object.
+        </p>
+
+<pre><code>int *p = malloc(sizeof *p);
+
+if (p != NULL)
+{
+    *p = 100;
+
+    printf("%d\n", *p);
+
+    free(p);
+}</code></pre>
+
+        <div class="alloc-demo">
+
+            <div class="demo-step">
+                p
+                <br>
+                <strong>0x1000</strong>
+            </div>
+
+            <div class="demo-arrow">→</div>
+
+            <div class="demo-step">
+                Heap
+                <br>
+                <strong>100</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     DYNAMIC ARRAYS
+====================================================== -->
+
+<section class="section reveal" id="arrays">
+
+    <div class="section-header">
+        <div class="section-number">14 • Dynamic Arrays</div>
+        <h2>Create arrays at runtime</h2>
+    </div>
+
+    <div class="card">
+
+        <p>
+            Dynamic memory is particularly useful when the number of
+            elements is known only while the program is running.
+        </p>
+
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main(void)
+{
+    int n;
+
+    printf("Enter number of elements: ");
+    scanf("%d", &amp;n);
+
+    if (n &lt;= 0)
+    {
+        return 1;
+    }
+
+    int *arr = malloc((size_t)n * sizeof *arr);
+
+    if (arr == NULL)
+    {
+        printf("Allocation failed\n");
+        return 1;
+    }
+
+    for (int i = 0; i &lt; n; i++)
+    {
+        scanf("%d", &amp;arr[i]);
+    }
+
+    for (int i = 0; i &lt; n; i++)
+    {
+        printf("%d ", arr[i]);
+    }
+
+    free(arr);
+
+    return 0;
+}</code></pre>
+
+        <div class="note">
+
+            <strong>Key connection:</strong>
+            <code>arr[i]</code> works with a dynamically allocated array
+            because the pointer returned by malloc points to contiguous
+            storage suitable for the allocated elements.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     DYNAMIC 2D ARRAY
+====================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+        <div class="section-number">15 • Dynamic 2D Arrays</div>
+        <h2>Dynamic matrix allocation</h2>
+    </div>
+
+    <div class="card">
+
+        <h3>Method 1 — Single contiguous block</h3>
+
+<pre><code>int rows = 3;
+int cols = 4;
+
+int *matrix = malloc(
+    (size_t)rows * cols * sizeof *matrix
+);
+
+if (matrix == NULL)
+{
+    return 1;
+}
+
+matrix[i * cols + j] = 50;
+
+free(matrix);</code></pre>
+
+        <div class="note">
+
+            <strong>Index formula:</strong>
+
+            <br>
+
+            <code>matrix[i * cols + j]</code>
+
+            <br><br>
+
+            This stores the entire matrix in one contiguous allocation.
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Method 2 — Array of row pointers</h3>
+
+<pre><code>int **matrix = malloc(rows * sizeof *matrix);
+
+if (matrix == NULL)
+{
+    return 1;
+}
+
+for (int i = 0; i &lt; rows; i++)
+{
+    matrix[i] = malloc(cols * sizeof *matrix[i]);
+
+    if (matrix[i] == NULL)
+    {
+        /* cleanup previously allocated rows */
+    }
+}
+
+/* use matrix[i][j] */
+
+/* free each row */
+for (int i = 0; i &lt; rows; i++)
+{
+    free(matrix[i]);
+}
+
+free(matrix);</code></pre>
+
+        <div class="note warning">
+
+            <strong>Important:</strong>
+            <code>int **</code> is not automatically the same thing as
+            a pointer to a contiguous 2D array. These are different
+            memory layouts.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     DYNAMIC STRINGS
+====================================================== -->
+
+<section class="section reveal" id="strings">
+
+    <div class="section-header">
+        <div class="section-number">16 • Dynamic Strings</div>
+        <h2>Dynamic character storage</h2>
+    </div>
+
+    <div class="card">
+
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+int main(void)
+{
+    const char *source = "ZENSUS";
+
+    char *name = malloc(strlen(source) + 1);
+
+    if (name == NULL)
+    {
+        return 1;
+    }
+
+    strcpy(name, source);
+
+    printf("%s\n", name);
+
+    free(name);
+
+    return 0;
+}</code></pre>
+
+        <div class="note success">
+
+            <strong>Why +1?</strong>
+            A C string needs space for its terminating
+            <code>'\0'</code> character.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     DYNAMIC STRUCTURES
+====================================================== -->
+
+<section class="section reveal" id="structures">
+
+    <div class="section-header">
+        <div class="section-number">17 • Dynamic Structures</div>
+        <h2>Allocate structures dynamically</h2>
+    </div>
+
+    <div class="card">
+
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+struct Student
+{
+    int roll;
+    char name[50];
+    float cgpa;
+};
+
+int main(void)
+{
+    struct Student *s =
+        malloc(sizeof *s);
+
+    if (s == NULL)
+    {
+        return 1;
+    }
+
+    s-&gt;roll = 101;
+    s-&gt;cgpa = 8.8f;
+
+    printf("Roll: %d\n", s-&gt;roll);
+    printf("CGPA: %.2f\n", s-&gt;cgpa);
+
+    free(s);
+
+    return 0;
+}</code></pre>
+
+        <div class="note">
+
+            <strong>Remember:</strong>
+            For a pointer to a structure,
+            <code>s-&gt;roll</code> is the convenient equivalent of
+            <code>(*s).roll</code>.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     ARRAY OF STRUCTURES
+====================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+        <div class="section-number">18 • Dynamic Record Storage</div>
+        <h2>Dynamic array of structures</h2>
+    </div>
+
+    <div class="card">
+
+<pre><code>int n;
+
+scanf("%d", &amp;n);
+
+struct Student *students =
+    malloc((size_t)n * sizeof *students);
+
+if (students == NULL)
+{
+    return 1;
+}
+
+for (int i = 0; i &lt; n; i++)
+{
+    scanf("%d", &amp;students[i].roll);
+}
+
+free(students);</code></pre>
+
+        <p>
+            This pattern is the foundation for many real-world
+            record-management systems.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     MEMORY LEAKS
+====================================================== -->
+
+<section class="section reveal" id="leaks">
+
+    <div class="section-header">
+        <div class="section-number">19 • Memory Leaks</div>
+        <h2>Memory Leak — the silent problem</h2>
+    </div>
+
+    <div class="card">
+
+        <p>
+            A <strong>memory leak</strong> occurs when dynamically
+            allocated memory remains allocated but the program loses
+            the ability to access and release it.
+        </p>
+
+<pre><code>int *p = malloc(100 * sizeof *p);
+
+/* use p */
+
+p = NULL;   // ❌ lost the allocation
+
+/* original block can no longer be freed through p */</code></pre>
+
+        <div class="leak-demo">
+
+            <div class="leak-box">
+
+                <h3>❌ Leak</h3>
+
+                <div class="leak-memory">
+
+                    <div class="leak-cell"></div>
+                    <div class="leak-cell"></div>
+                    <div class="leak-cell"></div>
+
+                </div>
+
+                <p>
+                    Allocation still exists but pointer was lost.
+                </p>
+
+            </div>
+
+            <div class="leak-box">
+
+                <h3>✅ Correct</h3>
+
+                <div class="leak-memory">
+
+                    <div style="
+                        color:#86efac;
+                        display:grid;
+                        place-items:center;
+                        width:100%;">
+                        free(p)
+                    </div>
+
+                </div>
+
+                <p>
+                    Memory is explicitly released.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     DANGLING
+====================================================== -->
+
+<section class="section reveal" id="dangling">
+
+    <div class="section-header">
+        <div class="section-number">20 • Dangling Pointers</div>
+        <h2>Dangling Pointer</h2>
+    </div>
+
+    <div class="card">
+
+<pre><code>int *p = malloc(sizeof *p);
+
+*p = 50;
+
+free(p);
+
+/* ❌ p is now a dangling pointer */
+printf("%d", *p);</code></pre>
+
+        <div class="note danger">
+
+            <strong>Never dereference a pointer after its pointed-to
+            storage has been released.</strong>
+
+        </div>
+
+        <h3>Safer pattern</h3>
+
+<pre><code>free(p);
+p = NULL;</code></pre>
+
+        <p>
+            Setting that particular pointer variable to NULL makes
+            accidental use through that variable easier to detect.
+            It does not magically invalidate other aliases pointing
+            to the same released storage.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     DOUBLE FREE
+====================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+        <div class="section-number">21 • Double Free</div>
+        <h2>Never release the same allocation twice</h2>
+    </div>
+
+    <div class="card">
+
+<pre><code>int *p = malloc(sizeof *p);
+
+free(p);
+
+free(p);   // ❌ invalid: double free</code></pre>
+
+        <div class="note success">
+
+            <strong>Safer pattern:</strong>
+
+<pre><code>free(p);
+p = NULL;
+
+free(p);   // free(NULL) is safe</code></pre>
+
+            In C, calling <code>free(NULL)</code> has no effect.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     USE AFTER FREE
+====================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+        <div class="section-number">22 • Use After Free</div>
+        <h2>Use-after-free</h2>
+    </div>
+
+    <div class="card">
+
+<pre><code>int *p = malloc(sizeof *p);
+
+*p = 100;
+
+free(p);
+
+/* ❌ Undefined behavior */
+*p = 200;</code></pre>
+
+        <div class="note danger">
+
+            <strong>Rule:</strong>
+            Once storage is released, stop using it through the pointer.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     ALLOCATION FAILURE
+====================================================== -->
+
+<section class="section reveal" id="errors">
+
+    <div class="section-header">
+        <div class="section-number">23 • Allocation Failure</div>
+        <h2>What if malloc() returns NULL?</h2>
+    </div>
+
+    <div class="card">
+
+<pre><code>int *p = malloc(1000000000ULL * sizeof *p);
+
+if (p == NULL)
+{
+    printf("Allocation failed\n");
+    return 1;
+}</code></pre>
+
+        <div class="note warning">
+
+            <strong>Never assume allocation always succeeds.</strong>
+            A robust program checks the returned pointer before
+            dereferencing it.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     SIZEOF
+====================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+        <div class="section-number">24 • sizeof()</div>
+        <h2>The safest allocation-size pattern</h2>
+    </div>
+
+    <div class="card">
+
+<pre><code>int *p = malloc(n * sizeof *p);</code></pre>
+
+        <p>
+            This is preferable to manually writing
+            <code>sizeof(int)</code> because the allocation remains
+            naturally tied to the type of the pointer.
+        </p>
+
+<pre><code>struct Student *s =
+    malloc(n * sizeof *s);</code></pre>
+
+        <div class="note">
+
+            <strong>Exam tip:</strong>
+            <code>sizeof *p</code> means the size of the object that
+            <code>p</code> points to.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     INTEGER OVERFLOW
+====================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+        <div class="section-number">25 • Advanced Safety</div>
+        <h2>Watch for size calculation overflow</h2>
+    </div>
+
+    <div class="card">
+
+        <p>
+            When calculating the number of bytes, multiplying large
+            values can overflow the integer type before malloc receives
+            the result.
+        </p>
+
+<pre><code>size_t bytes;
+
+if (n != 0 &amp;&amp; size > SIZE_MAX / n)
+{
+    /* multiplication would overflow */
+}</code></pre>
+
+        <p>
+            Production-quality code should validate sizes before
+            performing potentially overflowing calculations.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     INTERACTIVE LAB
+====================================================== -->
+
+<section class="section reveal" id="lab">
+
+    <div class="section-header">
+        <div class="section-number">26 • Interactive Lab</div>
+        <h2>🎮 Heap Allocation Simulator</h2>
+        <p class="section-subtitle">
+            Experiment with allocation, resizing and releasing memory.
+        </p>
+    </div>
+
+    <div class="lab">
+
+        <div class="lab-controls">
+
+            <button class="btn" onclick="allocateLab(3)">
+                malloc(3)
+            </button>
+
+            <button class="btn secondary" onclick="allocateLab(5)">
+                calloc(5)
+            </button>
+
+            <button class="btn secondary" onclick="resizeLab()">
+                realloc(7)
+            </button>
+
+            <button class="btn danger" onclick="freeLab()">
+                free()
+            </button>
+
+        </div>
+
+        <div class="lab-memory" id="labMemory">
+
+            <div style="
+                color:#94a3b8;
+                width:100%;
+                text-align:center;">
+                Heap is currently empty
+            </div>
+
+        </div>
+
+        <div class="lab-output" id="labOutput">
+            Try an operation above.
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     POINTER VISUAL
+====================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+        <div class="section-number">27 • Pointer Visualization</div>
+        <h2>Pointer → Heap → Value</h2>
+    </div>
+
+    <div class="card">
+
+        <div class="memory-stage">
+
+            <div class="memory-layout">
+
+                <div class="memory-zone">
+
+                    <div class="zone-label">
+                        STACK
+                    </div>
+
+                    <div class="stack-box">
+                        int *p
+                    </div>
+
+                    <div class="pointer-arrow">
+                        ↓
+                    </div>
+
+                    <div class="stack-box">
+                        address = 0x1000
+                    </div>
+
+                </div>
+
+                <div class="memory-zone">
+
+                    <div class="zone-label">
+                        HEAP
+                    </div>
+
+                    <div style="
+                        display:flex;
+                        justify-content:center;">
+
+                        <div class="heap-cell allocated">
+                            100
+                            <small>0x1000</small>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     COMPLETE EXAMPLES
+====================================================== -->
+
+<section class="section reveal" id="examples">
+
+    <div class="section-header">
+        <div class="section-number">28 • Complete Programs</div>
+        <h2>Interview-ready examples</h2>
+    </div>
+
+
+    <div class="card">
+
+        <h3>Example 1 — Sum of dynamic array</h3>
+
+<div class="code-wrap">
+
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main(void)
+{
+    int n;
+
+    scanf("%d", &amp;n);
+
+    if (n &lt;= 0)
+        return 1;
+
+    int *a = malloc((size_t)n * sizeof *a);
+
+    if (a == NULL)
+        return 1;
+
+    long long sum = 0;
+
+    for (int i = 0; i &lt; n; i++)
+    {
+        scanf("%d", &amp;a[i]);
+        sum += a[i];
+    }
+
+    printf("Sum = %lld\n", sum);
+
+    free(a);
+
+    return 0;
+}</code></pre>
+
+</div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Example 2 — Dynamic array growth</h3>
+
+<div class="code-wrap">
+
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main(void)
+{
+    size_t capacity = 2;
+    size_t size = 0;
+
+    int *a = malloc(capacity * sizeof *a);
+
+    if (a == NULL)
+        return 1;
+
+    for (int value = 10; value &lt;= 50; value += 10)
+    {
+        if (size == capacity)
+        {
+            size_t newCapacity = capacity * 2;
+
+            int *temp =
+                realloc(a, newCapacity * sizeof *a);
+
+            if (temp == NULL)
+            {
+                free(a);
+                return 1;
+            }
+
+            a = temp;
+            capacity = newCapacity;
+        }
+
+        a[size++] = value;
+    }
+
+    for (size_t i = 0; i &lt; size; i++)
+        printf("%d ", a[i]);
+
+    free(a);
+
+    return 0;
+}</code></pre>
+
+</div>
+
+        <div class="note">
+
+            This is the basic idea behind a dynamically growing array.
+            Many real libraries use more sophisticated growth strategies,
+            but the core concept is allocation + resizing + copying/preservation.
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Example 3 — calloc for counters</h3>
+
+<pre><code>int *frequency = calloc(26, sizeof *frequency);
+
+if (frequency == NULL)
+{
+    return 1;
+}
+
+/* frequency[0] ... frequency[25] start at zero */
+
+free(frequency);</code></pre>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     LINKED LIST BRIDGE
+====================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+        <div class="section-number">29 • DSA Connection</div>
+        <h2>Dynamic Memory + Linked Lists</h2>
+    </div>
+
+    <div class="card">
+
+        <p>
+            Dynamic memory allocation is one of the foundations of
+            important data structures such as linked lists, trees and
+            graphs.
+        </p>
+
+<pre><code>struct Node
+{
+    int data;
+    struct Node *next;
+};
+
+struct Node *newNode =
+    malloc(sizeof *newNode);</code></pre>
+
+        <div class="alloc-demo">
+
+            <div class="demo-step">
+                Node 1
+                <br>
+                <strong>10</strong>
+            </div>
+
+            <div class="demo-arrow">→</div>
+
+            <div class="demo-step">
+                Node 2
+                <br>
+                <strong>20</strong>
+            </div>
+
+            <div class="demo-arrow">→</div>
+
+            <div class="demo-step">
+                Node 3
+                <br>
+                <strong>30</strong>
+            </div>
+
+        </div>
+
+        <div class="note success">
+
+            <strong>DSA connection:</strong>
+            Linked-list nodes are commonly allocated dynamically because
+            the number of nodes changes while the program runs.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     REAL WORLD
+====================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+        <div class="section-number">30 • Real World</div>
+        <h2>Where is Dynamic Memory used?</h2>
+    </div>
+
+    <div class="grid-3">
+
+        <div class="card">
+            <h3>🌐 Web Servers</h3>
+            <p>
+                Request data may require memory whose size is known only
+                at runtime.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>🎮 Games</h3>
+            <p>
+                Dynamic objects, entities and resources can be created
+                and destroyed during execution.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>🧠 Data Structures</h3>
+            <p>
+                Linked lists, trees, graphs and many other structures
+                rely heavily on dynamic allocation.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>📷 Image Processing</h3>
+            <p>
+                Image dimensions and buffers may vary at runtime.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>📊 Databases</h3>
+            <p>
+                Runtime buffers and temporary structures often require
+                dynamically managed storage.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>⚙️ Operating Systems</h3>
+            <p>
+                Systems software constantly manages memory resources,
+                although user-level allocation is mediated by libraries
+                and the operating system.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     MINI PROJECT
+====================================================== -->
+
+<section class="section reveal" id="project">
+
+    <div class="section-header">
+        <div class="section-number">31 • Mini Project</div>
+        <h2>🏆 Dynamic Student Record System</h2>
+    </div>
+
+    <div class="card">
+
+        <p>
+            Build a student record program where the number of students
+            is entered at runtime.
+        </p>
+
+        <div class="flowchart">
+
+            <div class="flow-box">
+                Enter number of students
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="flow-box">
+                malloc() student array
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="flow-box">
+                Check allocation
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="flow-box">
+                Read student data
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="flow-box">
+                Display records
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="flow-box">
+                free()
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+struct Student
+{
+    int roll;
+    char name[50];
+    float cgpa;
+};
+
+int main(void)
+{
+    int n;
+
+    printf("Number of students: ");
+    scanf("%d", &amp;n);
+
+    if (n &lt;= 0)
+        return 1;
+
+    struct Student *students =
+        malloc((size_t)n * sizeof *students);
+
+    if (students == NULL)
+    {
+        printf("Memory allocation failed\n");
+        return 1;
+    }
+
+    for (int i = 0; i &lt; n; i++)
+    {
+        printf("\nStudent %d\n", i + 1);
+
+        printf("Roll: ");
+        scanf("%d", &amp;students[i].roll);
+
+        printf("Name: ");
+        scanf("%49s", students[i].name);
+
+        printf("CGPA: ");
+        scanf("%f", &amp;students[i].cgpa);
+    }
+
+    printf("\n===== STUDENTS =====\n");
+
+    for (int i = 0; i &lt; n; i++)
+    {
+        printf(
+            "%d | %s | %.2f\n",
+            students[i].roll,
+            students[i].name,
+            students[i].cgpa
+        );
+    }
+
+    free(students);
+
+    return 0;
+}</code></pre>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     COMMON MISTAKES
+====================================================== -->
+
+<section class="section reveal" id="mistakes">
+
+    <div class="section-header">
+        <div class="section-number">32 • Common Mistakes</div>
+        <h2>🚨 Mistakes students frequently make</h2>
+    </div>
+
+
+    <div class="mistake">
+        <div class="mistake-icon">❌</div>
+        <div>
+            <strong>Not checking malloc()</strong>
+            <p>Dereferencing NULL after allocation failure is invalid.</p>
+        </div>
+    </div>
+
+    <div class="mistake">
+        <div class="mistake-icon">❌</div>
+        <div>
+            <strong>Forgetting free()</strong>
+            <p>Repeated allocations without releasing them can cause memory leaks.</p>
+        </div>
+    </div>
+
+    <div class="mistake">
+        <div class="mistake-icon">❌</div>
+        <div>
+            <strong>Using memory after free()</strong>
+            <p>This creates use-after-free and undefined behavior.</p>
+        </div>
+    </div>
+
+    <div class="mistake">
+        <div class="mistake-icon">❌</div>
+        <div>
+            <strong>Double free</strong>
+            <p>Calling free twice on the same allocation is invalid.</p>
+        </div>
+    </div>
+
+    <div class="mistake">
+        <div class="mistake-icon">❌</div>
+        <div>
+            <strong>Wrong sizeof expression</strong>
+            <p>Prefer <code>sizeof *p</code> or <code>sizeof(array[0])</code> when appropriate.</p>
+        </div>
+    </div>
+
+    <div class="mistake">
+        <div class="mistake-icon">❌</div>
+        <div>
+            <strong>Unsafe realloc assignment</strong>
+            <p>Use a temporary pointer when you need to preserve the original allocation on failure.</p>
+        </div>
+    </div>
+
+    <div class="mistake">
+        <div class="mistake-icon">❌</div>
+        <div>
+            <strong>Assuming malloc initializes memory</strong>
+            <p>malloc does not initialize the allocated bytes.</p>
+        </div>
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     BEST PRACTICES
+====================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+        <div class="section-number">33 • Best Practices</div>
+        <h2>Professional memory-management habits</h2>
+    </div>
+
+    <div class="card">
+
+        <ul style="padding-left:22px">
+
+            <li>Always check allocation results before use.</li>
+            <li>Use <code>sizeof *pointer</code> to reduce type duplication.</li>
+            <li>Free every allocation when ownership is finished.</li>
+            <li>After freeing, set the owning pointer to <code>NULL</code> when appropriate.</li>
+            <li>Do not dereference freed memory.</li>
+            <li>Do not free the same allocation twice.</li>
+            <li>Use a temporary pointer for failure-safe <code>realloc()</code>.</li>
+            <li>Validate user-controlled sizes before allocation.</li>
+            <li>Keep ownership rules clear in larger programs.</li>
+            <li>Use memory-analysis tools during debugging.</li>
+
+        </ul>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     OWNERSHIP
+====================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+        <div class="section-number">34 • Advanced Concept</div>
+        <h2>Memory Ownership</h2>
+    </div>
+
+    <div class="card">
+
+        <p>
+            In larger C programs, an important question is:
+            <strong>Who is responsible for freeing this memory?</strong>
+        </p>
+
+        <div class="alloc-demo">
+
+            <div class="demo-step">
+                Function A
+                <br>
+                allocates
+            </div>
+
+            <div class="demo-arrow">→</div>
+
+            <div class="demo-step">
+                Function B
+                <br>
+                uses
+            </div>
+
+            <div class="demo-arrow">→</div>
+
+            <div class="demo-step">
+                Owner
+                <br>
+                frees
+            </div>
+
+        </div>
+
+        <div class="note">
+
+            <strong>Professional rule:</strong>
+            Clearly define ownership in your APIs. Confusion about who
+            must release memory is a common source of leaks and
+            double-free bugs.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     COMPLEXITY
+====================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+        <div class="section-number">35 • Complexity</div>
+        <h2>Time complexity perspective</h2>
+    </div>
+
+    <div class="card table-wrap">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Operation</th>
+                    <th>Typical conceptual cost</th>
+                    <th>Important note</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>malloc()</td>
+                    <td>Implementation-dependent</td>
+                    <td>Allocator internals determine actual behavior.</td>
+                </tr>
+
+                <tr>
+                    <td>calloc()</td>
+                    <td>May depend on requested size</td>
+                    <td>Memory initialization requires work.</td>
+                </tr>
+
+                <tr>
+                    <td>realloc()</td>
+                    <td>Implementation-dependent</td>
+                    <td>May move and copy the allocation.</td>
+                </tr>
+
+                <tr>
+                    <td>free()</td>
+                    <td>Implementation-dependent</td>
+                    <td>Allocator bookkeeping varies.</td>
+                </tr>
+
+                <tr>
+                    <td>Access arr[i]</td>
+                    <td>O(1)</td>
+                    <td>For valid allocated array-like storage.</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     INTERVIEW
+====================================================== -->
+
+<section class="section reveal" id="interview">
+
+    <div class="section-header">
+        <div class="section-number">36 • Interview Preparation</div>
+        <h2>🎤 Interview Questions</h2>
+    </div>
+
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            What is dynamic memory allocation?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            Dynamic memory allocation is the process of requesting and
+            releasing storage during program execution, commonly using
+            malloc(), calloc(), realloc() and free().
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            Difference between malloc() and calloc()?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            malloc() accepts a number of bytes and leaves the allocated
+            bytes uninitialized. calloc() accepts a count and element
+            size and initializes all allocated bytes to zero.
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            What does malloc() return on failure?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            malloc() returns NULL when it cannot satisfy the allocation request.
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            Why should malloc() not be cast in C?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            malloc() returns void*. In C, void* converts implicitly to
+            an object pointer type. Adding a cast is unnecessary and can
+            hide missing declarations in older-style code.
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            What is a memory leak?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            A memory leak occurs when allocated memory is no longer
+            reachable by the program and therefore cannot be released
+            normally.
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            What is a dangling pointer?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            A dangling pointer is a pointer whose pointed-to storage is
+            no longer valid, for example after the allocated block has
+            been freed.
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            What happens when realloc() moves memory?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            realloc() may allocate another block, preserve the old
+            contents up to the appropriate amount, release the old
+            block and return the new address.
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            Is free(NULL) safe?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            Yes. Calling free() with a null pointer has no effect.
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            Can malloc() return memory initialized to zero?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            You should not rely on malloc() for initialization. Use
+            calloc() when you need the allocated bytes initialized to zero.
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     QUIZ
+====================================================== -->
+
+<section class="section reveal" id="quiz">
+
+    <div class="section-header">
+        <div class="section-number">37 • Knowledge Check</div>
+        <h2>🧠 Test yourself</h2>
+    </div>
+
+
+    <div class="quiz">
+
+        <div class="quiz-question">
+            1. Which function releases dynamically allocated memory?
+        </div>
+
+        <label class="option" onclick="answer(this,false)">A. malloc()</label>
+        <label class="option" onclick="answer(this,false)">B. calloc()</label>
+        <label class="option" onclick="answer(this,true)">C. free()</label>
+        <label class="option" onclick="answer(this,false)">D. sizeof()</label>
+
+        <div class="quiz-result"></div>
+
+    </div>
+
+
+    <div class="quiz">
+
+        <div class="quiz-question">
+            2. What does malloc() return on allocation failure?
+        </div>
+
+        <label class="option" onclick="answer(this,false)">A. 0 bytes</label>
+        <label class="option" onclick="answer(this,true)">B. NULL</label>
+        <label class="option" onclick="answer(this,false)">C. EOF</label>
+        <label class="option" onclick="answer(this,false)">D. -1 always</label>
+
+        <div class="quiz-result"></div>
+
+    </div>
+
+
+    <div class="quiz">
+
+        <div class="quiz-question">
+            3. Which function initializes allocated bytes to zero?
+        </div>
+
+        <label class="option" onclick="answer(this,false)">A. malloc()</label>
+        <label class="option" onclick="answer(this,true)">B. calloc()</label>
+        <label class="option" onclick="answer(this,false)">C. realloc()</label>
+        <label class="option" onclick="answer(this,false)">D. free()</label>
+
+        <div class="quiz-result"></div>
+
+    </div>
+
+
+    <div class="quiz">
+
+        <div class="quiz-question">
+            4. What is a memory leak?
+        </div>
+
+        <label class="option" onclick="answer(this,true)">
+            A. Allocated memory that becomes unreachable
+        </label>
+
+        <label class="option" onclick="answer(this,false)">
+            B. A syntax error
+        </label>
+
+        <label class="option" onclick="answer(this,false)">
+            C. A full stack
+        </label>
+
+        <label class="option" onclick="answer(this,false)">
+            D. A compiler warning only
+        </label>
+
+        <div class="quiz-result"></div>
+
+    </div>
+
+
+    <div class="quiz">
+
+        <div class="quiz-question">
+            5. Which is a safer realloc pattern?
+        </div>
+
+        <label class="option" onclick="answer(this,true)">
+            A. Store result in a temporary pointer
+        </label>
+
+        <label class="option" onclick="answer(this,false)">
+            B. Always call realloc twice
+        </label>
+
+        <label class="option" onclick="answer(this,false)">
+            C. Never check result
+        </label>
+
+        <label class="option" onclick="answer(this,false)">
+            D. Free before every realloc
+        </label>
+
+        <div class="quiz-result"></div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     EXAM PREP
+====================================================== -->
+
+<section class="section reveal" id="exam">
+
+    <div class="section-header">
+        <div class="section-number">38 • JNTUK / Exam Preparation</div>
+        <h2>🎓 Exam-ready answers</h2>
+    </div>
+
+
+    <div class="card">
+
+        <h3>2-Mark Questions</h3>
+
+        <ul style="padding-left:22px">
+
+            <li>Define dynamic memory allocation.</li>
+            <li>What is malloc()?</li>
+            <li>What is calloc()?</li>
+            <li>What is realloc()?</li>
+            <li>What is free()?</li>
+            <li>What is a memory leak?</li>
+            <li>What is a dangling pointer?</li>
+
+        </ul>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>5-Mark Question</h3>
+
+        <p>
+            <strong>Explain malloc(), calloc(), realloc() and free()
+            with examples.</strong>
+        </p>
+
+        <ol style="padding-left:22px">
+
+            <li>Define dynamic memory allocation.</li>
+            <li>Explain heap memory.</li>
+            <li>Explain malloc().</li>
+            <li>Explain calloc().</li>
+            <li>Explain realloc().</li>
+            <li>Explain free().</li>
+            <li>Give a small program.</li>
+
+        </ol>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>🔥 10-Mark Answer Framework</h3>
+
+        <div class="flowchart">
+
+            <div class="flow-box">
+                Definition
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="flow-box">
+                Need for Dynamic Allocation
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="flow-box">
+                Heap Memory
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="flow-box">
+                malloc()
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="flow-box">
+                calloc()
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="flow-box">
+                realloc()
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="flow-box">
+                free()
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="flow-box">
+                Advantages + Problems
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="flow-box">
+                Example Program
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     CODING PRACTICE
+====================================================== -->
+
+<section class="section reveal" id="practice">
+
+    <div class="section-header">
+        <div class="section-number">39 • Coding Practice</div>
+        <h2>🔥 Practice Problems</h2>
+    </div>
+
+
+    <div class="practice">
+        <strong>Easy — Dynamic Sum</strong>
+        Allocate an integer array dynamically and calculate its sum.
+    </div>
+
+    <div class="practice">
+        <strong>Easy — Dynamic Maximum</strong>
+        Allocate n integers and find the largest value.
+    </div>
+
+    <div class="practice">
+        <strong>Easy — Dynamic Reverse</strong>
+        Dynamically allocate an array and reverse it.
+    </div>
+
+    <div class="practice">
+        <strong>Medium — Dynamic Frequency</strong>
+        Allocate a frequency array using calloc().
+    </div>
+
+    <div class="practice">
+        <strong>Medium — Dynamic Matrix</strong>
+        Dynamically allocate a matrix and calculate its transpose.
+    </div>
+
+    <div class="practice">
+        <strong>Medium — Dynamic String</strong>
+        Allocate enough memory for a string at runtime and copy it.
+    </div>
+
+    <div class="practice">
+        <strong>Hard — Dynamic Student Records</strong>
+        Allocate student records dynamically and implement search.
+    </div>
+
+    <div class="practice">
+        <strong>Interview — Dynamic Array</strong>
+        Implement an array that automatically grows when capacity is reached.
+    </div>
+
+    <div class="practice">
+        <strong>DSA Challenge</strong>
+        Implement a singly linked list using malloc() and free().
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     RAPID REVISION
+====================================================== -->
+
+<section class="section reveal" id="summary">
+
+    <div class="section-header">
+        <div class="section-number">40 • Rapid Revision</div>
+        <h2>⚡ One-minute memory map</h2>
+    </div>
+
+    <div class="card">
+
+        <div class="memory-stage">
+
+            <div style="
+                display:grid;
+                grid-template-columns:repeat(4,1fr);
+                gap:12px;">
+
+                <div class="heap-cell allocated">
+                    malloc()
+                    <small>allocate</small>
+                </div>
+
+                <div class="heap-cell allocated">
+                    calloc()
+                    <small>allocate + zero</small>
+                </div>
+
+                <div class="heap-cell allocated">
+                    realloc()
+                    <small>resize</small>
+                </div>
+
+                <div class="heap-cell allocated">
+                    free()
+                    <small>release</small>
+                </div>
+
+            </div>
+
+        </div>
+
+        <br>
+
+        <ul style="padding-left:22px">
+
+            <li>Dynamic memory is requested during program execution.</li>
+
+            <li>malloc() allocates a requested number of bytes.</li>
+
+            <li>calloc() allocates elements and initializes allocated bytes to zero.</li>
+
+            <li>realloc() changes the size of an existing allocation.</li>
+
+            <li>free() releases dynamically allocated storage.</li>
+
+            <li>Always check allocation results.</li>
+
+            <li>Do not use memory after free().</li>
+
+            <li>Do not free the same allocation twice.</li>
+
+            <li>Prevent memory leaks.</li>
+
+            <li>Use pointers to access dynamic objects.</li>
+
+            <li>Dynamic memory is fundamental to linked lists, trees and graphs.</li>
+
+        </ul>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     FINAL SUMMARY
+====================================================== -->
+
+<section class="section reveal">
+
+    <div class="card" style="
+        background:linear-gradient(135deg,#eef2ff,#faf5ff);
+        border-color:#d9d6fe;
+        text-align:center;
+        padding:35px;">
+
+        <div style="font-size:42px;margin-bottom:10px;">
+            🧠 → 📦 → 🎯 → 🔄 → 🗑️
+        </div>
+
+        <h2>
+            Master the memory lifecycle.
+        </h2>
+
+        <p style="max-width:750px;margin:10px auto;color:#667085">
+
+            Dynamic memory allocation gives C programs the flexibility
+            to decide how much memory they need while running.
+            But with that power comes responsibility:
+            allocate carefully, check failures, access valid memory,
+            and release what you own.
+
+        </p>
+
+        <div class="hero-meta" style="justify-content:center">
+
+            <span class="meta">malloc()</span>
+            <span class="meta">calloc()</span>
+            <span class="meta">realloc()</span>
+            <span class="meta">free()</span>
+            <span class="meta">Memory Safety</span>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     NEXT LESSON
+====================================================== -->
+
+<section class="section reveal">
+
+    <div class="card">
+
+        <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:20px;
+            flex-wrap:wrap;">
+
+            <div>
+
+                <div class="section-number">
+                    NEXT LESSON
+                </div>
+
+                <h2>
+                    Lesson 15 — C Mini Projects
+                </h2>
+
+                <p>
+                    Put your C fundamentals together and build
+                    practical projects from beginner to interview level.
+                </p>
+
+            </div>
+
+            <div style="
+                font-size:40px;
+                animation:floatOrb 3s infinite;">
+                🚀
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     FOOTER
+====================================================== -->
+
+<footer class="footer">
+
+    <strong>ZENSUS</strong>
+
+    <br>
+
+    Learn • Build • Practice • Get Placed
+
+    <br><br>
+
+    C Programming • Lesson 14 — Dynamic Memory Allocation
+
+</footer>
+
+</main>
+
+
+<!-- ======================================================
+     BACK TO TOP
+====================================================== -->
+
+<button class="back-top" id="backTop" onclick="window.scrollTo({
+    top:0,
+    behavior:'smooth'
+})">
+    ↑
+</button>
+
+
+<!-- ======================================================
+     JAVASCRIPT
+====================================================== -->
+
+<script>
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+function toggleSidebar(){
+
+    document
+        .getElementById("sidebar")
+        .classList.toggle("open");
+
+}
+
+
+/* =========================================================
+   COPY CODE
+========================================================= */
+
+function copyCode(button){
+
+    const code =
+        button.parentElement
+              .querySelector("code")
+              .innerText;
+
+    navigator.clipboard.writeText(code)
+        .then(() => {
+
+            const oldText = button.innerText;
+
+            button.innerText = "Copied!";
+
+            setTimeout(() => {
+                button.innerText = oldText;
+            },1500);
+
+        });
+
+}
+
+
+/* =========================================================
+   REVEAL ANIMATIONS
+========================================================= */
+
+const revealElements =
+    document.querySelectorAll(".reveal");
+
+const revealObserver =
+    new IntersectionObserver(
+        entries => {
+
+            entries.forEach(entry => {
+
+                if(entry.isIntersecting){
+
+                    entry.target.classList.add("show");
+
+                }
+
+            });
+
+        },
+        {
+            threshold:.1
+        }
+    );
+
+revealElements.forEach(el => {
+    revealObserver.observe(el);
+});
+
+
+/* =========================================================
+   MALLOC ANIMATION
+========================================================= */
+
+function runMallocAnimation(){
+
+    const container =
+        document.getElementById("mallocAnimation");
+
+    container.innerHTML = "";
+
+    const title =
+        document.createElement("div");
+
+    title.style.color = "#94a3b8";
+    title.style.marginBottom = "15px";
+    title.innerText =
+        "malloc(5 × sizeof(int)) → allocated block";
+
+    container.appendChild(title);
+
+    const memory =
+        document.createElement("div");
+
+    memory.style.display = "flex";
+    memory.style.justifyContent = "center";
+    memory.style.flexWrap = "wrap";
+    memory.style.gap = "7px";
+
+    container.appendChild(memory);
+
+    for(let i=0;i<5;i++){
+
+        setTimeout(() => {
+
+            const cell =
+                document.createElement("div");
+
+            cell.className =
+                "heap-cell allocated";
+
+            cell.innerHTML =
+                `? <small>p[${i}]</small>`;
+
+            memory.appendChild(cell);
+
+        },i*250);
+
+    }
+
+}
+
+
+/* =========================================================
+   REALLOC ANIMATION
+========================================================= */
+
+function resizeVisual(){
+
+    const container =
+        document.getElementById("reallocVisual");
+
+    container.innerHTML = "";
+
+    const values =
+        [10,20,30,40,50,60];
+
+    values.forEach((value,index)=>{
+
+        setTimeout(()=>{
+
+            const cell =
+                document.createElement("div");
+
+            cell.className =
+                "heap-cell allocated";
+
+            cell.innerHTML =
+                `${value}<small>element</small>`;
+
+            container.appendChild(cell);
+
+        },index*180);
+
+    });
+
+}
+
+
+/* =========================================================
+   INTERACTIVE HEAP LAB
+========================================================= */
+
+let labState = [];
+
+function renderLab(){
+
+    const memory =
+        document.getElementById("labMemory");
+
+    if(labState.length === 0){
+
+        memory.innerHTML = `
+            <div style="
+                color:#94a3b8;
+                width:100%;
+                text-align:center;">
+                Heap is currently empty
+            </div>
+        `;
+
+        return;
+    }
+
+    memory.innerHTML = "";
+
+    labState.forEach((value,index)=>{
+
+        const cell =
+            document.createElement("div");
+
+        cell.className =
+            "lab-cell active";
+
+        cell.innerHTML =
+            `${value}<br><small>[${index}]</small>`;
+
+        memory.appendChild(cell);
+
+    });
+
+}
+
+
+function allocateLab(size){
+
+    labState =
+        Array.from(
+            {length:size},
+            (_,i)=> i + 1
+        );
+
+    renderLab();
+
+    document.getElementById("labOutput")
+        .innerText =
+        `Allocated ${size} elements on the simulated heap.`;
+
+}
+
+
+function resizeLab(){
+
+    if(labState.length === 0){
+
+        document.getElementById("labOutput")
+            .innerText =
+            "Nothing to resize. Allocate memory first.";
+
+        return;
+    }
+
+    const oldLength =
+        labState.length;
+
+    while(labState.length < 7){
+
+        labState.push(0);
+
+    }
+
+    renderLab();
+
+    document.getElementById("labOutput")
+        .innerText =
+        `realloc(): simulated resize from ${oldLength} to ${labState.length} elements.`;
+
+}
+
+
+function freeLab(){
+
+    if(labState.length === 0){
+
+        document.getElementById("labOutput")
+            .innerText =
+            "No allocation exists.";
+
+        return;
+    }
+
+    labState = [];
+
+    renderLab();
+
+    document.getElementById("labOutput")
+        .innerText =
+        "free(): simulated heap block released.";
+
+}
+
+
+/* =========================================================
+   QUIZ
+========================================================= */
+
+function answer(option,isCorrect){
+
+    const quiz =
+        option.closest(".quiz");
+
+    const options =
+        quiz.querySelectorAll(".option");
+
+    options.forEach(opt => {
+
+        opt.style.pointerEvents = "none";
+
+    });
+
+    const result =
+        quiz.querySelector(".quiz-result");
+
+    if(isCorrect){
+
+        option.classList.add("correct");
+
+        result.innerText =
+            "✅ Correct! Excellent.";
+
+        result.style.color =
+            "#059669";
+
+    }else{
+
+        option.classList.add("wrong");
+
+        result.innerText =
+            "❌ Incorrect. Review the concept and try again.";
+
+        result.style.color =
+            "#dc2626";
+
+    }
+
+}
+
+
+/* =========================================================
+   ACCORDION
+========================================================= */
+
+document.querySelectorAll(".acc-head")
+    .forEach(button => {
+
+        button.addEventListener("click",()=>{
+
+            const body =
+                button.nextElementSibling;
+
+            const isOpen =
+                body.classList.contains("open");
+
+            document
+                .querySelectorAll(".acc-body")
+                .forEach(item =>
+                    item.classList.remove("open")
+                );
+
+            document
+                .querySelectorAll(".acc-head span")
+                .forEach(span =>
+                    span.innerText = "+"
+                );
+
+            if(!isOpen){
+
+                body.classList.add("open");
+
+                button.querySelector("span")
+                    .innerText = "−";
+
+            }
+
+        });
+
+    });
+
+
+/* =========================================================
+   ACTIVE SIDEBAR LINK
+========================================================= */
+
+const sections =
+    document.querySelectorAll("section[id]");
+
+const links =
+    document.querySelectorAll(".side-link");
+
+const sectionObserver =
+    new IntersectionObserver(
+        entries => {
+
+            entries.forEach(entry => {
+
+                if(entry.isIntersecting){
+
+                    links.forEach(link =>
+                        link.classList.remove("active")
+                    );
+
+                    const active =
+                        document.querySelector(
+                            `.side-link[href="#${entry.target.id}"]`
+                        );
+
+                    if(active)
+                        active.classList.add("active");
+
+                }
+
+            });
+
+        },
+        {
+            rootMargin:"-100px 0px -65% 0px"
+        }
+    );
+
+sections.forEach(section =>
+    sectionObserver.observe(section)
+);
+
+
+/* =========================================================
+   BACK TO TOP
+========================================================= */
+
+const backTop =
+    document.getElementById("backTop");
+
+window.addEventListener("scroll",()=>{
+
+    if(window.scrollY > 500){
+
+        backTop.style.display = "block";
+
+    }else{
+
+        backTop.style.display = "none";
+
+    }
+
+});
+
+
+/* =========================================================
+   CLOSE MOBILE SIDEBAR
+========================================================= */
+
+document.querySelectorAll(".side-link")
+    .forEach(link => {
+
+        link.addEventListener("click",()=>{
+
+            if(window.innerWidth <= 800){
+
+                document
+                    .getElementById("sidebar")
+                    .classList.remove("open");
+
+            }
+
+        });
+
+    });
+
+
+/* =========================================================
+   INITIAL STATE
+========================================================= */
+
+renderLab();
+
+</script>
+
+</body>
+</html>

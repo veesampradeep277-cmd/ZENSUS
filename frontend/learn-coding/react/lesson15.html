@@ -1,0 +1,2202 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENSUS React — Lesson 15: useRef()</title>
+
+<style>
+:root{
+    --bg:#f5f7fb;
+    --card:#ffffff;
+    --text:#172033;
+    --muted:#667085;
+    --border:#e5e7eb;
+    --primary:#4f46e5;
+    --primary2:#6366f1;
+    --dark:#101828;
+    --green:#16a34a;
+    --orange:#ea580c;
+    --red:#dc2626;
+    --cyan:#0891b2;
+    --shadow:0 10px 30px rgba(15,23,42,.07);
+    --radius:18px;
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+button,
+input{
+    font:inherit;
+}
+
+/* ================= TOPBAR ================= */
+
+.topbar{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    height:64px;
+    background:rgba(255,255,255,.94);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 28px;
+    z-index:1000;
+}
+
+.logo{
+    font-size:23px;
+    font-weight:900;
+    letter-spacing:-1px;
+    color:var(--dark);
+}
+
+.logo span{
+    color:var(--primary);
+}
+
+.lesson-badge{
+    padding:7px 14px;
+    border-radius:999px;
+    background:#eef2ff;
+    color:#4338ca;
+    font-size:13px;
+    font-weight:800;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar{
+    position:fixed;
+    top:64px;
+    left:0;
+    width:270px;
+    height:calc(100vh - 64px);
+    background:#fff;
+    border-right:1px solid var(--border);
+    padding:25px 17px;
+    overflow-y:auto;
+}
+
+.sidebar-title{
+    font-size:11px;
+    font-weight:900;
+    color:#98a2b3;
+    letter-spacing:1.3px;
+    margin:12px 10px;
+    text-transform:uppercase;
+}
+
+.sidebar a{
+    display:block;
+    text-decoration:none;
+    color:#475467;
+    font-size:14px;
+    padding:9px 11px;
+    border-radius:9px;
+    margin:3px 0;
+    transition:.2s;
+}
+
+.sidebar a:hover{
+    background:#f2f4f7;
+    color:var(--primary);
+    transform:translateX(3px);
+}
+
+.sidebar a.active{
+    background:#eef2ff;
+    color:var(--primary);
+    font-weight:800;
+}
+
+/* ================= MAIN ================= */
+
+.main{
+    margin-left:270px;
+    padding-top:64px;
+}
+
+.container{
+    max-width:1180px;
+    margin:auto;
+    padding:42px 30px 90px;
+}
+
+/* ================= HERO ================= */
+
+.hero{
+    background:linear-gradient(135deg,#101828,#172554);
+    color:white;
+    padding:65px 55px;
+    border-radius:28px;
+    position:relative;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+}
+
+.hero:before,
+.hero:after{
+    content:"";
+    position:absolute;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:50%;
+}
+
+.hero:before{
+    width:430px;
+    height:430px;
+    right:-180px;
+    top:-210px;
+}
+
+.hero:after{
+    width:260px;
+    height:260px;
+    right:100px;
+    bottom:-190px;
+}
+
+.hero-content{
+    position:relative;
+    z-index:2;
+    max-width:780px;
+}
+
+.hero-label{
+    display:inline-block;
+    padding:7px 13px;
+    border-radius:999px;
+    background:rgba(255,255,255,.1);
+    border:1px solid rgba(255,255,255,.12);
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:.5px;
+    margin-bottom:18px;
+}
+
+.hero h1{
+    font-size:48px;
+    line-height:1.12;
+    letter-spacing:-2px;
+    margin-bottom:18px;
+}
+
+.hero h1 span{
+    color:#a5b4fc;
+}
+
+.hero p{
+    color:#cbd5e1;
+    font-size:17px;
+    max-width:700px;
+}
+
+/* ================= SECTIONS ================= */
+
+.section{
+    margin-top:42px;
+}
+
+.section-head{
+    margin-bottom:20px;
+}
+
+.section-head h2{
+    font-size:30px;
+    line-height:1.25;
+    letter-spacing:-.8px;
+}
+
+.section-head p{
+    color:var(--muted);
+    margin-top:7px;
+}
+
+.card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:27px;
+    box-shadow:var(--shadow);
+    margin-bottom:20px;
+}
+
+.card h3{
+    margin-bottom:10px;
+    font-size:20px;
+}
+
+.card p{
+    color:#475467;
+}
+
+.highlight{
+    border-left:4px solid var(--primary);
+    background:#eef2ff;
+    padding:18px 20px;
+    border-radius:12px;
+    margin:18px 0;
+}
+
+.warning{
+    border-left:4px solid var(--orange);
+    background:#fff7ed;
+    padding:18px 20px;
+    border-radius:12px;
+    margin:18px 0;
+}
+
+.success{
+    border-left:4px solid var(--green);
+    background:#f0fdf4;
+    padding:18px 20px;
+    border-radius:12px;
+    margin:18px 0;
+}
+
+.danger{
+    border-left:4px solid var(--red);
+    background:#fef2f2;
+    padding:18px 20px;
+    border-radius:12px;
+    margin:18px 0;
+}
+
+/* ================= CODE ================= */
+
+.code-wrap{
+    background:#0b1220;
+    color:#e5e7eb;
+    border-radius:14px;
+    overflow:hidden;
+    margin:18px 0;
+    border:1px solid #1e293b;
+}
+
+.code-title{
+    padding:10px 16px;
+    background:#111827;
+    color:#94a3b8;
+    font-size:12px;
+    font-weight:700;
+    border-bottom:1px solid #1f2937;
+}
+
+pre{
+    padding:20px;
+    overflow-x:auto;
+    font-family:Consolas,Monaco,monospace;
+    font-size:13px;
+    line-height:1.7;
+}
+
+.keyword{color:#c084fc}
+.function{color:#60a5fa}
+.string{color:#86efac}
+.comment{color:#64748b}
+.number{color:#fbbf24}
+
+/* ================= GRID ================= */
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+}
+
+.grid-3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.mini-card{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:22px;
+    box-shadow:var(--shadow);
+}
+
+.mini-card h4{
+    margin-bottom:7px;
+}
+
+.mini-card p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+/* ================= REF VISUAL ================= */
+
+.ref-stage{
+    background:#0f172a;
+    border-radius:18px;
+    padding:30px;
+    color:white;
+    overflow:hidden;
+}
+
+.ref-flow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.ref-box{
+    min-width:145px;
+    text-align:center;
+    padding:18px 15px;
+    border-radius:14px;
+    background:#1e293b;
+    border:1px solid #334155;
+    transition:.4s;
+}
+
+.ref-box.active{
+    transform:translateY(-8px);
+    border-color:#818cf8;
+    box-shadow:0 12px 25px rgba(99,102,241,.2);
+}
+
+.ref-box strong{
+    display:block;
+    color:#a5b4fc;
+}
+
+.arrow{
+    color:#94a3b8;
+    font-size:25px;
+}
+
+/* ================= INTERACTIVE ================= */
+
+.demo{
+    background:#f8fafc;
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:24px;
+    margin-top:18px;
+}
+
+.demo-row{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.demo input{
+    padding:11px 14px;
+    border:1px solid #cbd5e1;
+    border-radius:9px;
+    outline:none;
+    background:white;
+}
+
+.demo input:focus{
+    border-color:var(--primary);
+    box-shadow:0 0 0 3px rgba(79,70,229,.1);
+}
+
+.btn{
+    border:none;
+    border-radius:9px;
+    padding:10px 16px;
+    cursor:pointer;
+    background:var(--primary);
+    color:white;
+    font-weight:700;
+    transition:.2s;
+}
+
+.btn:hover{
+    transform:translateY(-2px);
+    opacity:.93;
+}
+
+.btn.secondary{
+    background:#e2e8f0;
+    color:#334155;
+}
+
+.status{
+    margin-top:15px;
+    padding:12px 14px;
+    background:white;
+    border:1px solid var(--border);
+    border-radius:10px;
+    font-family:Consolas,monospace;
+    font-size:13px;
+}
+
+/* ================= COUNTER VISUAL ================= */
+
+.counter-display{
+    font-size:52px;
+    font-weight:900;
+    text-align:center;
+    margin:15px;
+    color:var(--primary);
+}
+
+/* ================= MEASUREMENT ================= */
+
+.measure-box{
+    width:100%;
+    max-width:430px;
+    padding:30px;
+    background:#eef2ff;
+    border:3px dashed #818cf8;
+    border-radius:16px;
+    margin:20px auto;
+    text-align:center;
+    transition:.3s;
+}
+
+.measure-info{
+    text-align:center;
+    font-family:Consolas,monospace;
+    color:#334155;
+}
+
+/* ================= TABLE ================= */
+
+.table-wrap{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+
+th,td{
+    text-align:left;
+    padding:13px;
+    border-bottom:1px solid var(--border);
+    font-size:14px;
+}
+
+th{
+    background:#f8fafc;
+    font-weight:800;
+}
+
+/* ================= QUIZ ================= */
+
+.quiz{
+    background:#111827;
+    color:white;
+    border-radius:18px;
+    padding:30px;
+}
+
+.question{
+    background:#1f2937;
+    padding:20px;
+    border-radius:13px;
+    margin-bottom:15px;
+}
+
+.question h4{
+    margin-bottom:13px;
+}
+
+.option{
+    display:block;
+    width:100%;
+    text-align:left;
+    margin:7px 0;
+    padding:11px 13px;
+    border-radius:8px;
+    border:1px solid #374151;
+    background:#111827;
+    color:#e5e7eb;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.option:hover{
+    background:#273449;
+}
+
+.option.correct{
+    background:#14532d;
+    border-color:#22c55e;
+}
+
+.option.wrong{
+    background:#7f1d1d;
+    border-color:#ef4444;
+}
+
+.quiz-result{
+    font-size:19px;
+    font-weight:800;
+    margin-top:20px;
+    color:#a5b4fc;
+}
+
+/* ================= FOOTER ================= */
+
+.footer{
+    margin-top:55px;
+    padding:30px;
+    text-align:center;
+    color:#667085;
+    border-top:1px solid var(--border);
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:900px){
+    .sidebar{
+        display:none;
+    }
+
+    .main{
+        margin-left:0;
+    }
+
+    .hero{
+        padding:45px 30px;
+    }
+
+    .hero h1{
+        font-size:37px;
+    }
+
+    .grid,
+    .grid-3{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:600px){
+    .container{
+        padding:25px 15px 60px;
+    }
+
+    .topbar{
+        padding:0 15px;
+    }
+
+    .hero{
+        border-radius:20px;
+        padding:35px 22px;
+    }
+
+    .hero h1{
+        font-size:31px;
+    }
+
+    .section-head h2{
+        font-size:25px;
+    }
+
+    .card{
+        padding:20px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="logo">ZEN<span>SUS</span></div>
+    <div class="lesson-badge">React • Lesson 15</div>
+</header>
+
+<aside class="sidebar">
+
+    <div class="sidebar-title">Lesson 15</div>
+
+    <a href="#intro" class="active">What is useRef?</a>
+    <a href="#ref-object">Ref Objects</a>
+    <a href="#dom">DOM References</a>
+    <a href="#focus">Focusing Inputs</a>
+    <a href="#mutable">Mutable Values</a>
+    <a href="#state-vs-ref">useRef vs State</a>
+    <a href="#previous">Previous Values</a>
+    <a href="#timer">Timer References</a>
+    <a href="#measure">DOM Measurements</a>
+    <a href="#rerender">Avoid Re-renders</a>
+    <a href="#forward">Forwarding Refs</a>
+    <a href="#mistakes">Common Mistakes</a>
+    <a href="#quiz">Quick Quiz</a>
+
+</aside>
+
+<main class="main">
+
+<div class="container">
+
+<!-- HERO -->
+
+<section class="hero" id="intro">
+    <div class="hero-content">
+
+        <div class="hero-label">ZENSUS REACT • LESSON 15</div>
+
+        <h1>
+            <span>useRef()</span> & DOM References
+        </h1>
+
+        <p>
+            Learn how React refs connect components to DOM elements,
+            store mutable values without re-rendering, access previous values,
+            control timers, measure elements, and expose DOM APIs safely.
+        </p>
+
+    </div>
+</section>
+
+
+<!-- INTRO -->
+
+<section class="section">
+
+<div class="section-head">
+    <h2>1. What is useRef()?</h2>
+    <p>A persistent container for a value that survives renders.</p>
+</div>
+
+<div class="card">
+
+<p>
+    <strong>useRef()</strong> is a React Hook that lets you create a
+    mutable reference object whose value persists for the lifetime of
+    a component instance.
+</p>
+
+<div class="highlight">
+    <strong>Core idea:</strong><br>
+    useRef() gives you an object with a single property:
+    <strong>current</strong>.
+</div>
+
+<div class="code-wrap">
+
+<div class="code-title">Basic Syntax</div>
+
+<pre><code><span class="keyword">import</span> { useRef } <span class="keyword">from</span> <span class="string">"react"</span>;
+
+<span class="keyword">const</span> myRef = <span class="function">useRef</span>(initialValue);
+
+<span class="comment">// Read</span>
+myRef.current;
+
+<span class="comment">// Update</span>
+myRef.current = newValue;</code></pre>
+
+</div>
+
+<p>
+    Unlike state, changing <strong>ref.current</strong> does not cause
+    React to render the component again.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- MENTAL MODEL -->
+
+<section class="section">
+
+<div class="section-head">
+    <h2>2. The useRef Mental Model</h2>
+    <p>Understand refs as persistent containers.</p>
+</div>
+
+<div class="card">
+
+<div class="ref-stage">
+
+<div class="ref-flow">
+
+    <div class="ref-box" id="refA">
+        <strong>Render</strong>
+        <span>Component runs</span>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="ref-box" id="refB">
+        <strong>useRef()</strong>
+        <span>Persistent object</span>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="ref-box" id="refC">
+        <strong>current</strong>
+        <span>Mutable value</span>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="ref-box" id="refD">
+        <strong>No Re-render</strong>
+        <span>UI stays stable</span>
+    </div>
+
+</div>
+
+</div>
+
+<div class="success">
+    <strong>Important:</strong>
+    The ref object itself remains the same between renders.
+    Its <code>current</code> property can change.
+</div>
+
+</div>
+
+</section>
+
+
+<!-- REF OBJECT -->
+
+<section class="section" id="ref-object">
+
+<div class="section-head">
+    <h2>3. Ref Objects</h2>
+    <p>What exactly does useRef() return?</p>
+</div>
+
+<div class="card">
+
+<div class="code-wrap">
+
+<div class="code-title">Ref Object</div>
+
+<pre><code><span class="keyword">const</span> countRef = <span class="function">useRef</span>(<span class="number">0</span>);
+
+console.<span class="function">log</span>(countRef);
+
+<span class="comment">// { current: 0 }</span>
+
+countRef.current++;
+
+console.<span class="function">log</span>(countRef.current);
+
+<span class="comment">// 1</span></code></pre>
+
+</div>
+
+<div class="grid">
+
+<div class="mini-card">
+<h4>Initial Value</h4>
+<p>
+The value passed to useRef() becomes the initial value of
+current.
+</p>
+</div>
+
+<div class="mini-card">
+<h4>Persistent Identity</h4>
+<p>
+React keeps the same ref object between renders.
+</p>
+</div>
+
+<div class="mini-card">
+<h4>Mutable</h4>
+<p>
+You can modify current without creating a new ref.
+</p>
+</div>
+
+<div class="mini-card">
+<h4>No Automatic Render</h4>
+<p>
+Changing current does not trigger a component re-render.
+</p>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- DOM -->
+
+<section class="section" id="dom">
+
+<div class="section-head">
+    <h2>4. Accessing DOM Elements</h2>
+    <p>The most common use of refs.</p>
+</div>
+
+<div class="card">
+
+<p>
+React normally manages the DOM for you. Sometimes, however, you need
+to directly access a DOM element—for example, to focus an input,
+measure an element, scroll to a position, or control browser APIs.
+</p>
+
+<div class="code-wrap">
+
+<div class="code-title">Accessing an Input</div>
+
+<pre><code><span class="keyword">import</span> { useRef } <span class="keyword">from</span> <span class="string">"react"</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+    <span class="keyword">const</span> inputRef = <span class="function">useRef</span>(<span class="keyword">null</span>);
+
+    <span class="keyword">function</span> <span class="function">focusInput</span>() {
+        inputRef.current.<span class="function">focus</span>();
+    }
+
+    <span class="keyword">return</span> (
+        &lt;&gt;
+            &lt;input ref={inputRef} /&gt;
+
+            &lt;button onClick={focusInput}&gt;
+                Focus
+            &lt;/button&gt;
+        &lt;/&gt;
+    );
+}</code></pre>
+
+</div>
+
+<div class="highlight">
+    <strong>Flow:</strong>
+    React renders the input → ref is attached to the DOM node →
+    inputRef.current points to that node → JavaScript can call DOM APIs.
+</div>
+
+</div>
+
+</section>
+
+
+<!-- FOCUS -->
+
+<section class="section" id="focus">
+
+<div class="section-head">
+    <h2>5. Focusing Inputs</h2>
+    <p>A practical DOM-reference example.</p>
+</div>
+
+<div class="card">
+
+<div class="demo">
+
+<div class="demo-row">
+
+<input id="focusInput" placeholder="Type something...">
+
+<button class="btn" onclick="focusInputDemo()">
+    Focus Input
+</button>
+
+<button class="btn secondary" onclick="clearFocusInput()">
+    Clear
+</button>
+
+</div>
+
+<div class="status" id="focusStatus">
+    Ref status: waiting for interaction...
+</div>
+
+</div>
+
+<div class="code-wrap">
+
+<div class="code-title">React Implementation</div>
+
+<pre><code><span class="keyword">const</span> inputRef = <span class="function">useRef</span>(<span class="keyword">null</span>);
+
+<span class="keyword">const</span> handleFocus = () =&gt; {
+    inputRef.current.<span class="function">focus</span>();
+};
+
+<span class="keyword">return</span> (
+    &lt;&gt;
+        &lt;input ref={inputRef} /&gt;
+
+        &lt;button onClick={handleFocus}&gt;
+            Focus Input
+        &lt;/button&gt;
+    &lt;/&gt;
+);</code></pre>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- MUTABLE -->
+
+<section class="section" id="mutable">
+
+<div class="section-head">
+    <h2>6. Storing Mutable Values</h2>
+    <p>Refs are useful when a value must persist but does not need to update the UI.</p>
+</div>
+
+<div class="card">
+
+<p>
+A ref can store values such as IDs, DOM nodes, timers, external objects,
+or other mutable information.
+</p>
+
+<div class="code-wrap">
+
+<div class="code-title">Persistent Mutable Value</div>
+
+<pre><code><span class="keyword">const</span> renderCount = <span class="function">useRef</span>(<span class="number">0</span>);
+
+renderCount.current++;
+
+console.<span class="function">log</span>(
+    <span class="string">"Render count:"</span>,
+    renderCount.current
+);</code></pre>
+
+</div>
+
+<div class="warning">
+    Do not use a ref simply because it is easier than state.
+    If the value affects what the user sees, state is usually the
+    appropriate choice.
+</div>
+
+</div>
+
+</section>
+
+
+<!-- STATE VS REF -->
+
+<section class="section" id="state-vs-ref">
+
+<div class="section-head">
+    <h2>7. useRef vs State</h2>
+    <p>One of the most important distinctions in React.</p>
+</div>
+
+<div class="card">
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+<tr>
+<th>Feature</th>
+<th>useState</th>
+<th>useRef</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td>Stores value</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Persists between renders</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Changing value triggers render?</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+
+<tr>
+<td>Designed for UI data?</td>
+<td>Yes</td>
+<td>Usually no</td>
+</tr>
+
+<tr>
+<td>Can access DOM?</td>
+<td>Not directly</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Mutable container?</td>
+<td>No — state should be updated through setter</td>
+<td>Yes — current is mutable</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<div class="highlight">
+    <strong>Rule of thumb:</strong><br><br>
+    If changing the value should update the screen → use <strong>state</strong>.<br>
+    If the value should persist but changing it should NOT update the screen → consider <strong>ref</strong>.
+</div>
+
+</div>
+
+</section>
+
+
+<!-- STATE REF INTERACTIVE -->
+
+<section class="section">
+
+<div class="section-head">
+    <h2>8. Visual: State vs Ref</h2>
+    <p>See the rendering difference.</p>
+</div>
+
+<div class="card">
+
+<div class="grid">
+
+<div class="mini-card">
+
+<h4>State Counter</h4>
+
+<div class="counter-display" id="stateCounter">
+    0
+</div>
+
+<button class="btn" onclick="incrementState()">
+    Update State
+</button>
+
+<p style="margin-top:12px;">
+Every update represents a UI-changing state update.
+</p>
+
+</div>
+
+<div class="mini-card">
+
+<h4>Ref Counter</h4>
+
+<div class="counter-display" id="refCounter">
+    0
+</div>
+
+<button class="btn" onclick="incrementRef()">
+    Update Ref
+</button>
+
+<p style="margin-top:12px;">
+The ref changes internally, but the displayed value does not automatically update.
+</p>
+
+<div class="status" id="refInternal">
+Ref current = 0
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- PREVIOUS -->
+
+<section class="section" id="previous">
+
+<div class="section-head">
+    <h2>9. Previous Values</h2>
+    <p>Refs can remember a value from an earlier render.</p>
+</div>
+
+<div class="card">
+
+<p>
+A common pattern is storing the previous value in a ref and updating
+the ref after the component has rendered.
+</p>
+
+<div class="code-wrap">
+
+<div class="code-title">Previous Value Pattern</div>
+
+<pre><code><span class="keyword">const</span> previousValue = <span class="function">useRef</span>();
+
+<span class="function">useEffect</span>(() =&gt; {
+    previousValue.current = value;
+}, [value]);
+
+console.<span class="function">log</span>(
+    <span class="string">"Previous:"</span>,
+    previousValue.current
+);</code></pre>
+
+</div>
+
+<div class="highlight">
+
+<strong>Concept:</strong>
+
+<br><br>
+
+Current render → read previous ref → UI renders →
+effect runs → ref stores current value → next render can read it as previous.
+
+</div>
+
+<div class="demo">
+
+<div class="demo-row">
+
+<input id="previousInput"
+       placeholder="Enter a value"
+       oninput="updatePreviousDemo()">
+
+</div>
+
+<div class="status" id="previousStatus">
+Previous value: —
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- TIMER -->
+
+<section class="section" id="timer">
+
+<div class="section-head">
+    <h2>10. Timer References</h2>
+    <p>Store timer IDs without putting them into UI state.</p>
+</div>
+
+<div class="card">
+
+<div class="code-wrap">
+
+<div class="code-title">setInterval with useRef</div>
+
+<pre><code><span class="keyword">const</span> timerRef = <span class="function">useRef</span>(<span class="keyword">null</span>);
+
+<span class="keyword">function</span> <span class="function">startTimer</span>() {
+
+    timerRef.current = <span class="function">setInterval</span>(() =&gt; {
+        console.<span class="function">log</span>(<span class="string">"Running..."</span>);
+    }, <span class="number">1000</span>);
+
+}
+
+<span class="keyword">function</span> <span class="function">stopTimer</span>() {
+
+    <span class="function">clearInterval</span>(timerRef.current);
+    timerRef.current = <span class="keyword">null</span>;
+
+}</code></pre>
+
+</div>
+
+<div class="success">
+    A timer ID is an excellent ref candidate because the ID needs to
+    survive renders, but changing it does not need to update the UI.
+</div>
+
+<div class="demo">
+
+<div class="counter-display" id="timerDisplay">
+    0
+</div>
+
+<div class="demo-row" style="justify-content:center;">
+
+<button class="btn" onclick="startDemoTimer()">Start</button>
+<button class="btn secondary" onclick="stopDemoTimer()">Stop</button>
+<button class="btn secondary" onclick="resetDemoTimer()">Reset</button>
+
+</div>
+
+<div class="status" id="timerStatus">
+Timer: stopped
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- MEASURE -->
+
+<section class="section" id="measure">
+
+<div class="section-head">
+    <h2>11. DOM Measurements</h2>
+    <p>Refs can access browser layout information.</p>
+</div>
+
+<div class="card">
+
+<p>
+Sometimes an application needs the dimensions or position of an element.
+A ref can point to the DOM element, after which browser measurement APIs
+can be used.
+</p>
+
+<div class="code-wrap">
+
+<div class="code-title">Measuring an Element</div>
+
+<pre><code><span class="keyword">const</span> boxRef = <span class="function">useRef</span>(<span class="keyword">null</span>);
+
+<span class="keyword">function</span> <span class="function">measureBox</span>() {
+
+    <span class="keyword">const</span> rect =
+        boxRef.current.<span class="function">getBoundingClientRect</span>();
+
+    console.<span class="function">log</span>(rect.width);
+    console.<span class="function">log</span>(rect.height);
+    console.<span class="function">log</span>(rect.top);
+    console.<span class="function">log</span>(rect.left);
+
+}</code></pre>
+
+</div>
+
+<div class="measure-box" id="measureBox">
+    Resize the browser window or measure me
+</div>
+
+<div class="demo-row" style="justify-content:center;">
+
+<button class="btn" onclick="measureElement()">
+    Measure Element
+</button>
+
+</div>
+
+<div class="measure-info" id="measureInfo">
+Width: — | Height: — | Top: — | Left: —
+</div>
+
+<div class="highlight">
+
+<strong>Real-world uses:</strong>
+
+tooltips, popovers, dropdown positioning, drag-and-drop,
+scroll-based interfaces, responsive visual components, and custom editors.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- RERENDER -->
+
+<section class="section" id="rerender">
+
+<div class="section-head">
+    <h2>12. Avoiding Unnecessary Re-renders</h2>
+    <p>Refs can store information that should not drive the UI.</p>
+</div>
+
+<div class="card">
+
+<p>
+Imagine an application receives hundreds of events. You might want to
+remember some internal information without causing the component to
+render every time.
+</p>
+
+<div class="code-wrap">
+
+<div class="code-title">Example</div>
+
+<pre><code><span class="keyword">const</span> lastMousePosition = <span class="function">useRef</span>({
+    x: <span class="number">0</span>,
+    y: <span class="number">0</span>
+});
+
+<span class="keyword">function</span> <span class="function">handleMouseMove</span>(event) {
+
+    lastMousePosition.current = {
+        x: event.clientX,
+        y: event.clientY
+    };
+
+}</code></pre>
+
+</div>
+
+<div class="warning">
+    This does NOT mean refs are a general-purpose replacement for state.
+    If the mouse position needs to appear in the UI, state may be required.
+</div>
+
+</div>
+
+</section>
+
+
+<!-- FORWARD REFS -->
+
+<section class="section" id="forward">
+
+<div class="section-head">
+    <h2>13. Forwarding Refs</h2>
+    <p>Allowing a parent to interact with a child DOM element.</p>
+</div>
+
+<div class="card">
+
+<p>
+Sometimes a parent component needs access to a DOM element rendered
+inside a child component.
+</p>
+
+<div class="code-wrap">
+
+<div class="code-title">Modern React Ref Prop Pattern</div>
+
+<pre><code><span class="keyword">function</span> <span class="function">TextInput</span>({ ref }) {
+
+    <span class="keyword">return</span> (
+        &lt;input
+            ref={ref}
+            placeholder=<span class="string">"Enter text"</span>
+        /&gt;
+    );
+
+}
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+    <span class="keyword">const</span> inputRef =
+        <span class="function">useRef</span>(<span class="keyword">null</span>);
+
+    <span class="keyword">return</span> (
+        &lt;&gt;
+
+            &lt;TextInput ref={inputRef} /&gt;
+
+            &lt;button
+                onClick={() =&gt;
+                    inputRef.current?.focus()
+                }
+            &gt;
+                Focus Child Input
+            &lt;/button&gt;
+
+        &lt;/&gt;
+    );
+
+}</code></pre>
+
+</div>
+
+<div class="highlight">
+
+<strong>React version note:</strong><br>
+In modern React, refs can be passed as a prop to function components.
+Older React code commonly uses <strong>forwardRef()</strong> for this pattern.
+
+</div>
+
+<div class="code-wrap">
+
+<div class="code-title">Traditional forwardRef Pattern</div>
+
+<pre><code><span class="keyword">const</span> TextInput =
+    <span class="function">forwardRef</span>(<span class="keyword">function</span> TextInput(props, ref) {
+
+        <span class="keyword">return</span> (
+            &lt;input ref={ref} /&gt;
+        );
+
+    });</code></pre>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- COMMON MISTAKES -->
+
+<section class="section" id="mistakes">
+
+<div class="section-head">
+    <h2>14. Common useRef() Mistakes</h2>
+    <p>Knowing when NOT to use a ref is just as important.</p>
+</div>
+
+<div class="card">
+
+<div class="danger">
+
+<strong>Mistake 1 — Expecting a re-render</strong>
+
+<div class="code-wrap">
+
+<pre><code><span class="keyword">const</span> count = <span class="function">useRef</span>(<span class="number">0</span>);
+
+count.current++;
+
+<span class="comment">// UI does not automatically update.</span></code></pre>
+
+</div>
+
+</div>
+
+<div class="danger">
+
+<strong>Mistake 2 — Using refs for normal UI state</strong>
+
+<p>
+If the user sees the value and the screen must update when it changes,
+state is generally the correct tool.
+</p>
+
+</div>
+
+<div class="danger">
+
+<strong>Mistake 3 — Reading DOM refs too early</strong>
+
+<p>
+A DOM ref is populated after React commits the element to the DOM.
+Do not assume ref.current points to a DOM node during the initial
+render.
+</p>
+
+</div>
+
+<div class="danger">
+
+<strong>Mistake 4 — Forgetting nullability</strong>
+
+<div class="code-wrap">
+
+<pre><code><span class="comment">// Unsafe if the element does not exist</span>
+inputRef.current.focus();
+
+<span class="comment">// Safer when null is possible</span>
+inputRef.current?.focus();</code></pre>
+
+</div>
+
+</div>
+
+<div class="danger">
+
+<strong>Mistake 5 — Mutating the DOM unnecessarily</strong>
+
+<p>
+React should remain the primary owner of the UI. Use refs for imperative
+operations that React cannot naturally express.
+</p>
+
+</div>
+
+<div class="danger">
+
+<strong>Mistake 6 — Reading or writing refs during rendering</strong>
+
+<p>
+Avoid using ref mutations as part of the component's rendering logic.
+Refs are primarily for event handlers, Effects, and imperative
+interactions.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- DECISION GUIDE -->
+
+<section class="section">
+
+<div class="section-head">
+    <h2>15. When Should You Use useRef()?</h2>
+    <p>A practical decision guide.</p>
+</div>
+
+<div class="grid-3">
+
+<div class="mini-card">
+<h4>Need UI to update?</h4>
+<p>
+Use <strong>useState()</strong>.
+</p>
+</div>
+
+<div class="mini-card">
+<h4>Need DOM access?</h4>
+<p>
+Use <strong>useRef()</strong>.
+</p>
+</div>
+
+<div class="mini-card">
+<h4>Need a timer ID?</h4>
+<p>
+A <strong>ref</strong> is usually appropriate.
+</p>
+</div>
+
+<div class="mini-card">
+<h4>Need previous value?</h4>
+<p>
+A <strong>ref + effect</strong> can store it.
+</p>
+</div>
+
+<div class="mini-card">
+<h4>Need dimensions?</h4>
+<p>
+Use a <strong>DOM ref</strong> and measurement APIs.
+</p>
+</div>
+
+<div class="mini-card">
+<h4>Need shared state?</h4>
+<p>
+Consider <strong>state, reducer, context</strong>, or another state solution.
+</p>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- COMPLETE EXAMPLE -->
+
+<section class="section">
+
+<div class="section-head">
+    <h2>16. Complete Real-World Example</h2>
+    <p>Search box that automatically receives focus.</p>
+</div>
+
+<div class="card">
+
+<div class="code-wrap">
+
+<div class="code-title">SearchBox.jsx</div>
+
+<pre><code><span class="keyword">import</span> { useEffect, useRef } <span class="keyword">from</span> <span class="string">"react"</span>;
+
+<span class="keyword">function</span> <span class="function">SearchBox</span>() {
+
+    <span class="keyword">const</span> searchRef =
+        <span class="function">useRef</span>(<span class="keyword">null</span>);
+
+    <span class="function">useEffect</span>(() =&gt; {
+
+        searchRef.current?.<span class="function">focus</span>();
+
+    }, []);
+
+    <span class="keyword">return</span> (
+        &lt;div&gt;
+
+            &lt;h2&gt;Search ZENSUS&lt;/h2&gt;
+
+            &lt;input
+                ref={searchRef}
+                placeholder=<span class="string">"Search lessons..."</span>
+            /&gt;
+
+        &lt;/div&gt;
+    );
+}
+
+<span class="keyword">export default</span> SearchBox;</code></pre>
+
+</div>
+
+<div class="success">
+    This is a realistic pattern: after the component mounts,
+    the input automatically receives keyboard focus.
+</div>
+
+</div>
+
+</section>
+
+
+<!-- CHEAT SHEET -->
+
+<section class="section">
+
+<div class="section-head">
+    <h2>17. useRef() Cheat Sheet</h2>
+</div>
+
+<div class="card">
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+<tr>
+<th>Goal</th>
+<th>Pattern</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td>Create a ref</td>
+<td><code>const ref = useRef(null)</code></td>
+</tr>
+
+<tr>
+<td>Access DOM</td>
+<td><code>ref.current</code></td>
+</tr>
+
+<tr>
+<td>Focus input</td>
+<td><code>ref.current.focus()</code></td>
+</tr>
+
+<tr>
+<td>Store mutable value</td>
+<td><code>ref.current = value</code></td>
+</tr>
+
+<tr>
+<td>Timer ID</td>
+<td><code>timerRef.current = setInterval(...)</code></td>
+</tr>
+
+<tr>
+<td>Measure element</td>
+<td><code>ref.current.getBoundingClientRect()</code></td>
+</tr>
+
+<tr>
+<td>Optional DOM access</td>
+<td><code>ref.current?.focus()</code></td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- MASTER MODEL -->
+
+<section class="section">
+
+<div class="section-head">
+    <h2>18. Master Mental Model</h2>
+</div>
+
+<div class="card">
+
+<div class="ref-stage">
+
+<div class="ref-flow">
+
+    <div class="ref-box">
+        <strong>useRef()</strong>
+        <span>Create persistent ref</span>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="ref-box">
+        <strong>.current</strong>
+        <span>Store value</span>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="ref-box">
+        <strong>DOM</strong>
+        <span>Access element</span>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="ref-box">
+        <strong>Imperative API</strong>
+        <span>Focus / Measure / Scroll</span>
+    </div>
+
+</div>
+
+</div>
+
+<div class="highlight">
+
+<strong>Remember:</strong><br><br>
+
+State is for information that drives the UI.<br>
+Refs are for persistent values or imperative interactions
+that do not need to trigger rendering.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- QUIZ -->
+
+<section class="section" id="quiz">
+
+<div class="section-head">
+    <h2>19. Quick Quiz</h2>
+    <p>Test your understanding of useRef().</p>
+</div>
+
+<div class="quiz">
+
+<div class="question">
+
+<h4>1. What does useRef() return?</h4>
+
+<button class="option" onclick="answer(this,false)">
+A. A state setter
+</button>
+
+<button class="option" onclick="answer(this,true)">
+B. A persistent object containing current
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. A React component
+</button>
+
+<button class="option" onclick="answer(this,false)">
+D. A reducer function
+</button>
+
+</div>
+
+
+<div class="question">
+
+<h4>2. Does changing ref.current trigger a re-render?</h4>
+
+<button class="option" onclick="answer(this,false)">
+A. Always
+</button>
+
+<button class="option" onclick="answer(this,true)">
+B. No
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. Only with useEffect
+</button>
+
+<button class="option" onclick="answer(this,false)">
+D. Only in production
+</button>
+
+</div>
+
+
+<div class="question">
+
+<h4>3. Which property stores the ref value?</h4>
+
+<button class="option" onclick="answer(this,false)">
+A. value
+</button>
+
+<button class="option" onclick="answer(this,true)">
+B. current
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. refValue
+</button>
+
+<button class="option" onclick="answer(this,false)">
+D. data
+</button>
+
+</div>
+
+
+<div class="question">
+
+<h4>4. Which is a common DOM-ref use case?</h4>
+
+<button class="option" onclick="answer(this,false)">
+A. Rendering a list
+</button>
+
+<button class="option" onclick="answer(this,true)">
+B. Focusing an input
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. Defining a component
+</button>
+
+<button class="option" onclick="answer(this,false)">
+D. Creating JSX syntax
+</button>
+
+</div>
+
+
+<div class="question">
+
+<h4>5. Which is usually better for visible UI data?</h4>
+
+<button class="option" onclick="answer(this,true)">
+A. useState
+</button>
+
+<button class="option" onclick="answer(this,false)">
+B. useRef
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. DOM mutation
+</button>
+
+<button class="option" onclick="answer(this,false)">
+D. setTimeout
+</button>
+
+</div>
+
+
+<div class="question">
+
+<h4>6. What can a DOM ref help you obtain?</h4>
+
+<button class="option" onclick="answer(this,false)">
+A. Only React props
+</button>
+
+<button class="option" onclick="answer(this,true)">
+B. DOM measurements
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. Component source code
+</button>
+
+<button class="option" onclick="answer(this,false)">
+D. JSX compilation errors
+</button>
+
+</div>
+
+
+<div class="quiz-result" id="quizResult">
+Score: 0 / 6
+</div>
+
+</div>
+
+</section>
+
+
+<div class="footer">
+    <strong>ZENSUS React • Lesson 15</strong><br>
+    useRef() → DOM References → Mutable Values → Imperative Interactions
+</div>
+
+</div>
+
+</main>
+
+
+<script>
+
+/* ================= SIDEBAR ACTIVE ================= */
+
+const links = document.querySelectorAll(".sidebar a");
+
+links.forEach(link => {
+
+    link.addEventListener("click", () => {
+
+        links.forEach(item => item.classList.remove("active"));
+
+        link.classList.add("active");
+
+    });
+
+});
+
+
+/* ================= FOCUS DEMO ================= */
+
+function focusInputDemo(){
+
+    const input = document.getElementById("focusInput");
+
+    input.focus();
+
+    document.getElementById("focusStatus").textContent =
+        "Ref status: inputRef.current → <input> → focus()";
+
+}
+
+function clearFocusInput(){
+
+    const input = document.getElementById("focusInput");
+
+    input.value = "";
+
+    input.focus();
+
+    document.getElementById("focusStatus").textContent =
+        "Input cleared and focused through the DOM reference.";
+
+}
+
+
+/* ================= STATE VS REF ================= */
+
+let stateValue = 0;
+let internalRefValue = 0;
+
+function incrementState(){
+
+    stateValue++;
+
+    document.getElementById("stateCounter").textContent =
+        stateValue;
+
+}
+
+function incrementRef(){
+
+    internalRefValue++;
+
+    document.getElementById("refInternal").textContent =
+        "Ref current = " + internalRefValue +
+        " (UI does not automatically re-render)";
+
+}
+
+
+/* ================= PREVIOUS VALUE ================= */
+
+let previousValue = "—";
+
+function updatePreviousDemo(){
+
+    const input =
+        document.getElementById("previousInput");
+
+    const currentValue = input.value;
+
+    document.getElementById("previousStatus").textContent =
+        "Previous value: " + previousValue;
+
+    previousValue = currentValue;
+
+}
+
+
+/* ================= TIMER ================= */
+
+let timerId = null;
+let timerValue = 0;
+
+function startDemoTimer(){
+
+    if(timerId !== null) return;
+
+    timerId = setInterval(() => {
+
+        timerValue++;
+
+        document.getElementById("timerDisplay").textContent =
+            timerValue;
+
+    },1000);
+
+    document.getElementById("timerStatus").textContent =
+        "Timer: running";
+
+}
+
+function stopDemoTimer(){
+
+    if(timerId !== null){
+
+        clearInterval(timerId);
+
+        timerId = null;
+
+    }
+
+    document.getElementById("timerStatus").textContent =
+        "Timer: stopped";
+
+}
+
+function resetDemoTimer(){
+
+    stopDemoTimer();
+
+    timerValue = 0;
+
+    document.getElementById("timerDisplay").textContent =
+        "0";
+
+    document.getElementById("timerStatus").textContent =
+        "Timer: reset";
+
+}
+
+
+/* ================= MEASUREMENT ================= */
+
+function measureElement(){
+
+    const box =
+        document.getElementById("measureBox");
+
+    const rect =
+        box.getBoundingClientRect();
+
+    document.getElementById("measureInfo").textContent =
+        "Width: " + Math.round(rect.width) +
+        "px | Height: " + Math.round(rect.height) +
+        "px | Top: " + Math.round(rect.top) +
+        "px | Left: " + Math.round(rect.left) +
+        "px";
+
+}
+
+
+/* ================= REF FLOW ANIMATION ================= */
+
+const refBoxes =
+    document.querySelectorAll(".ref-box");
+
+let activeIndex = 0;
+
+setInterval(() => {
+
+    refBoxes.forEach(box =>
+        box.classList.remove("active")
+    );
+
+    if(refBoxes.length){
+
+        refBoxes[activeIndex % refBoxes.length]
+            .classList.add("active");
+
+        activeIndex++;
+
+    }
+
+},850);
+
+
+/* ================= QUIZ ================= */
+
+let score = 0;
+let answered = 0;
+
+function answer(button, correct){
+
+    if(button.dataset.answered === "true"){
+        return;
+    }
+
+    button.dataset.answered = "true";
+
+    answered++;
+
+    if(correct){
+
+        button.classList.add("correct");
+        score++;
+
+    }else{
+
+        button.classList.add("wrong");
+
+    }
+
+    document.getElementById("quizResult").textContent =
+        "Score: " + score + " / 6";
+
+}
+
+</script>
+
+</body>
+</html>
+```

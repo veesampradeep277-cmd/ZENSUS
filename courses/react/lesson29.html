@@ -1,0 +1,2612 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS — Error Handling & Production Practices</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+    --bg:#f7f8fc;
+    --panel:#ffffff;
+    --soft:#f1f3f8;
+    --border:#e3e6ee;
+    --text:#172033;
+    --muted:#667085;
+
+    --primary:#6366f1;
+    --purple:#8b5cf6;
+    --blue:#3b82f6;
+    --green:#10b981;
+    --orange:#f59e0b;
+    --red:#ef4444;
+
+    --shadow:0 12px 35px rgba(20,25,50,.08);
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+/* ================= HEADER ================= */
+
+.header{
+    position:sticky;
+    top:0;
+    z-index:1000;
+    height:70px;
+
+    display:flex;
+    align-items:center;
+
+    padding:0 28px;
+
+    background:rgba(255,255,255,.95);
+    backdrop-filter:blur(12px);
+
+    border-bottom:1px solid var(--border);
+}
+
+.logo{
+    font-size:22px;
+    font-weight:850;
+    color:var(--primary);
+}
+
+.logo span{
+    color:var(--text);
+}
+
+.lesson-badge{
+    margin-left:18px;
+
+    padding:5px 12px;
+
+    border-radius:20px;
+
+    background:#eef2ff;
+    color:#4f46e5;
+
+    font-size:12px;
+    font-weight:750;
+}
+
+/* ================= LAYOUT ================= */
+
+.layout{
+    display:flex;
+    max-width:1500px;
+    margin:auto;
+}
+
+.sidebar{
+    width:275px;
+
+    height:calc(100vh - 70px);
+
+    position:sticky;
+    top:70px;
+
+    overflow-y:auto;
+
+    background:white;
+
+    border-right:1px solid var(--border);
+
+    padding:25px 18px;
+}
+
+.sidebar h3{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+
+    color:#98a2b3;
+
+    margin-bottom:15px;
+}
+
+.sidebar a{
+    display:block;
+
+    padding:9px 12px;
+
+    margin-bottom:3px;
+
+    border-radius:9px;
+
+    color:#475467;
+
+    text-decoration:none;
+
+    font-size:14px;
+
+    transition:.2s;
+}
+
+.sidebar a:hover{
+    background:#f1f3ff;
+    color:var(--primary);
+    transform:translateX(3px);
+}
+
+/* ================= MAIN ================= */
+
+.main{
+    flex:1;
+
+    max-width:1100px;
+
+    padding:55px 55px 100px;
+}
+
+/* ================= HERO ================= */
+
+.hero{
+    position:relative;
+
+    overflow:hidden;
+
+    padding:55px 45px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:24px;
+
+    box-shadow:var(--shadow);
+
+    margin-bottom:45px;
+}
+
+.hero::after{
+    content:"";
+
+    position:absolute;
+
+    width:300px;
+    height:300px;
+
+    right:-110px;
+    top:-120px;
+
+    border-radius:50%;
+
+    background:#eef2ff;
+}
+
+.hero-content{
+    position:relative;
+    z-index:1;
+}
+
+.eyebrow{
+    color:var(--primary);
+
+    font-size:13px;
+
+    font-weight:800;
+
+    text-transform:uppercase;
+
+    letter-spacing:1.4px;
+}
+
+.hero h1{
+    font-size:47px;
+
+    line-height:1.15;
+
+    letter-spacing:-1.5px;
+
+    margin:12px 0 18px;
+}
+
+.hero h1 span{
+    background-image:linear-gradient(
+        90deg,
+        #6366f1,
+        #8b5cf6
+    );
+
+    background-clip:text;
+    -webkit-background-clip:text;
+
+    color:transparent;
+    -webkit-text-fill-color:transparent;
+}
+
+.hero p{
+    max-width:800px;
+
+    color:var(--muted);
+
+    font-size:17px;
+}
+
+.tags{
+    display:flex;
+    flex-wrap:wrap;
+
+    gap:9px;
+
+    margin-top:25px;
+}
+
+.tag{
+    padding:7px 12px;
+
+    border-radius:20px;
+
+    background:#f2f4f7;
+
+    border:1px solid var(--border);
+
+    font-size:12px;
+
+    font-weight:700;
+}
+
+/* ================= SECTION ================= */
+
+.section{
+    margin-top:55px;
+
+    scroll-margin-top:90px;
+}
+
+.section h2{
+    font-size:30px;
+
+    letter-spacing:-.6px;
+
+    margin-bottom:14px;
+}
+
+.section h3{
+    font-size:21px;
+
+    margin:30px 0 10px;
+}
+
+.section-intro{
+    color:var(--muted);
+
+    margin-bottom:25px;
+}
+
+.card{
+    background:var(--panel);
+
+    border:1px solid var(--border);
+
+    border-radius:17px;
+
+    padding:25px;
+
+    margin:20px 0;
+
+    box-shadow:0 7px 24px rgba(20,25,50,.045);
+}
+
+.card p{
+    color:#475467;
+}
+
+.highlight{
+    background:#f5f6ff;
+
+    border-left:4px solid var(--primary);
+}
+
+/* ================= GRID ================= */
+
+.grid{
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:20px;
+}
+
+.grid3{
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:18px;
+}
+
+.mini-card{
+    padding:21px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:15px;
+
+    transition:.25s;
+}
+
+.mini-card:hover{
+    transform:translateY(-4px);
+
+    box-shadow:var(--shadow);
+}
+
+.mini-card h4{
+    margin-bottom:7px;
+}
+
+.mini-card p{
+    color:var(--muted);
+
+    font-size:14px;
+}
+
+/* ================= ERROR FLOW ================= */
+
+.error-flow{
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:13px;
+
+    flex-wrap:wrap;
+
+    margin:35px 0;
+}
+
+.error-box{
+    min-width:145px;
+
+    text-align:center;
+
+    padding:18px 14px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:14px;
+
+    box-shadow:0 7px 20px rgba(0,0,0,.05);
+
+    animation:errorFloat 3s ease-in-out infinite;
+}
+
+.error-box:nth-child(2){
+    animation-delay:.25s;
+}
+
+.error-box:nth-child(3){
+    animation-delay:.5s;
+}
+
+.error-box:nth-child(4){
+    animation-delay:.75s;
+}
+
+.error-box strong{
+    display:block;
+}
+
+.error-box small{
+    color:var(--muted);
+}
+
+.error-arrow{
+    font-size:24px;
+
+    color:var(--primary);
+
+    animation:arrowPulse 1.5s infinite;
+}
+
+@keyframes errorFloat{
+
+    0%,100%{
+        transform:translateY(0);
+    }
+
+    50%{
+        transform:translateY(-7px);
+    }
+
+}
+
+@keyframes arrowPulse{
+
+    0%,100%{
+        opacity:.3;
+    }
+
+    50%{
+        opacity:1;
+    }
+
+}
+
+/* ================= ERROR VISUAL ================= */
+
+.error-visual{
+    position:relative;
+
+    padding:35px;
+
+    background:#101426;
+
+    border-radius:20px;
+
+    color:white;
+
+    overflow:hidden;
+}
+
+.error-visual-title{
+    text-align:center;
+
+    color:#dbe2ff;
+
+    margin-bottom:30px;
+}
+
+.error-node-row{
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex-wrap:wrap;
+
+    gap:15px;
+}
+
+.error-node{
+    min-width:160px;
+
+    padding:20px;
+
+    text-align:center;
+
+    background:#171c31;
+
+    border:1px solid #313957;
+
+    border-radius:14px;
+}
+
+.error-node small{
+    color:#9da8c5;
+}
+
+.error-node.error-node-red{
+    border-color:#7f1d1d;
+
+    animation:redPulse 2s infinite;
+}
+
+@keyframes redPulse{
+
+    0%,100%{
+        box-shadow:0 0 0 rgba(239,68,68,0);
+    }
+
+    50%{
+        box-shadow:0 0 28px rgba(239,68,68,.18);
+    }
+
+}
+
+/* ================= CODE ================= */
+
+.code{
+    background:#101426;
+
+    color:#e7eaff;
+
+    border-radius:15px;
+
+    overflow:auto;
+
+    margin:18px 0;
+
+    border:1px solid #252c47;
+}
+
+.code-head{
+    padding:11px 17px;
+
+    background:#171c31;
+
+    color:#9da8c5;
+
+    font-size:12px;
+
+    border-bottom:1px solid #292f49;
+}
+
+pre{
+    padding:20px;
+
+    font-family:Consolas,Monaco,monospace;
+
+    font-size:13px;
+
+    line-height:1.75;
+
+    white-space:pre;
+}
+
+/* ================= STATUS CARDS ================= */
+
+.status-grid{
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:18px;
+
+    margin:25px 0;
+}
+
+.status{
+    padding:22px;
+
+    background:white;
+
+    border-radius:15px;
+
+    border:1px solid var(--border);
+
+    text-align:center;
+}
+
+.status-icon{
+    width:48px;
+    height:48px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    margin:0 auto 12px;
+
+    border-radius:50%;
+
+    font-weight:900;
+}
+
+.status.loading .status-icon{
+    background:#eef2ff;
+    color:#4f46e5;
+
+    animation:spinPulse 1.3s infinite;
+}
+
+.status.success .status-icon{
+    background:#ecfdf5;
+    color:#059669;
+}
+
+.status.empty .status-icon{
+    background:#fff7ed;
+    color:#d97706;
+}
+
+.status.error .status-icon{
+    background:#fef2f2;
+    color:#dc2626;
+}
+
+@keyframes spinPulse{
+
+    0%,100%{
+        transform:scale(1);
+    }
+
+    50%{
+        transform:scale(.8);
+        opacity:.5;
+    }
+
+}
+
+/* ================= RETRY ================= */
+
+.retry-box{
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex-wrap:wrap;
+
+    gap:13px;
+
+    margin:30px 0;
+}
+
+.retry-node{
+    padding:16px 22px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:12px;
+
+    font-weight:700;
+
+    animation:retryPulse 2.5s infinite;
+}
+
+.retry-node:nth-child(3){
+    animation-delay:.7s;
+}
+
+.retry-node:nth-child(5){
+    animation-delay:1.4s;
+}
+
+@keyframes retryPulse{
+
+    0%,100%{
+        transform:scale(1);
+    }
+
+    50%{
+        transform:scale(1.04);
+    }
+
+}
+
+/* ================= FORM ================= */
+
+.demo-form{
+    max-width:650px;
+
+    margin:20px auto;
+
+    padding:25px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:17px;
+}
+
+.demo-form label{
+    display:block;
+
+    margin-bottom:6px;
+
+    font-weight:700;
+
+    font-size:14px;
+}
+
+.demo-form input{
+    width:100%;
+
+    padding:12px;
+
+    margin-bottom:5px;
+
+    border:1px solid var(--border);
+
+    border-radius:9px;
+
+    outline:none;
+
+    font-size:14px;
+}
+
+.demo-form input:focus{
+    border-color:var(--primary);
+
+    box-shadow:0 0 0 3px #eef2ff;
+}
+
+.form-error{
+    color:#dc2626;
+
+    font-size:12px;
+
+    margin-bottom:15px;
+}
+
+/* ================= SECURITY ================= */
+
+.security-card{
+    display:flex;
+
+    gap:15px;
+
+    align-items:flex-start;
+
+    padding:20px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:14px;
+
+    margin:12px 0;
+}
+
+.security-number{
+    min-width:34px;
+    height:34px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    border-radius:50%;
+
+    background:#eef2ff;
+
+    color:#4f46e5;
+
+    font-weight:800;
+}
+
+/* ================= CHECKLIST ================= */
+
+.checklist{
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:18px;
+
+    padding:25px;
+}
+
+.check{
+    display:flex;
+
+    gap:12px;
+
+    padding:13px 0;
+
+    border-bottom:1px solid #f0f1f5;
+}
+
+.check:last-child{
+    border-bottom:none;
+}
+
+.check-icon{
+    color:var(--green);
+
+    font-weight:900;
+}
+
+/* ================= MISTAKES ================= */
+
+.mistake{
+    padding:18px;
+
+    margin:12px 0;
+
+    border-radius:13px;
+
+    border:1px solid #fed7aa;
+
+    background:#fff7ed;
+}
+
+.mistake strong{
+    color:#c2410c;
+}
+
+/* ================= QUIZ ================= */
+
+.quiz{
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:18px;
+
+    padding:25px;
+
+    margin:18px 0;
+}
+
+.quiz-question{
+    font-weight:800;
+
+    margin-bottom:14px;
+}
+
+.option{
+    display:block;
+
+    padding:11px 14px;
+
+    margin:7px 0;
+
+    border:1px solid var(--border);
+
+    border-radius:9px;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.option:hover{
+    background:#f4f5ff;
+
+    border-color:#c7c9ff;
+}
+
+.answer{
+    display:none;
+
+    margin-top:12px;
+
+    padding:10px 13px;
+
+    background:#ecfdf5;
+
+    color:#047857;
+
+    border-radius:8px;
+
+    font-size:13px;
+}
+
+/* ================= REVEAL ================= */
+
+.reveal{
+    opacity:0;
+
+    transform:translateY(25px);
+
+    transition:
+        opacity .7s ease,
+        transform .7s ease;
+}
+
+.reveal.show{
+    opacity:1;
+
+    transform:translateY(0);
+}
+
+/* ================= FOOTER ================= */
+
+.footer{
+    margin-top:80px;
+
+    padding:30px;
+
+    text-align:center;
+
+    color:var(--muted);
+
+    border-top:1px solid var(--border);
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:1000px){
+
+    .sidebar{
+        display:none;
+    }
+
+    .main{
+        padding:35px 22px 80px;
+    }
+
+    .grid,
+    .grid3{
+        grid-template-columns:1fr;
+    }
+
+    .status-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .hero h1{
+        font-size:38px;
+    }
+
+}
+
+@media(max-width:600px){
+
+    .hero{
+        padding:35px 23px;
+    }
+
+    .hero h1{
+        font-size:32px;
+    }
+
+    .status-grid{
+        grid-template-columns:1fr;
+    }
+
+    .header{
+        padding:0 18px;
+    }
+
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+
+<div class="logo">
+ZENSUS<span>.</span>
+</div>
+
+<div class="lesson-badge">
+REACT • LESSON 29
+</div>
+
+</header>
+
+
+<div class="layout">
+
+<aside class="sidebar">
+
+<h3>Lesson 29</h3>
+
+<a href="#intro">1. Production Mindset</a>
+<a href="#runtime">2. Runtime Errors</a>
+<a href="#boundaries">3. Error Boundaries</a>
+<a href="#api">4. API Errors</a>
+<a href="#status">5. HTTP Status Codes</a>
+<a href="#states">6. UI States</a>
+<a href="#fallback">7. Fallback UI</a>
+<a href="#forms">8. Form Errors</a>
+<a href="#network">9. Network Errors</a>
+<a href="#retry">10. Retry Logic</a>
+<a href="#messages">11. User Messages</a>
+<a href="#env">12. Environment Variables</a>
+<a href="#security">13. Security</a>
+<a href="#organization">14. Code Organization</a>
+<a href="#checklist">15. Production Checklist</a>
+<a href="#mistakes">16. Common Mistakes</a>
+<a href="#quiz">17. Quick Quiz</a>
+
+</aside>
+
+
+<main class="main">
+
+
+<!-- HERO -->
+
+<section class="hero reveal" id="intro">
+
+<div class="hero-content">
+
+<div class="eyebrow">
+React Production Engineering
+</div>
+
+<h1>
+Error Handling & <span>Production Practices</span>
+</h1>
+
+<p>
+Learn how to build React applications that remain understandable,
+stable and user-friendly when something goes wrong — from component
+crashes and API failures to network problems, invalid forms and
+production configuration.
+</p>
+
+<div class="tags">
+
+<span class="tag">Runtime Errors</span>
+<span class="tag">Error Boundaries</span>
+<span class="tag">API Errors</span>
+<span class="tag">Loading States</span>
+<span class="tag">Retry Logic</span>
+<span class="tag">Security</span>
+<span class="tag">Production</span>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- PRODUCTION MINDSET -->
+
+<section class="section reveal">
+
+<h2>1. The Production Mindset</h2>
+
+<p class="section-intro">
+A production application should not assume that everything will always
+work correctly.
+</p>
+
+<div class="card highlight">
+
+<strong>Development mindset:</strong>
+
+<p>
+"What happens when everything works?"
+</p>
+
+<br>
+
+<strong>Production mindset:</strong>
+
+<p>
+"What happens when the network fails, the API returns an error, the
+database is unavailable, the user enters invalid information, or a
+component crashes?"
+</p>
+
+</div>
+
+<div class="error-flow">
+
+<div class="error-box">
+<strong>User</strong>
+<small>Action</small>
+</div>
+
+<div class="error-arrow">→</div>
+
+<div class="error-box">
+<strong>React</strong>
+<small>Application</small>
+</div>
+
+<div class="error-arrow">→</div>
+
+<div class="error-box">
+<strong>API</strong>
+<small>Request</small>
+</div>
+
+<div class="error-arrow">→</div>
+
+<div class="error-box">
+<strong>Failure</strong>
+<small>Something goes wrong</small>
+</div>
+
+</div>
+
+<p>
+Good error handling converts unexpected failures into controlled
+application states.
+</p>
+
+</section>
+
+
+<!-- RUNTIME -->
+
+<section class="section reveal" id="runtime">
+
+<h2>2. Runtime Errors</h2>
+
+<p class="section-intro">
+A runtime error occurs while JavaScript is executing.
+</p>
+
+<h3>Example</h3>
+
+<div class="code">
+
+<div class="code-head">
+Runtime error
+</div>
+
+<pre>
+function UserProfile() {
+
+    const user = null;
+
+    return (
+        &lt;h2&gt;
+            {user.name}
+        &lt;/h2&gt;
+    );
+}
+</pre>
+
+</div>
+
+<p>
+Trying to access a property from a null value can cause an exception.
+</p>
+
+<h3>Safer approach</h3>
+
+<div class="code">
+
+<pre>
+function UserProfile({ user }) {
+
+    if (!user) {
+        return &lt;p&gt;User not available&lt;/p&gt;;
+    }
+
+    return (
+        &lt;h2&gt;
+            {user.name}
+        &lt;/h2&gt;
+    );
+}
+</pre>
+
+</div>
+
+<div class="highlight card">
+
+<strong>Important principle:</strong>
+
+<p>
+Prevent predictable errors through validation and conditional rendering,
+but use error boundaries for unexpected rendering failures.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- ERROR BOUNDARIES -->
+
+<section class="section reveal" id="boundaries">
+
+<h2>3. Error Boundaries</h2>
+
+<p class="section-intro">
+An Error Boundary is a React component designed to catch rendering
+errors in its child component tree and display fallback UI.
+</p>
+
+<div class="error-visual">
+
+<div class="error-visual-title">
+<strong>Component Failure Protection</strong>
+</div>
+
+<div class="error-node-row">
+
+<div class="error-node">
+<strong>App</strong>
+<small>Application</small>
+</div>
+
+<div class="error-arrow">→</div>
+
+<div class="error-node">
+<strong>Error Boundary</strong>
+<small>Protection Layer</small>
+</div>
+
+<div class="error-arrow">→</div>
+
+<div class="error-node error-node-red">
+<strong>Broken Component</strong>
+<small>Error</small>
+</div>
+
+<div class="error-arrow">→</div>
+
+<div class="error-node">
+<strong>Fallback UI</strong>
+<small>Safe screen</small>
+</div>
+
+</div>
+
+</div>
+
+<h3>Class-based Error Boundary</h3>
+
+<div class="code">
+
+<pre>
+import React from "react";
+
+class ErrorBoundary extends React.Component {
+
+    constructor(props) {
+
+        super(props);
+
+        this.state = {
+            hasError: false
+        };
+    }
+
+    static getDerivedStateFromError() {
+
+        return {
+            hasError: true
+        };
+    }
+
+    componentDidCatch(error, info) {
+
+        console.error(error, info);
+    }
+
+    render() {
+
+        if (this.state.hasError) {
+
+            return (
+                &lt;div&gt;
+                    &lt;h2&gt;
+                        Something went wrong.
+                    &lt;/h2&gt;
+
+                    &lt;p&gt;
+                        Please try again later.
+                    &lt;/p&gt;
+                &lt;/div&gt;
+            );
+        }
+
+        return this.props.children;
+    }
+}
+
+export default ErrorBoundary;
+</pre>
+
+</div>
+
+<h3>Using the boundary</h3>
+
+<div class="code">
+
+<pre>
+function App() {
+
+    return (
+        &lt;ErrorBoundary&gt;
+
+            &lt;Dashboard /&gt;
+
+        &lt;/ErrorBoundary&gt;
+    );
+}
+</pre>
+
+</div>
+
+<div class="card">
+
+<strong>What Error Boundaries are not:</strong>
+
+<ul>
+<li>They are not a replacement for try/catch around normal asynchronous API requests.</li>
+<li>They do not mean every possible JavaScript error is automatically handled.</li>
+<li>They should be combined with proper API and form error handling.</li>
+</ul>
+
+</div>
+
+</section>
+
+
+<!-- API -->
+
+<section class="section reveal" id="api">
+
+<h2>4. API Errors</h2>
+
+<p class="section-intro">
+Frontend applications communicate with servers, and servers can return
+success or failure responses.
+</p>
+
+<div class="code">
+
+<div class="code-head">
+API request handling
+</div>
+
+<pre>
+async function loadUsers() {
+
+    try {
+
+        const response =
+            await fetch("/api/users");
+
+        if (!response.ok) {
+
+            throw new Error(
+                `Request failed: ${response.status}`
+            );
+        }
+
+        const data =
+            await response.json();
+
+        return data;
+
+    } catch (error) {
+
+        console.error(error);
+
+        throw error;
+    }
+}
+</pre>
+
+</div>
+
+<h3>Why response.ok matters</h3>
+
+<p>
+A fetch promise can resolve even when the server responds with an HTTP
+error status. The application should explicitly inspect the response.
+</p>
+
+</section>
+
+
+<!-- STATUS -->
+
+<section class="section reveal" id="status">
+
+<h2>5. HTTP Status Codes</h2>
+
+<div class="grid3">
+
+<div class="mini-card">
+<h4>200 OK</h4>
+<p>The request succeeded.</p>
+</div>
+
+<div class="mini-card">
+<h4>201 Created</h4>
+<p>A resource was successfully created.</p>
+</div>
+
+<div class="mini-card">
+<h4>204 No Content</h4>
+<p>The request succeeded without a response body.</p>
+</div>
+
+<div class="mini-card">
+<h4>400 Bad Request</h4>
+<p>The server could not process invalid request data.</p>
+</div>
+
+<div class="mini-card">
+<h4>401 Unauthorized</h4>
+<p>Authentication is required or failed.</p>
+</div>
+
+<div class="mini-card">
+<h4>403 Forbidden</h4>
+<p>The server refuses the requested operation.</p>
+</div>
+
+<div class="mini-card">
+<h4>404 Not Found</h4>
+<p>The requested resource could not be found.</p>
+</div>
+
+<div class="mini-card">
+<h4>500 Internal Server Error</h4>
+<p>The server encountered an unexpected problem.</p>
+</div>
+
+<div class="mini-card">
+<h4>503 Service Unavailable</h4>
+<p>The service is temporarily unable to handle the request.</p>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- STATES -->
+
+<section class="section reveal" id="states">
+
+<h2>6. Loading, Empty & Error States</h2>
+
+<p class="section-intro">
+A professional application should explicitly represent the state of
+an asynchronous operation.
+</p>
+
+<div class="status-grid">
+
+<div class="status loading">
+
+<div class="status-icon">
+...
+</div>
+
+<h4>Loading State</h4>
+
+<p>
+The request is currently running.
+</p>
+
+</div>
+
+
+<div class="status success">
+
+<div class="status-icon">
+✓
+</div>
+
+<h4>Success State</h4>
+
+<p>
+Data was successfully loaded.
+</p>
+
+</div>
+
+
+<div class="status empty">
+
+<div class="status-icon">
+∅
+</div>
+
+<h4>Empty State</h4>
+
+<p>
+The request succeeded but there is no data.
+</p>
+
+</div>
+
+
+<div class="status error">
+
+<div class="status-icon">
+!
+</div>
+
+<h4>Error State</h4>
+
+<p>
+The operation failed.
+</p>
+
+</div>
+
+</div>
+
+<h3>Typical state machine</h3>
+
+<div class="error-flow">
+
+<div class="error-box">
+<strong>Idle</strong>
+<small>Nothing started</small>
+</div>
+
+<div class="error-arrow">→</div>
+
+<div class="error-box">
+<strong>Loading</strong>
+<small>Request running</small>
+</div>
+
+<div class="error-arrow">→</div>
+
+<div class="error-box">
+<strong>Success</strong>
+<small>Data available</small>
+</div>
+
+</div>
+
+<p>
+The loading state can transition into either a successful result or an
+error. A successful request can also produce an empty result.
+</p>
+
+</section>
+
+
+<!-- FALLBACK -->
+
+<section class="section reveal" id="fallback">
+
+<h2>7. Fallback UI</h2>
+
+<p class="section-intro">
+Fallback UI is the interface displayed when the expected content cannot
+be rendered or loaded.
+</p>
+
+<div class="grid">
+
+<div class="card">
+
+<h3>Good fallback</h3>
+
+<p>
+Something went wrong while loading the dashboard.
+</p>
+
+<button>
+Try Again
+</button>
+
+</div>
+
+<div class="card">
+
+<h3>Bad fallback</h3>
+
+<p>
+Something went wrong.
+</p>
+
+<p>
+No useful information or recovery action is provided.
+</p>
+
+</div>
+
+</div>
+
+<h3>Example</h3>
+
+<div class="code">
+
+<pre>
+if (error) {
+
+    return (
+        &lt;div className="error"&gt;
+
+            &lt;h2&gt;
+                Unable to load dashboard
+            &lt;/h2&gt;
+
+            &lt;p&gt;
+                Please check your connection
+                and try again.
+            &lt;/p&gt;
+
+            &lt;button onClick={loadDashboard}&gt;
+                Try Again
+            &lt;/button&gt;
+
+        &lt;/div&gt;
+    );
+}
+</pre>
+
+</div>
+
+</section>
+
+
+<!-- FORMS -->
+
+<section class="section reveal" id="forms">
+
+<h2>8. Form Errors</h2>
+
+<p class="section-intro">
+Form validation should tell users exactly what needs to be corrected.
+</p>
+
+<div class="demo-form">
+
+<label>Email</label>
+
+<input
+    type="text"
+    placeholder="student@example.com"
+>
+
+<div class="form-error">
+Please enter a valid email address.
+</div>
+
+
+<label>Password</label>
+
+<input
+    type="password"
+    placeholder="Password"
+>
+
+<div class="form-error">
+Password must satisfy the application's required rules.
+</div>
+
+</div>
+
+<h3>React validation example</h3>
+
+<div class="code">
+
+<pre>
+const [errors, setErrors] = useState({});
+
+
+function validate(form) {
+
+    const newErrors = {};
+
+    if (!form.email) {
+
+        newErrors.email =
+            "Email is required";
+    }
+
+    if (!form.password) {
+
+        newErrors.password =
+            "Password is required";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+}
+</pre>
+
+</div>
+
+<div class="highlight card">
+
+<strong>Good validation message:</strong>
+
+<p>
+"Email is required."
+</p>
+
+<strong>Avoid:</strong>
+
+<p>
+"Invalid input."
+</p>
+
+</div>
+
+</section>
+
+
+<!-- NETWORK -->
+
+<section class="section reveal" id="network">
+
+<h2>9. Network Errors</h2>
+
+<p class="section-intro">
+Not every failure is caused by your React code. The user's network,
+server availability or connection can fail.
+</p>
+
+<div class="grid3">
+
+<div class="mini-card">
+<h4>Offline</h4>
+<p>The device has no usable network connection.</p>
+</div>
+
+<div class="mini-card">
+<h4>Timeout</h4>
+<p>The request takes too long to complete.</p>
+</div>
+
+<div class="mini-card">
+<h4>Server Down</h4>
+<p>The backend cannot currently serve requests.</p>
+</div>
+
+</div>
+
+<h3>Basic handling</h3>
+
+<div class="code">
+
+<pre>
+try {
+
+    const response =
+        await fetch("/api/products");
+
+    if (!response.ok) {
+        throw new Error(
+            "Server request failed"
+        );
+    }
+
+} catch (error) {
+
+    setError(
+        "Unable to connect to the server. "
+        + "Please try again."
+    );
+}
+</pre>
+
+</div>
+
+</section>
+
+
+<!-- RETRY -->
+
+<section class="section reveal" id="retry">
+
+<h2>10. Retry Logic</h2>
+
+<p class="section-intro">
+Temporary failures may succeed if the request is attempted again.
+</p>
+
+<div class="retry-box">
+
+<div class="retry-node">
+Request
+</div>
+
+<div class="error-arrow">→</div>
+
+<div class="retry-node">
+Failure
+</div>
+
+<div class="error-arrow">→</div>
+
+<div class="retry-node">
+Retry
+</div>
+
+<div class="error-arrow">→</div>
+
+<div class="retry-node">
+Success
+</div>
+
+</div>
+
+<h3>Simple retry function</h3>
+
+<div class="code">
+
+<pre>
+async function fetchWithRetry(
+    url,
+    attempts = 3
+) {
+
+    for (
+        let attempt = 1;
+        attempt &lt;= attempts;
+        attempt++
+    ) {
+
+        try {
+
+            const response =
+                await fetch(url);
+
+            if (!response.ok) {
+                throw new Error(
+                    "Request failed"
+                );
+            }
+
+            return await response.json();
+
+        } catch (error) {
+
+            if (attempt === attempts) {
+                throw error;
+            }
+        }
+    }
+}
+</pre>
+
+</div>
+
+<div class="highlight card">
+
+<strong>Production consideration:</strong>
+
+<p>
+Retry logic should be designed carefully. Automatically retrying every
+failure can increase server load or repeat operations that should not
+be repeated. Retry behavior should depend on the type of request and
+failure.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- USER MESSAGES -->
+
+<section class="section reveal" id="messages">
+
+<h2>11. User-Friendly Error Messages</h2>
+
+<div class="grid">
+
+<div class="card">
+
+<h3>Technical message</h3>
+
+<p>
+"TypeError: Failed to fetch"
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>User-friendly message</h3>
+
+<p>
+"We couldn't connect to the server. Please check your connection and try again."
+</p>
+
+</div>
+
+</div>
+
+<h3>Error message formula</h3>
+
+<div class="flow">
+
+<div class="error-box">
+<strong>What happened?</strong>
+<small>Explain</small>
+</div>
+
+<div class="error-arrow">+</div>
+
+<div class="error-box">
+<strong>Why?</strong>
+<small>When useful</small>
+</div>
+
+<div class="error-arrow">+</div>
+
+<div class="error-box">
+<strong>What next?</strong>
+<small>Recovery</small>
+</div>
+
+</div>
+
+<p>
+A useful error message should help the user understand the problem and,
+when possible, recover from it.
+</p>
+
+</section>
+
+
+<!-- ENV -->
+
+<section class="section reveal" id="env">
+
+<h2>12. Environment Variables</h2>
+
+<p class="section-intro">
+Production applications often need different configuration values for
+development, testing and production.
+</p>
+
+<div class="code">
+
+<div class="code-head">
+.env
+</div>
+
+<pre>
+VITE_API_URL=http://localhost:5000/api
+</pre>
+
+</div>
+
+<div class="code">
+
+<div class="code-head">
+React
+</div>
+
+<pre>
+const API_URL =
+    import.meta.env.VITE_API_URL;
+</pre>
+
+</div>
+
+<h3>Important security distinction</h3>
+
+<div class="grid">
+
+<div class="card">
+
+<h3>Configuration</h3>
+
+<p>
+A frontend API base URL may be exposed because the browser needs it.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>Secrets</h3>
+
+<p>
+Database passwords, private API keys and server credentials should
+remain on the server.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- SECURITY -->
+
+<section class="section reveal" id="security">
+
+<h2>13. Security Practices</h2>
+
+<p class="section-intro">
+Production development requires security to be considered throughout
+the application rather than added at the end.
+</p>
+
+<div class="security-card">
+
+<div class="security-number">1</div>
+
+<div>
+<strong>Never expose server secrets</strong>
+<p>
+Do not place private credentials inside frontend source code.
+</p>
+</div>
+
+</div>
+
+
+<div class="security-card">
+
+<div class="security-number">2</div>
+
+<div>
+<strong>Validate input</strong>
+<p>
+Validate important data on the server even when frontend validation exists.
+</p>
+</div>
+
+</div>
+
+
+<div class="security-card">
+
+<div class="security-number">3</div>
+
+<div>
+<strong>Use HTTPS in production</strong>
+<p>
+Production applications should protect network communication with TLS.
+</p>
+</div>
+
+</div>
+
+
+<div class="security-card">
+
+<div class="security-number">4</div>
+
+<div>
+<strong>Do not trust client-side authorization</strong>
+<p>
+The backend should enforce authorization rules.
+</p>
+</div>
+
+</div>
+
+
+<div class="security-card">
+
+<div class="security-number">5</div>
+
+<div>
+<strong>Protect authentication credentials</strong>
+<p>
+Use an appropriate authentication architecture and avoid unnecessarily
+exposing sensitive credentials to JavaScript.
+</p>
+</div>
+
+</div>
+
+
+<div class="security-card">
+
+<div class="security-number">6</div>
+
+<div>
+<strong>Do not expose internal errors</strong>
+<p>
+Users generally do not need database stack traces or internal server
+details.
+</p>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ORGANIZATION -->
+
+<section class="section reveal" id="organization">
+
+<h2>14. Code Organization</h2>
+
+<p class="section-intro">
+Production code becomes easier to maintain when responsibilities are
+separated.
+</p>
+
+<div class="code">
+
+<div class="code-head">
+Recommended structure
+</div>
+
+<pre>
+src/
+│
+├── components/
+│   ├── Button.jsx
+│   ├── ErrorMessage.jsx
+│   └── Loading.jsx
+│
+├── pages/
+│   ├── Home.jsx
+│   ├── Dashboard.jsx
+│   └── Profile.jsx
+│
+├── services/
+│   ├── api.js
+│   ├── authService.js
+│   └── userService.js
+│
+├── hooks/
+│   ├── useFetch.js
+│   └── useAuth.js
+│
+├── context/
+│
+├── utils/
+│
+├── constants/
+│
+├── App.jsx
+│
+└── main.jsx
+</pre>
+
+</div>
+
+<h3>Separation of responsibilities</h3>
+
+<div class="grid3">
+
+<div class="mini-card">
+<h4>Components</h4>
+<p>Reusable UI.</p>
+</div>
+
+<div class="mini-card">
+<h4>Pages</h4>
+<p>Application screens.</p>
+</div>
+
+<div class="mini-card">
+<h4>Services</h4>
+<p>API communication.</p>
+</div>
+
+<div class="mini-card">
+<h4>Hooks</h4>
+<p>Reusable React logic.</p>
+</div>
+
+<div class="mini-card">
+<h4>Utils</h4>
+<p>General-purpose functions.</p>
+</div>
+
+<div class="mini-card">
+<h4>Constants</h4>
+<p>Shared application values.</p>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- PRODUCTION CHECKLIST -->
+
+<section class="section reveal" id="checklist">
+
+<h2>15. Production Checklist</h2>
+
+<p class="section-intro">
+Before deploying a React application, review the following areas.
+</p>
+
+<div class="checklist">
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Remove unnecessary console debugging.</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Handle loading states.</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Handle empty states.</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Handle API errors.</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Handle network failures.</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Provide useful fallback UI.</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Validate important user input.</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Protect server-side secrets.</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Configure production environment variables.</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Verify authentication and authorization.</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Check API endpoints.</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Test different failure scenarios.</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Build the application for production.</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Test the production build before deployment.</span>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- COMMON MISTAKES -->
+
+<section class="section reveal" id="mistakes">
+
+<h2>16. Common Production Mistakes</h2>
+
+<div class="mistake">
+
+<strong>01 — Showing raw technical errors</strong>
+
+<p>
+Avoid exposing stack traces and internal implementation details to normal users.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<strong>02 — Handling only successful responses</strong>
+
+<p>
+Real applications must account for failures, empty results and network problems.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<strong>03 — No loading state</strong>
+
+<p>
+A blank interface can make users think the application is frozen.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<strong>04 — Treating every error as retryable</strong>
+
+<p>
+Some failures require user correction rather than another identical request.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<strong>05 — Exposing secrets in frontend code</strong>
+
+<p>
+Browser code is not a secure location for server-only credentials.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<strong>06 — Depending only on frontend validation</strong>
+
+<p>
+Important validation and authorization must also be enforced on the backend.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<strong>07 — One giant component</strong>
+
+<p>
+Separating UI, API logic and reusable behavior makes applications easier
+to maintain.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- QUIZ -->
+
+<section class="section reveal" id="quiz">
+
+<h2>17. Quick Quiz</h2>
+
+
+<div class="quiz">
+
+<div class="quiz-question">
+1. What is the primary purpose of a React Error Boundary?
+</div>
+
+<div class="option" onclick="showAnswer(this)">
+A. Store data in a database
+</div>
+
+<div class="option" onclick="showAnswer(this)">
+B. Catch rendering errors in a child component tree and show fallback UI
+</div>
+
+<div class="option" onclick="showAnswer(this)">
+C. Replace all API authentication
+</div>
+
+<div class="option" onclick="showAnswer(this)">
+D. Automatically retry every network request
+</div>
+
+<div class="answer">
+Answer: B — Error Boundaries provide fallback UI for certain rendering errors in their child component tree.
+</div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="quiz-question">
+2. What should normally be displayed when an API request is still running?
+</div>
+
+<div class="option" onclick="showAnswer(this)">
+A. Loading state
+</div>
+
+<div class="option" onclick="showAnswer(this)">
+B. Empty state only
+</div>
+
+<div class="option" onclick="showAnswer(this)">
+C. Database credentials
+</div>
+
+<div class="option" onclick="showAnswer(this)">
+D. Stack trace
+</div>
+
+<div class="answer">
+Answer: A — A loading state communicates that the asynchronous operation is still in progress.
+</div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="quiz-question">
+3. Which HTTP status commonly represents a resource that could not be found?
+</div>
+
+<div class="option" onclick="showAnswer(this)">
+A. 200
+</div>
+
+<div class="option" onclick="showAnswer(this)">
+B. 201
+</div>
+
+<div class="option" onclick="showAnswer(this)">
+C. 404
+</div>
+
+<div class="option" onclick="showAnswer(this)">
+D. 500
+</div>
+
+<div class="answer">
+Answer: C — HTTP 404 indicates that the requested resource could not be found.
+</div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="quiz-question">
+4. Where should a private database password normally be stored?
+</div>
+
+<div class="option" onclick="showAnswer(this)">
+A. React JSX
+</div>
+
+<div class="option" onclick="showAnswer(this)">
+B. Browser source code
+</div>
+
+<div class="option" onclick="showAnswer(this)">
+C. Server-side configuration
+</div>
+
+<div class="option" onclick="showAnswer(this)">
+D. Public GitHub README
+</div>
+
+<div class="answer">
+Answer: C — Private database credentials should remain on the server side.
+</div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="quiz-question">
+5. Why are empty states important?
+</div>
+
+<div class="option" onclick="showAnswer(this)">
+A. They indicate that a successful operation returned no data
+</div>
+
+<div class="option" onclick="showAnswer(this)">
+B. They replace authentication
+</div>
+
+<div class="option" onclick="showAnswer(this)">
+C. They automatically fix server errors
+</div>
+
+<div class="option" onclick="showAnswer(this)">
+D. They store API keys
+</div>
+
+<div class="answer">
+Answer: A — An empty state gives users useful feedback when there is no content to display.
+</div>
+
+</div>
+
+</section>
+
+
+<!-- FINAL -->
+
+<section class="section reveal">
+
+<div class="card highlight">
+
+<h2>Production Principle</h2>
+
+<p>
+A professional application is not one where errors never happen.
+It is one where failures are anticipated, contained, communicated
+clearly and recovered from whenever possible.
+</p>
+
+<br>
+
+<strong>
+React UI → State → API → Backend → Failure Handling → User Feedback
+</strong>
+
+</div>
+
+</section>
+
+
+<footer class="footer">
+
+<strong>ZENSUS</strong>
+
+<br>
+
+React Course • Lesson 29
+
+<br>
+
+Error Handling & Production Practices
+
+</footer>
+
+
+</main>
+</div>
+
+
+<script>
+
+/* ================= REVEAL ANIMATION ================= */
+
+const observer = new IntersectionObserver(
+    entries => {
+
+        entries.forEach(entry => {
+
+            if(entry.isIntersecting){
+
+                entry.target.classList.add("show");
+
+            }
+
+        });
+
+    },
+    {
+        threshold:0.12
+    }
+);
+
+document
+    .querySelectorAll(".reveal")
+    .forEach(element => {
+
+        observer.observe(element);
+
+    });
+
+
+/* ================= QUIZ ================= */
+
+function showAnswer(element){
+
+    const quiz =
+        element.closest(".quiz");
+
+    const answer =
+        quiz.querySelector(".answer");
+
+    answer.style.display = "block";
+}
+
+</script>
+
+</body>
+</html>
+```

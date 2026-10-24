@@ -1,0 +1,3449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ZENSUS | SQL Lesson 13 - Views</title>
+
+    <style>
+        /* =========================================================
+           ZENSUS SQL LESSON 13 — VIEWS
+           Standalone HTML | CSS + JS included
+        ========================================================= */
+
+        :root {
+            --bg: #f6f8fc;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --text: #172033;
+            --muted: #667085;
+            --border: #e5e7eb;
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --secondary: #7c3aed;
+            --success: #16a34a;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --code-bg: #0f172a;
+            --code-text: #e2e8f0;
+            --sidebar: #ffffff;
+            --shadow: 0 8px 30px rgba(15, 23, 42, 0.07);
+            --radius: 18px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Inter, Arial, Helvetica, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        /* =========================
+           SCROLL PROGRESS
+        ========================= */
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            z-index: 9999;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 270px;
+            height: 100vh;
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            padding: 24px 16px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px 25px;
+        }
+
+        .brand-logo {
+            width: 38px;
+            height: 38px;
+            border-radius: 11px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+        }
+
+        .brand-text {
+            font-size: 21px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .course-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 10px 12px;
+        }
+
+        .lesson-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-decoration: none;
+            color: #475467;
+            padding: 10px 12px;
+            margin: 3px 0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: 0.25s;
+        }
+
+        .lesson-link:hover {
+            background: #f1f5f9;
+            color: var(--primary);
+        }
+
+        .lesson-link.active {
+            background: #eef2ff;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .lesson-number {
+            font-size: 11px;
+            color: #98a2b3;
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        .mobile-header {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            height: 62px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 18px;
+        }
+
+        .menu-btn {
+            border: none;
+            background: #eef2ff;
+            color: var(--primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .main {
+            margin-left: 270px;
+            max-width: 1250px;
+            padding: 45px 50px 100px;
+        }
+
+        /* =========================
+           HERO
+        ========================= */
+
+        .hero {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 25px;
+            padding: 48px;
+            box-shadow: var(--shadow);
+            margin-bottom: 28px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            width: 230px;
+            height: 230px;
+            border-radius: 50%;
+            background: #eef2ff;
+            right: -90px;
+            top: -90px;
+        }
+
+        .breadcrumb {
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        .hero h1 {
+            font-size: clamp(32px, 5vw, 56px);
+            line-height: 1.1;
+            margin-bottom: 18px;
+            max-width: 850px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 span {
+            color: var(--primary);
+        }
+
+        .hero p {
+            max-width: 800px;
+            color: var(--muted);
+            font-size: 17px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .tag {
+            background: #f1f5f9;
+            border: 1px solid var(--border);
+            padding: 7px 13px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* =========================
+           CARDS
+        ========================= */
+
+        .section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 34px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+        }
+
+        .section h2 {
+            font-size: 27px;
+            margin-bottom: 10px;
+        }
+
+        .section h3 {
+            font-size: 20px;
+            margin: 25px 0 10px;
+        }
+
+        .section-intro {
+            color: var(--muted);
+            margin-bottom: 22px;
+        }
+
+        /* =========================
+           OBJECTIVES
+        ========================= */
+
+        .objectives {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+
+        .objective {
+            padding: 18px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+        }
+
+        .objective strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        /* =========================
+           CONCEPT BOX
+        ========================= */
+
+        .concept-box {
+            padding: 22px;
+            background: #f8faff;
+            border-left: 4px solid var(--primary);
+            border-radius: 10px;
+            margin: 18px 0;
+        }
+
+        .concept-box strong {
+            color: var(--primary);
+        }
+
+        /* =========================
+           VIEW PIPELINE
+        ========================= */
+
+        .view-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 35px 0;
+        }
+
+        .flow-card {
+            width: 190px;
+            min-height: 105px;
+            padding: 18px;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(15,23,42,.05);
+            animation: floatCard 3s ease-in-out infinite;
+        }
+
+        .flow-card:nth-child(3) {
+            animation-delay: .5s;
+        }
+
+        .flow-card:nth-child(5) {
+            animation-delay: 1s;
+        }
+
+        .flow-card .icon {
+            font-size: 27px;
+            margin-bottom: 5px;
+        }
+
+        .flow-arrow {
+            font-size: 28px;
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        @keyframes floatCard {
+            0%,100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-7px);
+            }
+        }
+
+        /* =========================
+           CODE
+        ========================= */
+
+        .code-wrapper {
+            margin: 18px 0;
+            border-radius: 14px;
+            overflow: hidden;
+            background: var(--code-bg);
+            border: 1px solid #1e293b;
+        }
+
+        .code-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9px 15px;
+            background: #172033;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .copy-btn {
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: #cbd5e1;
+            padding: 5px 10px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        pre {
+            margin: 0;
+            padding: 20px;
+            overflow-x: auto;
+            color: var(--code-text);
+            background: var(--code-bg);
+            font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.75;
+            white-space: pre;
+        }
+
+        code {
+            color: inherit;
+        }
+
+        .keyword {
+            color: #c4b5fd;
+        }
+
+        .string {
+            color: #86efac;
+        }
+
+        .comment {
+            color: #94a3b8;
+        }
+
+        /* =========================
+           COMPARISON
+        ========================= */
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 18px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th,
+        td {
+            padding: 13px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: #f8fafc;
+            font-size: 13px;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        /* =========================
+           GRID
+        ========================= */
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .info-card {
+            padding: 22px;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            background: var(--surface-2);
+        }
+
+        .info-card h3 {
+            margin-top: 0;
+        }
+
+        /* =========================
+           LAB
+        ========================= */
+
+        .lab {
+            background: #101828;
+            color: white;
+            border-radius: 18px;
+            padding: 28px;
+            margin-top: 22px;
+        }
+
+        .lab h3 {
+            margin-top: 0;
+            color: white;
+        }
+
+        .lab-description {
+            color: #aeb8c7;
+            margin-bottom: 20px;
+        }
+
+        .lab-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .lab-btn {
+            border: 1px solid #344054;
+            background: #1d2939;
+            color: #e4e7ec;
+            padding: 10px 14px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: .2s;
+        }
+
+        .lab-btn:hover,
+        .lab-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .lab-sql {
+            background: #0b1220;
+            border: 1px solid #263244;
+            padding: 18px;
+            border-radius: 12px;
+            color: #c4b5fd;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+            margin-bottom: 18px;
+        }
+
+        .result-box {
+            overflow-x: auto;
+        }
+
+        .result-box table {
+            min-width: 500px;
+        }
+
+        .result-box th {
+            background: #1d2939;
+            color: #d0d5dd;
+            border-color: #344054;
+        }
+
+        .result-box td {
+            color: #d0d5dd;
+            border-color: #263244;
+        }
+
+        /* =========================
+           BADGES
+        ========================= */
+
+        .badge {
+            display: inline-block;
+            padding: 4px 9px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .badge-green {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-yellow {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-red {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-blue {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* =========================
+           QUIZ
+        ========================= */
+
+        .quiz-question {
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 15px 0;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .quiz-option {
+            padding: 11px 13px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .quiz-option:hover {
+            background: #f8fafc;
+        }
+
+        .quiz-option.correct {
+            background: #dcfce7;
+            border-color: #86efac;
+        }
+
+        .quiz-option.wrong {
+            background: #fee2e2;
+            border-color: #fca5a5;
+        }
+
+        .quiz-result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            background: #eef2ff;
+            color: #3730a3;
+            font-weight: 700;
+            display: none;
+        }
+
+        .primary-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 11px 18px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .primary-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* =========================
+           CHECKLIST
+        ========================= */
+
+        .checklist {
+            display: grid;
+            gap: 10px;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+
+        .check-item input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+        }
+
+        /* =========================
+           INTERVIEW
+        ========================= */
+
+        details {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px 17px;
+            margin: 10px 0;
+            background: #fff;
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        details p {
+            margin-top: 10px;
+            color: var(--muted);
+        }
+
+        /* =========================
+           CALLOUTS
+        ========================= */
+
+        .callout {
+            padding: 18px 20px;
+            border-radius: 12px;
+            margin: 18px 0;
+        }
+
+        .callout.warning {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+        }
+
+        .callout.success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+        }
+
+        .callout.danger {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+        }
+
+        .callout.info {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+        }
+
+        /* =========================
+           REVEAL
+        ========================= */
+
+        .reveal {
+            opacity: 1;
+            transform: none;
+        }
+
+        .reveal.animate {
+            animation: revealUp .7s ease forwards;
+        }
+
+        @keyframes revealUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        .footer {
+            text-align: center;
+            padding: 40px 10px;
+            color: var(--muted);
+        }
+
+        .next-lesson {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            padding: 25px;
+            border-radius: 16px;
+            background: #eef2ff;
+            border: 1px solid #c7d2fe;
+        }
+
+        .next-lesson strong {
+            color: var(--primary-dark);
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 1000px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: .3s;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 30px 20px 70px;
+            }
+
+            .objectives,
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .grid-3 {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .hero {
+                padding: 28px 22px;
+            }
+
+            .section {
+                padding: 23px 18px;
+            }
+
+            .hero h1 {
+                font-size: 34px;
+            }
+
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .view-flow {
+                flex-direction: column;
+            }
+
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+
+            .next-lesson {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- =========================
+     MOBILE HEADER
+========================= -->
+
+<header class="mobile-header">
+    <div class="brand">
+        <div class="brand-logo">Z</div>
+        <div class="brand-text">ZENSUS</div>
+    </div>
+
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+</header>
+
+<!-- =========================
+     SIDEBAR
+========================= -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+        <div class="brand-logo">Z</div>
+        <div class="brand-text">ZENSUS</div>
+    </div>
+
+    <div class="course-label">SQL Mastery</div>
+
+    <a class="lesson-link" href="#top">
+        <span>Introduction to SQL</span>
+        <span class="lesson-number">01</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>Database Fundamentals</span>
+        <span class="lesson-number">02</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>CREATE</span>
+        <span class="lesson-number">03</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>INSERT</span>
+        <span class="lesson-number">04</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>SELECT</span>
+        <span class="lesson-number">05</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>WHERE</span>
+        <span class="lesson-number">06</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>ORDER BY</span>
+        <span class="lesson-number">07</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>GROUP BY</span>
+        <span class="lesson-number">08</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>Aggregate Functions</span>
+        <span class="lesson-number">09</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>JOINS</span>
+        <span class="lesson-number">10</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>Subqueries</span>
+        <span class="lesson-number">11</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>Constraints</span>
+        <span class="lesson-number">12</span>
+    </a>
+
+    <a class="lesson-link active" href="#top">
+        <span>Views</span>
+        <span class="lesson-number">13</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>Next Lesson</span>
+        <span class="lesson-number">14</span>
+    </a>
+
+</aside>
+
+<!-- =========================
+     MAIN CONTENT
+========================= -->
+
+<main class="main" id="top">
+
+    <!-- HERO -->
+
+    <section class="hero reveal">
+
+        <div class="breadcrumb">
+            SQL • LESSON 13
+        </div>
+
+        <h1>
+            SQL <span>Views</span>
+        </h1>
+
+        <p>
+            Learn how to create virtual tables, simplify complex queries,
+            control data exposure, build reusable database interfaces,
+            and design professional SQL systems using Views.
+        </p>
+
+        <div class="hero-tags">
+            <span class="tag">Beginner → Advanced</span>
+            <span class="tag">CREATE VIEW</span>
+            <span class="tag">Security</span>
+            <span class="tag">Performance</span>
+            <span class="tag">Interview Ready</span>
+        </div>
+
+    </section>
+
+    <!-- OBJECTIVES -->
+
+    <section class="section reveal">
+
+        <h2>🎯 What You Will Learn</h2>
+
+        <p class="section-intro">
+            By the end of this lesson, you should be able to design,
+            query, update, secure, and manage SQL Views confidently.
+        </p>
+
+        <div class="objectives">
+
+            <div class="objective">
+                <strong>01 — Understand Views</strong>
+                Learn what a View is and why databases use it.
+            </div>
+
+            <div class="objective">
+                <strong>02 — Create Views</strong>
+                Master CREATE VIEW and view definitions.
+            </div>
+
+            <div class="objective">
+                <strong>03 — Query Views</strong>
+                Use Views just like virtual tables.
+            </div>
+
+            <div class="objective">
+                <strong>04 — Modify Views</strong>
+                Learn CREATE OR REPLACE VIEW and ALTER/DROP concepts.
+            </div>
+
+            <div class="objective">
+                <strong>05 — Security</strong>
+                Understand how Views can expose only required columns/rows.
+            </div>
+
+            <div class="objective">
+                <strong>06 — Advanced Design</strong>
+                Understand joins, aggregates, nested Views, materialized Views,
+                performance, and interview-level concepts.
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- WHAT IS VIEW -->
+
+    <section class="section reveal">
+
+        <h2>🧠 What Is a View?</h2>
+
+        <p>
+            A <strong>View</strong> is a named SQL query that behaves like a
+            virtual table. It usually does not store a separate copy of the
+            underlying data. Instead, the database stores the View definition
+            and retrieves data from its underlying tables when the View is queried.
+        </p>
+
+        <div class="concept-box">
+
+            <strong>Simple Definition:</strong>
+
+            <p>
+                A View is a saved query that can be accessed like a table.
+            </p>
+
+        </div>
+
+        <div class="view-flow">
+
+            <div class="flow-card">
+                <div class="icon">🗃️</div>
+                <strong>Base Tables</strong>
+                <p>Original data</p>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-card">
+                <div class="icon">⚙️</div>
+                <strong>SQL Query</strong>
+                <p>SELECT statement</p>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-card">
+                <div class="icon">👁️</div>
+                <strong>VIEW</strong>
+                <p>Virtual table</p>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-card">
+                <div class="icon">👤</div>
+                <strong>User</strong>
+                <p>Queries the View</p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- REAL WORLD -->
+
+    <section class="section reveal">
+
+        <h2>🌍 Real-World Analogy</h2>
+
+        <p>
+            Imagine a college database containing thousands of student records.
+            A faculty member may only need:
+        </p>
+
+        <ul>
+            <li>Student name</li>
+            <li>Department</li>
+            <li>CGPA</li>
+        </ul>
+
+        <p>
+            They don't need access to every sensitive field such as phone number,
+            personal address, or other private information.
+        </p>
+
+        <div class="concept-box">
+
+            <strong>Solution:</strong>
+
+            <p>
+                Create a View containing only the required columns.
+            </p>
+
+        </div>
+
+    </section>
+
+    <!-- BASIC SYNTAX -->
+
+    <section class="section reveal">
+
+        <h2>🧩 CREATE VIEW — Basic Syntax</h2>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>SQL</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>CREATE VIEW view_name AS
+SELECT column1, column2
+FROM table_name
+WHERE condition;</code></pre>
+
+        </div>
+
+        <h3>Example</h3>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>SQL</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>CREATE VIEW cse_students AS
+SELECT student_id, name, cgpa
+FROM students
+WHERE department = 'CSE';</code></pre>
+
+        </div>
+
+        <p>
+            Now the View can be queried almost like a table:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>SQL</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>SELECT *
+FROM cse_students;</code></pre>
+
+        </div>
+
+    </section>
+
+    <!-- WHY VIEWS -->
+
+    <section class="section reveal">
+
+        <h2>🚀 Why Do We Use Views?</h2>
+
+        <div class="grid-3">
+
+            <div class="info-card">
+                <h3>🔒 Security</h3>
+                <p>
+                    Expose only the columns and rows a user needs.
+                </p>
+            </div>
+
+            <div class="info-card">
+                <h3>♻️ Reusability</h3>
+                <p>
+                    Save complex queries and reuse them.
+                </p>
+            </div>
+
+            <div class="info-card">
+                <h3>🧹 Simplicity</h3>
+                <p>
+                    Hide complicated JOINs and calculations.
+                </p>
+            </div>
+
+            <div class="info-card">
+                <h3>🛠️ Abstraction</h3>
+                <p>
+                    Users can work with a simplified database interface.
+                </p>
+            </div>
+
+            <div class="info-card">
+                <h3>📊 Reporting</h3>
+                <p>
+                    Create reusable reporting datasets.
+                </p>
+            </div>
+
+            <div class="info-card">
+                <h3>🔄 Consistency</h3>
+                <p>
+                    Centralize commonly used query logic.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- TABLE EXAMPLE -->
+
+    <section class="section reveal">
+
+        <h2>🗃️ Example Database</h2>
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>student_id</th>
+                        <th>name</th>
+                        <th>department</th>
+                        <th>cgpa</th>
+                        <th>email</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>101</td>
+                        <td>Arun</td>
+                        <td>CSE</td>
+                        <td>9.1</td>
+                        <td>arun@mail.com</td>
+                    </tr>
+
+                    <tr>
+                        <td>102</td>
+                        <td>Priya</td>
+                        <td>ECE</td>
+                        <td>8.7</td>
+                        <td>priya@mail.com</td>
+                    </tr>
+
+                    <tr>
+                        <td>103</td>
+                        <td>Rahul</td>
+                        <td>CSE</td>
+                        <td>9.4</td>
+                        <td>rahul@mail.com</td>
+                    </tr>
+
+                    <tr>
+                        <td>104</td>
+                        <td>Anjali</td>
+                        <td>EEE</td>
+                        <td>8.2</td>
+                        <td>anjali@mail.com</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+    <!-- SELECTIVE VIEW -->
+
+    <section class="section reveal">
+
+        <h2>🔐 Creating a Security View</h2>
+
+        <p>
+            Suppose the original table contains sensitive email information.
+            We can create a View containing only public student information.
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>SQL</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>CREATE VIEW public_students AS
+SELECT student_id, name, department, cgpa
+FROM students;</code></pre>
+
+        </div>
+
+        <div class="callout success">
+
+            <strong>Security Principle</strong>
+
+            <p>
+                A View can reduce unnecessary exposure, but a View alone is not
+                a complete security system. Proper database privileges,
+                authentication, authorization, and row/column controls may
+                also be required.
+            </p>
+
+        </div>
+
+    </section>
+
+    <!-- VIEW WITH WHERE -->
+
+    <section class="section reveal">
+
+        <h2>🔎 View with WHERE</h2>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>SQL</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>CREATE VIEW toppers AS
+SELECT student_id, name, cgpa
+FROM students
+WHERE cgpa >= 9.0;</code></pre>
+
+        </div>
+
+        <p>
+            Query it:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>SQL</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>SELECT *
+FROM toppers
+ORDER BY cgpa DESC;</code></pre>
+
+        </div>
+
+    </section>
+
+    <!-- VIEW WITH JOIN -->
+
+    <section class="section reveal">
+
+        <h2>🔗 View with JOIN</h2>
+
+        <p>
+            Views become extremely useful when a query contains multiple tables.
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>SQL</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>CREATE VIEW student_department AS
+SELECT
+    s.student_id,
+    s.name,
+    d.department_name
+FROM students s
+JOIN departments d
+    ON s.department_id = d.department_id;</code></pre>
+
+        </div>
+
+        <p>
+            Instead of writing the JOIN repeatedly:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>SQL</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>SELECT *
+FROM student_department;</code></pre>
+
+        </div>
+
+    </section>
+
+    <!-- VIEW WITH AGGREGATE -->
+
+    <section class="section reveal">
+
+        <h2>📊 View with GROUP BY and Aggregate Functions</h2>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>SQL</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>CREATE VIEW department_statistics AS
+SELECT
+    department,
+    COUNT(*) AS student_count,
+    AVG(cgpa) AS average_cgpa,
+    MAX(cgpa) AS highest_cgpa
+FROM students
+GROUP BY department;</code></pre>
+
+        </div>
+
+        <p>
+            Then:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>SQL</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>SELECT *
+FROM department_statistics
+ORDER BY average_cgpa DESC;</code></pre>
+
+        </div>
+
+    </section>
+
+    <!-- VIEW AS ABSTRACTION -->
+
+    <section class="section reveal">
+
+        <h2>🧠 Views as an Abstraction Layer</h2>
+
+        <p>
+            One of the most powerful uses of Views is hiding implementation
+            complexity.
+        </p>
+
+        <div class="view-flow">
+
+            <div class="flow-card">
+                <div class="icon">👤</div>
+                <strong>Application</strong>
+                <p>Simple SELECT</p>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-card">
+                <div class="icon">👁️</div>
+                <strong>View</strong>
+                <p>Business logic</p>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-card">
+                <div class="icon">🔗</div>
+                <strong>JOINs</strong>
+                <p>Hidden complexity</p>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-card">
+                <div class="icon">🗃️</div>
+                <strong>Tables</strong>
+                <p>Actual data</p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- UPDATE VIEW -->
+
+    <section class="section reveal">
+
+        <h2>🔄 Replacing a View</h2>
+
+        <p>
+            If the View definition needs to change, many database systems
+            support:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>SQL</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>CREATE OR REPLACE VIEW toppers AS
+SELECT student_id, name, department, cgpa
+FROM students
+WHERE cgpa >= 8.5;</code></pre>
+
+        </div>
+
+        <div class="callout warning">
+
+            <strong>Important:</strong>
+
+            <p>
+                View-management syntax varies across database systems.
+                Always check the SQL dialect you are using.
+            </p>
+
+        </div>
+
+    </section>
+
+    <!-- DROP VIEW -->
+
+    <section class="section reveal">
+
+        <h2>🗑️ DROP VIEW</h2>
+
+        <p>
+            To remove a View:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>SQL</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>DROP VIEW toppers;</code></pre>
+
+        </div>
+
+        <p>
+            Some database systems support:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>SQL</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>DROP VIEW IF EXISTS toppers;</code></pre>
+
+        </div>
+
+        <div class="callout danger">
+
+            <strong>Remember:</strong>
+
+            <p>
+                Dropping a View removes the View definition. It does not normally
+                delete the underlying table data.
+            </p>
+
+        </div>
+
+    </section>
+
+    <!-- VIEW VS TABLE -->
+
+    <section class="section reveal">
+
+        <h2>⚖️ View vs Table</h2>
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Table</th>
+                        <th>View</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>Stores data</td>
+                        <td>Yes</td>
+                        <td>Usually no separate copy</td>
+                    </tr>
+
+                    <tr>
+                        <td>Created with</td>
+                        <td>CREATE TABLE</td>
+                        <td>CREATE VIEW</td>
+                    </tr>
+
+                    <tr>
+                        <td>Contains query definition</td>
+                        <td>No</td>
+                        <td>Yes</td>
+                    </tr>
+
+                    <tr>
+                        <td>Can simplify complex queries</td>
+                        <td>No</td>
+                        <td>Yes</td>
+                    </tr>
+
+                    <tr>
+                        <td>Can restrict columns</td>
+                        <td>Not its main purpose</td>
+                        <td>Yes</td>
+                    </tr>
+
+                    <tr>
+                        <td>Independent storage</td>
+                        <td>Yes</td>
+                        <td>Usually no</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+    <!-- VIEW VS SUBQUERY -->
+
+    <section class="section reveal">
+
+        <h2>🆚 View vs Subquery</h2>
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Subquery</th>
+                        <th>View</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>Reusable by name</td>
+                        <td>Usually no</td>
+                        <td>Yes</td>
+                    </tr>
+
+                    <tr>
+                        <td>Saved database object</td>
+                        <td>No</td>
+                        <td>Yes</td>
+                    </tr>
+
+                    <tr>
+                        <td>Good for one-time logic</td>
+                        <td>Excellent</td>
+                        <td>Possible</td>
+                    </tr>
+
+                    <tr>
+                        <td>Good for repeated logic</td>
+                        <td>Less convenient</td>
+                        <td>Excellent</td>
+                    </tr>
+
+                    <tr>
+                        <td>Can be queried like table</td>
+                        <td>Context dependent</td>
+                        <td>Yes</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+    <!-- VIEW VS CTE -->
+
+    <section class="section reveal">
+
+        <h2>🆚 View vs CTE</h2>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>CTE Example</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>WITH cse_students AS (
+    SELECT student_id, name, cgpa
+    FROM students
+    WHERE department = 'CSE'
+)
+SELECT *
+FROM cse_students;</code></pre>
+
+        </div>
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>View</th>
+                        <th>CTE</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>Persists as database object</td>
+                        <td>Yes</td>
+                        <td>No</td>
+                    </tr>
+
+                    <tr>
+                        <td>Reusable across sessions</td>
+                        <td>Yes</td>
+                        <td>No</td>
+                    </tr>
+
+                    <tr>
+                        <td>Good for one query</td>
+                        <td>Possible</td>
+                        <td>Excellent</td>
+                    </tr>
+
+                    <tr>
+                        <td>Good for reusable business logic</td>
+                        <td>Excellent</td>
+                        <td>Less suitable</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+    <!-- UPDATABLE VIEWS -->
+
+    <section class="section reveal">
+
+        <h2>✏️ Updatable Views</h2>
+
+        <p>
+            Some Views can allow INSERT, UPDATE, or DELETE operations that
+            affect the underlying table.
+        </p>
+
+        <p>
+            For example, a simple View based on one table may be updatable
+            depending on the database system and View definition.
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>SQL</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>CREATE VIEW cse_students AS
+SELECT student_id, name, cgpa
+FROM students
+WHERE department = 'CSE';</code></pre>
+
+        </div>
+
+        <p>
+            In a database that permits updates through this View:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>SQL</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>UPDATE cse_students
+SET cgpa = 9.5
+WHERE student_id = 101;</code></pre>
+
+        </div>
+
+        <div class="callout warning">
+
+            <strong>Important:</strong>
+
+            <p>
+                Not every View is updatable. JOINs, GROUP BY, DISTINCT,
+                aggregate functions, UNION, calculated columns, and other
+                constructs can make a View non-updatable depending on the
+                database system.
+            </p>
+
+        </div>
+
+    </section>
+
+    <!-- COMPLEX VIEW -->
+
+    <section class="section reveal">
+
+        <h2>🏢 Professional Reporting View</h2>
+
+        <p>
+            Imagine a company has:
+        </p>
+
+        <ul>
+            <li>Employees</li>
+            <li>Departments</li>
+            <li>Projects</li>
+            <li>Salary information</li>
+        </ul>
+
+        <p>
+            A reporting team may need a simplified employee dashboard.
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>SQL</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>CREATE VIEW employee_report AS
+SELECT
+    e.employee_id,
+    e.employee_name,
+    d.department_name,
+    e.salary
+FROM employees e
+JOIN departments d
+    ON e.department_id = d.department_id;</code></pre>
+
+        </div>
+
+        <p>
+            Application developers can then write:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>SQL</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>SELECT *
+FROM employee_report
+WHERE salary > 60000
+ORDER BY salary DESC;</code></pre>
+
+        </div>
+
+    </section>
+
+    <!-- NESTED VIEW -->
+
+    <section class="section reveal">
+
+        <h2>🪆 Views Based on Other Views</h2>
+
+        <p>
+            Some database systems allow a View to reference another View.
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>SQL</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>CREATE VIEW cse_students AS
+SELECT student_id, name, cgpa
+FROM students
+WHERE department = 'CSE';
+
+CREATE VIEW excellent_cse_students AS
+SELECT student_id, name, cgpa
+FROM cse_students
+WHERE cgpa >= 9.0;</code></pre>
+
+        </div>
+
+        <div class="callout warning">
+
+            <strong>Design Warning:</strong>
+
+            <p>
+                Deep chains of Views can become difficult to understand,
+                debug, and optimize. Keep the dependency structure clean.
+            </p>
+
+        </div>
+
+    </section>
+
+    <!-- MATERIALIZED VIEW -->
+
+    <section class="section reveal">
+
+        <h2>⚡ Materialized Views</h2>
+
+        <p>
+            A normal View generally represents a query definition.
+            A <strong>Materialized View</strong> stores the result of a query
+            physically and can be refreshed later.
+        </p>
+
+        <div class="grid-2">
+
+            <div class="info-card">
+
+                <h3>Normal View</h3>
+
+                <ul>
+                    <li>Usually does not store separate result data</li>
+                    <li>Reflects current underlying data when queried</li>
+                    <li>Useful for abstraction and security</li>
+                </ul>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>Materialized View</h3>
+
+                <ul>
+                    <li>Stores query results</li>
+                    <li>Can speed up expensive reports</li>
+                    <li>Needs refresh strategy</li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="callout info">
+
+            <strong>Database-specific feature:</strong>
+
+            <p>
+                Materialized View syntax and refresh behavior vary significantly
+                between database systems.
+            </p>
+
+        </div>
+
+    </section>
+
+    <!-- PERFORMANCE -->
+
+    <section class="section reveal">
+
+        <h2>⚡ Views and Performance</h2>
+
+        <p>
+            A View is not automatically faster than the query it represents.
+            It is primarily an abstraction mechanism.
+        </p>
+
+        <div class="grid-3">
+
+            <div class="info-card">
+                <h3>1️⃣ Query Complexity</h3>
+                <p>
+                    Complex View definitions may still require expensive joins
+                    or aggregations.
+                </p>
+            </div>
+
+            <div class="info-card">
+                <h3>2️⃣ Indexes</h3>
+                <p>
+                    Indexes on underlying tables may help the optimizer execute
+                    View queries efficiently.
+                </p>
+            </div>
+
+            <div class="info-card">
+                <h3>3️⃣ EXPLAIN</h3>
+                <p>
+                    Use your database's EXPLAIN tools to understand the actual
+                    execution plan.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="callout success">
+
+            <strong>Golden Rule:</strong>
+
+            <p>
+                Don't assume a View improves performance just because it makes
+                SQL shorter. Measure the actual query plan.
+            </p>
+
+        </div>
+
+    </section>
+
+    <!-- VIEW SECURITY -->
+
+    <section class="section reveal">
+
+        <h2>🔒 Views for Security</h2>
+
+        <p>
+            One of the most important real-world applications of Views is
+            controlled data exposure.
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>Original Table</span>
+            </div>
+
+            <pre><code>employees
+-----------------------------------------
+employee_id
+employee_name
+department
+salary
+phone
+address
+bank_account
+</code></pre>
+
+        </div>
+
+        <p>
+            HR analysts may not need banking information.
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>Security View</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>CREATE VIEW employee_public AS
+SELECT
+    employee_id,
+    employee_name,
+    department
+FROM employees;</code></pre>
+
+        </div>
+
+        <p>
+            Give the analyst access to the View rather than directly exposing
+            the underlying table, using appropriate database privileges.
+        </p>
+
+    </section>
+
+    <!-- SQL LOGICAL IDEA -->
+
+    <section class="section reveal">
+
+        <h2>🔬 How a View Works Conceptually</h2>
+
+        <div class="view-flow">
+
+            <div class="flow-card">
+                <div class="icon">📝</div>
+                <strong>CREATE VIEW</strong>
+                <p>Save definition</p>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-card">
+                <div class="icon">💾</div>
+                <strong>Database Catalog</strong>
+                <p>Stores metadata</p>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-card">
+                <div class="icon">🔍</div>
+                <strong>SELECT View</strong>
+                <p>Optimizer processes query</p>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-card">
+                <div class="icon">📊</div>
+                <strong>Result</strong>
+                <p>Rows returned</p>
+            </div>
+
+        </div>
+
+        <div class="callout info">
+
+            <strong>Important:</strong>
+
+            <p>
+                This is a conceptual model. A database optimizer may rewrite,
+                merge, or transform View queries internally. The exact execution
+                behavior depends on the DBMS.
+            </p>
+
+        </div>
+
+    </section>
+
+    <!-- INTERACTIVE LAB -->
+
+    <section class="section reveal">
+
+        <h2>🧪 Interactive SQL View Lab</h2>
+
+        <p class="section-intro">
+            Experiment with different View definitions.
+            This is a browser simulation — it does not execute SQL against
+            a real database.
+        </p>
+
+        <div class="lab">
+
+            <h3>View Simulator</h3>
+
+            <p class="lab-description">
+                Select a View to see its SQL definition and simulated result.
+            </p>
+
+            <div class="lab-controls">
+
+                <button class="lab-btn active" onclick="runView('all')">
+                    All Students
+                </button>
+
+                <button class="lab-btn" onclick="runView('cse')">
+                    CSE Students
+                </button>
+
+                <button class="lab-btn" onclick="runView('toppers')">
+                    Toppers
+                </button>
+
+                <button class="lab-btn" onclick="runView('public')">
+                    Public View
+                </button>
+
+                <button class="lab-btn" onclick="runView('stats')">
+                    Department Stats
+                </button>
+
+            </div>
+
+            <div class="lab-sql" id="labSQL">
+SELECT *
+FROM students;
+            </div>
+
+            <div class="result-box" id="labResult"></div>
+
+        </div>
+
+    </section>
+
+    <!-- COMMON MISTAKES -->
+
+    <section class="section reveal">
+
+        <h2>⚠️ Common Mistakes</h2>
+
+        <div class="grid-2">
+
+            <div class="info-card">
+
+                <h3>❌ Mistake 1</h3>
+
+                <p>
+                    Thinking a normal View always stores a separate copy of
+                    the data.
+                </p>
+
+                <strong>Fix:</strong>
+                <p>
+                    Understand the difference between a normal View and a
+                    materialized View.
+                </p>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>❌ Mistake 2</h3>
+
+                <p>
+                    Assuming Views automatically improve performance.
+                </p>
+
+                <strong>Fix:</strong>
+                <p>
+                    Check the execution plan and indexes.
+                </p>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>❌ Mistake 3</h3>
+
+                <p>
+                    Assuming every View is updateable.
+                </p>
+
+                <strong>Fix:</strong>
+                <p>
+                    Complex Views may not support modifications.
+                </p>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>❌ Mistake 4</h3>
+
+                <p>
+                    Creating too many deeply dependent Views.
+                </p>
+
+                <strong>Fix:</strong>
+                <p>
+                    Keep View dependencies simple and documented.
+                </p>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>❌ Mistake 5</h3>
+
+                <p>
+                    Treating Views as complete security by themselves.
+                </p>
+
+                <strong>Fix:</strong>
+                <p>
+                    Combine Views with database permissions and proper
+                    authorization.
+                </p>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>❌ Mistake 6</h3>
+
+                <p>
+                    Forgetting that View behavior can differ between DBMSs.
+                </p>
+
+                <strong>Fix:</strong>
+                <p>
+                    Always verify dialect-specific syntax and restrictions.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- BEST PRACTICES -->
+
+    <section class="section reveal">
+
+        <h2>🏆 Professional Best Practices</h2>
+
+        <ol>
+            <li>Use meaningful View names.</li>
+            <li>Document the purpose of important Views.</li>
+            <li>Avoid unnecessary SELECT * in production Views.</li>
+            <li>Expose only the columns required by consumers.</li>
+            <li>Keep View dependencies manageable.</li>
+            <li>Review View performance with execution plans.</li>
+            <li>Use indexes on underlying tables where appropriate.</li>
+            <li>Don't use Views as a substitute for proper authorization.</li>
+            <li>Understand how schema changes affect View dependencies.</li>
+            <li>Test Views after changes to underlying tables.</li>
+        </ol>
+
+    </section>
+
+    <!-- EXAM 5 MARK -->
+
+    <section class="section reveal">
+
+        <h2>📝 Exam Answer — 5 Marks</h2>
+
+        <div class="concept-box">
+
+            <strong>Question:</strong>
+
+            <p>
+                What is a View in SQL? Explain its advantages with an example.
+            </p>
+
+        </div>
+
+        <h3>Answer</h3>
+
+        <p>
+            A View is a virtual table based on the result of a SQL query.
+            It stores the query definition rather than normally storing a
+            separate copy of the underlying data.
+        </p>
+
+        <p><strong>Advantages:</strong></p>
+
+        <ul>
+            <li>Simplifies complex queries.</li>
+            <li>Provides an abstraction layer.</li>
+            <li>Can restrict access to selected columns and rows.</li>
+            <li>Improves query reusability.</li>
+            <li>Useful for reporting and data presentation.</li>
+        </ul>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>Example</span>
+            </div>
+
+            <pre><code>CREATE VIEW toppers AS
+SELECT student_id, name, cgpa
+FROM students
+WHERE cgpa >= 9.0;</code></pre>
+
+        </div>
+
+    </section>
+
+    <!-- EXAM 10 MARK -->
+
+    <section class="section reveal">
+
+        <h2>📚 Exam Answer — 10 Marks</h2>
+
+        <div class="concept-box">
+
+            <strong>Question:</strong>
+
+            <p>
+                Explain SQL Views in detail. Discuss creation, advantages,
+                security, updateability, and limitations with examples.
+            </p>
+
+        </div>
+
+        <h3>Suggested Answer Structure</h3>
+
+        <ol>
+            <li>Definition of View</li>
+            <li>Syntax of CREATE VIEW</li>
+            <li>Example</li>
+            <li>Querying a View</li>
+            <li>Views with WHERE</li>
+            <li>Views with JOIN</li>
+            <li>Views with aggregate functions</li>
+            <li>Security benefits</li>
+            <li>Updatable Views</li>
+            <li>DROP VIEW</li>
+            <li>Materialized Views</li>
+            <li>Advantages and limitations</li>
+        </ol>
+
+    </section>
+
+    <!-- INTERVIEW -->
+
+    <section class="section reveal">
+
+        <h2>🎤 Interview Questions</h2>
+
+        <details>
+            <summary>1. What is a View?</summary>
+            <p>
+                A View is a named database object representing the result of
+                a stored SELECT query and is generally queried like a virtual table.
+            </p>
+        </details>
+
+        <details>
+            <summary>2. Does a normal View store data?</summary>
+            <p>
+                Usually it stores the query definition rather than an independent
+                copy of the result data. Materialized Views are different.
+            </p>
+        </details>
+
+        <details>
+            <summary>3. Why use Views?</summary>
+            <p>
+                For abstraction, reuse, reporting, simplified queries, and
+                controlled exposure of data.
+            </p>
+        </details>
+
+        <details>
+            <summary>4. Can we update a View?</summary>
+            <p>
+                Some simple Views can be updated, but updateability depends on
+                the View definition and DBMS.
+            </p>
+        </details>
+
+        <details>
+            <summary>5. Can a View contain JOINs?</summary>
+            <p>
+                Yes. Views can be defined using joins, although such Views may
+                have restrictions on updateability.
+            </p>
+        </details>
+
+        <details>
+            <summary>6. What is a Materialized View?</summary>
+            <p>
+                A Materialized View stores the result of a query physically and
+                typically requires refreshing when the underlying data changes.
+            </p>
+        </details>
+
+        <details>
+            <summary>7. View vs Table?</summary>
+            <p>
+                A table primarily stores data, while a normal View primarily
+                stores a query definition and presents derived data.
+            </p>
+        </details>
+
+        <details>
+            <summary>8. Does a View improve performance?</summary>
+            <p>
+                Not automatically. A normal View is primarily an abstraction
+                mechanism. Performance depends on the resulting query plan,
+                indexes, optimizer, and database system.
+            </p>
+        </details>
+
+        <details>
+            <summary>9. Can a View reference another View?</summary>
+            <p>
+                Many database systems allow View dependencies, although excessive
+                nesting can make systems difficult to maintain.
+            </p>
+        </details>
+
+        <details>
+            <summary>10. How do you delete a View?</summary>
+            <p>
+                Use DROP VIEW, subject to the syntax and dependency rules of
+                the database system.
+            </p>
+        </details>
+
+    </section>
+
+    <!-- QUIZ -->
+
+    <section class="section reveal">
+
+        <h2>🧠 SQL Views Quiz</h2>
+
+        <div class="quiz-question" data-answer="1">
+
+            <strong>1. What does a View primarily represent?</strong>
+
+            <div class="quiz-options">
+
+                <div class="quiz-option" onclick="selectAnswer(this,0)">
+                    A physical backup of a database
+                </div>
+
+                <div class="quiz-option" onclick="selectAnswer(this,1)">
+                    A named query / virtual table
+                </div>
+
+                <div class="quiz-option" onclick="selectAnswer(this,2)">
+                    A database server
+                </div>
+
+                <div class="quiz-option" onclick="selectAnswer(this,3)">
+                    An index
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="quiz-question" data-answer="2">
+
+            <strong>2. Which command creates a View?</strong>
+
+            <div class="quiz-options">
+
+                <div class="quiz-option" onclick="selectAnswer(this,0)">
+                    MAKE VIEW
+                </div>
+
+                <div class="quiz-option" onclick="selectAnswer(this,1)">
+                    BUILD VIEW
+                </div>
+
+                <div class="quiz-option" onclick="selectAnswer(this,2)">
+                    CREATE VIEW
+                </div>
+
+                <div class="quiz-option" onclick="selectAnswer(this,3)">
+                    NEW VIEW
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="quiz-question" data-answer="1">
+
+            <strong>3. Which is a common advantage of Views?</strong>
+
+            <div class="quiz-options">
+
+                <div class="quiz-option" onclick="selectAnswer(this,0)">
+                    They always make queries faster
+                </div>
+
+                <div class="quiz-option" onclick="selectAnswer(this,1)">
+                    They can simplify complex queries
+                </div>
+
+                <div class="quiz-option" onclick="selectAnswer(this,2)">
+                    They replace indexes
+                </div>
+
+                <div class="quiz-option" onclick="selectAnswer(this,3)">
+                    They eliminate all database permissions
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="quiz-question" data-answer="3">
+
+            <strong>4. Which command removes a View?</strong>
+
+            <div class="quiz-options">
+
+                <div class="quiz-option" onclick="selectAnswer(this,0)">
+                    DELETE VIEW
+                </div>
+
+                <div class="quiz-option" onclick="selectAnswer(this,1)">
+                    REMOVE VIEW
+                </div>
+
+                <div class="quiz-option" onclick="selectAnswer(this,2)">
+                    CLEAR VIEW
+                </div>
+
+                <div class="quiz-option" onclick="selectAnswer(this,3)">
+                    DROP VIEW
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="quiz-question" data-answer="0">
+
+            <strong>5. What is a Materialized View?</strong>
+
+            <div class="quiz-options">
+
+                <div class="quiz-option" onclick="selectAnswer(this,0)">
+                    A stored result of a query that can be refreshed
+                </div>
+
+                <div class="quiz-option" onclick="selectAnswer(this,1)">
+                    A normal table constraint
+                </div>
+
+                <div class="quiz-option" onclick="selectAnswer(this,2)">
+                    A foreign key
+                </div>
+
+                <div class="quiz-option" onclick="selectAnswer(this,3)">
+                    A transaction
+                </div>
+
+            </div>
+
+        </div>
+
+        <button class="primary-btn" onclick="calculateQuiz()">
+            Check Score
+        </button>
+
+        <div class="quiz-result" id="quizResult"></div>
+
+    </section>
+
+    <!-- PRACTICE -->
+
+    <section class="section reveal">
+
+        <h2>💻 Practice Challenges</h2>
+
+        <div class="grid-2">
+
+            <div class="info-card">
+
+                <h3>Challenge 1 — Top Students</h3>
+
+                <p>
+                    Create a View containing students whose CGPA is greater
+                    than or equal to 9.0.
+                </p>
+            </div>
+
+            <div class="info-card">
+
+                <h3>Challenge 2 — Department Report</h3>
+
+                <p>
+                    Create a View using GROUP BY that displays department,
+                    student count, and average CGPA.
+                </p>
+            </div>
+
+            <div class="info-card">
+
+                <h3>Challenge 3 — Public Students</h3>
+
+                <p>
+                    Create a View that hides student email and phone number.
+                </p>
+            </div>
+
+            <div class="info-card">
+
+                <h3>Challenge 4 — Join View</h3>
+
+                <p>
+                    Create a View joining students and departments to show
+                    student name and department name.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- MINI PROJECT -->
+
+    <section class="section reveal">
+
+        <h2>🚀 Mini Project — Student Analytics Dashboard</h2>
+
+        <p>
+            Build a reporting layer for a college database using Views.
+        </p>
+
+        <h3>Required Views</h3>
+
+        <ol>
+            <li><strong>student_public_view</strong> — safe student information</li>
+            <li><strong>topper_view</strong> — students with CGPA ≥ 9</li>
+            <li><strong>department_stats</strong> — department-level statistics</li>
+            <li><strong>student_department_view</strong> — students with department names</li>
+            <li><strong>placement_eligible_view</strong> — students satisfying placement criteria</li>
+        </ol>
+
+        <h3>Example</h3>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                <span>SQL</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>CREATE VIEW placement_eligible_view AS
+SELECT
+    student_id,
+    name,
+    department,
+    cgpa
+FROM students
+WHERE cgpa >= 7.5;</code></pre>
+
+        </div>
+
+    </section>
+
+    <!-- QUICK REVISION -->
+
+    <section class="section reveal">
+
+        <h2>⚡ Rapid Revision</h2>
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Concept</th>
+                        <th>Remember</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>View</td>
+                        <td>Named query / virtual table</td>
+                    </tr>
+
+                    <tr>
+                        <td>CREATE VIEW</td>
+                        <td>Creates a View</td>
+                    </tr>
+
+                    <tr>
+                        <td>SELECT FROM View</td>
+                        <td>Queries the View</td>
+                    </tr>
+
+                    <tr>
+                        <td>DROP VIEW</td>
+                        <td>Removes the View definition</td>
+                    </tr>
+
+                    <tr>
+                        <td>Security</td>
+                        <td>Expose only required data</td>
+                    </tr>
+
+                    <tr>
+                        <td>Updatable View</td>
+                        <td>Depends on definition and DBMS</td>
+                    </tr>
+
+                    <tr>
+                        <td>Materialized View</td>
+                        <td>Stores query result physically</td>
+                    </tr>
+
+                    <tr>
+                        <td>Performance</td>
+                        <td>Use execution plans; don't assume</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+    <!-- CHECKLIST -->
+
+    <section class="section reveal">
+
+        <h2>✅ Lesson 13 Checklist</h2>
+
+        <div class="checklist">
+
+            <label class="check-item">
+                <input type="checkbox" data-check="view1">
+                I understand what a View is.
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-check="view2">
+                I can create a View.
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-check="view3">
+                I can query a View.
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-check="view4">
+                I can create Views with WHERE.
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-check="view5">
+                I understand Views with JOINs.
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-check="view6">
+                I understand aggregate Views.
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-check="view7">
+                I understand View security.
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-check="view8">
+                I understand updatable Views.
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-check="view9">
+                I understand Materialized Views.
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-check="view10">
+                I can answer View interview questions.
+            </label>
+
+        </div>
+
+    </section>
+
+    <!-- NEXT -->
+
+    <section class="section reveal">
+
+        <div class="next-lesson">
+
+            <div>
+                <small>SQL MASTERy</small>
+                <h2>Lesson 13 Complete 🎉</h2>
+                <strong>Next: Advanced SQL Concepts</strong>
+            </div>
+
+            <div>
+                <span class="badge badge-blue">
+                    Views Mastered
+                </span>
+            </div>
+
+        </div>
+
+    </section>
+
+    <footer class="footer">
+
+        <strong>ZENSUS</strong>
+
+        <p>
+            Direction Before Destination • Learn. Build. Prepare.
+        </p>
+
+        <p>
+            SQL Lesson 13 — Views
+        </p>
+
+    </footer>
+
+</main>
+
+<script>
+
+    /* =========================================================
+       SIDEBAR
+    ========================================================= */
+
+    function toggleSidebar() {
+
+        const sidebar = document.getElementById("sidebar");
+
+        sidebar.classList.toggle("open");
+
+    }
+
+
+    /* =========================================================
+       SCROLL PROGRESS
+    ========================================================= */
+
+    window.addEventListener("scroll", function () {
+
+        const scrollTop =
+            document.documentElement.scrollTop || document.body.scrollTop;
+
+        const scrollHeight =
+            document.documentElement.scrollHeight -
+            document.documentElement.clientHeight;
+
+        const percentage =
+            scrollHeight > 0
+                ? (scrollTop / scrollHeight) * 100
+                : 0;
+
+        document.getElementById("progressBar").style.width =
+            percentage + "%";
+
+    });
+
+
+    /* =========================================================
+       COPY CODE
+    ========================================================= */
+
+    function copyCode(button) {
+
+        const wrapper = button.closest(".code-wrapper");
+
+        const code = wrapper.querySelector("code");
+
+        navigator.clipboard.writeText(code.innerText);
+
+        const oldText = button.innerText;
+
+        button.innerText = "Copied!";
+
+        setTimeout(function () {
+
+            button.innerText = oldText;
+
+        }, 1200);
+
+    }
+
+
+    /* =========================================================
+       VIEW LAB DATA
+    ========================================================= */
+
+    const students = [
+
+        {
+            id: 101,
+            name: "Arun",
+            department: "CSE",
+            cgpa: 9.1,
+            email: "arun@mail.com"
+        },
+
+        {
+            id: 102,
+            name: "Priya",
+            department: "ECE",
+            cgpa: 8.7,
+            email: "priya@mail.com"
+        },
+
+        {
+            id: 103,
+            name: "Rahul",
+            department: "CSE",
+            cgpa: 9.4,
+            email: "rahul@mail.com"
+        },
+
+        {
+            id: 104,
+            name: "Anjali",
+            department: "EEE",
+            cgpa: 8.2,
+            email: "anjali@mail.com"
+        },
+
+        {
+            id: 105,
+            name: "Kiran",
+            department: "CSE",
+            cgpa: 8.9,
+            email: "kiran@mail.com"
+        },
+
+        {
+            id: 106,
+            name: "Sneha",
+            department: "ECE",
+            cgpa: 9.0,
+            email: "sneha@mail.com"
+        }
+
+    ];
+
+
+    function renderTable(rows, columns) {
+
+        let html = "<table>";
+
+        html += "<thead><tr>";
+
+        columns.forEach(function (column) {
+
+            html += "<th>" + column.label + "</th>";
+
+        });
+
+        html += "</tr></thead>";
+
+        html += "<tbody>";
+
+        rows.forEach(function (row) {
+
+            html += "<tr>";
+
+            columns.forEach(function (column) {
+
+                html += "<td>" +
+                    row[column.key] +
+                    "</td>";
+
+            });
+
+            html += "</tr>";
+
+        });
+
+        html += "</tbody></table>";
+
+        return html;
+
+    }
+
+
+    function runView(type) {
+
+        const sqlBox = document.getElementById("labSQL");
+
+        const resultBox = document.getElementById("labResult");
+
+        document.querySelectorAll(".lab-btn").forEach(function (btn) {
+
+            btn.classList.remove("active");
+
+        });
+
+        event.currentTarget.classList.add("active");
+
+
+        let rows = [];
+
+        let columns = [];
+
+        if (type === "all") {
+
+            sqlBox.innerText =
+`CREATE VIEW all_students AS
+SELECT *
+FROM students;`;
+
+            rows = students;
+
+            columns = [
+                { key: "id", label: "ID" },
+                { key: "name", label: "Name" },
+                { key: "department", label: "Department" },
+                { key: "cgpa", label: "CGPA" }
+            ];
+
+        }
+
+        else if (type === "cse") {
+
+            sqlBox.innerText =
+`CREATE VIEW cse_students AS
+SELECT student_id, name, department, cgpa
+FROM students
+WHERE department = 'CSE';`;
+
+            rows = students.filter(function (student) {
+
+                return student.department === "CSE";
+
+            });
+
+            columns = [
+                { key: "id", label: "ID" },
+                { key: "name", label: "Name" },
+                { key: "department", label: "Department" },
+                { key: "cgpa", label: "CGPA" }
+            ];
+
+        }
+
+        else if (type === "toppers") {
+
+            sqlBox.innerText =
+`CREATE VIEW toppers AS
+SELECT student_id, name, department, cgpa
+FROM students
+WHERE cgpa >= 9.0;`;
+
+            rows = students.filter(function (student) {
+
+                return student.cgpa >= 9.0;
+
+            });
+
+            columns = [
+                { key: "id", label: "ID" },
+                { key: "name", label: "Name" },
+                { key: "department", label: "Department" },
+                { key: "cgpa", label: "CGPA" }
+            ];
+
+        }
+
+        else if (type === "public") {
+
+            sqlBox.innerText =
+`CREATE VIEW public_students AS
+SELECT student_id, name, department, cgpa
+FROM students;`;
+
+            rows = students;
+
+            columns = [
+                { key: "id", label: "ID" },
+                { key: "name", label: "Name" },
+                { key: "department", label: "Department" },
+                { key: "cgpa", label: "CGPA" }
+            ];
+
+        }
+
+        else if (type === "stats") {
+
+            sqlBox.innerText =
+`CREATE VIEW department_statistics AS
+SELECT department,
+       COUNT(*) AS student_count,
+       AVG(cgpa) AS average_cgpa
+FROM students
+GROUP BY department;`;
+
+            const departments = {};
+
+            students.forEach(function (student) {
+
+                if (!departments[student.department]) {
+
+                    departments[student.department] = [];
+
+                }
+
+                departments[student.department].push(student.cgpa);
+
+            });
+
+            rows = Object.keys(departments).map(function (department) {
+
+                const values = departments[department];
+
+                const average =
+                    values.reduce(function (sum, value) {
+
+                        return sum + value;
+
+                    }, 0) / values.length;
+
+                return {
+
+                    department: department,
+
+                    count: values.length,
+
+                    average: average.toFixed(2)
+
+                };
+
+            });
+
+            columns = [
+                { key: "department", label: "Department" },
+                { key: "count", label: "Student Count" },
+                { key: "average", label: "Average CGPA" }
+            ];
+
+        }
+
+
+        resultBox.innerHTML = renderTable(rows, columns);
+
+    }
+
+
+    /* =========================================================
+       QUIZ
+    ========================================================= */
+
+    function selectAnswer(element, answer) {
+
+        const question =
+            element.closest(".quiz-question");
+
+        const correct =
+            parseInt(question.dataset.answer);
+
+        const options =
+            question.querySelectorAll(".quiz-option");
+
+        options.forEach(function (option) {
+
+            option.classList.remove("correct", "wrong");
+
+        });
+
+        if (answer === correct) {
+
+            element.classList.add("correct");
+
+            element.dataset.correct = "true";
+
+        } else {
+
+            element.classList.add("wrong");
+
+            element.dataset.correct = "false";
+
+        }
+
+        question.dataset.selected = answer;
+
+    }
+
+
+    function calculateQuiz() {
+
+        const questions =
+            document.querySelectorAll(".quiz-question");
+
+        let score = 0;
+
+        questions.forEach(function (question) {
+
+            if (question.dataset.selected === question.dataset.answer) {
+
+                score++;
+
+            }
+
+        });
+
+        const result =
+            document.getElementById("quizResult");
+
+        result.style.display = "block";
+
+        let message = "";
+
+        if (score === questions.length) {
+
+            message =
+                "🏆 Perfect! " +
+                score +
+                "/" +
+                questions.length +
+                " — You mastered SQL Views!";
+
+        }
+
+        else if (score >= 4) {
+
+            message =
+                "🔥 Excellent! " +
+                score +
+                "/" +
+                questions.length +
+                " — Very strong understanding.";
+
+        }
+
+        else if (score >= 3) {
+
+            message =
+                "👍 Good job! " +
+                score +
+                "/" +
+                questions.length +
+                " — Review a few concepts.";
+
+        }
+
+        else {
+
+            message =
+                "📚 " +
+                score +
+                "/" +
+                questions.length +
+                " — Revisit the lesson and try again.";
+
+        }
+
+        result.innerText = message;
+
+    }
+
+
+    /* =========================================================
+       CHECKLIST — LOCAL STORAGE
+    ========================================================= */
+
+    document.querySelectorAll(".check-item input").forEach(function (checkbox) {
+
+        const key = checkbox.dataset.check;
+
+        const saved =
+            localStorage.getItem("zensus_" + key);
+
+        checkbox.checked = saved === "true";
+
+        checkbox.addEventListener("change", function () {
+
+            localStorage.setItem(
+                "zensus_" + key,
+                checkbox.checked
+            );
+
+        });
+
+    });
+
+
+    /* =========================================================
+       REVEAL ANIMATIONS
+       Safe default means content remains visible if JS fails.
+    ========================================================= */
+
+    const revealElements =
+        document.querySelectorAll(".reveal");
+
+    if ("IntersectionObserver" in window) {
+
+        const observer =
+            new IntersectionObserver(function (entries) {
+
+                entries.forEach(function (entry) {
+
+                    if (entry.isIntersecting) {
+
+                        entry.target.classList.add("animate");
+
+                        observer.unobserve(entry.target);
+
+                    }
+
+                });
+
+            }, {
+                threshold: 0.08
+            });
+
+        revealElements.forEach(function (element) {
+
+            observer.observe(element);
+
+        });
+
+    }
+
+
+    /* =========================================================
+       INITIAL LAB
+    ========================================================= */
+
+    window.addEventListener("DOMContentLoaded", function () {
+
+        const firstButton =
+            document.querySelector(".lab-btn");
+
+        if (firstButton) {
+
+            firstButton.click();
+
+        }
+
+    });
+
+</script>
+
+</body>
+</html>

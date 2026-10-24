@@ -1,0 +1,1840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENSUS AI</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+    --bg: #f7f8fc;
+    --panel: #ffffff;
+    --border: #e5e7eb;
+    --text: #172033;
+    --muted: #667085;
+    --muted-2: #9298a5;
+    --dark: #111827;
+    --dark-hover: #1f2937;
+    --brand: #5b4ce8;
+    --brand-soft: #eeedff;
+    --danger: #b42318;
+}
+
+body {
+    font-family: Inter, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+}
+
+button, textarea, input { font: inherit; }
+
+.app { display: flex; height: 100vh; min-height: 0; }
+
+/* SIDEBAR */
+.sidebar {
+    width: 270px;
+    flex: 0 0 270px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 18px;
+    min-height: 0;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.brand-logo, .welcome-icon {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+}
+
+.brand-logo {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+}
+
+.brand-text { font-size: 19px; font-weight: 800; }
+.brand-subtitle { font-size: 11px; color: #7b8190; }
+
+.new-chat {
+    width: 100%;
+    border: none;
+    background: var(--dark);
+    color: #fff;
+    padding: 12px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.new-chat:hover { background: var(--dark-hover); }
+
+.sidebar-title {
+    font-size: 11px;
+    color: #8a91a0;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 10px;
+}
+
+.history { overflow-y: auto; flex: 1; min-height: 0; }
+
+.history-empty {
+    color: var(--muted-2);
+    font-size: 12px;
+    padding: 10px;
+    line-height: 1.5;
+}
+
+.history-item {
+    padding: 11px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 13px;
+    margin-bottom: 5px;
+    color: #4b5563;
+    border: 1px solid transparent;
+}
+
+.history-item:hover { background: #f1f3f8; }
+
+.history-item.active {
+    background: var(--brand-soft);
+    color: #4338ca;
+    border-color: #dedcff;
+}
+
+.history-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.history-date {
+    display: block;
+    margin-top: 4px;
+    font-size: 10px;
+    color: #98a0ad;
+}
+
+.sidebar-bottom {
+    border-top: 1px solid var(--border);
+    padding-top: 15px;
+    margin-top: 15px;
+}
+
+.sidebar-link {
+    display: block;
+    text-decoration: none;
+    color: #4b5563;
+    font-size: 13px;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.sidebar-link:hover { background: #f1f3f8; }
+
+/* MAIN */
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+}
+
+.topbar {
+    height: 65px;
+    flex: 0 0 65px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 25px;
+}
+
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+
+.topbar-title { font-size: 15px; font-weight: 700; }
+
+.mobile-menu {
+    display: none;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    background: #fff;
+    border-radius: 9px;
+    cursor: pointer;
+}
+
+.status {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+}
+
+.status.offline .status-dot { background: #f04438; }
+.status.loading .status-dot { background: #f79009; }
+
+/* CHAT */
+.chat-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 30px 20px;
+    min-height: 0;
+}
+
+.chat { max-width: 850px; margin: auto; }
+
+.welcome {
+    min-height: 55vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.welcome-icon {
+    width: 65px;
+    height: 65px;
+    border-radius: 20px;
+    font-size: 28px;
+    margin-bottom: 18px;
+}
+
+.welcome h1 { font-size: 32px; margin-bottom: 10px; }
+.welcome p { color: #6b7280; max-width: 550px; line-height: 1.6; }
+
+.suggestions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
+    max-width: 650px;
+    margin-top: 25px;
+}
+
+.suggestion {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 15px;
+    text-align: left;
+    cursor: pointer;
+    transition: background .25s ease, border-color .25s ease, transform .2s ease;
+}
+
+.suggestion:hover {
+    background: #f8f9ff;
+    border-color: #c7c9ff;
+    transform: translateY(-1px);
+}
+
+.suggestion-title { font-weight: 700; font-size: 13px; margin-bottom: 5px; }
+.suggestion-text { color: #737987; font-size: 12px; }
+
+/* MESSAGES */
+.message {
+    display: flex;
+    gap: 13px;
+    margin-bottom: 25px;
+    align-items: flex-start;
+}
+
+.message.user { justify-content: flex-end; }
+
+.message-shell {
+    max-width: 75%;
+    min-width: 0;
+}
+
+.message.user .message-shell { display: flex; flex-direction: column; align-items: flex-end; }
+
+.avatar {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.avatar.ai { background: var(--dark); color: #fff; }
+.avatar.user { background: #e8e9ff; color: #4f46e5; }
+
+.message-content {
+    max-width: 100%;
+    line-height: 1.65;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.user .message-content {
+    background: var(--dark);
+    color: #fff;
+    padding: 12px 16px;
+    border-radius: 15px 15px 3px 15px;
+}
+
+.ai .message-content {
+    background: #fff;
+    border: 1px solid var(--border);
+    padding: 13px 16px;
+    border-radius: 3px 15px 15px 15px;
+}
+
+.message-content p { margin: 0 0 10px; }
+.message-content p:last-child { margin-bottom: 0; }
+.message-content h1,
+.message-content h2,
+.message-content h3 {
+    margin: 14px 0 8px;
+    line-height: 1.3;
+}
+.message-content h1 { font-size: 22px; }
+.message-content h2 { font-size: 19px; }
+.message-content h3 { font-size: 16px; }
+
+.message-content ul,
+.message-content ol {
+    margin: 8px 0 10px 22px;
+}
+
+.message-content li { margin: 4px 0; }
+
+.message-content blockquote {
+    margin: 10px 0;
+    padding: 8px 12px;
+    border-left: 3px solid #a5a7ff;
+    color: #5f6675;
+    background: #f8f8ff;
+}
+
+.message-content a {
+    color: #4f46e5;
+    text-decoration: underline;
+}
+
+.message-content .inline-code {
+    background: #eef0f4;
+    color: #293241;
+    padding: 2px 5px;
+    border-radius: 5px;
+    font-family: Consolas, monospace;
+    font-size: .92em;
+}
+
+.user .message-content .inline-code {
+    background: rgba(255,255,255,.14);
+    color: #fff;
+}
+
+.code-block {
+    margin: 12px 0;
+    border: 1px solid #293241;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #111827;
+}
+
+.code-header {
+    min-height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 9px;
+    background: #1f2937;
+    color: #cbd5e1;
+    font-size: 11px;
+}
+
+.code-language { opacity: .9; }
+
+.code-copy {
+    border: 1px solid #4b5563;
+    background: transparent;
+    color: #e5e7eb;
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 11px;
+}
+
+.code-copy:hover { background: #374151; }
+
+.code-block pre {
+    margin: 0;
+    padding: 14px;
+    overflow-x: auto;
+    color: #e5e7eb;
+    font-family: Consolas, Monaco, monospace;
+    font-size: 13px;
+    line-height: 1.55;
+    white-space: pre;
+}
+
+.message-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 7px;
+    opacity: 0;
+    transition: opacity .2s ease;
+}
+
+.message:hover .message-actions,
+.message:focus-within .message-actions,
+.message.user .message-actions { opacity: 1; }
+
+.message-action {
+    border: 1px solid #e2e5eb;
+    background: #fff;
+    color: #667085;
+    padding: 5px 9px;
+    border-radius: 7px;
+    font-size: 11px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.message-action:hover {
+    background: #f4f5f8;
+    color: #111827;
+    border-color: #cfd3da;
+}
+
+.message-action:active { transform: scale(.97); }
+
+.attachments-in-message {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 9px;
+}
+
+.message-image {
+    display: block;
+    max-width: min(420px, 100%);
+    max-height: 330px;
+    object-fit: contain;
+    border-radius: 9px;
+    border: 1px solid rgba(0,0,0,.08);
+    background: #f3f4f6;
+}
+
+/* TYPING */
+.typing {
+    display: flex;
+    gap: 4px;
+    padding: 5px 0;
+}
+
+.typing span {
+    width: 6px;
+    height: 6px;
+    background: #9ca3af;
+    border-radius: 50%;
+    animation: typing 1s infinite ease-in-out;
+}
+
+.typing span:nth-child(2) { animation-delay: .15s; }
+.typing span:nth-child(3) { animation-delay: .3s; }
+
+@keyframes typing {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-5px); }
+}
+
+/* COMPOSER */
+.composer-area {
+    padding: 15px 20px 20px;
+    background: var(--bg);
+    flex: 0 0 auto;
+}
+
+.composer-wrap { max-width: 850px; margin: auto; }
+
+.attachment-preview {
+    display: none;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.attachment-preview.has-items { display: flex; }
+
+.attachment-chip {
+    position: relative;
+    width: 76px;
+    height: 76px;
+    border: 1px solid #dfe2e8;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.attachment-chip img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.remove-attachment {
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(17,24,39,.82);
+    color: #fff;
+    cursor: pointer;
+    line-height: 22px;
+}
+
+.file-chip {
+    padding: 8px 10px;
+    width: auto;
+    height: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #475467;
+}
+
+.composer {
+    background: #fff;
+    border: 1px solid #dfe2e8;
+    border-radius: 16px;
+    display: flex;
+    align-items: flex-end;
+    padding: 8px;
+    box-shadow: 0 5px 20px rgba(0,0,0,.04);
+}
+
+.attachment-button,
+.send-button {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border: none;
+    border-radius: 11px;
+    cursor: pointer;
+}
+
+.attachment-button {
+    background: #f1f3f7;
+    color: #475467;
+    font-size: 21px;
+}
+
+.attachment-button:hover { background: #e8ebf1; }
+
+.attachment-button:disabled { opacity: .5; cursor: not-allowed; }
+
+textarea {
+    flex: 1;
+    border: none;
+    outline: none;
+    resize: none;
+    min-height: 45px;
+    max-height: 150px;
+    padding: 12px;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.45;
+    background: transparent;
+}
+
+.send-button {
+    background: var(--dark);
+    color: #fff;
+    font-size: 17px;
+}
+
+.send-button:hover { background: #374151; }
+.send-button:disabled { opacity: .5; cursor: not-allowed; }
+
+.composer-note {
+    margin: 8px auto 0;
+    text-align: center;
+    color: var(--muted-2);
+    font-size: 10px;
+}
+
+/* MOBILE */
+.sidebar-overlay {
+    display: none;
+}
+
+@media (max-width: 800px) {
+    .sidebar {
+        position: fixed;
+        z-index: 50;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        transform: translateX(-100%);
+        transition: transform .2s ease;
+        box-shadow: 12px 0 30px rgba(0,0,0,.08);
+    }
+
+    .sidebar.open { transform: translateX(0); }
+
+    .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        background: rgba(15,23,42,.25);
+    }
+
+    .sidebar-overlay.open { display: block; }
+
+    .mobile-menu {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .topbar { padding: 0 14px; }
+    .chat-container { padding: 20px 12px; }
+    .composer-area { padding: 10px 12px 14px; }
+
+    .suggestions { grid-template-columns: 1fr; }
+    .message-shell { max-width: 88%; }
+    .message-actions { opacity: 1; }
+    .welcome { min-height: 48vh; }
+    .welcome h1 { font-size: 25px; }
+    .welcome p { font-size: 13px; }
+    .message-content { font-size: 13px; }
+}
+
+@media (max-width: 480px) {
+    .status { display: none; }
+    .avatar { width: 30px; height: 30px; min-width: 30px; }
+    .message { gap: 8px; }
+    .message-shell { max-width: 91%; }
+    .suggestion { padding: 12px; }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+    <aside class="sidebar" id="sidebar">
+        <div class="brand">
+            <div class="brand-logo">Z</div>
+            <div>
+                <div class="brand-text">ZENSUS AI</div>
+                <div class="brand-subtitle">Think. Understand. Create.</div>
+            </div>
+        </div>
+
+        <button class="new-chat" id="newChatBtn" type="button">+ New Chat</button>
+
+        <div class="sidebar-title">Recent Chats</div>
+        <div class="history" id="history"></div>
+
+        <div class="sidebar-bottom">
+            <a href="dashboard.html" class="sidebar-link">← Back to Dashboard</a>
+        </div>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="mobile-menu" id="mobileMenuBtn" type="button" aria-label="Open menu">☰</button>
+                <div class="topbar-title">ZENSUS AI Assistant</div>
+            </div>
+
+            <div class="status" id="connectionStatus">
+                <span class="status-dot"></span>
+                <span id="statusText">Connected</span>
+            </div>
+        </header>
+
+        <section class="chat-container" id="chatContainer">
+            <div class="chat" id="chat"></div>
+        </section>
+
+        <div class="composer-area">
+            <div class="composer-wrap">
+                <div class="attachment-preview" id="attachmentPreview"></div>
+
+                <div class="composer">
+                    <button
+                        class="attachment-button"
+                        id="attachmentButton"
+                        type="button"
+                        title="Attach image or file"
+                        aria-label="Attach image or file"
+                    >+</button>
+
+                    <input
+                        type="file"
+                        id="fileInput"
+                        hidden
+                        multiple
+                        accept="image/png,image/jpeg,image/webp,image/gif,image/bmp,image/svg+xml,.pdf,.txt,.csv,.json"
+                    >
+
+                    <textarea
+                        id="messageInput"
+                        placeholder="Message ZENSUS AI..."
+                        rows="1"
+                        aria-label="Message ZENSUS AI"
+                    ></textarea>
+
+                    <button class="send-button" id="sendButton" type="button" title="Send" aria-label="Send">➤</button>
+                </div>
+
+                <div class="composer-note">
+                    ZENSUS AI can make mistakes. Verify important information.
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+"use strict";
+
+/* =========================================================
+   CONFIGURATION
+========================================================= */
+const API_URL = "http://localhost:3000/api/ai/chat";
+const STORAGE_KEY = "zensusChats";
+const MAX_CHATS = 30;
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
+
+const ALLOWED_EXTENSIONS = new Set([
+    "png", "jpg", "jpeg", "webp", "gif", "bmp", "svg", "pdf", "txt", "csv", "json"
+]);
+
+const ALLOWED_IMAGE_TYPES = new Set([
+    "image/png",
+    "image/jpeg",
+    "image/webp",
+    "image/gif",
+    "image/bmp",
+    "image/svg+xml"
+]);
+
+/* =========================================================
+   DOM REFERENCES
+========================================================= */
+const chatContainer = document.getElementById("chatContainer");
+const chat = document.getElementById("chat");
+const messageInput = document.getElementById("messageInput");
+const sendButton = document.getElementById("sendButton");
+const attachmentButton = document.getElementById("attachmentButton");
+const fileInput = document.getElementById("fileInput");
+const attachmentPreview = document.getElementById("attachmentPreview");
+const historyElement = document.getElementById("history");
+const newChatBtn = document.getElementById("newChatBtn");
+const connectionStatus = document.getElementById("connectionStatus");
+const statusText = document.getElementById("statusText");
+const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+const sidebar = document.getElementById("sidebar");
+const sidebarOverlay = document.getElementById("sidebarOverlay");
+
+/* =========================================================
+   SINGLE SOURCE OF CONVERSATION STATE
+========================================================= */
+let messages = [];
+let currentChatId = null;
+let pendingAttachments = [];
+let isGenerating = false;
+
+/* =========================================================
+   WELCOME SCREEN
+========================================================= */
+function renderWelcome() {
+    chat.innerHTML = "";
+
+    const welcome = document.createElement("div");
+    welcome.className = "welcome";
+
+    welcome.innerHTML = `
+        <div class="welcome-icon">Z</div>
+        <h1>How can I help you?</h1>
+        <p>
+            Ask questions, learn concepts, write code, analyze problems,
+            brainstorm ideas, or explore technology with ZENSUS AI.
+        </p>
+
+        <div class="suggestions">
+            <button class="suggestion" type="button"
+                data-prompt="Explain Python from beginner to advanced with examples.">
+                <div class="suggestion-title">Learn Python</div>
+                <div class="suggestion-text">Teach me Python step by step.</div>
+            </button>
+
+            <button class="suggestion" type="button"
+                data-prompt="Explain artificial intelligence in simple terms with real-world examples.">
+                <div class="suggestion-title">Understand AI</div>
+                <div class="suggestion-text">Explain AI concepts clearly.</div>
+            </button>
+
+            <button class="suggestion" type="button"
+                data-prompt="Give me a professional roadmap for becoming a full stack Python developer.">
+                <div class="suggestion-title">Career Roadmap</div>
+                <div class="suggestion-text">Build a learning roadmap.</div>
+            </button>
+
+            <button class="suggestion" type="button"
+                data-prompt="Write a clean Python program and explain every line.">
+                <div class="suggestion-title">Write Code</div>
+                <div class="suggestion-text">Generate and explain code.</div>
+            </button>
+        </div>
+    `;
+
+    chat.appendChild(welcome);
+
+    welcome.querySelectorAll(".suggestion").forEach(function(card) {
+        card.addEventListener("click", function() {
+            messageInput.value = card.dataset.prompt || "";
+            autoResizeTextarea();
+            messageInput.focus();
+        });
+    });
+}
+
+/* =========================================================
+   SAFE HTML ESCAPING
+========================================================= */
+function escapeHTML(value) {
+    const div = document.createElement("div");
+    div.textContent = String(value ?? "");
+    return div.innerHTML;
+}
+
+/* =========================================================
+   MARKDOWN RENDERER
+   Supports headings, bold, italic, lists, blockquotes,
+   inline code, fenced code, and safe links.
+   All source text is escaped before HTML is created.
+========================================================= */
+function renderMarkdown(markdown) {
+    const source = String(markdown ?? "").replace(/\r\n?/g, "\n");
+    const lines = source.split("\n");
+    const output = [];
+    let inCode = false;
+    let codeLanguage = "";
+    let codeLines = [];
+
+    function renderInline(text) {
+        let result = escapeHTML(text);
+
+        const tokens = [];
+        function token(html) {
+            const key = `@@ZENSUS_TOKEN_${tokens.length}@@`;
+            tokens.push(html);
+            return key;
+        }
+
+        result = result.replace(/`([^`\n]+)`/g, function(_, code) {
+            return token(`<code class="inline-code">${code}</code>`);
+        });
+
+        result = result.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+        result = result.replace(/__(.+?)__/g, "<strong>$1</strong>");
+        result = result.replace(/\*([^*\n]+)\*/g, "<em>$1</em>");
+        result = result.replace(/_([^_\n]+)_/g, "<em>$1</em>");
+
+        result = result.replace(
+            /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+            function(_, label, url) {
+                return token(
+                    `<a href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer">${label}</a>`
+                );
+            }
+        );
+
+        result = result.replace(/@@ZENSUS_TOKEN_(\d+)@@/g, function(_, index) {
+            return tokens[Number(index)] || "";
+        });
+
+        return result;
+    }
+
+    function flushParagraph(buffer) {
+        if (!buffer.length) return;
+        const text = buffer.join("\n");
+        output.push(`<p>${renderInline(text).replace(/\n/g, "<br>")}</p>`);
+        buffer.length = 0;
+    }
+
+    const paragraph = [];
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+
+        if (line.trim().startsWith("```")) {
+            flushParagraph(paragraph);
+
+            if (!inCode) {
+                inCode = true;
+                codeLanguage = line.trim().slice(3).trim() || "code";
+                codeLines = [];
+            } else {
+                const code = codeLines.join("\n");
+                output.push(`
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-language">${escapeHTML(codeLanguage)}</span>
+                            <button class="code-copy" type="button" data-code="${encodeURIComponent(code)}">Copy</button>
+                        </div>
+                        <pre><code>${escapeHTML(code)}</code></pre>
+                    </div>
+                `);
+                inCode = false;
+                codeLanguage = "";
+                codeLines = [];
+            }
+            continue;
+        }
+
+        if (inCode) {
+            codeLines.push(line);
+            continue;
+        }
+
+        if (line.trim() === "") {
+            flushParagraph(paragraph);
+            continue;
+        }
+
+        const heading = line.match(/^(#{1,3})\s+(.+)$/);
+        if (heading) {
+            flushParagraph(paragraph);
+            const level = heading[1].length;
+            output.push(`<h${level}>${renderInline(heading[2])}</h${level}>`);
+            continue;
+        }
+
+        const unordered = line.match(/^\s*[-*+]\s+(.+)$/);
+        if (unordered) {
+            flushParagraph(paragraph);
+            const items = [unordered[1]];
+            while (i + 1 < lines.length) {
+                const next = lines[i + 1].match(/^\s*[-*+]\s+(.+)$/);
+                if (!next) break;
+                items.push(next[1]);
+                i++;
+            }
+            output.push(`<ul>${items.map(item => `<li>${renderInline(item)}</li>`).join("")}</ul>`);
+            continue;
+        }
+
+        const ordered = line.match(/^\s*\d+\.\s+(.+)$/);
+        if (ordered) {
+            flushParagraph(paragraph);
+            const items = [ordered[1]];
+            while (i + 1 < lines.length) {
+                const next = lines[i + 1].match(/^\s*\d+\.\s+(.+)$/);
+                if (!next) break;
+                items.push(next[1]);
+                i++;
+            }
+            output.push(`<ol>${items.map(item => `<li>${renderInline(item)}</li>`).join("")}</ol>`);
+            continue;
+        }
+
+        if (/^\s*>\s?/.test(line)) {
+            flushParagraph(paragraph);
+            const quoteLines = [line.replace(/^\s*>\s?/, "")];
+            while (i + 1 < lines.length && /^\s*>\s?/.test(lines[i + 1])) {
+                i++;
+                quoteLines.push(lines[i].replace(/^\s*>\s?/, ""));
+            }
+            output.push(`<blockquote>${renderInline(quoteLines.join("\n")).replace(/\n/g, "<br>")}</blockquote>`);
+            continue;
+        }
+
+        paragraph.push(line);
+    }
+
+    if (inCode) {
+        output.push(`
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-language">${escapeHTML(codeLanguage || "code")}</span>
+                    <button class="code-copy" type="button" data-code="${encodeURIComponent(codeLines.join("\n"))}">Copy</button>
+                </div>
+                <pre><code>${escapeHTML(codeLines.join("\n"))}</code></pre>
+            </div>
+        `);
+    }
+
+    flushParagraph(paragraph);
+    return output.join("");
+}
+
+/* =========================================================
+   COPY
+========================================================= */
+async function copyText(text, button) {
+    try {
+        await navigator.clipboard.writeText(String(text ?? ""));
+        if (button) {
+            const old = button.textContent;
+            button.textContent = "Copied";
+            setTimeout(() => { button.textContent = old; }, 1200);
+        }
+    } catch (error) {
+        console.error("Clipboard copy failed:", error);
+
+        const fallback = document.createElement("textarea");
+        fallback.value = String(text ?? "");
+        document.body.appendChild(fallback);
+        fallback.select();
+
+        try {
+            document.execCommand("copy");
+            if (button) {
+                const old = button.textContent;
+                button.textContent = "Copied";
+                setTimeout(() => { button.textContent = old; }, 1200);
+            }
+        } catch (fallbackError) {
+            console.error("Clipboard fallback failed:", fallbackError);
+        } finally {
+            fallback.remove();
+        }
+    }
+}
+
+/* =========================================================
+   MESSAGE RENDERING - SINGLE RENDER PATH
+========================================================= */
+function addMessage(role, content, options = {}) {
+    const wrapper = document.createElement("div");
+    wrapper.className = `message ${role}`;
+
+    const avatar = document.createElement("div");
+    avatar.className = `avatar ${role === "assistant" ? "ai" : "user"}`;
+    avatar.textContent = role === "assistant" ? "Z" : "U";
+
+    const shell = document.createElement("div");
+    shell.className = "message-shell";
+
+    const contentBox = document.createElement("div");
+    contentBox.className = "message-content";
+
+    if (role === "assistant") {
+        contentBox.innerHTML = renderMarkdown(content);
+    } else {
+        if (options.attachments?.length) {
+            const imageAttachments = options.attachments.filter(item => item.kind === "image");
+            if (imageAttachments.length) {
+                const gallery = document.createElement("div");
+                gallery.className = "attachments-in-message";
+
+                imageAttachments.forEach(item => {
+                    const img = document.createElement("img");
+                    img.className = "message-image";
+                    img.src = item.dataUrl;
+                    img.alt = item.name || "Uploaded image";
+                    img.loading = "lazy";
+                    gallery.appendChild(img);
+                });
+
+                contentBox.appendChild(gallery);
+            }
+        }
+
+        if (content) {
+            const textNode = document.createElement("div");
+            textNode.innerHTML = renderMarkdown(content);
+            contentBox.appendChild(textNode);
+        }
+    }
+
+    shell.appendChild(contentBox);
+
+    const actions = document.createElement("div");
+    actions.className = "message-actions";
+
+    const copyButton = document.createElement("button");
+    copyButton.type = "button";
+    copyButton.className = "message-action";
+    copyButton.textContent = "Copy";
+    copyButton.addEventListener("click", () => copyText(content, copyButton));
+    actions.appendChild(copyButton);
+
+    if (role === "user" && Number.isInteger(options.messageIndex)) {
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.className = "message-action";
+        editButton.textContent = "Edit";
+        editButton.addEventListener("click", () => editMessage(options.messageIndex));
+        actions.appendChild(editButton);
+    }
+
+    shell.appendChild(actions);
+
+    if (role === "user") {
+        wrapper.appendChild(shell);
+        wrapper.appendChild(avatar);
+    } else {
+        wrapper.appendChild(avatar);
+        wrapper.appendChild(shell);
+    }
+
+    chat.appendChild(wrapper);
+    attachCodeCopyHandlers(wrapper);
+    return wrapper;
+}
+
+function attachCodeCopyHandlers(scope) {
+    scope.querySelectorAll(".code-copy").forEach(button => {
+        if (button.dataset.bound === "true") return;
+        button.dataset.bound = "true";
+
+        button.addEventListener("click", function() {
+            const code = decodeURIComponent(button.dataset.code || "");
+            copyText(code, button);
+        });
+    });
+}
+
+/* =========================================================
+   RENDER ENTIRE CONVERSATION
+========================================================= */
+function renderConversation() {
+    chat.innerHTML = "";
+
+    if (!messages.length) {
+        renderWelcome();
+        return;
+    }
+
+    messages.forEach((message, index) => {
+        const content = getTextContent(message);
+        const attachments = getAttachments(message);
+
+        addMessage(
+            message.role === "assistant" ? "assistant" : "user",
+            content,
+            {
+                messageIndex: message.role === "user" ? index : null,
+                attachments
+            }
+        );
+    });
+
+    scrollToBottom();
+}
+
+function getTextContent(message) {
+    if (typeof message.content === "string") return message.content;
+
+    if (Array.isArray(message.content)) {
+        return message.content
+            .filter(part => part && part.type === "text")
+            .map(part => part.text || "")
+            .join("\n");
+    }
+
+    return "";
+}
+
+function getAttachments(message) {
+    if (!Array.isArray(message.content)) return [];
+
+    return message.content
+        .filter(part => part && part.type === "image_url" && part.image_url?.url)
+        .map(part => ({
+            kind: "image",
+            dataUrl: part.image_url.url,
+            name: "Uploaded image"
+        }));
+}
+
+/* =========================================================
+   TYPING INDICATOR
+========================================================= */
+function showTyping() {
+    removeTyping();
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "message assistant";
+    wrapper.id = "typingMessage";
+
+    const avatar = document.createElement("div");
+    avatar.className = "avatar ai";
+    avatar.textContent = "Z";
+
+    const shell = document.createElement("div");
+    shell.className = "message-shell";
+
+    const content = document.createElement("div");
+    content.className = "message-content";
+    content.innerHTML = `
+        <div class="typing" aria-label="ZENSUS AI is generating">
+            <span></span><span></span><span></span>
+        </div>
+    `;
+
+    shell.appendChild(content);
+    wrapper.appendChild(avatar);
+    wrapper.appendChild(shell);
+    chat.appendChild(wrapper);
+
+    scrollToBottom();
+}
+
+function removeTyping() {
+    document.getElementById("typingMessage")?.remove();
+}
+
+/* =========================================================
+   SCROLL
+========================================================= */
+function scrollToBottom() {
+    requestAnimationFrame(() => {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    });
+}
+
+/* =========================================================
+   TEXTAREA AUTO RESIZE
+========================================================= */
+function autoResizeTextarea() {
+    messageInput.style.height = "auto";
+    messageInput.style.height =
+        Math.min(messageInput.scrollHeight, 150) + "px";
+}
+
+/* =========================================================
+   ATTACHMENTS
+========================================================= */
+function getFileExtension(fileName) {
+    const parts = String(fileName || "").toLowerCase().split(".");
+    return parts.length > 1 ? parts.pop() : "";
+}
+
+function validateFile(file) {
+    const extension = getFileExtension(file.name);
+
+    if (!ALLOWED_EXTENSIONS.has(extension)) {
+        throw new Error(`Unsupported file type: ${file.name}`);
+    }
+
+    if (file.size > MAX_FILE_BYTES) {
+        throw new Error(`File is too large: ${file.name}. Maximum size is 10 MB.`);
+    }
+
+    if (extension === "pdf" || extension === "txt" || extension === "csv" || extension === "json") {
+        return "document";
+    }
+
+    if (ALLOWED_IMAGE_TYPES.has(file.type) || extension === "jpg" || extension === "jpeg" || extension === "png" || extension === "webp" || extension === "gif" || extension === "bmp" || extension === "svg") {
+        if (file.size > MAX_IMAGE_BYTES) {
+            throw new Error(`Image is too large: ${file.name}. Maximum image size is 5 MB.`);
+        }
+        return "image";
+    }
+
+    throw new Error(`The selected file could not be validated: ${file.name}`);
+}
+
+function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error(`Could not read ${file.name}.`));
+
+        reader.readAsDataURL(file);
+    });
+}
+
+async function handleFiles(fileList) {
+    if (isGenerating) return;
+
+    const files = Array.from(fileList || []);
+    if (!files.length) return;
+
+    for (const file of files) {
+        try {
+            const kind = validateFile(file);
+
+            if (kind !== "image") {
+                throw new Error(
+                    `${file.name} is accepted by the attachment UI, but this prototype sends only image attachments to the AI endpoint.`
+                );
+            }
+
+            const dataUrl = await readFileAsDataURL(file);
+
+            pendingAttachments.push({
+                kind: "image",
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                dataUrl
+            });
+        } catch (error) {
+            showClientError(error.message);
+        }
+    }
+
+    renderAttachmentPreview();
+    fileInput.value = "";
+}
+
+function renderAttachmentPreview() {
+    attachmentPreview.innerHTML = "";
+    attachmentPreview.classList.toggle("has-items", pendingAttachments.length > 0);
+
+    pendingAttachments.forEach((item, index) => {
+        const chip = document.createElement("div");
+        chip.className = "attachment-chip";
+
+        const img = document.createElement("img");
+        img.src = item.dataUrl;
+        img.alt = item.name || "Selected image";
+        chip.appendChild(img);
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "remove-attachment";
+        remove.textContent = "×";
+        remove.title = "Remove attachment";
+        remove.addEventListener("click", () => {
+            pendingAttachments.splice(index, 1);
+            renderAttachmentPreview();
+        });
+
+        chip.appendChild(remove);
+        attachmentPreview.appendChild(chip);
+    });
+}
+
+function createUserContent(text, attachments) {
+    const cleanText = text.trim();
+
+    if (!attachments.length) {
+        return cleanText;
+    }
+
+    const content = [];
+
+    if (cleanText) {
+        content.push({
+            type: "text",
+            text: cleanText
+        });
+    }
+
+    attachments.forEach(item => {
+        content.push({
+            type: "image_url",
+            image_url: {
+                url: item.dataUrl
+            }
+        });
+    });
+
+    return content;
+}
+
+/* =========================================================
+   CLIENT ERROR
+========================================================= */
+function showClientError(message) {
+    const errorBox = document.createElement("div");
+    errorBox.className = "message assistant";
+
+    const avatar = document.createElement("div");
+    avatar.className = "avatar ai";
+    avatar.textContent = "Z";
+
+    const shell = document.createElement("div");
+    shell.className = "message-shell";
+
+    const content = document.createElement("div");
+    content.className = "message-content";
+    content.innerHTML = `<p><strong>Attachment error:</strong> ${escapeHTML(message)}</p>`;
+
+    shell.appendChild(content);
+    errorBox.appendChild(avatar);
+    errorBox.appendChild(shell);
+    chat.appendChild(errorBox);
+    scrollToBottom();
+}
+
+/* =========================================================
+   RESPONSE EXTRACTION
+========================================================= */
+function extractAIText(data) {
+    const candidates = [
+        data?.response?.choices?.[0]?.message?.content,
+        data?.choices?.[0]?.message?.content,
+        data?.response?.output_text,
+        data?.response?.content,
+        data?.output_text,
+        data?.content,
+        data?.message
+    ];
+
+    for (const candidate of candidates) {
+        if (typeof candidate === "string" && candidate.trim()) {
+            return candidate;
+        }
+
+        if (Array.isArray(candidate)) {
+            const text = candidate
+                .filter(part => part && (part.type === "text" || typeof part.text === "string"))
+                .map(part => part.text || "")
+                .join("\n")
+                .trim();
+
+            if (text) return text;
+        }
+    }
+
+    return "";
+}
+
+/* =========================================================
+   SEND MESSAGE - SINGLE IMPLEMENTATION
+========================================================= */
+async function sendMessage() {
+    if (isGenerating) return;
+
+    const text = messageInput.value.trim();
+    const attachments = [...pendingAttachments];
+
+    if (!text && !attachments.length) return;
+
+    isGenerating = true;
+    setGeneratingState(true);
+    setStatus("loading", "Generating");
+
+    const userContent = createUserContent(
+        text || "Please analyze the uploaded image.",
+        attachments
+    );
+
+    const userMessage = {
+        role: "user",
+        content: userContent
+    };
+
+    messages.push(userMessage);
+    const userMessageIndex = messages.length - 1;
+
+    addMessage("user", text || "Please analyze the uploaded image.", {
+        messageIndex: userMessageIndex,
+        attachments
+    });
+
+    messageInput.value = "";
+    messageInput.style.height = "auto";
+    pendingAttachments = [];
+    renderAttachmentPreview();
+
+    showTyping();
+
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({
+                messages: messages
+            })
+        });
+
+        const rawText = await response.text();
+
+        let data = null;
+
+        try {
+            data = rawText ? JSON.parse(rawText) : null;
+        } catch {
+            throw new Error("Backend returned invalid JSON.");
+        }
+
+        if (!response.ok) {
+            throw new Error(
+                data?.error ||
+                data?.message ||
+                `ZENSUS AI backend request failed with HTTP ${response.status}.`
+            );
+        }
+
+        const aiText = extractAIText(data);
+
+        if (!aiText) {
+            throw new Error("ZENSUS AI returned an empty response.");
+        }
+
+        removeTyping();
+
+        messages.push({
+            role: "assistant",
+            content: aiText
+        });
+
+        addMessage("assistant", aiText);
+        persistCurrentChat();
+        renderHistory();
+        setStatus("online", "Connected");
+        scrollToBottom();
+
+    } catch (error) {
+        console.error("ZENSUS AI request failed:", error);
+        removeTyping();
+
+        let message = "I couldn't complete that request right now.";
+
+        if (error instanceof TypeError && error.message === "Failed to fetch") {
+            message =
+                "I couldn't connect to the ZENSUS AI backend. " +
+                "Make sure Node.js/Express is running at http://localhost:3000 " +
+                "and that POST /api/ai/chat is available.";
+            setStatus("offline", "Backend offline");
+        } else {
+            message = error.message || message;
+            setStatus("offline", "Connection error");
+        }
+
+        addMessage("assistant", message);
+        scrollToBottom();
+
+        /*
+         * Keep the user's submitted turn in memory so the UI does not
+         * silently lose what was sent. It is not persisted as a completed
+         * chat until a successful assistant response is received.
+         */
+    } finally {
+        isGenerating = false;
+        setGeneratingState(false);
+        messageInput.focus();
+    }
+}
+
+/* =========================================================
+   EDIT USER MESSAGE
+   Removes the selected user message and every later turn,
+   then places its text back into the composer.
+========================================================= */
+function editMessage(index) {
+    if (isGenerating) return;
+    if (!messages[index] || messages[index].role !== "user") return;
+
+    const message = messages[index];
+    const text = getTextContent(message);
+    const attachments = getAttachments(message);
+
+    messages = messages.slice(0, index);
+
+    messageInput.value = text;
+    pendingAttachments = attachments.map(item => ({
+        kind: "image",
+        name: item.name,
+        type: "image/*",
+        size: 0,
+        dataUrl: item.dataUrl
+    }));
+
+    renderConversation();
+    renderAttachmentPreview();
+    autoResizeTextarea();
+    messageInput.focus();
+    persistCurrentChat();
+    renderHistory();
+}
+
+/* =========================================================
+   HISTORY
+========================================================= */
+function getStoredChats() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+        console.error("Could not read chat history:", error);
+        return [];
+    }
+}
+
+function setStoredChats(chats) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(chats.slice(0, MAX_CHATS)));
+}
+
+function makeChatId() {
+    return `zensus-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+function getChatTitle(chatMessages) {
+    const firstUser = chatMessages.find(item => item.role === "user");
+    if (!firstUser) return "New Chat";
+
+    const text = getTextContent(firstUser).trim();
+    if (!text) return "Image Analysis";
+
+    return text.length > 48 ? text.slice(0, 48) + "…" : text;
+}
+
+function persistCurrentChat() {
+    if (!messages.length) return;
+
+    if (!currentChatId) {
+        currentChatId = makeChatId();
+    }
+
+    const chats = getStoredChats();
+    const now = new Date().toISOString();
+
+    const existingIndex = chats.findIndex(item => item.id === currentChatId);
+
+    const record = {
+        id: currentChatId,
+        title: getChatTitle(messages),
+        date: now,
+        messages: messages
+    };
+
+    if (existingIndex >= 0) {
+        chats[existingIndex] = record;
+    } else {
+        chats.unshift(record);
+    }
+
+    chats.sort((a, b) => new Date(b.date) - new Date(a.date));
+    setStoredChats(chats);
+}
+
+function loadChat(id) {
+    if (isGenerating) return;
+
+    const chats = getStoredChats();
+    const selected = chats.find(item => item.id === id);
+
+    if (!selected) return;
+
+    currentChatId = selected.id;
+    messages = Array.isArray(selected.messages) ? selected.messages : [];
+    pendingAttachments = [];
+
+    renderAttachmentPreview();
+    renderConversation();
+    renderHistory();
+    closeMobileSidebar();
+    messageInput.focus();
+}
+
+function renderHistory() {
+    historyElement.innerHTML = "";
+
+    const chats = getStoredChats();
+
+    if (!chats.length) {
+        const empty = document.createElement("div");
+        empty.className = "history-empty";
+        empty.textContent = "No previous chats yet.";
+        historyElement.appendChild(empty);
+        return;
+    }
+
+    chats.forEach(item => {
+        const element = document.createElement("div");
+        element.className = "history-item" + (item.id === currentChatId ? " active" : "");
+        element.tabIndex = 0;
+        element.setAttribute("role", "button");
+
+        const title = document.createElement("div");
+        title.className = "history-title";
+        title.textContent = item.title || "Untitled Chat";
+
+        const date = document.createElement("span");
+        date.className = "history-date";
+        date.textContent = formatHistoryDate(item.date);
+
+        element.appendChild(title);
+        element.appendChild(date);
+
+        element.addEventListener("click", () => loadChat(item.id));
+        element.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                loadChat(item.id);
+            }
+        });
+
+        historyElement.appendChild(element);
+    });
+}
+
+function formatHistoryDate(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+
+    return date.toLocaleString([], {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+    });
+}
+
+/* =========================================================
+   NEW CHAT
+========================================================= */
+function startNewChat() {
+    if (isGenerating) return;
+
+    currentChatId = null;
+    messages = [];
+    pendingAttachments = [];
+
+    messageInput.value = "";
+    messageInput.style.height = "auto";
+
+    renderAttachmentPreview();
+    renderConversation();
+    renderHistory();
+    setStatus("online", "Connected");
+    closeMobileSidebar();
+    messageInput.focus();
+}
+
+/* =========================================================
+   UI STATE
+========================================================= */
+function setGeneratingState(active) {
+    sendButton.disabled = active;
+    messageInput.disabled = active;
+    attachmentButton.disabled = active;
+    fileInput.disabled = active;
+}
+
+function setStatus(state, text) {
+    connectionStatus.classList.remove("offline", "loading");
+
+    if (state === "offline") connectionStatus.classList.add("offline");
+    if (state === "loading") connectionStatus.classList.add("loading");
+
+    statusText.textContent = text;
+}
+
+/* =========================================================
+   MOBILE SIDEBAR
+========================================================= */
+function openMobileSidebar() {
+    sidebar.classList.add("open");
+    sidebarOverlay.classList.add("open");
+}
+
+function closeMobileSidebar() {
+    sidebar.classList.remove("open");
+    sidebarOverlay.classList.remove("open");
+}
+
+/* =========================================================
+   EVENT LISTENERS
+========================================================= */
+sendButton.addEventListener("click", sendMessage);
+
+messageInput.addEventListener("keydown", function(event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+    }
+});
+
+messageInput.addEventListener("input", autoResizeTextarea);
+
+attachmentButton.addEventListener("click", function() {
+    if (!isGenerating) fileInput.click();
+});
+
+fileInput.addEventListener("change", function() {
+    handleFiles(fileInput.files);
+});
+
+newChatBtn.addEventListener("click", startNewChat);
+
+mobileMenuBtn.addEventListener("click", openMobileSidebar);
+sidebarOverlay.addEventListener("click", closeMobileSidebar);
+
+/* Clipboard image paste support */
+messageInput.addEventListener("paste", function(event) {
+    if (isGenerating) return;
+
+    const items = Array.from(event.clipboardData?.items || []);
+    const imageItems = items.filter(item => item.kind === "file" && item.type.startsWith("image/"));
+
+    if (!imageItems.length) return;
+
+    event.preventDefault();
+
+    const files = imageItems
+        .map(item => item.getAsFile())
+        .filter(Boolean);
+
+    handleFiles(files);
+});
+
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+renderWelcome();
+renderHistory();
+autoResizeTextarea();
+messageInput.focus();
+
+console.log("ZENSUS AI frontend ready.");
+console.log("API endpoint:", API_URL);
+</script>
+</body>
+</html>

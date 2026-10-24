@@ -1,0 +1,3647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS — Django Lesson 07: Django ORM</title>
+
+<style>
+:root{
+  --blue:#2563eb;
+  --blue-dark:#1d4ed8;
+  --blue-light:#eff6ff;
+  --blue-soft:#dbeafe;
+  --blue-border:#bfdbfe;
+  --text:#10213f;
+  --text-light:#5f6f86;
+  --muted:#8b9ab0;
+  --bg:#f7faff;
+  --white:#fff;
+  --border:#dce6f2;
+  --green:#16a34a;
+  --green-light:#f0fdf4;
+  --orange:#f59e0b;
+  --orange-light:#fffbeb;
+  --red:#dc2626;
+  --red-light:#fef2f2;
+  --purple:#7c3aed;
+  --shadow:0 12px 35px rgba(37,99,235,.08);
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  font-family:Inter,Segoe UI,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.7;
+}
+
+button,input{
+  font:inherit;
+}
+
+a{
+  text-decoration:none;
+  color:inherit;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+  position:fixed;
+  left:0;
+  top:0;
+  width:280px;
+  height:100vh;
+  background:#fff;
+  border-right:1px solid var(--border);
+  overflow-y:auto;
+  z-index:100;
+}
+
+.brand{
+  padding:25px 22px 20px;
+  border-bottom:1px solid var(--border);
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:23px;
+  font-weight:900;
+  color:var(--blue);
+}
+
+.logo-box{
+  width:38px;
+  height:38px;
+  border-radius:10px;
+  background:var(--blue);
+  color:#fff;
+  display:grid;
+  place-items:center;
+  font-weight:900;
+}
+
+.lesson-label{
+  margin-top:12px;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:1.3px;
+  color:var(--muted);
+}
+
+.lesson-name{
+  font-size:14px;
+  font-weight:700;
+  margin-top:3px;
+}
+
+.nav{
+  padding:18px 13px 30px;
+}
+
+.nav-title{
+  padding:10px 12px;
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:1.4px;
+  color:var(--muted);
+  font-weight:800;
+}
+
+.nav a{
+  display:block;
+  padding:9px 12px;
+  margin:3px 0;
+  border-radius:8px;
+  color:var(--text-light);
+  font-size:13px;
+  transition:.2s;
+}
+
+.nav a:hover{
+  background:var(--blue-light);
+  color:var(--blue);
+}
+
+.nav a.active{
+  background:var(--blue-light);
+  color:var(--blue);
+  font-weight:700;
+  border-left:3px solid var(--blue);
+}
+
+/* MAIN */
+
+.main{
+  margin-left:280px;
+  min-height:100vh;
+}
+
+.progress{
+  position:fixed;
+  top:0;
+  left:280px;
+  right:0;
+  height:4px;
+  background:#e8eef7;
+  z-index:200;
+}
+
+.progress-bar{
+  height:100%;
+  width:0;
+  background:linear-gradient(90deg,var(--blue),#60a5fa);
+}
+
+/* HERO */
+
+.hero{
+  padding:75px 7% 50px;
+  background:
+    radial-gradient(circle at 85% 20%,#dbeafe 0,transparent 30%),
+    linear-gradient(135deg,#fff,#f3f8ff);
+  border-bottom:1px solid var(--border);
+}
+
+.hero-inner{
+  max-width:1050px;
+  margin:auto;
+}
+
+.breadcrumb{
+  color:var(--blue);
+  font-size:13px;
+  font-weight:700;
+  margin-bottom:16px;
+}
+
+.hero h1{
+  font-size:clamp(34px,5vw,58px);
+  line-height:1.08;
+  letter-spacing:-2px;
+}
+
+.hero h1 span{
+  color:var(--blue);
+}
+
+.hero p{
+  margin-top:18px;
+  max-width:800px;
+  color:var(--text-light);
+  font-size:17px;
+}
+
+.meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+  margin-top:25px;
+}
+
+.pill{
+  background:#fff;
+  border:1px solid var(--border);
+  padding:7px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  color:var(--text-light);
+}
+
+/* SEARCH */
+
+.search-wrap{
+  max-width:1050px;
+  margin:28px auto 0;
+  padding:0 7%;
+}
+
+.search{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#fff;
+  padding:14px 18px;
+  outline:none;
+  color:var(--text);
+}
+
+.search:focus{
+  border-color:var(--blue);
+  box-shadow:0 0 0 4px rgba(37,99,235,.08);
+}
+
+/* CONTENT */
+
+.content{
+  max-width:1050px;
+  margin:auto;
+  padding:30px 7% 80px;
+}
+
+.section{
+  margin:55px 0;
+  scroll-margin-top:30px;
+}
+
+.section.hidden{
+  display:none;
+}
+
+.section-head{
+  display:flex;
+  align-items:flex-start;
+  gap:15px;
+  margin-bottom:20px;
+}
+
+.number{
+  min-width:39px;
+  height:39px;
+  border-radius:11px;
+  background:var(--blue-light);
+  color:var(--blue);
+  display:grid;
+  place-items:center;
+  font-weight:900;
+  font-size:13px;
+}
+
+.section h2{
+  font-size:28px;
+  line-height:1.2;
+}
+
+.section h3{
+  font-size:19px;
+  margin:25px 0 10px;
+}
+
+.section p{
+  color:var(--text-light);
+  margin:10px 0;
+}
+
+.card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:24px;
+  box-shadow:var(--shadow);
+  margin:18px 0;
+}
+
+.info{
+  border-left:4px solid var(--blue);
+  background:var(--blue-light);
+  padding:17px 20px;
+  border-radius:0 12px 12px 0;
+  margin:20px 0;
+}
+
+.success{
+  border-left-color:var(--green);
+  background:var(--green-light);
+}
+
+.warning{
+  border-left-color:var(--orange);
+  background:var(--orange-light);
+}
+
+.danger{
+  border-left-color:var(--red);
+  background:var(--red-light);
+}
+
+code{
+  background:#eef4ff;
+  color:#1d4ed8;
+  padding:2px 6px;
+  border-radius:5px;
+  font-size:.9em;
+}
+
+/* CODE */
+
+.code-wrap{
+  background:#0f172a;
+  border-radius:14px;
+  overflow:hidden;
+  margin:18px 0;
+  box-shadow:0 15px 30px rgba(15,23,42,.12);
+}
+
+.code-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 14px;
+  background:#172033;
+  color:#aebbd0;
+  font-size:12px;
+}
+
+.copy{
+  border:1px solid #3b4a63;
+  background:#23304a;
+  color:#fff;
+  border-radius:7px;
+  padding:6px 10px;
+  cursor:pointer;
+  font-size:11px;
+}
+
+.copy:hover{
+  background:#30415f;
+}
+
+pre{
+  padding:20px;
+  overflow:auto;
+  color:#e6edf7;
+  font-size:13px;
+  line-height:1.7;
+}
+
+/* PIPELINE */
+
+.pipeline{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:12px;
+  margin:28px 0;
+}
+
+.pipe-card{
+  width:145px;
+  min-height:105px;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:14px;
+  box-shadow:var(--shadow);
+  animation:float 3s ease-in-out infinite;
+}
+
+.pipe-card:nth-child(2){animation-delay:.2s}
+.pipe-card:nth-child(3){animation-delay:.4s}
+.pipe-card:nth-child(4){animation-delay:.6s}
+.pipe-card:nth-child(5){animation-delay:.8s}
+
+.pipe-icon{
+  font-size:27px;
+  margin-bottom:7px;
+}
+
+.pipe-card strong{
+  font-size:13px;
+}
+
+.pipe-card small{
+  color:var(--muted);
+  font-size:11px;
+}
+
+.arrow{
+  color:var(--blue);
+  font-size:24px;
+  font-weight:900;
+}
+
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-7px)}
+}
+
+/* GRID */
+
+.grid2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
+
+.grid3{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+
+.mini-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:19px;
+  transition:.25s;
+}
+
+.mini-card:hover{
+  transform:translateY(-4px);
+  box-shadow:var(--shadow);
+}
+
+.mini-card h4{
+  margin-bottom:6px;
+}
+
+.mini-card p{
+  font-size:13px;
+  margin:0;
+}
+
+/* QUERYSET VISUAL */
+
+.query-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:23px;
+  box-shadow:var(--shadow);
+  transition:.25s;
+}
+
+.query-card:hover{
+  transform:translateY(-5px);
+}
+
+.query-icon{
+  width:48px;
+  height:48px;
+  display:grid;
+  place-items:center;
+  background:var(--blue-light);
+  border-radius:12px;
+  font-size:24px;
+  margin-bottom:12px;
+}
+
+.query-card p{
+  font-size:13px;
+}
+
+/* DATABASE TABLE */
+
+.database{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+  margin:25px 0;
+}
+
+.db-title{
+  background:var(--blue);
+  color:#fff;
+  padding:14px 18px;
+  font-weight:800;
+}
+
+.db-row{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr 1fr;
+  border-bottom:1px solid var(--border);
+}
+
+.db-row:last-child{
+  border-bottom:0;
+}
+
+.db-cell{
+  padding:13px 16px;
+  font-size:13px;
+  border-right:1px solid var(--border);
+}
+
+.db-cell:last-child{
+  border-right:0;
+}
+
+.db-header{
+  background:var(--blue-light);
+  font-weight:800;
+  color:var(--blue);
+}
+
+/* ORM FLOW */
+
+.orm-flow{
+  display:grid;
+  grid-template-columns:1fr 70px 1fr 70px 1fr;
+  align-items:center;
+  gap:10px;
+  margin:30px 0;
+}
+
+.orm-box{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:15px;
+  padding:22px;
+  text-align:center;
+  box-shadow:var(--shadow);
+}
+
+.orm-box .icon{
+  font-size:28px;
+  margin-bottom:7px;
+}
+
+.orm-arrow{
+  color:var(--blue);
+  font-size:27px;
+  font-weight:900;
+  text-align:center;
+}
+
+/* CRUD */
+
+.crud{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+}
+
+.crud-item{
+  padding:22px;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  text-align:center;
+  transition:.25s;
+}
+
+.crud-item:hover{
+  transform:translateY(-5px);
+  box-shadow:var(--shadow);
+}
+
+.crud-letter{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  background:var(--blue-light);
+  color:var(--blue);
+  display:grid;
+  place-items:center;
+  margin:auto auto 10px;
+  font-weight:900;
+  font-size:20px;
+}
+
+.crud-item strong{
+  display:block;
+}
+
+.crud-item span{
+  color:var(--text-light);
+  font-size:12px;
+}
+
+/* TERMINAL */
+
+.terminal{
+  background:#0b1220;
+  color:#d9e4f5;
+  border-radius:14px;
+  padding:20px;
+  font-family:Consolas,monospace;
+  font-size:13px;
+  line-height:2;
+  box-shadow:var(--shadow);
+  overflow:auto;
+}
+
+.prompt{
+  color:#60a5fa;
+}
+
+.command{
+  color:#fff;
+}
+
+.output{
+  color:#94a3b8;
+}
+
+/* TABS */
+
+.tabs{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:0;
+}
+
+.tab{
+  border:1px solid var(--border);
+  background:#fff;
+  color:var(--text-light);
+  padding:9px 13px;
+  border-radius:8px 8px 0 0;
+  cursor:pointer;
+  font-size:12px;
+  font-weight:700;
+}
+
+.tab.active{
+  background:var(--blue);
+  border-color:var(--blue);
+  color:#fff;
+}
+
+.tab-content{
+  display:none;
+}
+
+.tab-content.active{
+  display:block;
+}
+
+/* PRACTICE */
+
+.challenge{
+  background:linear-gradient(135deg,#eff6ff,#fff);
+  border:1px solid var(--blue-border);
+  border-radius:18px;
+  padding:25px;
+}
+
+.challenge-title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.challenge-icon{
+  width:45px;
+  height:45px;
+  background:var(--blue);
+  color:#fff;
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+  font-size:22px;
+}
+
+/* QUIZ */
+
+.quiz{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:24px;
+  margin-bottom:20px;
+}
+
+.option{
+  display:block;
+  width:100%;
+  text-align:left;
+  border:1px solid var(--border);
+  background:#fff;
+  padding:12px 15px;
+  margin:9px 0;
+  border-radius:9px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.option:hover{
+  border-color:var(--blue);
+  background:var(--blue-light);
+}
+
+.option.correct{
+  border-color:#86efac;
+  background:#f0fdf4;
+}
+
+.option.wrong{
+  border-color:#fca5a5;
+  background:#fef2f2;
+}
+
+.quiz-result{
+  margin-top:14px;
+  font-weight:700;
+  color:var(--blue);
+}
+
+/* REVEAL */
+
+.reveal{
+  opacity:0;
+  transform:translateY(20px);
+  transition:.6s ease;
+}
+
+.reveal.show{
+  opacity:1;
+  transform:none;
+}
+
+/* FOOTER */
+
+.lesson-footer{
+  border-top:1px solid var(--border);
+  padding:25px 0;
+  margin-top:60px;
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+}
+
+.footer-btn{
+  padding:11px 16px;
+  border:1px solid var(--border);
+  background:#fff;
+  border-radius:9px;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.footer-btn.primary{
+  background:var(--blue);
+  border-color:var(--blue);
+  color:#fff;
+}
+
+/* MOBILE */
+
+@media(max-width:900px){
+
+  .sidebar{
+    position:relative;
+    width:100%;
+    height:auto;
+  }
+
+  .main{
+    margin-left:0;
+  }
+
+  .progress{
+    left:0;
+  }
+
+  .grid2,
+  .grid3{
+    grid-template-columns:1fr;
+  }
+
+  .orm-flow{
+    grid-template-columns:1fr;
+  }
+
+  .orm-arrow{
+    transform:rotate(90deg);
+  }
+
+  .crud{
+    grid-template-columns:1fr 1fr;
+  }
+}
+
+@media(max-width:600px){
+
+  .hero{
+    padding:45px 5% 40px;
+  }
+
+  .content,
+  .search-wrap{
+    padding-left:5%;
+    padding-right:5%;
+  }
+
+  .hero h1{
+    font-size:36px;
+  }
+
+  .pipeline{
+    flex-direction:column;
+  }
+
+  .arrow{
+    transform:rotate(90deg);
+  }
+
+  .pipe-card{
+    width:100%;
+  }
+
+  .crud{
+    grid-template-columns:1fr;
+  }
+
+  .db-row{
+    grid-template-columns:1fr;
+  }
+
+  .db-cell{
+    border-right:0;
+    border-bottom:1px solid var(--border);
+  }
+
+  .lesson-footer{
+    flex-direction:column;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+
+<aside class="sidebar">
+
+  <div class="brand">
+
+    <div class="logo">
+      <div class="logo-box">Z</div>
+      ZENSUS
+    </div>
+
+    <div class="lesson-label">
+      LESSON 07
+    </div>
+
+    <div class="lesson-name">
+      Django ORM
+    </div>
+
+  </div>
+
+
+  <nav class="nav">
+
+    <div class="nav-title">
+      Lesson Navigation
+    </div>
+
+    <a href="#overview">Overview</a>
+    <a href="#orm">What is ORM?</a>
+    <a href="#sql-vs-orm">SQL vs ORM</a>
+    <a href="#queryset">QuerySets</a>
+    <a href="#all">all()</a>
+    <a href="#get">get()</a>
+    <a href="#filter">filter()</a>
+    <a href="#exclude">exclude()</a>
+    <a href="#lookup">Field Lookups</a>
+    <a href="#ordering">Ordering</a>
+    <a href="#values">values()</a>
+    <a href="#create">Create Records</a>
+    <a href="#update">Update Records</a>
+    <a href="#delete">Delete Records</a>
+    <a href="#crud">CRUD</a>
+    <a href="#relationships">Relationships</a>
+    <a href="#aggregate">Aggregation</a>
+    <a href="#practice">Practice</a>
+    <a href="#mistakes">Common Mistakes</a>
+    <a href="#quiz">Quiz</a>
+    <a href="#takeaway">Takeaway</a>
+
+  </nav>
+
+</aside>
+
+
+<main class="main">
+
+  <div class="progress">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+
+  <!-- HERO -->
+
+  <header class="hero">
+
+    <div class="hero-inner">
+
+      <div class="breadcrumb">
+        DJANGO / LESSON 07
+      </div>
+
+      <h1>
+        Django <span>ORM</span>
+      </h1>
+
+      <p>
+        Learn how Django lets you create, read, update and delete
+        database records using Python instead of writing SQL for every
+        operation.
+      </p>
+
+      <div class="meta">
+
+        <span class="pill">
+          Lesson 07 of 15
+        </span>
+
+        <span class="pill">
+          Important
+        </span>
+
+        <span class="pill">
+          Django
+        </span>
+
+        <span class="pill">
+          Database
+        </span>
+
+        <span class="pill">
+          Python
+        </span>
+
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <div class="search-wrap">
+
+    <input
+      class="search"
+      id="searchInput"
+      type="text"
+      placeholder="Search this lesson... e.g. filter, QuerySet, get, create, update"
+    >
+
+  </div>
+
+
+  <div class="content">
+
+
+    <!-- 01 -->
+
+    <section class="section reveal" id="overview">
+
+      <div class="section-head">
+
+        <div class="number">
+          01
+        </div>
+
+        <div>
+          <h2>
+            Why Django ORM Matters
+          </h2>
+        </div>
+
+      </div>
+
+      <p>
+        In Lesson 06, you learned how Django models represent database
+        tables. Now we need a way to actually work with the records
+        stored in those tables.
+      </p>
+
+      <div class="info success">
+
+        <strong>
+          Django ORM allows you to work with database data using
+          Python objects and methods.
+        </strong>
+
+      </div>
+
+
+      <div class="orm-flow">
+
+        <div class="orm-box">
+
+          <div class="icon">
+            🐍
+          </div>
+
+          <strong>
+            Python Code
+          </strong>
+
+          <p>
+            Django model methods
+          </p>
+
+        </div>
+
+        <div class="orm-arrow">
+          →
+        </div>
+
+        <div class="orm-box">
+
+          <div class="icon">
+            ⚙️
+          </div>
+
+          <strong>
+            Django ORM
+          </strong>
+
+          <p>
+            Converts operations into database queries
+          </p>
+
+        </div>
+
+        <div class="orm-arrow">
+          →
+        </div>
+
+        <div class="orm-box">
+
+          <div class="icon">
+            🗄️
+          </div>
+
+          <strong>
+            Database
+          </strong>
+
+          <p>
+            Stores and returns records
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- 02 -->
+
+    <section class="section reveal" id="orm">
+
+      <div class="section-head">
+
+        <div class="number">
+          02
+        </div>
+
+        <div>
+          <h2>
+            What is ORM?
+          </h2>
+        </div>
+
+      </div>
+
+      <p>
+        ORM stands for:
+      </p>
+
+      <div class="info">
+
+        <strong>
+          Object-Relational Mapping
+        </strong>
+
+      </div>
+
+      <p>
+        It creates a connection between Python objects and relational
+        database data.
+      </p>
+
+
+      <div class="grid3">
+
+        <div class="query-card">
+
+          <div class="query-icon">
+            🐍
+          </div>
+
+          <h4>
+            Object
+          </h4>
+
+          <p>
+            A Python representation of a database record.
+          </p>
+
+        </div>
+
+
+        <div class="query-card">
+
+          <div class="query-icon">
+            🔗
+          </div>
+
+          <h4>
+            Mapping
+          </h4>
+
+          <p>
+            Django maps Python model objects to database structures.
+          </p>
+
+        </div>
+
+
+        <div class="query-card">
+
+          <div class="query-icon">
+            🗄️
+          </div>
+
+          <h4>
+            Relational Database
+          </h4>
+
+          <p>
+            Data is stored in tables, rows and columns.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="info success">
+
+        Instead of thinking only in terms of SQL tables,
+        you can work with your Django models directly.
+
+      </div>
+
+    </section>
+
+
+    <!-- 03 -->
+
+    <section class="section reveal" id="sql-vs-orm">
+
+      <div class="section-head">
+
+        <div class="number">
+          03
+        </div>
+
+        <div>
+          <h2>
+            SQL vs Django ORM
+          </h2>
+        </div>
+
+      </div>
+
+      <p>
+        Suppose we want all students whose course is Django.
+      </p>
+
+
+      <div class="tabs">
+
+        <button class="tab active" data-tab="orm-tab">
+          Django ORM
+        </button>
+
+        <button class="tab" data-tab="sql-tab">
+          SQL Concept
+        </button>
+
+      </div>
+
+
+      <div
+        class="tab-content active"
+        id="orm-tab"
+      >
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+
+            <span>
+              Django ORM
+            </span>
+
+            <button class="copy">
+              Copy
+            </button>
+
+          </div>
+
+<pre><code>Student.objects.filter(
+    course="Django"
+)</code></pre>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="tab-content"
+        id="sql-tab"
+      >
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+
+            <span>
+              SQL concept
+            </span>
+
+            <button class="copy">
+              Copy
+            </button>
+
+          </div>
+
+<pre><code>SELECT *
+FROM student
+WHERE course = 'Django';</code></pre>
+
+        </div>
+
+      </div>
+
+
+      <div class="info">
+
+        Django ORM does not mean SQL disappears from existence.
+        Django generates database queries behind the scenes.
+
+      </div>
+
+    </section>
+
+
+    <!-- 04 -->
+
+    <section class="section reveal" id="queryset">
+
+      <div class="section-head">
+
+        <div class="number">
+          04
+        </div>
+
+        <div>
+          <h2>
+            What is a QuerySet?
+          </h2>
+        </div>
+
+      </div>
+
+      <p>
+        A QuerySet is a collection of database query results that can
+        be further filtered, ordered and processed.
+      </p>
+
+
+      <div class="info">
+
+        <strong>
+          QuerySet = a Django object representing a collection of
+          database records.
+        </strong>
+
+      </div>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            Example
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>students = Student.objects.all()</code></pre>
+
+      </div>
+
+
+      <div class="database">
+
+        <div class="db-title">
+          Student QuerySet
+        </div>
+
+        <div class="db-row">
+
+          <div class="db-cell db-header">
+            ID
+          </div>
+
+          <div class="db-cell db-header">
+            Name
+          </div>
+
+          <div class="db-cell db-header">
+            Course
+          </div>
+
+          <div class="db-cell db-header">
+            Age
+          </div>
+
+        </div>
+
+        <div class="db-row">
+
+          <div class="db-cell">
+            1
+          </div>
+
+          <div class="db-cell">
+            Pradeep
+          </div>
+
+          <div class="db-cell">
+            Django
+          </div>
+
+          <div class="db-cell">
+            21
+          </div>
+
+        </div>
+
+        <div class="db-row">
+
+          <div class="db-cell">
+            2
+          </div>
+
+          <div class="db-cell">
+            Rahul
+          </div>
+
+          <div class="db-cell">
+            Python
+          </div>
+
+          <div class="db-cell">
+            22
+          </div>
+
+        </div>
+
+        <div class="db-row">
+
+          <div class="db-cell">
+            3
+          </div>
+
+          <div class="db-cell">
+            Anjali
+          </div>
+
+          <div class="db-cell">
+            Django
+          </div>
+
+          <div class="db-cell">
+            20
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- 05 -->
+
+    <section class="section reveal" id="all">
+
+      <div class="section-head">
+
+        <div class="number">
+          05
+        </div>
+
+        <div>
+          <h2>
+            all() — Get All Records
+          </h2>
+        </div>
+
+      </div>
+
+      <p>
+        The <code>all()</code> method returns a QuerySet containing
+        all records for that model.
+      </p>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            Python
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>students = Student.objects.all()
+
+for student in students:
+    print(student.name)</code></pre>
+
+      </div>
+
+
+      <div class="info success">
+
+        <strong>
+          Student.objects
+        </strong>
+        is the model manager.
+
+        <br>
+
+        <strong>
+          .all()
+        </strong>
+        asks Django for all records.
+
+      </div>
+
+    </section>
+
+
+    <!-- 06 -->
+
+    <section class="section reveal" id="get">
+
+      <div class="section-head">
+
+        <div class="number">
+          06
+        </div>
+
+        <div>
+          <h2>
+            get() — Get One Record
+          </h2>
+        </div>
+
+      </div>
+
+      <p>
+        Use <code>get()</code> when you expect exactly one matching
+        object.
+      </p>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            Python
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>student = Student.objects.get(
+    id=1
+)
+
+print(student.name)</code></pre>
+
+      </div>
+
+
+      <div class="info warning">
+
+        <strong>
+          Important:
+        </strong>
+
+        <code>get()</code> expects one matching record.
+
+        <br><br>
+
+        If no matching object exists, Django raises
+        <code>DoesNotExist</code>.
+
+        <br><br>
+
+        If multiple objects match, Django raises
+        <code>MultipleObjectsReturned</code>.
+
+      </div>
+
+    </section>
+
+
+    <!-- 07 -->
+
+    <section class="section reveal" id="filter">
+
+      <div class="section-head">
+
+        <div class="number">
+          07
+        </div>
+
+        <div>
+          <h2>
+            filter() — Find Matching Records
+          </h2>
+        </div>
+
+      </div>
+
+      <p>
+        The <code>filter()</code> method returns all records that
+        match the given conditions.
+      </p>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            Filter by course
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>students = Student.objects.filter(
+    course="Django"
+)</code></pre>
+
+      </div>
+
+
+      <h3>
+        Multiple conditions
+      </h3>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            Multiple filters
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>students = Student.objects.filter(
+    course="Django",
+    age=21
+)</code></pre>
+
+      </div>
+
+
+      <div class="info success">
+
+        Unlike <code>get()</code>, <code>filter()</code> can return
+        zero, one or many records.
+
+      </div>
+
+    </section>
+
+
+    <!-- 08 -->
+
+    <section class="section reveal" id="exclude">
+
+      <div class="section-head">
+
+        <div class="number">
+          08
+        </div>
+
+        <div>
+          <h2>
+            exclude() — Remove Matching Records
+          </h2>
+        </div>
+
+      </div>
+
+      <p>
+        The <code>exclude()</code> method returns records that do
+        not match the specified condition.
+      </p>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            Python
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>students = Student.objects.exclude(
+    course="Django"
+)</code></pre>
+
+      </div>
+
+
+      <div class="info">
+
+        Example:
+
+        <br><br>
+
+        If your database contains Django, Python and AI students,
+        this query returns the students who are not enrolled in
+        Django.
+
+      </div>
+
+    </section>
+
+
+    <!-- 09 -->
+
+    <section class="section reveal" id="lookup">
+
+      <div class="section-head">
+
+        <div class="number">
+          09
+        </div>
+
+        <div>
+          <h2>
+            Field Lookups
+          </h2>
+        </div>
+
+      </div>
+
+      <p>
+        Django provides lookup expressions for more powerful
+        filtering.
+      </p>
+
+
+      <div class="grid3">
+
+        <div class="mini-card">
+
+          <h4>
+            Exact
+          </h4>
+
+          <p>
+            Exact value match.
+          </p>
+
+          <code>
+            name__exact="Pradeep"
+          </code>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            Contains
+          </h4>
+
+          <p>
+            Checks whether text contains a value.
+          </p>
+
+          <code>
+            name__contains="Pra"
+          </code>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            Starts With
+          </h4>
+
+          <p>
+            Checks beginning of text.
+          </p>
+
+          <code>
+            name__startswith="P"
+          </code>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            Greater Than
+          </h4>
+
+          <p>
+            Finds values greater than another value.
+          </p>
+
+          <code>
+            age__gt=20
+          </code>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            Less Than
+          </h4>
+
+          <p>
+            Finds values below another value.
+          </p>
+
+          <code>
+            age__lt=25
+          </code>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            Range
+          </h4>
+
+          <p>
+            Finds values inside a range.
+          </p>
+
+          <code>
+            age__range=(18,25)
+          </code>
+
+        </div>
+
+      </div>
+
+
+      <h3>
+        Example
+      </h3>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            QuerySet
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>students = Student.objects.filter(
+    age__gte=18
+)</code></pre>
+
+      </div>
+
+
+      <p>
+        <code>gte</code> means greater than or equal to.
+      </p>
+
+    </section>
+
+
+    <!-- 10 -->
+
+    <section class="section reveal" id="ordering">
+
+      <div class="section-head">
+
+        <div class="number">
+          10
+        </div>
+
+        <div>
+          <h2>
+            Ordering Query Results
+          </h2>
+        </div>
+
+      </div>
+
+      <p>
+        Use <code>order_by()</code> when you want records in a
+        particular order.
+      </p>
+
+
+      <h3>
+        Ascending order
+      </h3>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            Python
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>students = Student.objects.order_by(
+    "name"
+)</code></pre>
+
+      </div>
+
+
+      <h3>
+        Descending order
+      </h3>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            Python
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>students = Student.objects.order_by(
+    "-age"
+)</code></pre>
+
+      </div>
+
+
+      <div class="info">
+
+        The minus sign <code>-</code> before a field means descending
+        order.
+
+      </div>
+
+    </section>
+
+
+    <!-- 11 -->
+
+    <section class="section reveal" id="values">
+
+      <div class="section-head">
+
+        <div class="number">
+          11
+        </div>
+
+        <div>
+          <h2>
+            values()
+          </h2>
+        </div>
+
+      </div>
+
+      <p>
+        Sometimes you do not need complete model objects.
+        You only need selected fields.
+      </p>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            Python
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>students = Student.objects.values(
+    "name",
+    "course"
+)</code></pre>
+
+      </div>
+
+
+      <div class="info">
+
+        <code>values()</code> returns dictionary-like data containing
+        the fields you requested.
+
+      </div>
+
+    </section>
+
+
+    <!-- 12 -->
+
+    <section class="section reveal" id="create">
+
+      <div class="section-head">
+
+        <div class="number">
+          12
+        </div>
+
+        <div>
+          <h2>
+            Creating Records
+          </h2>
+        </div>
+
+      </div>
+
+      <p>
+        ORM can create database records directly through your model.
+      </p>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            create()
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>student = Student.objects.create(
+
+    name="Pradeep",
+
+    email="pradeep@example.com",
+
+    age=21,
+
+    course="Django"
+
+)</code></pre>
+
+      </div>
+
+
+      <div class="info success">
+
+        <code>create()</code> creates the object and saves it to
+        the database.
+
+      </div>
+
+
+      <h3>
+        Alternative approach
+      </h3>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            save()
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>student = Student(
+    name="Pradeep",
+    email="pradeep@example.com",
+    age=21,
+    course="Django"
+)
+
+student.save()</code></pre>
+
+      </div>
+
+
+      <div class="info">
+
+        Both approaches can create records. The
+        <code>save()</code> approach is useful when you want to
+        modify the object before saving it.
+
+      </div>
+
+    </section>
+
+
+    <!-- 13 -->
+
+    <section class="section reveal" id="update">
+
+      <div class="section-head">
+
+        <div class="number">
+          13
+        </div>
+
+        <div>
+          <h2>
+            Updating Records
+          </h2>
+        </div>
+
+      </div>
+
+
+      <h3>
+        Update one object
+      </h3>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            Python
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>student = Student.objects.get(
+    id=1
+)
+
+student.course = "Python"
+
+student.save()</code></pre>
+
+      </div>
+
+
+      <h3>
+        Update multiple records
+      </h3>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            QuerySet update
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>Student.objects.filter(
+    course="Python"
+).update(
+    active=False
+)</code></pre>
+
+      </div>
+
+
+      <div class="info warning">
+
+        Be careful when updating a QuerySet. If your filter matches
+        many records, all matching records can be changed.
+
+      </div>
+
+    </section>
+
+
+    <!-- 14 -->
+
+    <section class="section reveal" id="delete">
+
+      <div class="section-head">
+
+        <div class="number">
+          14
+        </div>
+
+        <div>
+          <h2>
+            Deleting Records
+          </h2>
+        </div>
+
+      </div>
+
+
+      <h3>
+        Delete one object
+      </h3>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            Python
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>student = Student.objects.get(
+    id=1
+)
+
+student.delete()</code></pre>
+
+      </div>
+
+
+      <h3>
+        Delete matching records
+      </h3>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            QuerySet delete
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>Student.objects.filter(
+    active=False
+).delete()</code></pre>
+
+      </div>
+
+
+      <div class="info danger">
+
+        Always check your filter before using
+        <code>delete()</code>.
+
+        <br><br>
+
+        A broad filter can remove more records than intended.
+
+      </div>
+
+    </section>
+
+
+    <!-- 15 -->
+
+    <section class="section reveal" id="crud">
+
+      <div class="section-head">
+
+        <div class="number">
+          15
+        </div>
+
+        <div>
+          <h2>
+            CRUD with Django ORM
+          </h2>
+        </div>
+
+      </div>
+
+      <p>
+        CRUD represents the four fundamental database operations.
+      </p>
+
+
+      <div class="crud">
+
+        <div class="crud-item">
+
+          <div class="crud-letter">
+            C
+          </div>
+
+          <strong>
+            Create
+          </strong>
+
+          <span>
+            Add new records
+          </span>
+
+        </div>
+
+
+        <div class="crud-item">
+
+          <div class="crud-letter">
+            R
+          </div>
+
+          <strong>
+            Read
+          </strong>
+
+          <span>
+            Retrieve records
+          </span>
+
+        </div>
+
+
+        <div class="crud-item">
+
+          <div class="crud-letter">
+            U
+          </div>
+
+          <strong>
+            Update
+          </strong>
+
+          <span>
+            Modify records
+          </span>
+
+        </div>
+
+
+        <div class="crud-item">
+
+          <div class="crud-letter">
+            D
+          </div>
+
+          <strong>
+            Delete
+          </strong>
+
+          <span>
+            Remove records
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="info success">
+
+        Once you understand these four operations, you can build
+        many database-driven Django applications.
+
+      </div>
+
+    </section>
+
+
+    <!-- 16 -->
+
+    <section class="section reveal" id="relationships">
+
+      <div class="section-head">
+
+        <div class="number">
+          16
+        </div>
+
+        <div>
+          <h2>
+            ORM and Relationships
+          </h2>
+        </div>
+
+      </div>
+
+      <p>
+        ORM becomes especially powerful when models are connected
+        through relationships.
+      </p>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            Models
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>class Course(models.Model):
+
+    name = models.CharField(
+        max_length=100
+    )
+
+
+class Student(models.Model):
+
+    name = models.CharField(
+        max_length=100
+    )
+
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE
+    )</code></pre>
+
+      </div>
+
+
+      <h3>
+        Get students of a particular course
+      </h3>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            Related query
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>students = Student.objects.filter(
+    course=course
+)</code></pre>
+
+      </div>
+
+
+      <div class="info">
+
+        More advanced relationship queries will become easier after
+        you understand models, QuerySets and field lookups.
+
+      </div>
+
+    </section>
+
+
+    <!-- 17 -->
+
+    <section class="section reveal" id="aggregate">
+
+      <div class="section-head">
+
+        <div class="number">
+          17
+        </div>
+
+        <div>
+          <h2>
+            Aggregation
+          </h2>
+        </div>
+
+      </div>
+
+      <p>
+        Django ORM can also perform calculations such as counting,
+        averaging, finding maximum values and minimum values.
+      </p>
+
+
+      <div class="grid3">
+
+        <div class="mini-card">
+
+          <h4>
+            Count
+          </h4>
+
+          <code>
+            .count()
+          </code>
+
+          <p>
+            Counts records.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            Average
+          </h4>
+
+          <code>
+            Avg()
+          </code>
+
+          <p>
+            Calculates an average.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            Maximum
+          </h4>
+
+          <code>
+            Max()
+          </code>
+
+          <p>
+            Finds the largest value.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            Minimum
+          </h4>
+
+          <code>
+            Min()
+          </code>
+
+          <p>
+            Finds the smallest value.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            Sum
+          </h4>
+
+          <code>
+            Sum()
+          </code>
+
+          <p>
+            Calculates a total.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <h3>
+        Example — Count Students
+      </h3>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            Python
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>total_students = Student.objects.count()
+
+print(total_students)</code></pre>
+
+      </div>
+
+    </section>
+
+
+    <!-- 18 PRACTICE -->
+
+    <section class="section reveal" id="practice">
+
+      <div class="section-head">
+
+        <div class="number">
+          18
+        </div>
+
+        <div>
+          <h2>
+            Hands-On Practice — ZENSUS Student Database
+          </h2>
+        </div>
+
+      </div>
+
+
+      <div class="challenge">
+
+        <div class="challenge-title">
+
+          <div class="challenge-icon">
+            🚀
+          </div>
+
+          <h3 style="margin:0;">
+            Build a Mini ORM Practice
+          </h3>
+
+        </div>
+
+
+        <p>
+          Assume you already created the Student model from Lesson 06.
+          Now practice the following operations.
+        </p>
+
+
+        <h3>
+          1. Create a student
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+
+            <span>
+              Create
+            </span>
+
+            <button class="copy">
+              Copy
+            </button>
+
+          </div>
+
+<pre><code>Student.objects.create(
+    name="Pradeep",
+    email="pradeep@example.com",
+    age=21,
+    course="Django"
+)</code></pre>
+
+        </div>
+
+
+        <h3>
+          2. Get all students
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+
+            <span>
+              Read
+            </span>
+
+            <button class="copy">
+              Copy
+            </button>
+
+          </div>
+
+<pre><code>students = Student.objects.all()
+
+for student in students:
+    print(student.name)</code></pre>
+
+        </div>
+
+
+        <h3>
+          3. Find Django students
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+
+            <span>
+              Filter
+            </span>
+
+            <button class="copy">
+              Copy
+            </button>
+
+          </div>
+
+<pre><code>students = Student.objects.filter(
+    course="Django"
+)</code></pre>
+
+        </div>
+
+
+        <h3>
+          4. Find students older than 20
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+
+            <span>
+              Lookup
+            </span>
+
+            <button class="copy">
+              Copy
+            </button>
+
+          </div>
+
+<pre><code>students = Student.objects.filter(
+    age__gt=20
+)</code></pre>
+
+        </div>
+
+
+        <h3>
+          5. Count students
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+
+            <span>
+              Count
+            </span>
+
+            <button class="copy">
+              Copy
+            </button>
+
+          </div>
+
+<pre><code>total = Student.objects.count()
+
+print(total)</code></pre>
+
+        </div>
+
+
+        <div class="info success">
+
+          <strong>
+            Challenge:
+          </strong>
+
+          Try writing ORM queries to:
+
+          <br><br>
+
+          • Find students whose names contain "a"
+
+          <br>
+
+          • Find students between ages 18 and 25
+
+          <br>
+
+          • Sort students by age
+
+          <br>
+
+          • Find students who are not studying Django
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- 19 MISTAKES -->
+
+    <section class="section reveal" id="mistakes">
+
+      <div class="section-head">
+
+        <div class="number">
+          19
+        </div>
+
+        <div>
+          <h2>
+            Common ORM Mistakes
+          </h2>
+        </div>
+
+      </div>
+
+
+      <div class="grid2">
+
+        <div class="mini-card">
+
+          <h4>
+            ❌ Confusing get() and filter()
+          </h4>
+
+          <p>
+            Use get() when you expect one object. Use filter() when
+            multiple matching objects are possible.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            ❌ Forgetting objects
+          </h4>
+
+          <p>
+            Queries usually begin with the model manager,
+            such as Student.objects.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            ❌ Wrong lookup syntax
+          </h4>
+
+          <p>
+            Django lookups use double underscores, such as
+            age__gt or name__contains.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            ❌ Dangerous delete()
+          </h4>
+
+          <p>
+            Check your filter carefully before deleting QuerySets.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            ❌ Forgetting migrations
+          </h4>
+
+          <p>
+            Model changes and database structure changes should be
+            handled through migrations.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            ❌ Expecting get() to return a list
+          </h4>
+
+          <p>
+            get() returns one model object, not a QuerySet.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="info warning">
+
+        <strong>
+          Important habit:
+        </strong>
+
+        When writing a database query, first ask:
+
+        <br><br>
+
+        "Do I need one object, many objects, or only specific fields?"
+
+      </div>
+
+    </section>
+
+
+    <!-- 20 QUIZ -->
+
+    <section class="section reveal" id="quiz">
+
+      <div class="section-head">
+
+        <div class="number">
+          20
+        </div>
+
+        <div>
+          <h2>
+            Quick Knowledge Check
+          </h2>
+        </div>
+
+      </div>
+
+
+      <div class="quiz">
+
+        <h3 style="margin-top:0;">
+          1. What does ORM stand for?
+        </h3>
+
+        <button class="option" data-answer="wrong">
+          A. Object Runtime Model
+        </button>
+
+        <button class="option" data-answer="correct">
+          B. Object-Relational Mapping
+        </button>
+
+        <button class="option" data-answer="wrong">
+          C. Online Record Manager
+        </button>
+
+        <button class="option" data-answer="wrong">
+          D. Object Request Method
+        </button>
+
+        <div class="quiz-result"></div>
+
+      </div>
+
+
+      <div class="quiz">
+
+        <h3 style="margin-top:0;">
+          2. Which method retrieves all records?
+        </h3>
+
+        <button class="option" data-answer="correct">
+          A. all()
+        </button>
+
+        <button class="option" data-answer="wrong">
+          B. get()
+        </button>
+
+        <button class="option" data-answer="wrong">
+          C. one()
+        </button>
+
+        <button class="option" data-answer="wrong">
+          D. fetch()
+        </button>
+
+        <div class="quiz-result"></div>
+
+      </div>
+
+
+      <div class="quiz">
+
+        <h3 style="margin-top:0;">
+          3. Which method is normally used to retrieve one matching object?
+        </h3>
+
+        <button class="option" data-answer="wrong">
+          A. all()
+        </button>
+
+        <button class="option" data-answer="correct">
+          B. get()
+        </button>
+
+        <button class="option" data-answer="wrong">
+          C. values()
+        </button>
+
+        <button class="option" data-answer="wrong">
+          D. exclude()
+        </button>
+
+        <div class="quiz-result"></div>
+
+      </div>
+
+
+      <div class="quiz">
+
+        <h3 style="margin-top:0;">
+          4. Which method finds records matching conditions?
+        </h3>
+
+        <button class="option" data-answer="wrong">
+          A. search()
+        </button>
+
+        <button class="option" data-answer="correct">
+          B. filter()
+        </button>
+
+        <button class="option" data-answer="wrong">
+          C. match()
+        </button>
+
+        <button class="option" data-answer="wrong">
+          D. find()
+        </button>
+
+        <div class="quiz-result"></div>
+
+      </div>
+
+
+      <div class="quiz">
+
+        <h3 style="margin-top:0;">
+          5. Which symbol makes order_by() descending?
+        </h3>
+
+        <button class="option" data-answer="wrong">
+          A. +
+        </button>
+
+        <button class="option" data-answer="correct">
+          B. -
+        </button>
+
+        <button class="option" data-answer="wrong">
+          C. *
+        </button>
+
+        <button class="option" data-answer="wrong">
+          D. #
+        </button>
+
+        <div class="quiz-result"></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- 21 TAKEAWAY -->
+
+    <section class="section reveal" id="takeaway">
+
+      <div class="section-head">
+
+        <div class="number">
+          21
+        </div>
+
+        <div>
+          <h2>
+            Lesson Takeaway
+          </h2>
+        </div>
+
+      </div>
+
+
+      <div class="card">
+
+        <h3>
+          Remember the ORM flow
+        </h3>
+
+
+        <div class="pipeline">
+
+          <div class="pipe-card">
+
+            <div class="pipe-icon">
+              🐍
+            </div>
+
+            <strong>
+              Model
+            </strong>
+
+            <small>
+              Student
+            </small>
+
+          </div>
+
+          <div class="arrow">
+            →
+          </div>
+
+          <div class="pipe-card">
+
+            <div class="pipe-icon">
+              🔎
+            </div>
+
+            <strong>
+              ORM Query
+            </strong>
+
+            <small>
+              filter / get / all
+            </small>
+
+          </div>
+
+          <div class="arrow">
+            →
+          </div>
+
+          <div class="pipe-card">
+
+            <div class="pipe-icon">
+              🗄️
+            </div>
+
+            <strong>
+              Database
+            </strong>
+
+            <small>
+              Data
+            </small>
+
+          </div>
+
+          <div class="arrow">
+            →
+          </div>
+
+          <div class="pipe-card">
+
+            <div class="pipe-icon">
+              📦
+            </div>
+
+            <strong>
+              QuerySet / Object
+            </strong>
+
+            <small>
+              Result
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <div class="info success">
+
+          <strong>
+            The most important ORM methods:
+          </strong>
+
+          <br><br>
+
+          <code>all()</code> → get all records
+
+          <br>
+
+          <code>get()</code> → get one object
+
+          <br>
+
+          <code>filter()</code> → get matching records
+
+          <br>
+
+          <code>exclude()</code> → remove matching conditions
+
+          <br>
+
+          <code>order_by()</code> → sort records
+
+          <br>
+
+          <code>values()</code> → select specific fields
+
+          <br>
+
+          <code>create()</code> → create a record
+
+          <br>
+
+          <code>update()</code> → modify records
+
+          <br>
+
+          <code>delete()</code> → remove records
+
+        </div>
+
+
+        <p>
+          In the next lesson, we will learn how Django Forms allow
+          users to safely submit and validate data.
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- FOOTER -->
+
+    <div class="lesson-footer">
+
+      <button
+        class="footer-btn"
+        onclick="alert('Previous lesson: Models & Migrations')"
+      >
+        ← Lesson 06: Models & Migrations
+      </button>
+
+      <button
+        class="footer-btn primary"
+        onclick="alert('Next lesson: Forms & Validation')"
+      >
+        Lesson 08: Forms & Validation →
+      </button>
+
+    </div>
+
+  </div>
+
+</main>
+
+
+<script>
+
+/* =========================
+   PROGRESS
+========================= */
+
+const progressBar =
+  document.getElementById("progressBar");
+
+window.addEventListener("scroll", () => {
+
+  const scrollTop =
+    window.scrollY;
+
+  const height =
+    document.documentElement.scrollHeight -
+    document.documentElement.clientHeight;
+
+  const progress =
+    height > 0
+      ? (scrollTop / height) * 100
+      : 0;
+
+  progressBar.style.width =
+    progress + "%";
+
+});
+
+
+/* =========================
+   COPY BUTTONS
+========================= */
+
+document.querySelectorAll(".copy")
+.forEach(button => {
+
+  button.addEventListener("click", async () => {
+
+    const code =
+      button.parentElement
+      .nextElementSibling
+      .innerText;
+
+    try{
+
+      await navigator.clipboard.writeText(code);
+
+      const old =
+        button.innerText;
+
+      button.innerText =
+        "Copied!";
+
+      setTimeout(() => {
+        button.innerText = old;
+      },1200);
+
+    }catch{
+
+      button.innerText =
+        "Copy failed";
+
+      setTimeout(() => {
+        button.innerText =
+          "Copy";
+      },1200);
+
+    }
+
+  });
+
+});
+
+
+/* =========================
+   REVEAL
+========================= */
+
+const revealItems =
+  document.querySelectorAll(".reveal");
+
+const revealObserver =
+  new IntersectionObserver(
+    entries => {
+
+      entries.forEach(entry => {
+
+        if(entry.isIntersecting){
+
+          entry.target
+            .classList
+            .add("show");
+
+        }
+
+      });
+
+    },
+    {
+      threshold:.08
+    }
+  );
+
+revealItems.forEach(item => {
+  revealObserver.observe(item);
+});
+
+
+/* =========================
+   ACTIVE NAV
+========================= */
+
+const sections =
+  document.querySelectorAll(".section");
+
+const navLinks =
+  document.querySelectorAll(".nav a");
+
+const navObserver =
+  new IntersectionObserver(
+    entries => {
+
+      entries.forEach(entry => {
+
+        if(entry.isIntersecting){
+
+          navLinks.forEach(link => {
+            link.classList.remove("active");
+          });
+
+          const active =
+            document.querySelector(
+              '.nav a[href="#' +
+              entry.target.id +
+              '"]'
+            );
+
+          if(active){
+            active.classList.add("active");
+          }
+
+        }
+
+      });
+
+    },
+    {
+      rootMargin:"-25% 0px -65% 0px"
+    }
+  );
+
+sections.forEach(section => {
+  navObserver.observe(section);
+});
+
+
+/* =========================
+   SEARCH
+========================= */
+
+const searchInput =
+  document.getElementById("searchInput");
+
+searchInput.addEventListener(
+  "input",
+  () => {
+
+    const query =
+      searchInput.value
+      .trim()
+      .toLowerCase();
+
+    sections.forEach(section => {
+
+      const text =
+        section.innerText.toLowerCase();
+
+      if(
+        !query ||
+        text.includes(query)
+      ){
+
+        section.classList
+          .remove("hidden");
+
+      }else{
+
+        section.classList
+          .add("hidden");
+
+      }
+
+    });
+
+  }
+);
+
+
+/* =========================
+   TABS
+========================= */
+
+document.querySelectorAll(".tab")
+.forEach(tab => {
+
+  tab.addEventListener("click", () => {
+
+    const group =
+      tab.parentElement;
+
+    group.querySelectorAll(".tab")
+      .forEach(btn => {
+        btn.classList.remove("active");
+      });
+
+    tab.classList.add("active");
+
+    const target =
+      tab.dataset.tab;
+
+    document.querySelectorAll(".tab-content")
+      .forEach(content => {
+
+        content.classList.remove("active");
+
+      });
+
+    const selected =
+      document.getElementById(target);
+
+    if(selected){
+      selected.classList.add("active");
+    }
+
+  });
+
+});
+
+
+/* =========================
+   QUIZ
+========================= */
+
+document.querySelectorAll(".quiz")
+.forEach(quiz => {
+
+  const options =
+    quiz.querySelectorAll(".option");
+
+  const result =
+    quiz.querySelector(".quiz-result");
+
+  options.forEach(option => {
+
+    option.addEventListener(
+      "click",
+      () => {
+
+        options.forEach(btn => {
+
+          btn.classList.remove(
+            "correct",
+            "wrong"
+          );
+
+        });
+
+        if(
+          option.dataset.answer ===
+          "correct"
+        ){
+
+          option.classList.add(
+            "correct"
+          );
+
+          result.innerText =
+            "✓ Correct! Excellent.";
+
+        }else{
+
+          option.classList.add(
+            "wrong"
+          );
+
+          result.innerText =
+            "✗ Not quite. Try again.";
+
+        }
+
+      }
+    );
+
+  });
+
+});
+
+
+/* =========================
+   NAVIGATION
+========================= */
+
+document.querySelectorAll(".nav a")
+.forEach(link => {
+
+  link.addEventListener(
+    "click",
+    event => {
+
+      event.preventDefault();
+
+      const target =
+        document.querySelector(
+          link.getAttribute("href")
+        );
+
+      if(target){
+
+        target.scrollIntoView({
+          behavior:"smooth",
+          block:"start"
+        });
+
+      }
+
+    }
+  );
+
+});
+
+</script>
+
+</body>
+</html>

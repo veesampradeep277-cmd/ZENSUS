@@ -1,0 +1,4765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS | Lesson 13 - Inheritance in C++</title>
+
+<style>
+/* =========================================================
+   ZENSUS LESSON 13 — INHERITANCE
+   Standalone CSS
+========================================================= */
+
+:root{
+    --primary:#2563eb;
+    --primary-dark:#1d4ed8;
+    --secondary:#7c3aed;
+    --success:#16a34a;
+    --warning:#d97706;
+    --danger:#dc2626;
+
+    --bg:#f7f9fc;
+    --surface:#ffffff;
+    --surface-2:#f1f5f9;
+    --border:#e2e8f0;
+
+    --text:#0f172a;
+    --muted:#64748b;
+    --code-bg:#0b1220;
+    --code-text:#e2e8f0;
+
+    --sidebar:280px;
+    --header:72px;
+
+    --shadow:0 10px 30px rgba(15,23,42,.07);
+    --shadow-lg:0 20px 50px rgba(15,23,42,.10);
+
+    --radius:18px;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+    scroll-padding-top:90px;
+}
+
+body{
+    font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+/* =========================
+   SCROLL PROGRESS
+========================= */
+
+.progress-bar{
+    position:fixed;
+    top:0;
+    left:0;
+    width:0;
+    height:4px;
+    background:linear-gradient(90deg,var(--primary),var(--secondary));
+    z-index:9999;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    width:var(--sidebar);
+    height:100vh;
+    background:#fff;
+    border-right:1px solid var(--border);
+    overflow-y:auto;
+    z-index:1000;
+}
+
+.brand{
+    height:var(--header);
+    display:flex;
+    align-items:center;
+    padding:0 24px;
+    border-bottom:1px solid var(--border);
+}
+
+.brand-logo{
+    width:40px;
+    height:40px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,var(--primary),var(--secondary));
+    color:#fff;
+    font-weight:900;
+    font-size:18px;
+}
+
+.brand-text{
+    margin-left:12px;
+    font-size:20px;
+    font-weight:900;
+    letter-spacing:.5px;
+}
+
+.lesson-label{
+    padding:20px 24px 10px;
+    font-size:11px;
+    font-weight:800;
+    color:#94a3b8;
+    text-transform:uppercase;
+    letter-spacing:1.3px;
+}
+
+.sidebar nav a{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    margin:3px 12px;
+    padding:10px 13px;
+    color:#64748b;
+    text-decoration:none;
+    font-size:13px;
+    font-weight:650;
+    border-radius:10px;
+    transition:.2s ease;
+}
+
+.sidebar nav a:hover{
+    color:var(--primary);
+    background:#eff6ff;
+}
+
+.sidebar nav a.active{
+    color:var(--primary);
+    background:#eff6ff;
+    font-weight:800;
+}
+
+.nav-number{
+    width:23px;
+    height:23px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:7px;
+    background:#f1f5f9;
+    font-size:10px;
+    font-weight:800;
+}
+
+.active .nav-number{
+    background:var(--primary);
+    color:#fff;
+}
+
+.sidebar-footer{
+    padding:20px;
+    margin-top:20px;
+    border-top:1px solid var(--border);
+}
+
+.progress-card{
+    padding:16px;
+    border-radius:14px;
+    background:#f8fafc;
+    border:1px solid var(--border);
+}
+
+.progress-card-title{
+    font-size:12px;
+    font-weight:800;
+    margin-bottom:9px;
+}
+
+.progress-track{
+    height:7px;
+    border-radius:20px;
+    background:#e2e8f0;
+    overflow:hidden;
+}
+
+.progress-fill{
+    width:0%;
+    height:100%;
+    background:linear-gradient(90deg,var(--primary),var(--secondary));
+    transition:.5s;
+}
+
+.progress-small{
+    margin-top:8px;
+    color:var(--muted);
+    font-size:11px;
+}
+
+/* =========================
+   MAIN
+========================= */
+
+.main{
+    margin-left:var(--sidebar);
+    min-height:100vh;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.topbar{
+    position:sticky;
+    top:0;
+    height:var(--header);
+    background:rgba(255,255,255,.94);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 34px;
+    z-index:900;
+}
+
+.topbar-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.menu-btn{
+    display:none;
+    border:0;
+    background:#eff6ff;
+    color:var(--primary);
+    width:40px;
+    height:40px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:20px;
+}
+
+.breadcrumb{
+    color:var(--muted);
+    font-size:13px;
+}
+
+.breadcrumb strong{
+    color:var(--text);
+}
+
+.top-actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.badge{
+    padding:7px 11px;
+    border-radius:30px;
+    font-size:11px;
+    font-weight:800;
+    background:#eff6ff;
+    color:var(--primary);
+}
+
+/* =========================
+   CONTENT
+========================= */
+
+.content{
+    max-width:1200px;
+    margin:auto;
+    padding:42px 38px 80px;
+}
+
+.section{
+    margin-top:70px;
+    scroll-margin-top:90px;
+}
+
+.section:first-child{
+    margin-top:0;
+}
+
+.section-title{
+    font-size:30px;
+    line-height:1.25;
+    margin-bottom:10px;
+    letter-spacing:-.5px;
+}
+
+.section-subtitle{
+    color:var(--muted);
+    margin-bottom:28px;
+}
+
+.kicker{
+    color:var(--primary);
+    font-size:12px;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+    margin-bottom:9px;
+}
+
+/* =========================
+   HERO
+========================= */
+
+.hero{
+    padding:38px;
+    border:1px solid var(--border);
+    border-radius:26px;
+    background:#fff;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    position:relative;
+}
+
+.hero::after{
+    content:"";
+    position:absolute;
+    width:330px;
+    height:330px;
+    right:-160px;
+    top:-160px;
+    border-radius:50%;
+    background:#eff6ff;
+}
+
+.hero h1{
+    position:relative;
+    z-index:1;
+    font-size:clamp(38px,5vw,65px);
+    line-height:1.05;
+    letter-spacing:-2.5px;
+    max-width:780px;
+}
+
+.hero h1 span{
+    color:var(--primary);
+    font-weight:900;
+}
+
+.hero p{
+    position:relative;
+    z-index:1;
+    max-width:750px;
+    margin-top:18px;
+    color:var(--muted);
+    font-size:16px;
+}
+
+.hero-badges{
+    position:relative;
+    z-index:1;
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    margin-top:23px;
+}
+
+.hero-badge{
+    padding:8px 12px;
+    background:#f8fafc;
+    border:1px solid var(--border);
+    border-radius:30px;
+    font-size:11px;
+    font-weight:800;
+}
+
+.hero-code{
+    position:relative;
+    z-index:1;
+    margin-top:30px;
+}
+
+/* =========================
+   GRID / CARDS
+========================= */
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+}
+
+.grid-3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:24px;
+    box-shadow:var(--shadow);
+}
+
+.card h3{
+    font-size:19px;
+    margin-bottom:8px;
+}
+
+.card h4{
+    font-size:15px;
+    margin-bottom:7px;
+}
+
+.card p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+.card ul{
+    padding-left:20px;
+    color:var(--muted);
+    font-size:14px;
+}
+
+.card li{
+    margin:5px 0;
+}
+
+.icon-box{
+    width:45px;
+    height:45px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:12px;
+    background:#eff6ff;
+    color:var(--primary);
+    font-weight:900;
+    margin-bottom:15px;
+    font-size:18px;
+}
+
+/* =========================
+   CODE
+========================= */
+
+.code-box{
+    background:var(--code-bg);
+    border-radius:15px;
+    overflow:hidden;
+    border:1px solid #1e293b;
+    margin:18px 0;
+    box-shadow:0 12px 30px rgba(2,6,23,.14);
+}
+
+.code-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 14px;
+    background:#111827;
+    border-bottom:1px solid #1e293b;
+}
+
+.code-title{
+    color:#cbd5e1;
+    font-size:11px;
+    font-weight:800;
+}
+
+.copy-btn{
+    border:0;
+    background:#1e293b;
+    color:#cbd5e1;
+    padding:5px 9px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:10px;
+}
+
+.copy-btn:hover{
+    background:#334155;
+}
+
+.code-box pre{
+    margin:0;
+    padding:20px;
+    overflow-x:auto;
+    color:var(--code-text);
+    font-family:Consolas,"Courier New",monospace;
+    font-size:13px;
+    line-height:1.75;
+    white-space:pre;
+}
+
+.code-box code{
+    color:var(--code-text);
+    font-family:inherit;
+}
+
+/* =========================
+   CALLOUTS
+========================= */
+
+.note{
+    padding:17px 19px;
+    border-radius:13px;
+    border-left:4px solid var(--primary);
+    background:#eff6ff;
+    margin:18px 0;
+    font-size:14px;
+}
+
+.note strong{
+    color:#1d4ed8;
+}
+
+.warning{
+    border-left-color:var(--warning);
+    background:#fff7ed;
+}
+
+.warning strong{
+    color:#c2410c;
+}
+
+.success{
+    border-left-color:var(--success);
+    background:#f0fdf4;
+}
+
+.success strong{
+    color:#15803d;
+}
+
+.danger{
+    border-left-color:var(--danger);
+    background:#fef2f2;
+}
+
+.danger strong{
+    color:#b91c1c;
+}
+
+/* =========================
+   TABLE
+========================= */
+
+.table-wrap{
+    overflow-x:auto;
+    border:1px solid var(--border);
+    border-radius:15px;
+    background:#fff;
+    box-shadow:var(--shadow);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:650px;
+}
+
+th,td{
+    padding:13px 15px;
+    text-align:left;
+    border-bottom:1px solid var(--border);
+    font-size:13px;
+}
+
+th{
+    background:#f8fafc;
+    font-size:12px;
+    font-weight:900;
+}
+
+td{
+    color:#475569;
+}
+
+/* =========================
+   OBJECTIVE LIST
+========================= */
+
+.objectives{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+}
+
+.objective{
+    display:flex;
+    gap:11px;
+    padding:13px 15px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:#fff;
+    font-size:13px;
+}
+
+.check{
+    width:22px;
+    height:22px;
+    flex-shrink:0;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#dcfce7;
+    color:#15803d;
+    font-weight:900;
+}
+
+/* =========================
+   INHERITANCE VISUAL
+========================= */
+
+.inheritance-stage{
+    padding:35px;
+    border:1px solid var(--border);
+    border-radius:20px;
+    background:#fff;
+    box-shadow:var(--shadow);
+}
+
+.tree{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:18px;
+}
+
+.node{
+    min-width:190px;
+    padding:16px 25px;
+    text-align:center;
+    border-radius:14px;
+    border:2px solid var(--primary);
+    background:#eff6ff;
+    font-weight:900;
+    position:relative;
+    transition:.4s;
+}
+
+.node small{
+    display:block;
+    margin-top:3px;
+    color:var(--muted);
+    font-weight:600;
+    font-size:10px;
+}
+
+.node.active{
+    transform:scale(1.07);
+    box-shadow:0 0 0 6px rgba(37,99,235,.1);
+}
+
+.connector{
+    width:3px;
+    height:30px;
+    background:#94a3b8;
+    position:relative;
+}
+
+.connector::after{
+    content:"▼";
+    position:absolute;
+    bottom:-13px;
+    left:50%;
+    transform:translateX(-50%);
+    color:#64748b;
+    font-size:13px;
+}
+
+.children{
+    display:flex;
+    justify-content:center;
+    gap:30px;
+    position:relative;
+}
+
+.children::before{
+    content:"";
+    position:absolute;
+    top:-15px;
+    left:12%;
+    right:12%;
+    height:2px;
+    background:#94a3b8;
+}
+
+.children .node{
+    margin-top:12px;
+}
+
+/* =========================
+   ACCESS VISUALIZER
+========================= */
+
+.access-demo{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.access-box{
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:20px;
+    background:#fff;
+}
+
+.access-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+.access-row{
+    display:grid;
+    grid-template-columns:100px 1fr 100px;
+    gap:8px;
+    align-items:center;
+    padding:11px;
+    margin:7px 0;
+    border-radius:9px;
+    background:#f8fafc;
+    font-size:12px;
+}
+
+.access-tag{
+    font-weight:900;
+}
+
+.allowed{
+    color:#15803d;
+    font-weight:800;
+}
+
+.blocked{
+    color:#dc2626;
+    font-weight:800;
+}
+
+/* =========================
+   TYPE CARDS
+========================= */
+
+.type-card{
+    position:relative;
+    overflow:hidden;
+}
+
+.type-number{
+    position:absolute;
+    right:18px;
+    top:12px;
+    font-size:42px;
+    font-weight:900;
+    color:#f1f5f9;
+}
+
+.type-card p{
+    position:relative;
+}
+
+/* =========================
+   ANIMATION LAB
+========================= */
+
+.lab{
+    border:1px solid var(--border);
+    border-radius:20px;
+    background:#fff;
+    padding:25px;
+    box-shadow:var(--shadow);
+}
+
+.lab-screen{
+    min-height:250px;
+    background:#f8fafc;
+    border:1px dashed #cbd5e1;
+    border-radius:15px;
+    padding:25px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.flow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:12px;
+}
+
+.flow-box{
+    padding:14px 18px;
+    border-radius:12px;
+    border:1px solid #cbd5e1;
+    background:#fff;
+    font-size:12px;
+    font-weight:800;
+    min-width:120px;
+    text-align:center;
+}
+
+.flow-arrow{
+    color:var(--primary);
+    font-size:22px;
+    font-weight:900;
+}
+
+.lab-controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    margin-top:18px;
+}
+
+.btn{
+    border:0;
+    border-radius:9px;
+    padding:10px 15px;
+    cursor:pointer;
+    font-size:12px;
+    font-weight:800;
+    transition:.2s;
+}
+
+.btn-primary{
+    background:var(--primary);
+    color:#fff;
+}
+
+.btn-primary:hover{
+    background:var(--primary-dark);
+    transform:translateY(-1px);
+}
+
+.btn-light{
+    background:#f1f5f9;
+    color:#334155;
+}
+
+.btn-success{
+    background:#dcfce7;
+    color:#15803d;
+}
+
+/* =========================
+   CONSTRUCTOR ANIMATION
+========================= */
+
+.execution{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    width:min(700px,100%);
+}
+
+.execution-step{
+    padding:14px 17px;
+    border-radius:11px;
+    background:#fff;
+    border:1px solid var(--border);
+    opacity:.35;
+    transform:translateX(-10px);
+    transition:.4s;
+    font-size:13px;
+}
+
+.execution-step.active{
+    opacity:1;
+    transform:translateX(0);
+    border-color:var(--primary);
+    background:#eff6ff;
+}
+
+/* =========================
+   DIAMOND
+========================= */
+
+.diamond{
+    position:relative;
+    min-height:390px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.diamond-node{
+    position:absolute;
+    padding:14px 25px;
+    border-radius:12px;
+    background:#fff;
+    border:2px solid var(--primary);
+    font-weight:900;
+    min-width:140px;
+    text-align:center;
+}
+
+.diamond-a{
+    top:15px;
+    left:50%;
+    transform:translateX(-50%);
+}
+
+.diamond-b{
+    top:145px;
+    left:20%;
+}
+
+.diamond-c{
+    top:145px;
+    right:20%;
+}
+
+.diamond-d{
+    bottom:15px;
+    left:50%;
+    transform:translateX(-50%);
+}
+
+.diamond-line{
+    position:absolute;
+    height:2px;
+    background:#94a3b8;
+    transform-origin:left center;
+}
+
+.line-ab{
+    width:180px;
+    top:100px;
+    left:39%;
+    transform:rotate(125deg);
+}
+
+.line-ac{
+    width:180px;
+    top:100px;
+    left:52%;
+    transform:rotate(55deg);
+}
+
+.line-bd{
+    width:180px;
+    top:230px;
+    left:30%;
+    transform:rotate(55deg);
+}
+
+.line-cd{
+    width:180px;
+    top:230px;
+    left:53%;
+    transform:rotate(125deg);
+}
+
+/* =========================
+   QUIZ
+========================= */
+
+.quiz-card{
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:22px;
+    margin-bottom:15px;
+    background:#fff;
+}
+
+.quiz-question{
+    font-weight:800;
+    margin-bottom:14px;
+}
+
+.option{
+    display:block;
+    width:100%;
+    text-align:left;
+    border:1px solid var(--border);
+    background:#f8fafc;
+    padding:11px 13px;
+    border-radius:9px;
+    margin:7px 0;
+    cursor:pointer;
+    font-size:13px;
+    color:#334155;
+}
+
+.option:hover{
+    border-color:var(--primary);
+    background:#eff6ff;
+}
+
+.option.correct{
+    background:#dcfce7;
+    border-color:#86efac;
+    color:#166534;
+}
+
+.option.wrong{
+    background:#fee2e2;
+    border-color:#fca5a5;
+    color:#991b1b;
+}
+
+.quiz-result{
+    display:none;
+    padding:15px;
+    border-radius:10px;
+    margin-top:18px;
+    font-weight:800;
+}
+
+/* =========================
+   ACCORDION
+========================= */
+
+.accordion{
+    border:1px solid var(--border);
+    border-radius:13px;
+    overflow:hidden;
+    margin-bottom:10px;
+    background:#fff;
+}
+
+.acc-head{
+    width:100%;
+    border:0;
+    background:#fff;
+    padding:17px;
+    text-align:left;
+    display:flex;
+    justify-content:space-between;
+    cursor:pointer;
+    font-weight:800;
+    color:var(--text);
+}
+
+.acc-body{
+    display:none;
+    padding:0 17px 17px;
+    color:var(--muted);
+    font-size:13px;
+}
+
+.acc-body.open{
+    display:block;
+}
+
+/* =========================
+   CHECKLIST
+========================= */
+
+.checklist{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+}
+
+.check-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:10px;
+    font-size:13px;
+}
+
+.check-item input{
+    accent-color:var(--primary);
+    width:17px;
+    height:17px;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.footer{
+    margin-top:80px;
+    padding:35px;
+    border-radius:22px;
+    background:#0f172a;
+    color:#cbd5e1;
+    text-align:center;
+}
+
+.footer strong{
+    color:#fff;
+}
+
+.footer p{
+    font-size:12px;
+    margin-top:5px;
+}
+
+/* =========================
+   REVEAL
+========================= */
+
+.reveal{
+    opacity:0;
+    transform:translateY(25px);
+    transition:opacity .65s ease,transform .65s ease;
+}
+
+.reveal.visible{
+    opacity:1;
+    transform:translateY(0);
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:1000px){
+
+    :root{
+        --sidebar:250px;
+    }
+
+    .grid-3{
+        grid-template-columns:1fr 1fr;
+    }
+
+}
+
+@media(max-width:760px){
+
+    .sidebar{
+        transform:translateX(-100%);
+        transition:.3s;
+    }
+
+    .sidebar.open{
+        transform:translateX(0);
+    }
+
+    .main{
+        margin-left:0;
+    }
+
+    .menu-btn{
+        display:block;
+    }
+
+    .topbar{
+        padding:0 15px;
+    }
+
+    .content{
+        padding:25px 15px 60px;
+    }
+
+    .hero{
+        padding:25px;
+    }
+
+    .grid,
+    .grid-3,
+    .objectives,
+    .access-demo,
+    .checklist{
+        grid-template-columns:1fr;
+    }
+
+    .children{
+        gap:8px;
+    }
+
+    .node{
+        min-width:130px;
+        padding:12px;
+        font-size:12px;
+    }
+
+    .diamond{
+        transform:scale(.75);
+        margin:-30px 0;
+    }
+
+    .breadcrumb{
+        display:none;
+    }
+
+}
+
+@media(prefers-reduced-motion:reduce){
+
+    *{
+        scroll-behavior:auto!important;
+        animation:none!important;
+        transition:none!important;
+    }
+
+    .reveal{
+        opacity:1;
+        transform:none;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- =====================================================
+     SIDEBAR
+===================================================== -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+        <div class="brand-logo">Z</div>
+        <div class="brand-text">ZENSUS</div>
+    </div>
+
+    <div class="lesson-label">Lesson 13 · Inheritance</div>
+
+    <nav>
+
+        <a href="#top" class="active">
+            <span class="nav-number">01</span>
+            Overview
+        </a>
+
+        <a href="#what">
+            <span class="nav-number">02</span>
+            What is Inheritance?
+        </a>
+
+        <a href="#syntax">
+            <span class="nav-number">03</span>
+            Syntax & Access
+        </a>
+
+        <a href="#access">
+            <span class="nav-number">04</span>
+            Access Control
+        </a>
+
+        <a href="#types">
+            <span class="nav-number">05</span>
+            Types of Inheritance
+        </a>
+
+        <a href="#single">
+            <span class="nav-number">06</span>
+            Single
+        </a>
+
+        <a href="#multilevel">
+            <span class="nav-number">07</span>
+            Multilevel
+        </a>
+
+        <a href="#multiple">
+            <span class="nav-number">08</span>
+            Multiple
+        </a>
+
+        <a href="#hierarchical">
+            <span class="nav-number">09</span>
+            Hierarchical
+        </a>
+
+        <a href="#hybrid">
+            <span class="nav-number">10</span>
+            Hybrid
+        </a>
+
+        <a href="#diamond">
+            <span class="nav-number">11</span>
+            Diamond Problem
+        </a>
+
+        <a href="#constructors">
+            <span class="nav-number">12</span>
+            Constructors
+        </a>
+
+        <a href="#override">
+            <span class="nav-number">13</span>
+            Overriding
+        </a>
+
+        <a href="#polymorphism">
+            <span class="nav-number">14</span>
+            Polymorphism
+        </a>
+
+        <a href="#casting">
+            <span class="nav-number">15</span>
+            Upcasting / Downcasting
+        </a>
+
+        <a href="#lab">
+            <span class="nav-number">16</span>
+            Interactive Lab
+        </a>
+
+        <a href="#exam">
+            <span class="nav-number">17</span>
+            Exam Preparation
+        </a>
+
+        <a href="#interview">
+            <span class="nav-number">18</span>
+            Interview
+        </a>
+
+        <a href="#quiz">
+            <span class="nav-number">19</span>
+            Quiz
+        </a>
+
+        <a href="#practice">
+            <span class="nav-number">20</span>
+            Practice
+        </a>
+
+        <a href="#checklist">
+            <span class="nav-number">21</span>
+            Completion
+        </a>
+
+    </nav>
+
+    <div class="sidebar-footer">
+
+        <div class="progress-card">
+
+            <div class="progress-card-title">
+                Lesson Progress
+            </div>
+
+            <div class="progress-track">
+                <div class="progress-fill" id="sideProgress"></div>
+            </div>
+
+            <div class="progress-small">
+                Scroll to complete the lesson
+            </div>
+
+        </div>
+
+    </div>
+
+</aside>
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<main class="main">
+
+<header class="topbar">
+
+    <div class="topbar-left">
+
+        <button class="menu-btn" id="menuBtn">☰</button>
+
+        <div class="breadcrumb">
+            C++ / Object-Oriented Programming /
+            <strong>Inheritance</strong>
+        </div>
+
+    </div>
+
+    <div class="top-actions">
+
+        <span class="badge">C++</span>
+        <span class="badge">Lesson 13</span>
+
+    </div>
+
+</header>
+
+<div class="content" id="top">
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<section class="hero reveal">
+
+    <div class="kicker">
+        C++ Object-Oriented Programming
+    </div>
+
+    <h1>
+        Master
+        <span>Inheritance</span>
+    </h1>
+
+    <p>
+        Learn how C++ classes can reuse, extend and specialize
+        existing classes — from basic single inheritance to
+        multiple inheritance, the diamond problem, virtual
+        inheritance and runtime polymorphism.
+    </p>
+
+    <div class="hero-badges">
+
+        <span class="hero-badge">Single Inheritance</span>
+        <span class="hero-badge">Multilevel</span>
+        <span class="hero-badge">Multiple</span>
+        <span class="hero-badge">Hierarchical</span>
+        <span class="hero-badge">Hybrid</span>
+        <span class="hero-badge">Virtual Inheritance</span>
+        <span class="hero-badge">Polymorphism</span>
+
+    </div>
+
+    <div class="hero-code">
+
+        <div class="code-box">
+
+            <div class="code-head">
+                <span class="code-title">inheritance.cpp</span>
+                <button class="copy-btn">Copy</button>
+            </div>
+
+<pre><code>class Animal {
+public:
+    void eat() {
+        cout &lt;&lt; "Eating";
+    }
+};
+
+class Dog : public Animal {
+public:
+    void bark() {
+        cout &lt;&lt; "Barking";
+    }
+};
+
+int main() {
+    Dog d;
+
+    d.eat();   // inherited
+    d.bark();  // own member
+}</code></pre>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     OBJECTIVES
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">Learning Objectives</div>
+
+    <h2 class="section-title">
+        What you will master
+    </h2>
+
+    <p class="section-subtitle">
+        By the end of this lesson, you should be able to explain
+        inheritance and implement its major forms confidently.
+    </p>
+
+    <div class="objectives">
+
+        <div class="objective">
+            <span class="check">✓</span>
+            Understand base and derived classes
+        </div>
+
+        <div class="objective">
+            <span class="check">✓</span>
+            Write inheritance syntax correctly
+        </div>
+
+        <div class="objective">
+            <span class="check">✓</span>
+            Understand public/protected/private inheritance
+        </div>
+
+        <div class="objective">
+            <span class="check">✓</span>
+            Implement all major inheritance types
+        </div>
+
+        <div class="objective">
+            <span class="check">✓</span>
+            Understand the diamond problem
+        </div>
+
+        <div class="objective">
+            <span class="check">✓</span>
+            Use virtual inheritance
+        </div>
+
+        <div class="objective">
+            <span class="check">✓</span>
+            Understand constructor/destructor order
+        </div>
+
+        <div class="objective">
+            <span class="check">✓</span>
+            Understand overriding and polymorphism
+        </div>
+
+        <div class="objective">
+            <span class="check">✓</span>
+            Understand upcasting and downcasting
+        </div>
+
+        <div class="objective">
+            <span class="check">✓</span>
+            Prepare for exams and interviews
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     WHAT
+===================================================== -->
+
+<section class="section reveal" id="what">
+
+    <div class="kicker">01 · Foundation</div>
+
+    <h2 class="section-title">
+        What is Inheritance?
+    </h2>
+
+    <p class="section-subtitle">
+        Inheritance allows a new class to reuse and extend an
+        existing class.
+    </p>
+
+    <div class="grid">
+
+        <div class="card">
+
+            <div class="icon-box">🧬</div>
+
+            <h3>Simple Definition</h3>
+
+            <p>
+                Inheritance is an OOP mechanism where a
+                <strong>derived class</strong> acquires accessible
+                properties and behaviors of a
+                <strong>base class</strong>.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <div class="icon-box">♻</div>
+
+            <h3>Why use it?</h3>
+
+            <ul>
+                <li>Code reuse</li>
+                <li>Extension of existing functionality</li>
+                <li>Hierarchical design</li>
+                <li>Relationship modeling</li>
+                <li>Foundation for runtime polymorphism</li>
+            </ul>
+
+        </div>
+
+    </div>
+
+    <div class="note">
+
+        <strong>Important:</strong>
+        Inheritance should represent a meaningful
+        <strong>"is-a"</strong> relationship.
+        A Dog is an Animal. A Car is a Vehicle.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     VISUAL TREE
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">Animated Visualization</div>
+
+    <h2 class="section-title">
+        Base Class → Derived Class
+    </h2>
+
+    <p class="section-subtitle">
+        Watch how a derived class extends a base class.
+    </p>
+
+    <div class="inheritance-stage">
+
+        <div class="tree">
+
+            <div class="node active" id="animalNode">
+                Animal
+                <small>Base Class</small>
+            </div>
+
+            <div class="connector"></div>
+
+            <div class="children">
+
+                <div class="node">
+                    Dog
+                    <small>Derived Class</small>
+                </div>
+
+                <div class="node">
+                    Cat
+                    <small>Derived Class</small>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     SYNTAX
+===================================================== -->
+
+<section class="section reveal" id="syntax">
+
+    <div class="kicker">02 · Syntax</div>
+
+    <h2 class="section-title">
+        Inheritance Syntax
+    </h2>
+
+    <p class="section-subtitle">
+        The colon specifies the base class and the inheritance mode.
+    </p>
+
+    <div class="code-box">
+
+        <div class="code-head">
+            <span class="code-title">Basic Syntax</span>
+            <button class="copy-btn">Copy</button>
+        </div>
+
+<pre><code>class Derived : public Base {
+    // members of Derived
+};</code></pre>
+
+    </div>
+
+    <div class="grid">
+
+        <div class="card">
+
+            <h3>Base Class</h3>
+
+            <p>
+                The existing class whose accessible members can
+                be inherited by another class.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Derived Class</h3>
+
+            <p>
+                The new class that extends or specializes
+                the base class.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="code-box">
+
+        <div class="code-head">
+            <span class="code-title">Example</span>
+            <button class="copy-btn">Copy</button>
+        </div>
+
+<pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+class Vehicle {
+public:
+    void start() {
+        cout &lt;&lt; "Vehicle started\n";
+    }
+};
+
+class Car : public Vehicle {
+public:
+    void drive() {
+        cout &lt;&lt; "Car is driving\n";
+    }
+};
+
+int main() {
+
+    Car c;
+
+    c.start();
+    c.drive();
+
+    return 0;
+}</code></pre>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     ACCESS
+===================================================== -->
+
+<section class="section reveal" id="access">
+
+    <div class="kicker">03 · Access Control</div>
+
+    <h2 class="section-title">
+        public, protected and private
+    </h2>
+
+    <p class="section-subtitle">
+        Understanding access control is one of the most important
+        parts of inheritance.
+    </p>
+
+    <div class="access-demo">
+
+        <div class="access-box">
+
+            <div class="access-title">
+                <strong>Inside Base Class</strong>
+                <span>Base</span>
+            </div>
+
+            <div class="access-row">
+                <span class="access-tag">public</span>
+                <span>Base members</span>
+                <span class="allowed">✓</span>
+            </div>
+
+            <div class="access-row">
+                <span class="access-tag">protected</span>
+                <span>Base members</span>
+                <span class="allowed">✓</span>
+            </div>
+
+            <div class="access-row">
+                <span class="access-tag">private</span>
+                <span>Base members</span>
+                <span class="allowed">✓</span>
+            </div>
+
+        </div>
+
+        <div class="access-box">
+
+            <div class="access-title">
+                <strong>Inside Derived Class</strong>
+                <span>Derived</span>
+            </div>
+
+            <div class="access-row">
+                <span class="access-tag">public</span>
+                <span>Inherited access</span>
+                <span class="allowed">✓</span>
+            </div>
+
+            <div class="access-row">
+                <span class="access-tag">protected</span>
+                <span>Inherited access</span>
+                <span class="allowed">✓</span>
+            </div>
+
+            <div class="access-row">
+                <span class="access-tag">private</span>
+                <span>Direct access</span>
+                <span class="blocked">✕</span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="note warning">
+
+        <strong>Remember:</strong>
+        Private members of the base class are not directly accessible
+        inside the derived class. They still belong to the base
+        subobject and can be manipulated through appropriate
+        base-class functions.
+
+    </div>
+
+    <div class="code-box">
+
+        <div class="code-head">
+            <span class="code-title">protected.cpp</span>
+            <button class="copy-btn">Copy</button>
+        </div>
+
+<pre><code>class Parent {
+
+protected:
+    int age = 20;
+
+};
+
+class Child : public Parent {
+
+public:
+
+    void showAge() {
+        cout &lt;&lt; age;   // allowed
+    }
+};
+
+int main() {
+
+    Child c;
+
+    c.showAge();
+
+    // cout &lt;&lt; c.age; // ERROR
+}</code></pre>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     INHERITANCE MODES
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">Access Transformation</div>
+
+    <h2 class="section-title">
+        Public vs Protected vs Private Inheritance
+    </h2>
+
+    <p class="section-subtitle">
+        The inheritance mode controls how inherited public and
+        protected members appear in the derived class.
+    </p>
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Base Member</th>
+                    <th>public inheritance</th>
+                    <th>protected inheritance</th>
+                    <th>private inheritance</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>public</td>
+                    <td>public</td>
+                    <td>protected</td>
+                    <td>private</td>
+                </tr>
+
+                <tr>
+                    <td>protected</td>
+                    <td>protected</td>
+                    <td>protected</td>
+                    <td>private</td>
+                </tr>
+
+                <tr>
+                    <td>private</td>
+                    <td>Not directly accessible</td>
+                    <td>Not directly accessible</td>
+                    <td>Not directly accessible</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="note success">
+
+        <strong>Best beginner rule:</strong>
+        Prefer <strong>public inheritance</strong> when modeling a
+        true "is-a" relationship.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     TYPES
+===================================================== -->
+
+<section class="section reveal" id="types">
+
+    <div class="kicker">04 · Classification</div>
+
+    <h2 class="section-title">
+        Types of Inheritance
+    </h2>
+
+    <p class="section-subtitle">
+        C++ supports several inheritance structures.
+    </p>
+
+    <div class="grid-3">
+
+        <div class="card type-card">
+            <div class="type-number">01</div>
+            <h3>Single</h3>
+            <p>
+                One base class and one derived class.
+            </p>
+        </div>
+
+        <div class="card type-card">
+            <div class="type-number">02</div>
+            <h3>Multilevel</h3>
+            <p>
+                A class derives from another derived class.
+            </p>
+        </div>
+
+        <div class="card type-card">
+            <div class="type-number">03</div>
+            <h3>Multiple</h3>
+            <p>
+                One derived class has multiple base classes.
+            </p>
+        </div>
+
+        <div class="card type-card">
+            <div class="type-number">04</div>
+            <h3>Hierarchical</h3>
+            <p>
+                Multiple derived classes share one base class.
+            </p>
+        </div>
+
+        <div class="card type-card">
+            <div class="type-number">05</div>
+            <h3>Hybrid</h3>
+            <p>
+                Combination of two or more inheritance structures.
+            </p>
+        </div>
+
+        <div class="card type-card">
+            <div class="type-number">06</div>
+            <h3>Virtual</h3>
+            <p>
+                Virtual inheritance solves shared-base duplication
+                in diamond structures.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     SINGLE
+===================================================== -->
+
+<section class="section reveal" id="single">
+
+    <div class="kicker">05 · Single Inheritance</div>
+
+    <h2 class="section-title">
+        Single Inheritance
+    </h2>
+
+    <p class="section-subtitle">
+        The simplest inheritance relationship.
+    </p>
+
+    <div class="inheritance-stage">
+
+        <div class="tree">
+
+            <div class="node">
+                Person
+                <small>Base</small>
+            </div>
+
+            <div class="connector"></div>
+
+            <div class="node">
+                Student
+                <small>Derived</small>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="code-box">
+
+        <div class="code-head">
+            <span class="code-title">single.cpp</span>
+            <button class="copy-btn">Copy</button>
+        </div>
+
+<pre><code>class Person {
+
+public:
+
+    void speak() {
+        cout &lt;&lt; "Person speaks\n";
+    }
+};
+
+class Student : public Person {
+
+public:
+
+    void study() {
+        cout &lt;&lt; "Student studies\n";
+    }
+};
+
+int main() {
+
+    Student s;
+
+    s.speak();
+    s.study();
+
+}</code></pre>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     MULTILEVEL
+===================================================== -->
+
+<section class="section reveal" id="multilevel">
+
+    <div class="kicker">06 · Multilevel</div>
+
+    <h2 class="section-title">
+        Multilevel Inheritance
+    </h2>
+
+    <p class="section-subtitle">
+        Inheritance can continue through multiple levels.
+    </p>
+
+    <div class="inheritance-stage">
+
+        <div class="tree">
+
+            <div class="node">
+                Person
+                <small>Level 1</small>
+            </div>
+
+            <div class="connector"></div>
+
+            <div class="node">
+                Student
+                <small>Level 2</small>
+            </div>
+
+            <div class="connector"></div>
+
+            <div class="node">
+                EngineeringStudent
+                <small>Level 3</small>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="code-box">
+
+        <div class="code-head">
+            <span class="code-title">multilevel.cpp</span>
+            <button class="copy-btn">Copy</button>
+        </div>
+
+<pre><code>class Person {
+
+public:
+
+    void breathe() {
+        cout &lt;&lt; "Breathing\n";
+    }
+};
+
+class Student : public Person {
+
+public:
+
+    void study() {
+        cout &lt;&lt; "Studying\n";
+    }
+};
+
+class EngineeringStudent : public Student {
+
+public:
+
+    void code() {
+        cout &lt;&lt; "Coding\n";
+    }
+};
+
+int main() {
+
+    EngineeringStudent e;
+
+    e.breathe();
+    e.study();
+    e.code();
+
+}</code></pre>
+
+    </div>
+
+    <div class="note">
+
+        <strong>Key idea:</strong>
+        EngineeringStudent can access accessible members from
+        Student and, through that chain, from Person.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     MULTIPLE
+===================================================== -->
+
+<section class="section reveal" id="multiple">
+
+    <div class="kicker">07 · Multiple</div>
+
+    <h2 class="section-title">
+        Multiple Inheritance
+    </h2>
+
+    <p class="section-subtitle">
+        One derived class inherits from two or more base classes.
+    </p>
+
+    <div class="inheritance-stage">
+
+        <div class="tree">
+
+            <div class="children">
+
+                <div class="node">
+                    Printer
+                    <small>Base</small>
+                </div>
+
+                <div class="node">
+                    Scanner
+                    <small>Base</small>
+                </div>
+
+            </div>
+
+            <div class="connector"></div>
+
+            <div class="node">
+                AllInOne
+                <small>Derived</small>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="code-box">
+
+        <div class="code-head">
+            <span class="code-title">multiple.cpp</span>
+            <button class="copy-btn">Copy</button>
+        </div>
+
+<pre><code>class Printer {
+
+public:
+
+    void print() {
+        cout &lt;&lt; "Printing\n";
+    }
+};
+
+class Scanner {
+
+public:
+
+    void scan() {
+        cout &lt;&lt; "Scanning\n";
+    }
+};
+
+class AllInOne : public Printer,
+                 public Scanner {
+
+public:
+
+    void copy() {
+        cout &lt;&lt; "Copying\n";
+    }
+};
+
+int main() {
+
+    AllInOne device;
+
+    device.print();
+    device.scan();
+    device.copy();
+
+}</code></pre>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     HIERARCHICAL
+===================================================== -->
+
+<section class="section reveal" id="hierarchical">
+
+    <div class="kicker">08 · Hierarchical</div>
+
+    <h2 class="section-title">
+        Hierarchical Inheritance
+    </h2>
+
+    <p class="section-subtitle">
+        Multiple derived classes inherit from one base class.
+    </p>
+
+    <div class="inheritance-stage">
+
+        <div class="tree">
+
+            <div class="node">
+                Vehicle
+                <small>Common Base</small>
+            </div>
+
+            <div class="connector"></div>
+
+            <div class="children">
+
+                <div class="node">
+                    Car
+                    <small>Derived</small>
+                </div>
+
+                <div class="node">
+                    Bike
+                    <small>Derived</small>
+                </div>
+
+                <div class="node">
+                    Bus
+                    <small>Derived</small>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="code-box">
+
+        <div class="code-head">
+            <span class="code-title">hierarchical.cpp</span>
+            <button class="copy-btn">Copy</button>
+        </div>
+
+<pre><code>class Vehicle {
+
+public:
+
+    void start() {
+        cout &lt;&lt; "Vehicle starts\n";
+    }
+};
+
+class Car : public Vehicle {
+
+public:
+
+    void drive() {
+        cout &lt;&lt; "Car drives\n";
+    }
+};
+
+class Bike : public Vehicle {
+
+public:
+
+    void ride() {
+        cout &lt;&lt; "Bike rides\n";
+    }
+};</code></pre>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     HYBRID
+===================================================== -->
+
+<section class="section reveal" id="hybrid">
+
+    <div class="kicker">09 · Hybrid</div>
+
+    <h2 class="section-title">
+        Hybrid Inheritance
+    </h2>
+
+    <p class="section-subtitle">
+        Hybrid inheritance combines multiple inheritance structures.
+    </p>
+
+    <div class="card">
+
+        <h3>Example structure</h3>
+
+        <p>
+            A common hybrid structure can combine hierarchical
+            and multiple inheritance.
+        </p>
+
+        <div class="code-box">
+
+            <div class="code-head">
+                <span class="code-title">hybrid structure</span>
+            </div>
+
+<pre><code>        A
+       / \
+      B   C
+       \ /
+        D</code></pre>
+
+        </div>
+
+    </div>
+
+    <div class="note warning">
+
+        <strong>Important:</strong>
+        Hybrid inheritance itself is not necessarily a problem.
+        The ambiguity problem occurs when multiple paths create
+        more than one instance of the same base class.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     DIAMOND
+===================================================== -->
+
+<section class="section reveal" id="diamond">
+
+    <div class="kicker">10 · Advanced Inheritance</div>
+
+    <h2 class="section-title">
+        The Diamond Problem
+    </h2>
+
+    <p class="section-subtitle">
+        One of the most important inheritance interview questions.
+    </p>
+
+    <div class="inheritance-stage">
+
+        <div class="diamond">
+
+            <div class="diamond-node diamond-a">
+                A
+                <small>Base</small>
+            </div>
+
+            <div class="diamond-node diamond-b">
+                B
+                <small>Derived from A</small>
+            </div>
+
+            <div class="diamond-node diamond-c">
+                C
+                <small>Derived from A</small>
+            </div>
+
+            <div class="diamond-node diamond-d">
+                D
+                <small>Derived from B + C</small>
+            </div>
+
+            <div class="diamond-line line-ab"></div>
+            <div class="diamond-line line-ac"></div>
+            <div class="diamond-line line-bd"></div>
+            <div class="diamond-line line-cd"></div>
+
+        </div>
+
+    </div>
+
+    <div class="code-box">
+
+        <div class="code-head">
+            <span class="code-title">diamond.cpp</span>
+            <button class="copy-btn">Copy</button>
+        </div>
+
+<pre><code>class A {
+public:
+    void show() {
+        cout &lt;&lt; "A";
+    }
+};
+
+class B : public A {};
+
+class C : public A {};
+
+class D : public B, public C {};
+
+int main() {
+
+    D obj;
+
+    // obj.show(); 
+    // ERROR: ambiguous
+
+}</code></pre>
+
+    </div>
+
+    <div class="note danger">
+
+        <strong>Why is it ambiguous?</strong>
+
+        D contains a B part and a C part.
+        Both B and C contain their own A base subobject.
+        Therefore D can have two A subobjects.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     VIRTUAL INHERITANCE
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">11 · Solution</div>
+
+    <h2 class="section-title">
+        Virtual Inheritance
+    </h2>
+
+    <p class="section-subtitle">
+        Virtual inheritance makes the shared base a single virtual
+        base subobject in the most-derived object.
+    </p>
+
+    <div class="code-box">
+
+        <div class="code-head">
+            <span class="code-title">virtual-inheritance.cpp</span>
+            <button class="copy-btn">Copy</button>
+        </div>
+
+<pre><code>class A {
+
+public:
+
+    void show() {
+        cout &lt;&lt; "A";
+    }
+};
+
+class B : virtual public A {};
+
+class C : virtual public A {};
+
+class D : public B, public C {};
+
+int main() {
+
+    D obj;
+
+    obj.show();  // OK
+
+}</code></pre>
+
+    </div>
+
+    <div class="note success">
+
+        <strong>Result:</strong>
+        D has one shared A base subobject instead of separate
+        A subobjects through B and C.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     CONSTRUCTORS
+===================================================== -->
+
+<section class="section reveal" id="constructors">
+
+    <div class="kicker">12 · Object Construction</div>
+
+    <h2 class="section-title">
+        Constructor Order in Inheritance
+    </h2>
+
+    <p class="section-subtitle">
+        Constructors execute from the base toward the derived class.
+    </p>
+
+    <div class="lab">
+
+        <div class="lab-screen">
+
+            <div class="execution">
+
+                <div class="execution-step" id="step1">
+                    1. Base constructor
+                </div>
+
+                <div class="execution-step" id="step2">
+                    2. Derived class members initialize
+                </div>
+
+                <div class="execution-step" id="step3">
+                    3. Derived constructor body
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="lab-controls">
+
+            <button class="btn btn-primary" onclick="runConstruction()">
+                ▶ Animate Construction
+            </button>
+
+            <button class="btn btn-light" onclick="resetConstruction()">
+                Reset
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="code-box">
+
+        <div class="code-head">
+            <span class="code-title">constructor-order.cpp</span>
+            <button class="copy-btn">Copy</button>
+        </div>
+
+<pre><code>class Base {
+
+public:
+
+    Base() {
+        cout &lt;&lt; "Base Constructor\n";
+    }
+};
+
+class Derived : public Base {
+
+public:
+
+    Derived() {
+        cout &lt;&lt; "Derived Constructor\n";
+    }
+};
+
+int main() {
+
+    Derived d;
+
+}</code></pre>
+
+    </div>
+
+    <div class="note">
+
+        <strong>Execution:</strong>
+
+        Base constructor → Derived constructor.
+
+        For more complex inheritance, virtual bases are initialized
+        first, followed by direct bases, members in declaration order,
+        and finally the constructor body.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     BASE CONSTRUCTOR
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">Base Initialization</div>
+
+    <h2 class="section-title">
+        Calling a Base Constructor
+    </h2>
+
+    <div class="code-box">
+
+        <div class="code-head">
+            <span class="code-title">base-constructor.cpp</span>
+            <button class="copy-btn">Copy</button>
+        </div>
+
+<pre><code>class Person {
+
+protected:
+    string name;
+
+public:
+
+    Person(string n)
+        : name(n) {}
+};
+
+class Student : public Person {
+
+private:
+    int roll;
+
+public:
+
+    Student(string n, int r)
+        : Person(n), roll(r) {}
+};</code></pre>
+
+    </div>
+
+    <div class="note">
+
+        <strong>Important:</strong>
+        A derived constructor uses the member-initializer list
+        to explicitly select the base constructor.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     USING BASE CONSTRUCTORS
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">Modern C++</div>
+
+    <h2 class="section-title">
+        Constructor Inheritance with using
+    </h2>
+
+    <div class="code-box">
+
+        <div class="code-head">
+            <span class="code-title">using-base-constructor.cpp</span>
+            <button class="copy-btn">Copy</button>
+        </div>
+
+<pre><code>class Person {
+
+public:
+
+    Person(string name) {
+        cout &lt;&lt; name;
+    }
+};
+
+class Student : public Person {
+
+public:
+
+    using Person::Person;
+};</code></pre>
+
+    </div>
+
+    <div class="note warning">
+
+        <strong>Do not confuse this:</strong>
+        <code>using Person::Person</code> makes base constructors
+        available for initialization of Student objects. It does not
+        turn constructors into ordinary inherited member functions.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     DESTRUCTOR
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">Object Destruction</div>
+
+    <h2 class="section-title">
+        Destructor Order
+    </h2>
+
+    <div class="card">
+
+        <h3>Construction</h3>
+
+        <p>
+            Base → Derived
+        </p>
+
+        <br>
+
+        <h3>Destruction</h3>
+
+        <p>
+            Derived → Base
+        </p>
+
+    </div>
+
+    <div class="code-box">
+
+        <div class="code-head">
+            <span class="code-title">destructor-order.cpp</span>
+            <button class="copy-btn">Copy</button>
+        </div>
+
+<pre><code>class Base {
+
+public:
+
+    ~Base() {
+        cout &lt;&lt; "Base destroyed\n";
+    }
+};
+
+class Derived : public Base {
+
+public:
+
+    ~Derived() {
+        cout &lt;&lt; "Derived destroyed\n";
+    }
+};</code></pre>
+
+    </div>
+
+    <div class="note">
+
+        <strong>Rule:</strong>
+        Destruction happens in the reverse order of construction.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     OVERRIDING
+===================================================== -->
+
+<section class="section reveal" id="override">
+
+    <div class="kicker">13 · Member Functions</div>
+
+    <h2 class="section-title">
+        Function Overriding
+    </h2>
+
+    <p class="section-subtitle">
+        A derived class can provide its own implementation of a
+        virtual function from the base class.
+    </p>
+
+    <div class="code-box">
+
+        <div class="code-head">
+            <span class="code-title">override.cpp</span>
+            <button class="copy-btn">Copy</button>
+        </div>
+
+<pre><code>class Animal {
+
+public:
+
+    virtual void sound() {
+        cout &lt;&lt; "Animal sound\n";
+    }
+};
+
+class Dog : public Animal {
+
+public:
+
+    void sound() override {
+        cout &lt;&lt; "Dog barks\n";
+    }
+};</code></pre>
+
+    </div>
+
+    <div class="note success">
+
+        <strong>Best practice:</strong>
+        Use the <code>override</code> keyword. It tells the compiler
+        that you intend to override a virtual base function.
+
+    </div>
+
+    <div class="note warning">
+
+        <strong>Important distinction:</strong>
+        If the base function is not virtual, a same-name function
+        in the derived class generally hides the base function rather
+        than providing runtime overriding.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     FINAL
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">Inheritance Control</div>
+
+    <h2 class="section-title">
+        final Keyword
+    </h2>
+
+    <div class="code-box">
+
+        <div class="code-head">
+            <span class="code-title">final.cpp</span>
+            <button class="copy-btn">Copy</button>
+        </div>
+
+<pre><code>class Animal {
+
+public:
+
+    virtual void sound() final {
+        cout &lt;&lt; "Sound";
+    }
+};
+
+// class Dog : public Animal {
+//     void sound() override; // ERROR
+// }</code></pre>
+
+    </div>
+
+    <p class="section-subtitle">
+        You can also mark a class as <code>final</code> to prevent
+        further derivation.
+    </p>
+
+    <div class="code-box">
+
+<pre><code>class Vehicle final {
+};
+
+// class Car : public Vehicle {}; // ERROR</code></pre>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     PROTECTED
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">Encapsulation</div>
+
+    <h2 class="section-title">
+        Understanding protected Members
+    </h2>
+
+    <div class="grid">
+
+        <div class="card">
+
+            <h3>public</h3>
+
+            <p>
+                Accessible from class, derived classes and external
+                code through objects.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>protected</h3>
+
+            <p>
+                Accessible inside the class and derived classes,
+                but not directly through ordinary outside code.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>private</h3>
+
+            <p>
+                Directly accessible only inside the class and its
+                friends, not directly inside derived classes.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="note warning">
+
+        <strong>Design tip:</strong>
+        Prefer private data with well-designed protected/public
+        functions when possible. Excessive protected state can weaken
+        encapsulation.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     POLYMORPHISM
+===================================================== -->
+
+<section class="section reveal" id="polymorphism">
+
+    <div class="kicker">14 · OOP Connection</div>
+
+    <h2 class="section-title">
+        Inheritance + Polymorphism
+    </h2>
+
+    <p class="section-subtitle">
+        Inheritance creates the relationship; virtual functions can
+        provide runtime polymorphism.
+    </p>
+
+    <div class="code-box">
+
+        <div class="code-head">
+            <span class="code-title">runtime-polymorphism.cpp</span>
+            <button class="copy-btn">Copy</button>
+        </div>
+
+<pre><code>class Animal {
+
+public:
+
+    virtual void sound() {
+        cout &lt;&lt; "Animal sound\n";
+    }
+
+    virtual ~Animal() = default;
+};
+
+class Dog : public Animal {
+
+public:
+
+    void sound() override {
+        cout &lt;&lt; "Dog barks\n";
+    }
+};
+
+class Cat : public Animal {
+
+public:
+
+    void sound() override {
+        cout &lt;&lt; "Cat meows\n";
+    }
+};
+
+void makeSound(const Animal&amp; a) {
+    a.sound();
+}
+
+int main() {
+
+    Dog d;
+    Cat c;
+
+    makeSound(d);
+    makeSound(c);
+
+}</code></pre>
+
+    </div>
+
+    <div class="note success">
+
+        <strong>Runtime polymorphism:</strong>
+        The call to <code>sound()</code> is resolved according to the
+        actual object because the function is virtual.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     VIRTUAL DESTRUCTOR
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">Interview Essential</div>
+
+    <h2 class="section-title">
+        Why should a Base Destructor often be virtual?
+    </h2>
+
+    <div class="code-box">
+
+<pre><code>class Base {
+
+public:
+
+    virtual ~Base() = default;
+};</code></pre>
+
+    </div>
+
+    <p class="section-subtitle">
+        If a derived object may be destroyed through a base pointer,
+        a virtual base destructor ensures the derived destructor
+        participates correctly in destruction.
+    </p>
+
+</section>
+
+<!-- =====================================================
+     CASTING
+===================================================== -->
+
+<section class="section reveal" id="casting">
+
+    <div class="kicker">15 · Type Conversion</div>
+
+    <h2 class="section-title">
+        Upcasting and Downcasting
+    </h2>
+
+    <div class="grid">
+
+        <div class="card">
+
+            <div class="icon-box">↑</div>
+
+            <h3>Upcasting</h3>
+
+            <p>
+                Converting a derived object reference/pointer to a
+                base class reference/pointer.
+            </p>
+
+            <div class="code-box">
+
+<pre><code>Dog d;
+
+Animal* a = &amp;d;</code></pre>
+
+            </div>
+
+            <p>
+                For public inheritance, this is safe and implicit.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <div class="icon-box">↓</div>
+
+            <h3>Downcasting</h3>
+
+            <p>
+                Converting a base pointer/reference toward a specific
+                derived type.
+            </p>
+
+            <div class="code-box">
+
+<pre><code>Animal* a = &amp;d;
+
+Dog* dptr =
+    dynamic_cast&lt;Dog*&gt;(a);</code></pre>
+
+            </div>
+
+            <p>
+                <code>dynamic_cast</code> can check the relationship
+                when the base is polymorphic.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="note danger">
+
+        <strong>Warning:</strong>
+        Downcasting should not be performed blindly. The object must
+        actually represent the appropriate derived type.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     OBJECT SLICING
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">Important Concept</div>
+
+    <h2 class="section-title">
+        Object Slicing
+    </h2>
+
+    <div class="code-box">
+
+<pre><code>class Animal {
+public:
+    virtual void sound() {}
+};
+
+class Dog : public Animal {
+public:
+    void sound() override {}
+};
+
+Dog d;
+
+Animal a = d;   // slicing</code></pre>
+
+    </div>
+
+    <p class="section-subtitle">
+        When a derived object is copied into a base object by value,
+        only the base subobject is retained. The derived-specific
+        part is sliced away.
+    </p>
+
+    <div class="note success">
+
+        <strong>Polymorphism tip:</strong>
+        Prefer references or pointers when you need to preserve the
+        actual derived object behavior.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     INTERACTIVE LAB
+===================================================== -->
+
+<section class="section reveal" id="lab">
+
+    <div class="kicker">16 · Interactive Lab</div>
+
+    <h2 class="section-title">
+        Inheritance Simulator
+    </h2>
+
+    <p class="section-subtitle">
+        Visualize how a derived object can access members from its
+        base class.
+    </p>
+
+    <div class="lab">
+
+        <div class="lab-screen">
+
+            <div id="inheritanceLab">
+
+                <div style="
+                    display:flex;
+                    flex-direction:column;
+                    align-items:center;
+                    gap:12px;
+                ">
+
+                    <div class="flow-box" id="baseBox">
+                        Base Class
+                    </div>
+
+                    <div class="flow-arrow">
+                        ↓
+                    </div>
+
+                    <div class="flow-box" id="derivedBox">
+                        Derived Class
+                    </div>
+
+                    <div class="flow-arrow">
+                        ↓
+                    </div>
+
+                    <div class="flow-box" id="objectBox">
+                        Derived Object
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="lab-controls">
+
+            <button class="btn btn-primary"
+                    onclick="simulateInheritance()">
+                ▶ Simulate
+            </button>
+
+            <button class="btn btn-light"
+                    onclick="resetInheritance()">
+                Reset
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     FLOWCHART
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">Visual Flow</div>
+
+    <h2 class="section-title">
+        How Inheritance Works
+    </h2>
+
+    <div class="lab">
+
+        <div class="lab-screen">
+
+            <div class="flow">
+
+                <div class="flow-box">
+                    Define Base
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    Define Derived
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    Select Access Mode
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    Create Object
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    Use Accessible Members
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     REAL WORLD
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">Real-World Modeling</div>
+
+    <h2 class="section-title">
+        Real-World Inheritance Examples
+    </h2>
+
+    <div class="grid-3">
+
+        <div class="card">
+
+            <h3>Vehicle</h3>
+
+            <p>
+                Vehicle → Car → ElectricCar
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Education</h3>
+
+            <p>
+                Person → Student → EngineeringStudent
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Banking</h3>
+
+            <p>
+                Account → SavingsAccount / CurrentAccount
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Company</h3>
+
+            <p>
+                Employee → Developer / Manager
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Gaming</h3>
+
+            <p>
+                Character → Warrior / Mage / Archer
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Devices</h3>
+
+            <p>
+                Device → Phone / Laptop / Tablet
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     COMMON MISTAKES
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">Avoid These</div>
+
+    <h2 class="section-title">
+        Common Inheritance Mistakes
+    </h2>
+
+    <div class="grid">
+
+        <div class="card">
+
+            <h3>❌ Accessing private base members</h3>
+
+            <p>
+                Derived classes cannot directly access private base
+                members.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>❌ Confusing overriding and hiding</h3>
+
+            <p>
+                A same-name function is not automatically runtime
+                overriding. Use virtual + override.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>❌ Ignoring diamond ambiguity</h3>
+
+            <p>
+                Multiple inheritance can create multiple copies of a
+                shared base class.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>❌ Unsafe downcasting</h3>
+
+            <p>
+                Never assume every Base object is a particular Derived
+                object.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>❌ Forgetting virtual destructor</h3>
+
+            <p>
+                Polymorphic base classes often need virtual destructors.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>❌ Using inheritance everywhere</h3>
+
+            <p>
+                Not every relationship is an "is-a" relationship.
+                Sometimes composition is better.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     COMPOSITION
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">Design Thinking</div>
+
+    <h2 class="section-title">
+        Inheritance vs Composition
+    </h2>
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Inheritance</th>
+                    <th>Composition</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>Represents "is-a"</td>
+                    <td>Represents "has-a"</td>
+                </tr>
+
+                <tr>
+                    <td>Car is a Vehicle</td>
+                    <td>Car has an Engine</td>
+                </tr>
+
+                <tr>
+                    <td>Creates class hierarchy</td>
+                    <td>Combines independent objects</td>
+                </tr>
+
+                <tr>
+                    <td>Useful for polymorphism</td>
+                    <td>Often gives flexible design</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     EXAM
+===================================================== -->
+
+<section class="section reveal" id="exam">
+
+    <div class="kicker">17 · Exam Preparation</div>
+
+    <h2 class="section-title">
+        5-Mark Answer
+    </h2>
+
+    <div class="card">
+
+        <h3>Define inheritance and explain its types.</h3>
+
+        <p>
+            Inheritance is an object-oriented programming mechanism
+            in which a derived class acquires accessible members of
+            an existing base class and can add or specialize its own
+            members. It promotes code reuse and supports hierarchical
+            class design.
+        </p>
+
+        <br>
+
+        <p>
+            The major types are:
+        </p>
+
+        <ul>
+
+            <li>Single inheritance</li>
+            <li>Multilevel inheritance</li>
+            <li>Multiple inheritance</li>
+            <li>Hierarchical inheritance</li>
+            <li>Hybrid inheritance</li>
+
+        </ul>
+
+    </div>
+
+</section>
+
+<section class="section reveal">
+
+    <div class="kicker">10-Mark Answer</div>
+
+    <h2 class="section-title">
+        Complete Exam Structure
+    </h2>
+
+    <div class="card">
+
+        <h3>Introduction</h3>
+
+        <p>
+            Define inheritance and explain the purpose of code reuse.
+        </p>
+
+        <br>
+
+        <h3>Syntax</h3>
+
+        <p>
+            Show <code>class Derived : public Base</code>.
+        </p>
+
+        <br>
+
+        <h3>Access Modes</h3>
+
+        <p>
+            Explain public, protected and private inheritance.
+        </p>
+
+        <br>
+
+        <h3>Types</h3>
+
+        <p>
+            Explain single, multilevel, multiple, hierarchical and
+            hybrid inheritance with diagrams.
+        </p>
+
+        <br>
+
+        <h3>Advanced Concept</h3>
+
+        <p>
+            Explain diamond problem and virtual inheritance.
+        </p>
+
+        <br>
+
+        <h3>Conclusion</h3>
+
+        <p>
+            Mention code reuse, extensibility and relationship with
+            polymorphism.
+        </p>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     INTERVIEW
+===================================================== -->
+
+<section class="section reveal" id="interview">
+
+    <div class="kicker">18 · Interview Preparation</div>
+
+    <h2 class="section-title">
+        Interview Questions
+    </h2>
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            What is inheritance?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            Inheritance is an OOP mechanism in which a derived class
+            reuses and extends accessible members of a base class.
+        </div>
+
+    </div>
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            What is the difference between public and private inheritance?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            Public inheritance preserves the base public/protected
+            access levels as public/protected in the derived class.
+            Private inheritance converts inherited public/protected
+            members to private in the derived class.
+        </div>
+
+    </div>
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            Can a derived class access private members of its base?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            No. Private base members are not directly accessible from
+            the derived class. The base class can provide public or
+            protected functions to access or modify its state.
+        </div>
+
+    </div>
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            What is the diamond problem?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            It occurs when a class inherits through two paths from the
+            same base class, potentially creating two base subobjects
+            and ambiguity.
+        </div>
+
+    </div>
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            How does virtual inheritance solve it?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            Virtual inheritance ensures the shared virtual base is
+            represented by one base subobject in the most-derived
+            object.
+        </div>
+
+    </div>
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            What is function overriding?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            Overriding occurs when a derived class provides a matching
+            implementation for a virtual function inherited from the
+            base class. The override keyword is recommended.
+        </div>
+
+    </div>
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            What is upcasting?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            Upcasting converts a derived pointer/reference to a base
+            pointer/reference. With public inheritance it is safe and
+            implicit.
+        </div>
+
+    </div>
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            Why should a polymorphic base destructor be virtual?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            A virtual destructor ensures correct destruction when a
+            derived object is destroyed through a base pointer.
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     QUIZ
+===================================================== -->
+
+<section class="section reveal" id="quiz">
+
+    <div class="kicker">19 · Knowledge Check</div>
+
+    <h2 class="section-title">
+        Inheritance Quiz
+    </h2>
+
+    <p class="section-subtitle">
+        Test your understanding.
+    </p>
+
+    <div class="quiz-card">
+
+        <div class="quiz-question">
+            1. Which keyword is used to specify inheritance?
+        </div>
+
+        <button class="option" data-correct="false">
+            inherit
+        </button>
+
+        <button class="option" data-correct="true">
+            :
+        </button>
+
+        <button class="option" data-correct="false">
+            extends
+        </button>
+
+        <button class="option" data-correct="false">
+            derives
+        </button>
+
+    </div>
+
+    <div class="quiz-card">
+
+        <div class="quiz-question">
+            2. Which base member cannot be directly accessed by a
+            derived class?
+        </div>
+
+        <button class="option" data-correct="false">
+            public
+        </button>
+
+        <button class="option" data-correct="false">
+            protected
+        </button>
+
+        <button class="option" data-correct="true">
+            private
+        </button>
+
+        <button class="option" data-correct="false">
+            virtual
+        </button>
+
+    </div>
+
+    <div class="quiz-card">
+
+        <div class="quiz-question">
+            3. Which inheritance type has multiple base classes?
+        </div>
+
+        <button class="option" data-correct="false">
+            Single
+        </button>
+
+        <button class="option" data-correct="true">
+            Multiple
+        </button>
+
+        <button class="option" data-correct="false">
+            Hierarchical
+        </button>
+
+        <button class="option" data-correct="false">
+            Multilevel
+        </button>
+
+    </div>
+
+    <div class="quiz-card">
+
+        <div class="quiz-question">
+            4. Which feature helps solve the diamond problem?
+        </div>
+
+        <button class="option" data-correct="true">
+            Virtual inheritance
+        </button>
+
+        <button class="option" data-correct="false">
+            Encapsulation
+        </button>
+
+        <button class="option" data-correct="false">
+            Templates
+        </button>
+
+        <button class="option" data-correct="false">
+            Namespaces
+        </button>
+
+    </div>
+
+    <div class="quiz-card">
+
+        <div class="quiz-question">
+            5. Which keyword is recommended when intentionally
+            overriding a virtual function?
+        </div>
+
+        <button class="option" data-correct="false">
+            virtualize
+        </button>
+
+        <button class="option" data-correct="true">
+            override
+        </button>
+
+        <button class="option" data-correct="false">
+            inherit
+        </button>
+
+        <button class="option" data-correct="false">
+            replace
+        </button>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     PRACTICE
+===================================================== -->
+
+<section class="section reveal" id="practice">
+
+    <div class="kicker">20 · Coding Practice</div>
+
+    <h2 class="section-title">
+        Coding Challenges
+    </h2>
+
+    <div class="grid">
+
+        <div class="card">
+
+            <h3>Challenge 1 · Vehicle</h3>
+
+            <p>
+                Create a Vehicle base class and derive Car and Bike.
+                Add common and specialized functions.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Challenge 2 · Banking</h3>
+
+            <p>
+                Create Account as a base class and derive
+                SavingsAccount and CurrentAccount.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Challenge 3 · Employees</h3>
+
+            <p>
+                Create Employee as a base class and derive Developer
+                and Manager.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Challenge 4 · Polymorphism</h3>
+
+            <p>
+                Create an Animal base class with virtual sound().
+                Override it for Dog, Cat and Cow.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     MINI PROJECT
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">Mini Project</div>
+
+    <h2 class="section-title">
+        Employee Management System
+    </h2>
+
+    <p class="section-subtitle">
+        Apply inheritance in a realistic C++ program.
+    </p>
+
+    <div class="code-box">
+
+        <div class="code-head">
+            <span class="code-title">employee-system.cpp</span>
+            <button class="copy-btn">Copy</button>
+        </div>
+
+<pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+using namespace std;
+
+class Employee {
+
+protected:
+
+    string name;
+    double salary;
+
+public:
+
+    Employee(string n, double s)
+        : name(n), salary(s) {}
+
+    virtual void display() const {
+
+        cout &lt;&lt; "Name: "
+             &lt;&lt; name &lt;&lt; '\n';
+
+        cout &lt;&lt; "Salary: "
+             &lt;&lt; salary &lt;&lt; '\n';
+    }
+
+    virtual ~Employee() = default;
+};
+
+class Developer : public Employee {
+
+private:
+
+    string language;
+
+public:
+
+    Developer(
+        string n,
+        double s,
+        string lang
+    )
+        : Employee(n, s),
+          language(lang) {}
+
+    void display() const override {
+
+        Employee::display();
+
+        cout &lt;&lt; "Language: "
+             &lt;&lt; language &lt;&lt; '\n';
+    }
+};
+
+class Manager : public Employee {
+
+private:
+
+    int teamSize;
+
+public:
+
+    Manager(
+        string n,
+        double s,
+        int size
+    )
+        : Employee(n, s),
+          teamSize(size) {}
+
+    void display() const override {
+
+        Employee::display();
+
+        cout &lt;&lt; "Team Size: "
+             &lt;&lt; teamSize &lt;&lt; '\n';
+    }
+};
+
+int main() {
+
+    Developer d(
+        "Rahul",
+        60000,
+        "C++"
+    );
+
+    Manager m(
+        "Priya",
+        85000,
+        8
+    );
+
+    d.display();
+
+    cout &lt;&lt; '\n';
+
+    m.display();
+
+    return 0;
+}</code></pre>
+
+    </div>
+
+    <div class="note success">
+
+        <strong>What this project teaches:</strong>
+        inheritance, protected members, constructors,
+        constructor initialization, overriding, virtual functions,
+        polymorphism and virtual destructors.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     RAPID REVISION
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">Rapid Revision</div>
+
+    <h2 class="section-title">
+        Inheritance in 60 Seconds
+    </h2>
+
+    <div class="grid-3">
+
+        <div class="card">
+            <h4>Inheritance</h4>
+            <p>Reuse and extend an existing class.</p>
+        </div>
+
+        <div class="card">
+            <h4>Base</h4>
+            <p>Existing parent class.</p>
+        </div>
+
+        <div class="card">
+            <h4>Derived</h4>
+            <p>Class extending the base.</p>
+        </div>
+
+        <div class="card">
+            <h4>Single</h4>
+            <p>One base → one derived.</p>
+        </div>
+
+        <div class="card">
+            <h4>Multiple</h4>
+            <p>Multiple bases → one derived.</p>
+        </div>
+
+        <div class="card">
+            <h4>Multilevel</h4>
+            <p>A → B → C.</p>
+        </div>
+
+        <div class="card">
+            <h4>Hierarchical</h4>
+            <p>One base → multiple derived classes.</p>
+        </div>
+
+        <div class="card">
+            <h4>Diamond</h4>
+            <p>Shared base through multiple paths.</p>
+        </div>
+
+        <div class="card">
+            <h4>Virtual Inheritance</h4>
+            <p>Shares one virtual base subobject.</p>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     CHECKLIST
+===================================================== -->
+
+<section class="section reveal" id="checklist">
+
+    <div class="kicker">21 · Completion</div>
+
+    <h2 class="section-title">
+        Lesson Completion Checklist
+    </h2>
+
+    <p class="section-subtitle">
+        Check each skill after you understand it.
+    </p>
+
+    <div class="checklist">
+
+        <label class="check-item">
+            <input type="checkbox" data-check="1">
+            I understand base and derived classes
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="2">
+            I can write inheritance syntax
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="3">
+            I understand public/protected/private
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="4">
+            I know all major inheritance types
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="5">
+            I understand multilevel inheritance
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="6">
+            I understand multiple inheritance
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="7">
+            I understand hierarchical inheritance
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="8">
+            I understand the diamond problem
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="9">
+            I can explain virtual inheritance
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="10">
+            I understand constructor order
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="11">
+            I understand function overriding
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="12">
+            I understand runtime polymorphism
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="13">
+            I understand upcasting
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="14">
+            I understand downcasting
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="15">
+            I can solve inheritance coding problems
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="16">
+            I can answer inheritance interview questions
+        </label>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     NEXT
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="card" style="
+        background:linear-gradient(135deg,#eff6ff,#f5f3ff);
+        border-color:#dbeafe;
+    ">
+
+        <div class="kicker">
+            Next Lesson
+        </div>
+
+        <h2 class="section-title">
+            Lesson 14 → Polymorphism
+        </h2>
+
+        <p>
+            Next, go deeper into compile-time polymorphism,
+            function overloading, operator overloading, virtual
+            functions, dynamic dispatch, abstract classes and
+            interfaces.
+        </p>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer class="footer">
+
+    <strong>ZENSUS</strong>
+
+    <p>
+        Learn. Build. Practice. Get Placement Ready.
+    </p>
+
+    <p>
+        C++ Lesson 13 · Inheritance
+    </p>
+
+</footer>
+
+</div>
+</main>
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+<script>
+
+/* =========================================================
+   MOBILE SIDEBAR
+========================================================= */
+
+const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.getElementById("sidebar");
+
+menuBtn.addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+});
+
+document.querySelectorAll(".sidebar a").forEach(link => {
+
+    link.addEventListener("click", () => {
+
+        if(window.innerWidth <= 760){
+            sidebar.classList.remove("open");
+        }
+
+    });
+
+});
+
+/* =========================================================
+   SCROLL PROGRESS
+========================================================= */
+
+function updateProgress(){
+
+    const scrollTop =
+        window.scrollY;
+
+    const docHeight =
+        document.documentElement.scrollHeight -
+        window.innerHeight;
+
+    const percentage =
+        docHeight > 0
+        ? (scrollTop / docHeight) * 100
+        : 0;
+
+    document.getElementById("progressBar")
+        .style.width = percentage + "%";
+
+    document.getElementById("sideProgress")
+        .style.width = percentage + "%";
+}
+
+window.addEventListener("scroll", updateProgress);
+
+updateProgress();
+
+/* =========================================================
+   REVEAL ANIMATION
+========================================================= */
+
+const revealObserver =
+    new IntersectionObserver(
+        entries => {
+
+            entries.forEach(entry => {
+
+                if(entry.isIntersecting){
+
+                    entry.target.classList.add("visible");
+
+                    revealObserver.unobserve(entry.target);
+
+                }
+
+            });
+
+        },
+        {
+            threshold:.12
+        }
+    );
+
+document.querySelectorAll(".reveal")
+    .forEach(el => revealObserver.observe(el));
+
+/* =========================================================
+   ACTIVE SIDEBAR
+========================================================= */
+
+const sections =
+    document.querySelectorAll(
+        "section[id]"
+    );
+
+const navLinks =
+    document.querySelectorAll(
+        ".sidebar nav a"
+    );
+
+const sectionObserver =
+    new IntersectionObserver(
+        entries => {
+
+            entries.forEach(entry => {
+
+                if(entry.isIntersecting){
+
+                    navLinks.forEach(link => {
+
+                        link.classList.remove("active");
+
+                    });
+
+                    const active =
+                        document.querySelector(
+                            `.sidebar nav a[href="#${entry.target.id}"]`
+                        );
+
+                    if(active){
+                        active.classList.add("active");
+                    }
+
+                }
+
+            });
+
+        },
+        {
+            rootMargin:"-20% 0px -65% 0px"
+        }
+    );
+
+sections.forEach(section =>
+    sectionObserver.observe(section)
+);
+
+/* =========================================================
+   COPY BUTTONS
+========================================================= */
+
+document.querySelectorAll(".copy-btn")
+.forEach(button => {
+
+    button.addEventListener("click", async () => {
+
+        const codeBox =
+            button.closest(".code-box");
+
+        const code =
+            codeBox.querySelector("code");
+
+        if(!code) return;
+
+        try{
+
+            await navigator.clipboard.writeText(
+                code.innerText
+            );
+
+            const oldText =
+                button.innerText;
+
+            button.innerText = "Copied!";
+
+            setTimeout(() => {
+                button.innerText = oldText;
+            },1200);
+
+        }catch(error){
+
+            button.innerText = "Select & Copy";
+
+            setTimeout(() => {
+                button.innerText = "Copy";
+            },1200);
+
+        }
+
+    });
+
+});
+
+/* =========================================================
+   CONSTRUCTOR ANIMATION
+========================================================= */
+
+function runConstruction(){
+
+    const steps = [
+        document.getElementById("step1"),
+        document.getElementById("step2"),
+        document.getElementById("step3")
+    ];
+
+    steps.forEach(step => {
+        step.classList.remove("active");
+    });
+
+    steps.forEach((step,index) => {
+
+        setTimeout(() => {
+
+            step.classList.add("active");
+
+        },index * 900);
+
+    });
+
+}
+
+function resetConstruction(){
+
+    document.querySelectorAll(".execution-step")
+        .forEach(step =>
+            step.classList.remove("active")
+        );
+
+}
+
+/* =========================================================
+   INHERITANCE SIMULATOR
+========================================================= */
+
+function simulateInheritance(){
+
+    const base =
+        document.getElementById("baseBox");
+
+    const derived =
+        document.getElementById("derivedBox");
+
+    const object =
+        document.getElementById("objectBox");
+
+    base.style.borderColor =
+        "#2563eb";
+
+    derived.style.borderColor =
+        "#cbd5e1";
+
+    object.style.borderColor =
+        "#cbd5e1";
+
+    setTimeout(() => {
+
+        derived.style.borderColor =
+            "#2563eb";
+
+    },800);
+
+    setTimeout(() => {
+
+        object.style.borderColor =
+            "#16a34a";
+
+    },1600);
+
+}
+
+function resetInheritance(){
+
+    document.getElementById("baseBox")
+        .style.borderColor = "#cbd5e1";
+
+    document.getElementById("derivedBox")
+        .style.borderColor = "#cbd5e1";
+
+    document.getElementById("objectBox")
+        .style.borderColor = "#cbd5e1";
+
+}
+
+/* =========================================================
+   QUIZ
+========================================================= */
+
+let quizScore = 0;
+
+document.querySelectorAll(".quiz-card")
+.forEach(card => {
+
+    const options =
+        card.querySelectorAll(".option");
+
+    let answered = false;
+
+    options.forEach(option => {
+
+        option.addEventListener("click", () => {
+
+            if(answered) return;
+
+            answered = true;
+
+            const correct =
+                option.dataset.correct === "true";
+
+            if(correct){
+
+                option.classList.add("correct");
+
+                quizScore++;
+
+            }else{
+
+                option.classList.add("wrong");
+
+                options.forEach(other => {
+
+                    if(
+                        other.dataset.correct === "true"
+                    ){
+                        other.classList.add("correct");
+                    }
+
+                });
+
+            }
+
+        });
+
+    });
+
+});
+
+/* =========================================================
+   ACCORDION
+========================================================= */
+
+document.querySelectorAll(".acc-head")
+.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        const body =
+            button.nextElementSibling;
+
+        body.classList.toggle("open");
+
+        const icon =
+            button.querySelector("span");
+
+        icon.textContent =
+            body.classList.contains("open")
+            ? "−"
+            : "+";
+
+    });
+
+});
+
+/* =========================================================
+   CHECKLIST LOCAL STORAGE
+========================================================= */
+
+document.querySelectorAll("[data-check]")
+.forEach(box => {
+
+    const key =
+        "zensus_lesson13_check_" +
+        box.dataset.check;
+
+    box.checked =
+        localStorage.getItem(key) === "true";
+
+    box.addEventListener("change", () => {
+
+        localStorage.setItem(
+            key,
+            box.checked
+        );
+
+    });
+
+});
+
+/* =========================================================
+   ANIMATED BASE NODE
+========================================================= */
+
+const animalNode =
+    document.getElementById("animalNode");
+
+setInterval(() => {
+
+    animalNode.classList.toggle("active");
+
+},1800);
+
+</script>
+
+</body>
+</html>

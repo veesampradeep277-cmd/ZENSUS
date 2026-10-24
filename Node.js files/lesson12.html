@@ -1,0 +1,3740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ZENSUS AI - Node.js Lesson 12: Database & MongoDB with Mongoose" />
+  <title>ZENSUS | Lesson 12 - Database & MongoDB with Mongoose</title>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --navy: #0f172a;
+      --text: #334155;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --bg: #f8fafc;
+      --white: #ffffff;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --purple: #7c3aed;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 90px;
+    }
+
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    code {
+      font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+    }
+
+    /* =========================
+       TOP NAVIGATION
+    ========================== */
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+    }
+
+    .topbar-inner {
+      width: min(1500px, 94%);
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      color: var(--navy);
+      letter-spacing: 0.5px;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), #60a5fa);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+    }
+
+    .brand span {
+      font-size: 18px;
+    }
+
+    .top-progress {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .progress-track {
+      width: 150px;
+      height: 7px;
+      background: #e5e7eb;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), #60a5fa);
+      border-radius: inherit;
+      transition: width 0.4s ease;
+    }
+
+    .progress-label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    /* =========================
+       LAYOUT
+    ========================== */
+
+    .page {
+      width: min(1500px, 94%);
+      margin: 0 auto;
+      padding-top: 92px;
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr);
+      gap: 28px;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 90px;
+      height: calc(100vh - 110px);
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .sidebar-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .toc {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .toc a {
+      padding: 9px 12px;
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      transition: 0.2s;
+    }
+
+    .toc a:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .toc a.active {
+      background: #dbeafe;
+      color: var(--primary-dark);
+      font-weight: 800;
+      border-left: 3px solid var(--primary);
+    }
+
+    .content {
+      min-width: 0;
+    }
+
+    /* =========================
+       HERO
+    ========================== */
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 85% 20%, rgba(96, 165, 250, 0.2), transparent 30%),
+        radial-gradient(circle at 15% 80%, rgba(37, 99, 235, 0.08), transparent 35%),
+        var(--white);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 54px;
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      right: -80px;
+      bottom: -90px;
+      border-radius: 50%;
+      border: 35px solid rgba(37, 99, 235, 0.06);
+    }
+
+    .lesson-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #dbeafe;
+      color: var(--primary-dark);
+      border-radius: 999px;
+      padding: 7px 13px;
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 18px;
+    }
+
+    .hero h1 {
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1.05;
+      color: var(--navy);
+      max-width: 900px;
+      letter-spacing: -1.5px;
+    }
+
+    .hero h1 span {
+      color: var(--primary);
+    }
+
+    .hero-subtitle {
+      margin-top: 18px;
+      max-width: 850px;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .hero-meta {
+      margin-top: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .meta {
+      padding: 8px 13px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: white;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* =========================
+       SECTIONS
+    ========================== */
+
+    .section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 34px;
+      margin-bottom: 24px;
+      box-shadow: 0 5px 20px rgba(15, 23, 42, 0.035);
+    }
+
+    .section-header {
+      margin-bottom: 24px;
+    }
+
+    .section-number {
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .section h2 {
+      margin-top: 4px;
+      color: var(--navy);
+      font-size: 28px;
+      line-height: 1.2;
+    }
+
+    .section h3 {
+      color: var(--navy);
+      margin: 25px 0 10px;
+      font-size: 20px;
+    }
+
+    .section p {
+      margin-bottom: 14px;
+    }
+
+    .section ul,
+    .section ol {
+      margin: 12px 0 18px 22px;
+    }
+
+    .section li {
+      margin-bottom: 8px;
+    }
+
+    strong {
+      color: var(--navy);
+    }
+
+    /* =========================
+       CARDS
+    ========================== */
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .info-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      background: #fff;
+      transition: transform 0.2s, box-shadow 0.2s, border 0.2s;
+    }
+
+    .info-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+      border-color: #bfdbfe;
+    }
+
+    .icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 20px;
+      margin-bottom: 13px;
+    }
+
+    .info-card h4 {
+      color: var(--navy);
+      margin-bottom: 7px;
+    }
+
+    .info-card p {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0;
+    }
+
+    /* =========================
+       OBJECTIVE LIST
+    ========================== */
+
+    .objective {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .objective:last-child {
+      border-bottom: none;
+    }
+
+    .check {
+      width: 25px;
+      height: 25px;
+      flex: 0 0 25px;
+      border-radius: 50%;
+      background: #dcfce7;
+      color: var(--success);
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 13px;
+    }
+
+    /* =========================
+       CODE
+    ========================== */
+
+    .code-wrap {
+      margin: 18px 0;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #0b1220;
+      border: 1px solid #1e293b;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+    }
+
+    .code-top {
+      background: #111827;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #94a3b8;
+      font-size: 12px;
+    }
+
+    .code-top button {
+      border: 1px solid #334155;
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 5px 9px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    pre {
+      margin: 0;
+      padding: 20px;
+      overflow-x: auto;
+      color: #dbeafe;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .inline-code {
+      background: #eff6ff;
+      color: #1d4ed8;
+      padding: 2px 6px;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 0.92em;
+    }
+
+    /* =========================
+       NOTE / WARNING / SUCCESS
+    ========================== */
+
+    .callout {
+      padding: 18px 20px;
+      border-radius: 12px;
+      margin: 18px 0;
+      border-left: 4px solid;
+    }
+
+    .callout.info {
+      background: #eff6ff;
+      border-color: var(--primary);
+    }
+
+    .callout.success {
+      background: #f0fdf4;
+      border-color: var(--success);
+    }
+
+    .callout.warning {
+      background: #fffbeb;
+      border-color: var(--warning);
+    }
+
+    .callout.danger {
+      background: #fef2f2;
+      border-color: var(--danger);
+    }
+
+    .callout strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* =========================
+       TABLES
+    ========================== */
+
+    .table-wrap {
+      overflow-x: auto;
+      margin: 18px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 650px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--border);
+      padding: 13px 14px;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f8fafc;
+      color: var(--navy);
+      font-weight: 800;
+    }
+
+    tr:hover td {
+      background: #fafcff;
+    }
+
+    /* =========================
+       DATABASE VISUAL
+    ========================== */
+
+    .architecture {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: 12px;
+      margin: 25px 0;
+    }
+
+    .arch-box {
+      min-height: 125px;
+      padding: 20px;
+      border-radius: 15px;
+      border: 1px solid var(--border);
+      background: white;
+      text-align: center;
+      display: grid;
+      place-items: center;
+    }
+
+    .arch-box strong {
+      display: block;
+      font-size: 16px;
+    }
+
+    .arch-box small {
+      color: var(--muted);
+    }
+
+    .arrow {
+      font-size: 27px;
+      color: var(--primary);
+      animation: pulseArrow 1.6s infinite;
+    }
+
+    @keyframes pulseArrow {
+      50% {
+        transform: translateX(5px);
+        opacity: 0.55;
+      }
+    }
+
+    /* =========================
+       MONGODB DOCUMENT
+    ========================== */
+
+    .document-demo {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 20px;
+    }
+
+    .mongo-doc {
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      overflow: hidden;
+      background: white;
+    }
+
+    .mongo-head {
+      background: #f1f5f9;
+      padding: 11px 15px;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--navy);
+    }
+
+    .mongo-body {
+      padding: 18px;
+      font-family: monospace;
+      font-size: 13px;
+      background: #fbfdff;
+    }
+
+    .key {
+      color: #2563eb;
+    }
+
+    .string {
+      color: #15803d;
+    }
+
+    .number {
+      color: #b45309;
+    }
+
+    /* =========================
+       CRUD
+    ========================== */
+
+    .crud-card {
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .crud-card.selected {
+      border-color: var(--primary);
+      background: #eff6ff;
+      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.1);
+    }
+
+    .crud-method {
+      font-family: monospace;
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--primary);
+      margin-bottom: 7px;
+    }
+
+    .crud-detail {
+      margin-top: 20px;
+      background: #f8fafc;
+      border-radius: 14px;
+      padding: 22px;
+      border: 1px solid var(--border);
+      min-height: 130px;
+    }
+
+    /* =========================
+       MONGOOSE FLOW
+    ========================== */
+
+    .flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 28px 0;
+    }
+
+    .flow-node {
+      padding: 14px 18px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: white;
+      color: var(--navy);
+      font-weight: 800;
+      font-size: 13px;
+      box-shadow: 0 5px 15px rgba(15, 23, 42, 0.05);
+    }
+
+    .flow-node.active {
+      background: #dbeafe;
+      border-color: #93c5fd;
+      color: var(--primary-dark);
+    }
+
+    .flow-arrow {
+      color: var(--primary);
+      font-size: 20px;
+    }
+
+    /* =========================
+       INTERACTIVE LAB
+    ========================== */
+
+    .lab {
+      background:
+        linear-gradient(135deg, #f8fbff, #eff6ff);
+      border: 1px solid #bfdbfe;
+      border-radius: 18px;
+      padding: 24px;
+    }
+
+    .lab-controls {
+      display: grid;
+      grid-template-columns: 160px 1fr auto;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .lab select,
+    .lab input,
+    .lab textarea {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      background: white;
+      border-radius: 9px;
+      padding: 10px 12px;
+      outline: none;
+    }
+
+    .lab textarea {
+      min-height: 110px;
+      resize: vertical;
+      margin-bottom: 12px;
+      font-family: monospace;
+    }
+
+    .btn {
+      border: none;
+      background: var(--primary);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-weight: 800;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn.secondary {
+      background: white;
+      color: var(--primary);
+      border: 1px solid #bfdbfe;
+    }
+
+    .response-box {
+      background: #0b1220;
+      color: #dbeafe;
+      border-radius: 12px;
+      padding: 18px;
+      min-height: 150px;
+      font-family: monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .status-success {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* =========================
+       QUIZ
+    ========================== */
+
+    .quiz-question {
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 14px;
+    }
+
+    .quiz-question h4 {
+      color: var(--navy);
+      margin-bottom: 12px;
+    }
+
+    .option {
+      display: block;
+      width: 100%;
+      text-align: left;
+      border: 1px solid var(--border);
+      background: white;
+      padding: 10px 12px;
+      border-radius: 9px;
+      margin: 7px 0;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    .option:hover {
+      border-color: #93c5fd;
+      background: #f8fbff;
+    }
+
+    .option.correct {
+      background: #dcfce7;
+      border-color: #86efac;
+      color: #166534;
+    }
+
+    .option.wrong {
+      background: #fee2e2;
+      border-color: #fca5a5;
+      color: #991b1b;
+    }
+
+    .quiz-result {
+      display: none;
+      margin-top: 18px;
+      padding: 18px;
+      background: #eff6ff;
+      border-radius: 12px;
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    /* =========================
+       ACCORDION
+    ========================== */
+
+    .accordion {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .accordion-btn {
+      width: 100%;
+      border: none;
+      background: white;
+      padding: 16px 18px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      color: var(--navy);
+      font-weight: 800;
+    }
+
+    .accordion-content {
+      display: none;
+      padding: 0 18px 18px;
+      color: var(--muted);
+      background: #fbfdff;
+    }
+
+    .accordion.open .accordion-content {
+      display: block;
+    }
+
+    /* =========================
+       CHALLENGE
+    ========================== */
+
+    .challenge {
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 18px;
+      padding: 28px;
+    }
+
+    .challenge h3 {
+      color: white;
+      margin-top: 0;
+    }
+
+    .challenge ul {
+      margin-left: 20px;
+    }
+
+    /* =========================
+       COMPLETE
+    ========================== */
+
+    .completion {
+      text-align: center;
+      padding: 38px;
+      background:
+        radial-gradient(circle at top, rgba(96, 165, 250, 0.18), transparent 40%),
+        white;
+    }
+
+    .completion-icon {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #dcfce7;
+      color: var(--success);
+      font-size: 30px;
+    }
+
+    .completion h2 {
+      margin-bottom: 10px;
+    }
+
+    .completion p {
+      color: var(--muted);
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    /* =========================
+       MOBILE
+    ========================== */
+
+    .mobile-toc {
+      display: none;
+      margin-bottom: 18px;
+    }
+
+    .mobile-toc button {
+      width: 100%;
+      background: white;
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 800;
+      color: var(--navy);
+    }
+
+    @media (max-width: 1050px) {
+      .page {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .mobile-toc {
+        display: block;
+      }
+
+      .grid-3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .top-progress {
+        display: none;
+      }
+
+      .hero {
+        padding: 30px 22px;
+      }
+
+      .section {
+        padding: 23px 18px;
+      }
+
+      .grid-2,
+      .grid-3,
+      .document-demo {
+        grid-template-columns: 1fr;
+      }
+
+      .architecture {
+        grid-template-columns: 1fr;
+      }
+
+      .arrow {
+        transform: rotate(90deg);
+        text-align: center;
+      }
+
+      .lab-controls {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-buttons {
+        flex-direction: column;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================
+       TOP BAR
+  ========================== -->
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="#" class="brand">
+        <div class="brand-mark">Z</div>
+        <span>ZENSUS</span>
+      </a>
+
+      <div class="top-progress">
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-label" id="progressLabel">0% Complete</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="page">
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <aside class="sidebar">
+      <div class="sidebar-title">Lesson 12 Contents</div>
+
+      <nav class="toc" id="toc">
+        <a href="#overview">Overview</a>
+        <a href="#objectives">Learning Objectives</a>
+        <a href="#database">What Is a Database?</a>
+        <a href="#sql-nosql">SQL vs NoSQL</a>
+        <a href="#mongodb">What Is MongoDB?</a>
+        <a href="#documents">Documents & Collections</a>
+        <a href="#mongodb-architecture">MongoDB Architecture</a>
+        <a href="#crud">MongoDB CRUD</a>
+        <a href="#mongoose">What Is Mongoose?</a>
+        <a href="#connection">Connecting Mongoose</a>
+        <a href="#schema">Mongoose Schema</a>
+        <a href="#model">Mongoose Model</a>
+        <a href="#create">Create Documents</a>
+        <a href="#read">Read Documents</a>
+        <a href="#update">Update Documents</a>
+        <a href="#delete">Delete Documents</a>
+        <a href="#validation">Validation</a>
+        <a href="#relationships">Relationships</a>
+        <a href="#express">Express + MongoDB</a>
+        <a href="#full-api">Complete CRUD API</a>
+        <a href="#interactive">Interactive MongoDB Lab</a>
+        <a href="#mistakes">Common Mistakes</a>
+        <a href="#interview">Interview Questions</a>
+        <a href="#quiz">Quiz</a>
+        <a href="#challenge">Coding Challenge</a>
+        <a href="#complete">Complete Lesson</a>
+      </nav>
+    </aside>
+
+    <!-- =========================
+         MAIN CONTENT
+    ========================== -->
+
+    <main class="content">
+
+      <div class="mobile-toc">
+        <button onclick="document.querySelector('.sidebar').style.display =
+          document.querySelector('.sidebar').style.display === 'block' ? 'none' : 'block'">
+          ☰ Lesson Contents
+        </button>
+      </div>
+
+      <!-- HERO -->
+
+      <section class="hero" id="overview" data-section>
+        <div class="lesson-badge">NODE.JS • LESSON 12</div>
+
+        <h1>
+          Database & <span>MongoDB</span> with Mongoose
+        </h1>
+
+        <p class="hero-subtitle">
+          Learn how Node.js applications store, retrieve, update, and delete
+          persistent data using MongoDB and Mongoose — from database fundamentals
+          to building a complete CRUD backend.
+        </p>
+
+        <div class="hero-meta">
+          <div class="meta">⏱ Deep Learning</div>
+          <div class="meta">🗄 MongoDB</div>
+          <div class="meta">🔗 Mongoose</div>
+          <div class="meta">⚡ Node.js</div>
+          <div class="meta">🛠 CRUD</div>
+          <div class="meta">📚 Beginner → Intermediate</div>
+        </div>
+      </section>
+
+      <!-- OBJECTIVES -->
+
+      <section class="section" id="objectives" data-section>
+        <div class="section-header">
+          <div class="section-number">01 • Learning Goals</div>
+          <h2>What You Will Learn</h2>
+        </div>
+
+        <div class="objective">
+          <div class="check">✓</div>
+          <div>Understand why applications need databases and persistent storage.</div>
+        </div>
+
+        <div class="objective">
+          <div class="check">✓</div>
+          <div>Understand the difference between SQL and NoSQL databases.</div>
+        </div>
+
+        <div class="objective">
+          <div class="check">✓</div>
+          <div>Understand MongoDB databases, collections, documents, and fields.</div>
+        </div>
+
+        <div class="objective">
+          <div class="check">✓</div>
+          <div>Understand BSON, ObjectId, and MongoDB's document-oriented approach.</div>
+        </div>
+
+        <div class="objective">
+          <div class="check">✓</div>
+          <div>Install and connect MongoDB with a Node.js application.</div>
+        </div>
+
+        <div class="objective">
+          <div class="check">✓</div>
+          <div>Create Mongoose schemas and models.</div>
+        </div>
+
+        <div class="objective">
+          <div class="check">✓</div>
+          <div>Perform Create, Read, Update, and Delete operations.</div>
+        </div>
+
+        <div class="objective">
+          <div class="check">✓</div>
+          <div>Add validation and handle database errors.</div>
+        </div>
+
+        <div class="objective">
+          <div class="check">✓</div>
+          <div>Connect Express REST APIs to MongoDB using Mongoose.</div>
+        </div>
+      </section>
+
+      <!-- DATABASE -->
+
+      <section class="section" id="database" data-section>
+        <div class="section-header">
+          <div class="section-number">02 • Fundamentals</div>
+          <h2>What Is a Database?</h2>
+        </div>
+
+        <p>
+          A <strong>database</strong> is a system used to store, organize,
+          manage, and retrieve data efficiently.
+        </p>
+
+        <p>
+          Imagine an application such as an online shopping website. It needs
+          to remember users, products, orders, payments, reviews, and many other
+          pieces of information.
+        </p>
+
+        <p>
+          If this information were stored only in JavaScript variables, it would
+          disappear when the server stops.
+        </p>
+
+        <div class="callout info">
+          <strong>Important Idea</strong>
+          Variables store data temporarily in memory. A database provides
+          persistent storage so data can survive application restarts.
+        </div>
+
+        <div class="grid grid-3">
+
+          <div class="info-card">
+            <div class="icon">💾</div>
+            <h4>Persistent</h4>
+            <p>
+              Data remains available even after the Node.js process stops.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <div class="icon">🔎</div>
+            <h4>Searchable</h4>
+            <p>
+              Applications can efficiently find specific records.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <div class="icon">📈</div>
+            <h4>Scalable</h4>
+            <p>
+              Databases can handle large amounts of application data.
+            </p>
+          </div>
+
+        </div>
+
+        <h3>Without a Database</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>server.js</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code>let users = [
+  { name: "Asha", email: "asha@example.com" },
+  { name: "Ravi", email: "ravi@example.com" }
+];</code></pre>
+        </div>
+
+        <p>
+          This works temporarily, but when the server restarts,
+          the data stored in the variable is lost.
+        </p>
+
+        <h3>With a Database</h3>
+
+        <p>
+          The Node.js application sends data to a database. The database
+          stores the information and returns it whenever the application asks.
+        </p>
+
+      </section>
+
+      <!-- SQL VS NOSQL -->
+
+      <section class="section" id="sql-nosql" data-section>
+        <div class="section-header">
+          <div class="section-number">03 • Database Types</div>
+          <h2>SQL vs NoSQL</h2>
+        </div>
+
+        <p>
+          Databases are commonly divided into two broad categories:
+          <strong>relational databases</strong> and <strong>NoSQL databases</strong>.
+        </p>
+
+        <div class="grid grid-2">
+
+          <div class="info-card">
+            <div class="icon">📊</div>
+            <h4>SQL / Relational</h4>
+
+            <p>
+              Data is generally organized into tables containing rows and columns.
+            </p>
+
+            <ul>
+              <li>Tables</li>
+              <li>Rows</li>
+              <li>Columns</li>
+              <li>Relationships</li>
+              <li>Structured schemas</li>
+              <li>SQL queries</li>
+            </ul>
+
+            <p>
+              Examples:
+              PostgreSQL, MySQL, Microsoft SQL Server, Oracle Database.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <div class="icon">🍃</div>
+            <h4>NoSQL / Document</h4>
+
+            <p>
+              Data can be stored as flexible documents rather than traditional
+              rows and columns.
+            </p>
+
+            <ul>
+              <li>Documents</li>
+              <li>Collections</li>
+              <li>Flexible structure</li>
+              <li>Document-oriented data</li>
+              <li>JSON-like representation</li>
+            </ul>
+
+            <p>
+              Example:
+              <strong>MongoDB</strong>.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Concept</th>
+                <th>SQL</th>
+                <th>MongoDB</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>Structure</td>
+                <td>Tables</td>
+                <td>Collections</td>
+              </tr>
+
+              <tr>
+                <td>Record</td>
+                <td>Row</td>
+                <td>Document</td>
+              </tr>
+
+              <tr>
+                <td>Field</td>
+                <td>Column</td>
+                <td>Field</td>
+              </tr>
+
+              <tr>
+                <td>Query language</td>
+                <td>SQL</td>
+                <td>MongoDB query/document operations</td>
+              </tr>
+
+              <tr>
+                <td>Schema</td>
+                <td>Usually strongly defined</td>
+                <td>Flexible document structure</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout warning">
+          <strong>Do not think "NoSQL" means "no structure."</strong>
+          MongoDB allows flexible document structures, but good applications
+          still define and validate the shape of their data.
+        </div>
+      </section>
+
+      <!-- MONGODB -->
+
+      <section class="section" id="mongodb" data-section>
+        <div class="section-header">
+          <div class="section-number">04 • MongoDB</div>
+          <h2>What Is MongoDB?</h2>
+        </div>
+
+        <p>
+          <strong>MongoDB</strong> is a document-oriented NoSQL database.
+          Instead of storing application records as traditional table rows,
+          MongoDB stores them as documents inside collections.
+        </p>
+
+        <p>
+          MongoDB documents look similar to JSON when represented in application
+          code, although MongoDB internally uses a binary representation called
+          <strong>BSON</strong>.
+        </p>
+
+        <div class="callout info">
+          <strong>Simple Mental Model</strong>
+          Database → Collection → Document → Field → Value
+        </div>
+
+        <div class="grid grid-3">
+
+          <div class="info-card">
+            <div class="icon">🗃️</div>
+            <h4>Database</h4>
+            <p>
+              Container for related collections.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <div class="icon">📁</div>
+            <h4>Collection</h4>
+            <p>
+              Group of related documents.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <div class="icon">📄</div>
+            <h4>Document</h4>
+            <p>
+              Individual record containing fields and values.
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- DOCUMENTS -->
+
+      <section class="section" id="documents" data-section>
+        <div class="section-header">
+          <div class="section-number">05 • Data Structure</div>
+          <h2>Documents & Collections</h2>
+        </div>
+
+        <p>
+          Suppose we are building a student management application.
+        </p>
+
+        <p>
+          We could create a database called:
+        </p>
+
+        <p>
+          <span class="inline-code">schoolDB</span>
+        </p>
+
+        <p>
+          Inside it, we could have a collection:
+        </p>
+
+        <p>
+          <span class="inline-code">students</span>
+        </p>
+
+        <p>
+          And the collection can contain documents such as:
+        </p>
+
+        <div class="document-demo">
+
+          <div class="mongo-doc">
+            <div class="mongo-head">
+              students collection
+            </div>
+
+            <div class="mongo-body">
+              {<br>
+              &nbsp;&nbsp;<span class="key">"name"</span>:
+              <span class="string">"Asha"</span>,<br>
+              &nbsp;&nbsp;<span class="key">"age"</span>:
+              <span class="number">21</span>,<br>
+              &nbsp;&nbsp;<span class="key">"course"</span>:
+              <span class="string">"AI"</span><br>
+              }
+            </div>
+          </div>
+
+          <div class="mongo-doc">
+            <div class="mongo-head">
+              Another document
+            </div>
+
+            <div class="mongo-body">
+              {<br>
+              &nbsp;&nbsp;<span class="key">"name"</span>:
+              <span class="string">"Ravi"</span>,<br>
+              &nbsp;&nbsp;<span class="key">"age"</span>:
+              <span class="number">22</span>,<br>
+              &nbsp;&nbsp;<span class="key">"course"</span>:
+              <span class="string">"CSE"</span><br>
+              }
+            </div>
+          </div>
+
+        </div>
+
+        <h3>What Is BSON?</h3>
+
+        <p>
+          BSON means <strong>Binary JSON</strong>.
+          MongoDB uses BSON internally because it supports additional data types
+          and efficient processing beyond ordinary JSON.
+        </p>
+
+        <h3>What Is ObjectId?</h3>
+
+        <p>
+          MongoDB commonly uses an <strong>ObjectId</strong> as the unique
+          identifier for a document.
+        </p>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>MongoDB document</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>{
+  "_id": ObjectId("66a123456789abcdef123456"),
+  "name": "Asha",
+  "email": "asha@example.com"
+}</code></pre>
+        </div>
+
+        <p>
+          The <span class="inline-code">_id</span> field uniquely identifies
+          the document within its collection.
+        </p>
+      </section>
+
+      <!-- ARCHITECTURE -->
+
+      <section class="section" id="mongodb-architecture" data-section>
+        <div class="section-header">
+          <div class="section-number">06 • Architecture</div>
+          <h2>How Node.js Talks to MongoDB</h2>
+        </div>
+
+        <p>
+          A browser normally does not directly communicate with MongoDB.
+          Instead, the request travels through the backend.
+        </p>
+
+        <div class="architecture">
+
+          <div class="arch-box">
+            <div>
+              <strong>Browser / Client</strong>
+              <small>React, HTML, mobile app</small>
+            </div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="arch-box">
+            <div>
+              <strong>Express API</strong>
+              <small>Routes + controllers</small>
+            </div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="arch-box">
+            <div>
+              <strong>MongoDB</strong>
+              <small>Persistent data</small>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="callout success">
+          <strong>Typical Flow</strong>
+          Client → HTTP Request → Express Route → Mongoose → MongoDB →
+          Mongoose → Express Response → Client
+        </div>
+      </section>
+
+      <!-- CRUD -->
+
+      <section class="section" id="crud" data-section>
+        <div class="section-header">
+          <div class="section-number">07 • CRUD</div>
+          <h2>MongoDB CRUD Operations</h2>
+        </div>
+
+        <p>
+          CRUD stands for:
+        </p>
+
+        <div class="grid grid-2">
+
+          <div class="info-card crud-card" data-crud="create" onclick="selectCrud('create')">
+            <div class="crud-method">CREATE</div>
+            <h4>Insert Data</h4>
+            <p>Add a new document.</p>
+          </div>
+
+          <div class="info-card crud-card" data-crud="read" onclick="selectCrud('read')">
+            <div class="crud-method">READ</div>
+            <h4>Find Data</h4>
+            <p>Retrieve documents.</p>
+          </div>
+
+          <div class="info-card crud-card" data-crud="update" onclick="selectCrud('update')">
+            <div class="crud-method">UPDATE</div>
+            <h4>Change Data</h4>
+            <p>Modify existing documents.</p>
+          </div>
+
+          <div class="info-card crud-card" data-crud="delete" onclick="selectCrud('delete')">
+            <div class="crud-method">DELETE</div>
+            <h4>Remove Data</h4>
+            <p>Delete documents.</p>
+          </div>
+
+        </div>
+
+        <div class="crud-detail" id="crudDetail">
+          <strong>Select a CRUD operation above.</strong>
+          <p style="margin-top:8px;color:#64748b;">
+            The explanation, Mongoose method, and typical REST method will appear here.
+          </p>
+        </div>
+      </section>
+
+      <!-- MONGOOSE -->
+
+      <section class="section" id="mongoose" data-section>
+        <div class="section-header">
+          <div class="section-number">08 • Mongoose</div>
+          <h2>What Is Mongoose?</h2>
+        </div>
+
+        <p>
+          <strong>Mongoose</strong> is an Object Data Modeling library for
+          MongoDB and Node.js.
+        </p>
+
+        <p>
+          It provides a convenient way to define the structure of application
+          data, validate values, create models, and perform database operations.
+        </p>
+
+        <div class="grid grid-3">
+
+          <div class="info-card">
+            <div class="icon">📐</div>
+            <h4>Schema</h4>
+            <p>
+              Defines the expected structure and rules for documents.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <div class="icon">🧠</div>
+            <h4>Model</h4>
+            <p>
+              Provides an interface for interacting with a MongoDB collection.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <div class="icon">✅</div>
+            <h4>Validation</h4>
+            <p>
+              Helps ensure application data follows defined rules.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="callout info">
+          <strong>Important</strong>
+          MongoDB itself is the database. Mongoose is a Node.js library that
+          helps your application work with MongoDB.
+        </div>
+
+        <div class="flow">
+
+          <div class="flow-node">Node.js</div>
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">Mongoose</div>
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">MongoDB Driver</div>
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">MongoDB</div>
+
+        </div>
+      </section>
+
+      <!-- CONNECTION -->
+
+      <section class="section" id="connection" data-section>
+        <div class="section-header">
+          <div class="section-number">09 • Connection</div>
+          <h2>Connecting Node.js to MongoDB</h2>
+        </div>
+
+        <h3>Step 1 — Create a Node.js Project</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>Terminal</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>mkdir mongodb-app
+cd mongodb-app
+
+npm init -y</code></pre>
+        </div>
+
+        <h3>Step 2 — Install Dependencies</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>Terminal</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>npm install express mongoose dotenv</code></pre>
+        </div>
+
+        <p>
+          Here:
+        </p>
+
+        <ul>
+          <li><strong>express</strong> → creates the backend API.</li>
+          <li><strong>mongoose</strong> → communicates with MongoDB.</li>
+          <li><strong>dotenv</strong> → loads environment variables.</li>
+        </ul>
+
+        <h3>Step 3 — Connection Code</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>server.js</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const express = require("express");
+const mongoose = require("mongoose");
+
+const app = express();
+
+app.use(express.json());
+
+mongoose
+  .connect("mongodb://127.0.0.1:27017/schoolDB")
+  .then(() => {
+    console.log("MongoDB connected");
+  })
+  .catch((error) => {
+    console.error("MongoDB connection failed:", error);
+  });
+
+app.listen(3000, () => {
+  console.log("Server running on port 3000");
+});</code></pre>
+        </div>
+
+        <div class="callout warning">
+          <strong>Production Tip</strong>
+          Do not hard-code database credentials or sensitive connection strings
+          directly inside source code. Use environment variables.
+        </div>
+
+        <h3>Using an Environment Variable</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>.env</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>MONGODB_URI=mongodb://127.0.0.1:27017/schoolDB</code></pre>
+        </div>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>server.js</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>require("dotenv").config();
+
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log("MongoDB connected");
+  })
+  .catch((error) => {
+    console.error(error);
+  });</code></pre>
+        </div>
+      </section>
+
+      <!-- SCHEMA -->
+
+      <section class="section" id="schema" data-section>
+        <div class="section-header">
+          <div class="section-number">10 • Schema</div>
+          <h2>Mongoose Schema</h2>
+        </div>
+
+        <p>
+          A Mongoose <strong>Schema</strong> describes the structure of documents
+          that your application expects.
+        </p>
+
+        <p>
+          For example, a user might have:
+        </p>
+
+        <ul>
+          <li>name</li>
+          <li>email</li>
+          <li>age</li>
+          <li>role</li>
+        </ul>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>models/User.js</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const mongoose = require("mongoose");
+
+const userSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  age: Number,
+  role: String
+});
+
+module.exports = userSchema;</code></pre>
+        </div>
+
+        <h3>Schema with Validation</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>User schema</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true
+  },
+
+  age: {
+    type: Number,
+    min: 18
+  },
+
+  role: {
+    type: String,
+    enum: ["student", "admin", "teacher"],
+    default: "student"
+  }
+});</code></pre>
+        </div>
+
+        <h3>Common Mongoose Schema Types</h3>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Example</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>String</td>
+                <td><code>name: String</code></td>
+                <td>Text</td>
+              </tr>
+
+              <tr>
+                <td>Number</td>
+                <td><code>age: Number</code></td>
+                <td>Numbers</td>
+              </tr>
+
+              <tr>
+                <td>Boolean</td>
+                <td><code>active: Boolean</code></td>
+                <td>True/false</td>
+              </tr>
+
+              <tr>
+                <td>Date</td>
+                <td><code>createdAt: Date</code></td>
+                <td>Date/time</td>
+              </tr>
+
+              <tr>
+                <td>Array</td>
+                <td><code>skills: [String]</code></td>
+                <td>List of values</td>
+              </tr>
+
+              <tr>
+                <td>ObjectId</td>
+                <td><code>userId: mongoose.Schema.Types.ObjectId</code></td>
+                <td>Document reference</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- MODEL -->
+
+      <section class="section" id="model" data-section>
+        <div class="section-header">
+          <div class="section-number">11 • Model</div>
+          <h2>Mongoose Model</h2>
+        </div>
+
+        <p>
+          A <strong>Model</strong> is created from a schema.
+          It provides methods for interacting with a MongoDB collection.
+        </p>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>User.js</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const mongoose = require("mongoose");
+
+const userSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  age: Number
+});
+
+const User = mongoose.model("User", userSchema);
+
+module.exports = User;</code></pre>
+        </div>
+
+        <div class="callout success">
+          <strong>Remember This Relationship</strong>
+          Schema defines the structure → Model uses the schema →
+          Model communicates with the MongoDB collection.
+        </div>
+      </section>
+
+      <!-- CREATE -->
+
+      <section class="section" id="create" data-section>
+        <div class="section-header">
+          <div class="section-number">12 • Create</div>
+          <h2>Creating Documents</h2>
+        </div>
+
+        <p>
+          To add a new document, you can use <span class="inline-code">create()</span>
+          or create an instance and call <span class="inline-code">save()</span>.
+        </p>
+
+        <h3>Using create()</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>Create user</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const user = await User.create({
+  name: "Asha",
+  email: "asha@example.com",
+  age: 21
+});
+
+console.log(user);</code></pre>
+        </div>
+
+        <h3>Using save()</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>save()</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const user = new User({
+  name: "Ravi",
+  email: "ravi@example.com",
+  age: 22
+});
+
+await user.save();</code></pre>
+        </div>
+
+        <div class="callout info">
+          <strong>What happens?</strong>
+          Mongoose validates the document according to the schema and then
+          sends the operation to MongoDB.
+        </div>
+      </section>
+
+      <!-- READ -->
+
+      <section class="section" id="read" data-section>
+        <div class="section-header">
+          <div class="section-number">13 • Read</div>
+          <h2>Reading Documents</h2>
+        </div>
+
+        <h3>Find All Documents</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>find()</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const users = await User.find();
+
+console.log(users);</code></pre>
+        </div>
+
+        <h3>Find One Document</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>findOne()</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const user = await User.findOne({
+  email: "asha@example.com"
+});
+
+console.log(user);</code></pre>
+        </div>
+
+        <h3>Find By ID</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>findById()</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const user = await User.findById(userId);
+
+console.log(user);</code></pre>
+        </div>
+
+        <h3>Filtering</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>Filtering documents</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const users = await User.find({
+  age: { $gte: 18 }
+});</code></pre>
+        </div>
+
+        <p>
+          Here <span class="inline-code">$gte</span> means
+          "greater than or equal to."
+        </p>
+      </section>
+
+      <!-- UPDATE -->
+
+      <section class="section" id="update" data-section>
+        <div class="section-header">
+          <div class="section-number">14 • Update</div>
+          <h2>Updating Documents</h2>
+        </div>
+
+        <p>
+          Mongoose provides several update methods.
+        </p>
+
+        <h3>findByIdAndUpdate()</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>Update user</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const updatedUser = await User.findByIdAndUpdate(
+  userId,
+  {
+    age: 22
+  },
+  {
+    new: true,
+    runValidators: true
+  }
+);
+
+console.log(updatedUser);</code></pre>
+        </div>
+
+        <p>
+          <span class="inline-code">new: true</span> tells Mongoose to return
+          the updated document rather than the old version.
+        </p>
+
+        <p>
+          <span class="inline-code">runValidators: true</span> ensures schema
+          validators are applied during this update operation.
+        </p>
+
+        <h3>Updating Multiple Documents</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>updateMany()</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>await User.updateMany(
+  { role: "student" },
+  { $set: { active: true } }
+);</code></pre>
+        </div>
+      </section>
+
+      <!-- DELETE -->
+
+      <section class="section" id="delete" data-section>
+        <div class="section-header">
+          <div class="section-number">15 • Delete</div>
+          <h2>Deleting Documents</h2>
+        </div>
+
+        <h3>Delete One</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>findByIdAndDelete()</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const deletedUser = await User.findByIdAndDelete(userId);
+
+console.log(deletedUser);</code></pre>
+        </div>
+
+        <h3>Delete Many</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>deleteMany()</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>await User.deleteMany({
+  active: false
+});</code></pre>
+        </div>
+
+        <div class="callout danger">
+          <strong>Be Careful</strong>
+          Delete operations permanently remove documents unless your application
+          has a separate backup or soft-delete strategy.
+        </div>
+      </section>
+
+      <!-- VALIDATION -->
+
+      <section class="section" id="validation" data-section>
+        <div class="section-header">
+          <div class="section-number">16 • Data Quality</div>
+          <h2>Validation & Error Handling</h2>
+        </div>
+
+        <p>
+          Validation ensures that incoming data follows the rules expected by
+          your application.
+        </p>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>Validation example</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, "Name is required"],
+    minlength: 2,
+    maxlength: 50
+  },
+
+  email: {
+    type: String,
+    required: [true, "Email is required"],
+    unique: true
+  },
+
+  age: {
+    type: Number,
+    min: [18, "Age must be at least 18"]
+  }
+});</code></pre>
+        </div>
+
+        <h3>Express Error Handling</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>Controller example</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>app.post("/api/users", async (req, res) => {
+  try {
+    const user = await User.create(req.body);
+
+    res.status(201).json(user);
+  } catch (error) {
+    res.status(400).json({
+      message: error.message
+    });
+  }
+});</code></pre>
+        </div>
+
+        <div class="callout warning">
+          <strong>Never trust client data.</strong>
+          Data sent from a browser or API client should be validated before
+          being stored or used.
+        </div>
+      </section>
+
+      <!-- RELATIONSHIPS -->
+
+      <section class="section" id="relationships" data-section>
+        <div class="section-header">
+          <div class="section-number">17 • Relationships</div>
+          <h2>Relationships Between Documents</h2>
+        </div>
+
+        <p>
+          Real applications often contain related data.
+        </p>
+
+        <p>
+          For example:
+        </p>
+
+        <ul>
+          <li>A user can have many orders.</li>
+          <li>A student can enroll in many courses.</li>
+          <li>A product can have many reviews.</li>
+        </ul>
+
+        <h3>ObjectId Reference</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>Order schema</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const orderSchema = new mongoose.Schema({
+  product: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
+    required: true
+  },
+
+  quantity: {
+    type: Number,
+    required: true
+  }
+});</code></pre>
+        </div>
+
+        <h3>populate()</h3>
+
+        <p>
+          Mongoose can use <span class="inline-code">populate()</span>
+          to replace referenced ObjectIds with related documents.
+        </p>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>populate()</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const orders = await Order.find()
+  .populate("product");</code></pre>
+        </div>
+
+        <div class="callout info">
+          <strong>Concept</strong>
+          MongoDB does not require every relationship to be represented like
+          a traditional SQL foreign key. Applications can model relationships
+          using references or embedded documents depending on the use case.
+        </div>
+      </section>
+
+      <!-- EXPRESS -->
+
+      <section class="section" id="express" data-section>
+        <div class="section-header">
+          <div class="section-number">18 • Integration</div>
+          <h2>Express + MongoDB + Mongoose</h2>
+        </div>
+
+        <p>
+          Now combine the technologies:
+        </p>
+
+        <div class="architecture">
+
+          <div class="arch-box">
+            <div>
+              <strong>Client</strong>
+              <small>GET / POST / PATCH</small>
+            </div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="arch-box">
+            <div>
+              <strong>Express</strong>
+              <small>Routes</small>
+            </div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="arch-box">
+            <div>
+              <strong>Mongoose</strong>
+              <small>Schema + Model</small>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="architecture">
+
+          <div class="arch-box">
+            <div>
+              <strong>MongoDB</strong>
+              <small>Persistent storage</small>
+            </div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="arch-box">
+            <div>
+              <strong>Mongoose</strong>
+              <small>Database result</small>
+            </div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="arch-box">
+            <div>
+              <strong>Express Response</strong>
+              <small>JSON</small>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- COMPLETE API -->
+
+      <section class="section" id="full-api" data-section>
+        <div class="section-header">
+          <div class="section-number">19 • Complete Project</div>
+          <h2>Complete User CRUD API</h2>
+        </div>
+
+        <p>
+          The following example connects Express, Mongoose, MongoDB, validation,
+          and REST API operations into one small application.
+        </p>
+
+        <h3>Project Structure</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>Project</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>mongodb-app/
+│
+├── models/
+│   └── User.js
+│
+├── .env
+├── server.js
+├── package.json
+└── node_modules/</code></pre>
+        </div>
+
+        <h3>User Model</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>models/User.js</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const mongoose = require("mongoose");
+
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true
+    },
+
+    age: {
+      type: Number,
+      min: 18
+    }
+  },
+  {
+    timestamps: true
+  }
+);
+
+module.exports = mongoose.model("User", userSchema);</code></pre>
+        </div>
+
+        <h3>Complete Server</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>server.js</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>require("dotenv").config();
+
+const express = require("express");
+const mongoose = require("mongoose");
+
+const User = require("./models/User");
+
+const app = express();
+
+app.use(express.json());
+
+/* =========================
+   DATABASE CONNECTION
+========================= */
+
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log("MongoDB connected");
+  })
+  .catch((error) => {
+    console.error("Database connection error:", error);
+  });
+
+/* =========================
+   CREATE
+========================= */
+
+app.post("/api/users", async (req, res) => {
+  try {
+    const user = await User.create(req.body);
+
+    res.status(201).json(user);
+  } catch (error) {
+    res.status(400).json({
+      message: error.message
+    });
+  }
+});
+
+/* =========================
+   READ ALL
+========================= */
+
+app.get("/api/users", async (req, res) => {
+  try {
+    const users = await User.find();
+
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch users"
+    });
+  }
+});
+
+/* =========================
+   READ ONE
+========================= */
+
+app.get("/api/users/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found"
+      });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(400).json({
+      message: "Invalid user ID"
+    });
+  }
+});
+
+/* =========================
+   UPDATE
+========================= */
+
+app.patch("/api/users/:id", async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+        runValidators: true
+      }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found"
+      });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(400).json({
+      message: error.message
+    });
+  }
+});
+
+/* =========================
+   DELETE
+========================= */
+
+app.delete("/api/users/:id", async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found"
+      });
+    }
+
+    res.status(200).json({
+      message: "User deleted successfully"
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: "Invalid user ID"
+    });
+  }
+});
+
+/* =========================
+   SERVER
+========================= */
+
+app.listen(3000, () => {
+  console.log("Server running on port 3000");
+});</code></pre>
+        </div>
+
+        <div class="callout success">
+          <strong>What you have built</strong>
+          You now have a real REST-style backend that persists user data in
+          MongoDB instead of keeping it only inside JavaScript memory.
+        </div>
+      </section>
+
+      <!-- INTERACTIVE LAB -->
+
+      <section class="section" id="interactive" data-section>
+        <div class="section-header">
+          <div class="section-number">20 • Interactive Lab</div>
+          <h2>MongoDB CRUD Simulator</h2>
+        </div>
+
+        <p>
+          This simulator does not connect to a real MongoDB server.
+          Instead, it demonstrates how CRUD operations conceptually change
+          documents.
+        </p>
+
+        <div class="lab">
+
+          <div class="lab-controls">
+
+            <select id="mongoOperation">
+              <option value="create">CREATE</option>
+              <option value="read">READ</option>
+              <option value="update">UPDATE</option>
+              <option value="delete">DELETE</option>
+            </select>
+
+            <input
+              id="mongoName"
+              placeholder="Document name"
+              value="Asha"
+            />
+
+            <button class="btn" onclick="runMongoSimulation()">
+              Execute
+            </button>
+
+          </div>
+
+          <div class="response-box" id="mongoOutput">
+MongoDB Simulator Ready
+
+Collection: users
+
+Try CREATE, READ, UPDATE, or DELETE.
+          </div>
+
+        </div>
+      </section>
+
+      <!-- QUERY EXAMPLES -->
+
+      <section class="section" data-section>
+        <div class="section-header">
+          <div class="section-number">21 • Querying</div>
+          <h2>Useful Mongoose Query Patterns</h2>
+        </div>
+
+        <h3>Sorting</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>sort()</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const users = await User.find()
+  .sort({ age: -1 });</code></pre>
+        </div>
+
+        <p>
+          <span class="inline-code">-1</span> means descending order and
+          <span class="inline-code">1</span> means ascending order.
+        </p>
+
+        <h3>Limit Results</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>limit()</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const users = await User.find()
+  .limit(10);</code></pre>
+        </div>
+
+        <h3>Select Specific Fields</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>select()</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const users = await User.find()
+  .select("name email");</code></pre>
+        </div>
+
+        <h3>Chaining Queries</h3>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>Mongoose query</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const users = await User.find({
+  age: { $gte: 18 }
+})
+.sort({ age: -1 })
+.limit(10)
+.select("name email age");</code></pre>
+        </div>
+      </section>
+
+      <!-- INDEXING -->
+
+      <section class="section" data-section>
+        <div class="section-header">
+          <div class="section-number">22 • Performance</div>
+          <h2>Indexes</h2>
+        </div>
+
+        <p>
+          An <strong>index</strong> helps MongoDB locate matching documents
+          more efficiently for supported queries.
+        </p>
+
+        <p>
+          For example, if your application frequently searches users by email,
+          an index can be useful.
+        </p>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>Schema index</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const userSchema = new mongoose.Schema({
+  name: String,
+
+  email: {
+    type: String,
+    required: true,
+    unique: true
+  }
+});</code></pre>
+        </div>
+
+        <div class="callout warning">
+          <strong>Trade-off</strong>
+          Indexes can improve reads, but they also consume storage and can add
+          overhead to writes. Index only fields that benefit from your actual
+          query patterns.
+        </div>
+      </section>
+
+      <!-- TIMESTAMPS -->
+
+      <section class="section" data-section>
+        <div class="section-header">
+          <div class="section-number">23 • Practical Feature</div>
+          <h2>Mongoose Timestamps</h2>
+        </div>
+
+        <p>
+          Mongoose can automatically maintain creation and update timestamps.
+        </p>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>timestamps</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>const userSchema = new mongoose.Schema(
+  {
+    name: String,
+    email: String
+  },
+  {
+    timestamps: true
+  }
+);</code></pre>
+        </div>
+
+        <p>
+          The document will then have fields such as:
+        </p>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>Document</span>
+            <button onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>{
+  "_id": "...",
+  "name": "Asha",
+  "email": "asha@example.com",
+  "createdAt": "...",
+  "updatedAt": "..."
+}</code></pre>
+        </div>
+      </section>
+
+      <!-- COMMON MISTAKES -->
+
+      <section class="section" id="mistakes" data-section>
+        <div class="section-header">
+          <div class="section-number">24 • Debugging</div>
+          <h2>Common MongoDB & Mongoose Mistakes</h2>
+        </div>
+
+        <div class="grid grid-2">
+
+          <div class="info-card">
+            <h4>❌ Forgetting express.json()</h4>
+            <p>
+              Then JSON request bodies may not be available through
+              <span class="inline-code">req.body</span>.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <h4>❌ Wrong MongoDB URI</h4>
+            <p>
+              Verify the hostname, port, database name, credentials,
+              and network configuration.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <h4>❌ Not handling errors</h4>
+            <p>
+              Database operations are asynchronous and can fail.
+              Use proper try/catch or centralized error handling.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <h4>❌ Trusting client input</h4>
+            <p>
+              Always validate and sanitize application data before storing it.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <h4>❌ Ignoring indexes</h4>
+            <p>
+              Large datasets can make repeated queries expensive without
+              appropriate indexes.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <h4>❌ Hard-coding secrets</h4>
+            <p>
+              Keep database credentials and connection strings outside source
+              code.
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- INTERVIEW -->
+
+      <section class="section" id="interview" data-section>
+        <div class="section-header">
+          <div class="section-number">25 • Interview Preparation</div>
+          <h2>MongoDB & Mongoose Interview Questions</h2>
+        </div>
+
+        <div class="accordion">
+          <button class="accordion-btn">
+            What is MongoDB?
+            <span>+</span>
+          </button>
+          <div class="accordion-content">
+            MongoDB is a document-oriented NoSQL database that stores data
+            as BSON documents inside collections.
+          </div>
+        </div>
+
+        <div class="accordion">
+          <button class="accordion-btn">
+            What is a collection?
+            <span>+</span>
+          </button>
+          <div class="accordion-content">
+            A collection is a group of MongoDB documents. It is roughly
+            comparable to a table in a relational database, although the
+            underlying data model is different.
+          </div>
+        </div>
+
+        <div class="accordion">
+          <button class="accordion-btn">
+            What is a MongoDB document?
+            <span>+</span>
+          </button>
+          <div class="accordion-content">
+            A document is an individual record stored in a MongoDB collection.
+            It contains fields and values.
+          </div>
+        </div>
+
+        <div class="accordion">
+          <button class="accordion-btn">
+            What is Mongoose?
+            <span>+</span>
+          </button>
+          <div class="accordion-content">
+            Mongoose is a Node.js library that provides schemas, models,
+            validation, and convenient database operations for MongoDB.
+          </div>
+        </div>
+
+        <div class="accordion">
+          <button class="accordion-btn">
+            Schema vs Model?
+            <span>+</span>
+          </button>
+          <div class="accordion-content">
+            A schema describes the structure and rules for documents.
+            A model is created from the schema and provides an interface
+            for interacting with a MongoDB collection.
+          </div>
+        </div>
+
+        <div class="accordion">
+          <button class="accordion-btn">
+            What is ObjectId?
+            <span>+</span>
+          </button>
+          <div class="accordion-content">
+            ObjectId is a BSON type commonly used by MongoDB as a unique
+            identifier for documents.
+          </div>
+        </div>
+
+        <div class="accordion">
+          <button class="accordion-btn">
+            What is populate()?
+            <span>+</span>
+          </button>
+          <div class="accordion-content">
+            populate() allows Mongoose to replace referenced ObjectIds with
+            related documents when the relationship is defined using refs.
+          </div>
+        </div>
+
+        <div class="accordion">
+          <button class="accordion-btn">
+            What is the difference between find(), findOne(), and findById()?
+            <span>+</span>
+          </button>
+          <div class="accordion-content">
+            find() returns matching documents, findOne() returns one matching
+            document, and findById() looks up a document using its identifier.
+          </div>
+        </div>
+
+        <div class="accordion">
+          <button class="accordion-btn">
+            Why use environment variables?
+            <span>+</span>
+          </button>
+          <div class="accordion-content">
+            Environment variables keep configuration and sensitive connection
+            information outside the application source code.
+          </div>
+        </div>
+
+        <div class="accordion">
+          <button class="accordion-btn">
+            SQL vs MongoDB?
+            <span>+</span>
+          </button>
+          <div class="accordion-content">
+            SQL databases organize data primarily into relational tables,
+            while MongoDB uses collections of document-oriented records.
+            Each model has different strengths and design patterns.
+          </div>
+        </div>
+      </section>
+
+      <!-- QUIZ -->
+
+      <section class="section" id="quiz" data-section>
+        <div class="section-header">
+          <div class="section-number">26 • Knowledge Check</div>
+          <h2>Lesson Quiz</h2>
+        </div>
+
+        <div id="quizContainer">
+
+          <div class="quiz-question">
+            <h4>1. What type of database is MongoDB?</h4>
+
+            <button class="option" data-answer="wrong">
+              Relational SQL database
+            </button>
+
+            <button class="option" data-answer="correct">
+              Document-oriented NoSQL database
+            </button>
+
+            <button class="option" data-answer="wrong">
+              Operating system
+            </button>
+          </div>
+
+          <div class="quiz-question">
+            <h4>2. What is a collection in MongoDB?</h4>
+
+            <button class="option" data-answer="wrong">
+              A JavaScript function
+            </button>
+
+            <button class="option" data-answer="correct">
+              A group of documents
+            </button>
+
+            <button class="option" data-answer="wrong">
+              A Node.js package
+            </button>
+          </div>
+
+          <div class="quiz-question">
+            <h4>3. What does a Mongoose schema define?</h4>
+
+            <button class="option" data-answer="correct">
+              Document structure and validation rules
+            </button>
+
+            <button class="option" data-answer="wrong">
+              The browser interface
+            </button>
+
+            <button class="option" data-answer="wrong">
+              The HTTP protocol
+            </button>
+          </div>
+
+          <div class="quiz-question">
+            <h4>4. Which method retrieves all matching documents?</h4>
+
+            <button class="option" data-answer="wrong">
+              User.create()
+            </button>
+
+            <button class="option" data-answer="correct">
+              User.find()
+            </button>
+
+            <button class="option" data-answer="wrong">
+              User.delete()
+            </button>
+          </div>
+
+          <div class="quiz-question">
+            <h4>5. What does CRUD stand for?</h4>
+
+            <button class="option" data-answer="correct">
+              Create, Read, Update, Delete
+            </button>
+
+            <button class="option" data-answer="wrong">
+              Connect, Route, Upload, Deploy
+            </button>
+
+            <button class="option" data-answer="wrong">
+              Create, Run, Undo, Debug
+            </button>
+          </div>
+
+        </div>
+
+        <button class="btn" onclick="finishQuiz()">
+          Check Quiz
+        </button>
+
+        <div class="quiz-result" id="quizResult"></div>
+      </section>
+
+      <!-- CHALLENGE -->
+
+      <section class="section" id="challenge" data-section>
+        <div class="section-header">
+          <div class="section-number">27 • Practical Challenge</div>
+          <h2>Build a Product Management API</h2>
+        </div>
+
+        <div class="challenge">
+
+          <h3>Your Task</h3>
+
+          <p>
+            Build a complete Express + MongoDB + Mongoose API for products.
+          </p>
+
+          <p>
+            Create a Product schema containing:
+          </p>
+
+          <ul>
+            <li>name</li>
+            <li>price</li>
+            <li>category</li>
+            <li>stock</li>
+          </ul>
+
+          <p>
+            Implement these endpoints:
+          </p>
+
+          <ul>
+            <li>GET <code>/api/products</code></li>
+            <li>GET <code>/api/products/:id</code></li>
+            <li>POST <code>/api/products</code></li>
+            <li>PATCH <code>/api/products/:id</code></li>
+            <li>DELETE <code>/api/products/:id</code></li>
+          </ul>
+
+          <p>
+            Requirements:
+          </p>
+
+          <ul>
+            <li>name should be required.</li>
+            <li>price should be greater than or equal to 0.</li>
+            <li>stock should be a number.</li>
+            <li>Return 404 when a product does not exist.</li>
+            <li>Return 201 when a product is successfully created.</li>
+            <li>Handle invalid MongoDB IDs.</li>
+            <li>Use try/catch for asynchronous operations.</li>
+          </ul>
+
+          <p>
+            <strong>Bonus:</strong>
+            Add filtering using
+            <code>?category=electronics</code>
+            and pagination using
+            <code>?page=1&amp;limit=10</code>.
+          </p>
+
+        </div>
+      </section>
+
+      <!-- REVISION -->
+
+      <section class="section" data-section>
+        <div class="section-header">
+          <div class="section-number">28 • Quick Revision</div>
+          <h2>Remember These Concepts</h2>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Concept</th>
+                <th>Remember</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>Database</td>
+                <td>Persistent storage for application data.</td>
+              </tr>
+
+              <tr>
+                <td>MongoDB</td>
+                <td>Document-oriented NoSQL database.</td>
+              </tr>
+
+              <tr>
+                <td>Collection</td>
+                <td>Group of MongoDB documents.</td>
+              </tr>
+
+              <tr>
+                <td>Document</td>
+                <td>Individual MongoDB record.</td>
+              </tr>
+
+              <tr>
+                <td>BSON</td>
+                <td>Binary representation used by MongoDB.</td>
+              </tr>
+
+              <tr>
+                <td>ObjectId</td>
+                <td>Common MongoDB document identifier.</td>
+              </tr>
+
+              <tr>
+                <td>Mongoose</td>
+                <td>Node.js ODM for MongoDB.</td>
+              </tr>
+
+              <tr>
+                <td>Schema</td>
+                <td>Defines document structure and validation.</td>
+              </tr>
+
+              <tr>
+                <td>Model</td>
+                <td>Interface for working with a collection.</td>
+              </tr>
+
+              <tr>
+                <td>CRUD</td>
+                <td>Create, Read, Update, Delete.</td>
+              </tr>
+
+              <tr>
+                <td>populate()</td>
+                <td>Loads referenced documents.</td>
+              </tr>
+
+              <tr>
+                <td>timestamps</td>
+                <td>Automatically maintains created/updated times.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- COMPLETE -->
+
+      <section class="section completion" id="complete" data-section>
+
+        <div class="completion-icon">✓</div>
+
+        <h2>Ready to Work with MongoDB</h2>
+
+        <p>
+          You have covered databases, MongoDB documents and collections,
+          Mongoose schemas and models, CRUD operations, validation,
+          relationships, and Express integration.
+        </p>
+
+        <button class="btn" id="completeBtn" onclick="completeLesson()">
+          Mark Lesson 12 Complete
+        </button>
+
+        <div class="nav-buttons">
+
+          <a class="btn secondary" href="lesson11.html">
+            ← Lesson 11
+          </a>
+
+          <a class="btn" href="lesson13.html">
+            Lesson 13 →
+          </a>
+
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+
+    /* =========================
+       PROGRESS
+    ========================== */
+
+    const sections = [...document.querySelectorAll("[data-section]")];
+    const progressFill = document.getElementById("progressFill");
+    const progressLabel = document.getElementById("progressLabel");
+
+    function updateProgress() {
+      const scrollTop = window.scrollY;
+      const documentHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
+
+      const percentage =
+        documentHeight <= 0
+          ? 0
+          : Math.min(100, Math.round((scrollTop / documentHeight) * 100));
+
+      progressFill.style.width = percentage + "%";
+      progressLabel.textContent = percentage + "% Complete";
+    }
+
+    window.addEventListener("scroll", updateProgress);
+    updateProgress();
+
+
+    /* =========================
+       ACTIVE TOC
+    ========================== */
+
+    const tocLinks = [...document.querySelectorAll("#toc a")];
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+
+        entries.forEach((entry) => {
+
+          if (entry.isIntersecting) {
+
+            const id = entry.target.id;
+
+            tocLinks.forEach((link) => {
+              link.classList.toggle(
+                "active",
+                link.getAttribute("href") === "#" + id
+              );
+            });
+
+          }
+
+        });
+
+      },
+      {
+        rootMargin: "-20% 0px -65% 0px"
+      }
+    );
+
+    sections.forEach((section) => observer.observe(section));
+
+
+    /* =========================
+       COPY CODE
+    ========================== */
+
+    function copyCode(button) {
+
+      const code =
+        button
+          .closest(".code-wrap")
+          .querySelector("code")
+          .innerText;
+
+      navigator.clipboard.writeText(code);
+
+      const original = button.innerText;
+
+      button.innerText = "Copied!";
+
+      setTimeout(() => {
+        button.innerText = original;
+      }, 1200);
+    }
+
+
+    /* =========================
+       CRUD EXPLORER
+    ========================== */
+
+    const crudInfo = {
+
+      create: {
+        title: "CREATE",
+        method: "POST",
+        endpoint: "/api/users",
+        description:
+          "Adds a new document to the users collection.",
+        mongoose:
+          "User.create({ name: \"Asha\", email: \"asha@example.com\" })"
+      },
+
+      read: {
+        title: "READ",
+        method: "GET",
+        endpoint: "/api/users",
+        description:
+          "Retrieves documents from the users collection.",
+        mongoose:
+          "User.find()"
+      },
+
+      update: {
+        title: "UPDATE",
+        method: "PATCH",
+        endpoint: "/api/users/:id",
+        description:
+          "Changes selected fields of an existing document.",
+        mongoose:
+          "User.findByIdAndUpdate(id, updates, { new: true })"
+      },
+
+      delete: {
+        title: "DELETE",
+        method: "DELETE",
+        endpoint: "/api/users/:id",
+        description:
+          "Removes an existing document.",
+        mongoose:
+          "User.findByIdAndDelete(id)"
+      }
+
+    };
+
+    function selectCrud(type) {
+
+      document
+        .querySelectorAll(".crud-card")
+        .forEach(card => card.classList.remove("selected"));
+
+      document
+        .querySelector(`[data-crud="${type}"]`)
+        .classList.add("selected");
+
+      const info = crudInfo[type];
+
+      document.getElementById("crudDetail").innerHTML = `
+        <strong>${info.title}</strong>
+
+        <p style="margin-top:8px;">
+          <strong>REST Method:</strong>
+          <span class="inline-code">${info.method}</span>
+        </p>
+
+        <p>
+          <strong>Endpoint:</strong>
+          <span class="inline-code">${info.endpoint}</span>
+        </p>
+
+        <p>${info.description}</p>
+
+        <div class="code-wrap">
+          <div class="code-top">
+            <span>Mongoose</span>
+          </div>
+
+          <pre><code>${info.mongoose}</code></pre>
+        </div>
+      `;
+    }
+
+
+    /* =========================
+       MONGODB SIMULATOR
+    ========================== */
+
+    let simulatedUsers = [
+      {
+        id: 1,
+        name: "Asha"
+      },
+      {
+        id: 2,
+        name: "Ravi"
+      }
+    ];
+
+    function runMongoSimulation() {
+
+      const operation =
+        document.getElementById("mongoOperation").value;
+
+      const name =
+        document.getElementById("mongoName").value.trim();
+
+      const output =
+        document.getElementById("mongoOutput");
+
+      if (operation === "create") {
+
+        const newUser = {
+          id: simulatedUsers.length + 1,
+          name: name || "New User"
+        };
+
+        simulatedUsers.push(newUser);
+
+        output.textContent =
+`STATUS: 201 Created
+
+Operation: CREATE
+
+Collection: users
+
+Inserted document:
+${JSON.stringify(newUser, null, 2)}
+
+Current collection:
+${JSON.stringify(simulatedUsers, null, 2)}`;
+
+      }
+
+      else if (operation === "read") {
+
+        output.textContent =
+`STATUS: 200 OK
+
+Operation: READ
+
+Collection: users
+
+Documents:
+${JSON.stringify(simulatedUsers, null, 2)}`;
+
+      }
+
+      else if (operation === "update") {
+
+        const user = simulatedUsers[0];
+
+        if (user) {
+
+          user.name = name || "Updated User";
+
+          output.textContent =
+`STATUS: 200 OK
+
+Operation: UPDATE
+
+Updated document:
+${JSON.stringify(user, null, 2)}
+
+Current collection:
+${JSON.stringify(simulatedUsers, null, 2)}`;
+
+        }
+
+      }
+
+      else if (operation === "delete") {
+
+        if (simulatedUsers.length > 0) {
+
+          const deleted =
+            simulatedUsers.shift();
+
+          output.textContent =
+`STATUS: 200 OK
+
+Operation: DELETE
+
+Deleted document:
+${JSON.stringify(deleted, null, 2)}
+
+Current collection:
+${JSON.stringify(simulatedUsers, null, 2)}`;
+
+        }
+
+        else {
+
+          output.textContent =
+`STATUS: 404 Not Found
+
+There are no documents available to delete.`;
+
+        }
+
+      }
+    }
+
+
+    /* =========================
+       ACCORDION
+    ========================== */
+
+    document
+      .querySelectorAll(".accordion-btn")
+      .forEach(button => {
+
+        button.addEventListener("click", () => {
+
+          const accordion =
+            button.parentElement;
+
+          accordion.classList.toggle("open");
+
+          const symbol =
+            button.querySelector("span");
+
+          symbol.textContent =
+            accordion.classList.contains("open")
+              ? "−"
+              : "+";
+
+        });
+
+      });
+
+
+    /* =========================
+       QUIZ
+    ========================== */
+
+    let quizScore = 0;
+    let answeredQuestions = 0;
+
+    document
+      .querySelectorAll(".quiz-question")
+      .forEach(question => {
+
+        const options =
+          question.querySelectorAll(".option");
+
+        options.forEach(option => {
+
+          option.addEventListener("click", () => {
+
+            if (question.dataset.answered === "true") {
+              return;
+            }
+
+            question.dataset.answered = "true";
+
+            answeredQuestions++;
+
+            if (option.dataset.answer === "correct") {
+
+              option.classList.add("correct");
+              quizScore++;
+
+            } else {
+
+              option.classList.add("wrong");
+
+              const correct =
+                question.querySelector(
+                  '[data-answer="correct"]'
+                );
+
+              correct.classList.add("correct");
+            }
+
+          });
+
+        });
+
+      });
+
+    function finishQuiz() {
+
+      const result =
+        document.getElementById("quizResult");
+
+      if (answeredQuestions < 5) {
+
+        result.style.display = "block";
+
+        result.textContent =
+          `Answer all 5 questions first. You have answered ${answeredQuestions}/5.`;
+
+        return;
+      }
+
+      result.style.display = "block";
+
+      result.textContent =
+        `Your score: ${quizScore}/5. ${
+          quizScore === 5
+            ? "Excellent! You have a strong understanding of MongoDB and Mongoose."
+            : "Review the sections above and try the quiz again."
+        }`;
+
+      localStorage.setItem(
+        "zensus-node-lesson12-quiz",
+        quizScore
+      );
+    }
+
+
+    /* =========================
+       COMPLETE LESSON
+    ========================== */
+
+    function completeLesson() {
+
+      localStorage.setItem(
+        "zensus-node-lesson12-complete",
+        "true"
+      );
+
+      document.getElementById("completeBtn").textContent =
+        "✓ Lesson 12 Completed";
+
+      document.getElementById("completeBtn").style.background =
+        "#16a34a";
+
+      progressFill.style.width = "100%";
+      progressLabel.textContent = "100% Complete";
+    }
+
+
+    /* =========================
+       LOAD COMPLETION STATE
+    ========================== */
+
+    if (
+      localStorage.getItem(
+        "zensus-node-lesson12-complete"
+      ) === "true"
+    ) {
+
+      document.getElementById("completeBtn").textContent =
+        "✓ Lesson 12 Completed";
+
+      document.getElementById("completeBtn").style.background =
+        "#16a34a";
+    }
+
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,3304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Git & GitHub — Lesson 12: Issues, Projects & GitHub Collaboration | ZENSUS</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f8fafc;
+            color: #172033;
+            line-height: 1.7;
+        }
+
+        :root {
+            --blue: #2563eb;
+            --blue-dark: #1d4ed8;
+            --blue-light: #eff6ff;
+            --border: #e2e8f0;
+            --muted: #64748b;
+            --dark: #172033;
+            --green: #16a34a;
+            --red: #dc2626;
+            --orange: #d97706;
+            --purple: #7c3aed;
+            --white: #ffffff;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 270px;
+            height: 100vh;
+            background: #ffffff;
+            border-right: 1px solid var(--border);
+            padding: 25px 18px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--blue);
+            margin-bottom: 6px;
+        }
+
+        .course-name {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 25px;
+        }
+
+        .sidebar-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            margin: 20px 8px 8px;
+            font-weight: 700;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 9px 12px;
+            border-radius: 8px;
+            color: #475569;
+            text-decoration: none;
+            font-size: 14px;
+            margin: 2px 0;
+            transition: 0.2s;
+        }
+
+        .nav-link:hover {
+            background: var(--blue-light);
+            color: var(--blue);
+        }
+
+        .nav-link.active {
+            background: var(--blue-light);
+            color: var(--blue);
+            font-weight: 600;
+            border-left: 3px solid var(--blue);
+        }
+
+        /* MAIN */
+
+        .main {
+            margin-left: 270px;
+            padding: 35px 50px 80px;
+            max-width: 1400px;
+        }
+
+        /* TOPBAR */
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .search {
+            width: 330px;
+            padding: 11px 15px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: white;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .search:focus {
+            border-color: var(--blue);
+        }
+
+        .lesson-progress {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .progress-bar {
+            width: 150px;
+            height: 7px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            width: 80%;
+            height: 100%;
+            background: var(--blue);
+        }
+
+        /* HERO */
+
+        .hero {
+            background: linear-gradient(135deg, #eff6ff, #ffffff);
+            border: 1px solid #dbeafe;
+            border-radius: 18px;
+            padding: 45px;
+            margin-bottom: 35px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #dbeafe;
+            color: var(--blue-dark);
+            padding: 5px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            line-height: 1.2;
+            margin-bottom: 15px;
+            color: #0f172a;
+        }
+
+        .hero p {
+            color: #475569;
+            max-width: 900px;
+            font-size: 17px;
+        }
+
+        /* CONTENT */
+
+        section {
+            margin-bottom: 55px;
+            scroll-margin-top: 25px;
+        }
+
+        section h2 {
+            font-size: 28px;
+            color: #0f172a;
+            margin-bottom: 15px;
+        }
+
+        section h3 {
+            font-size: 21px;
+            margin: 25px 0 10px;
+            color: #1e293b;
+        }
+
+        p {
+            margin-bottom: 13px;
+            color: #475569;
+        }
+
+        ul,
+        ol {
+            margin: 12px 0 18px 25px;
+            color: #475569;
+        }
+
+        li {
+            margin-bottom: 7px;
+        }
+
+        strong {
+            color: #1e293b;
+        }
+
+        code {
+            font-family: Consolas, Monaco, monospace;
+        }
+
+        /* INFO GRID */
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin: 25px 0;
+        }
+
+        .info-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 22px;
+            transition: 0.25s;
+        }
+
+        .info-card:hover {
+            transform: translateY(-3px);
+            border-color: #bfdbfe;
+        }
+
+        .info-card h3 {
+            margin-top: 0;
+            font-size: 18px;
+            color: var(--blue-dark);
+        }
+
+        /* FLOW */
+
+        .flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 28px 0;
+        }
+
+        .flow-box {
+            background: white;
+            border: 2px solid #bfdbfe;
+            border-radius: 10px;
+            padding: 16px 20px;
+            text-align: center;
+            min-width: 145px;
+        }
+
+        .flow-box strong {
+            display: block;
+            color: var(--blue-dark);
+        }
+
+        .arrow {
+            color: var(--blue);
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        /* CODE */
+
+        .code-wrapper {
+            position: relative;
+            margin: 18px 0;
+        }
+
+        pre {
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 11px;
+            padding: 20px;
+            overflow-x: auto;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            border: 0;
+            background: #334155;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .copy-btn:hover {
+            background: #475569;
+        }
+
+        /* NOTE */
+
+        .note {
+            border-left: 4px solid var(--blue);
+            background: #eff6ff;
+            padding: 17px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .warning {
+            border-left-color: var(--orange);
+            background: #fffbeb;
+        }
+
+        .success {
+            border-left-color: var(--green);
+            background: #f0fdf4;
+        }
+
+        .purple-note {
+            border-left-color: var(--purple);
+            background: #faf5ff;
+        }
+
+        /* TABLE */
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border: 1px solid var(--border);
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            padding: 13px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        td {
+            color: #475569;
+        }
+
+        td code {
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 3px 6px;
+            border-radius: 5px;
+        }
+
+        /* ISSUE CARD */
+
+        .issue-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+            margin: 20px 0;
+        }
+
+        .issue-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+
+        .issue-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .issue-open {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: #dcfce7;
+            color: #15803d;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .issue-closed {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: #e2e8f0;
+            color: #475569;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .label {
+            display: inline-block;
+            padding: 4px 9px;
+            border-radius: 20px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-size: 11px;
+            font-weight: 700;
+            margin-right: 5px;
+        }
+
+        .label.bug {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .label.feature {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .label.docs {
+            background: #fef3c7;
+            color: #a16207;
+        }
+
+        /* PROJECT BOARD */
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            background: #f1f5f9;
+            padding: 18px;
+            border-radius: 14px;
+            margin: 25px 0;
+        }
+
+        .column {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 13px;
+            min-height: 240px;
+        }
+
+        .column h3 {
+            margin: 0 0 14px;
+            font-size: 15px;
+        }
+
+        .task {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: #475569;
+        }
+
+        .task strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        /* TEAM */
+
+        .team-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+        }
+
+        .member {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 13px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .member:last-child {
+            border-bottom: none;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #dbeafe;
+            color: var(--blue-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+        }
+
+        .member-info strong {
+            display: block;
+        }
+
+        .member-info span {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        /* SIMULATOR */
+
+        .simulator {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 25px;
+        }
+
+        .sim-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            border: none;
+            background: var(--blue);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background: var(--blue-dark);
+        }
+
+        .btn.green {
+            background: var(--green);
+        }
+
+        .btn.purple {
+            background: var(--purple);
+        }
+
+        .btn.orange {
+            background: var(--orange);
+        }
+
+        .btn.secondary {
+            background: #475569;
+        }
+
+        .sim-output {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 18px;
+            border-radius: 9px;
+            min-height: 270px;
+            font-family: Consolas, Monaco, monospace;
+            white-space: pre-wrap;
+        }
+
+        /* PRACTICE */
+
+        .practice {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 25px;
+        }
+
+        .practice input {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            margin: 10px 0;
+        }
+
+        .answer {
+            display: none;
+            margin-top: 15px;
+            padding: 14px;
+            background: #f0fdf4;
+            border-left: 4px solid var(--green);
+            border-radius: 7px;
+        }
+
+        /* QUIZ */
+
+        .quiz-question {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 22px;
+            margin: 18px 0;
+        }
+
+        .quiz-question h3 {
+            margin-top: 0;
+            font-size: 17px;
+        }
+
+        .option {
+            display: block;
+            padding: 9px 12px;
+            margin: 7px 0;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .option:hover {
+            background: var(--blue-light);
+        }
+
+        .option.correct {
+            background: #dcfce7;
+            border-color: #86efac;
+        }
+
+        .option.wrong {
+            background: #fee2e2;
+            border-color: #fecaca;
+        }
+
+        #quizResult {
+            margin-top: 20px;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        /* TAKEAWAY */
+
+        .takeaway {
+            background: linear-gradient(135deg, #eff6ff, #ffffff);
+            border: 1px solid #bfdbfe;
+            border-radius: 15px;
+            padding: 30px;
+        }
+
+        .takeaway ul {
+            margin-bottom: 0;
+        }
+
+        /* REVEAL */
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: 0.6s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* MOBILE */
+
+        .mobile-header {
+            display: none;
+        }
+
+        @media (max-width: 1100px) {
+
+            .info-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .board {
+                grid-template-columns: 1fr 1fr;
+            }
+
+        }
+
+        @media (max-width: 800px) {
+
+            .sidebar {
+                display: none;
+            }
+
+            .mobile-header {
+                display: block;
+                padding: 18px;
+                background: white;
+                border-bottom: 1px solid var(--border);
+                position: sticky;
+                top: 0;
+                z-index: 1000;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 25px 18px 60px;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search {
+                width: 100%;
+            }
+
+            .hero {
+                padding: 28px;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .info-grid,
+            .board {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+</head>
+
+<body>
+
+
+    <!-- MOBILE HEADER -->
+
+    <div class="mobile-header">
+
+        <strong style="color:#2563eb;">
+            ZENSUS
+        </strong>
+
+        <span style="color:#64748b; margin-left:10px;">
+            Git & GitHub — Lesson 12
+        </span>
+
+    </div>
+
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            ZENSUS
+        </div>
+
+        <div class="course-name">
+            Git & GitHub Course
+        </div>
+
+        <div class="sidebar-title">
+            Lesson 12
+        </div>
+
+        <a class="nav-link active" href="#overview">
+            Overview
+        </a>
+
+        <a class="nav-link" href="#issues">
+            GitHub Issues
+        </a>
+
+        <a class="nav-link" href="#issue-anatomy">
+            Issue Anatomy
+        </a>
+
+        <a class="nav-link" href="#issue-workflow">
+            Issue Workflow
+        </a>
+
+        <a class="nav-link" href="#labels">
+            Labels & Milestones
+        </a>
+
+        <a class="nav-link" href="#projects">
+            GitHub Projects
+        </a>
+
+        <a class="nav-link" href="#project-board">
+            Project Board
+        </a>
+
+        <a class="nav-link" href="#collaboration">
+            Collaboration
+        </a>
+
+        <a class="nav-link" href="#teams">
+            Team Workflow
+        </a>
+
+        <a class="nav-link" href="#linking">
+            Issues & Pull Requests
+        </a>
+
+        <a class="nav-link" href="#best-practices">
+            Best Practices
+        </a>
+
+        <a class="nav-link" href="#common-mistakes">
+            Common Mistakes
+        </a>
+
+        <a class="nav-link" href="#simulator">
+            Interactive Simulator
+        </a>
+
+        <a class="nav-link" href="#practice">
+            Practice
+        </a>
+
+        <a class="nav-link" href="#quiz">
+            Quiz
+        </a>
+
+        <a class="nav-link" href="#takeaway">
+            Takeaway
+        </a>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+
+        <!-- TOPBAR -->
+
+        <div class="topbar">
+
+            <input
+                type="text"
+                id="searchInput"
+                class="search"
+                placeholder="Search this lesson..."
+            >
+
+            <div class="lesson-progress">
+
+                Lesson 12 of 15
+
+                <div class="progress-bar">
+
+                    <div class="progress-fill"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- HERO -->
+
+        <section
+            id="overview"
+            class="hero reveal"
+        >
+
+            <span class="badge">
+                GIT & GITHUB • LESSON 12
+            </span>
+
+            <h1>
+                Issues, Projects & GitHub Collaboration
+            </h1>
+
+            <p>
+                Learn how teams use GitHub Issues to track work,
+                GitHub Projects to organize tasks, and collaboration
+                features to plan, discuss, develop, review, and
+                deliver software together.
+            </p>
+
+        </section>
+
+
+        <!-- INTRO -->
+
+        <section
+            id="issues"
+            class="reveal"
+        >
+
+            <h2>
+                1. What Are GitHub Issues?
+            </h2>
+
+            <p>
+                A <strong>GitHub Issue</strong> is a place for a repository
+                to track a task, bug, feature request, question, improvement,
+                or other piece of work.
+            </p>
+
+            <p>
+                Issues help a team remember what needs to be done and provide
+                a shared place for discussion.
+            </p>
+
+
+            <div class="info-grid">
+
+                <div class="info-card">
+
+                    <h3>
+                        🐛 Bug Reports
+                    </h3>
+
+                    <p>
+                        Record problems found in the application.
+                    </p>
+
+                </div>
+
+                <div class="info-card">
+
+                    <h3>
+                        ✨ Features
+                    </h3>
+
+                    <p>
+                        Track new functionality that should be developed.
+                    </p>
+
+                </div>
+
+                <div class="info-card">
+
+                    <h3>
+                        📝 Tasks
+                    </h3>
+
+                    <p>
+                        Break project work into manageable pieces.
+                    </p>
+
+                </div>
+
+                <div class="info-card">
+
+                    <h3>
+                        💡 Ideas
+                    </h3>
+
+                    <p>
+                        Discuss possible improvements and future work.
+                    </p>
+
+                </div>
+
+                <div class="info-card">
+
+                    <h3>
+                        ❓ Questions
+                    </h3>
+
+                    <p>
+                        Ask project-related questions and document answers.
+                    </p>
+
+                </div>
+
+                <div class="info-card">
+
+                    <h3>
+                        📚 Documentation
+                    </h3>
+
+                    <p>
+                        Track documentation improvements and missing content.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ISSUE ANATOMY -->
+
+        <section
+            id="issue-anatomy"
+            class="reveal"
+        >
+
+            <h2>
+                2. Anatomy of an Issue
+            </h2>
+
+            <div class="issue-card">
+
+                <div class="issue-header">
+
+                    <div class="issue-title">
+                        Add password reset functionality
+                    </div>
+
+                    <span class="issue-open">
+                        OPEN
+                    </span>
+
+                </div>
+
+                <p>
+                    Users should be able to reset their password through
+                    a secure email-based workflow.
+                </p>
+
+                <div style="margin:15px 0;">
+
+                    <span class="label feature">
+                        enhancement
+                    </span>
+
+                    <span class="label">
+                        authentication
+                    </span>
+
+                    <span class="label">
+                        priority
+                    </span>
+
+                </div>
+
+                <p>
+                    <strong>Assignee:</strong>
+                    Developer A
+                </p>
+
+                <p>
+                    <strong>Milestone:</strong>
+                    Version 2.0
+                </p>
+
+            </div>
+
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Element
+                        </th>
+
+                        <th>
+                            Purpose
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+
+                        <td>
+                            Title
+                        </td>
+
+                        <td>
+                            Clearly identifies the task or problem.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            Description
+                        </td>
+
+                        <td>
+                            Explains the problem, requirement, or idea.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            Labels
+                        </td>
+
+                        <td>
+                            Categorize and organize issues.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            Assignee
+                        </td>
+
+                        <td>
+                            Identifies who is responsible for the work.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            Milestone
+                        </td>
+
+                        <td>
+                            Groups work toward a larger target or release.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            Comments
+                        </td>
+
+                        <td>
+                            Allow team members to discuss the issue.
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+
+        <!-- ISSUE WORKFLOW -->
+
+        <section
+            id="issue-workflow"
+            class="reveal"
+        >
+
+            <h2>
+                3. Issue Workflow
+            </h2>
+
+            <div class="flow">
+
+                <div class="flow-box">
+
+                    <strong>
+                        Report
+                    </strong>
+
+                    Create issue
+
+                </div>
+
+                <div class="arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+
+                    <strong>
+                        Plan
+                    </strong>
+
+                    Assign & label
+
+                </div>
+
+                <div class="arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+
+                    <strong>
+                        Develop
+                    </strong>
+
+                    Create branch
+
+                </div>
+
+                <div class="arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+
+                    <strong>
+                        Review
+                    </strong>
+
+                    Open PR
+
+                </div>
+
+                <div class="arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+
+                    <strong>
+                        Close
+                    </strong>
+
+                    Complete work
+
+                </div>
+
+            </div>
+
+
+            <p>
+                An issue can therefore represent the larger piece of work,
+                while a branch and pull request can contain the actual code
+                changes needed to complete it.
+            </p>
+
+        </section>
+
+
+        <!-- LABELS -->
+
+        <section
+            id="labels"
+            class="reveal"
+        >
+
+            <h2>
+                4. Labels, Assignees & Milestones
+            </h2>
+
+            <h3>
+                Labels
+            </h3>
+
+            <p>
+                Labels help categorize issues so developers can quickly
+                understand their type or priority.
+            </p>
+
+            <div class="info-grid">
+
+                <div class="info-card">
+
+                    <h3>
+                        Bug
+                    </h3>
+
+                    <p>
+                        Something is not working as expected.
+                    </p>
+
+                </div>
+
+                <div class="info-card">
+
+                    <h3>
+                        Feature
+                    </h3>
+
+                    <p>
+                        New functionality is being requested.
+                    </p>
+
+                </div>
+
+                <div class="info-card">
+
+                    <h3>
+                        Documentation
+                    </h3>
+
+                    <p>
+                        Documentation needs to be added or updated.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <h3>
+                Assignees
+            </h3>
+
+            <p>
+                An assignee is a person responsible for working on an issue.
+            </p>
+
+
+            <h3>
+                Milestones
+            </h3>
+
+            <p>
+                A milestone groups related issues and pull requests toward
+                a larger objective, such as a release.
+            </p>
+
+        </section>
+
+
+        <!-- PROJECTS -->
+
+        <section
+            id="projects"
+            class="reveal"
+        >
+
+            <h2>
+                5. What Are GitHub Projects?
+            </h2>
+
+            <p>
+                <strong>GitHub Projects</strong> provides a way to organize
+                and visualize repository work.
+            </p>
+
+            <p>
+                Teams can use project views to understand what is planned,
+                what is currently being worked on, and what has been completed.
+            </p>
+
+
+            <div class="info-grid">
+
+                <div class="info-card">
+
+                    <h3>
+                        📋 Plan
+                    </h3>
+
+                    <p>
+                        Organize upcoming work and priorities.
+                    </p>
+
+                </div>
+
+                <div class="info-card">
+
+                    <h3>
+                        🔄 Track
+                    </h3>
+
+                    <p>
+                        Follow the current state of tasks.
+                    </p>
+
+                </div>
+
+                <div class="info-card">
+
+                    <h3>
+                        📊 Visualize
+                    </h3>
+
+                    <p>
+                        Use project views to understand progress.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="note purple-note">
+
+                <strong>
+                    Simple idea:
+                </strong>
+
+                <br><br>
+
+                Issues describe the work.
+
+                <br>
+
+                Projects organize the work.
+
+                <br>
+
+                Pull Requests implement and review code changes.
+
+            </div>
+
+        </section>
+
+
+        <!-- PROJECT BOARD -->
+
+        <section
+            id="project-board"
+            class="reveal"
+        >
+
+            <h2>
+                6. Project Board Example
+            </h2>
+
+            <p>
+                A common project workflow can be represented using columns
+                such as Backlog, Todo, In Progress, and Done.
+            </p>
+
+
+            <div class="board">
+
+                <div class="column">
+
+                    <h3>
+                        Backlog
+                    </h3>
+
+                    <div class="task">
+
+                        <strong>
+                            Add dark mode
+                        </strong>
+
+                        #24
+
+                    </div>
+
+                    <div class="task">
+
+                        <strong>
+                            Improve documentation
+                        </strong>
+
+                        #27
+
+                    </div>
+
+                </div>
+
+
+                <div class="column">
+
+                    <h3>
+                        Todo
+                    </h3>
+
+                    <div class="task">
+
+                        <strong>
+                            Login validation
+                        </strong>
+
+                        #21
+
+                    </div>
+
+                    <div class="task">
+
+                        <strong>
+                            Add API tests
+                        </strong>
+
+                        #29
+
+                    </div>
+
+                </div>
+
+
+                <div class="column">
+
+                    <h3>
+                        In Progress
+                    </h3>
+
+                    <div class="task">
+
+                        <strong>
+                            Student search
+                        </strong>
+
+                        #18
+
+                    </div>
+
+                    <div class="task">
+
+                        <strong>
+                            Dashboard UI
+                        </strong>
+
+                        #31
+
+                    </div>
+
+                </div>
+
+
+                <div class="column">
+
+                    <h3>
+                        Done
+                    </h3>
+
+                    <div class="task">
+
+                        <strong>
+                            Registration
+                        </strong>
+
+                        #12
+
+                    </div>
+
+                    <div class="task">
+
+                        <strong>
+                            Database setup
+                        </strong>
+
+                        #15
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- COLLABORATION -->
+
+        <section
+            id="collaboration"
+            class="reveal"
+        >
+
+            <h2>
+                7. GitHub Collaboration
+            </h2>
+
+            <p>
+                GitHub collaboration combines several tools rather than
+                relying on Git commands alone.
+            </p>
+
+
+            <div class="flow">
+
+                <div class="flow-box">
+
+                    <strong>
+                        Issues
+                    </strong>
+
+                    Plan work
+
+                </div>
+
+                <div class="arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+
+                    <strong>
+                        Branches
+                    </strong>
+
+                    Isolate changes
+
+                </div>
+
+                <div class="arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+
+                    <strong>
+                        Pull Requests
+                    </strong>
+
+                    Review changes
+
+                </div>
+
+                <div class="arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+
+                    <strong>
+                        Project
+                    </strong>
+
+                    Track progress
+
+                </div>
+
+            </div>
+
+
+            <h3>
+                Example
+            </h3>
+
+            <p>
+                Suppose a team wants to add a student search feature.
+            </p>
+
+            <ol>
+
+                <li>
+                    Create an issue describing the feature.
+                </li>
+
+                <li>
+                    Assign the issue to a developer.
+                </li>
+
+                <li>
+                    Create a feature branch.
+                </li>
+
+                <li>
+                    Develop and commit the feature.
+                </li>
+
+                <li>
+                    Push the branch to GitHub.
+                </li>
+
+                <li>
+                    Open a pull request.
+                </li>
+
+                <li>
+                    Review the code.
+                </li>
+
+                <li>
+                    Merge the pull request.
+                </li>
+
+                <li>
+                    Mark the issue as completed.
+                </li>
+
+            </ol>
+
+        </section>
+
+
+        <!-- TEAM -->
+
+        <section
+            id="teams"
+            class="reveal"
+        >
+
+            <h2>
+                8. Working as a Team
+            </h2>
+
+            <div class="team-card">
+
+                <div class="member">
+
+                    <div class="avatar">
+                        A
+                    </div>
+
+                    <div class="member-info">
+
+                        <strong>
+                            Alex — Backend Developer
+                        </strong>
+
+                        <span>
+                            API, database, authentication
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="member">
+
+                    <div class="avatar">
+                        S
+                    </div>
+
+                    <div class="member-info">
+
+                        <strong>
+                            Sam — Frontend Developer
+                        </strong>
+
+                        <span>
+                            UI, forms, dashboard
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="member">
+
+                    <div class="avatar">
+                        R
+                    </div>
+
+                    <div class="member-info">
+
+                        <strong>
+                            Ravi — Reviewer
+                        </strong>
+
+                        <span>
+                            Code review and testing
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <h3>
+                Good team workflow
+            </h3>
+
+            <ul>
+
+                <li>
+                    Keep tasks visible through issues or project planning.
+                </li>
+
+                <li>
+                    Give each task a clear owner when appropriate.
+                </li>
+
+                <li>
+                    Use branches for separate changes.
+                </li>
+
+                <li>
+                    Use pull requests for review.
+                </li>
+
+                <li>
+                    Communicate through issue and PR discussions.
+                </li>
+
+                <li>
+                    Keep important branches protected according to team policy.
+                </li>
+
+            </ul>
+
+        </section>
+
+
+        <!-- LINKING -->
+
+        <section
+            id="linking"
+            class="reveal"
+        >
+
+            <h2>
+                9. Connecting Issues with Pull Requests
+            </h2>
+
+            <p>
+                Issues and pull requests can be connected so the team can
+                understand which code change addresses which piece of work.
+            </p>
+
+            <p>
+                GitHub supports keywords such as:
+            </p>
+
+            <div class="code-wrapper">
+
+                <button class="copy-btn">
+                    Copy
+                </button>
+
+                <pre><code>Fixes #24
+
+Closes #24
+
+Resolves #24</code></pre>
+
+            </div>
+
+            <p>
+                When used appropriately in a pull request or commit message,
+                these keywords can connect the work to the referenced issue.
+            </p>
+
+            <div class="note">
+
+                <strong>
+                    Example:
+                </strong>
+
+                <br><br>
+
+                Issue #24:
+
+                <br>
+
+                "Add student search"
+
+                <br><br>
+
+                Pull request description:
+
+                <br>
+
+                <code>Fixes #24</code>
+
+            </div>
+
+        </section>
+
+
+        <!-- COMPLETE WORKFLOW -->
+
+        <section
+            class="reveal"
+        >
+
+            <h2>
+                10. Complete GitHub Collaboration Workflow
+            </h2>
+
+            <div class="flow">
+
+                <div class="flow-box">
+
+                    <strong>
+                        Issue
+                    </strong>
+
+                    Define problem
+
+                </div>
+
+                <div class="arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+
+                    <strong>
+                        Project
+                    </strong>
+
+                    Plan work
+
+                </div>
+
+                <div class="arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+
+                    <strong>
+                        Branch
+                    </strong>
+
+                    Develop
+
+                </div>
+
+                <div class="arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+
+                    <strong>
+                        PR
+                    </strong>
+
+                    Review
+
+                </div>
+
+                <div class="arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+
+                    <strong>
+                        Merge
+                    </strong>
+
+                    Integrate
+
+                </div>
+
+            </div>
+
+
+            <p>
+                This workflow separates planning, development, review,
+                and integration into clear stages.
+            </p>
+
+        </section>
+
+
+        <!-- BEST PRACTICES -->
+
+        <section
+            id="best-practices"
+            class="reveal"
+        >
+
+            <h2>
+                11. Collaboration Best Practices
+            </h2>
+
+            <div class="info-grid">
+
+                <div class="info-card">
+
+                    <h3>
+                        Clear Issues
+                    </h3>
+
+                    <p>
+                        Write enough information for another developer to
+                        understand the task.
+                    </p>
+
+                </div>
+
+                <div class="info-card">
+
+                    <h3>
+                        Small Tasks
+                    </h3>
+
+                    <p>
+                        Break large features into smaller manageable pieces.
+                    </p>
+
+                </div>
+
+                <div class="info-card">
+
+                    <h3>
+                        Meaningful Branches
+                    </h3>
+
+                    <p>
+                        Use descriptive branch names related to the work.
+                    </p>
+
+                </div>
+
+                <div class="info-card">
+
+                    <h3>
+                        Focused PRs
+                    </h3>
+
+                    <p>
+                        Keep pull requests focused on a clear change.
+                    </p>
+
+                </div>
+
+                <div class="info-card">
+
+                    <h3>
+                        Useful Discussions
+                    </h3>
+
+                    <p>
+                        Use issue and PR comments to document decisions.
+                    </p>
+
+                </div>
+
+                <div class="info-card">
+
+                    <h3>
+                        Keep Work Updated
+                    </h3>
+
+                    <p>
+                        Communicate progress and update project tracking.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- COMMON MISTAKES -->
+
+        <section
+            id="common-mistakes"
+            class="reveal"
+        >
+
+            <h2>
+                12. Common GitHub Collaboration Mistakes
+            </h2>
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Mistake
+                        </th>
+
+                        <th>
+                            Problem
+                        </th>
+
+                        <th>
+                            Better Approach
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+
+                        <td>
+                            Vague issue title
+                        </td>
+
+                        <td>
+                            Team cannot quickly understand the task.
+                        </td>
+
+                        <td>
+                            Use a clear, specific title.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            No issue description
+                        </td>
+
+                        <td>
+                            Requirements are unclear.
+                        </td>
+
+                        <td>
+                            Explain the problem and expected result.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            Huge PR
+                        </td>
+
+                        <td>
+                            Difficult to review.
+                        </td>
+
+                        <td>
+                            Break work into focused changes.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            No task tracking
+                        </td>
+
+                        <td>
+                            Work can become difficult to coordinate.
+                        </td>
+
+                        <td>
+                            Use Issues and Projects where appropriate.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            Unclear ownership
+                        </td>
+
+                        <td>
+                            Team members may duplicate work.
+                        </td>
+
+                        <td>
+                            Assign responsibility when useful.
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+
+        <!-- SIMULATOR -->
+
+        <section
+            id="simulator"
+            class="reveal"
+        >
+
+            <h2>
+                13. Interactive Collaboration Simulator
+            </h2>
+
+            <p>
+                Simulate a simple issue → branch → pull request → merge
+                workflow.
+            </p>
+
+            <div class="simulator">
+
+                <div class="sim-controls">
+
+                    <button
+                        class="btn"
+                        onclick="createIssue()"
+                    >
+                        Create Issue
+                    </button>
+
+                    <button
+                        class="btn purple"
+                        onclick="createBranch()"
+                    >
+                        Create Branch
+                    </button>
+
+                    <button
+                        class="btn orange"
+                        onclick="openPR()"
+                    >
+                        Open PR
+                    </button>
+
+                    <button
+                        class="btn"
+                        onclick="reviewPR()"
+                    >
+                        Review
+                    </button>
+
+                    <button
+                        class="btn green"
+                        onclick="mergePR()"
+                    >
+                        Merge
+                    </button>
+
+                    <button
+                        class="btn secondary"
+                        onclick="closeIssue()"
+                    >
+                        Close Issue
+                    </button>
+
+                    <button
+                        class="btn secondary"
+                        onclick="resetSimulator()"
+                    >
+                        Reset
+                    </button>
+
+                </div>
+
+                <div
+                    id="simOutput"
+                    class="sim-output"
+                >GITHUB COLLABORATION SIMULATOR
+
+Issue:
+Not created
+
+Branch:
+Not created
+
+Pull Request:
+Not created
+
+Review:
+Not completed
+
+Issue:
+Open
+
+Choose an action to begin.</div>
+
+            </div>
+
+        </section>
+
+
+        <!-- PRACTICE -->
+
+        <section
+            id="practice"
+            class="reveal"
+        >
+
+            <h2>
+                14. Practice Challenges
+            </h2>
+
+            <div class="practice">
+
+                <h3>
+                    Challenge 1
+                </h3>
+
+                <p>
+                    What GitHub feature is commonly used to report a bug
+                    or request a feature?
+                </p>
+
+                <input
+                    type="text"
+                    id="practice1"
+                    placeholder="Type your answer..."
+                >
+
+                <button
+                    class="btn"
+                    onclick="checkPractice1()"
+                >
+                    Check
+                </button>
+
+                <div
+                    id="practiceResult1"
+                    class="answer"
+                ></div>
+
+
+                <h3>
+                    Challenge 2
+                </h3>
+
+                <p>
+                    What is the main purpose of GitHub Projects?
+                </p>
+
+                <input
+                    type="text"
+                    id="practice2"
+                    placeholder="Type your answer..."
+                >
+
+                <button
+                    class="btn"
+                    onclick="checkPractice2()"
+                >
+                    Check
+                </button>
+
+                <div
+                    id="practiceResult2"
+                    class="answer"
+                ></div>
+
+
+                <h3>
+                    Challenge 3
+                </h3>
+
+                <p>
+                    Which GitHub collaboration feature is commonly used
+                    to review proposed code changes?
+                </p>
+
+                <input
+                    type="text"
+                    id="practice3"
+                    placeholder="Type your answer..."
+                >
+
+                <button
+                    class="btn"
+                    onclick="checkPractice3()"
+                >
+                    Check
+                </button>
+
+                <div
+                    id="practiceResult3"
+                    class="answer"
+                ></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- QUIZ -->
+
+        <section
+            id="quiz"
+            class="reveal"
+        >
+
+            <h2>
+                15. Knowledge Check
+            </h2>
+
+
+            <div class="quiz-question">
+
+                <h3>
+                    1. What is a GitHub Issue?
+                </h3>
+
+                <div
+                    class="option"
+                    data-q="1"
+                    data-answer="true"
+                >
+                    A place to track tasks, bugs, features, questions, or other work
+                </div>
+
+                <div
+                    class="option"
+                    data-q="1"
+                    data-answer="false"
+                >
+                    A replacement for Git
+                </div>
+
+                <div
+                    class="option"
+                    data-q="1"
+                    data-answer="false"
+                >
+                    A command that creates a branch
+                </div>
+
+            </div>
+
+
+            <div class="quiz-question">
+
+                <h3>
+                    2. What can labels be used for?
+                </h3>
+
+                <div
+                    class="option"
+                    data-q="2"
+                    data-answer="true"
+                >
+                    Categorizing and organizing issues
+                </div>
+
+                <div
+                    class="option"
+                    data-q="2"
+                    data-answer="false"
+                >
+                    Encrypting Git repositories
+                </div>
+
+                <div
+                    class="option"
+                    data-q="2"
+                    data-answer="false"
+                >
+                    Replacing commits
+                </div>
+
+            </div>
+
+
+            <div class="quiz-question">
+
+                <h3>
+                    3. What is the purpose of GitHub Projects?
+                </h3>
+
+                <div
+                    class="option"
+                    data-q="3"
+                    data-answer="true"
+                >
+                    Organizing and tracking project work
+                </div>
+
+                <div
+                    class="option"
+                    data-q="3"
+                    data-answer="false"
+                >
+                    Installing Git
+                </div>
+
+                <div
+                    class="option"
+                    data-q="3"
+                    data-answer="false"
+                >
+                    Creating passwords
+                </div>
+
+            </div>
+
+
+            <div class="quiz-question">
+
+                <h3>
+                    4. Which sequence represents a common collaboration workflow?
+                </h3>
+
+                <div
+                    class="option"
+                    data-q="4"
+                    data-answer="true"
+                >
+                    Issue → Branch → Pull Request → Review → Merge
+                </div>
+
+                <div
+                    class="option"
+                    data-q="4"
+                    data-answer="false"
+                >
+                    Merge → Issue → Delete → Branch
+                </div>
+
+                <div
+                    class="option"
+                    data-q="4"
+                    data-answer="false"
+                >
+                    Clone → Delete → Password → Merge
+                </div>
+
+            </div>
+
+
+            <div class="quiz-question">
+
+                <h3>
+                    5. What can connect a pull request to an issue?
+                </h3>
+
+                <div
+                    class="option"
+                    data-q="5"
+                    data-answer="true"
+                >
+                    References such as "Fixes #24"
+                </div>
+
+                <div
+                    class="option"
+                    data-q="5"
+                    data-answer="false"
+                >
+                    git init
+                </div>
+
+                <div
+                    class="option"
+                    data-q="5"
+                    data-answer="false"
+                >
+                    git status
+                </div>
+
+            </div>
+
+
+            <div class="quiz-question">
+
+                <h3>
+                    6. Why are issues useful in a team?
+                </h3>
+
+                <div
+                    class="option"
+                    data-q="6"
+                    data-answer="true"
+                >
+                    They provide a shared place to track and discuss work
+                </div>
+
+                <div
+                    class="option"
+                    data-q="6"
+                    data-answer="false"
+                >
+                    They automatically write all application code
+                </div>
+
+                <div
+                    class="option"
+                    data-q="6"
+                    data-answer="false"
+                >
+                    They replace all Git commands
+                </div>
+
+            </div>
+
+
+            <button
+                class="btn"
+                onclick="calculateQuiz()"
+            >
+                Submit Quiz
+            </button>
+
+            <div id="quizResult"></div>
+
+        </section>
+
+
+        <!-- TAKEAWAY -->
+
+        <section
+            id="takeaway"
+            class="takeaway reveal"
+        >
+
+            <h2>
+                16. Lesson Takeaway
+            </h2>
+
+            <p>
+                GitHub provides more than just remote code hosting.
+                Its collaboration features help teams plan, discuss,
+                implement, review, and track software work.
+            </p>
+
+            <ul>
+
+                <li>
+                    <strong>Issues</strong> track bugs, tasks, features,
+                    questions, and improvements.
+                </li>
+
+                <li>
+                    <strong>Labels</strong> categorize and organize issues.
+                </li>
+
+                <li>
+                    <strong>Assignees</strong> identify people responsible
+                    for work.
+                </li>
+
+                <li>
+                    <strong>Milestones</strong> group work toward larger
+                    objectives.
+                </li>
+
+                <li>
+                    <strong>GitHub Projects</strong> help organize and
+                    visualize project work.
+                </li>
+
+                <li>
+                    <strong>Branches</strong> isolate development work.
+                </li>
+
+                <li>
+                    <strong>Pull Requests</strong> allow code changes to
+                    be proposed and reviewed.
+                </li>
+
+                <li>
+                    Issues and pull requests can be connected using
+                    references such as <code>Fixes #24</code>.
+                </li>
+
+                <li>
+                    Good collaboration requires clear communication,
+                    focused tasks, useful reviews, and visible progress.
+                </li>
+
+            </ul>
+
+
+            <div
+                class="success note"
+                style="margin-top:25px;"
+            >
+
+                <strong>
+                    Next Lesson:
+                </strong>
+
+                GitHub Actions & Basic CI/CD
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script>
+
+        /* COPY BUTTONS */
+
+        document
+            .querySelectorAll(".copy-btn")
+            .forEach(button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        const code =
+                            button.parentElement
+                                .querySelector("code")
+                                .innerText;
+
+                        navigator.clipboard.writeText(
+                            code
+                        );
+
+                        const oldText =
+                            button.innerText;
+
+                        button.innerText =
+                            "Copied!";
+
+                        setTimeout(
+                            () => {
+
+                                button.innerText =
+                                    oldText;
+
+                            },
+                            1200
+                        );
+
+                    }
+                );
+
+            });
+
+
+        /* SEARCH */
+
+        const searchInput =
+            document.getElementById(
+                "searchInput"
+            );
+
+        searchInput.addEventListener(
+            "input",
+            function () {
+
+                const query =
+                    this.value
+                        .toLowerCase()
+                        .trim();
+
+                document
+                    .querySelectorAll("section")
+                    .forEach(section => {
+
+                        const text =
+                            section.innerText
+                                .toLowerCase();
+
+                        if (
+                            !query ||
+                            text.includes(query)
+                        ) {
+
+                            section.classList
+                                .remove("hidden");
+
+                        } else {
+
+                            section.classList
+                                .add("hidden");
+
+                        }
+
+                    });
+
+            }
+        );
+
+
+        /* SCROLL REVEAL */
+
+        const observer =
+            new IntersectionObserver(
+                entries => {
+
+                    entries.forEach(entry => {
+
+                        if (
+                            entry.isIntersecting
+                        ) {
+
+                            entry.target.classList
+                                .add("visible");
+
+                        }
+
+                    });
+
+                },
+                {
+                    threshold: 0.08
+                }
+            );
+
+
+        document
+            .querySelectorAll(".reveal")
+            .forEach(section => {
+
+                observer.observe(section);
+
+            });
+
+
+        /* ACTIVE SIDEBAR */
+
+        const sections =
+            document.querySelectorAll(
+                "section[id]"
+            );
+
+        const navLinks =
+            document.querySelectorAll(
+                ".nav-link"
+            );
+
+        window.addEventListener(
+            "scroll",
+            () => {
+
+                let current = "";
+
+                sections.forEach(section => {
+
+                    const top =
+                        section.offsetTop -
+                        150;
+
+                    if (
+                        window.scrollY >= top
+                    ) {
+
+                        current =
+                            section.id;
+
+                    }
+
+                });
+
+                navLinks.forEach(link => {
+
+                    link.classList
+                        .remove("active");
+
+                    if (
+                        link.getAttribute("href") ===
+                        "#" + current
+                    ) {
+
+                        link.classList
+                            .add("active");
+
+                    }
+
+                });
+
+            }
+        );
+
+
+        /* COLLABORATION SIMULATOR */
+
+        let issueCreated = false;
+        let branchCreated = false;
+        let prCreated = false;
+        let reviewed = false;
+        let merged = false;
+        let issueClosed = false;
+
+
+        function renderSimulator(
+            action
+        ) {
+
+            let output =
+                "GITHUB COLLABORATION SIMULATOR\n\n";
+
+            output +=
+                "Issue:\n" +
+                (
+                    issueCreated
+                        ? "Created"
+                        : "Not created"
+                ) +
+                "\n\n";
+
+            output +=
+                "Feature branch:\n" +
+                (
+                    branchCreated
+                        ? "feature/student-search"
+                        : "Not created"
+                ) +
+                "\n\n";
+
+            output +=
+                "Pull Request:\n" +
+                (
+                    prCreated
+                        ? "Opened"
+                        : "Not created"
+                ) +
+                "\n\n";
+
+            output +=
+                "Code Review:\n" +
+                (
+                    reviewed
+                        ? "Completed"
+                        : "Not completed"
+                ) +
+                "\n\n";
+
+            output +=
+                "Merged:\n" +
+                (
+                    merged
+                        ? "Yes"
+                        : "No"
+                ) +
+                "\n\n";
+
+            output +=
+                "Issue status:\n" +
+                (
+                    issueClosed
+                        ? "Closed"
+                        : "Open"
+                ) +
+                "\n\n";
+
+            output +=
+                "ACTION:\n" +
+                action;
+
+            document.getElementById(
+                "simOutput"
+            ).innerText = output;
+
+        }
+
+
+        function createIssue() {
+
+            issueCreated = true;
+
+            renderSimulator(
+                "Issue #24 created: Add student search feature."
+            );
+
+        }
+
+
+        function createBranch() {
+
+            if (!issueCreated) {
+
+                renderSimulator(
+                    "Create an issue first so the work has a tracked task."
+                );
+
+                return;
+
+            }
+
+            branchCreated = true;
+
+            renderSimulator(
+                "Feature branch created: feature/student-search"
+            );
+
+        }
+
+
+        function openPR() {
+
+            if (!branchCreated) {
+
+                renderSimulator(
+                    "Create the feature branch before opening a pull request."
+                );
+
+                return;
+
+            }
+
+            prCreated = true;
+
+            renderSimulator(
+                "Pull request opened: feature/student-search → main"
+            );
+
+        }
+
+
+        function reviewPR() {
+
+            if (!prCreated) {
+
+                renderSimulator(
+                    "Open a pull request before reviewing it."
+                );
+
+                return;
+
+            }
+
+            reviewed = true;
+
+            renderSimulator(
+                "Code review completed. The reviewer approved the proposed changes."
+            );
+
+        }
+
+
+        function mergePR() {
+
+            if (!reviewed) {
+
+                renderSimulator(
+                    "Complete the code review before merging the pull request."
+                );
+
+                return;
+
+            }
+
+            merged = true;
+
+            renderSimulator(
+                "Pull request merged into main."
+            );
+
+        }
+
+
+        function closeIssue() {
+
+            if (!merged) {
+
+                renderSimulator(
+                    "Complete the tracked work before closing the issue."
+                );
+
+                return;
+
+            }
+
+            issueClosed = true;
+
+            renderSimulator(
+                "Issue #24 closed because the feature has been completed."
+            );
+
+        }
+
+
+        function resetSimulator() {
+
+            issueCreated = false;
+            branchCreated = false;
+            prCreated = false;
+            reviewed = false;
+            merged = false;
+            issueClosed = false;
+
+            renderSimulator(
+                "Simulator reset. Create an issue to begin."
+            );
+
+        }
+
+
+        /* PRACTICE */
+
+        function normalizeAnswer(
+            value
+        ) {
+
+            return value
+                .trim()
+                .replace(/\s+/g, " ")
+                .toLowerCase();
+
+        }
+
+
+        function showPracticeResult(
+            id,
+            message
+        ) {
+
+            const element =
+                document.getElementById(id);
+
+            element.style.display =
+                "block";
+
+            element.innerHTML =
+                message;
+
+        }
+
+
+        function checkPractice1() {
+
+            const answer =
+                normalizeAnswer(
+                    document.getElementById(
+                        "practice1"
+                    ).value
+                );
+
+            if (
+                answer.includes("issue") ||
+                answer.includes("github issue")
+            ) {
+
+                showPracticeResult(
+                    "practiceResult1",
+                    "✓ Correct! GitHub Issues are commonly used to report bugs, request features, and track tasks."
+                );
+
+            } else {
+
+                showPracticeResult(
+                    "practiceResult1",
+                    "Think about the GitHub feature used to track bugs, tasks, and feature requests."
+                );
+
+            }
+
+        }
+
+
+        function checkPractice2() {
+
+            const answer =
+                normalizeAnswer(
+                    document.getElementById(
+                        "practice2"
+                    ).value
+                );
+
+            if (
+                answer.includes("organ") ||
+                answer.includes("track") ||
+                answer.includes("project")
+            ) {
+
+                showPracticeResult(
+                    "practiceResult2",
+                    "✓ Correct! GitHub Projects help organize, visualize, and track project work."
+                );
+
+            } else {
+
+                showPracticeResult(
+                    "practiceResult2",
+                    "Think about planning and tracking tasks across a project."
+                );
+
+            }
+
+        }
+
+
+        function checkPractice3() {
+
+            const answer =
+                normalizeAnswer(
+                    document.getElementById(
+                        "practice3"
+                    ).value
+                );
+
+            if (
+                answer.includes("pull request") ||
+                answer.includes("pr")
+            ) {
+
+                showPracticeResult(
+                    "practiceResult3",
+                    "✓ Correct! Pull Requests are commonly used to propose and review code changes."
+                );
+
+            } else {
+
+                showPracticeResult(
+                    "practiceResult3",
+                    "Think about the GitHub feature introduced in Lesson 11 for reviewing proposed code."
+                );
+
+            }
+
+        }
+
+
+        /* QUIZ */
+
+        const selectedAnswers = {};
+
+        document
+            .querySelectorAll(".option")
+            .forEach(option => {
+
+                option.addEventListener(
+                    "click",
+                    () => {
+
+                        const question =
+                            option.dataset.q;
+
+                        document
+                            .querySelectorAll(
+                                '.option[data-q="' +
+                                question +
+                                '"]'
+                            )
+                            .forEach(item => {
+
+                                item.classList
+                                    .remove(
+                                        "correct",
+                                        "wrong"
+                                    );
+
+                            });
+
+                        const isCorrect =
+                            option.dataset.answer ===
+                            "true";
+
+                        option.classList.add(
+                            isCorrect
+                                ? "correct"
+                                : "wrong"
+                        );
+
+                        selectedAnswers[
+                            question
+                        ] = isCorrect;
+
+                    }
+                );
+
+            });
+
+
+        function calculateQuiz() {
+
+            const total = 6;
+
+            let score = 0;
+
+            Object.values(
+                selectedAnswers
+            ).forEach(answer => {
+
+                if (answer) {
+                    score++;
+                }
+
+            });
+
+            const result =
+                document.getElementById(
+                    "quizResult"
+                );
+
+            result.innerText =
+                "Your Score: " +
+                score +
+                " / " +
+                total;
+
+            if (
+                score === total
+            ) {
+
+                result.innerText +=
+                    " — Excellent! You understand GitHub collaboration.";
+
+            } else if (
+                score >= 4
+            ) {
+
+                result.innerText +=
+                    " — Good work! Review Issues and Projects once more.";
+
+            } else {
+
+                result.innerText +=
+                    " — Review the lesson and try again.";
+
+            }
+
+        }
+
+    </script>
+
+</body>
+</html>

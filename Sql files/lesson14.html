@@ -1,0 +1,5634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ZENSUS | SQL Lesson 14 - Indexes</title>
+
+    <style>
+        /* =========================================================
+           ZENSUS SQL LESSON 14 — INDEXES
+           Standalone HTML
+           CSS + JavaScript included
+        ========================================================= */
+
+        :root {
+            --bg: #f6f8fc;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --text: #172033;
+            --muted: #667085;
+            --border: #e5e7eb;
+
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --secondary: #7c3aed;
+
+            --success: #16a34a;
+            --warning: #d97706;
+            --danger: #dc2626;
+
+            --code-bg: #0f172a;
+            --code-text: #e2e8f0;
+
+            --shadow: 0 8px 30px rgba(15, 23, 42, 0.07);
+            --radius: 18px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Inter, Arial, Helvetica, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        /* =========================================================
+           PROGRESS
+        ========================================================= */
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(
+                90deg,
+                var(--primary),
+                var(--secondary)
+            );
+            z-index: 9999;
+        }
+
+        /* =========================================================
+           SIDEBAR
+        ========================================================= */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 270px;
+            height: 100vh;
+
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+
+            padding: 24px 16px;
+            overflow-y: auto;
+
+            z-index: 1000;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px 25px;
+        }
+
+        .brand-logo {
+            width: 38px;
+            height: 38px;
+
+            border-radius: 11px;
+
+            background: linear-gradient(
+                135deg,
+                var(--primary),
+                var(--secondary)
+            );
+
+            color: white;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-weight: 800;
+        }
+
+        .brand-text {
+            font-size: 21px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .course-label {
+            padding: 10px 12px;
+
+            color: var(--muted);
+
+            font-size: 11px;
+            font-weight: 700;
+
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .lesson-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            text-decoration: none;
+
+            color: #475467;
+
+            padding: 10px 12px;
+            margin: 3px 0;
+
+            border-radius: 10px;
+
+            font-size: 14px;
+
+            transition: 0.25s;
+        }
+
+        .lesson-link:hover {
+            background: #f1f5f9;
+            color: var(--primary);
+        }
+
+        .lesson-link.active {
+            background: #eef2ff;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .lesson-number {
+            font-size: 11px;
+            color: #98a2b3;
+        }
+
+        /* =========================================================
+           MOBILE
+        ========================================================= */
+
+        .mobile-header {
+            display: none;
+
+            position: sticky;
+            top: 0;
+
+            height: 62px;
+
+            background: white;
+            border-bottom: 1px solid var(--border);
+
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 18px;
+
+            z-index: 999;
+        }
+
+        .menu-btn {
+            border: none;
+
+            background: #eef2ff;
+            color: var(--primary);
+
+            width: 40px;
+            height: 40px;
+
+            border-radius: 10px;
+
+            font-size: 20px;
+
+            cursor: pointer;
+        }
+
+        /* =========================================================
+           MAIN
+        ========================================================= */
+
+        .main {
+            margin-left: 270px;
+
+            max-width: 1250px;
+
+            padding: 45px 50px 100px;
+        }
+
+        /* =========================================================
+           HERO
+        ========================================================= */
+
+        .hero {
+            background: var(--surface);
+
+            border: 1px solid var(--border);
+
+            border-radius: 25px;
+
+            padding: 48px;
+
+            box-shadow: var(--shadow);
+
+            margin-bottom: 28px;
+
+            position: relative;
+
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: "";
+
+            position: absolute;
+
+            width: 250px;
+            height: 250px;
+
+            border-radius: 50%;
+
+            background: #eef2ff;
+
+            right: -100px;
+            top: -100px;
+        }
+
+        .breadcrumb {
+            color: var(--primary);
+
+            font-size: 13px;
+            font-weight: 700;
+
+            margin-bottom: 14px;
+        }
+
+        .hero h1 {
+            font-size: clamp(34px, 5vw, 58px);
+
+            line-height: 1.1;
+
+            margin-bottom: 18px;
+
+            max-width: 850px;
+
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 span {
+            color: var(--primary);
+        }
+
+        .hero p {
+            max-width: 820px;
+
+            color: var(--muted);
+
+            font-size: 17px;
+
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-tags {
+            display: flex;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
+
+            margin-top: 25px;
+
+            position: relative;
+            z-index: 2;
+        }
+
+        .tag {
+            background: #f1f5f9;
+
+            border: 1px solid var(--border);
+
+            padding: 7px 13px;
+
+            border-radius: 999px;
+
+            font-size: 12px;
+
+            font-weight: 700;
+        }
+
+        /* =========================================================
+           SECTION
+        ========================================================= */
+
+        .section {
+            background: var(--surface);
+
+            border: 1px solid var(--border);
+
+            border-radius: var(--radius);
+
+            padding: 34px;
+
+            margin-bottom: 25px;
+
+            box-shadow: var(--shadow);
+        }
+
+        .section h2 {
+            font-size: 27px;
+
+            margin-bottom: 10px;
+        }
+
+        .section h3 {
+            font-size: 20px;
+
+            margin: 25px 0 10px;
+        }
+
+        .section-intro {
+            color: var(--muted);
+
+            margin-bottom: 22px;
+        }
+
+        /* =========================================================
+           OBJECTIVES
+        ========================================================= */
+
+        .objectives {
+            display: grid;
+
+            grid-template-columns: repeat(2, 1fr);
+
+            gap: 14px;
+        }
+
+        .objective {
+            padding: 18px;
+
+            background: var(--surface-2);
+
+            border: 1px solid var(--border);
+
+            border-radius: 14px;
+        }
+
+        .objective strong {
+            display: block;
+
+            margin-bottom: 5px;
+        }
+
+        /* =========================================================
+           CONCEPT
+        ========================================================= */
+
+        .concept-box {
+            padding: 22px;
+
+            background: #f8faff;
+
+            border-left: 4px solid var(--primary);
+
+            border-radius: 10px;
+
+            margin: 18px 0;
+        }
+
+        .concept-box strong {
+            color: var(--primary);
+        }
+
+        /* =========================================================
+           FLOW
+        ========================================================= */
+
+        .flow {
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            gap: 12px;
+
+            flex-wrap: wrap;
+
+            margin: 35px 0;
+        }
+
+        .flow-card {
+            width: 190px;
+
+            min-height: 110px;
+
+            padding: 18px;
+
+            border: 1px solid var(--border);
+
+            background: white;
+
+            border-radius: 15px;
+
+            text-align: center;
+
+            box-shadow:
+                0 5px 20px rgba(15, 23, 42, 0.05);
+
+            animation: floatCard 3s ease-in-out infinite;
+        }
+
+        .flow-card:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .flow-card:nth-child(5) {
+            animation-delay: 0.8s;
+        }
+
+        .flow-card:nth-child(7) {
+            animation-delay: 1.2s;
+        }
+
+        .flow-card .icon {
+            font-size: 28px;
+
+            margin-bottom: 5px;
+        }
+
+        .flow-arrow {
+            color: var(--primary);
+
+            font-size: 28px;
+
+            font-weight: 800;
+        }
+
+        @keyframes floatCard {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-7px);
+            }
+        }
+
+        /* =========================================================
+           CODE
+        ========================================================= */
+
+        .code-wrapper {
+            margin: 18px 0;
+
+            border-radius: 14px;
+
+            overflow: hidden;
+
+            background: var(--code-bg);
+
+            border: 1px solid #1e293b;
+        }
+
+        .code-header {
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 9px 15px;
+
+            background: #172033;
+
+            color: #94a3b8;
+
+            font-size: 12px;
+        }
+
+        .copy-btn {
+            border: 1px solid #334155;
+
+            background: #1e293b;
+
+            color: #cbd5e1;
+
+            padding: 5px 10px;
+
+            border-radius: 7px;
+
+            cursor: pointer;
+
+            font-size: 11px;
+        }
+
+        pre {
+            margin: 0;
+
+            padding: 20px;
+
+            overflow-x: auto;
+
+            color: var(--code-text);
+
+            background: var(--code-bg);
+
+            font-family:
+                "Cascadia Code",
+                "Fira Code",
+                Consolas,
+                monospace;
+
+            font-size: 13px;
+
+            line-height: 1.75;
+
+            white-space: pre;
+        }
+
+        code {
+            color: inherit;
+        }
+
+        /* =========================================================
+           GRIDS
+        ========================================================= */
+
+        .grid-2 {
+            display: grid;
+
+            grid-template-columns: repeat(2, 1fr);
+
+            gap: 20px;
+        }
+
+        .grid-3 {
+            display: grid;
+
+            grid-template-columns: repeat(3, 1fr);
+
+            gap: 18px;
+        }
+
+        .info-card {
+            padding: 22px;
+
+            border: 1px solid var(--border);
+
+            border-radius: 15px;
+
+            background: var(--surface-2);
+        }
+
+        .info-card h3 {
+            margin-top: 0;
+        }
+
+        /* =========================================================
+           TABLE
+        ========================================================= */
+
+        .table-container {
+            overflow-x: auto;
+
+            margin-top: 18px;
+        }
+
+        table {
+            width: 100%;
+
+            border-collapse: collapse;
+
+            min-width: 600px;
+        }
+
+        th,
+        td {
+            padding: 13px 15px;
+
+            text-align: left;
+
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: #f8fafc;
+
+            font-size: 13px;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        /* =========================================================
+           INDEX VISUAL
+        ========================================================= */
+
+        .index-visual {
+            padding: 25px;
+
+            background: #f8fafc;
+
+            border: 1px solid var(--border);
+
+            border-radius: 18px;
+
+            margin: 25px 0;
+        }
+
+        .index-root {
+            width: 150px;
+
+            margin: auto;
+
+            padding: 14px;
+
+            text-align: center;
+
+            background: #eef2ff;
+
+            border: 2px solid #c7d2fe;
+
+            border-radius: 12px;
+
+            font-weight: 800;
+
+            animation: pulseIndex 2s infinite;
+        }
+
+        .index-lines {
+            display: flex;
+
+            justify-content: center;
+
+            gap: 25px;
+
+            margin-top: 20px;
+
+            flex-wrap: wrap;
+        }
+
+        .index-node {
+            padding: 14px 18px;
+
+            background: white;
+
+            border: 1px solid var(--border);
+
+            border-radius: 10px;
+
+            box-shadow: 0 5px 15px rgba(15, 23, 42, .05);
+
+            min-width: 120px;
+
+            text-align: center;
+        }
+
+        @keyframes pulseIndex {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.04);
+            }
+        }
+
+        /* =========================================================
+           LAB
+        ========================================================= */
+
+        .lab {
+            background: #101828;
+
+            color: white;
+
+            border-radius: 18px;
+
+            padding: 28px;
+
+            margin-top: 22px;
+        }
+
+        .lab h3 {
+            color: white;
+
+            margin-top: 0;
+        }
+
+        .lab-description {
+            color: #aeb8c7;
+
+            margin-bottom: 20px;
+        }
+
+        .lab-controls {
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 10px;
+
+            margin-bottom: 20px;
+        }
+
+        .lab-btn {
+            border: 1px solid #344054;
+
+            background: #1d2939;
+
+            color: #e4e7ec;
+
+            padding: 10px 14px;
+
+            border-radius: 9px;
+
+            cursor: pointer;
+
+            font-weight: 600;
+
+            transition: .2s;
+        }
+
+        .lab-btn:hover,
+        .lab-btn.active {
+            background: var(--primary);
+
+            border-color: var(--primary);
+
+            color: white;
+        }
+
+        .lab-sql {
+            background: #0b1220;
+
+            border: 1px solid #263244;
+
+            padding: 18px;
+
+            border-radius: 12px;
+
+            color: #c4b5fd;
+
+            font-family: Consolas, monospace;
+
+            overflow-x: auto;
+
+            margin-bottom: 18px;
+        }
+
+        .lab-message {
+            padding: 15px;
+
+            border-radius: 10px;
+
+            background: #1d2939;
+
+            color: #d0d5dd;
+
+            margin-bottom: 15px;
+        }
+
+        .result-box {
+            overflow-x: auto;
+        }
+
+        .result-box table {
+            min-width: 500px;
+        }
+
+        .result-box th {
+            background: #1d2939;
+
+            color: #d0d5dd;
+
+            border-color: #344054;
+        }
+
+        .result-box td {
+            color: #d0d5dd;
+
+            border-color: #263244;
+        }
+
+        /* =========================================================
+           BADGES
+        ========================================================= */
+
+        .badge {
+            display: inline-block;
+
+            padding: 4px 9px;
+
+            border-radius: 999px;
+
+            font-size: 11px;
+
+            font-weight: 700;
+        }
+
+        .badge-green {
+            background: #dcfce7;
+
+            color: #166534;
+        }
+
+        .badge-yellow {
+            background: #fef3c7;
+
+            color: #92400e;
+        }
+
+        .badge-red {
+            background: #fee2e2;
+
+            color: #991b1b;
+        }
+
+        .badge-blue {
+            background: #dbeafe;
+
+            color: #1e40af;
+        }
+
+        /* =========================================================
+           CALLOUT
+        ========================================================= */
+
+        .callout {
+            padding: 18px 20px;
+
+            border-radius: 12px;
+
+            margin: 18px 0;
+        }
+
+        .callout.warning {
+            background: #fffbeb;
+
+            border: 1px solid #fde68a;
+        }
+
+        .callout.success {
+            background: #f0fdf4;
+
+            border: 1px solid #bbf7d0;
+        }
+
+        .callout.danger {
+            background: #fef2f2;
+
+            border: 1px solid #fecaca;
+        }
+
+        .callout.info {
+            background: #eff6ff;
+
+            border: 1px solid #bfdbfe;
+        }
+
+        /* =========================================================
+           QUIZ
+        ========================================================= */
+
+        .quiz-question {
+            padding: 20px;
+
+            border: 1px solid var(--border);
+
+            border-radius: 14px;
+
+            margin: 15px 0;
+        }
+
+        .quiz-options {
+            display: grid;
+
+            gap: 8px;
+
+            margin-top: 12px;
+        }
+
+        .quiz-option {
+            padding: 11px 13px;
+
+            border: 1px solid var(--border);
+
+            border-radius: 9px;
+
+            cursor: pointer;
+
+            transition: .2s;
+        }
+
+        .quiz-option:hover {
+            background: #f8fafc;
+        }
+
+        .quiz-option.correct {
+            background: #dcfce7;
+
+            border-color: #86efac;
+        }
+
+        .quiz-option.wrong {
+            background: #fee2e2;
+
+            border-color: #fca5a5;
+        }
+
+        .quiz-result {
+            margin-top: 20px;
+
+            padding: 15px;
+
+            border-radius: 12px;
+
+            background: #eef2ff;
+
+            color: #3730a3;
+
+            font-weight: 700;
+
+            display: none;
+        }
+
+        .primary-btn {
+            background: var(--primary);
+
+            color: white;
+
+            border: none;
+
+            padding: 11px 18px;
+
+            border-radius: 9px;
+
+            cursor: pointer;
+
+            font-weight: 700;
+        }
+
+        .primary-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* =========================================================
+           DETAILS
+        ========================================================= */
+
+        details {
+            border: 1px solid var(--border);
+
+            border-radius: 12px;
+
+            padding: 15px 17px;
+
+            margin: 10px 0;
+
+            background: #fff;
+        }
+
+        summary {
+            cursor: pointer;
+
+            font-weight: 700;
+        }
+
+        details p {
+            margin-top: 10px;
+
+            color: var(--muted);
+        }
+
+        /* =========================================================
+           CHECKLIST
+        ========================================================= */
+
+        .checklist {
+            display: grid;
+
+            gap: 10px;
+        }
+
+        .check-item {
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            padding: 13px;
+
+            border: 1px solid var(--border);
+
+            border-radius: 10px;
+        }
+
+        .check-item input {
+            width: 18px;
+
+            height: 18px;
+
+            accent-color: var(--primary);
+        }
+
+        /* =========================================================
+           REVEAL
+        ========================================================= */
+
+        .reveal {
+            opacity: 1;
+
+            transform: none;
+        }
+
+        .reveal.animate {
+            animation: revealUp .7s ease forwards;
+        }
+
+        @keyframes revealUp {
+
+            from {
+                opacity: 0;
+
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+
+                transform: translateY(0);
+            }
+        }
+
+        /* =========================================================
+           NEXT
+        ========================================================= */
+
+        .next-lesson {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 20px;
+
+            padding: 25px;
+
+            border-radius: 16px;
+
+            background: #eef2ff;
+
+            border: 1px solid #c7d2fe;
+        }
+
+        .next-lesson strong {
+            color: var(--primary-dark);
+        }
+
+        /* =========================================================
+           FOOTER
+        ========================================================= */
+
+        .footer {
+            text-align: center;
+
+            padding: 40px 10px;
+
+            color: var(--muted);
+        }
+
+        /* =========================================================
+           RESPONSIVE
+        ========================================================= */
+
+        @media (max-width: 1000px) {
+
+            .sidebar {
+                transform: translateX(-100%);
+
+                transition: .3s;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main {
+                margin-left: 0;
+
+                padding: 30px 20px 70px;
+            }
+
+            .objectives,
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .grid-3 {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 650px) {
+
+            .hero {
+                padding: 28px 22px;
+            }
+
+            .section {
+                padding: 23px 18px;
+            }
+
+            .hero h1 {
+                font-size: 35px;
+            }
+
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .flow {
+                flex-direction: column;
+            }
+
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+
+            .next-lesson {
+                flex-direction: column;
+
+                align-items: flex-start;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+<!-- =========================================================
+     PROGRESS BAR
+========================================================= -->
+
+<div class="progress-bar" id="progressBar"></div>
+
+
+<!-- =========================================================
+     MOBILE HEADER
+========================================================= -->
+
+<header class="mobile-header">
+
+    <div class="brand">
+
+        <div class="brand-logo">
+            Z
+        </div>
+
+        <div class="brand-text">
+            ZENSUS
+        </div>
+
+    </div>
+
+    <button
+        class="menu-btn"
+        onclick="toggleSidebar()"
+    >
+        ☰
+    </button>
+
+</header>
+
+
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+
+        <div class="brand-logo">
+            Z
+        </div>
+
+        <div class="brand-text">
+            ZENSUS
+        </div>
+
+    </div>
+
+    <div class="course-label">
+        SQL Mastery
+    </div>
+
+    <a class="lesson-link" href="#top">
+        <span>Introduction to SQL</span>
+        <span class="lesson-number">01</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>Database Fundamentals</span>
+        <span class="lesson-number">02</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>CREATE</span>
+        <span class="lesson-number">03</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>INSERT</span>
+        <span class="lesson-number">04</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>SELECT</span>
+        <span class="lesson-number">05</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>WHERE</span>
+        <span class="lesson-number">06</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>ORDER BY</span>
+        <span class="lesson-number">07</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>GROUP BY</span>
+        <span class="lesson-number">08</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>Aggregate Functions</span>
+        <span class="lesson-number">09</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>JOINS</span>
+        <span class="lesson-number">10</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>Subqueries</span>
+        <span class="lesson-number">11</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>Constraints</span>
+        <span class="lesson-number">12</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>Views</span>
+        <span class="lesson-number">13</span>
+    </a>
+
+    <a class="lesson-link active" href="#top">
+        <span>Indexes</span>
+        <span class="lesson-number">14</span>
+    </a>
+
+    <a class="lesson-link" href="#top">
+        <span>Advanced SQL</span>
+        <span class="lesson-number">15</span>
+    </a>
+
+</aside>
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<main class="main" id="top">
+
+
+    <!-- =====================================================
+         HERO
+    ====================================================== -->
+
+    <section class="hero reveal">
+
+        <div class="breadcrumb">
+            SQL • LESSON 14
+        </div>
+
+        <h1>
+            SQL <span>Indexes</span>
+        </h1>
+
+        <p>
+            Learn how databases find data efficiently, how indexes speed up
+            SELECT queries, why indexes can slow down writes, and how to design
+            professional indexes using single-column, composite, unique,
+            partial, covering, and specialized indexing strategies.
+        </p>
+
+        <div class="hero-tags">
+
+            <span class="tag">
+                Beginner → Advanced
+            </span>
+
+            <span class="tag">
+                Query Performance
+            </span>
+
+            <span class="tag">
+                B-Tree
+            </span>
+
+            <span class="tag">
+                Composite Index
+            </span>
+
+            <span class="tag">
+                EXPLAIN
+            </span>
+
+            <span class="tag">
+                Interview Ready
+            </span>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         OBJECTIVES
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🎯 What You Will Learn
+        </h2>
+
+        <p class="section-intro">
+            By the end of this lesson, you should understand not only how to
+            create an index, but also when an index helps, when it hurts, and
+            how database engineers reason about indexing.
+        </p>
+
+        <div class="objectives">
+
+            <div class="objective">
+
+                <strong>
+                    01 — Understand Indexes
+                </strong>
+
+                Learn why databases use indexes to locate rows efficiently.
+
+            </div>
+
+            <div class="objective">
+
+                <strong>
+                    02 — Create Indexes
+                </strong>
+
+                Learn CREATE INDEX and DROP INDEX.
+
+            </div>
+
+            <div class="objective">
+
+                <strong>
+                    03 — Index Types
+                </strong>
+
+                Understand single, composite, unique, partial, and specialized
+                indexes.
+
+            </div>
+
+            <div class="objective">
+
+                <strong>
+                    04 — B-Tree
+                </strong>
+
+                Understand the most common general-purpose index structure.
+
+            </div>
+
+            <div class="objective">
+
+                <strong>
+                    05 — Query Optimization
+                </strong>
+
+                Understand how WHERE, JOIN, ORDER BY, and range conditions can
+                benefit from indexes.
+
+            </div>
+
+            <div class="objective">
+
+                <strong>
+                    06 — EXPLAIN
+                </strong>
+
+                Learn the basics of reading query execution plans.
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         WHAT IS INDEX
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🧠 What Is an Index?
+        </h2>
+
+        <p>
+            An <strong>index</strong> is a database structure designed to help
+            the database find rows more efficiently without examining every
+            row of the table.
+        </p>
+
+        <div class="concept-box">
+
+            <strong>
+                Simple Definition:
+            </strong>
+
+            <p>
+                An index is like a carefully organized lookup structure that
+                helps the database locate relevant data faster.
+            </p>
+
+        </div>
+
+        <h3>
+            📚 Real-World Analogy
+        </h3>
+
+        <p>
+            Imagine a 1,000-page textbook. You want to find the topic
+            <strong>"Binary Search"</strong>.
+        </p>
+
+        <p>
+            Without an index, you might scan page after page.
+        </p>
+
+        <p>
+            With the book's index, you can jump directly toward the relevant
+            pages.
+        </p>
+
+        <div class="flow">
+
+            <div class="flow-card">
+
+                <div class="icon">
+                    📖
+                </div>
+
+                <strong>
+                    Huge Table
+                </strong>
+
+                <p>
+                    Millions of rows
+                </p>
+
+            </div>
+
+            <div class="flow-arrow">
+                →
+            </div>
+
+            <div class="flow-card">
+
+                <div class="icon">
+                    🔎
+                </div>
+
+                <strong>
+                    Index
+                </strong>
+
+                <p>
+                    Organized search structure
+                </p>
+
+            </div>
+
+            <div class="flow-arrow">
+                →
+            </div>
+
+            <div class="flow-card">
+
+                <div class="icon">
+                    🎯
+                </div>
+
+                <strong>
+                    Matching Rows
+                </strong>
+
+                <p>
+                    Locate relevant records
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         WITHOUT INDEX
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🐌 Searching Without an Index
+        </h2>
+
+        <p>
+            Suppose we have one million students:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+            </div>
+
+            <pre><code>SELECT *
+FROM students
+WHERE email = 'arun@example.com';</code></pre>
+
+        </div>
+
+        <p>
+            If there is no useful index and the optimizer chooses a sequential
+            scan, the database may inspect many rows to determine which ones
+            match.
+        </p>
+
+        <div class="concept-box">
+
+            <strong>
+                Sequential Scan:
+            </strong>
+
+            <p>
+                Conceptually, the database examines rows one after another.
+                The exact physical behavior depends on the database engine
+                and execution plan.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         WITH INDEX
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            ⚡ Searching With an Index
+        </h2>
+
+        <p>
+            Create an index on the searched column:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+                <button
+                    class="copy-btn"
+                    onclick="copyCode(this)"
+                >
+                    Copy
+                </button>
+            </div>
+
+            <pre><code>CREATE INDEX idx_students_email
+ON students(email);</code></pre>
+
+        </div>
+
+        <p>
+            Now the optimizer may choose an index-based access path for queries
+            involving the indexed column.
+        </p>
+
+        <div class="callout info">
+
+            <strong>
+                Important:
+            </strong>
+
+            <p>
+                Creating an index does not guarantee that the database will use
+                it. The optimizer chooses a plan based on statistics, cost,
+                selectivity, table size, query structure, and other factors.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         INDEX VISUAL
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🌳 How an Index Can Organize Data
+        </h2>
+
+        <p>
+            A common general-purpose structure is a balanced tree, especially
+            a B-tree or B-tree variant.
+        </p>
+
+        <div class="index-visual">
+
+            <div class="index-root">
+                Root / Branch
+            </div>
+
+            <div class="index-lines">
+
+                <div class="index-node">
+                    10–30
+                </div>
+
+                <div class="index-node">
+                    31–60
+                </div>
+
+                <div class="index-node">
+                    61–90
+                </div>
+
+            </div>
+
+            <div class="index-lines">
+
+                <div class="index-node">
+                    Leaf
+                </div>
+
+                <div class="index-node">
+                    Leaf
+                </div>
+
+                <div class="index-node">
+                    Leaf
+                </div>
+
+                <div class="index-node">
+                    Leaf
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="concept-box">
+
+            <strong>
+                Why balanced trees?
+            </strong>
+
+            <p>
+                They keep search paths relatively shallow and support efficient
+                equality and range operations for the data types they are
+                designed to handle.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         B TREE
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🌳 B-Tree Index
+        </h2>
+
+        <p>
+            B-tree-style indexes are widely used for general-purpose database
+            indexing.
+        </p>
+
+        <div class="grid-3">
+
+            <div class="info-card">
+
+                <h3>
+                    🔍 Equality
+                </h3>
+
+                <p>
+                    Useful for conditions such as:
+                </p>
+
+                <code>
+                    WHERE id = 100
+                </code>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>
+                    📏 Range
+                </h3>
+
+                <p>
+                    Useful for:
+                </p>
+
+                <code>
+                    WHERE salary &gt; 50000
+                </code>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>
+                    ↕️ Ordering
+                </h3>
+
+                <p>
+                    Can help some ORDER BY operations depending on the query
+                    and index definition.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         BASIC SYNTAX
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🧩 CREATE INDEX Syntax
+        </h2>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+                <button
+                    class="copy-btn"
+                    onclick="copyCode(this)"
+                >
+                    Copy
+                </button>
+            </div>
+
+            <pre><code>CREATE INDEX index_name
+ON table_name(column_name);</code></pre>
+
+        </div>
+
+        <h3>
+            Example
+        </h3>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+                <button
+                    class="copy-btn"
+                    onclick="copyCode(this)"
+                >
+                    Copy
+                </button>
+            </div>
+
+            <pre><code>CREATE INDEX idx_students_name
+ON students(name);</code></pre>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         SINGLE COLUMN
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            1️⃣ Single-Column Index
+        </h2>
+
+        <p>
+            An index containing one column.
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+                <button
+                    class="copy-btn"
+                    onclick="copyCode(this)"
+                >
+                    Copy
+                </button>
+            </div>
+
+            <pre><code>CREATE INDEX idx_student_city
+ON students(city);</code></pre>
+
+        </div>
+
+        <p>
+            It may help queries such as:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+            </div>
+
+            <pre><code>SELECT *
+FROM students
+WHERE city = 'Guntur';</code></pre>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         UNIQUE INDEX
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            2️⃣ Unique Index
+        </h2>
+
+        <p>
+            A unique index prevents duplicate indexed key values, subject to
+            the database's NULL semantics.
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+                <button
+                    class="copy-btn"
+                    onclick="copyCode(this)"
+                >
+                    Copy
+                </button>
+            </div>
+
+            <pre><code>CREATE UNIQUE INDEX idx_unique_email
+ON students(email);</code></pre>
+
+        </div>
+
+        <div class="callout warning">
+
+            <strong>
+                UNIQUE Constraint vs Unique Index:
+            </strong>
+
+            <p>
+                A UNIQUE constraint expresses a data-integrity rule. A unique
+                index is an indexing structure enforcing uniqueness. Database
+                systems may implement a UNIQUE constraint using a unique index,
+                but the concepts are not identical.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         COMPOSITE
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            3️⃣ Composite Index
+        </h2>
+
+        <p>
+            A composite index contains multiple columns.
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+                <button
+                    class="copy-btn"
+                    onclick="copyCode(this)"
+                >
+                    Copy
+                </button>
+            </div>
+
+            <pre><code>CREATE INDEX idx_students_dept_cgpa
+ON students(department, cgpa);</code></pre>
+
+        </div>
+
+        <p>
+            It can be useful for queries such as:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+            </div>
+
+            <pre><code>SELECT *
+FROM students
+WHERE department = 'CSE'
+  AND cgpa &gt;= 8.5;</code></pre>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         LEFTMOST PREFIX
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            ⭐ Composite Index and Column Order
+        </h2>
+
+        <p>
+            Column order matters.
+        </p>
+
+        <p>
+            Suppose:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                Index
+            </div>
+
+            <pre><code>(department, cgpa)</code></pre>
+
+        </div>
+
+        <p>
+            This ordering generally gives the optimizer the best opportunity
+            to use the index when the query constrains the leading
+            <strong>department</strong> column.
+        </p>
+
+        <div class="grid-2">
+
+            <div class="info-card">
+
+                <h3>
+                    ✅ Strong Match
+                </h3>
+
+                <div class="code-wrapper">
+
+                    <pre><code>WHERE department = 'CSE'
+AND cgpa &gt;= 8.5</code></pre>
+
+                </div>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>
+                    ⚠️ Different Pattern
+                </h3>
+
+                <div class="code-wrapper">
+
+                    <pre><code>WHERE cgpa &gt;= 8.5</code></pre>
+
+                </div>
+
+                <p>
+                    The index may be less useful because the leading column is
+                    not constrained. Exact behavior is optimizer/DBMS dependent.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="callout info">
+
+            <strong>
+                Interview Term: Leftmost Prefix
+            </strong>
+
+            <p>
+                For a composite index, the leading columns are especially
+                important. Do not memorize this as an absolute rule for every
+                query; modern optimizers and different index types can behave
+                differently.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         WHERE
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🔎 Indexes and WHERE
+        </h2>
+
+        <p>
+            Indexes are commonly created on columns used frequently in
+            selective filtering.
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+            </div>
+
+            <pre><code>SELECT *
+FROM employees
+WHERE employee_id = 105;</code></pre>
+
+        </div>
+
+        <p>
+            A primary key normally has an index or index-like access structure
+            in many database systems, but the exact implementation depends on
+            the DBMS.
+        </p>
+
+    </section>
+
+
+    <!-- =====================================================
+         JOIN
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🔗 Indexes and JOIN
+        </h2>
+
+        <p>
+            Indexes can be useful on columns participating in joins, especially
+            foreign-key columns and frequently joined keys.
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+            </div>
+
+            <pre><code>SELECT
+    s.name,
+    d.department_name
+FROM students s
+JOIN departments d
+    ON s.department_id = d.department_id;</code></pre>
+
+        </div>
+
+        <div class="concept-box">
+
+            <strong>
+                Practical Idea:
+            </strong>
+
+            <p>
+                Indexing the child-side foreign-key column can help joins and
+                can also help some UPDATE/DELETE operations involving the
+                referenced parent key. The exact benefit depends on workload
+                and execution plan.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ORDER BY
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            ↕️ Indexes and ORDER BY
+        </h2>
+
+        <p>
+            An appropriately ordered index may help the database avoid an
+            additional sort operation for some queries.
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+            </div>
+
+            <pre><code>CREATE INDEX idx_students_cgpa
+ON students(cgpa DESC);</code></pre>
+
+        </div>
+
+        <p>
+            Query:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+            </div>
+
+            <pre><code>SELECT student_id, name, cgpa
+FROM students
+ORDER BY cgpa DESC;</code></pre>
+
+        </div>
+
+        <div class="callout warning">
+
+            <strong>
+                Don't assume:
+            </strong>
+
+            <p>
+                The optimizer may still choose a sort or another plan if it
+                estimates that doing so is cheaper.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         RANGE
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            📏 Range Queries
+        </h2>
+
+        <p>
+            B-tree-style indexes are particularly useful for ordered ranges.
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+            </div>
+
+            <pre><code>SELECT *
+FROM products
+WHERE price BETWEEN 1000 AND 5000;</code></pre>
+
+        </div>
+
+        <p>
+            An index on <strong>price</strong> may provide an efficient way to
+            locate the relevant range.
+        </p>
+
+    </section>
+
+
+    <!-- =====================================================
+         SELECTIVITY
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🎯 Selectivity
+        </h2>
+
+        <p>
+            <strong>Selectivity</strong> describes how effectively a condition
+            narrows down the possible rows.
+        </p>
+
+        <div class="grid-2">
+
+            <div class="info-card">
+
+                <h3>
+                    High Selectivity
+                </h3>
+
+                <p>
+                    Example:
+                </p>
+
+                <div class="code-wrapper">
+
+                    <pre><code>WHERE email = 'a@b.com'</code></pre>
+
+                </div>
+
+                <p>
+                    Usually only a tiny number of rows match.
+                </p>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>
+                    Low Selectivity
+                </h3>
+
+                <p>
+                    Example:
+                </p>
+
+                <div class="code-wrapper">
+
+                    <pre><code>WHERE gender = 'M'</code></pre>
+
+                </div>
+
+                <p>
+                    If a large percentage of rows match, an index may provide
+                    less benefit.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="callout info">
+
+            <strong>
+                Important:
+            </strong>
+
+            <p>
+                Selectivity is only one factor. Table size, data distribution,
+                statistics, cost estimates, cache state, query shape, and the
+                DBMS optimizer all influence the final plan.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         COVERING INDEX
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🚀 Covering Index
+        </h2>
+
+        <p>
+            A covering index contains enough indexed information for a query
+            to be satisfied without needing to fetch the full table row, when
+            the DBMS and index structure support that access path.
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+            </div>
+
+            <pre><code>CREATE INDEX idx_student_lookup
+ON students(department, cgpa, name);</code></pre>
+
+        </div>
+
+        <p>
+            Query:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+            </div>
+
+            <pre><code>SELECT name, cgpa
+FROM students
+WHERE department = 'CSE'
+  AND cgpa &gt;= 9.0;</code></pre>
+
+        </div>
+
+        <div class="callout warning">
+
+            <strong>
+                Trade-off:
+            </strong>
+
+            <p>
+                Adding more columns to an index makes the index larger and can
+                increase storage and write-maintenance cost.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PARTIAL INDEX
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🧩 Partial / Filtered Index
+        </h2>
+
+        <p>
+            Some database systems allow indexes to cover only rows satisfying
+            a condition.
+        </p>
+
+        <h3>
+            PostgreSQL-style Example
+        </h3>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+            </div>
+
+            <pre><code>CREATE INDEX idx_active_users
+ON users(email)
+WHERE status = 'active';</code></pre>
+
+        </div>
+
+        <p>
+            This can be useful when only a subset of a table is frequently
+            queried.
+        </p>
+
+        <div class="callout info">
+
+            <strong>
+                Dialect Note:
+            </strong>
+
+            <p>
+                Partial/filtered index syntax and support differ across
+                database systems.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         FUNCTIONAL INDEX
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🧮 Expression / Functional Index
+        </h2>
+
+        <p>
+            Some database systems support indexes on expressions rather than
+            only raw column values.
+        </p>
+
+        <h3>
+            Example
+        </h3>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+            </div>
+
+            <pre><code>CREATE INDEX idx_lower_email
+ON users (LOWER(email));</code></pre>
+
+        </div>
+
+        <p>
+            This can support searches such as:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+            </div>
+
+            <pre><code>SELECT *
+FROM users
+WHERE LOWER(email) = 'arun@example.com';</code></pre>
+
+        </div>
+
+        <div class="callout warning">
+
+            <strong>
+                DBMS-specific:
+            </strong>
+
+            <p>
+                Expression-index syntax and capabilities differ across
+                database systems.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         HASH INDEX
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            #️⃣ Hash Index
+        </h2>
+
+        <p>
+            Hash-based indexing can provide efficient equality lookups in
+            database systems that support it.
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                PostgreSQL-style example
+            </div>
+
+            <pre><code>CREATE INDEX idx_users_email_hash
+ON users USING HASH(email);</code></pre>
+
+        </div>
+
+        <p>
+            Conceptually:
+        </p>
+
+        <div class="flow">
+
+            <div class="flow-card">
+
+                <div class="icon">
+                    🔤
+                </div>
+
+                <strong>
+                    Search Value
+                </strong>
+
+                <p>
+                    email
+                </p>
+
+            </div>
+
+            <div class="flow-arrow">
+                →
+            </div>
+
+            <div class="flow-card">
+
+                <div class="icon">
+                    #️⃣
+                </div>
+
+                <strong>
+                    Hash Function
+                </strong>
+
+                <p>
+                    Bucket calculation
+                </p>
+
+            </div>
+
+            <div class="flow-arrow">
+                →
+            </div>
+
+            <div class="flow-card">
+
+                <div class="icon">
+                    🎯
+                </div>
+
+                <strong>
+                    Matching Entry
+                </strong>
+
+                <p>
+                    Equality lookup
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="callout warning">
+
+            <strong>
+                Important:
+            </strong>
+
+            <p>
+                Hash indexes are specialized. They are generally associated
+                with equality lookups and are not a universal replacement for
+                B-tree indexes.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         FULL TEXT / SPECIALIZED
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🔤 Specialized Indexes
+        </h2>
+
+        <p>
+            Modern database systems can provide specialized indexing methods
+            for particular workloads.
+        </p>
+
+        <div class="grid-3">
+
+            <div class="info-card">
+
+                <h3>
+                    🔤 Full Text
+                </h3>
+
+                <p>
+                    Designed for searching words and textual content.
+                </p>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>
+                    🗺️ Spatial
+                </h3>
+
+                <p>
+                    Useful for geographic and geometric data.
+                </p>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>
+                    🧱 GIN / GiST
+                </h3>
+
+                <p>
+                    PostgreSQL provides specialized index methods such as
+                    GIN and GiST for particular data types and operators.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="callout info">
+
+            <strong>
+                Interview Tip:
+            </strong>
+
+            <p>
+                Don't claim that one index type is "best". The correct index
+                depends on the query workload, data type, operators, and DBMS.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         INDEX AND NULL
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            NULL and Indexes
+        </h2>
+
+        <p>
+            Index behavior involving NULL values depends on the database
+            system and index type.
+        </p>
+
+        <p>
+            For example:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+            </div>
+
+            <pre><code>SELECT *
+FROM students
+WHERE email IS NULL;</code></pre>
+
+        </div>
+
+        <p>
+            Whether and how efficiently an index is used for NULL predicates
+            depends on the DBMS and index design.
+        </p>
+
+    </section>
+
+
+    <!-- =====================================================
+         INDEX COST
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            ⚖️ The Cost of Indexes
+        </h2>
+
+        <p>
+            Indexes are not free.
+        </p>
+
+        <div class="grid-2">
+
+            <div class="info-card">
+
+                <h3>
+                    ✅ Advantages
+                </h3>
+
+                <ul>
+                    <li>Faster selective lookups</li>
+                    <li>Can improve joins</li>
+                    <li>Can help ORDER BY</li>
+                    <li>Can help range queries</li>
+                    <li>Can enforce uniqueness</li>
+                </ul>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>
+                    ❌ Costs
+                </h3>
+
+                <ul>
+                    <li>Consumes storage</li>
+                    <li>INSERT can become more expensive</li>
+                    <li>UPDATE can become more expensive</li>
+                    <li>DELETE can become more expensive</li>
+                    <li>Too many indexes complicate maintenance</li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="callout danger">
+
+            <strong>
+                Golden Rule:
+            </strong>
+
+            <p>
+                Don't create an index for every column. Indexes should be
+                designed from actual query and workload requirements.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         WRITE PERFORMANCE
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            ✍️ Why Indexes Can Slow INSERT / UPDATE / DELETE
+        </h2>
+
+        <p>
+            Imagine a table has five indexes.
+        </p>
+
+        <p>
+            When a new row is inserted, the database may need to maintain each
+            relevant index.
+        </p>
+
+        <div class="flow">
+
+            <div class="flow-card">
+
+                <div class="icon">
+                    ➕
+                </div>
+
+                <strong>
+                    INSERT
+                </strong>
+
+            </div>
+
+            <div class="flow-arrow">
+                →
+            </div>
+
+            <div class="flow-card">
+
+                <div class="icon">
+                    🗃️
+                </div>
+
+                <strong>
+                    Table
+                </strong>
+
+            </div>
+
+            <div class="flow-arrow">
+                →
+            </div>
+
+            <div class="flow-card">
+
+                <div class="icon">
+                    📑
+                </div>
+
+                <strong>
+                    Index 1
+                </strong>
+
+            </div>
+
+            <div class="flow-arrow">
+                →
+            </div>
+
+            <div class="flow-card">
+
+                <div class="icon">
+                    📑
+                </div>
+
+                <strong>
+                    Index 2...
+                </strong>
+
+            </div>
+
+        </div>
+
+        <p>
+            Therefore, indexes represent a classic database trade-off:
+        </p>
+
+        <div class="concept-box">
+
+            <strong>
+                Read Performance ↔ Write Cost
+            </strong>
+
+            <p>
+                Good index design balances both.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PRIMARY KEY
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🔑 Primary Keys and Indexes
+        </h2>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+            </div>
+
+            <pre><code>CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(255)
+);</code></pre>
+
+        </div>
+
+        <p>
+            In many relational database systems, a primary key is backed by
+            an index or index-like structure to enforce uniqueness and support
+            efficient lookup.
+        </p>
+
+        <div class="callout info">
+
+            <strong>
+                Don't create redundant indexes blindly.
+            </strong>
+
+            <p>
+                If a primary key already provides the required index structure,
+                creating another identical index is usually unnecessary.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         FOREIGN KEY
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🔗 Foreign Keys and Indexes
+        </h2>
+
+        <p>
+            Consider:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+            </div>
+
+            <pre><code>CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    department_id INT,
+
+    FOREIGN KEY (department_id)
+        REFERENCES departments(department_id)
+);</code></pre>
+
+        </div>
+
+        <p>
+            Indexing <strong>students.department_id</strong> can often be
+            beneficial for joins and for operations involving the referenced
+            parent rows.
+        </p>
+
+        <div class="callout warning">
+
+            <strong>
+                Important:
+            </strong>
+
+            <p>
+                A foreign key does not necessarily cause every DBMS to
+                automatically create an index on the child column.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         DROP INDEX
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🗑️ DROP INDEX
+        </h2>
+
+        <p>
+            Index removal syntax varies by DBMS.
+        </p>
+
+        <h3>
+            PostgreSQL / many systems
+        </h3>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+            </div>
+
+            <pre><code>DROP INDEX idx_students_email;</code></pre>
+
+        </div>
+
+        <div class="callout warning">
+
+            <strong>
+                Dialect Difference:
+            </strong>
+
+            <p>
+                MySQL, SQL Server, Oracle, PostgreSQL, and SQLite have
+                differences in CREATE/DROP INDEX syntax and index management.
+                Learn the syntax for the database you are actually using.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         EXPLAIN
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🔬 EXPLAIN — See the Query Plan
+        </h2>
+
+        <p>
+            Instead of guessing whether an index helps, inspect the query
+            execution plan.
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                PostgreSQL / MySQL-style concept
+            </div>
+
+            <pre><code>EXPLAIN
+SELECT *
+FROM students
+WHERE email = 'arun@example.com';</code></pre>
+
+        </div>
+
+        <p>
+            Some database systems also support commands such as
+            <strong>EXPLAIN ANALYZE</strong> or related features to inspect
+            actual execution behavior.
+        </p>
+
+        <div class="grid-3">
+
+            <div class="info-card">
+
+                <h3>
+                    🔎 Scan
+                </h3>
+
+                <p>
+                    What access method is being used?
+                </p>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>
+                    💰 Cost
+                </h3>
+
+                <p>
+                    What estimated work does the optimizer expect?
+                </p>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>
+                    📊 Rows
+                </h3>
+
+                <p>
+                    How many rows are estimated or actually processed?
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         INDEX SCAN VS SEQ SCAN
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🆚 Index Scan vs Sequential Scan
+        </h2>
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Index Access</th>
+                        <th>Sequential Scan</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>Search method</td>
+                        <td>Uses index structure</td>
+                        <td>Reads table rows/pages</td>
+                    </tr>
+
+                    <tr>
+                        <td>Selective query</td>
+                        <td>Often useful</td>
+                        <td>May be more work</td>
+                    </tr>
+
+                    <tr>
+                        <td>Large percentage of rows</td>
+                        <td>May be less attractive</td>
+                        <td>Can be efficient</td>
+                    </tr>
+
+                    <tr>
+                        <td>Always faster?</td>
+                        <td>No</td>
+                        <td>No</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="callout success">
+
+            <strong>
+                Interview Answer:
+            </strong>
+
+            <p>
+                The optimizer chooses the cheapest estimated execution plan.
+                An index is a tool, not a guarantee of better performance.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         FUNCTIONS AND INDEX
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            ⚠️ Functions Can Affect Index Usage
+        </h2>
+
+        <p>
+            Consider:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+            </div>
+
+            <pre><code>SELECT *
+FROM users
+WHERE LOWER(email) = 'arun@example.com';</code></pre>
+
+        </div>
+
+        <p>
+            A simple index on <strong>email</strong> may not be directly usable
+            for this expression in some database systems.
+        </p>
+
+        <p>
+            An expression index may solve this when supported:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+            </div>
+
+            <pre><code>CREATE INDEX idx_lower_email
+ON users(LOWER(email));</code></pre>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         INDEX LAB
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🧪 Interactive Index Lab
+        </h2>
+
+        <p class="section-intro">
+            Compare how different query patterns relate to indexing.
+            This is a browser simulation, not a real database optimizer.
+        </p>
+
+        <div class="lab">
+
+            <h3>
+                Index Simulator
+            </h3>
+
+            <p class="lab-description">
+                Select a query pattern to see the recommended index concept.
+            </p>
+
+            <div class="lab-controls">
+
+                <button
+                    class="lab-btn active"
+                    onclick="runIndexLab('email')"
+                >
+                    Email Lookup
+                </button>
+
+                <button
+                    class="lab-btn"
+                    onclick="runIndexLab('department')"
+                >
+                    Department
+                </button>
+
+                <button
+                    class="lab-btn"
+                    onclick="runIndexLab('range')"
+                >
+                    Range Query
+                </button>
+
+                <button
+                    class="lab-btn"
+                    onclick="runIndexLab('composite')"
+                >
+                    Composite
+                </button>
+
+                <button
+                    class="lab-btn"
+                    onclick="runIndexLab('join')"
+                >
+                    JOIN
+                </button>
+
+                <button
+                    class="lab-btn"
+                    onclick="runIndexLab('order')"
+                >
+                    ORDER BY
+                </button>
+
+            </div>
+
+            <div
+                class="lab-sql"
+                id="labSQL"
+            >
+                SELECT *
+                FROM students
+                WHERE email = 'arun@example.com';
+            </div>
+
+            <div
+                class="lab-message"
+                id="labMessage"
+            >
+                Recommended concept: index on email for selective lookups.
+            </div>
+
+            <div
+                class="result-box"
+                id="labResult"
+            ></div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         INDEX DESIGN PROCESS
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🧭 Professional Index Design Process
+        </h2>
+
+        <div class="flow">
+
+            <div class="flow-card">
+
+                <div class="icon">
+                    1️⃣
+                </div>
+
+                <strong>
+                    Find Slow Query
+                </strong>
+
+            </div>
+
+            <div class="flow-arrow">
+                →
+            </div>
+
+            <div class="flow-card">
+
+                <div class="icon">
+                    2️⃣
+                </div>
+
+                <strong>
+                    EXPLAIN
+                </strong>
+
+            </div>
+
+            <div class="flow-arrow">
+                →
+            </div>
+
+            <div class="flow-card">
+
+                <div class="icon">
+                    3️⃣
+                </div>
+
+                <strong>
+                    Design Index
+                </strong>
+
+            </div>
+
+            <div class="flow-arrow">
+                →
+            </div>
+
+            <div class="flow-card">
+
+                <div class="icon">
+                    4️⃣
+                </div>
+
+                <strong>
+                    Test
+                </strong>
+
+            </div>
+
+            <div class="flow-arrow">
+                →
+            </div>
+
+            <div class="flow-card">
+
+                <div class="icon">
+                    5️⃣
+                </div>
+
+                <strong>
+                    Measure
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         WHEN NOT TO INDEX
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🚫 When Should You Avoid an Index?
+        </h2>
+
+        <ul>
+
+            <li>
+                Very small tables where scanning is already cheap.
+            </li>
+
+            <li>
+                Columns rarely used for filtering, joining, ordering, or
+                uniqueness.
+            </li>
+
+            <li>
+                Columns with poor usefulness for the workload.
+            </li>
+
+            <li>
+                Excessive indexes on write-heavy tables.
+            </li>
+
+            <li>
+                Duplicate or redundant indexes.
+            </li>
+
+        </ul>
+
+        <div class="callout warning">
+
+            <strong>
+                Remember:
+            </strong>
+
+            <p>
+                "More indexes" does not mean "more performance".
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         REDUNDANT INDEX
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            ♻️ Redundant Indexes
+        </h2>
+
+        <p>
+            Suppose you already have:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                Index A
+            </div>
+
+            <pre><code>(department, cgpa)</code></pre>
+
+        </div>
+
+        <p>
+            Creating another index with the exact same key order may provide
+            little or no additional benefit and increases maintenance cost.
+        </p>
+
+        <div class="callout danger">
+
+            <strong>
+                Professional Rule:
+            </strong>
+
+            <p>
+                Audit existing indexes before creating new ones.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         INDEX VS CONSTRAINT
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🆚 Index vs Constraint
+        </h2>
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Feature</th>
+                        <th>Index</th>
+                        <th>Constraint</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>Main purpose</td>
+                        <td>Efficient data access</td>
+                        <td>Data integrity</td>
+                    </tr>
+
+                    <tr>
+                        <td>Speeds queries</td>
+                        <td>Potentially</td>
+                        <td>Not its primary purpose</td>
+                    </tr>
+
+                    <tr>
+                        <td>Enforces uniqueness</td>
+                        <td>Unique index can</td>
+                        <td>UNIQUE constraint does</td>
+                    </tr>
+
+                    <tr>
+                        <td>Represents business rule</td>
+                        <td>Usually no</td>
+                        <td>Yes</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         INDEX VS VIEW
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🆚 Index vs View
+        </h2>
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Index</th>
+                        <th>View</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>Purpose</td>
+                        <td>Query access optimization</td>
+                        <td>Query abstraction</td>
+                    </tr>
+
+                    <tr>
+                        <td>Virtual table</td>
+                        <td>No</td>
+                        <td>Yes</td>
+                    </tr>
+
+                    <tr>
+                        <td>Stores query definition</td>
+                        <td>No</td>
+                        <td>Yes</td>
+                    </tr>
+
+                    <tr>
+                        <td>Designed for performance</td>
+                        <td>Yes</td>
+                        <td>Not inherently</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         TRANSACTIONS
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🔄 Indexes and Transactions
+        </h2>
+
+        <p>
+            Index modifications participate in database write operations and
+            transaction behavior according to the DBMS's rules.
+        </p>
+
+        <p>
+            For example, when inserting:
+        </p>
+
+        <div class="flow">
+
+            <div class="flow-card">
+                <div class="icon">📝</div>
+                <strong>INSERT</strong>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-card">
+                <div class="icon">🗃️</div>
+                <strong>Table Change</strong>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-card">
+                <div class="icon">📑</div>
+                <strong>Index Maintenance</strong>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-card">
+                <div class="icon">✅</div>
+                <strong>Commit</strong>
+            </div>
+
+        </div>
+
+        <div class="callout info">
+
+            <strong>
+                DBMS-specific:
+            </strong>
+
+            <p>
+                Details such as locking, isolation, index maintenance, and
+                transactional DDL behavior vary by database engine.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         BEST PRACTICES
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🏆 Index Best Practices
+        </h2>
+
+        <ol>
+
+            <li>
+                Index based on real workload, not assumptions.
+            </li>
+
+            <li>
+                Inspect execution plans.
+            </li>
+
+            <li>
+                Prefer meaningful composite indexes for recurring query patterns.
+            </li>
+
+            <li>
+                Carefully choose column order in composite indexes.
+            </li>
+
+            <li>
+                Avoid unnecessary duplicate indexes.
+            </li>
+
+            <li>
+                Remember write overhead.
+            </li>
+
+            <li>
+                Consider foreign-key columns used heavily in joins.
+            </li>
+
+            <li>
+                Use specialized indexes only when their workload justifies them.
+            </li>
+
+            <li>
+                Monitor index size and usage.
+            </li>
+
+            <li>
+                Re-evaluate indexes as application workloads change.
+            </li>
+
+        </ol>
+
+    </section>
+
+
+    <!-- =====================================================
+         COMMON MISTAKES
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            ⚠️ Common Index Mistakes
+        </h2>
+
+        <div class="grid-2">
+
+            <div class="info-card">
+
+                <h3>
+                    ❌ Mistake 1
+                </h3>
+
+                <p>
+                    Creating indexes on every column.
+                </p>
+
+                <strong>
+                    Fix:
+                </strong>
+
+                <p>
+                    Index based on workload.
+                </p>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>
+                    ❌ Mistake 2
+                </h3>
+
+                <p>
+                    Assuming an index is always used.
+                </p>
+
+                <strong>
+                    Fix:
+                </strong>
+
+                <p>
+                    Check EXPLAIN.
+                </p>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>
+                    ❌ Mistake 3
+                </h3>
+
+                <p>
+                    Ignoring composite column order.
+                </p>
+
+                <strong>
+                    Fix:
+                </strong>
+
+                <p>
+                    Design the index around common predicates and ordering.
+                </p>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>
+                    ❌ Mistake 4
+                </h3>
+
+                <p>
+                    Forgetting INSERT/UPDATE/DELETE overhead.
+                </p>
+
+                <strong>
+                    Fix:
+                </strong>
+
+                <p>
+                    Balance read performance with write cost.
+                </p>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>
+                    ❌ Mistake 5
+                </h3>
+
+                <p>
+                    Creating duplicate indexes.
+                </p>
+
+                <strong>
+                    Fix:
+                </strong>
+
+                <p>
+                    Audit existing indexes.
+                </p>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>
+                    ❌ Mistake 6
+                </h3>
+
+                <p>
+                    Assuming syntax is identical across all databases.
+                </p>
+
+                <strong>
+                    Fix:
+                </strong>
+
+                <p>
+                    Learn your DBMS dialect.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         EXAM 5 MARK
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            📝 Exam Answer — 5 Marks
+        </h2>
+
+        <div class="concept-box">
+
+            <strong>
+                Question:
+            </strong>
+
+            <p>
+                What is an index in SQL? Explain its advantages.
+            </p>
+
+        </div>
+
+        <h3>
+            Answer
+        </h3>
+
+        <p>
+            An index is a database data structure used to improve the efficiency
+            of data retrieval. It allows the database to locate relevant rows
+            without necessarily scanning the entire table.
+        </p>
+
+        <p>
+            Indexes can improve:
+        </p>
+
+        <ul>
+
+            <li>
+                SELECT queries
+            </li>
+
+            <li>
+                WHERE filtering
+            </li>
+
+            <li>
+                JOIN operations
+            </li>
+
+            <li>
+                ORDER BY operations
+            </li>
+
+            <li>
+                Range searches
+            </li>
+
+        </ul>
+
+        <p>
+            However, indexes require storage and can increase the cost of
+            INSERT, UPDATE, and DELETE operations.
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                Example
+            </div>
+
+            <pre><code>CREATE INDEX idx_student_email
+ON students(email);</code></pre>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         EXAM 10 MARK
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            📚 Exam Answer — 10 Marks
+        </h2>
+
+        <div class="concept-box">
+
+            <strong>
+                Question:
+            </strong>
+
+            <p>
+                Explain SQL indexes in detail. Discuss types, advantages,
+                disadvantages, and examples.
+            </p>
+
+        </div>
+
+        <h3>
+            Suggested Structure
+        </h3>
+
+        <ol>
+
+            <li>
+                Definition of Index
+            </li>
+
+            <li>
+                Need for Indexes
+            </li>
+
+            <li>
+                Index working concept
+            </li>
+
+            <li>
+                B-tree concept
+            </li>
+
+            <li>
+                Single-column index
+            </li>
+
+            <li>
+                Unique index
+            </li>
+
+            <li>
+                Composite index
+            </li>
+
+            <li>
+                Indexes for WHERE and JOIN
+            </li>
+
+            <li>
+                Advantages
+            </li>
+
+            <li>
+                Disadvantages
+            </li>
+
+            <li>
+                EXPLAIN
+            </li>
+
+            <li>
+                Best practices
+            </li>
+
+        </ol>
+
+    </section>
+
+
+    <!-- =====================================================
+         INTERVIEW
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🎤 Interview Questions
+        </h2>
+
+        <details>
+
+            <summary>
+                1. What is an index?
+            </summary>
+
+            <p>
+                An index is a database structure that can provide a more
+                efficient access path to rows for suitable queries.
+            </p>
+
+        </details>
+
+        <details>
+
+            <summary>
+                2. Why do indexes improve query performance?
+            </summary>
+
+            <p>
+                They can allow the database to locate relevant entries without
+                scanning all table rows, reducing the amount of work for
+                suitable queries.
+            </p>
+
+        </details>
+
+        <details>
+
+            <summary>
+                3. What is the disadvantage of indexes?
+            </summary>
+
+            <p>
+                They consume storage and require maintenance during INSERT,
+                UPDATE, and DELETE operations.
+            </p>
+
+        </details>
+
+        <details>
+
+            <summary>
+                4. What is a composite index?
+            </summary>
+
+            <p>
+                An index containing multiple columns, such as
+                (department, cgpa).
+            </p>
+
+        </details>
+
+        <details>
+
+            <summary>
+                5. Why does column order matter?
+            </summary>
+
+            <p>
+                Composite indexes are ordered by their key columns, so the
+                leading columns strongly influence which query predicates can
+                efficiently use the index.
+            </p>
+
+        </details>
+
+        <details>
+
+            <summary>
+                6. What is selectivity?
+            </summary>
+
+            <p>
+                Selectivity describes how effectively a predicate narrows the
+                possible rows. Highly selective predicates often make indexes
+                more attractive.
+            </p>
+
+        </details>
+
+        <details>
+
+            <summary>
+                7. What is a covering index?
+            </summary>
+
+            <p>
+                An index containing enough information for a query to be
+                satisfied from the index access path without fetching the full
+                table row, where supported and chosen by the optimizer.
+            </p>
+
+        </details>
+
+        <details>
+
+            <summary>
+                8. Does an index guarantee faster queries?
+            </summary>
+
+            <p>
+                No. The optimizer chooses the execution plan based on cost,
+                statistics, data distribution, query shape, and other factors.
+            </p>
+
+        </details>
+
+        <details>
+
+            <summary>
+                9. Why can an index slow INSERT?
+            </summary>
+
+            <p>
+                The database may need to update the index structures whenever
+                indexed values change or new rows are inserted.
+            </p>
+
+        </details>
+
+        <details>
+
+            <summary>
+                10. What is EXPLAIN?
+            </summary>
+
+            <p>
+                EXPLAIN is used to inspect how a database plans to execute a
+                query. Exact output and syntax vary by DBMS.
+            </p>
+
+        </details>
+
+        <details>
+
+            <summary>
+                11. Should foreign-key columns be indexed?
+            </summary>
+
+            <p>
+                Often yes when they are frequently used for joins or parent-row
+                modifications, but the decision should be based on workload
+                and execution plans.
+            </p>
+
+        </details>
+
+        <details>
+
+            <summary>
+                12. B-tree vs Hash index?
+            </summary>
+
+            <p>
+                B-tree indexes support a broad set of ordered operations,
+                including equality and ranges. Hash indexes are specialized
+                primarily for equality access where supported.
+            </p>
+
+        </details>
+
+    </section>
+
+
+    <!-- =====================================================
+         QUIZ
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🧠 SQL Index Quiz
+        </h2>
+
+
+        <div
+            class="quiz-question"
+            data-answer="1"
+        >
+
+            <strong>
+                1. What is the primary purpose of an index?
+            </strong>
+
+            <div class="quiz-options">
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,0)"
+                >
+                    Store a backup copy of the table
+                </div>
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,1)"
+                >
+                    Improve efficient data access
+                </div>
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,2)"
+                >
+                    Replace the database
+                </div>
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,3)"
+                >
+                    Automatically normalize tables
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="quiz-question"
+            data-answer="2"
+        >
+
+            <strong>
+                2. Which command creates an index?
+            </strong>
+
+            <div class="quiz-options">
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,0)"
+                >
+                    MAKE INDEX
+                </div>
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,1)"
+                >
+                    BUILD INDEX
+                </div>
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,2)"
+                >
+                    CREATE INDEX
+                </div>
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,3)"
+                >
+                    NEW INDEX
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="quiz-question"
+            data-answer="0"
+        >
+
+            <strong>
+                3. What is a composite index?
+            </strong>
+
+            <div class="quiz-options">
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,0)"
+                >
+                    An index containing multiple columns
+                </div>
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,1)"
+                >
+                    An index containing multiple databases
+                </div>
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,2)"
+                >
+                    A backup index
+                </div>
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,3)"
+                >
+                    An index without columns
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="quiz-question"
+            data-answer="3"
+        >
+
+            <strong>
+                4. Which command is commonly used to inspect a query plan?
+            </strong>
+
+            <div class="quiz-options">
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,0)"
+                >
+                    CHECK QUERY
+                </div>
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,1)"
+                >
+                    SHOW QUERY
+                </div>
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,2)"
+                >
+                    ANALYZE QUERY
+                </div>
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,3)"
+                >
+                    EXPLAIN
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="quiz-question"
+            data-answer="1"
+        >
+
+            <strong>
+                5. What is a major cost of having many indexes?
+            </strong>
+
+            <div class="quiz-options">
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,0)"
+                >
+                    SELECT becomes impossible
+                </div>
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,1)"
+                >
+                    More storage and write-maintenance cost
+                </div>
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,2)"
+                >
+                    Tables cannot contain NULL
+                </div>
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,3)"
+                >
+                    JOINs stop working
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="quiz-question"
+            data-answer="0"
+        >
+
+            <strong>
+                6. Why does composite-index column order matter?
+            </strong>
+
+            <div class="quiz-options">
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,0)"
+                >
+                    Leading columns influence efficient index use
+                </div>
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,1)"
+                >
+                    SQL does not allow multiple columns
+                </div>
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,2)"
+                >
+                    It changes the table's data
+                </div>
+
+                <div
+                    class="quiz-option"
+                    onclick="selectAnswer(this,3)"
+                >
+                    It removes NULL values
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <button
+            class="primary-btn"
+            onclick="calculateQuiz()"
+        >
+            Check Score
+        </button>
+
+        <div
+            class="quiz-result"
+            id="quizResult"
+        ></div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PRACTICE
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            💻 Practice Challenges
+        </h2>
+
+        <div class="grid-2">
+
+            <div class="info-card">
+
+                <h3>
+                    Challenge 1 — Email
+                </h3>
+
+                <p>
+                    Create an index on the students.email column.
+                </p>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>
+                    Challenge 2 — Composite
+                </h3>
+
+                <p>
+                    Create a composite index for department and CGPA.
+                </p>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>
+                    Challenge 3 — Foreign Key
+                </h3>
+
+                <p>
+                    Decide whether department_id should be indexed and explain
+                    why.
+                </p>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>
+                    Challenge 4 — EXPLAIN
+                </h3>
+
+                <p>
+                    Run EXPLAIN on a slow SELECT query and identify the access
+                    method chosen by your database.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         MINI PROJECT
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            🚀 Mini Project — High-Performance Student Database
+        </h2>
+
+        <p>
+            Design indexes for a college management system.
+        </p>
+
+        <h3>
+            Tables
+        </h3>
+
+        <ul>
+
+            <li>
+                students
+            </li>
+
+            <li>
+                departments
+            </li>
+
+            <li>
+                courses
+            </li>
+
+            <li>
+                enrollments
+            </li>
+
+            <li>
+                placements
+            </li>
+
+        </ul>
+
+        <h3>
+            Suggested Workload
+        </h3>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                Frequent Query
+            </div>
+
+            <pre><code>SELECT *
+FROM students
+WHERE department_id = 10
+  AND cgpa &gt;= 8.5;</code></pre>
+
+        </div>
+
+        <p>
+            Candidate index:
+        </p>
+
+        <div class="code-wrapper">
+
+            <div class="code-header">
+                SQL
+            </div>
+
+            <pre><code>CREATE INDEX idx_students_dept_cgpa
+ON students(department_id, cgpa);</code></pre>
+
+        </div>
+
+        <h3>
+            Your Tasks
+        </h3>
+
+        <ol>
+
+            <li>
+                Create indexes for common queries.
+            </li>
+
+            <li>
+                Run EXPLAIN.
+            </li>
+
+            <li>
+                Compare query plans.
+            </li>
+
+            <li>
+                Identify redundant indexes.
+            </li>
+
+            <li>
+                Measure read/write trade-offs.
+            </li>
+
+        </ol>
+
+    </section>
+
+
+    <!-- =====================================================
+         RAPID REVISION
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            ⚡ Rapid Revision
+        </h2>
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>
+                            Concept
+                        </th>
+
+                        <th>
+                            Remember
+                        </th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>
+                            Index
+                        </td>
+
+                        <td>
+                            Data-access optimization structure
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            CREATE INDEX
+                        </td>
+
+                        <td>
+                            Creates an index
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            Composite
+                        </td>
+
+                        <td>
+                            Multiple columns
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            Unique Index
+                        </td>
+
+                        <td>
+                            Enforces uniqueness through the index
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            B-tree
+                        </td>
+
+                        <td>
+                            Common general-purpose ordered index structure
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            Selectivity
+                        </td>
+
+                        <td>
+                            How strongly a condition narrows rows
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            EXPLAIN
+                        </td>
+
+                        <td>
+                            Inspect query execution plan
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            Write Cost
+                        </td>
+
+                        <td>
+                            Indexes require maintenance
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            Column Order
+                        </td>
+
+                        <td>
+                            Important for composite indexes
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         CHECKLIST
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <h2>
+            ✅ Lesson 14 Checklist
+        </h2>
+
+        <div class="checklist">
+
+            <label class="check-item">
+
+                <input
+                    type="checkbox"
+                    data-check="index1"
+                >
+
+                I understand what an index is.
+
+            </label>
+
+
+            <label class="check-item">
+
+                <input
+                    type="checkbox"
+                    data-check="index2"
+                >
+
+                I understand why indexes improve suitable queries.
+
+            </label>
+
+
+            <label class="check-item">
+
+                <input
+                    type="checkbox"
+                    data-check="index3"
+                >
+
+                I can create a single-column index.
+
+            </label>
+
+
+            <label class="check-item">
+
+                <input
+                    type="checkbox"
+                    data-check="index4"
+                >
+
+                I understand unique indexes.
+
+            </label>
+
+
+            <label class="check-item">
+
+                <input
+                    type="checkbox"
+                    data-check="index5"
+                >
+
+                I understand composite indexes.
+
+            </label>
+
+
+            <label class="check-item">
+
+                <input
+                    type="checkbox"
+                    data-check="index6"
+                >
+
+                I understand composite-column order.
+
+            </label>
+
+
+            <label class="check-item">
+
+                <input
+                    type="checkbox"
+                    data-check="index7"
+                >
+
+                I understand B-tree indexes.
+
+            </label>
+
+
+            <label class="check-item">
+
+                <input
+                    type="checkbox"
+                    data-check="index8"
+                >
+
+                I understand index trade-offs.
+
+            </label>
+
+
+            <label class="check-item">
+
+                <input
+                    type="checkbox"
+                    data-check="index9"
+                >
+
+                I understand EXPLAIN.
+
+            </label>
+
+
+            <label class="check-item">
+
+                <input
+                    type="checkbox"
+                    data-check="index10"
+                >
+
+                I can design indexes for common queries.
+
+            </label>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         NEXT LESSON
+    ====================================================== -->
+
+    <section class="section reveal">
+
+        <div class="next-lesson">
+
+            <div>
+
+                <small>
+                    SQL MASTERY
+                </small>
+
+                <h2>
+                    Lesson 14 Complete 🎉
+                </h2>
+
+                <strong>
+                    Next: Advanced SQL Concepts
+                </strong>
+
+            </div>
+
+            <div>
+
+                <span class="badge badge-blue">
+                    Indexes Mastered
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <footer class="footer">
+
+        <strong>
+            ZENSUS
+        </strong>
+
+        <p>
+            Direction Before Destination • Learn. Build. Prepare.
+        </p>
+
+        <p>
+            SQL Lesson 14 — Indexes
+        </p>
+
+    </footer>
+
+</main>
+
+
+<script>
+
+    /* =========================================================
+       SIDEBAR
+    ========================================================= */
+
+    function toggleSidebar() {
+
+        const sidebar =
+            document.getElementById("sidebar");
+
+        sidebar.classList.toggle("open");
+
+    }
+
+
+    /* =========================================================
+       SCROLL PROGRESS
+    ========================================================= */
+
+    window.addEventListener("scroll", function () {
+
+        const scrollTop =
+            document.documentElement.scrollTop ||
+            document.body.scrollTop;
+
+        const scrollHeight =
+            document.documentElement.scrollHeight -
+            document.documentElement.clientHeight;
+
+        const percentage =
+            scrollHeight > 0
+                ? (scrollTop / scrollHeight) * 100
+                : 0;
+
+        document.getElementById(
+            "progressBar"
+        ).style.width =
+            percentage + "%";
+
+    });
+
+
+    /* =========================================================
+       COPY CODE
+    ========================================================= */
+
+    function copyCode(button) {
+
+        const wrapper =
+            button.closest(".code-wrapper");
+
+        const code =
+            wrapper.querySelector("code");
+
+        navigator.clipboard.writeText(
+            code.innerText
+        );
+
+        const oldText =
+            button.innerText;
+
+        button.innerText =
+            "Copied!";
+
+        setTimeout(function () {
+
+            button.innerText =
+                oldText;
+
+        }, 1200);
+
+    }
+
+
+    /* =========================================================
+       INDEX LAB
+    ========================================================= */
+
+    function runIndexLab(type) {
+
+        const sqlBox =
+            document.getElementById("labSQL");
+
+        const messageBox =
+            document.getElementById("labMessage");
+
+        const resultBox =
+            document.getElementById("labResult");
+
+
+        document
+            .querySelectorAll(".lab-btn")
+            .forEach(function (button) {
+
+                button.classList.remove("active");
+
+            });
+
+
+        if (event && event.currentTarget) {
+
+            event.currentTarget.classList.add(
+                "active"
+            );
+
+        }
+
+
+        if (type === "email") {
+
+            sqlBox.innerText =
+`SELECT *
+FROM students
+WHERE email = 'arun@example.com';`;
+
+            messageBox.innerText =
+                "Recommended concept: index on email for selective equality lookup.";
+
+            resultBox.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Query</th>
+                            <th>Possible Index</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>Email equality</td>
+                            <td>email</td>
+                            <td>Highly selective lookup</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+
+        }
+
+
+        else if (type === "department") {
+
+            sqlBox.innerText =
+`SELECT *
+FROM students
+WHERE department_id = 10;`;
+
+            messageBox.innerText =
+                "A department_id index may help when the predicate is selective and the workload justifies it.";
+
+            resultBox.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Column</th>
+                            <th>Index Idea</th>
+                            <th>Typical Use</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>department_id</td>
+                            <td>Single-column index</td>
+                            <td>Filtering / JOIN</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+
+        }
+
+
+        else if (type === "range") {
+
+            sqlBox.innerText =
+`SELECT *
+FROM students
+WHERE cgpa >= 8.5;`;
+
+            messageBox.innerText =
+                "A B-tree-style index can be useful for ordered range predicates.";
+
+            resultBox.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Predicate</th>
+                            <th>Possible Index</th>
+                            <th>Benefit</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>cgpa &gt;= 8.5</td>
+                            <td>cgpa</td>
+                            <td>Range access may be efficient</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+
+        }
+
+
+        else if (type === "composite") {
+
+            sqlBox.innerText =
+`SELECT *
+FROM students
+WHERE department = 'CSE'
+AND cgpa >= 8.5;`;
+
+            messageBox.innerText =
+                "A composite index such as (department, cgpa) matches this query pattern well.";
+
+            resultBox.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Index</th>
+                            <th>Leading Column</th>
+                            <th>Query Pattern</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>(department, cgpa)</td>
+                            <td>department</td>
+                            <td>Equality + range</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+
+        }
+
+
+        else if (type === "join") {
+
+            sqlBox.innerText =
+`SELECT s.name, d.department_name
+FROM students s
+JOIN departments d
+ON s.department_id = d.department_id;`;
+
+            messageBox.innerText =
+                "Indexing frequently joined foreign-key columns can help, depending on the optimizer and workload.";
+
+            resultBox.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Column</th>
+                            <th>Potential Index</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>students.department_id</td>
+                            <td>Index</td>
+                            <td>JOIN access</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+
+        }
+
+
+        else if (type === "order") {
+
+            sqlBox.innerText =
+`SELECT student_id, name, cgpa
+FROM students
+ORDER BY cgpa DESC;`;
+
+            messageBox.innerText =
+                "An appropriately ordered index may help avoid or reduce sorting work in suitable queries.";
+
+            resultBox.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Query</th>
+                            <th>Possible Index</th>
+                            <th>Potential Benefit</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>ORDER BY cgpa DESC</td>
+                            <td>cgpa</td>
+                            <td>May help ordered access</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+
+        }
+
+    }
+
+
+    /* =========================================================
+       QUIZ
+    ========================================================= */
+
+    function selectAnswer(
+        element,
+        answer
+    ) {
+
+        const question =
+            element.closest(
+                ".quiz-question"
+            );
+
+        const correct =
+            parseInt(
+                question.dataset.answer
+            );
+
+        const options =
+            question.querySelectorAll(
+                ".quiz-option"
+            );
+
+        options.forEach(
+            function (option) {
+
+                option.classList.remove(
+                    "correct",
+                    "wrong"
+                );
+
+            }
+        );
+
+
+        if (answer === correct) {
+
+            element.classList.add(
+                "correct"
+            );
+
+        }
+
+        else {
+
+            element.classList.add(
+                "wrong"
+            );
+
+        }
+
+
+        question.dataset.selected =
+            answer;
+
+    }
+
+
+    function calculateQuiz() {
+
+        const questions =
+            document.querySelectorAll(
+                ".quiz-question"
+            );
+
+        let score = 0;
+
+
+        questions.forEach(
+            function (question) {
+
+                if (
+                    question.dataset.selected ===
+                    question.dataset.answer
+                ) {
+
+                    score++;
+
+                }
+
+            }
+        );
+
+
+        const result =
+            document.getElementById(
+                "quizResult"
+            );
+
+        result.style.display =
+            "block";
+
+
+        if (
+            score === questions.length
+        ) {
+
+            result.innerText =
+                "🏆 Perfect! " +
+                score +
+                "/" +
+                questions.length +
+                " — You mastered SQL Indexes!";
+
+        }
+
+        else if (score >= 5) {
+
+            result.innerText =
+                "🔥 Excellent! " +
+                score +
+                "/" +
+                questions.length +
+                " — Strong understanding.";
+
+        }
+
+        else if (score >= 3) {
+
+            result.innerText =
+                "👍 Good job! " +
+                score +
+                "/" +
+                questions.length +
+                " — Review a few concepts.";
+
+        }
+
+        else {
+
+            result.innerText =
+                "📚 " +
+                score +
+                "/" +
+                questions.length +
+                " — Review the lesson and try again.";
+
+        }
+
+    }
+
+
+    /* =========================================================
+       CHECKLIST
+       LOCAL STORAGE
+    ========================================================= */
+
+    document
+        .querySelectorAll(
+            ".check-item input"
+        )
+        .forEach(
+            function (checkbox) {
+
+                const key =
+                    checkbox.dataset.check;
+
+                const saved =
+                    localStorage.getItem(
+                        "zensus_" + key
+                    );
+
+                checkbox.checked =
+                    saved === "true";
+
+
+                checkbox.addEventListener(
+                    "change",
+                    function () {
+
+                        localStorage.setItem(
+                            "zensus_" + key,
+                            checkbox.checked
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+    /* =========================================================
+       REVEAL ANIMATIONS
+       Safe default keeps content visible.
+    ========================================================= */
+
+    const revealElements =
+        document.querySelectorAll(
+            ".reveal"
+        );
+
+
+    if (
+        "IntersectionObserver"
+        in window
+    ) {
+
+        const observer =
+            new IntersectionObserver(
+                function (entries) {
+
+                    entries.forEach(
+                        function (entry) {
+
+                            if (
+                                entry.isIntersecting
+                            ) {
+
+                                entry.target.classList.add(
+                                    "animate"
+                                );
+
+                                observer.unobserve(
+                                    entry.target
+                                );
+
+                            }
+
+                        }
+                    );
+
+                },
+                {
+                    threshold: 0.08
+                }
+            );
+
+
+        revealElements.forEach(
+            function (element) {
+
+                observer.observe(
+                    element
+                );
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       INITIAL LAB
+    ========================================================= */
+
+    window.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            const firstButton =
+                document.querySelector(
+                    ".lab-btn"
+                );
+
+            if (firstButton) {
+
+                firstButton.click();
+
+            }
+
+        }
+    );
+
+</script>
+
+</body>
+</html>

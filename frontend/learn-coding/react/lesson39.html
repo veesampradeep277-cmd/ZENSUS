@@ -1,0 +1,2248 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS React — Lesson 39: React Security</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+    --bg:#f7f8fc;
+    --panel:#ffffff;
+    --panel-soft:#f8fafc;
+    --border:#e2e8f0;
+    --text:#172033;
+    --muted:#64748b;
+    --primary:#4f46e5;
+    --primary2:#6366f1;
+    --purple:#7c3aed;
+    --green:#059669;
+    --red:#dc2626;
+    --orange:#d97706;
+    --blue:#2563eb;
+    --shadow:0 10px 30px rgba(15,23,42,.07);
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+a{
+    color:inherit;
+    text-decoration:none;
+}
+
+button{
+    font:inherit;
+}
+
+header{
+    position:sticky;
+    top:0;
+    z-index:1000;
+    height:64px;
+    background:rgba(255,255,255,.95);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 28px;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-weight:800;
+    letter-spacing:.5px;
+}
+
+.logo{
+    width:38px;
+    height:38px;
+    border-radius:11px;
+    display:grid;
+    place-items:center;
+    background:#4f46e5;
+    color:white;
+    font-weight:900;
+}
+
+.header-right{
+    font-size:13px;
+    color:var(--muted);
+}
+
+.layout{
+    display:grid;
+    grid-template-columns:260px 1fr;
+    min-height:calc(100vh - 64px);
+}
+
+.sidebar{
+    position:sticky;
+    top:64px;
+    height:calc(100vh - 64px);
+    overflow-y:auto;
+    background:white;
+    border-right:1px solid var(--border);
+    padding:24px 14px;
+}
+
+.sidebar-title{
+    font-size:11px;
+    font-weight:800;
+    color:#94a3b8;
+    letter-spacing:1.4px;
+    padding:0 12px 12px;
+}
+
+.sidebar a{
+    display:block;
+    padding:10px 12px;
+    margin:3px 0;
+    border-radius:9px;
+    color:#475569;
+    font-size:13px;
+    transition:.2s;
+}
+
+.sidebar a:hover,
+.sidebar a.active{
+    background:#eef2ff;
+    color:var(--primary);
+    font-weight:700;
+}
+
+main{
+    max-width:1180px;
+    width:100%;
+    margin:auto;
+    padding:42px 34px 90px;
+}
+
+.hero{
+    position:relative;
+    overflow:hidden;
+    background:white;
+    border:1px solid var(--border);
+    border-radius:24px;
+    padding:52px 46px;
+    box-shadow:var(--shadow);
+    margin-bottom:30px;
+}
+
+.hero::after{
+    content:"";
+    position:absolute;
+    width:260px;
+    height:260px;
+    right:-110px;
+    top:-110px;
+    border:1px solid #dbe4ff;
+    border-radius:50%;
+}
+
+.eyebrow{
+    color:var(--primary);
+    font-weight:800;
+    font-size:12px;
+    letter-spacing:1.8px;
+    margin-bottom:12px;
+}
+
+.hero h1{
+    font-size:clamp(38px,6vw,68px);
+    line-height:1.05;
+    margin-bottom:20px;
+}
+
+.hero h1 span{
+    background-image:linear-gradient(90deg,#6366f1,#8b5cf6);
+    background-clip:text;
+    -webkit-background-clip:text;
+    color:transparent;
+    -webkit-text-fill-color:transparent;
+}
+
+.hero p{
+    max-width:820px;
+    color:var(--muted);
+    font-size:17px;
+}
+
+.lesson-meta{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:25px;
+}
+
+.badge{
+    padding:7px 12px;
+    background:#eef2ff;
+    border:1px solid #dbe4ff;
+    color:#4338ca;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:700;
+}
+
+.section{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:32px;
+    margin-bottom:24px;
+    box-shadow:0 6px 22px rgba(15,23,42,.04);
+}
+
+.section h2{
+    font-size:28px;
+    margin-bottom:10px;
+}
+
+.section h3{
+    font-size:19px;
+    margin:25px 0 10px;
+}
+
+.section p{
+    color:#475569;
+    margin:10px 0;
+}
+
+.section ul,
+.section ol{
+    padding-left:22px;
+    color:#475569;
+}
+
+.section li{
+    margin:7px 0;
+}
+
+.intro-box{
+    padding:18px 20px;
+    border-left:4px solid var(--primary);
+    background:#f5f7ff;
+    border-radius:10px;
+    margin:20px 0;
+}
+
+.info{
+    padding:17px 19px;
+    background:#eff6ff;
+    border:1px solid #bfdbfe;
+    border-radius:12px;
+    margin:18px 0;
+}
+
+.warning{
+    padding:17px 19px;
+    background:#fffbeb;
+    border:1px solid #fde68a;
+    border-radius:12px;
+    margin:18px 0;
+}
+
+.danger{
+    padding:17px 19px;
+    background:#fef2f2;
+    border:1px solid #fecaca;
+    border-radius:12px;
+    margin:18px 0;
+}
+
+.success{
+    padding:17px 19px;
+    background:#ecfdf5;
+    border:1px solid #a7f3d0;
+    border-radius:12px;
+    margin:18px 0;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+    margin:22px 0;
+}
+
+.grid3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:16px;
+    margin:22px 0;
+}
+
+.card{
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:20px;
+    background:white;
+    transition:.25s;
+}
+
+.card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 10px 25px rgba(15,23,42,.07);
+}
+
+.card h4{
+    margin-bottom:7px;
+}
+
+.card p{
+    font-size:14px;
+    margin:0;
+}
+
+.icon{
+    width:42px;
+    height:42px;
+    display:grid;
+    place-items:center;
+    background:#eef2ff;
+    color:var(--primary);
+    border-radius:12px;
+    font-weight:900;
+    margin-bottom:13px;
+}
+
+.architecture{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin:28px 0;
+}
+
+.node{
+    min-width:135px;
+    padding:17px;
+    text-align:center;
+    border:1px solid #cbd5e1;
+    border-radius:14px;
+    background:white;
+    box-shadow:0 5px 16px rgba(15,23,42,.05);
+    animation:floatNode 3s ease-in-out infinite;
+}
+
+.node:nth-child(2){animation-delay:.2s;}
+.node:nth-child(3){animation-delay:.4s;}
+.node:nth-child(4){animation-delay:.6s;}
+.node:nth-child(5){animation-delay:.8s;}
+
+.arrow{
+    font-size:24px;
+    color:var(--primary);
+    font-weight:800;
+}
+
+@keyframes floatNode{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-5px)}
+}
+
+.code-box{
+    background:#0f172a;
+    border-radius:15px;
+    overflow:hidden;
+    margin:20px 0;
+    box-shadow:0 10px 28px rgba(15,23,42,.15);
+}
+
+.code-header{
+    height:42px;
+    display:flex;
+    align-items:center;
+    padding:0 16px;
+    background:#111827;
+    color:#94a3b8;
+    font-size:12px;
+    border-bottom:1px solid #1e293b;
+}
+
+.dots{
+    display:flex;
+    gap:6px;
+    margin-right:12px;
+}
+
+.dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#475569;
+}
+
+pre{
+    margin:0;
+    padding:22px;
+    overflow-x:auto;
+}
+
+code{
+    font-family:"Cascadia Code","Fira Code",Consolas,monospace;
+    font-size:13px;
+    line-height:1.75;
+    color:#e2e8f0;
+}
+
+.inline-code{
+    font-family:monospace;
+    background:#f1f5f9;
+    border:1px solid #e2e8f0;
+    padding:2px 6px;
+    border-radius:5px;
+    color:#4338ca;
+}
+
+.security-flow{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:10px;
+    margin:25px 0;
+}
+
+.flow-item{
+    background:#f8fafc;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:18px 10px;
+    text-align:center;
+    font-size:13px;
+}
+
+.flow-item strong{
+    display:block;
+    color:var(--primary);
+    margin-bottom:5px;
+}
+
+.compare{
+    width:100%;
+    border-collapse:collapse;
+    margin:20px 0;
+    font-size:14px;
+}
+
+.compare th,
+.compare td{
+    border:1px solid var(--border);
+    padding:12px 14px;
+    text-align:left;
+}
+
+.compare th{
+    background:#f8fafc;
+    color:#334155;
+}
+
+.compare td{
+    color:#475569;
+}
+
+.threat{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+    margin:20px 0;
+}
+
+.threat-bad,
+.threat-good{
+    padding:22px;
+    border-radius:15px;
+    border:1px solid var(--border);
+}
+
+.threat-bad{
+    background:#fff7f7;
+    border-color:#fecaca;
+}
+
+.threat-good{
+    background:#f0fdf4;
+    border-color:#bbf7d0;
+}
+
+.threat-bad h4{
+    color:var(--red);
+}
+
+.threat-good h4{
+    color:var(--green);
+}
+
+.checklist{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+    margin-top:20px;
+}
+
+.check{
+    padding:14px 16px;
+    background:#f8fafc;
+    border:1px solid var(--border);
+    border-radius:10px;
+}
+
+.quiz-question{
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:20px;
+    margin:15px 0;
+}
+
+.quiz-question h4{
+    margin-bottom:12px;
+}
+
+.answer{
+    display:none;
+    margin-top:12px;
+    padding:12px;
+    background:#ecfdf5;
+    color:#065f46;
+    border-radius:9px;
+    font-size:14px;
+}
+
+.quiz-btn{
+    border:none;
+    background:#eef2ff;
+    color:#4338ca;
+    padding:8px 12px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:700;
+}
+
+.quiz-btn:hover{
+    background:#e0e7ff;
+}
+
+.summary{
+    background:#111827;
+    color:#e5e7eb;
+}
+
+.summary h2{
+    color:white;
+}
+
+.summary p,
+.summary li{
+    color:#cbd5e1;
+}
+
+.reveal{
+    opacity:0;
+    transform:translateY(20px);
+    transition:.7s ease;
+}
+
+.reveal.visible{
+    opacity:1;
+    transform:translateY(0);
+}
+
+footer{
+    text-align:center;
+    color:#94a3b8;
+    font-size:13px;
+    padding:30px;
+}
+
+@media(max-width:950px){
+    .layout{
+        grid-template-columns:1fr;
+    }
+
+    .sidebar{
+        display:none;
+    }
+
+    .grid,
+    .threat{
+        grid-template-columns:1fr;
+    }
+
+    .grid3{
+        grid-template-columns:1fr;
+    }
+
+    .security-flow{
+        grid-template-columns:1fr 1fr;
+    }
+}
+
+@media(max-width:650px){
+    main{
+        padding:22px 15px 60px;
+    }
+
+    .hero,
+    .section{
+        padding:24px 19px;
+        border-radius:17px;
+    }
+
+    .hero h1{
+        font-size:40px;
+    }
+
+    .security-flow{
+        grid-template-columns:1fr;
+    }
+
+    .checklist{
+        grid-template-columns:1fr;
+    }
+
+    header{
+        padding:0 15px;
+    }
+
+    .header-right{
+        display:none;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="brand">
+    <div class="logo">Z</div>
+    <div>ZENSUS REACT</div>
+</div>
+
+<div class="header-right">
+    PHASE 5 • ADVANCED REACT • LESSON 39
+</div>
+
+</header>
+
+<div class="layout">
+
+<aside class="sidebar">
+
+<div class="sidebar-title">LESSON 39</div>
+
+<a href="#frontend">1. Frontend Security</a> <a href="#xss">2. XSS</a> <a href="#input">3. Input Handling</a> <a href="#dangerous">4. Dangerous HTML</a> <a href="#auth">5. Authentication Security</a> <a href="#tokens">6. Token Security</a> <a href="#cookies">7. Cookies</a> <a href="#csrf">8. CSRF Concepts</a> <a href="#cors">9. CORS</a> <a href="#env">10. Environment Variables</a> <a href="#sensitive">11. Sensitive Information</a> <a href="#dependencies">12. Dependency Security</a> <a href="#api">13. Secure API Communication</a> <a href="#checklist">14. Security Checklist</a> <a href="#quiz">15. Quick Quiz</a>
+
+</aside>
+
+<main>
+
+<!-- HERO -->
+
+<section class="hero reveal">
+
+<div class="eyebrow">
+PHASE 5 • ADVANCED REACT • LESSON 39
+</div>
+
+<h1>React <span>Security</span></h1>
+
+<p>
+Learn how to build safer React applications by understanding
+XSS, input handling, authentication, tokens, cookies, CSRF,
+CORS, environment variables, dependency risks and secure API
+communication.
+</p>
+
+<div class="lesson-meta">
+
+<span class="badge">XSS</span> <span class="badge">Authentication</span> <span class="badge">Cookies</span> <span class="badge">CSRF</span> <span class="badge">CORS</span> <span class="badge">API Security</span>
+
+</div>
+
+</section>
+
+<!-- FRONTEND SECURITY -->
+
+<section class="section reveal" id="frontend">
+
+<h2>1. Frontend Security</h2>
+
+<p>
+Frontend security is the practice of reducing security risks in the
+browser-based part of an application.
+</p>
+
+<div class="intro-box">
+React provides useful defaults that reduce some common injection risks,
+but React itself cannot make an entire application secure.
+Security also depends on the backend, authentication system, browser
+configuration, dependencies and deployment environment.
+</div>
+
+<h3>Security Boundary</h3>
+
+<div class="architecture">
+
+<div class="node">
+User
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Browser
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+React
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+API
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Server
+</div>
+
+</div>
+
+<h3>Important Principle</h3>
+
+<div class="danger">
+<strong>Never trust the frontend as a security boundary.</strong>
+Anything delivered to the browser can potentially be inspected or
+modified by the user.
+</div>
+
+<div class="grid3">
+
+<div class="card">
+<div class="icon">X</div>
+<h4>Injection</h4>
+<p>Untrusted data can become dangerous when inserted into executable contexts.</p>
+</div>
+
+<div class="card">
+<div class="icon">A</div>
+<h4>Authentication</h4>
+<p>Login credentials and sessions must be handled carefully.</p>
+</div>
+
+<div class="card">
+<div class="icon">D</div>
+<h4>Dependencies</h4>
+<p>Third-party packages can introduce security vulnerabilities.</p>
+</div>
+
+</div>
+
+</section>
+
+<!-- XSS -->
+
+<section class="section reveal" id="xss">
+
+<h2>2. XSS — Cross-Site Scripting</h2>
+
+<p>
+Cross-Site Scripting, commonly called XSS, occurs when attacker-controlled
+content is interpreted as executable code in another user's browser.
+</p>
+
+<h3>Conceptual Attack Flow</h3>
+
+<div class="security-flow">
+
+<div class="flow-item">
+<strong>1</strong>
+Attacker creates malicious input
+</div>
+
+<div class="flow-item">
+<strong>2</strong>
+Application handles it incorrectly
+</div>
+
+<div class="flow-item">
+<strong>3</strong>
+Content reaches browser
+</div>
+
+<div class="flow-item">
+<strong>4</strong>
+Browser interprets dangerous content
+</div>
+
+<div class="flow-item">
+<strong>5</strong>
+User is affected
+</div>
+
+</div>
+
+<h3>Why React Helps</h3>
+
+<p>
+React normally escapes values inserted into JSX text and attribute values.
+This means ordinary rendering is safer than directly constructing HTML.
+</p>
+
+<div class="code-box">
+
+<div class="code-header">
+<div class="dots">
+<span class="dot"></span>
+<span class="dot"></span>
+<span class="dot"></span>
+</div>
+Safe rendering
+</div>
+
+<pre><code>function Message({ message }) {
+    return (
+        &lt;p&gt;
+            {message}
+        &lt;/p&gt;
+    );
+}</code></pre>
+
+</div>
+
+<p>
+If <span class="inline-code">message</span> contains markup-like text,
+React treats it as data rather than automatically interpreting it as HTML.
+</p>
+
+<div class="success">
+React's default escaping is helpful, but developers can still introduce
+security problems through unsafe APIs, third-party libraries, server
+responses or incorrect handling of untrusted data.
+</div>
+
+<h3>Common XSS Categories</h3>
+
+<table class="compare">
+
+<tr>
+<th>Type</th>
+<th>Concept</th>
+</tr>
+
+<tr>
+<td>Stored XSS</td>
+<td>Malicious content is stored by an application and later displayed.</td>
+</tr>
+
+<tr>
+<td>Reflected XSS</td>
+<td>Malicious input is reflected through an application response.</td>
+</tr>
+
+<tr>
+<td>DOM-based XSS</td>
+<td>Client-side JavaScript creates a dangerous DOM interpretation.</td>
+</tr>
+
+</table>
+
+</section>
+
+<!-- INPUT -->
+
+<section class="section reveal" id="input">
+
+<h2>3. Input Handling</h2>
+
+<p>
+User input should always be considered untrusted.
+</p>
+
+<div class="architecture">
+
+<div class="node">
+User Input
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Validate
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Normalize
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Send
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Server Validation
+</div>
+
+</div>
+
+<h3>Client Validation</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<div class="dots">
+<span class="dot"></span>
+<span class="dot"></span>
+<span class="dot"></span>
+</div>
+validation.js
+</div>
+
+<pre><code>function validateUsername(username) {
+
+    const value = username.trim();
+
+    if (value.length &lt; 3) {
+        return "Username is too short";
+    }
+
+    return null;
+}</code></pre>
+
+</div>
+
+<div class="warning">
+Client-side validation improves user experience.
+It is NOT a replacement for server-side validation because users can
+bypass frontend code.
+</div>
+
+<h3>Security Rules</h3>
+
+<ul>
+<li>Validate data on the server.</li>
+<li>Use allowlists where practical.</li>
+<li>Enforce length limits.</li>
+<li>Validate expected formats.</li>
+<li>Do not trust hidden form fields.</li>
+<li>Do not assume client-side restrictions cannot be bypassed.</li>
+</ul>
+
+</section>
+
+<!-- DANGEROUS HTML -->
+
+<section class="section reveal" id="dangerous">
+
+<h2>4. Dangerous HTML</h2>
+
+<p>
+React provides an API called
+<span class="inline-code">dangerouslySetInnerHTML</span>
+for inserting raw HTML into the DOM.
+</p>
+
+<div class="code-box">
+
+<div class="code-header">
+<div class="dots">
+<span class="dot"></span>
+<span class="dot"></span>
+<span class="dot"></span>
+</div>
+Dangerous HTML
+</div>
+
+<pre><code>function Article({ html }) {
+    return (
+        &lt;div
+            dangerouslySetInnerHTML={{
+                __html: html
+            }}
+        /&gt;
+    );
+}</code></pre>
+
+</div>
+
+<div class="danger">
+The name is intentional.
+Never place arbitrary untrusted HTML into
+<span class="inline-code">dangerouslySetInnerHTML</span>
+without an appropriate sanitization strategy.
+</div>
+
+<h3>Safer Pattern</h3>
+
+<div class="threat">
+
+<div class="threat-bad">
+
+<h4>Risky</h4>
+
+<p>
+Untrusted HTML
+</p>
+
+<p>↓</p>
+
+<p>
+Direct HTML injection
+</p>
+
+<p>↓</p>
+
+<p>
+Potential XSS
+</p>
+
+</div>
+
+<div class="threat-good">
+
+<h4>Safer</h4>
+
+<p>
+Untrusted content
+</p>
+
+<p>↓</p>
+
+<p>
+Validate / sanitize according to context
+</p>
+
+<p>↓</p>
+
+<p>
+Render intentionally
+</p>
+
+</div>
+
+</div>
+
+<div class="info">
+HTML sanitization is context-sensitive. Do not assume that a simple
+string replacement is a complete security solution.
+</div>
+
+</section>
+
+<!-- AUTH -->
+
+<section class="section reveal" id="auth">
+
+<h2>5. Authentication Security</h2>
+
+<p>
+Authentication answers:
+<strong>“Who are you?”</strong>
+</p>
+
+<p>
+Authorization answers:
+<strong>“What are you allowed to do?”</strong>
+</p>
+
+<div class="grid">
+
+<div class="card">
+
+<div class="icon">1</div>
+
+<h4>Authentication</h4>
+
+<p>
+Verifies identity using credentials, sessions, tokens or other
+authentication mechanisms.
+</p>
+
+</div>
+
+<div class="card">
+
+<div class="icon">2</div>
+
+<h4>Authorization</h4>
+
+<p>
+Determines whether an authenticated user has permission to perform
+an operation.
+</p>
+
+</div>
+
+</div>
+
+<h3>Login Architecture</h3>
+
+<div class="architecture">
+
+<div class="node">
+Login Form
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+HTTPS
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Authentication API
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Session
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Protected API
+</div>
+
+</div>
+
+<h3>Important Rules</h3>
+
+<ul>
+<li>Never send passwords over an unencrypted connection.</li>
+<li>Passwords should be handled by a properly designed backend authentication system.</li>
+<li>Use strong authentication practices on the server.</li>
+<li>Perform authorization checks on the server.</li>
+<li>Do not rely on hiding a button as authorization.</li>
+</ul>
+
+<div class="danger">
+A React condition such as
+<span class="inline-code">user.role === "admin"</span>
+can control what the UI displays, but it must never be the only protection
+for an admin API endpoint.
+</div>
+
+</section>
+
+<!-- TOKENS -->
+
+<section class="section reveal" id="tokens">
+
+<h2>6. Token Security</h2>
+
+<p>
+Many applications use access tokens or other credentials to represent
+an authenticated session.
+</p>
+
+<h3>Token Flow</h3>
+
+<div class="security-flow">
+
+<div class="flow-item">
+<strong>Login</strong>
+User authenticates
+</div>
+
+<div class="flow-item">
+<strong>Issue</strong>
+Server establishes session/credential
+</div>
+
+<div class="flow-item">
+<strong>Store</strong>
+Browser handles credential
+</div>
+
+<div class="flow-item">
+<strong>Send</strong>
+Credential accompanies authorized requests
+</div>
+
+<div class="flow-item">
+<strong>Verify</strong>
+Server checks authorization
+</div>
+
+</div>
+
+<h3>Storage Considerations</h3>
+
+<table class="compare">
+
+<tr>
+<th>Storage</th>
+<th>Security Consideration</th>
+</tr>
+
+<tr>
+<td>localStorage</td>
+<td>Accessible to JavaScript; XSS can expose stored credentials.</td>
+</tr>
+
+<tr>
+<td>sessionStorage</td>
+<td>Also accessible to JavaScript; lifetime is tied to the tab/session behavior.</td>
+</tr>
+
+<tr>
+<td>HttpOnly Cookie</td>
+<td>JavaScript cannot directly read the cookie.</td>
+</tr>
+
+</table>
+
+<div class="warning">
+There is no universal storage choice that automatically solves all
+authentication security problems. Session design, cookie attributes,
+CSRF protection, XSS prevention, expiration and backend controls all matter.
+</div>
+
+<h3>Do Not Put Secrets in React Source</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<div class="dots">
+<span class="dot"></span>
+<span class="dot"></span>
+<span class="dot"></span>
+</div>
+Never do this
+</div>
+
+<pre><code>const SECRET_KEY =
+    "super-secret-production-key";</code></pre>
+
+</div>
+
+<p>
+Frontend JavaScript is delivered to the user's browser.
+A value embedded in frontend code should be considered potentially visible.
+</p>
+
+</section>
+
+<!-- COOKIES -->
+
+<section class="section reveal" id="cookies">
+
+<h2>7. Cookies</h2>
+
+<p>
+Cookies allow browsers to store small pieces of data associated with a
+website or domain.
+</p>
+
+<h3>Important Cookie Attributes</h3>
+
+<table class="compare">
+
+<tr>
+<th>Attribute</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>HttpOnly</td>
+<td>Prevents JavaScript from reading the cookie through document.cookie.</td>
+</tr>
+
+<tr>
+<td>Secure</td>
+<td>Instructs the browser to send the cookie only over secure connections.</td>
+</tr>
+
+<tr>
+<td>SameSite</td>
+<td>Controls when cookies are sent in cross-site contexts.</td>
+</tr>
+
+<tr>
+<td>Expires / Max-Age</td>
+<td>Controls cookie lifetime.</td>
+</tr>
+
+</table>
+
+<h3>Example Concept</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<div class="dots">
+<span class="dot"></span>
+<span class="dot"></span>
+<span class="dot"></span>
+</div>
+Server-side concept
+</div>
+
+<pre><code>Set-Cookie:
+session=VALUE;
+HttpOnly;
+Secure;
+SameSite=Lax</code></pre>
+
+</div>
+
+<div class="info">
+Cookie configuration should match the application's architecture.
+For cross-site authentication flows, SameSite and CSRF protections need
+careful consideration.
+</div>
+
+</section>
+
+<!-- CSRF -->
+
+<section class="section reveal" id="csrf">
+
+<h2>8. CSRF Concepts</h2>
+
+<p>
+CSRF stands for Cross-Site Request Forgery.
+It is a class of attack in which a victim's browser is induced to send
+an unwanted authenticated request to a site where the victim is already
+authenticated.
+</p>
+
+<h3>Conceptual Flow</h3>
+
+<div class="architecture">
+
+<div class="node">
+Victim<br>
+Browser
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Malicious<br>
+Site
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Authenticated<br>
+Request
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Target<br>
+Server
+</div>
+
+</div>
+
+<h3>Common Defenses</h3>
+
+<div class="grid3">
+
+<div class="card">
+<h4>SameSite Cookies</h4>
+<p>Restrict when cookies are sent in cross-site requests.</p>
+</div>
+
+<div class="card">
+<h4>CSRF Tokens</h4>
+<p>Require an unpredictable token associated with the user's session.</p>
+</div>
+
+<div class="card">
+<h4>Origin Checks</h4>
+<p>Servers can validate relevant request origin information.</p>
+</div>
+
+</div>
+
+<div class="warning">
+CSRF protection depends on how authentication works.
+Cookie-based authentication requires particular attention to CSRF.
+Bearer-token architectures have different considerations.
+</div>
+
+</section>
+
+<!-- CORS -->
+
+<section class="section reveal" id="cors">
+
+<h2>9. CORS</h2>
+
+<p>
+CORS means Cross-Origin Resource Sharing.
+It is a browser security mechanism that controls whether frontend
+JavaScript can access resources from another origin.
+</p>
+
+<h3>What Is an Origin?</h3>
+
+<p>
+An origin is determined by the combination of:
+</p>
+
+<ul>
+<li>Scheme</li>
+<li>Host</li>
+<li>Port</li>
+</ul>
+
+<div class="architecture">
+
+<div class="node">
+React App
+<br>
+<small>Origin A</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Browser
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+API
+<br>
+<small>Origin B</small>
+</div>
+
+</div>
+
+<h3>Example Backend Configuration</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<div class="dots">
+<span class="dot"></span>
+<span class="dot"></span>
+<span class="dot"></span>
+</div>
+Express concept
+</div>
+
+<pre><code>import cors from "cors";
+
+app.use(cors({
+    origin: "https://example.com"
+}));</code></pre>
+
+</div>
+
+<div class="danger">
+CORS is not an authentication system.
+It controls browser cross-origin access; it does not replace
+authorization on the server.
+</div>
+
+<h3>Important Distinction</h3>
+
+<table class="compare">
+
+<tr>
+<th>Concept</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>CORS</td>
+<td>Browser cross-origin access control.</td>
+</tr>
+
+<tr>
+<td>Authentication</td>
+<td>Establishes identity.</td>
+</tr>
+
+<tr>
+<td>Authorization</td>
+<td>Controls permissions.</td>
+</tr>
+
+<tr>
+<td>CSRF Protection</td>
+<td>Defends against unwanted authenticated requests in relevant architectures.</td>
+</tr>
+
+</table>
+
+</section>
+
+<!-- ENV -->
+
+<section class="section reveal" id="env">
+
+<h2>10. Environment Variables</h2>
+
+<p>
+Environment variables are commonly used to configure applications
+differently across development, testing and production.
+</p>
+
+<h3>React/Vite Example</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<div class="dots">
+<span class="dot"></span>
+<span class="dot"></span>
+<span class="dot"></span>
+</div>
+.env
+</div>
+
+<pre><code>VITE_API_URL=https://api.example.com</code></pre>
+
+</div>
+
+<div class="code-box">
+
+<div class="code-header">
+<div class="dots">
+<span class="dot"></span>
+<span class="dot"></span>
+<span class="dot"></span>
+</div>
+React
+</div>
+
+<pre><code>const apiUrl =
+    import.meta.env.VITE_API_URL;</code></pre>
+
+</div>
+
+<div class="danger">
+In Vite applications, variables exposed through the frontend build
+are available to client-side code. They are configuration values,
+not a secure vault for private server secrets.
+</div>
+
+<h3>Safe vs Unsafe</h3>
+
+<table class="compare">
+
+<tr>
+<th>Value</th>
+<th>Frontend?</th>
+</tr>
+
+<tr>
+<td>Public API base URL</td>
+<td>Usually acceptable</td>
+</tr>
+
+<tr>
+<td>Public analytics identifier</td>
+<td>May be acceptable depending on service</td>
+</tr>
+
+<tr>
+<td>Database password</td>
+<td>Never</td>
+</tr>
+
+<tr>
+<td>Private API secret</td>
+<td>Never</td>
+</tr>
+
+<tr>
+<td>Server signing key</td>
+<td>Never</td>
+</tr>
+
+</table>
+
+</section>
+
+<!-- SENSITIVE -->
+
+<section class="section reveal" id="sensitive">
+
+<h2>11. Sensitive Information</h2>
+
+<p>
+Sensitive information should not be unnecessarily exposed to the browser,
+source code, logs or client-side storage.
+</p>
+
+<h3>Examples</h3>
+
+<div class="grid3">
+
+<div class="card">
+<div class="icon">!</div>
+<h4>Passwords</h4>
+<p>Never expose or log user passwords.</p>
+</div>
+
+<div class="card">
+<div class="icon">!</div>
+<h4>Private Keys</h4>
+<p>Keep server-side cryptographic secrets private.</p>
+</div>
+
+<div class="card">
+<div class="icon">!</div>
+<h4>Database Credentials</h4>
+<p>Database credentials belong on the server.</p>
+</div>
+
+<div class="card">
+<div class="icon">!</div>
+<h4>Access Tokens</h4>
+<p>Protect authentication credentials and minimize their lifetime where appropriate.</p>
+</div>
+
+<div class="card">
+<div class="icon">!</div>
+<h4>Personal Data</h4>
+<p>Collect and expose only what the application needs.</p>
+</div>
+
+<div class="card">
+<div class="icon">!</div>
+<h4>Internal Errors</h4>
+<p>Do not expose unnecessary server internals to users.</p>
+</div>
+
+</div>
+
+<h3>Bad Error Handling</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<div class="dots">
+<span class="dot"></span>
+<span class="dot"></span>
+<span class="dot"></span>
+</div>
+Avoid
+</div>
+
+<pre><code>catch (error) {
+    setMessage(error.stack);
+}</code></pre>
+
+</div>
+
+<h3>Better User Experience</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<div class="dots">
+<span class="dot"></span>
+<span class="dot"></span>
+<span class="dot"></span>
+</div>
+Safer UI message
+</div>
+
+<pre><code>catch (error) {
+    setMessage(
+        "Something went wrong. Please try again."
+    );
+}</code></pre>
+
+</div>
+
+<div class="info">
+Detailed technical errors can be logged securely on the server or sent
+to an approved monitoring system without exposing unnecessary internals
+to the end user.
+</div>
+
+</section>
+
+<!-- DEPENDENCIES -->
+
+<section class="section reveal" id="dependencies">
+
+<h2>12. Dependency Security</h2>
+
+<p>
+Modern React applications depend on many third-party packages.
+Every dependency becomes part of the application's software supply chain.
+</p>
+
+<div class="architecture">
+
+<div class="node">
+Your App
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Dependencies
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Transitive<br>
+Dependencies
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Production
+</div>
+
+</div>
+
+<h3>Security Practices</h3>
+
+<ul>
+<li>Keep dependencies reasonably up to date.</li>
+<li>Review security advisories.</li>
+<li>Remove packages that are no longer needed.</li>
+<li>Review unfamiliar dependencies before installing them.</li>
+<li>Use lockfiles for reproducible installations.</li>
+<li>Run package-manager security auditing tools.</li>
+<li>Review dependency changes during code review.</li>
+</ul>
+
+<h3>Example Commands</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<div class="dots">
+<span class="dot"></span>
+<span class="dot"></span>
+<span class="dot"></span>
+</div>
+Terminal
+</div>
+
+<pre><code>npm audit
+
+npm outdated</code></pre>
+
+</div>
+
+<div class="warning">
+A vulnerability report does not automatically mean your application
+is exploitable. Review the affected package, version, dependency path,
+runtime usage and available fixes before deciding how to respond.
+</div>
+
+</section>
+
+<!-- API -->
+
+<section class="section reveal" id="api">
+
+<h2>13. Secure API Communication</h2>
+
+<p>
+React applications frequently communicate with backend APIs.
+The browser-to-server boundary is one of the most important security
+boundaries in a full-stack application.
+</p>
+
+<h3>Secure Communication Flow</h3>
+
+<div class="security-flow">
+
+<div class="flow-item">
+<strong>1</strong>
+User action
+</div>
+
+<div class="flow-item">
+<strong>2</strong>
+HTTPS request
+</div>
+
+<div class="flow-item">
+<strong>3</strong>
+Authentication
+</div>
+
+<div class="flow-item">
+<strong>4</strong>
+Authorization
+</div>
+
+<div class="flow-item">
+<strong>5</strong>
+Validated response
+</div>
+
+</div>
+
+<h3>Frontend Request</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<div class="dots">
+<span class="dot"></span>
+<span class="dot"></span>
+<span class="dot"></span>
+</div>
+api.js
+</div>
+
+<pre><code>async function getProfile() {
+
+    const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/profile`,
+        {
+            credentials: "include"
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error("Request failed");
+    }
+
+    return response.json();
+}</code></pre>
+
+</div>
+
+<h3>Backend Must Still Verify</h3>
+
+<ul>
+<li>Authentication</li>
+<li>Authorization</li>
+<li>Input validation</li>
+<li>Resource ownership</li>
+<li>Rate limits where appropriate</li>
+<li>Business rules</li>
+<li>Safe error responses</li>
+</ul>
+
+<div class="danger">
+Never assume that because a React button is hidden or disabled,
+the corresponding API operation is protected.
+The server must enforce authorization.
+</div>
+
+</section>
+
+<!-- CHECKLIST -->
+
+<section class="section reveal" id="checklist">
+
+<h2>14. Security Checklist</h2>
+
+<p>
+Use this checklist before considering a React application ready for
+production.
+</p>
+
+<div class="checklist">
+
+<div class="check">✓ Treat user input as untrusted</div>
+
+<div class="check">✓ Avoid unsafe HTML injection</div>
+
+<div class="check">✓ Use HTTPS in production</div>
+
+<div class="check">✓ Validate input on the server</div>
+
+<div class="check">✓ Protect authentication credentials</div>
+
+<div class="check">✓ Understand cookie security attributes</div>
+
+<div class="check">✓ Apply CSRF defenses where applicable</div>
+
+<div class="check">✓ Configure CORS intentionally</div>
+
+<div class="check">✓ Never put server secrets in frontend code</div>
+
+<div class="check">✓ Avoid exposing sensitive information</div>
+
+<div class="check">✓ Keep dependencies maintained</div>
+
+<div class="check">✓ Enforce authorization on the server</div>
+
+<div class="check">✓ Handle API errors safely</div>
+
+<div class="check">✓ Review production configuration</div>
+
+</div>
+
+<h3>Security Layers</h3>
+
+<div class="architecture">
+
+<div class="node">
+Browser
+</div>
+
+<div class="arrow">+</div>
+
+<div class="node">
+React
+</div>
+
+<div class="arrow">+</div>
+
+<div class="node">
+Network
+</div>
+
+<div class="arrow">+</div>
+
+<div class="node">
+API
+</div>
+
+<div class="arrow">+</div>
+
+<div class="node">
+Server
+</div>
+
+</div>
+
+<div class="success">
+<strong>Security is layered.</strong>
+There is rarely one React feature that “makes the application secure.”
+Multiple controls work together.
+</div>
+
+</section>
+
+<!-- QUIZ -->
+
+<section class="section reveal" id="quiz">
+
+<h2>15. Quick Quiz</h2>
+
+<p>
+Check your understanding of React security fundamentals.
+</p>
+
+<div class="quiz-question">
+
+<h4>Q1. What is XSS?</h4>
+
+<button class="quiz-btn" onclick="toggleAnswer('a1')">
+Show Answer
+</button>
+
+<div class="answer" id="a1">
+Cross-Site Scripting is a class of attacks involving
+attacker-controlled content being interpreted as executable code
+in another user's browser.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<h4>Q2. Why should client-side validation not be treated as security?</h4>
+
+<button class="quiz-btn" onclick="toggleAnswer('a2')">
+Show Answer
+</button>
+
+<div class="answer" id="a2">
+Because users can bypass or modify frontend code. Important validation
+and authorization must be enforced on the server.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<h4>Q3. Why is dangerouslySetInnerHTML risky?</h4>
+
+<button class="quiz-btn" onclick="toggleAnswer('a3')">
+Show Answer
+</button>
+
+<div class="answer" id="a3">
+It inserts raw HTML into the DOM, so unsafe untrusted HTML can create
+XSS risk if it is not handled with an appropriate sanitization strategy.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<h4>Q4. Which cookie attribute prevents JavaScript from reading the cookie?</h4>
+
+<button class="quiz-btn" onclick="toggleAnswer('a4')">
+Show Answer
+</button>
+
+<div class="answer" id="a4">
+HttpOnly.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<h4>Q5. What does CORS primarily control?</h4>
+
+<button class="quiz-btn" onclick="toggleAnswer('a5')">
+Show Answer
+</button>
+
+<div class="answer" id="a5">
+It controls whether browser JavaScript is permitted to access resources
+across origins under the browser's CORS rules.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<h4>Q6. Can a VITE_ environment variable be used as a private secret?</h4>
+
+<button class="quiz-btn" onclick="toggleAnswer('a6')">
+Show Answer
+</button>
+
+<div class="answer" id="a6">
+No. Frontend-exposed environment variables become part of the client
+application and should not contain private server secrets.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<h4>Q7. Where should authorization ultimately be enforced?</h4>
+
+<button class="quiz-btn" onclick="toggleAnswer('a7')">
+Show Answer
+</button>
+
+<div class="answer" id="a7">
+On the server/API that protects the resource or operation.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<h4>Q8. What is CSRF?</h4>
+
+<button class="quiz-btn" onclick="toggleAnswer('a8')">
+Show Answer
+</button>
+
+<div class="answer" id="a8">
+Cross-Site Request Forgery is a class of attacks involving unwanted
+authenticated requests sent to a target site from a victim's browser.
+</div>
+
+</div>
+
+</section>
+
+<!-- SUMMARY -->
+
+<section class="section summary reveal">
+
+<h2>ZENSUS Security Mindset</h2>
+
+<p>
+A professional React developer does not think of security as one
+checkbox. Security is a chain of controls across the entire system.
+</p>
+
+<div class="architecture">
+
+<div class="node">
+Validate
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Authenticate
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Authorize
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Protect
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Monitor
+</div>
+
+</div>
+
+<ul>
+<li>Never trust client-side data.</li>
+<li>Understand XSS and unsafe HTML.</li>
+<li>Protect authentication credentials.</li>
+<li>Understand cookies, CSRF and CORS separately.</li>
+<li>Never place private server secrets in frontend code.</li>
+<li>Keep sensitive information out of client-side logs and responses.</li>
+<li>Maintain third-party dependencies.</li>
+<li>Use HTTPS for production communication.</li>
+<li>Enforce authorization on the backend.</li>
+<li>Think about security during design, development and deployment.</li>
+</ul>
+
+<div class="success">
+<strong>ZENSUS Rule:</strong>
+The frontend can improve security, but the backend must enforce
+security-critical decisions.
+</div>
+
+</section>
+
+<footer>
+ZENSUS React • Lesson 39 • React Security
+</footer>
+
+</main>
+</div>
+
+<script>
+
+function toggleAnswer(id){
+
+    const answer = document.getElementById(id);
+
+    if(answer.style.display === "block"){
+        answer.style.display = "none";
+    }else{
+        answer.style.display = "block";
+    }
+
+}
+
+
+/* Scroll reveal */
+
+const revealItems =
+    document.querySelectorAll(".reveal");
+
+const observer =
+    new IntersectionObserver(
+        entries => {
+
+            entries.forEach(entry => {
+
+                if(entry.isIntersecting){
+                    entry.target.classList.add("visible");
+                }
+
+            });
+
+        },
+        {
+            threshold:0.08
+        }
+    );
+
+revealItems.forEach(item => {
+    observer.observe(item);
+});
+
+
+/* Active sidebar */
+
+const sections =
+    document.querySelectorAll("section[id]");
+
+const links =
+    document.querySelectorAll(".sidebar a");
+
+window.addEventListener("scroll", () => {
+
+    let current = "";
+
+    sections.forEach(section => {
+
+        const top =
+            section.offsetTop - 120;
+
+        if(window.scrollY >= top){
+            current = section.id;
+        }
+
+    });
+
+    links.forEach(link => {
+
+        link.classList.remove("active");
+
+        if(
+            link.getAttribute("href") ===
+            "#" + current
+        ){
+            link.classList.add("active");
+        }
+
+    });
+
+});
+
+</script>
+
+</body>
+</html>

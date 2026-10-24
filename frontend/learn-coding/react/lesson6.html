@@ -1,0 +1,1913 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENSUS React — Lesson 6: State & useState()</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+    --bg:#f7f8fc;
+    --surface:#ffffff;
+    --surface2:#f1f4f9;
+    --text:#172033;
+    --muted:#657084;
+    --primary:#635bff;
+    --primary-dark:#5148e5;
+    --border:#e4e8f0;
+    --green:#16a34a;
+    --red:#dc2626;
+    --orange:#ea580c;
+    --blue:#2563eb;
+    --shadow:0 10px 35px rgba(20,30,60,.08);
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+button{
+    font-family:inherit;
+}
+
+.topbar{
+    position:sticky;
+    top:0;
+    z-index:100;
+    height:68px;
+    background:rgba(255,255,255,.94);
+    backdrop-filter:blur(15px);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 30px;
+}
+
+.logo{
+    font-size:22px;
+    font-weight:800;
+    letter-spacing:-.5px;
+}
+
+.logo span{
+    color:var(--primary);
+}
+
+.lesson-tag{
+    padding:7px 14px;
+    border-radius:20px;
+    background:#eeecff;
+    color:var(--primary);
+    font-size:13px;
+    font-weight:700;
+}
+
+.layout{
+    display:grid;
+    grid-template-columns:270px 1fr;
+    max-width:1500px;
+    margin:auto;
+}
+
+.sidebar{
+    position:sticky;
+    top:68px;
+    height:calc(100vh - 68px);
+    overflow:auto;
+    background:white;
+    border-right:1px solid var(--border);
+    padding:28px 18px;
+}
+
+.sidebar-title{
+    font-size:12px;
+    color:#8a93a5;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin-bottom:15px;
+    font-weight:800;
+}
+
+.sidebar a{
+    display:block;
+    padding:9px 12px;
+    margin:3px 0;
+    border-radius:8px;
+    color:#596579;
+    text-decoration:none;
+    font-size:14px;
+}
+
+.sidebar a:hover{
+    background:#f2f1ff;
+    color:var(--primary);
+}
+
+.sidebar a.active{
+    background:#eeecff;
+    color:var(--primary);
+    font-weight:700;
+}
+
+main{
+    max-width:1000px;
+    width:100%;
+    margin:auto;
+    padding:55px 50px 100px;
+}
+
+.hero{
+    background:linear-gradient(135deg,#171a2b,#272452);
+    color:white;
+    border-radius:25px;
+    padding:55px;
+    margin-bottom:55px;
+    position:relative;
+    overflow:hidden;
+}
+
+.hero:before,
+.hero:after{
+    content:"";
+    position:absolute;
+    border-radius:50%;
+    filter:blur(3px);
+    opacity:.25;
+}
+
+.hero:before{
+    width:280px;
+    height:280px;
+    background:#635bff;
+    right:-100px;
+    top:-100px;
+}
+
+.hero:after{
+    width:180px;
+    height:180px;
+    background:#a78bfa;
+    left:-80px;
+    bottom:-80px;
+}
+
+.hero-content{
+    position:relative;
+    z-index:2;
+}
+
+.eyebrow{
+    color:#b8b4ff;
+    text-transform:uppercase;
+    letter-spacing:2px;
+    font-size:12px;
+    font-weight:800;
+    margin-bottom:14px;
+}
+
+.hero h1{
+    font-size:clamp(36px,5vw,60px);
+    line-height:1.05;
+    letter-spacing:-2px;
+    margin-bottom:20px;
+}
+
+.hero p{
+    color:#d9d9e8;
+    max-width:760px;
+    font-size:17px;
+}
+
+.section{
+    margin-bottom:70px;
+    scroll-margin-top:90px;
+}
+
+.section h2{
+    font-size:32px;
+    letter-spacing:-1px;
+    margin-bottom:16px;
+}
+
+.section h3{
+    font-size:21px;
+    margin:30px 0 10px;
+}
+
+.section p{
+    color:#596579;
+    margin:12px 0;
+}
+
+.info{
+    padding:20px 22px;
+    border:1px solid var(--border);
+    background:white;
+    border-radius:14px;
+    margin:22px 0;
+    box-shadow:var(--shadow);
+}
+
+.info strong{
+    color:var(--text);
+}
+
+.highlight{
+    background:#f1efff;
+    border-left:4px solid var(--primary);
+    padding:18px 20px;
+    border-radius:8px;
+    margin:20px 0;
+}
+
+.warning{
+    background:#fff7ed;
+    border-left:4px solid var(--orange);
+    padding:18px 20px;
+    border-radius:8px;
+    margin:20px 0;
+}
+
+.success{
+    background:#ecfdf3;
+    border-left:4px solid var(--green);
+    padding:18px 20px;
+    border-radius:8px;
+    margin:20px 0;
+}
+
+code{
+    background:#f0f2f6;
+    padding:2px 6px;
+    border-radius:5px;
+    font-family:Consolas,monospace;
+    color:#b42318;
+}
+
+pre{
+    background:#10131c;
+    color:#e7e9ef;
+    border-radius:15px;
+    padding:24px;
+    overflow:auto;
+    margin:18px 0;
+    font-family:Consolas,monospace;
+    font-size:14px;
+    line-height:1.65;
+    box-shadow:0 15px 35px rgba(0,0,0,.12);
+}
+
+.keyword{color:#c084fc;}
+.func{color:#67e8f9;}
+.string{color:#86efac;}
+.comment{color:#78839a;}
+.number{color:#fbbf24;}
+
+.card-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+    margin:25px 0;
+}
+
+.card{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:24px;
+    box-shadow:var(--shadow);
+}
+
+.card h3{
+    margin:0 0 8px;
+}
+
+.card p{
+    font-size:14px;
+}
+
+.compare{
+    width:100%;
+    border-collapse:collapse;
+    margin:25px 0;
+    background:white;
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+}
+
+.compare th,
+.compare td{
+    border-bottom:1px solid var(--border);
+    padding:15px;
+    text-align:left;
+}
+
+.compare th{
+    background:#f3f4f8;
+}
+
+.visual{
+    background:#10131c;
+    color:white;
+    border-radius:20px;
+    padding:28px;
+    margin:30px 0;
+    overflow:hidden;
+}
+
+.visual-title{
+    color:#aeb4c5;
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin-bottom:20px;
+}
+
+.state-flow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:18px;
+    flex-wrap:wrap;
+}
+
+.state-box{
+    min-width:180px;
+    padding:22px;
+    background:#1b2030;
+    border:1px solid #30384d;
+    border-radius:15px;
+    text-align:center;
+}
+
+.state-value{
+    font-size:34px;
+    font-weight:800;
+    color:#a78bfa;
+    margin-top:7px;
+}
+
+.arrow{
+    color:#a78bfa;
+    font-size:30px;
+}
+
+.render-pulse{
+    animation:pulseRender .8s ease;
+}
+
+@keyframes pulseRender{
+    0%{transform:scale(1);box-shadow:0 0 0 rgba(99,91,255,0)}
+    50%{transform:scale(1.08);box-shadow:0 0 35px rgba(99,91,255,.45)}
+    100%{transform:scale(1);box-shadow:none}
+}
+
+.demo{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:30px;
+    margin:25px 0;
+    box-shadow:var(--shadow);
+}
+
+.demo-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.demo-header h3{
+    margin:0;
+}
+
+.demo-btn{
+    border:0;
+    background:var(--primary);
+    color:white;
+    padding:10px 18px;
+    border-radius:9px;
+    cursor:pointer;
+    font-weight:700;
+    transition:.2s;
+}
+
+.demo-btn:hover{
+    background:var(--primary-dark);
+    transform:translateY(-1px);
+}
+
+.counter{
+    text-align:center;
+    padding:30px;
+    background:#f7f7ff;
+    border-radius:15px;
+}
+
+.counter-number{
+    font-size:60px;
+    font-weight:800;
+    color:var(--primary);
+    line-height:1;
+    margin:20px;
+}
+
+.counter button{
+    margin:5px;
+}
+
+.visual-code{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+    margin-top:25px;
+}
+
+.code-step{
+    background:#171b27;
+    border:1px solid #2c3344;
+    border-radius:14px;
+    padding:20px;
+}
+
+.code-step span{
+    display:block;
+    color:#8e98ad;
+    font-size:12px;
+    margin-bottom:8px;
+}
+
+.code-step strong{
+    color:#fff;
+}
+
+.flow-animation{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:15px;
+    margin:25px 0;
+    flex-wrap:wrap;
+}
+
+.flow-node{
+    padding:15px 20px;
+    border-radius:12px;
+    background:#202638;
+    border:1px solid #3a435b;
+    text-align:center;
+}
+
+.flow-node.active{
+    animation:nodeGlow 1.5s infinite;
+}
+
+@keyframes nodeGlow{
+    0%,100%{box-shadow:0 0 0 rgba(124,108,255,0)}
+    50%{box-shadow:0 0 25px rgba(124,108,255,.5)}
+}
+
+.flow-arrow{
+    color:#8f86ff;
+    font-size:22px;
+}
+
+.types-demo{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:12px;
+    margin-top:25px;
+}
+
+.type-box{
+    padding:20px 10px;
+    border-radius:13px;
+    background:#f6f7fa;
+    text-align:center;
+    border:1px solid var(--border);
+}
+
+.type-icon{
+    font-size:28px;
+    margin-bottom:8px;
+}
+
+.array-items{
+    display:flex;
+    gap:8px;
+    justify-content:center;
+    margin-top:15px;
+}
+
+.array-item{
+    width:55px;
+    height:55px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:10px;
+    background:#eeecff;
+    color:var(--primary);
+    font-weight:800;
+    transition:.3s;
+}
+
+.array-item.new{
+    animation:itemPop .5s ease;
+}
+
+@keyframes itemPop{
+    0%{transform:scale(0);opacity:0}
+    80%{transform:scale(1.15)}
+    100%{transform:scale(1);opacity:1}
+}
+
+.immutable{
+    display:grid;
+    grid-template-columns:1fr 100px 1fr;
+    gap:15px;
+    align-items:center;
+    margin:25px 0;
+}
+
+.immutable-box{
+    background:#f7f8fa;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:20px;
+    text-align:center;
+}
+
+.immutable-box.bad{
+    border-color:#fecaca;
+    background:#fff5f5;
+}
+
+.immutable-box.good{
+    border-color:#bbf7d0;
+    background:#f0fdf4;
+}
+
+.big-arrow{
+    text-align:center;
+    font-size:30px;
+    color:var(--primary);
+}
+
+.mistakes{
+    display:grid;
+    gap:15px;
+}
+
+.mistake{
+    border:1px solid #fee2e2;
+    background:#fffafa;
+    border-radius:14px;
+    padding:20px;
+}
+
+.mistake h3{
+    color:var(--red);
+    margin:0 0 7px;
+    font-size:17px;
+}
+
+.quiz{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:25px;
+    margin:18px 0;
+    box-shadow:var(--shadow);
+}
+
+.quiz-question{
+    font-weight:750;
+    margin-bottom:15px;
+}
+
+.option{
+    display:block;
+    width:100%;
+    padding:12px 15px;
+    margin:7px 0;
+    text-align:left;
+    border:1px solid var(--border);
+    background:#fafbfc;
+    border-radius:9px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.option:hover{
+    border-color:var(--primary);
+    background:#f5f3ff;
+}
+
+.option.correct{
+    background:#ecfdf3;
+    border-color:#86efac;
+    color:#166534;
+}
+
+.option.wrong{
+    background:#fef2f2;
+    border-color:#fca5a5;
+    color:#991b1b;
+}
+
+.quiz-result{
+    margin-top:10px;
+    font-weight:700;
+}
+
+.footer{
+    border-top:1px solid var(--border);
+    padding-top:30px;
+    color:#778197;
+    text-align:center;
+}
+
+@media(max-width:900px){
+    .layout{
+        grid-template-columns:1fr;
+    }
+
+    .sidebar{
+        display:none;
+    }
+
+    main{
+        padding:35px 20px 80px;
+    }
+
+    .hero{
+        padding:35px 25px;
+    }
+
+    .card-grid,
+    .visual-code{
+        grid-template-columns:1fr;
+    }
+
+    .types-demo{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .immutable{
+        grid-template-columns:1fr;
+    }
+
+    .big-arrow{
+        transform:rotate(90deg);
+    }
+}
+
+@media(max-width:550px){
+    .topbar{
+        padding:0 16px;
+    }
+
+    .lesson-tag{
+        display:none;
+    }
+
+    .section h2{
+        font-size:27px;
+    }
+
+    .types-demo{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="logo">ZEN<span>SUS</span></div>
+    <div class="lesson-tag">REACT • LESSON 6</div>
+</header>
+
+<div class="layout">
+
+<aside class="sidebar">
+    <div class="sidebar-title">Lesson 6</div>
+
+    <a href="#state" class="active">What is State?</a>
+    <a href="#props-state">Props vs State</a>
+    <a href="#why">Why State?</a>
+    <a href="#useState">useState()</a>
+    <a href="#declaration">State Declaration</a>
+    <a href="#setter">State Setter</a>
+    <a href="#rerender">Re-rendering</a>
+    <a href="#types">State Data Types</a>
+    <a href="#functional">Functional Updates</a>
+    <a href="#multiple">Multiple State</a>
+    <a href="#immutability">Immutability</a>
+    <a href="#mistakes">Common Mistakes</a>
+    <a href="#quiz">Quick Quiz</a>
+</aside>
+
+<main>
+
+<section class="hero">
+    <div class="hero-content">
+        <div class="eyebrow">ZENSUS React Course • Lesson 06</div>
+        <h1>State & <span style="color:#a9a2ff;">useState()</span></h1>
+        <p>
+            Learn how React components remember information, respond to user
+            interactions, update their UI, and manage changing data using state.
+        </p>
+    </div>
+</section>
+
+<!-- STATE -->
+
+<section class="section" id="state">
+
+<h2>01. What is State?</h2>
+
+<p>
+    <strong>State</strong> is data that belongs to a React component and can
+    change over time. When state changes, React updates the component's UI
+    so that what the user sees stays synchronized with the latest data.
+</p>
+
+<div class="highlight">
+    <strong>Simple definition:</strong><br>
+    State is a component's <strong>memory</strong> — information that React
+    remembers between renders.
+</div>
+
+<div class="card-grid">
+
+<div class="card">
+<h3>🧠 Component Memory</h3>
+<p>
+A normal local variable does not persist reliably across React renders.
+State does.
+</p>
+</div>
+
+<div class="card">
+<h3>🔄 Dynamic UI</h3>
+<p>
+When state changes, React renders the component again using the new state.
+</p>
+</div>
+
+<div class="card">
+<h3>👆 User Interaction</h3>
+<p>
+Buttons, forms, toggles, counters and menus commonly depend on state.
+</p>
+</div>
+
+<div class="card">
+<h3>📦 Component-Owned Data</h3>
+<p>
+State is generally used for information that can change during the component's lifetime.
+</p>
+</div>
+
+</div>
+
+<h3>Real-world example</h3>
+
+<p>
+Think about a shopping cart. The number of products in the cart changes
+when the user clicks <strong>Add to Cart</strong>. That changing number
+can be represented using state.
+</p>
+
+<div class="visual">
+
+<div class="visual-title">STATE FLOW — INTERACTIVE CONCEPT</div>
+
+<div class="state-flow">
+
+<div class="state-box">
+    <div>User Action</div>
+    <div style="font-size:28px;">👆</div>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="state-box">
+    <div>State Changes</div>
+    <div class="state-value">+1</div>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="state-box">
+    <div>Component Re-renders</div>
+    <div style="font-size:28px;">🔄</div>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="state-box">
+    <div>Updated UI</div>
+    <div style="font-size:28px;">✨</div>
+</div>
+
+</div>
+</div>
+
+</section>
+
+<!-- PROPS VS STATE -->
+
+<section class="section" id="props-state">
+
+<h2>02. Props vs State</h2>
+
+<p>
+Props and state are both important React concepts, but they solve different problems.
+</p>
+
+<table class="compare">
+
+<tr>
+<th>Feature</th>
+<th>Props</th>
+<th>State</th>
+</tr>
+
+<tr>
+<td>Source</td>
+<td>Passed from parent</td>
+<td>Managed by component</td>
+</tr>
+
+<tr>
+<td>Can component directly change it?</td>
+<td>❌ No</td>
+<td>✅ Yes, through setter</td>
+</tr>
+
+<tr>
+<td>Purpose</td>
+<td>Pass information</td>
+<td>Store changing information</td>
+</tr>
+
+<tr>
+<td>Example</td>
+<td><code>&lt;User name="Pradeep" /&gt;</code></td>
+<td><code>const [count,setCount]</code></td>
+</tr>
+
+<tr>
+<td>Change causes render?</td>
+<td>Parent passing new props can cause render</td>
+<td>State update causes render</td>
+</tr>
+
+</table>
+
+<div class="highlight">
+    <strong>Think of it this way:</strong><br>
+    Props are information a component <strong>receives</strong>.
+    State is information a component <strong>remembers and manages</strong>.
+</div>
+
+</section>
+
+<!-- WHY -->
+
+<section class="section" id="why">
+
+<h2>03. Why Do We Need State?</h2>
+
+<p>
+Without state, interactive React applications would be extremely difficult
+to build.
+</p>
+
+<div class="card-grid">
+
+<div class="card">
+<h3>🔢 Counters</h3>
+<p>Track likes, quantity, score, views and counts.</p>
+</div>
+
+<div class="card">
+<h3>🌙 Dark Mode</h3>
+<p>Remember whether the interface is currently light or dark.</p>
+</div>
+
+<div class="card">
+<h3>📝 Forms</h3>
+<p>Store values typed into inputs.</p>
+</div>
+
+<div class="card">
+<h3>📂 Menus</h3>
+<p>Track whether dropdowns, modals or navigation panels are open.</p>
+</div>
+
+</div>
+
+</section>
+
+<!-- USESTATE -->
+
+<section class="section" id="useState">
+
+<h2>04. <code>useState()</code></h2>
+
+<p>
+    <code>useState()</code> is a React Hook that lets a functional component
+    create and manage state.
+</p>
+
+<pre><span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="func">Counter</span>() {
+
+    <span class="keyword">const</span> [count, setCount] = <span class="func">useState</span>(0);
+
+    <span class="keyword">return</span> (
+        &lt;button&gt;
+            {count}
+        &lt;/button&gt;
+    );
+}</pre>
+
+<h3>The basic structure</h3>
+
+<pre><span class="keyword">const</span> [state, setState] = <span class="func">useState</span>(initialValue);</pre>
+
+<div class="card-grid">
+
+<div class="card">
+<h3>state</h3>
+<p>
+The current value stored by React.
+</p>
+</div>
+
+<div class="card">
+<h3>setState</h3>
+<p>
+The function used to request a state update.
+</p>
+</div>
+
+<div class="card">
+<h3>initialValue</h3>
+<p>
+The value used when the component initializes.
+</p>
+</div>
+
+<div class="card">
+<h3>useState</h3>
+<p>
+React Hook responsible for creating the state variable and setter.
+</p>
+</div>
+
+</div>
+
+<div class="success">
+<strong>Important:</strong> You normally should not directly modify the state variable.
+Use its setter function.
+</div>
+
+</section>
+
+<!-- DECLARATION -->
+
+<section class="section" id="declaration">
+
+<h2>05. State Declaration</h2>
+
+<p>
+A state variable is commonly declared using array destructuring.
+</p>
+
+<pre><span class="keyword">const</span> [name, setName] = <span class="func">useState</span>(<span class="string">"Pradeep"</span>);
+
+<span class="keyword">const</span> [age, setAge] = <span class="func">useState</span>(19);
+
+<span class="keyword">const</span> [isLoggedIn, setIsLoggedIn] = <span class="func">useState</span>(<span class="keyword">false</span>);</pre>
+
+<h3>Why two values?</h3>
+
+<div class="visual">
+
+<div class="visual-title">ARRAY DESTRUCTURING</div>
+
+<div class="flow-animation">
+
+<div class="flow-node active">
+    <strong>useState(0)</strong>
+    <small style="display:block;color:#8d96a8;">returns two values</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+    <strong>count</strong>
+    <small style="display:block;color:#8d96a8;">current value</small>
+</div>
+
+<div class="flow-arrow">+</div>
+
+<div class="flow-node">
+    <strong>setCount</strong>
+    <small style="display:block;color:#8d96a8;">update function</small>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- INITIAL STATE -->
+
+<section class="section">
+
+<h2>06. Initial State</h2>
+
+<p>
+The argument passed to <code>useState()</code> becomes the initial state.
+</p>
+
+<pre><span class="keyword">const</span> [count, setCount] = <span class="func">useState</span>(0);
+
+<span class="keyword">const</span> [name, setName] = <span class="func">useState</span>(<span class="string">"Pradeep"</span>);
+
+<span class="keyword">const</span> [loggedIn, setLoggedIn] = <span class="func">useState</span>(<span class="keyword">false</span>);
+
+<span class="keyword">const</span> [skills, setSkills] = <span class="func">useState</span>([]);</pre>
+
+<div class="info">
+<strong>Initial state is used during initialization.</strong>
+After that, the setter is used to update the state.
+</div>
+
+</section>
+
+<!-- STATE VARIABLE -->
+
+<section class="section">
+
+<h2>07. State Variable</h2>
+
+<p>
+The first value returned by <code>useState()</code> is the state variable.
+</p>
+
+<pre><span class="keyword">const</span> [score, setScore] = <span class="func">useState</span>(0);</pre>
+
+<p>
+Here:
+</p>
+
+<ul>
+<li><code>score</code> → current state</li>
+<li><code>setScore</code> → state update function</li>
+<li><code>0</code> → initial value</li>
+</ul>
+
+</section>
+
+<!-- SETTER -->
+
+<section class="section" id="setter">
+
+<h2>08. State Setter</h2>
+
+<p>
+The setter function tells React that the state should be updated.
+</p>
+
+<pre><span class="keyword">const</span> [count, setCount] = <span class="func">useState</span>(0);
+
+setCount(10);</pre>
+
+<p>
+After the update, React schedules a new render using the updated state.
+</p>
+
+<div class="highlight">
+<strong>Never do this:</strong>
+<pre style="margin-top:10px;">count = 10;</pre>
+
+Use:
+
+<pre style="margin-top:10px;">setCount(10);</pre>
+</div>
+
+</section>
+
+<!-- UPDATE -->
+
+<section class="section">
+
+<h2>09. Updating State</h2>
+
+<p>
+State is updated by calling its setter.
+</p>
+
+<pre><span class="keyword">const</span> [count, setCount] = <span class="func">useState</span>(0);
+
+<span class="comment">// Increase</span>
+setCount(count + 1);
+
+<span class="comment">// Set a specific value</span>
+setCount(100);
+
+<span class="comment">// Decrease</span>
+setCount(count - 1);</pre>
+
+</section>
+
+<!-- RERENDER -->
+
+<section class="section" id="rerender">
+
+<h2>10. State Re-rendering</h2>
+
+<p>
+One of the most important ideas in React is that updating state causes
+the component to render again.
+</p>
+
+<div class="visual">
+
+<div class="visual-title">WATCH A STATE UPDATE</div>
+
+<div class="counter">
+
+<div>Current State</div>
+
+<div id="counterValue" class="counter-number">0</div>
+
+<button class="demo-btn" onclick="changeCounter(-1)">− 1</button>
+<button class="demo-btn" onclick="changeCounter(1)">+ 1</button>
+
+<div id="renderMessage" style="margin-top:18px;color:#737b90;">
+Render #1
+</div>
+
+</div>
+
+</div>
+
+<p>
+Every time you click the button, the state value changes. React then
+renders the component again so the displayed value matches the new state.
+</p>
+
+<div class="flow-animation">
+
+<div class="flow-node active">User clicks</div>
+<div class="flow-arrow">→</div>
+<div class="flow-node">setCount()</div>
+<div class="flow-arrow">→</div>
+<div class="flow-node">React schedules update</div>
+<div class="flow-arrow">→</div>
+<div class="flow-node active">UI updates</div>
+
+</div>
+
+<div class="warning">
+<strong>Important:</strong> Re-rendering does not mean React destroys the
+entire page and creates everything again. React compares the result and
+updates the necessary DOM parts.
+</div>
+
+</section>
+
+<!-- TYPES -->
+
+<section class="section" id="types">
+
+<h2>11. State with Different Data Types</h2>
+
+<div class="types-demo">
+
+<div class="type-box">
+<div class="type-icon">🔢</div>
+<strong>Number</strong>
+<code>useState(0)</code>
+</div>
+
+<div class="type-box">
+<div class="type-icon">🔤</div>
+<strong>String</strong>
+<code>useState("")</code>
+</div>
+
+<div class="type-box">
+<div class="type-icon">✅</div>
+<strong>Boolean</strong>
+<code>useState(false)</code>
+</div>
+
+<div class="type-box">
+<div class="type-icon">📋</div>
+<strong>Array</strong>
+<code>useState([])</code>
+</div>
+
+<div class="type-box">
+<div class="type-icon">📦</div>
+<strong>Object</strong>
+<code>useState({})</code>
+</div>
+
+</div>
+
+<h3>Number State</h3>
+
+<pre><span class="keyword">const</span> [count, setCount] = <span class="func">useState</span>(0);
+
+setCount(count + 1);</pre>
+
+<h3>String State</h3>
+
+<pre><span class="keyword">const</span> [name, setName] = <span class="func">useState</span>(<span class="string">""</span>);
+
+setName(<span class="string">"Pradeep"</span>);</pre>
+
+<h3>Boolean State</h3>
+
+<pre><span class="keyword">const</span> [darkMode, setDarkMode] = <span class="func">useState</span>(<span class="keyword">false</span>);
+
+setDarkMode(<span class="keyword">true</span>);</pre>
+
+<h3>Array State</h3>
+
+<pre><span class="keyword">const</span> [skills, setSkills] =
+    <span class="func">useState</span>([<span class="string">"Python"</span>, <span class="string">"React"</span>]);
+
+setSkills([...skills, <span class="string">"SQL"</span>]);</pre>
+
+<div class="demo">
+
+<div class="demo-header">
+<h3>Array State Visualizer</h3>
+<button class="demo-btn" onclick="addSkill()">Add Skill</button>
+</div>
+
+<div class="array-items" id="skillsVisual">
+<div class="array-item">Python</div>
+<div class="array-item">React</div>
+</div>
+
+<p style="text-align:center;margin-top:15px;">
+New array = old values + new value
+</p>
+
+</div>
+
+<h3>Object State</h3>
+
+<pre><span class="keyword">const</span> [user, setUser] = <span class="func">useState</span>({
+    name: <span class="string">"Pradeep"</span>,
+    age: 19
+});
+
+setUser({
+    ...user,
+    age: 20
+});</pre>
+
+<div class="success">
+The spread operator <code>...</code> creates a new object containing
+the previous properties while allowing you to replace the property you want.
+</div>
+
+</section>
+
+<!-- FUNCTIONAL -->
+
+<section class="section" id="functional">
+
+<h2>12. Functional State Updates</h2>
+
+<p>
+When the next state depends on the previous state, the recommended approach
+is the <strong>functional updater</strong>.
+</p>
+
+<pre><span class="keyword">setCount</span>(prevCount =&gt; prevCount + 1);</pre>
+
+<p>
+Here <code>prevCount</code> represents the previous state value.
+</p>
+
+<div class="visual">
+
+<div class="visual-title">FUNCTIONAL UPDATE</div>
+
+<div class="flow-animation">
+
+<div class="flow-node">
+Previous State
+<strong style="display:block;color:#a78bfa;">5</strong>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+Function
+<strong style="display:block;color:#67e8f9;">prev + 1</strong>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+New State
+<strong style="display:block;color:#86efac;">6</strong>
+</div>
+
+</div>
+
+</div>
+
+<h3>Why use it?</h3>
+
+<p>
+It is especially useful when several updates depend on the previous value.
+</p>
+
+<pre><span class="comment">// Better when each update depends on previous state</span>
+
+setCount(prev =&gt; prev + 1);
+setCount(prev =&gt; prev + 1);
+setCount(prev =&gt; prev + 1);</pre>
+
+<div class="highlight">
+<strong>Rule:</strong> If your new state depends on the old state,
+prefer the functional updater.
+</div>
+
+</section>
+
+<!-- MULTIPLE -->
+
+<section class="section" id="multiple">
+
+<h2>13. Multiple State Variables</h2>
+
+<p>
+A component can have multiple independent state variables.
+</p>
+
+<pre><span class="keyword">const</span> [name, setName] = <span class="func">useState</span>(<span class="string">""</span>);
+
+<span class="keyword">const</span> [age, setAge] = <span class="func">useState</span>(19);
+
+<span class="keyword">const</span> [isOnline, setIsOnline] = <span class="func">useState</span>(<span class="keyword">true</span>);</pre>
+
+<div class="card-grid">
+
+<div class="card">
+<h3>name</h3>
+<p>Stores a person's name.</p>
+</div>
+
+<div class="card">
+<h3>age</h3>
+<p>Stores the person's age.</p>
+</div>
+
+<div class="card">
+<h3>isOnline</h3>
+<p>Stores whether the user is online.</p>
+</div>
+
+<div class="card">
+<h3>Independent Updates</h3>
+<p>Each setter updates its corresponding state.</p>
+</div>
+
+</div>
+
+<div class="info">
+You can also group related values inside an object, but separate state
+variables are often easier when the values change independently.
+</div>
+
+</section>
+
+<!-- IMMUTABILITY -->
+
+<section class="section" id="immutability">
+
+<h2>14. State Immutability</h2>
+
+<p>
+React state should be treated as <strong>immutable</strong>.
+Instead of modifying an existing object or array directly, create a new
+value and pass that new value to the setter.
+</p>
+
+<div class="immutable">
+
+<div class="immutable-box bad">
+
+<h3>❌ Mutate Existing Array</h3>
+
+<pre style="font-size:12px;">items.push("React");</pre>
+
+<p>Changes the existing array.</p>
+
+</div>
+
+<div class="big-arrow">→</div>
+
+<div class="immutable-box good">
+
+<h3>✅ Create New Array</h3>
+
+<pre style="font-size:12px;">setItems([
+ ...items,
+ "React"
+]);</pre>
+
+<p>Creates a new array.</p>
+
+</div>
+
+</div>
+
+<h3>Object example</h3>
+
+<pre><span class="comment">// ❌ Avoid</span>
+user.age = 20;
+
+<span class="comment">// ✅ Better</span>
+setUser({
+    ...user,
+    age: 20
+});</pre>
+
+<h3>Array example</h3>
+
+<pre><span class="comment">// ❌ Avoid</span>
+skills.push(<span class="string">"React"</span>);
+
+<span class="comment">// ✅ Better</span>
+setSkills([...skills, <span class="string">"React"</span>]);</pre>
+
+<div class="success">
+<strong>Core idea:</strong> Don't modify the existing state value.
+Create a new value and give it to React through the setter.
+</div>
+
+</section>
+
+<!-- COMMON MISTAKES -->
+
+<section class="section" id="mistakes">
+
+<h2>15. Common State Mistakes</h2>
+
+<div class="mistakes">
+
+<div class="mistake">
+<h3>❌ Mistake 1 — Direct mutation</h3>
+<pre>count = count + 1;</pre>
+<p>Use <code>setCount(count + 1)</code> instead.</p>
+</div>
+
+<div class="mistake">
+<h3>❌ Mistake 2 — Mutating arrays</h3>
+<pre>items.push("New Item");</pre>
+<p>Use <code>setItems([...items, "New Item"])</code>.</p>
+</div>
+
+<div class="mistake">
+<h3>❌ Mistake 3 — Mutating objects</h3>
+<pre>user.name = "Alex";</pre>
+<p>Use the spread operator and setter.</p>
+</div>
+
+<div class="mistake">
+<h3>❌ Mistake 4 — Ignoring previous state</h3>
+<pre>setCount(count + 1);</pre>
+<p>
+This is fine for many simple situations, but when multiple updates depend
+on previous state, use:
+</p>
+<pre>setCount(prev =&gt; prev + 1);</pre>
+</div>
+
+<div class="mistake">
+<h3>❌ Mistake 5 — Calling hooks conditionally</h3>
+
+<pre>// ❌ Don't do this
+
+if (loggedIn) {
+    const [name, setName] = useState("");
+}</pre>
+
+<p>
+Hooks should be called at the top level of the component.
+</p>
+
+</div>
+
+<div class="mistake">
+<h3>❌ Mistake 6 — Expecting immediate state changes</h3>
+
+<pre>setCount(count + 1);
+
+console.log(count);</pre>
+
+<p>
+The logged value may still represent the current render's state.
+State updates are scheduled rather than behaving like ordinary variable assignments.
+</p>
+</div>
+
+</div>
+
+</section>
+
+<!-- COMPLETE EXAMPLE -->
+
+<section class="section">
+
+<h2>16. Complete Counter Example</h2>
+
+<p>
+Here is a small but complete React component using state.
+</p>
+
+<pre><span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">"react"</span>;
+
+<span class="keyword">function</span> <span class="func">Counter</span>() {
+
+    <span class="keyword">const</span> [count, setCount] = <span class="func">useState</span>(0);
+
+    <span class="keyword">function</span> <span class="func">increase</span>() {
+        setCount(prev =&gt; prev + 1);
+    }
+
+    <span class="keyword">return</span> (
+        &lt;div&gt;
+
+            &lt;h2&gt;Count: {count}&lt;/h2&gt;
+
+            &lt;button onClick={increase}&gt;
+                Increase
+            &lt;/button&gt;
+
+        &lt;/div&gt;
+    );
+}
+
+<span class="keyword">export default</span> Counter;</pre>
+
+<div class="highlight">
+<strong>What happens?</strong><br><br>
+1. Component starts with <code>count = 0</code>.<br>
+2. User clicks the button.<br>
+3. <code>setCount()</code> requests an update.<br>
+4. React renders the component again.<br>
+5. The UI displays the new count.
+</div>
+
+</section>
+
+<!-- MENTAL MODEL -->
+
+<section class="section">
+
+<h2>17. The React State Mental Model</h2>
+
+<div class="visual">
+
+<div class="visual-title">REMEMBER THIS PATTERN</div>
+
+<div class="flow-animation">
+
+<div class="flow-node active">
+👤 User
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+⚡ Event
+<br>
+<small style="color:#8993a8;">onClick / onChange</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+🔧 Setter
+<br>
+<small style="color:#8993a8;">setState()</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+🧠 State
+<br>
+<small style="color:#8993a8;">new value</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+✨ UI
+<br>
+<small style="color:#8993a8;">re-render</small>
+</div>
+
+</div>
+
+</div>
+
+<div class="success">
+<strong>Golden Rule:</strong><br>
+Event → State Update → Re-render → Updated UI
+</div>
+
+</section>
+
+<!-- QUIZ -->
+
+<section class="section" id="quiz">
+
+<h2>18. Quick Quiz</h2>
+
+<p>
+Test whether you actually understand React state.
+</p>
+
+<div class="quiz">
+
+<div class="quiz-question">
+1. What does <code>useState()</code> provide?
+</div>
+
+<button class="option" onclick="answer(this,false)">
+A. Only a variable
+</button>
+
+<button class="option" onclick="answer(this,true)">
+B. A state value and a setter function
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. Only a setter
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+<div class="quiz">
+
+<div class="quiz-question">
+2. Which is the correct way to update count?
+</div>
+
+<button class="option" onclick="answer(this,false)">
+A. count = count + 1
+</button>
+
+<button class="option" onclick="answer(this,true)">
+B. setCount(count + 1)
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. count.update(1)
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+<div class="quiz">
+
+<div class="quiz-question">
+3. Which approach is preferred when the next state depends on the previous state?
+</div>
+
+<button class="option" onclick="answer(this,false)">
+A. setCount(10)
+</button>
+
+<button class="option" onclick="answer(this,true)">
+B. setCount(prev =&gt; prev + 1)
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. count++
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+<div class="quiz">
+
+<div class="quiz-question">
+4. Which is the immutable way to add an item to an array?
+</div>
+
+<button class="option" onclick="answer(this,false)">
+A. items.push("React")
+</button>
+
+<button class="option" onclick="answer(this,true)">
+B. setItems([...items, "React"])
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. items.add("React")
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+</section>
+
+<!-- SUMMARY -->
+
+<section class="section">
+
+<h2>19. Lesson Summary</h2>
+
+<div class="card-grid">
+
+<div class="card">
+<h3>State</h3>
+<p>Component memory that can change over time.</p>
+</div>
+
+<div class="card">
+<h3>useState()</h3>
+<p>React Hook for managing state inside functional components.</p>
+</div>
+
+<div class="card">
+<h3>Setter</h3>
+<p>Use the setter to request a state update.</p>
+</div>
+
+<div class="card">
+<h3>Re-render</h3>
+<p>State updates cause React to render using the latest state.</p>
+</div>
+
+<div class="card">
+<h3>Functional Update</h3>
+<p>Use it when the next state depends on previous state.</p>
+</div>
+
+<div class="card">
+<h3>Immutability</h3>
+<p>Create new arrays/objects instead of mutating existing state.</p>
+</div>
+
+</div>
+
+<div class="highlight">
+
+<strong>ZENSUS Memory Trick</strong>
+
+<p style="margin-top:10px;">
+<strong>State = Memory</strong><br>
+<strong>Setter = Change Request</strong><br>
+<strong>Re-render = React Updates the UI</strong>
+</p>
+
+</div>
+
+</section>
+
+<div class="footer">
+    <strong>ZENSUS React Course</strong><br>
+    Learn • Build • Practice • Master
+</div>
+
+</main>
+</div>
+
+<script>
+
+let counter = 0;
+let renderCount = 1;
+
+function changeCounter(amount){
+
+    counter += amount;
+    renderCount++;
+
+    const value = document.getElementById("counterValue");
+    const message = document.getElementById("renderMessage");
+
+    value.textContent = counter;
+
+    value.classList.remove("render-pulse");
+
+    void value.offsetWidth;
+
+    value.classList.add("render-pulse");
+
+    message.textContent =
+        "Render #" + renderCount +
+        " • State changed to " + counter;
+}
+
+let skillNumber = 1;
+
+function addSkill(){
+
+    const container = document.getElementById("skillsVisual");
+
+    const item = document.createElement("div");
+
+    item.className = "array-item new";
+
+    item.textContent =
+        skillNumber === 1 ? "SQL" :
+        skillNumber === 2 ? "Django" :
+        skillNumber === 3 ? "Git" :
+        "AI";
+
+    skillNumber++;
+
+    container.appendChild(item);
+}
+
+function answer(button, correct){
+
+    const quiz = button.closest(".quiz");
+
+    const options = quiz.querySelectorAll(".option");
+
+    options.forEach(option => {
+        option.disabled = true;
+    });
+
+    const result = quiz.querySelector(".quiz-result");
+
+    if(correct){
+
+        button.classList.add("correct");
+
+        result.textContent = "✓ Correct! Excellent.";
+
+        result.style.color = "#16a34a";
+
+    }else{
+
+        button.classList.add("wrong");
+
+        result.textContent =
+            "✗ Not quite. Review the concept above.";
+
+        result.style.color = "#dc2626";
+
+        options.forEach(option => {
+
+            if(option.getAttribute("onclick")?.includes("true")){
+                option.classList.add("correct");
+            }
+
+        });
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
+

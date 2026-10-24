@@ -1,0 +1,5132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ZENSUS | SQL Lesson 6 — WHERE Clause</title>
+
+    <style>
+        /* =========================================================
+           ZENSUS SQL LESSON 6
+           WHERE CLAUSE — FILTERING DATA
+           Standalone CSS
+        ========================================================= */
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #7c3aed;
+            --success: #16a34a;
+            --warning: #d97706;
+            --danger: #dc2626;
+
+            --bg: #f6f8fc;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+
+            --text: #0f172a;
+            --muted: #64748b;
+            --border: #e2e8f0;
+
+            --code-bg: #0b1220;
+            --code-text: #e2e8f0;
+
+            --sidebar-width: 280px;
+            --header-height: 70px;
+
+            --radius: 18px;
+            --shadow: 0 8px 30px rgba(15, 23, 42, 0.07);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 90px;
+        }
+
+        body {
+            font-family:
+                Inter,
+                ui-sans-serif,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* =========================================================
+           TOP PROGRESS
+        ========================================================= */
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(
+                90deg,
+                var(--primary),
+                var(--secondary)
+            );
+            z-index: 9999;
+        }
+
+        /* =========================================================
+           HEADER
+        ========================================================= */
+
+        .top-header {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: var(--header-height);
+
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(14px);
+
+            border-bottom: 1px solid var(--border);
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 28px;
+
+            z-index: 900;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .mobile-menu {
+            display: none;
+            border: 1px solid var(--border);
+            background: white;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .breadcrumb {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .breadcrumb strong {
+            color: var(--text);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .lesson-pill {
+            background: #eff6ff;
+            color: var(--primary);
+            border: 1px solid #dbeafe;
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .complete-header {
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--text);
+            padding: 9px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .complete-header:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* =========================================================
+           SIDEBAR
+        ========================================================= */
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+
+            background: #ffffff;
+
+            border-right: 1px solid var(--border);
+
+            z-index: 1000;
+
+            overflow-y: auto;
+            padding: 22px 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 6px 10px 24px;
+        }
+
+        .brand-logo {
+            width: 40px;
+            height: 40px;
+
+            display: grid;
+            place-items: center;
+
+            border-radius: 12px;
+
+            background: linear-gradient(
+                135deg,
+                var(--primary),
+                var(--secondary)
+            );
+
+            color: white;
+            font-weight: 900;
+            font-size: 19px;
+        }
+
+        .brand-text h2 {
+            font-size: 18px;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-text span {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .side-title {
+            padding: 10px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: #94a3b8;
+            font-weight: 800;
+        }
+
+        .side-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .side-nav a {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+
+            padding: 10px 12px;
+
+            border-radius: 10px;
+
+            color: #475569;
+
+            font-size: 13px;
+            font-weight: 600;
+
+            transition: 0.2s ease;
+        }
+
+        .side-nav a:hover {
+            background: #f1f5f9;
+            color: var(--primary);
+        }
+
+        .side-nav a.active {
+            background: #eff6ff;
+            color: var(--primary);
+        }
+
+        .nav-number {
+            width: 24px;
+            height: 24px;
+
+            display: grid;
+            place-items: center;
+
+            border-radius: 7px;
+
+            background: #f1f5f9;
+
+            color: #64748b;
+
+            font-size: 11px;
+        }
+
+        .side-nav a.active .nav-number {
+            background: var(--primary);
+            color: white;
+        }
+
+        .sidebar-footer {
+            margin-top: 28px;
+            padding: 14px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .mini-progress {
+            height: 7px;
+            background: #e2e8f0;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .mini-progress span {
+            display: block;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(
+                90deg,
+                var(--primary),
+                var(--secondary)
+            );
+            transition: width 0.5s ease;
+        }
+
+        /* =========================================================
+           MAIN
+        ========================================================= */
+
+        main {
+            margin-left: var(--sidebar-width);
+            padding-top: var(--header-height);
+        }
+
+        .content {
+            max-width: 1180px;
+            margin: auto;
+            padding: 38px 34px 80px;
+        }
+
+        /* =========================================================
+           HERO
+        ========================================================= */
+
+        .hero {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 26px;
+            padding: 42px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background: #dbeafe;
+            right: -100px;
+            top: -100px;
+            opacity: 0.5;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 11px;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: var(--primary);
+            border: 1px solid #dbeafe;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 17px;
+        }
+
+        .hero h1 {
+            font-size: clamp(34px, 5vw, 58px);
+            line-height: 1.05;
+            letter-spacing: -2px;
+            max-width: 760px;
+            margin-bottom: 18px;
+        }
+
+        .hero h1 span {
+            color: var(--primary);
+        }
+
+        .hero-description {
+            max-width: 780px;
+            color: var(--muted);
+            font-size: 17px;
+        }
+
+        .hero-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .meta-item {
+            padding: 8px 12px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 12px;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .hero-query {
+            margin-top: 28px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* =========================================================
+           CODE
+        ========================================================= */
+
+        .code-box {
+            background: var(--code-bg);
+            color: var(--code-text);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid #1e293b;
+            margin: 18px 0;
+            box-shadow: 0 10px 30px rgba(2, 6, 23, 0.14);
+        }
+
+        .code-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 10px 14px;
+
+            background: #111827;
+            border-bottom: 1px solid #243044;
+        }
+
+        .code-title {
+            color: #cbd5e1;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .copy-btn {
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: #cbd5e1;
+            padding: 5px 9px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .copy-btn:hover {
+            background: #334155;
+        }
+
+        .code-box pre {
+            margin: 0;
+            padding: 20px;
+            overflow-x: auto;
+
+            color: var(--code-text);
+
+            font-family:
+                "Cascadia Code",
+                "Fira Code",
+                Consolas,
+                monospace;
+
+            font-size: 13px;
+            line-height: 1.75;
+        }
+
+        .sql-keyword {
+            color: #93c5fd;
+        }
+
+        .sql-string {
+            color: #86efac;
+        }
+
+        .sql-number {
+            color: #fcd34d;
+        }
+
+        .sql-comment {
+            color: #64748b;
+        }
+
+        /* =========================================================
+           SECTIONS
+        ========================================================= */
+
+        .section {
+            margin-top: 55px;
+        }
+
+        .section-heading {
+            margin-bottom: 20px;
+        }
+
+        .section-number {
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1.4px;
+            margin-bottom: 5px;
+        }
+
+        .section-heading h2 {
+            font-size: clamp(26px, 3vw, 35px);
+            letter-spacing: -0.8px;
+            line-height: 1.2;
+        }
+
+        .section-heading p {
+            margin-top: 7px;
+            color: var(--muted);
+            max-width: 800px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .three-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .info-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px;
+            box-shadow: var(--shadow);
+        }
+
+        .info-icon {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 11px;
+            background: #eff6ff;
+            color: var(--primary);
+            font-size: 20px;
+            margin-bottom: 14px;
+        }
+
+        .info-card h3 {
+            font-size: 17px;
+            margin-bottom: 7px;
+        }
+
+        .info-card p {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* =========================================================
+           OBJECTIVES
+        ========================================================= */
+
+        .objectives {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px 20px;
+        }
+
+        .objective {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 0;
+        }
+
+        .check {
+            min-width: 24px;
+            height: 24px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: #dcfce7;
+            color: var(--success);
+            font-weight: 900;
+            font-size: 12px;
+        }
+
+        /* =========================================================
+           TABLE
+        ========================================================= */
+
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 650px;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #475569;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            padding: 13px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 13px 15px;
+            border-bottom: 1px solid #eef2f7;
+            font-size: 13px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: #f8fbff;
+        }
+
+        .badge {
+            display: inline-flex;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        /* =========================================================
+           FLOWCHART
+        ========================================================= */
+
+        .flowchart {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 28px 10px;
+        }
+
+        .flow-node {
+            min-width: 145px;
+            text-align: center;
+            padding: 17px 14px;
+            border-radius: 14px;
+            background: white;
+            border: 2px solid #dbeafe;
+            box-shadow: 0 5px 18px rgba(37, 99, 235, 0.07);
+            position: relative;
+        }
+
+        .flow-node strong {
+            display: block;
+            color: var(--primary);
+            margin-bottom: 3px;
+        }
+
+        .flow-node small {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .flow-arrow {
+            color: #94a3b8;
+            font-size: 22px;
+            font-weight: 900;
+        }
+
+        /* =========================================================
+           QUERY ORDER
+        ========================================================= */
+
+        .query-order {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .order-item {
+            padding: 13px 8px;
+            border-radius: 10px;
+            text-align: center;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+        }
+
+        .order-item .num {
+            display: block;
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 900;
+            margin-bottom: 3px;
+        }
+
+        .order-item strong {
+            font-size: 11px;
+        }
+
+        /* =========================================================
+           OPERATOR TABLE
+        ========================================================= */
+
+        .operator {
+            font-family: Consolas, monospace;
+            background: #f1f5f9;
+            padding: 3px 7px;
+            border-radius: 6px;
+            color: var(--secondary);
+            font-weight: 700;
+        }
+
+        /* =========================================================
+           NOTE / WARNING
+        ========================================================= */
+
+        .note {
+            padding: 17px 18px;
+            border-radius: 13px;
+            margin: 17px 0;
+            border: 1px solid;
+            font-size: 14px;
+        }
+
+        .note strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .note-blue {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            color: #1e40af;
+        }
+
+        .note-yellow {
+            background: #fffbeb;
+            border-color: #fde68a;
+            color: #92400e;
+        }
+
+        .note-red {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #991b1b;
+        }
+
+        .note-green {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+            color: #166534;
+        }
+
+        /* =========================================================
+           COMPARISON VISUAL
+        ========================================================= */
+
+        .filter-visual {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 18px;
+            margin-top: 20px;
+        }
+
+        .visual-table {
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .visual-title {
+            padding: 11px 14px;
+            background: #f8fafc;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .visual-row {
+            display: grid;
+            grid-template-columns: 50px 1fr 1fr;
+            padding: 10px 13px;
+            border-top: 1px solid #eef2f7;
+            font-size: 12px;
+        }
+
+        .visual-row.highlight {
+            background: #eff6ff;
+        }
+
+        .filter-arrow {
+            font-size: 32px;
+            color: var(--primary);
+            animation: arrowPulse 1.5s infinite;
+        }
+
+        @keyframes arrowPulse {
+            0%, 100% {
+                transform: translateX(0);
+                opacity: 0.65;
+            }
+
+            50% {
+                transform: translateX(7px);
+                opacity: 1;
+            }
+        }
+
+        /* =========================================================
+           SIMULATOR
+        ========================================================= */
+
+        .simulator {
+            background: #0b1220;
+            color: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 45px rgba(2, 6, 23, 0.18);
+        }
+
+        .simulator h3 {
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .simulator > p {
+            color: #94a3b8;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .sim-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .sim-controls select,
+        .sim-controls input {
+            background: #111827;
+            border: 1px solid #334155;
+            color: #e2e8f0;
+            border-radius: 9px;
+            padding: 10px;
+            outline: none;
+        }
+
+        .sim-controls select:focus,
+        .sim-controls input:focus {
+            border-color: #60a5fa;
+        }
+
+        .sim-btn {
+            border: none;
+            background: var(--primary);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-weight: 800;
+        }
+
+        .sim-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .sim-output {
+            background: #020617;
+            border: 1px solid #1e293b;
+            border-radius: 13px;
+            overflow: auto;
+        }
+
+        .sim-output table {
+            min-width: 650px;
+            color: #e2e8f0;
+        }
+
+        .sim-output th {
+            background: #111827;
+            color: #94a3b8;
+            border-color: #1e293b;
+        }
+
+        .sim-output td {
+            border-color: #1e293b;
+        }
+
+        .result-count {
+            padding: 11px 13px;
+            color: #94a3b8;
+            font-size: 12px;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        /* =========================================================
+           QUIZ
+        ========================================================= */
+
+        .quiz {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .question {
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            background: #fff;
+        }
+
+        .question h4 {
+            margin-bottom: 13px;
+            font-size: 15px;
+        }
+
+        .option {
+            display: block;
+            padding: 9px 11px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            margin: 7px 0;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+
+        .option:hover {
+            border-color: #93c5fd;
+            background: #f8fbff;
+        }
+
+        .option input {
+            margin-right: 8px;
+        }
+
+        .quiz-result {
+            display: none;
+            margin-top: 18px;
+            padding: 18px;
+            border-radius: 13px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+            font-weight: 700;
+        }
+
+        /* =========================================================
+           INTERVIEW
+        ========================================================= */
+
+        .interview-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .interview-item {
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .interview-question {
+            width: 100%;
+            background: white;
+            border: none;
+            padding: 16px;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 750;
+            color: var(--text);
+        }
+
+        .interview-answer {
+            display: none;
+            padding: 0 16px 17px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .interview-item.open .interview-answer {
+            display: block;
+        }
+
+        .interview-item.open .plus {
+            transform: rotate(45deg);
+        }
+
+        .plus {
+            font-size: 20px;
+            color: var(--primary);
+            transition: 0.2s;
+        }
+
+        /* =========================================================
+           PRACTICE
+        ========================================================= */
+
+        .challenge {
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 15px;
+            padding: 18px;
+            margin-bottom: 12px;
+        }
+
+        .challenge-number {
+            display: inline-flex;
+            width: 28px;
+            height: 28px;
+            align-items: center;
+            justify-content: center;
+            background: #eff6ff;
+            color: var(--primary);
+            border-radius: 8px;
+            font-weight: 900;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        /* =========================================================
+           CHECKLIST
+        ========================================================= */
+
+        .checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .check-item {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 11px;
+            border-radius: 10px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .check-item input {
+            accent-color: var(--primary);
+        }
+
+        /* =========================================================
+           FOOTER
+        ========================================================= */
+
+        .lesson-footer {
+            margin-top: 60px;
+            padding: 25px;
+            background: #0f172a;
+            color: white;
+            border-radius: 20px;
+        }
+
+        .lesson-footer h3 {
+            margin-bottom: 7px;
+        }
+
+        .lesson-footer p {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .next-box {
+            margin-top: 18px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: #1e293b;
+            border-radius: 10px;
+            color: #bfdbfe;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        /* =========================================================
+           REVEAL
+           IMPORTANT: visible by default so content never disappears
+           if JavaScript is unavailable.
+        ========================================================= */
+
+        .reveal {
+            opacity: 1;
+            transform: none;
+        }
+
+        .js-reveal {
+            animation: revealUp 0.65s ease both;
+        }
+
+        @keyframes revealUp {
+            from {
+                opacity: 0.15;
+                transform: translateY(18px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* =========================================================
+           MOBILE
+        ========================================================= */
+
+        @media (max-width: 1050px) {
+            :root {
+                --sidebar-width: 235px;
+            }
+
+            .three-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .query-order {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 800px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.25s ease;
+                box-shadow: 20px 0 50px rgba(15, 23, 42, 0.12);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .top-header {
+                left: 0;
+            }
+
+            main {
+                margin-left: 0;
+            }
+
+            .mobile-menu {
+                display: grid;
+                place-items: center;
+            }
+
+            .breadcrumb {
+                display: none;
+            }
+
+            .content {
+                padding: 25px 17px 60px;
+            }
+
+            .hero {
+                padding: 28px 22px;
+                border-radius: 20px;
+            }
+
+            .card-grid,
+            .objectives,
+            .three-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-visual {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-arrow {
+                transform: rotate(90deg);
+                text-align: center;
+            }
+
+            .sim-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .top-header {
+                padding: 0 14px;
+            }
+
+            .header-right .lesson-pill {
+                display: none;
+            }
+
+            .hero h1 {
+                letter-spacing: -1px;
+            }
+
+            .section {
+                margin-top: 40px;
+            }
+
+            .card,
+            .info-card {
+                padding: 18px;
+            }
+
+            .query-order {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+
+            .flowchart {
+                flex-direction: column;
+            }
+
+            .flow-node {
+                width: min(100%, 250px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================================================
+         TOP PROGRESS
+    ========================================================= -->
+
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- =========================================================
+         SIDEBAR
+    ========================================================= -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="brand">
+            <div class="brand-logo">Z</div>
+
+            <div class="brand-text">
+                <h2>ZENSUS</h2>
+                <span>SQL Learning Path</span>
+            </div>
+        </div>
+
+        <div class="side-title">SQL Course</div>
+
+        <nav class="side-nav">
+
+            <a href="lesson1.html">
+                <span class="nav-number">01</span>
+                Introduction
+            </a>
+
+            <a href="lesson2.html">
+                <span class="nav-number">02</span>
+                Database Fundamentals
+            </a>
+
+            <a href="lesson3.html">
+                <span class="nav-number">03</span>
+                CREATE
+            </a>
+
+            <a href="lesson4.html">
+                <span class="nav-number">04</span>
+                INSERT
+            </a>
+
+            <a href="lesson5.html">
+                <span class="nav-number">05</span>
+                SELECT
+            </a>
+
+            <a href="#top" class="active">
+                <span class="nav-number">06</span>
+                WHERE
+            </a>
+
+            <a href="#operators">
+                <span class="nav-number">07</span>
+                Operators
+            </a>
+
+            <a href="#and-or">
+                <span class="nav-number">08</span>
+                AND / OR / NOT
+            </a>
+
+            <a href="#like">
+                <span class="nav-number">09</span>
+                LIKE
+            </a>
+
+            <a href="#null">
+                <span class="nav-number">10</span>
+                NULL
+            </a>
+
+            <a href="#practice">
+                <span class="nav-number">11</span>
+                Practice
+            </a>
+
+        </nav>
+
+        <div class="sidebar-footer">
+
+            <div class="progress-label">
+                <span>Lesson progress</span>
+                <strong id="progressText">0%</strong>
+            </div>
+
+            <div class="mini-progress">
+                <span id="miniProgress"></span>
+            </div>
+
+        </div>
+
+    </aside>
+
+    <!-- =========================================================
+         HEADER
+    ========================================================= -->
+
+    <header class="top-header">
+
+        <div class="header-left">
+
+            <button
+                class="mobile-menu"
+                id="mobileMenu"
+                aria-label="Open menu"
+            >
+                ☰
+            </button>
+
+            <div class="breadcrumb">
+                ZENSUS / SQL / <strong>Lesson 6 — WHERE</strong>
+            </div>
+
+        </div>
+
+        <div class="header-right">
+
+            <span class="lesson-pill">
+                SQL • Lesson 06
+            </span>
+
+            <button
+                class="complete-header"
+                onclick="markComplete()"
+            >
+                ✓ Mark Complete
+            </button>
+
+        </div>
+
+    </header>
+
+    <!-- =========================================================
+         MAIN
+    ========================================================= -->
+
+    <main id="top">
+
+        <div class="content">
+
+            <!-- =================================================
+                 HERO
+            ================================================= -->
+
+            <section class="hero reveal">
+
+                <div class="eyebrow">
+                    🎯 SQL FUNDAMENTALS → INTERVIEW LEVEL
+                </div>
+
+                <h1>
+                    SQL <span>WHERE</span>
+                    Clause
+                </h1>
+
+                <p class="hero-description">
+                    Learn how to filter exactly the rows you need from a
+                    database. Master comparison operators, AND, OR, NOT,
+                    BETWEEN, IN, LIKE, NULL handling, and real-world
+                    filtering techniques.
+                </p>
+
+                <div class="hero-meta">
+
+                    <span class="meta-item">
+                        📚 Beginner → Advanced
+                    </span>
+
+                    <span class="meta-item">
+                        ⏱ 45–60 minutes
+                    </span>
+
+                    <span class="meta-item">
+                        💼 Interview Ready
+                    </span>
+
+                    <span class="meta-item">
+                        🧪 Interactive Lab
+                    </span>
+
+                </div>
+
+                <div class="hero-query">
+
+                    <div class="code-box">
+
+                        <div class="code-head">
+
+                            <span class="code-title">
+                                THE CORE IDEA
+                            </span>
+
+                            <button class="copy-btn">
+                                Copy
+                            </button>
+
+                        </div>
+
+                        <pre><code>SELECT *
+FROM students
+WHERE marks >= 80;</code></pre>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 01 OBJECTIVES
+            ================================================= -->
+
+            <section class="section reveal" id="objectives">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        Lesson 06 • Objectives
+                    </div>
+
+                    <h2>What you will learn</h2>
+
+                    <p>
+                        By the end of this lesson, you should be able to
+                        filter database records confidently.
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    <div class="objectives">
+
+                        <div class="objective">
+                            <span class="check">✓</span>
+                            Understand why WHERE is used
+                        </div>
+
+                        <div class="objective">
+                            <span class="check">✓</span>
+                            Write basic WHERE conditions
+                        </div>
+
+                        <div class="objective">
+                            <span class="check">✓</span>
+                            Use comparison operators
+                        </div>
+
+                        <div class="objective">
+                            <span class="check">✓</span>
+                            Combine conditions using AND and OR
+                        </div>
+
+                        <div class="objective">
+                            <span class="check">✓</span>
+                            Use NOT, IN and BETWEEN
+                        </div>
+
+                        <div class="objective">
+                            <span class="check">✓</span>
+                            Search text using LIKE
+                        </div>
+
+                        <div class="objective">
+                            <span class="check">✓</span>
+                            Handle NULL correctly
+                        </div>
+
+                        <div class="objective">
+                            <span class="check">✓</span>
+                            Avoid dangerous UPDATE/DELETE mistakes
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 02 WHAT IS WHERE
+            ================================================= -->
+
+            <section class="section reveal" id="what">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        01 • Concept
+                    </div>
+
+                    <h2>What is the WHERE clause?</h2>
+
+                    <p>
+                        WHERE tells SQL which rows should qualify for a
+                        query.
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    <p>
+                        Imagine a college database containing 10,000
+                        students.
+                    </p>
+
+                    <p style="margin-top:10px;">
+                        If you ask:
+                    </p>
+
+                    <div class="code-box">
+
+                        <div class="code-head">
+                            <span class="code-title">SQL</span>
+                            <button class="copy-btn">Copy</button>
+                        </div>
+
+                        <pre><code>SELECT *
+FROM students
+WHERE marks >= 80;</code></pre>
+
+                    </div>
+
+                    <p>
+                        SQL does not return every student. It checks the
+                        condition
+                        <strong>marks >= 80</strong>
+                        and returns only matching rows.
+                    </p>
+
+                </div>
+
+                <div class="filter-visual">
+
+                    <div class="visual-table">
+
+                        <div class="visual-title">
+                            ALL STUDENTS
+                        </div>
+
+                        <div class="visual-row">
+                            <span>1</span>
+                            <span>Pradeep</span>
+                            <span>92</span>
+                        </div>
+
+                        <div class="visual-row">
+                            <span>2</span>
+                            <span>Rahul</span>
+                            <span>65</span>
+                        </div>
+
+                        <div class="visual-row">
+                            <span>3</span>
+                            <span>Anu</span>
+                            <span>88</span>
+                        </div>
+
+                        <div class="visual-row">
+                            <span>4</span>
+                            <span>Ravi</span>
+                            <span>72</span>
+                        </div>
+
+                    </div>
+
+                    <div class="filter-arrow">
+                        →
+                    </div>
+
+                    <div class="visual-table">
+
+                        <div class="visual-title">
+                            WHERE marks >= 80
+                        </div>
+
+                        <div class="visual-row highlight">
+                            <span>1</span>
+                            <span>Pradeep</span>
+                            <span>92</span>
+                        </div>
+
+                        <div class="visual-row highlight">
+                            <span>3</span>
+                            <span>Anu</span>
+                            <span>88</span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 03 SYNTAX
+            ================================================= -->
+
+            <section class="section reveal" id="syntax">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        02 • Syntax
+                    </div>
+
+                    <h2>Basic WHERE syntax</h2>
+
+                </div>
+
+                <div class="code-box">
+
+                    <div class="code-head">
+                        <span class="code-title">
+                            GENERAL SYNTAX
+                        </span>
+
+                        <button class="copy-btn">
+                            Copy
+                        </button>
+                    </div>
+
+                    <pre><code>SELECT column1, column2
+FROM table_name
+WHERE condition;</code></pre>
+
+                </div>
+
+                <div class="card-grid">
+
+                    <div class="info-card">
+
+                        <div class="info-icon">
+                            1
+                        </div>
+
+                        <h3>SELECT</h3>
+
+                        <p>
+                            Specifies which columns you want to display.
+                        </p>
+
+                    </div>
+
+                    <div class="info-card">
+
+                        <div class="info-icon">
+                            2
+                        </div>
+
+                        <h3>FROM</h3>
+
+                        <p>
+                            Specifies the table from which data is read.
+                        </p>
+
+                    </div>
+
+                    <div class="info-card">
+
+                        <div class="info-icon">
+                            3
+                        </div>
+
+                        <h3>WHERE</h3>
+
+                        <p>
+                            Defines the condition used to filter rows.
+                        </p>
+
+                    </div>
+
+                    <div class="info-card">
+
+                        <div class="info-icon">
+                            4
+                        </div>
+
+                        <h3>Condition</h3>
+
+                        <p>
+                            An expression that evaluates to TRUE, FALSE,
+                            or UNKNOWN.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 04 FLOWCHART
+            ================================================= -->
+
+            <section class="section reveal" id="flow">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        03 • Visual Learning
+                    </div>
+
+                    <h2>How WHERE works</h2>
+
+                    <p>
+                        Think of WHERE as a filter placed between the
+                        database table and your final result.
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    <div class="flowchart">
+
+                        <div class="flow-node">
+                            <strong>TABLE</strong>
+                            <small>All rows</small>
+                        </div>
+
+                        <div class="flow-arrow">→</div>
+
+                        <div class="flow-node">
+                            <strong>FROM</strong>
+                            <small>Choose source</small>
+                        </div>
+
+                        <div class="flow-arrow">→</div>
+
+                        <div class="flow-node">
+                            <strong>WHERE</strong>
+                            <small>Apply condition</small>
+                        </div>
+
+                        <div class="flow-arrow">→</div>
+
+                        <div class="flow-node">
+                            <strong>RESULT</strong>
+                            <small>Matching rows</small>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 05 SAMPLE TABLE
+            ================================================= -->
+
+            <section class="section reveal" id="dataset">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        04 • Practice Dataset
+                    </div>
+
+                    <h2>Our students table</h2>
+
+                    <p>
+                        We will use this dataset throughout the lesson.
+                    </p>
+
+                </div>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>id</th>
+                                <th>name</th>
+                                <th>department</th>
+                                <th>age</th>
+                                <th>marks</th>
+                                <th>city</th>
+                                <th>status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <tr>
+                                <td>1</td>
+                                <td>Pradeep</td>
+                                <td>CSE</td>
+                                <td>19</td>
+                                <td>92</td>
+                                <td>Guntur</td>
+                                <td><span class="badge">Active</span></td>
+                            </tr>
+
+                            <tr>
+                                <td>2</td>
+                                <td>Rahul</td>
+                                <td>ECE</td>
+                                <td>20</td>
+                                <td>76</td>
+                                <td>Vijayawada</td>
+                                <td><span class="badge">Active</span></td>
+                            </tr>
+
+                            <tr>
+                                <td>3</td>
+                                <td>Anu</td>
+                                <td>CSE</td>
+                                <td>19</td>
+                                <td>88</td>
+                                <td>Hyderabad</td>
+                                <td><span class="badge">Active</span></td>
+                            </tr>
+
+                            <tr>
+                                <td>4</td>
+                                <td>Ravi</td>
+                                <td>EEE</td>
+                                <td>21</td>
+                                <td>67</td>
+                                <td>Guntur</td>
+                                <td><span class="badge">Inactive</span></td>
+                            </tr>
+
+                            <tr>
+                                <td>5</td>
+                                <td>Sneha</td>
+                                <td>CSE</td>
+                                <td>20</td>
+                                <td>95</td>
+                                <td>Chennai</td>
+                                <td><span class="badge">Active</span></td>
+                            </tr>
+
+                            <tr>
+                                <td>6</td>
+                                <td>Kiran</td>
+                                <td>MECH</td>
+                                <td>22</td>
+                                <td>71</td>
+                                <td>Guntur</td>
+                                <td><span class="badge">Active</span></td>
+                            </tr>
+
+                            <tr>
+                                <td>7</td>
+                                <td>Divya</td>
+                                <td>ECE</td>
+                                <td>19</td>
+                                <td>84</td>
+                                <td>Hyderabad</td>
+                                <td><span class="badge">Active</span></td>
+                            </tr>
+
+                            <tr>
+                                <td>8</td>
+                                <td>Arjun</td>
+                                <td>CSE</td>
+                                <td>21</td>
+                                <td>79</td>
+                                <td>Vijayawada</td>
+                                <td><span class="badge">Inactive</span></td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 06 COMPARISON OPERATORS
+            ================================================= -->
+
+            <section class="section reveal" id="operators">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        05 • Core Operators
+                    </div>
+
+                    <h2>Comparison operators</h2>
+
+                    <p>
+                        Most WHERE conditions start with a comparison.
+                    </p>
+
+                </div>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>Operator</th>
+                                <th>Meaning</th>
+                                <th>Example</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <tr>
+                                <td><span class="operator">=</span></td>
+                                <td>Equal to</td>
+                                <td>marks = 90</td>
+                            </tr>
+
+                            <tr>
+                                <td><span class="operator">&lt;&gt;</span></td>
+                                <td>Not equal to</td>
+                                <td>department &lt;&gt; 'CSE'</td>
+                            </tr>
+
+                            <tr>
+                                <td><span class="operator">!=</span></td>
+                                <td>Not equal to</td>
+                                <td>age != 20</td>
+                            </tr>
+
+                            <tr>
+                                <td><span class="operator">&gt;</span></td>
+                                <td>Greater than</td>
+                                <td>marks &gt; 80</td>
+                            </tr>
+
+                            <tr>
+                                <td><span class="operator">&lt;</span></td>
+                                <td>Less than</td>
+                                <td>marks &lt; 80</td>
+                            </tr>
+
+                            <tr>
+                                <td><span class="operator">&gt;=</span></td>
+                                <td>Greater than or equal</td>
+                                <td>marks &gt;= 80</td>
+                            </tr>
+
+                            <tr>
+                                <td><span class="operator">&lt;=</span></td>
+                                <td>Less than or equal</td>
+                                <td>marks &lt;= 80</td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 07 BASIC EXAMPLES
+            ================================================= -->
+
+            <section class="section reveal" id="examples">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        06 • Examples
+                    </div>
+
+                    <h2>Basic WHERE examples</h2>
+
+                </div>
+
+                <div class="card-grid">
+
+                    <div class="card">
+
+                        <h3>Exact match</h3>
+
+                        <div class="code-box">
+
+                            <div class="code-head">
+                                <span class="code-title">SQL</span>
+                                <button class="copy-btn">Copy</button>
+                            </div>
+
+                            <pre><code>SELECT *
+FROM students
+WHERE department = 'CSE';</code></pre>
+
+                        </div>
+
+                        <p>
+                            Returns students whose department is CSE.
+                        </p>
+
+                    </div>
+
+                    <div class="card">
+
+                        <h3>Greater than</h3>
+
+                        <div class="code-box">
+
+                            <div class="code-head">
+                                <span class="code-title">SQL</span>
+                                <button class="copy-btn">Copy</button>
+                            </div>
+
+                            <pre><code>SELECT name, marks
+FROM students
+WHERE marks > 80;</code></pre>
+
+                        </div>
+
+                        <p>
+                            Returns students with marks above 80.
+                        </p>
+
+                    </div>
+
+                    <div class="card">
+
+                        <h3>Less than or equal</h3>
+
+                        <div class="code-box">
+
+                            <div class="code-head">
+                                <span class="code-title">SQL</span>
+                                <button class="copy-btn">Copy</button>
+                            </div>
+
+                            <pre><code>SELECT *
+FROM students
+WHERE age <= 20;</code></pre>
+
+                        </div>
+
+                    </div>
+
+                    <div class="card">
+
+                        <h3>Not equal</h3>
+
+                        <div class="code-box">
+
+                            <div class="code-head">
+                                <span class="code-title">SQL</span>
+                                <button class="copy-btn">Copy</button>
+                            </div>
+
+                            <pre><code>SELECT *
+FROM students
+WHERE department <> 'CSE';</code></pre>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 08 AND
+            ================================================= -->
+
+            <section class="section reveal" id="and-or">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        07 • Multiple Conditions
+                    </div>
+
+                    <h2>AND — all conditions must be true</h2>
+
+                </div>
+
+                <div class="card">
+
+                    <p>
+                        Use <strong>AND</strong> when every condition must
+                        be satisfied.
+                    </p>
+
+                    <div class="code-box">
+
+                        <div class="code-head">
+                            <span class="code-title">SQL</span>
+                            <button class="copy-btn">Copy</button>
+                        </div>
+
+                        <pre><code>SELECT *
+FROM students
+WHERE department = 'CSE'
+AND marks >= 80;</code></pre>
+
+                    </div>
+
+                    <div class="note note-blue">
+
+                        <strong>Think: AND = BOTH</strong>
+
+                        Department must be CSE
+                        <strong>AND</strong>
+                        marks must be at least 80.
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 09 OR
+            ================================================= -->
+
+            <section class="section reveal">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        08 • Multiple Conditions
+                    </div>
+
+                    <h2>OR — at least one condition must be true</h2>
+
+                </div>
+
+                <div class="card">
+
+                    <div class="code-box">
+
+                        <div class="code-head">
+                            <span class="code-title">SQL</span>
+                            <button class="copy-btn">Copy</button>
+                        </div>
+
+                        <pre><code>SELECT *
+FROM students
+WHERE department = 'CSE'
+OR department = 'ECE';</code></pre>
+
+                    </div>
+
+                    <div class="note note-green">
+
+                        <strong>Think: OR = EITHER</strong>
+
+                        A student can belong to CSE or ECE.
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 10 NOT
+            ================================================= -->
+
+            <section class="section reveal">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        09 • Logical Operator
+                    </div>
+
+                    <h2>NOT — reverse a condition</h2>
+
+                </div>
+
+                <div class="code-box">
+
+                    <div class="code-head">
+                        <span class="code-title">SQL</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+
+                    <pre><code>SELECT *
+FROM students
+WHERE NOT department = 'CSE';</code></pre>
+
+                </div>
+
+                <p>
+                    This selects rows where the condition
+                    <strong>department = 'CSE'</strong>
+                    is not true.
+                </p>
+
+                <div class="note note-yellow">
+
+                    <strong>Common alternative</strong>
+
+                    You will often see:
+
+                    <br><br>
+
+                    <code>WHERE department &lt;&gt; 'CSE'</code>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 11 PRECEDENCE
+            ================================================= -->
+
+            <section class="section reveal" id="precedence">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        10 • Important
+                    </div>
+
+                    <h2>AND vs OR precedence</h2>
+
+                    <p>
+                        This is a common interview and exam topic.
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    <p>
+                        In a condition containing both AND and OR,
+                        <strong>AND is generally evaluated before OR</strong>.
+                    </p>
+
+                    <div class="code-box">
+
+                        <div class="code-head">
+                            <span class="code-title">POTENTIALLY CONFUSING</span>
+                            <button class="copy-btn">Copy</button>
+                        </div>
+
+                        <pre><code>SELECT *
+FROM students
+WHERE department = 'CSE'
+OR department = 'ECE'
+AND marks >= 80;</code></pre>
+
+                    </div>
+
+                    <p>
+                        Conceptually, this is interpreted as:
+                    </p>
+
+                    <div class="code-box">
+
+                        <pre><code>WHERE department = 'CSE'
+OR (department = 'ECE' AND marks >= 80);</code></pre>
+
+                    </div>
+
+                    <div class="note note-green">
+
+                        <strong>Best practice</strong>
+
+                        Use parentheses whenever the logic matters.
+
+                    </div>
+
+                    <div class="code-box">
+
+                        <pre><code>SELECT *
+FROM students
+WHERE
+    (department = 'CSE' OR department = 'ECE')
+    AND marks >= 80;</code></pre>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 12 BETWEEN
+            ================================================= -->
+
+            <section class="section reveal">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        11 • Range Filtering
+                    </div>
+
+                    <h2>BETWEEN</h2>
+
+                    <p>
+                        BETWEEN checks whether a value lies within an
+                        inclusive range.
+                    </p>
+
+                </div>
+
+                <div class="code-box">
+
+                    <div class="code-head">
+                        <span class="code-title">SQL</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+
+                    <pre><code>SELECT *
+FROM students
+WHERE marks BETWEEN 70 AND 90;</code></pre>
+
+                </div>
+
+                <div class="note note-blue">
+
+                    <strong>Important</strong>
+
+                    BETWEEN is normally inclusive.
+
+                    <br>
+
+                    70 and 90 are both included.
+
+                </div>
+
+                <div class="code-box">
+
+                    <pre><code>-- Equivalent idea
+
+WHERE marks >= 70
+AND marks <= 90;</code></pre>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 13 IN
+            ================================================= -->
+
+            <section class="section reveal">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        12 • Multiple Values
+                    </div>
+
+                    <h2>IN and NOT IN</h2>
+
+                </div>
+
+                <p>
+                    IN is useful when a column can match one of several
+                    specified values.
+                </p>
+
+                <div class="code-box">
+
+                    <pre><code>SELECT *
+FROM students
+WHERE department IN ('CSE', 'ECE', 'EEE');</code></pre>
+
+                </div>
+
+                <p>
+                    Instead of writing:
+                </p>
+
+                <div class="code-box">
+
+                    <pre><code>WHERE department = 'CSE'
+OR department = 'ECE'
+OR department = 'EEE';</code></pre>
+
+                </div>
+
+                <h3 style="margin-top:25px;">
+                    NOT IN
+                </h3>
+
+                <div class="code-box">
+
+                    <pre><code>SELECT *
+FROM students
+WHERE department NOT IN ('CSE', 'ECE');</code></pre>
+
+                </div>
+
+                <div class="note note-yellow">
+
+                    <strong>NULL warning</strong>
+
+                    NOT IN can behave unexpectedly when NULL values are
+                    involved. For nullable columns, understand SQL's
+                    three-valued logic before relying on NOT IN.
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 14 LIKE
+            ================================================= -->
+
+            <section class="section reveal" id="like">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        13 • Pattern Matching
+                    </div>
+
+                    <h2>LIKE — search text patterns</h2>
+
+                    <p>
+                        LIKE is used when you do not know the complete
+                        text value.
+                    </p>
+
+                </div>
+
+                <div class="card-grid">
+
+                    <div class="info-card">
+
+                        <div class="info-icon">
+                            %
+                        </div>
+
+                        <h3>% wildcard</h3>
+
+                        <p>
+                            Represents zero or more characters.
+                        </p>
+
+                        <div class="code-box">
+
+                            <pre><code>WHERE name LIKE 'P%'</code></pre>
+
+                        </div>
+
+                        <p>
+                            Names beginning with P.
+                        </p>
+
+                    </div>
+
+                    <div class="info-card">
+
+                        <div class="info-icon">
+                            _
+                        </div>
+
+                        <h3>_ wildcard</h3>
+
+                        <p>
+                            Represents exactly one character.
+                        </p>
+
+                        <div class="code-box">
+
+                            <pre><code>WHERE name LIKE 'A_nu'</code></pre>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="card" style="margin-top:18px;">
+
+                    <h3>Useful LIKE patterns</h3>
+
+                    <div class="table-wrap" style="margin-top:15px;">
+
+                        <table>
+
+                            <thead>
+                                <tr>
+                                    <th>Pattern</th>
+                                    <th>Meaning</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                <tr>
+                                    <td><code>'P%'</code></td>
+                                    <td>Starts with P</td>
+                                </tr>
+
+                                <tr>
+                                    <td><code>'%a'</code></td>
+                                    <td>Ends with a</td>
+                                </tr>
+
+                                <tr>
+                                    <td><code>'%ra%'</code></td>
+                                    <td>Contains "ra"</td>
+                                </tr>
+
+                                <tr>
+                                    <td><code>'_a%'</code></td>
+                                    <td>Second character is a</td>
+                                </tr>
+
+                                <tr>
+                                    <td><code>'____'</code></td>
+                                    <td>Exactly four characters</td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 15 NULL
+            ================================================= -->
+
+            <section class="section reveal" id="null">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        14 • Critical SQL Concept
+                    </div>
+
+                    <h2>NULL — the special case</h2>
+
+                    <p>
+                        NULL does not mean zero, empty string, or the word
+                        "NULL".
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    <div class="three-grid">
+
+                        <div class="info-card">
+
+                            <h3>NULL</h3>
+
+                            <p>
+                                Represents missing or unknown information.
+                            </p>
+
+                        </div>
+
+                        <div class="info-card">
+
+                            <h3>0</h3>
+
+                            <p>
+                                A numeric value.
+                            </p>
+
+                        </div>
+
+                        <div class="info-card">
+
+                            <h3>''</h3>
+
+                            <p>
+                                An empty string in databases that support
+                                it as such.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="note note-red" style="margin-top:20px;">
+
+                        <strong>Never use = NULL</strong>
+
+                        This is not the correct way to test for NULL:
+
+                        <br><br>
+
+                        <code>WHERE city = NULL</code>
+
+                    </div>
+
+                    <p>
+                        Instead use:
+                    </p>
+
+                    <div class="code-box">
+
+                        <pre><code>SELECT *
+FROM students
+WHERE city IS NULL;</code></pre>
+
+                    </div>
+
+                    <p>
+                        Or:
+                    </p>
+
+                    <div class="code-box">
+
+                        <pre><code>SELECT *
+FROM students
+WHERE city IS NOT NULL;</code></pre>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 16 THREE VALUED LOGIC
+            ================================================= -->
+
+            <section class="section reveal">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        15 • Advanced Understanding
+                    </div>
+
+                    <h2>SQL's three-valued logic</h2>
+
+                </div>
+
+                <div class="card">
+
+                    <p>
+                        A normal programming language often thinks in terms
+                        of TRUE and FALSE.
+                    </p>
+
+                    <p style="margin-top:10px;">
+                        SQL can produce:
+                    </p>
+
+                    <div class="three-grid" style="margin-top:15px;">
+
+                        <div class="info-card">
+
+                            <div class="info-icon">✓</div>
+
+                            <h3>TRUE</h3>
+
+                            <p>
+                                The row satisfies the condition.
+                            </p>
+
+                        </div>
+
+                        <div class="info-card">
+
+                            <div class="info-icon">✕</div>
+
+                            <h3>FALSE</h3>
+
+                            <p>
+                                The row does not satisfy the condition.
+                            </p>
+
+                        </div>
+
+                        <div class="info-card">
+
+                            <div class="info-icon">?</div>
+
+                            <h3>UNKNOWN</h3>
+
+                            <p>
+                                Often occurs when NULL participates in a
+                                comparison.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="note note-blue">
+
+                        <strong>WHERE keeps TRUE rows</strong>
+
+                        Rows for which the WHERE condition evaluates to
+                        FALSE or UNKNOWN are not returned.
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 17 QUERY ORDER
+            ================================================= -->
+
+            <section class="section reveal">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        16 • Query Execution
+                    </div>
+
+                    <h2>Where does WHERE fit?</h2>
+
+                    <p>
+                        SQL is written in one order, but conceptually
+                        processed in a different logical order.
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    <div class="code-box">
+
+                        <pre><code>SELECT department, AVG(marks)
+FROM students
+WHERE marks >= 60
+GROUP BY department
+HAVING AVG(marks) >= 75
+ORDER BY AVG(marks) DESC;</code></pre>
+
+                    </div>
+
+                    <div class="query-order">
+
+                        <div class="order-item">
+                            <span class="num">1</span>
+                            <strong>FROM</strong>
+                        </div>
+
+                        <div class="order-item">
+                            <span class="num">2</span>
+                            <strong>WHERE</strong>
+                        </div>
+
+                        <div class="order-item">
+                            <span class="num">3</span>
+                            <strong>GROUP BY</strong>
+                        </div>
+
+                        <div class="order-item">
+                            <span class="num">4</span>
+                            <strong>HAVING</strong>
+                        </div>
+
+                        <div class="order-item">
+                            <span class="num">5</span>
+                            <strong>SELECT</strong>
+                        </div>
+
+                        <div class="order-item">
+                            <span class="num">6</span>
+                            <strong>DISTINCT</strong>
+                        </div>
+
+                        <div class="order-item">
+                            <span class="num">7</span>
+                            <strong>ORDER BY</strong>
+                        </div>
+
+                        <div class="order-item">
+                            <span class="num">8</span>
+                            <strong>LIMIT</strong>
+                        </div>
+
+                    </div>
+
+                    <div class="note note-green">
+
+                        <strong>Interview point</strong>
+
+                        WHERE filters rows before grouping.
+                        HAVING filters groups after GROUP BY.
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 18 WHERE WITH SELECT
+            ================================================= -->
+
+            <section class="section reveal">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        17 • Combining Clauses
+                    </div>
+
+                    <h2>WHERE with SELECT</h2>
+
+                </div>
+
+                <div class="code-box">
+
+                    <pre><code>SELECT name, department, marks
+FROM students
+WHERE marks >= 80;</code></pre>
+
+                </div>
+
+                <p>
+                    SELECT determines the columns displayed.
+                    WHERE determines which rows qualify.
+                </p>
+
+            </section>
+
+
+            <!-- =================================================
+                 19 WHERE + ORDER BY
+            ================================================= -->
+
+            <section class="section reveal">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        18 • Combining Clauses
+                    </div>
+
+                    <h2>WHERE with ORDER BY</h2>
+
+                </div>
+
+                <div class="code-box">
+
+                    <pre><code>SELECT name, marks
+FROM students
+WHERE marks >= 70
+ORDER BY marks DESC;</code></pre>
+
+                </div>
+
+                <p>
+                    First filter the qualifying rows, then sort the result.
+                </p>
+
+            </section>
+
+
+            <!-- =================================================
+                 20 WHERE + LIMIT
+            ================================================= -->
+
+            <section class="section reveal">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        19 • Result Limiting
+                    </div>
+
+                    <h2>WHERE with LIMIT</h2>
+
+                </div>
+
+                <div class="code-box">
+
+                    <pre><code>SELECT *
+FROM students
+WHERE marks >= 80
+ORDER BY marks DESC
+LIMIT 3;</code></pre>
+
+                </div>
+
+                <div class="note note-yellow">
+
+                    <strong>Dialect note</strong>
+
+                    LIMIT is common in MySQL, PostgreSQL and SQLite.
+                    SQL Server commonly uses TOP or OFFSET/FETCH, while
+                    standard SQL supports FETCH FIRST.
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 21 UPDATE WARNING
+            ================================================= -->
+
+            <section class="section reveal">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        20 • Safety
+                    </div>
+
+                    <h2>WHERE with UPDATE</h2>
+
+                    <p>
+                        This is extremely important in real-world SQL.
+                    </p>
+
+                </div>
+
+                <div class="code-box">
+
+                    <pre><code>UPDATE students
+SET marks = 95
+WHERE id = 3;</code></pre>
+
+                </div>
+
+                <div class="note note-red">
+
+                    <strong>⚠️ Dangerous mistake</strong>
+
+                    Never casually run:
+
+                    <br><br>
+
+                    <code>UPDATE students SET marks = 95;</code>
+
+                    <br><br>
+
+                    Without a WHERE condition, you may update every row
+                    in the table.
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 22 DELETE WARNING
+            ================================================= -->
+
+            <section class="section reveal">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        21 • Safety
+                    </div>
+
+                    <h2>WHERE with DELETE</h2>
+
+                </div>
+
+                <div class="code-box">
+
+                    <pre><code>DELETE FROM students
+WHERE id = 8;</code></pre>
+
+                </div>
+
+                <div class="note note-red">
+
+                    <strong>Critical rule</strong>
+
+                    Always verify your WHERE condition before DELETE.
+
+                    <br><br>
+
+                    <code>DELETE FROM students;</code>
+
+                    <br><br>
+
+                    can remove all rows from the table.
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 23 DATES
+            ================================================= -->
+
+            <section class="section reveal">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        22 • Real-World Data
+                    </div>
+
+                    <h2>Filtering dates</h2>
+
+                </div>
+
+                <p>
+                    Date syntax varies somewhat between database systems,
+                    so follow the conventions of your DBMS.
+                </p>
+
+                <div class="code-box">
+
+                    <pre><code>SELECT *
+FROM orders
+WHERE order_date >= '2026-01-01';</code></pre>
+
+                </div>
+
+                <div class="code-box">
+
+                    <pre><code>SELECT *
+FROM orders
+WHERE order_date BETWEEN '2026-01-01'
+                     AND '2026-01-31';</code></pre>
+
+                </div>
+
+                <div class="note note-yellow">
+
+                    <strong>Important date/time point</strong>
+
+                    If a column stores timestamps, filtering through an
+                    inclusive end date can be tricky. For a full day,
+                    a half-open range such as
+
+                    <br><br>
+
+                    <code>
+                    order_date >= '2026-01-01'
+                    AND order_date &lt; '2026-02-01'
+                    </code>
+
+                    <br><br>
+
+                    is often safer than assuming the end date represents
+                    the entire day.
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 24 EXPRESSIONS
+            ================================================= -->
+
+            <section class="section reveal">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        23 • Expressions
+                    </div>
+
+                    <h2>WHERE can use expressions</h2>
+
+                </div>
+
+                <div class="code-box">
+
+                    <pre><code>SELECT *
+FROM students
+WHERE marks + 5 >= 90;</code></pre>
+
+                </div>
+
+                <p>
+                    SQL can evaluate an expression before determining
+                    whether a row qualifies.
+                </p>
+
+            </section>
+
+
+            <!-- =================================================
+                 25 REAL WORLD EXAMPLES
+            ================================================= -->
+
+            <section class="section reveal">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        24 • Real World
+                    </div>
+
+                    <h2>WHERE in real applications</h2>
+
+                </div>
+
+                <div class="three-grid">
+
+                    <div class="info-card">
+
+                        <div class="info-icon">🎓</div>
+
+                        <h3>Students</h3>
+
+                        <div class="code-box">
+
+                            <pre><code>WHERE marks >= 80</code></pre>
+
+                        </div>
+
+                    </div>
+
+                    <div class="info-card">
+
+                        <div class="info-icon">🛒</div>
+
+                        <h3>Products</h3>
+
+                        <div class="code-box">
+
+                            <pre><code>WHERE price < 1000</code></pre>
+
+                        </div>
+
+                    </div>
+
+                    <div class="info-card">
+
+                        <div class="info-icon">👨‍💼</div>
+
+                        <h3>Employees</h3>
+
+                        <div class="code-box">
+
+                            <pre><code>WHERE salary >= 50000</code></pre>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 26 INTERACTIVE SIMULATOR
+            ================================================= -->
+
+            <section class="section reveal" id="simulator">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        25 • Interactive Lab
+                    </div>
+
+                    <h2>WHERE filtering simulator</h2>
+
+                    <p>
+                        Experiment with conditions against the sample
+                        students table. This is a browser simulation,
+                        not a real SQL database.
+                    </p>
+
+                </div>
+
+                <div class="simulator">
+
+                    <h3>SQL Filter Lab</h3>
+
+                    <p>
+                        Choose a column, operator and value, then apply
+                        the WHERE condition.
+                    </p>
+
+                    <div class="sim-controls">
+
+                        <select id="filterColumn">
+
+                            <option value="marks">
+                                marks
+                            </option>
+
+                            <option value="age">
+                                age
+                            </option>
+
+                            <option value="department">
+                                department
+                            </option>
+
+                            <option value="city">
+                                city
+                            </option>
+
+                            <option value="status">
+                                status
+                            </option>
+
+                        </select>
+
+                        <select id="filterOperator">
+
+                            <option value="=">=</option>
+                            <option value="!=">!=</option>
+                            <option value=">">&gt;</option>
+                            <option value="<">&lt;</option>
+                            <option value=">=">&gt;=</option>
+                            <option value="<=">&lt;=</option>
+
+                        </select>
+
+                        <input
+                            id="filterValue"
+                            type="text"
+                            placeholder="Example: 80"
+                            value="80"
+                        >
+
+                        <button
+                            class="sim-btn"
+                            onclick="runFilter()"
+                        >
+                            Apply WHERE
+                        </button>
+
+                    </div>
+
+                    <div
+                        id="generatedQuery"
+                        style="
+                            background:#111827;
+                            border:1px solid #334155;
+                            border-radius:10px;
+                            padding:12px;
+                            margin-bottom:14px;
+                            color:#bfdbfe;
+                            font-family:Consolas,monospace;
+                            font-size:12px;
+                        "
+                    >
+                        SELECT * FROM students WHERE marks &gt;= 80;
+                    </div>
+
+                    <div class="sim-output">
+
+                        <div
+                            class="result-count"
+                            id="resultCount"
+                        >
+                            Result: 0 rows
+                        </div>
+
+                        <div id="simTable"></div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 27 COMMON MISTAKES
+            ================================================= -->
+
+            <section class="section reveal">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        26 • Avoid These
+                    </div>
+
+                    <h2>Common WHERE mistakes</h2>
+
+                </div>
+
+                <div class="card-grid">
+
+                    <div class="info-card">
+
+                        <h3>❌ Using = NULL</h3>
+
+                        <div class="code-box">
+
+                            <pre><code>WHERE city = NULL;</code></pre>
+
+                        </div>
+
+                        <p>
+                            Use IS NULL instead.
+                        </p>
+
+                    </div>
+
+                    <div class="info-card">
+
+                        <h3>❌ Forgetting quotes</h3>
+
+                        <div class="code-box">
+
+                            <pre><code>WHERE department = CSE;</code></pre>
+
+                        </div>
+
+                        <p>
+                            Text values normally require string quotes.
+                        </p>
+
+                    </div>
+
+                    <div class="info-card">
+
+                        <h3>❌ Wrong AND/OR logic</h3>
+
+                        <div class="code-box">
+
+                            <pre><code>WHERE A OR B AND C;</code></pre>
+
+                        </div>
+
+                        <p>
+                            Use parentheses when the intended logic is
+                            important.
+                        </p>
+
+                    </div>
+
+                    <div class="info-card">
+
+                        <h3>❌ Missing WHERE in UPDATE</h3>
+
+                        <div class="code-box">
+
+                            <pre><code>UPDATE students
+SET marks = 100;</code></pre>
+
+                        </div>
+
+                        <p>
+                            This can affect every row.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 28 EXAM ANSWER
+            ================================================= -->
+
+            <section class="section reveal">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        27 • Exam Preparation
+                    </div>
+
+                    <h2>5-mark answer: WHERE clause</h2>
+
+                </div>
+
+                <div class="card">
+
+                    <p>
+                        The <strong>WHERE clause</strong> is used in SQL to
+                        filter rows based on a specified condition. Only
+                        rows for which the condition evaluates to TRUE are
+                        returned by a SELECT query.
+                    </p>
+
+                    <div class="code-box">
+
+                        <pre><code>SELECT *
+FROM students
+WHERE marks >= 80;</code></pre>
+
+                    </div>
+
+                    <p>
+                        WHERE can use comparison operators such as
+                        <strong>=, &gt;, &lt;, &gt;=, &lt;=, &lt;&gt;</strong>,
+                        as well as logical operators such as
+                        <strong>AND, OR, and NOT</strong>.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 29 10 MARK ANSWER
+            ================================================= -->
+
+            <section class="section reveal">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        28 • Exam Preparation
+                    </div>
+
+                    <h2>10-mark answer structure</h2>
+
+                </div>
+
+                <div class="card">
+
+                    <ol style="padding-left:22px;">
+
+                        <li>Define WHERE clause.</li>
+
+                        <li>Explain its purpose.</li>
+
+                        <li>Give syntax.</li>
+
+                        <li>Explain comparison operators.</li>
+
+                        <li>Explain AND, OR and NOT.</li>
+
+                        <li>Explain BETWEEN and IN.</li>
+
+                        <li>Explain LIKE and wildcards.</li>
+
+                        <li>Explain IS NULL and IS NOT NULL.</li>
+
+                        <li>Give practical examples.</li>
+
+                        <li>Conclude with its importance in filtering.</li>
+
+                    </ol>
+
+                    <div class="code-box">
+
+                        <pre><code>SELECT name, marks
+FROM students
+WHERE department = 'CSE'
+AND marks BETWEEN 80 AND 100
+ORDER BY marks DESC;</code></pre>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 30 INTERVIEW
+            ================================================= -->
+
+            <section class="section reveal" id="interview">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        29 • Interview Preparation
+                    </div>
+
+                    <h2>SQL WHERE interview questions</h2>
+
+                </div>
+
+                <div class="interview-list">
+
+                    <div class="interview-item">
+
+                        <button
+                            class="interview-question"
+                            onclick="toggleInterview(this)"
+                        >
+                            What is the purpose of WHERE?
+                            <span class="plus">+</span>
+                        </button>
+
+                        <div class="interview-answer">
+                            WHERE filters rows according to a condition.
+                            It is commonly used with SELECT, UPDATE and
+                            DELETE.
+                        </div>
+
+                    </div>
+
+                    <div class="interview-item">
+
+                        <button
+                            class="interview-question"
+                            onclick="toggleInterview(this)"
+                        >
+                            What is the difference between WHERE and HAVING?
+                            <span class="plus">+</span>
+                        </button>
+
+                        <div class="interview-answer">
+                            WHERE filters individual rows before grouping.
+                            HAVING filters groups after GROUP BY.
+                        </div>
+
+                    </div>
+
+                    <div class="interview-item">
+
+                        <button
+                            class="interview-question"
+                            onclick="toggleInterview(this)"
+                        >
+                            Can WHERE be used with UPDATE?
+                            <span class="plus">+</span>
+                        </button>
+
+                        <div class="interview-answer">
+                            Yes. WHERE determines which rows are updated.
+                            Omitting it may update every row.
+                        </div>
+
+                    </div>
+
+                    <div class="interview-item">
+
+                        <button
+                            class="interview-question"
+                            onclick="toggleInterview(this)"
+                        >
+                            Why do we use IS NULL instead of = NULL?
+                            <span class="plus">+</span>
+                        </button>
+
+                        <div class="interview-answer">
+                            NULL represents missing or unknown information.
+                            Comparisons using = with NULL do not produce
+                            TRUE, so IS NULL is used for NULL testing.
+                        </div>
+
+                    </div>
+
+                    <div class="interview-item">
+
+                        <button
+                            class="interview-question"
+                            onclick="toggleInterview(this)"
+                        >
+                            Is BETWEEN inclusive?
+                            <span class="plus">+</span>
+                        </button>
+
+                        <div class="interview-answer">
+                            Yes. BETWEEN normally includes both boundary
+                            values.
+                        </div>
+
+                    </div>
+
+                    <div class="interview-item">
+
+                        <button
+                            class="interview-question"
+                            onclick="toggleInterview(this)"
+                        >
+                            What is the difference between AND and OR?
+                            <span class="plus">+</span>
+                        </button>
+
+                        <div class="interview-answer">
+                            AND requires all combined conditions to be true,
+                            while OR requires at least one condition to be
+                            true.
+                        </div>
+
+                    </div>
+
+                    <div class="interview-item">
+
+                        <button
+                            class="interview-question"
+                            onclick="toggleInterview(this)"
+                        >
+                            What does % mean in LIKE?
+                            <span class="plus">+</span>
+                        </button>
+
+                        <div class="interview-answer">
+                            % represents zero or more characters.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 31 QUIZ
+            ================================================= -->
+
+            <section class="section reveal" id="quiz">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        30 • Knowledge Check
+                    </div>
+
+                    <h2>WHERE clause quiz</h2>
+
+                </div>
+
+                <div class="card">
+
+                    <form id="quizForm" class="quiz">
+
+                        <div class="question">
+
+                            <h4>
+                                1. Which clause is used to filter rows?
+                            </h4>
+
+                            <label class="option">
+                                <input
+                                    type="radio"
+                                    name="q1"
+                                    value="a"
+                                >
+                                SELECT
+                            </label>
+
+                            <label class="option">
+                                <input
+                                    type="radio"
+                                    name="q1"
+                                    value="b"
+                                >
+                                WHERE
+                            </label>
+
+                            <label class="option">
+                                <input
+                                    type="radio"
+                                    name="q1"
+                                    value="c"
+                                >
+                                ORDER BY
+                            </label>
+
+                            <label class="option">
+                                <input
+                                    type="radio"
+                                    name="q1"
+                                    value="d"
+                                >
+                                GROUP BY
+                            </label>
+
+                        </div>
+
+
+                        <div class="question">
+
+                            <h4>
+                                2. Which operator checks for NULL?
+                            </h4>
+
+                            <label class="option">
+                                <input
+                                    type="radio"
+                                    name="q2"
+                                    value="a"
+                                >
+                                = NULL
+                            </label>
+
+                            <label class="option">
+                                <input
+                                    type="radio"
+                                    name="q2"
+                                    value="b"
+                                >
+                                IS NULL
+                            </label>
+
+                            <label class="option">
+                                <input
+                                    type="radio"
+                                    name="q2"
+                                    value="c"
+                                >
+                                == NULL
+                            </label>
+
+                            <label class="option">
+                                <input
+                                    type="radio"
+                                    name="q2"
+                                    value="d"
+                                >
+                                NULL =
+                            </label>
+
+                        </div>
+
+
+                        <div class="question">
+
+                            <h4>
+                                3. Which wildcard represents zero or more
+                                characters?
+                            </h4>
+
+                            <label class="option">
+                                <input
+                                    type="radio"
+                                    name="q3"
+                                    value="a"
+                                >
+                                _
+                            </label>
+
+                            <label class="option">
+                                <input
+                                    type="radio"
+                                    name="q3"
+                                    value="b"
+                                >
+                                %
+                            </label>
+
+                            <label class="option">
+                                <input
+                                    type="radio"
+                                    name="q3"
+                                    value="c"
+                                >
+                                *
+                            </label>
+
+                            <label class="option">
+                                <input
+                                    type="radio"
+                                    name="q3"
+                                    value="d"
+                                >
+                                #
+                            </label>
+
+                        </div>
+
+
+                        <div class="question">
+
+                            <h4>
+                                4. Which operator checks an inclusive range?
+                            </h4>
+
+                            <label class="option">
+                                <input
+                                    type="radio"
+                                    name="q4"
+                                    value="a"
+                                >
+                                IN
+                            </label>
+
+                            <label class="option">
+                                <input
+                                    type="radio"
+                                    name="q4"
+                                    value="b"
+                                >
+                                LIKE
+                            </label>
+
+                            <label class="option">
+                                <input
+                                    type="radio"
+                                    name="q4"
+                                    value="c"
+                                >
+                                BETWEEN
+                            </label>
+
+                            <label class="option">
+                                <input
+                                    type="radio"
+                                    name="q4"
+                                    value="d"
+                                >
+                                RANGE
+                            </label>
+
+                        </div>
+
+
+                        <div class="question">
+
+                            <h4>
+                                5. What can happen if UPDATE is executed
+                                without WHERE?
+                            </h4>
+
+                            <label class="option">
+                                <input
+                                    type="radio"
+                                    name="q5"
+                                    value="a"
+                                >
+                                Nothing
+                            </label>
+
+                            <label class="option">
+                                <input
+                                    type="radio"
+                                    name="q5"
+                                    value="b"
+                                >
+                                Only first row changes
+                            </label>
+
+                            <label class="option">
+                                <input
+                                    type="radio"
+                                    name="q5"
+                                    value="c"
+                                >
+                                Every row may be updated
+                            </label>
+
+                            <label class="option">
+                                <input
+                                    type="radio"
+                                    name="q5"
+                                    value="d"
+                                >
+                                Database is automatically deleted
+                            </label>
+
+                        </div>
+
+                        <button
+                            type="button"
+                            class="sim-btn"
+                            onclick="checkQuiz()"
+                        >
+                            Check My Score
+                        </button>
+
+                    </form>
+
+                    <div
+                        class="quiz-result"
+                        id="quizResult"
+                    ></div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 32 PRACTICE
+            ================================================= -->
+
+            <section class="section reveal" id="practice">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        31 • Coding Practice
+                    </div>
+
+                    <h2>Practice challenges</h2>
+
+                    <p>
+                        Try solving these without looking at the answers.
+                    </p>
+
+                </div>
+
+                <div class="challenge">
+
+                    <span class="challenge-number">1</span>
+
+                    Find all students who scored at least 85 marks.
+
+                </div>
+
+                <div class="challenge">
+
+                    <span class="challenge-number">2</span>
+
+                    Find all CSE students younger than 21.
+
+                </div>
+
+                <div class="challenge">
+
+                    <span class="challenge-number">3</span>
+
+                    Find students whose department is either CSE or ECE.
+
+                </div>
+
+                <div class="challenge">
+
+                    <span class="challenge-number">4</span>
+
+                    Find students whose marks are between 70 and 90.
+
+                </div>
+
+                <div class="challenge">
+
+                    <span class="challenge-number">5</span>
+
+                    Find students whose names start with the letter P.
+
+                </div>
+
+                <div class="challenge">
+
+                    <span class="challenge-number">6</span>
+
+                    Find students whose city is not Guntur.
+
+                </div>
+
+                <div class="challenge">
+
+                    <span class="challenge-number">7</span>
+
+                    Find active CSE students with marks greater than 80.
+
+                </div>
+
+                <div class="challenge">
+
+                    <span class="challenge-number">8</span>
+
+                    Find students whose city is NULL.
+
+                </div>
+
+                <div class="note note-green">
+
+                    <strong>Challenge mindset</strong>
+
+                    Don't just memorize syntax. Before writing the query,
+                    translate the requirement into plain English.
+
+                    <br><br>
+
+                    Example:
+
+                    <br>
+
+                    "CSE students with marks above 80"
+
+                    <br><br>
+
+                    becomes:
+
+                    <br>
+
+                    <code>
+                    department = 'CSE' AND marks &gt; 80
+                    </code>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 33 MINI PROJECT
+            ================================================= -->
+
+            <section class="section reveal">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        32 • Mini Project
+                    </div>
+
+                    <h2>Mini project — Student Filter System</h2>
+
+                    <p>
+                        Build a student analytics system using SELECT and
+                        WHERE.
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Required features</h3>
+
+                    <ul style="padding-left:22px; margin-top:12px;">
+
+                        <li>Show all students.</li>
+
+                        <li>Show students above a marks threshold.</li>
+
+                        <li>Filter by department.</li>
+
+                        <li>Filter by city.</li>
+
+                        <li>Find students within an age range.</li>
+
+                        <li>Search student names with LIKE.</li>
+
+                        <li>Show active students only.</li>
+
+                        <li>Combine multiple filters.</li>
+
+                    </ul>
+
+                    <div class="code-box" style="margin-top:20px;">
+
+                        <pre><code>SELECT name, department, marks
+FROM students
+WHERE department = 'CSE'
+AND marks >= 80
+ORDER BY marks DESC;</code></pre>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 34 RAPID REVISION
+            ================================================= -->
+
+            <section class="section reveal">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        33 • Rapid Revision
+                    </div>
+
+                    <h2>WHERE in 60 seconds</h2>
+
+                </div>
+
+                <div class="card">
+
+                    <div class="table-wrap">
+
+                        <table>
+
+                            <thead>
+                                <tr>
+                                    <th>Concept</th>
+                                    <th>Syntax</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                <tr>
+                                    <td>Equal</td>
+                                    <td><code>WHERE marks = 90</code></td>
+                                </tr>
+
+                                <tr>
+                                    <td>Greater</td>
+                                    <td><code>WHERE marks &gt; 80</code></td>
+                                </tr>
+
+                                <tr>
+                                    <td>AND</td>
+                                    <td><code>WHERE A AND B</code></td>
+                                </tr>
+
+                                <tr>
+                                    <td>OR</td>
+                                    <td><code>WHERE A OR B</code></td>
+                                </tr>
+
+                                <tr>
+                                    <td>NOT</td>
+                                    <td><code>WHERE NOT A</code></td>
+                                </tr>
+
+                                <tr>
+                                    <td>Range</td>
+                                    <td><code>WHERE marks BETWEEN 70 AND 90</code></td>
+                                </tr>
+
+                                <tr>
+                                    <td>Multiple values</td>
+                                    <td><code>WHERE dept IN ('CSE','ECE')</code></td>
+                                </tr>
+
+                                <tr>
+                                    <td>Pattern</td>
+                                    <td><code>WHERE name LIKE 'P%'</code></td>
+                                </tr>
+
+                                <tr>
+                                    <td>NULL</td>
+                                    <td><code>WHERE city IS NULL</code></td>
+                                </tr>
+
+                                <tr>
+                                    <td>Not NULL</td>
+                                    <td><code>WHERE city IS NOT NULL</code></td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 35 CHECKLIST
+            ================================================= -->
+
+            <section class="section reveal">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        34 • Completion
+                    </div>
+
+                    <h2>Lesson 6 checklist</h2>
+
+                    <p>
+                        Check each skill you can confidently perform.
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    <div class="checklist">
+
+                        <label class="check-item">
+                            <input
+                                type="checkbox"
+                                class="lesson-check"
+                            >
+                            I understand what WHERE does
+                        </label>
+
+                        <label class="check-item">
+                            <input
+                                type="checkbox"
+                                class="lesson-check"
+                            >
+                            I can use comparison operators
+                        </label>
+
+                        <label class="check-item">
+                            <input
+                                type="checkbox"
+                                class="lesson-check"
+                            >
+                            I can use AND, OR and NOT
+                        </label>
+
+                        <label class="check-item">
+                            <input
+                                type="checkbox"
+                                class="lesson-check"
+                            >
+                            I understand operator precedence
+                        </label>
+
+                        <label class="check-item">
+                            <input
+                                type="checkbox"
+                                class="lesson-check"
+                            >
+                            I can use BETWEEN
+                        </label>
+
+                        <label class="check-item">
+                            <input
+                                type="checkbox"
+                                class="lesson-check"
+                            >
+                            I can use IN and NOT IN
+                        </label>
+
+                        <label class="check-item">
+                            <input
+                                type="checkbox"
+                                class="lesson-check"
+                            >
+                            I can use LIKE with % and _
+                        </label>
+
+                        <label class="check-item">
+                            <input
+                                type="checkbox"
+                                class="lesson-check"
+                            >
+                            I understand IS NULL
+                        </label>
+
+                        <label class="check-item">
+                            <input
+                                type="checkbox"
+                                class="lesson-check"
+                            >
+                            I understand the UPDATE/DELETE WHERE warning
+                        </label>
+
+                        <label class="check-item">
+                            <input
+                                type="checkbox"
+                                class="lesson-check"
+                            >
+                            I can write real-world filtering queries
+                        </label>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 36 FINAL TAKEAWAY
+            ================================================= -->
+
+            <section class="section reveal">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        35 • Final Takeaway
+                    </div>
+
+                    <h2>The mental model to remember</h2>
+
+                </div>
+
+                <div class="card">
+
+                    <div class="flowchart">
+
+                        <div class="flow-node">
+                            <strong>DATABASE</strong>
+                            <small>Many rows</small>
+                        </div>
+
+                        <div class="flow-arrow">→</div>
+
+                        <div class="flow-node">
+                            <strong>WHERE</strong>
+                            <small>Ask a condition</small>
+                        </div>
+
+                        <div class="flow-arrow">→</div>
+
+                        <div class="flow-node">
+                            <strong>TRUE?</strong>
+                            <small>Keep row</small>
+                        </div>
+
+                        <div class="flow-arrow">→</div>
+
+                        <div class="flow-node">
+                            <strong>RESULT</strong>
+                            <small>Filtered data</small>
+                        </div>
+
+                    </div>
+
+                    <div class="note note-green">
+
+                        <strong>Master sentence</strong>
+
+                        <code>
+                        WHERE = "Give me only the rows that satisfy this
+                        condition."
+                        </code>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 FOOTER
+            ================================================= -->
+
+            <footer class="lesson-footer">
+
+                <h3>
+                    🎉 Lesson 6 Complete — SQL WHERE
+                </h3>
+
+                <p>
+                    You now know how SQL decides which rows should appear
+                    in a result.
+                </p>
+
+                <div class="next-box">
+                    Next concept → SQL Operators & Advanced Filtering
+                </div>
+
+            </footer>
+
+        </div>
+
+    </main>
+
+
+    <!-- =========================================================
+         JAVASCRIPT
+    ========================================================= -->
+
+    <script>
+
+        /* =========================================================
+           MOBILE SIDEBAR
+        ========================================================= */
+
+        const mobileMenu =
+            document.getElementById("mobileMenu");
+
+        const sidebar =
+            document.getElementById("sidebar");
+
+        if (mobileMenu) {
+
+            mobileMenu.addEventListener("click", () => {
+
+                sidebar.classList.toggle("open");
+
+            });
+
+        }
+
+
+        /* =========================================================
+           CLOSE SIDEBAR AFTER LINK CLICK
+        ========================================================= */
+
+        document
+            .querySelectorAll(".side-nav a")
+            .forEach(link => {
+
+                link.addEventListener("click", () => {
+
+                    sidebar.classList.remove("open");
+
+                });
+
+            });
+
+
+        /* =========================================================
+           SCROLL PROGRESS
+        ========================================================= */
+
+        function updateProgress() {
+
+            const scrollTop =
+                window.scrollY;
+
+            const docHeight =
+                document.documentElement.scrollHeight
+                - window.innerHeight;
+
+            const percent =
+                docHeight > 0
+                    ? Math.min(
+                        100,
+                        Math.round(
+                            (scrollTop / docHeight) * 100
+                        )
+                    )
+                    : 0;
+
+            document.getElementById("progressBar")
+                .style.width = percent + "%";
+
+            document.getElementById("miniProgress")
+                .style.width = percent + "%";
+
+            document.getElementById("progressText")
+                .textContent = percent + "%";
+
+        }
+
+        window.addEventListener(
+            "scroll",
+            updateProgress
+        );
+
+        updateProgress();
+
+
+        /* =========================================================
+           COPY CODE BUTTONS
+        ========================================================= */
+
+        document
+            .querySelectorAll(".copy-btn")
+            .forEach(button => {
+
+                button.addEventListener("click", async () => {
+
+                    const codeBox =
+                        button.closest(".code-box");
+
+                    const code =
+                        codeBox
+                            .querySelector("code")
+                            ?.innerText || "";
+
+                    try {
+
+                        await navigator.clipboard.writeText(code);
+
+                        const oldText =
+                            button.textContent;
+
+                        button.textContent =
+                            "Copied!";
+
+                        setTimeout(() => {
+
+                            button.textContent =
+                                oldText;
+
+                        }, 1300);
+
+                    } catch (error) {
+
+                        button.textContent =
+                            "Select & copy";
+
+                        setTimeout(() => {
+
+                            button.textContent =
+                                "Copy";
+
+                        }, 1300);
+
+                    }
+
+                });
+
+            });
+
+
+        /* =========================================================
+           INTERVIEW ACCORDION
+        ========================================================= */
+
+        function toggleInterview(button) {
+
+            const item =
+                button.parentElement;
+
+            item.classList.toggle("open");
+
+        }
+
+
+        /* =========================================================
+           SIMULATOR DATA
+        ========================================================= */
+
+        const students = [
+
+            {
+                id: 1,
+                name: "Pradeep",
+                department: "CSE",
+                age: 19,
+                marks: 92,
+                city: "Guntur",
+                status: "Active"
+            },
+
+            {
+                id: 2,
+                name: "Rahul",
+                department: "ECE",
+                age: 20,
+                marks: 76,
+                city: "Vijayawada",
+                status: "Active"
+            },
+
+            {
+                id: 3,
+                name: "Anu",
+                department: "CSE",
+                age: 19,
+                marks: 88,
+                city: "Hyderabad",
+                status: "Active"
+            },
+
+            {
+                id: 4,
+                name: "Ravi",
+                department: "EEE",
+                age: 21,
+                marks: 67,
+                city: "Guntur",
+                status: "Inactive"
+            },
+
+            {
+                id: 5,
+                name: "Sneha",
+                department: "CSE",
+                age: 20,
+                marks: 95,
+                city: "Chennai",
+                status: "Active"
+            },
+
+            {
+                id: 6,
+                name: "Kiran",
+                department: "MECH",
+                age: 22,
+                marks: 71,
+                city: "Guntur",
+                status: "Active"
+            },
+
+            {
+                id: 7,
+                name: "Divya",
+                department: "ECE",
+                age: 19,
+                marks: 84,
+                city: "Hyderabad",
+                status: "Active"
+            },
+
+            {
+                id: 8,
+                name: "Arjun",
+                department: "CSE",
+                age: 21,
+                marks: 79,
+                city: "Vijayawada",
+                status: "Inactive"
+            }
+
+        ];
+
+
+        /* =========================================================
+           INITIAL SIMULATOR
+        ========================================================= */
+
+        function runFilter() {
+
+            const column =
+                document.getElementById(
+                    "filterColumn"
+                ).value;
+
+            const operator =
+                document.getElementById(
+                    "filterOperator"
+                ).value;
+
+            const rawValue =
+                document.getElementById(
+                    "filterValue"
+                ).value.trim();
+
+            let filtered =
+                students.filter(student => {
+
+                    let actual =
+                        student[column];
+
+                    let value =
+                        rawValue;
+
+                    if (
+                        column === "marks" ||
+                        column === "age"
+                    ) {
+
+                        actual =
+                            Number(actual);
+
+                        value =
+                            Number(rawValue);
+
+                    } else {
+
+                        actual =
+                            String(actual)
+                                .toLowerCase();
+
+                        value =
+                            String(rawValue)
+                                .toLowerCase();
+
+                    }
+
+                    switch (operator) {
+
+                        case "=":
+                            return actual === value;
+
+                        case "!=":
+                            return actual !== value;
+
+                        case ">":
+                            return actual > value;
+
+                        case "<":
+                            return actual < value;
+
+                        case ">=":
+                            return actual >= value;
+
+                        case "<=":
+                            return actual <= value;
+
+                        default:
+                            return false;
+
+                    }
+
+                });
+
+
+            const displayValue =
+                (
+                    column === "marks" ||
+                    column === "age"
+                )
+                    ? rawValue
+                    : "'" + rawValue + "'";
+
+
+            document.getElementById(
+                "generatedQuery"
+            ).textContent =
+                `SELECT * FROM students WHERE ${column} ${operator} ${displayValue};`;
+
+
+            document.getElementById(
+                "resultCount"
+            ).textContent =
+                `Result: ${filtered.length} row${filtered.length === 1 ? "" : "s"}`;
+
+
+            renderSimulationTable(filtered);
+
+        }
+
+
+        /* =========================================================
+           SIMULATOR TABLE
+        ========================================================= */
+
+        function renderSimulationTable(data) {
+
+            const container =
+                document.getElementById(
+                    "simTable"
+                );
+
+            if (!data.length) {
+
+                container.innerHTML = `
+                    <div style="
+                        padding:25px;
+                        text-align:center;
+                        color:#94a3b8;
+                        font-size:13px;
+                    ">
+                        No rows match the WHERE condition.
+                    </div>
+                `;
+
+                return;
+
+            }
+
+            let html = `
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Department</th>
+                            <th>Age</th>
+                            <th>Marks</th>
+                            <th>City</th>
+                            <th>Status</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+            `;
+
+            data.forEach(student => {
+
+                html += `
+
+                    <tr>
+
+                        <td>${student.id}</td>
+
+                        <td>${student.name}</td>
+
+                        <td>${student.department}</td>
+
+                        <td>${student.age}</td>
+
+                        <td>${student.marks}</td>
+
+                        <td>${student.city}</td>
+
+                        <td>${student.status}</td>
+
+                    </tr>
+
+                `;
+
+            });
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = html;
+
+        }
+
+
+        /* =========================================================
+           RUN DEFAULT SIMULATION
+        ========================================================= */
+
+        runFilter();
+
+
+        /* =========================================================
+           QUIZ
+        ========================================================= */
+
+        function checkQuiz() {
+
+            const answers = {
+
+                q1: "b",
+                q2: "b",
+                q3: "b",
+                q4: "c",
+                q5: "c"
+
+            };
+
+            let score = 0;
+
+            let attempted = 0;
+
+            Object.keys(answers)
+                .forEach(question => {
+
+                    const selected =
+                        document.querySelector(
+                            `input[name="${question}"]:checked`
+                        );
+
+                    if (selected) {
+
+                        attempted++;
+
+                        if (
+                            selected.value ===
+                            answers[question]
+                        ) {
+
+                            score++;
+
+                        }
+
+                    }
+
+                });
+
+
+            const result =
+                document.getElementById(
+                    "quizResult"
+                );
+
+            result.style.display =
+                "block";
+
+
+            if (attempted < 5) {
+
+                result.innerHTML =
+                    `You answered ${attempted}/5 questions. Try all questions for a complete score. Current score: ${score}/5.`;
+
+                return;
+
+            }
+
+
+            let message = "";
+
+            if (score === 5) {
+
+                message =
+                    "🔥 Perfect! You have mastered the core WHERE concepts.";
+
+            } else if (score >= 4) {
+
+                message =
+                    "👏 Excellent! You have a strong understanding of WHERE.";
+
+            } else if (score >= 3) {
+
+                message =
+                    "👍 Good start. Review NULL, LIKE and logical operators.";
+
+            } else {
+
+                message =
+                    "📚 Review the lesson and try the quiz again.";
+
+            }
+
+
+            result.innerHTML =
+                `Your Score: ${score}/5<br><br>${message}`;
+
+        }
+
+
+        /* =========================================================
+           CHECKLIST LOCAL STORAGE
+        ========================================================= */
+
+        const checks =
+            document.querySelectorAll(
+                ".lesson-check"
+            );
+
+
+        checks.forEach((checkbox, index) => {
+
+            const key =
+                `zensus_sql_lesson6_check_${index}`;
+
+            checkbox.checked =
+                localStorage.getItem(key) === "true";
+
+
+            checkbox.addEventListener(
+                "change",
+                () => {
+
+                    localStorage.setItem(
+                        key,
+                        checkbox.checked
+                    );
+
+                }
+            );
+
+        });
+
+
+        /* =========================================================
+           MARK COMPLETE
+        ========================================================= */
+
+        function markComplete() {
+
+            localStorage.setItem(
+                "zensus_sql_lesson6_complete",
+                "true"
+            );
+
+            checks.forEach(
+                checkbox => {
+                    checkbox.checked = true;
+                }
+            );
+
+            checks.forEach(
+                (checkbox, index) => {
+
+                    localStorage.setItem(
+                        `zensus_sql_lesson6_check_${index}`,
+                        "true"
+                    );
+
+                }
+            );
+
+
+            alert(
+                "🎉 Lesson 6 completed! SQL WHERE is now part of your ZENSUS learning progress."
+            );
+
+        }
+
+
+        /* =========================================================
+           OPTIONAL REVEAL ANIMATION
+           Content remains visible even without JS.
+        ========================================================= */
+
+        const revealObserver =
+            "IntersectionObserver" in window
+                ? new IntersectionObserver(
+                    entries => {
+
+                        entries.forEach(entry => {
+
+                            if (entry.isIntersecting) {
+
+                                entry.target.classList.add(
+                                    "js-reveal"
+                                );
+
+                                revealObserver.unobserve(
+                                    entry.target
+                                );
+
+                            }
+
+                        });
+
+                    },
+                    {
+                        threshold: 0.08
+                    }
+                )
+                : null;
+
+
+        if (revealObserver) {
+
+            document
+                .querySelectorAll(".reveal")
+                .forEach(element => {
+
+                    revealObserver.observe(element);
+
+                });
+
+        }
+
+
+        /* =========================================================
+           KEYBOARD SHORTCUT
+        ========================================================= */
+
+        document.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key === "/" &&
+                    document.activeElement.tagName !== "INPUT"
+                ) {
+
+                    document
+                        .getElementById(
+                            "filterValue"
+                        )
+                        .focus();
+
+                    event.preventDefault();
+
+                }
+
+            }
+        );
+
+
+        /* =========================================================
+           FINAL CONSOLE MESSAGE
+        ========================================================= */
+
+        console.log(
+            "ZENSUS SQL Lesson 6 loaded successfully."
+        );
+
+    </script>
+
+</body>
+</html>

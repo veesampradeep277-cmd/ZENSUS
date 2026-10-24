@@ -1,0 +1,4495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS — Node.js Lesson 07 | HTTP Server & Event-Driven Architecture</title>
+
+<style>
+/* =========================================================
+   ZENSUS NODE.JS — LESSON 07
+   PROFESSIONAL WHITE + BLUE DESIGN
+   ========================================================= */
+
+:root{
+    --primary:#1769e0;
+    --primary-dark:#0d47a1;
+    --primary-light:#eaf3ff;
+    --blue-soft:#f4f8ff;
+    --blue-border:#cfe0f7;
+
+    --white:#ffffff;
+    --surface:#f7faff;
+    --surface-2:#eef4fb;
+
+    --text:#172033;
+    --text-light:#526174;
+    --muted:#7b8798;
+
+    --success:#16845b;
+    --success-bg:#eaf8f2;
+
+    --warning:#b7791f;
+    --warning-bg:#fff7e5;
+
+    --danger:#c0392b;
+    --danger-bg:#fff0ee;
+
+    --code-bg:#0f172a;
+    --code-text:#e7eefc;
+
+    --shadow:0 8px 30px rgba(20,55,100,.08);
+    --shadow-hover:0 14px 40px rgba(23,105,224,.14);
+
+    --radius:14px;
+    --sidebar:270px;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Segoe UI,Arial,sans-serif;
+    background:var(--surface);
+    color:var(--text);
+    line-height:1.7;
+}
+
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+
+.topbar{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    height:68px;
+    background:rgba(255,255,255,.96);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--blue-border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 28px;
+    z-index:1000;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.logo{
+    width:40px;
+    height:40px;
+    border-radius:10px;
+    background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:800;
+    font-size:18px;
+    box-shadow:0 5px 15px rgba(23,105,224,.25);
+}
+
+.brand-text{
+    font-weight:800;
+    letter-spacing:1px;
+    font-size:17px;
+}
+
+.lesson-label{
+    font-size:12px;
+    color:var(--muted);
+}
+
+.top-actions{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+
+.progress-mini{
+    width:150px;
+    height:7px;
+    background:#e5edf8;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.progress-mini span{
+    display:block;
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,var(--primary),#4b91f1);
+    transition:.4s;
+}
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar{
+    position:fixed;
+    top:68px;
+    left:0;
+    bottom:0;
+    width:var(--sidebar);
+    background:white;
+    border-right:1px solid var(--blue-border);
+    overflow-y:auto;
+    padding:25px 18px;
+    z-index:900;
+}
+
+.sidebar-title{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1.4px;
+    color:var(--muted);
+    margin:0 10px 12px;
+    font-weight:700;
+}
+
+.toc a{
+    display:block;
+    padding:9px 12px;
+    margin:3px 0;
+    border-radius:8px;
+    color:var(--text-light);
+    text-decoration:none;
+    font-size:13px;
+    transition:.2s;
+}
+
+.toc a:hover{
+    background:var(--primary-light);
+    color:var(--primary);
+}
+
+.toc a.active{
+    background:var(--primary-light);
+    color:var(--primary);
+    font-weight:700;
+    border-left:3px solid var(--primary);
+}
+
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+.main{
+    margin-left:var(--sidebar);
+    padding-top:68px;
+}
+
+.container{
+    max-width:1100px;
+    margin:auto;
+    padding:50px 42px 100px;
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero{
+    background:
+        radial-gradient(circle at 85% 20%,rgba(59,130,246,.15),transparent 28%),
+        linear-gradient(135deg,#ffffff,#eef5ff);
+    border:1px solid var(--blue-border);
+    border-radius:22px;
+    padding:55px;
+    position:relative;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+    margin-bottom:42px;
+}
+
+.hero::after{
+    content:"";
+    position:absolute;
+    width:260px;
+    height:260px;
+    right:-90px;
+    bottom:-110px;
+    border-radius:50%;
+    border:30px solid rgba(23,105,224,.05);
+}
+
+.lesson-number{
+    color:var(--primary);
+    font-size:13px;
+    font-weight:800;
+    letter-spacing:2px;
+    margin-bottom:8px;
+}
+
+.hero h1{
+    font-family:Georgia,serif;
+    font-size:46px;
+    line-height:1.15;
+    margin-bottom:18px;
+    color:#10264d;
+}
+
+.hero h1 span{
+    color:var(--primary);
+}
+
+.hero p{
+    max-width:820px;
+    color:var(--text-light);
+    font-size:17px;
+}
+
+.hero-tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    margin-top:25px;
+}
+
+.tag{
+    background:white;
+    border:1px solid var(--blue-border);
+    color:var(--primary-dark);
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:700;
+}
+
+/* =========================================================
+   SECTIONS
+   ========================================================= */
+
+section{
+    scroll-margin-top:90px;
+    margin-bottom:55px;
+}
+
+.section-heading{
+    margin-bottom:22px;
+}
+
+.section-number{
+    color:var(--primary);
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+}
+
+.section-heading h2{
+    font-family:Georgia,serif;
+    font-size:31px;
+    color:#12294f;
+    margin-top:3px;
+}
+
+.section-heading p{
+    color:var(--text-light);
+    margin-top:7px;
+}
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+.card{
+    background:white;
+    border:1px solid var(--blue-border);
+    border-radius:var(--radius);
+    padding:26px;
+    box-shadow:var(--shadow);
+    margin-bottom:20px;
+    transition:.25s;
+}
+
+.card:hover{
+    transform:translateY(-2px);
+    box-shadow:var(--shadow-hover);
+}
+
+.card h3{
+    color:#163663;
+    margin-bottom:10px;
+}
+
+.card p{
+    color:var(--text-light);
+}
+
+.grid-2{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+}
+
+.grid-3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+/* =========================================================
+   OBJECTIVES
+   ========================================================= */
+
+.objective{
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+}
+
+.objective-icon{
+    width:34px;
+    height:34px;
+    border-radius:9px;
+    background:var(--primary-light);
+    color:var(--primary);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:800;
+    flex-shrink:0;
+}
+
+/* =========================================================
+   CODE
+   ========================================================= */
+
+.code-box{
+    background:var(--code-bg);
+    border-radius:12px;
+    overflow:hidden;
+    margin:18px 0;
+    box-shadow:0 8px 22px rgba(15,23,42,.14);
+}
+
+.code-header{
+    background:#17233a;
+    color:#b9c9e4;
+    padding:10px 15px;
+    font-size:12px;
+    display:flex;
+    justify-content:space-between;
+    border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.copy-btn{
+    border:0;
+    background:#263a5b;
+    color:white;
+    padding:4px 10px;
+    border-radius:5px;
+    cursor:pointer;
+    font-size:11px;
+}
+
+pre{
+    padding:20px;
+    overflow-x:auto;
+    color:var(--code-text);
+    font-family:Consolas,monospace;
+    font-size:13px;
+    line-height:1.75;
+}
+
+/* =========================================================
+   INFO BOXES
+   ========================================================= */
+
+.info{
+    border-left:4px solid var(--primary);
+    background:var(--primary-light);
+    padding:17px 20px;
+    border-radius:0 10px 10px 0;
+    margin:18px 0;
+}
+
+.success{
+    border-left-color:var(--success);
+    background:var(--success-bg);
+}
+
+.warning{
+    border-left-color:var(--warning);
+    background:var(--warning-bg);
+}
+
+.danger{
+    border-left-color:var(--danger);
+    background:var(--danger-bg);
+}
+
+/* =========================================================
+   HTTP FLOW
+   ========================================================= */
+
+.http-flow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:10px;
+    padding:35px 10px;
+}
+
+.http-node{
+    width:180px;
+    min-height:105px;
+    background:white;
+    border:2px solid var(--blue-border);
+    border-radius:14px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    box-shadow:var(--shadow);
+    position:relative;
+}
+
+.http-node strong{
+    color:var(--primary-dark);
+}
+
+.http-node small{
+    color:var(--muted);
+    font-size:12px;
+}
+
+.node-icon{
+    font-size:25px;
+    margin-bottom:4px;
+}
+
+.http-arrow{
+    font-size:27px;
+    color:var(--primary);
+    font-weight:800;
+}
+
+/* =========================================================
+   REQUEST PACKET ANIMATION
+   ========================================================= */
+
+.packet-demo{
+    position:relative;
+    height:150px;
+    background:#0f172a;
+    border-radius:14px;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 35px;
+    margin-top:20px;
+}
+
+.packet-server{
+    width:75px;
+    height:75px;
+    border-radius:12px;
+    border:2px solid #6ea8ff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#bcd7ff;
+    font-weight:700;
+    z-index:2;
+}
+
+.packet-client{
+    width:75px;
+    height:75px;
+    border-radius:12px;
+    border:2px solid #6ea8ff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#bcd7ff;
+    font-weight:700;
+    z-index:2;
+}
+
+.packet-line{
+    position:absolute;
+    left:95px;
+    right:95px;
+    height:2px;
+    background:#314968;
+}
+
+.packet{
+    position:absolute;
+    width:18px;
+    height:18px;
+    background:#62a1ff;
+    border-radius:50%;
+    left:105px;
+    box-shadow:0 0 18px rgba(98,161,255,.7);
+    animation:sendPacket 3s infinite ease-in-out;
+}
+
+@keyframes sendPacket{
+    0%{
+        left:105px;
+        opacity:0;
+    }
+
+    10%{
+        opacity:1;
+    }
+
+    45%{
+        left:calc(100% - 123px);
+        opacity:1;
+    }
+
+    55%{
+        left:calc(100% - 123px);
+        opacity:0;
+    }
+
+    60%{
+        left:calc(100% - 123px);
+        opacity:0;
+    }
+
+    100%{
+        left:105px;
+        opacity:0;
+    }
+}
+
+/* =========================================================
+   REQUEST / RESPONSE
+   ========================================================= */
+
+.message{
+    border-radius:12px;
+    padding:20px;
+    font-family:Consolas,monospace;
+    font-size:13px;
+    margin:15px 0;
+}
+
+.request-message{
+    background:#edf5ff;
+    border:1px solid #c5dbf7;
+}
+
+.response-message{
+    background:#edf9f4;
+    border:1px solid #c5e5d6;
+}
+
+.method-badge{
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:5px;
+    background:#1769e0;
+    color:white;
+    font-size:11px;
+    font-weight:700;
+    margin-right:8px;
+}
+
+/* =========================================================
+   METHOD CARDS
+   ========================================================= */
+
+.method{
+    border:1px solid var(--blue-border);
+    border-radius:11px;
+    overflow:hidden;
+    background:white;
+}
+
+.method-head{
+    padding:14px 17px;
+    background:#f3f7fd;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.method-name{
+    font-family:Consolas,monospace;
+    color:var(--primary-dark);
+    font-weight:700;
+}
+
+.method-type{
+    font-size:11px;
+    padding:3px 8px;
+    border-radius:12px;
+    background:var(--primary-light);
+    color:var(--primary);
+}
+
+.method-body{
+    padding:16px;
+    color:var(--text-light);
+    font-size:14px;
+}
+
+/* =========================================================
+   STATUS GRID
+   ========================================================= */
+
+.status{
+    padding:20px;
+    border-radius:11px;
+    border:1px solid var(--blue-border);
+    background:white;
+}
+
+.status-code{
+    font-size:25px;
+    font-weight:800;
+    color:var(--primary);
+}
+
+.status-name{
+    font-weight:700;
+    color:#17345e;
+}
+
+.status-desc{
+    font-size:13px;
+    color:var(--muted);
+}
+
+/* =========================================================
+   EVENT LOOP
+   ========================================================= */
+
+.event-loop{
+    background:#0f172a;
+    border-radius:16px;
+    padding:28px;
+    color:white;
+    box-shadow:var(--shadow);
+}
+
+.event-title{
+    color:#dce8fb;
+    font-weight:700;
+    margin-bottom:22px;
+}
+
+.event-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:14px;
+}
+
+.event-box{
+    min-height:130px;
+    border:1px solid #304664;
+    border-radius:10px;
+    background:#131f33;
+    padding:17px;
+}
+
+.event-box h4{
+    color:#8ebaff;
+    margin-bottom:10px;
+}
+
+.event-item{
+    background:#1e3353;
+    border-radius:7px;
+    padding:8px 10px;
+    margin:7px 0;
+    font-size:12px;
+    color:#dbe8fa;
+    animation:eventPulse 2s infinite;
+}
+
+@keyframes eventPulse{
+    0%,100%{transform:translateX(0);}
+    50%{transform:translateX(4px);}
+}
+
+/* =========================================================
+   EVENT EMITTER
+   ========================================================= */
+
+.emitter{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:330px;
+    background:
+        radial-gradient(circle,#eef5ff 0%,#ffffff 65%);
+    border:1px solid var(--blue-border);
+    border-radius:16px;
+    overflow:hidden;
+}
+
+.emitter-center{
+    width:150px;
+    height:150px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#1769e0,#0d47a1);
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-weight:800;
+    box-shadow:0 15px 35px rgba(23,105,224,.25);
+    z-index:2;
+    animation:emitterPulse 2s infinite;
+}
+
+@keyframes emitterPulse{
+    0%,100%{transform:scale(1);}
+    50%{transform:scale(1.05);}
+}
+
+.listener{
+    position:absolute;
+    background:white;
+    border:1px solid #bfd4ef;
+    padding:10px 14px;
+    border-radius:9px;
+    box-shadow:var(--shadow);
+    font-size:12px;
+    color:#21416c;
+}
+
+.listener.one{
+    top:35px;
+    left:15%;
+}
+
+.listener.two{
+    top:40px;
+    right:13%;
+}
+
+.listener.three{
+    bottom:35px;
+    left:29%;
+}
+
+.listener.four{
+    bottom:35px;
+    right:27%;
+}
+
+.event-wave{
+    position:absolute;
+    width:170px;
+    height:170px;
+    border:2px solid rgba(23,105,224,.25);
+    border-radius:50%;
+    animation:wave 2.5s infinite;
+}
+
+@keyframes wave{
+    0%{
+        transform:scale(.8);
+        opacity:.8;
+    }
+    100%{
+        transform:scale(2.2);
+        opacity:0;
+    }
+}
+
+/* =========================================================
+   ROUTING
+   ========================================================= */
+
+.route{
+    display:grid;
+    grid-template-columns:160px 1fr 180px;
+    gap:12px;
+    align-items:center;
+    margin:12px 0;
+}
+
+.route-method{
+    padding:10px;
+    border-radius:7px;
+    background:#1769e0;
+    color:white;
+    text-align:center;
+    font-family:Consolas,monospace;
+    font-size:12px;
+    font-weight:700;
+}
+
+.route-path{
+    padding:10px 14px;
+    background:#f3f7fd;
+    border:1px solid var(--blue-border);
+    border-radius:7px;
+    font-family:Consolas,monospace;
+    color:#17345e;
+}
+
+.route-result{
+    padding:10px;
+    border-radius:7px;
+    background:var(--success-bg);
+    color:var(--success);
+    text-align:center;
+    font-size:12px;
+    font-weight:700;
+}
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.compare{
+    width:100%;
+    border-collapse:collapse;
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+}
+
+.compare th{
+    background:#12366b;
+    color:white;
+    text-align:left;
+    padding:14px;
+}
+
+.compare td{
+    padding:13px 14px;
+    border-bottom:1px solid #e2eaf4;
+    color:var(--text-light);
+    background:white;
+}
+
+.compare tr:hover td{
+    background:#f6f9fd;
+}
+
+/* =========================================================
+   ACCORDION
+   ========================================================= */
+
+.accordion{
+    border:1px solid var(--blue-border);
+    border-radius:10px;
+    overflow:hidden;
+    margin-bottom:10px;
+    background:white;
+}
+
+.question{
+    padding:16px 18px;
+    cursor:pointer;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-weight:700;
+    color:#17345e;
+}
+
+.question:hover{
+    background:var(--primary-light);
+}
+
+.answer{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .3s ease;
+    padding:0 18px;
+    color:var(--text-light);
+}
+
+.accordion.open .answer{
+    max-height:500px;
+    padding:0 18px 18px;
+}
+
+.plus{
+    color:var(--primary);
+    font-size:20px;
+}
+
+/* =========================================================
+   QUIZ
+   ========================================================= */
+
+.quiz-option{
+    border:1px solid #d2deed;
+    border-radius:9px;
+    padding:12px 14px;
+    margin:8px 0;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.quiz-option:hover{
+    background:var(--primary-light);
+    border-color:#a9c8ef;
+}
+
+.quiz-option.correct{
+    background:var(--success-bg);
+    border-color:#8ad1b2;
+}
+
+.quiz-option.wrong{
+    background:var(--danger-bg);
+    border-color:#e5aaa2;
+}
+
+.quiz-feedback{
+    margin-top:12px;
+    font-weight:700;
+}
+
+/* =========================================================
+   CHALLENGE
+   ========================================================= */
+
+.challenge{
+    background:linear-gradient(135deg,#0d2b55,#174b91);
+    color:white;
+    border-radius:16px;
+    padding:30px;
+    box-shadow:0 12px 30px rgba(13,71,161,.2);
+}
+
+.challenge h3{
+    color:white;
+}
+
+.challenge p{
+    color:#dbe9ff;
+}
+
+.reveal{
+    border:1px solid rgba(255,255,255,.3);
+    background:rgba(255,255,255,.08);
+    color:white;
+    padding:10px 15px;
+    border-radius:7px;
+    cursor:pointer;
+    margin-top:15px;
+}
+
+.solution{
+    display:none;
+    margin-top:18px;
+}
+
+/* =========================================================
+   CHECKLIST
+   ========================================================= */
+
+.checklist{
+    display:grid;
+    gap:10px;
+}
+
+.check{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    padding:11px 13px;
+    background:white;
+    border:1px solid var(--blue-border);
+    border-radius:9px;
+}
+
+.check input{
+    accent-color:var(--primary);
+}
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+.lesson-nav{
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    margin-top:70px;
+    padding-top:30px;
+    border-top:1px solid var(--blue-border);
+}
+
+.nav-btn{
+    text-decoration:none;
+    padding:13px 20px;
+    border:1px solid var(--blue-border);
+    background:white;
+    color:var(--primary-dark);
+    border-radius:9px;
+    font-weight:700;
+    transition:.2s;
+}
+
+.nav-btn:hover{
+    background:var(--primary);
+    color:white;
+    border-color:var(--primary);
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+footer{
+    background:#0c1c34;
+    color:#b9c8dc;
+    text-align:center;
+    padding:35px 20px;
+    font-size:13px;
+}
+
+footer strong{
+    color:white;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(max-width:900px){
+
+    :root{
+        --sidebar:0px;
+    }
+
+    .sidebar{
+        display:none;
+    }
+
+    .container{
+        padding:35px 20px 70px;
+    }
+
+    .hero{
+        padding:35px 25px;
+    }
+
+    .hero h1{
+        font-size:36px;
+    }
+
+    .grid-2,
+    .grid-3{
+        grid-template-columns:1fr;
+    }
+
+    .event-grid{
+        grid-template-columns:1fr;
+    }
+
+    .route{
+        grid-template-columns:1fr;
+    }
+
+}
+
+@media(max-width:600px){
+
+    .progress-mini{
+        display:none;
+    }
+
+    .hero h1{
+        font-size:30px;
+    }
+
+    .section-heading h2{
+        font-size:26px;
+    }
+
+    .http-flow{
+        flex-direction:column;
+    }
+
+    .http-arrow{
+        transform:rotate(90deg);
+    }
+
+    .packet-demo{
+        padding:0 15px;
+    }
+
+    .packet-line{
+        left:80px;
+        right:80px;
+    }
+
+    .packet{
+        left:90px;
+    }
+
+    .listener{
+        position:static;
+        margin:5px;
+    }
+
+    .emitter{
+        flex-wrap:wrap;
+        padding:20px;
+        gap:10px;
+    }
+
+}
+</style>
+</head>
+
+<body>
+
+<!-- =====================================================
+     TOP BAR
+     ===================================================== -->
+
+<header class="topbar">
+
+    <div class="brand">
+
+        <div class="logo">Z</div>
+
+        <div>
+            <div class="brand-text">ZENSUS</div>
+            <div class="lesson-label">
+                NODE.JS LEARNING PATH
+            </div>
+        </div>
+
+    </div>
+
+    <div class="top-actions">
+
+        <span style="font-size:12px;color:#718096;">
+            LESSON 07
+        </span>
+
+        <div class="progress-mini">
+            <span id="progressBar"></span>
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- =====================================================
+     SIDEBAR
+     ===================================================== -->
+
+<aside class="sidebar">
+
+    <div class="sidebar-title">
+        Lesson 07 Contents
+    </div>
+
+    <nav class="toc">
+
+        <a href="#intro">Introduction</a>
+        <a href="#objectives">Learning Objectives</a>
+        <a href="#http">HTTP Fundamentals</a>
+        <a href="#server">Node HTTP Server</a>
+        <a href="#request">Request Object</a>
+        <a href="#response">Response Object</a>
+        <a href="#methods">HTTP Methods</a>
+        <a href="#status">Status Codes</a>
+        <a href="#headers">Headers</a>
+        <a href="#url">URLs & Routing</a>
+        <a href="#event">Event-Driven Architecture</a>
+        <a href="#emitter">EventEmitter</a>
+        <a href="#events">Events in Node.js</a>
+        <a href="#architecture">Architecture Flow</a>
+        <a href="#visual">Interactive Lab</a>
+        <a href="#project">Mini Project</a>
+        <a href="#errors">Error Handling</a>
+        <a href="#interview">Interview Questions</a>
+        <a href="#quiz">Quiz</a>
+        <a href="#challenge">Challenge</a>
+
+    </nav>
+
+</aside>
+
+
+<!-- =====================================================
+     MAIN
+     ===================================================== -->
+
+<main class="main">
+
+<div class="container">
+
+
+<!-- =====================================================
+     HERO
+     ===================================================== -->
+
+<section class="hero" id="intro">
+
+    <div class="lesson-number">
+        NODE.JS · LESSON 07
+    </div>
+
+    <h1>
+        HTTP Server
+        <span>&</span>
+        Event-Driven Architecture
+    </h1>
+
+    <p>
+        Learn how Node.js creates web servers, receives HTTP
+        requests, generates responses, performs routing and uses
+        an event-driven architecture to efficiently handle
+        asynchronous operations.
+    </p>
+
+    <div class="hero-tags">
+
+        <span class="tag">HTTP</span>
+        <span class="tag">Web Server</span>
+        <span class="tag">Request</span>
+        <span class="tag">Response</span>
+        <span class="tag">Routing</span>
+        <span class="tag">EventEmitter</span>
+        <span class="tag">Event Loop</span>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     OBJECTIVES
+     ===================================================== -->
+
+<section id="objectives">
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            01 · Foundation
+        </div>
+
+        <h2>Learning Objectives</h2>
+
+        <p>
+            Build a strong foundation for backend development
+            with Node.js.
+        </p>
+
+    </div>
+
+
+    <div class="grid-2">
+
+        <div class="card objective">
+
+            <div class="objective-icon">01</div>
+
+            <div>
+                <h3>Understand HTTP</h3>
+                <p>
+                    Understand how clients and servers communicate
+                    through HTTP requests and responses.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="card objective">
+
+            <div class="objective-icon">02</div>
+
+            <div>
+                <h3>Create a Server</h3>
+                <p>
+                    Create a working HTTP server using Node's
+                    built-in http module.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="card objective">
+
+            <div class="objective-icon">03</div>
+
+            <div>
+                <h3>Build Routes</h3>
+                <p>
+                    Handle different URLs and HTTP methods
+                    inside a Node.js server.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="card objective">
+
+            <div class="objective-icon">04</div>
+
+            <div>
+                <h3>Understand Events</h3>
+                <p>
+                    Learn EventEmitter and the event-driven
+                    architecture used throughout Node.js.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     HTTP FUNDAMENTALS
+     ===================================================== -->
+
+<section id="http">
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            02 · Web Fundamentals
+        </div>
+
+        <h2>What is HTTP?</h2>
+
+    </div>
+
+
+    <div class="card">
+
+        <p>
+            <strong>HTTP</strong> stands for
+            <strong>HyperText Transfer Protocol</strong>.
+        </p>
+
+        <br>
+
+        <p>
+            It is an application-layer protocol used for
+            communication between clients and servers on the Web.
+        </p>
+
+        <br>
+
+        <p>
+            A browser, mobile application or another program can
+            act as an HTTP client. A Node.js application can act
+            as an HTTP server.
+        </p>
+
+    </div>
+
+
+    <div class="http-flow">
+
+        <div class="http-node">
+
+            <div class="node-icon">💻</div>
+
+            <strong>Client</strong>
+
+            <small>
+                Browser / Mobile App
+            </small>
+
+        </div>
+
+
+        <div class="http-arrow">
+            →
+        </div>
+
+
+        <div class="http-node">
+
+            <div class="node-icon">📨</div>
+
+            <strong>HTTP Request</strong>
+
+            <small>
+                Method + URL + Headers
+            </small>
+
+        </div>
+
+
+        <div class="http-arrow">
+            →
+        </div>
+
+
+        <div class="http-node">
+
+            <div class="node-icon">🖥</div>
+
+            <strong>Node.js Server</strong>
+
+            <small>
+                Process request
+            </small>
+
+        </div>
+
+
+        <div class="http-arrow">
+            →
+        </div>
+
+
+        <div class="http-node">
+
+            <div class="node-icon">📤</div>
+
+            <strong>HTTP Response</strong>
+
+            <small>
+                Status + Headers + Body
+            </small>
+
+        </div>
+
+    </div>
+
+
+    <div class="packet-demo">
+
+        <div class="packet-server">
+            SERVER
+        </div>
+
+        <div class="packet-line"></div>
+
+        <div class="packet"></div>
+
+        <div class="packet-client">
+            CLIENT
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     HTTP SERVER
+     ===================================================== -->
+
+<section id="server">
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            03 · Node.js HTTP
+        </div>
+
+        <h2>Creating an HTTP Server</h2>
+
+    </div>
+
+
+    <div class="card">
+
+        <p>
+            Node.js includes a built-in <code>http</code> module.
+            This module provides APIs for creating HTTP servers
+            and clients.
+        </p>
+
+
+        <div class="code-box">
+
+            <div class="code-header">
+
+                server.js
+
+                <button
+                    class="copy-btn"
+                    onclick="copyCode(this)"
+                >
+                    Copy
+                </button>
+
+            </div>
+
+<pre>const http = require('http');
+
+const server = http.createServer(
+    (req, res) => {
+
+        res.writeHead(200, {
+            'Content-Type': 'text/plain'
+        });
+
+        res.end('Hello from ZENSUS');
+    }
+);
+
+server.listen(3000, () => {
+
+    console.log(
+        'Server running on port 3000'
+    );
+
+});</pre>
+
+        </div>
+
+
+        <div class="info">
+
+            <strong>Core idea:</strong>
+
+            <br>
+
+            <code>http.createServer()</code> creates an HTTP server
+            and receives a callback that is invoked when an HTTP
+            request is received.
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Run the Server</h3>
+
+        <div class="code-box">
+
+<pre>node server.js</pre>
+
+        </div>
+
+        <p>
+            The server starts listening on port
+            <strong>3000</strong>.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     REQUEST
+     ===================================================== -->
+
+<section id="request">
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            04 · Request
+        </div>
+
+        <h2>The Request Object</h2>
+
+    </div>
+
+
+    <div class="card">
+
+        <p>
+            The <code>req</code> object represents the incoming
+            HTTP request.
+        </p>
+
+        <br>
+
+        <p>
+            Important properties include:
+        </p>
+
+        <div class="grid-2" style="margin-top:20px;">
+
+            <div class="method">
+
+                <div class="method-head">
+                    <span class="method-name">req.method</span>
+                    <span class="method-type">METHOD</span>
+                </div>
+
+                <div class="method-body">
+                    Contains the HTTP method such as GET or POST.
+                </div>
+
+            </div>
+
+
+            <div class="method">
+
+                <div class="method-head">
+                    <span class="method-name">req.url</span>
+                    <span class="method-type">URL</span>
+                </div>
+
+                <div class="method-body">
+                    Contains the requested URL path and query string.
+                </div>
+
+            </div>
+
+
+            <div class="method">
+
+                <div class="method-head">
+                    <span class="method-name">req.headers</span>
+                    <span class="method-type">HEADERS</span>
+                </div>
+
+                <div class="method-body">
+                    Contains request headers sent by the client.
+                </div>
+
+            </div>
+
+
+            <div class="method">
+
+                <div class="method-head">
+                    <span class="method-name">req.on()</span>
+                    <span class="method-type">EVENT</span>
+                </div>
+
+                <div class="method-body">
+                    Can be used to listen for request stream events.
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="code-box">
+
+        <div class="code-header">
+            Inspecting a Request
+            <button
+                class="copy-btn"
+                onclick="copyCode(this)"
+            >
+                Copy
+            </button>
+        </div>
+
+<pre>const http = require('http');
+
+const server = http.createServer(
+    (req, res) => {
+
+        console.log('Method:', req.method);
+        console.log('URL:', req.url);
+        console.log('Headers:', req.headers);
+
+        res.end('Request received');
+    }
+);
+
+server.listen(3000);</pre>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     RESPONSE
+     ===================================================== -->
+
+<section id="response">
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            05 · Response
+        </div>
+
+        <h2>The Response Object</h2>
+
+    </div>
+
+
+    <div class="card">
+
+        <p>
+            The <code>res</code> object represents the response
+            that Node.js sends back to the client.
+        </p>
+
+
+        <div class="grid-2" style="margin-top:20px;">
+
+            <div class="method">
+
+                <div class="method-head">
+
+                    <span class="method-name">
+                        res.writeHead()
+                    </span>
+
+                    <span class="method-type">
+                        STATUS
+                    </span>
+
+                </div>
+
+                <div class="method-body">
+                    Sets the HTTP status code and response headers.
+                </div>
+
+            </div>
+
+
+            <div class="method">
+
+                <div class="method-head">
+
+                    <span class="method-name">
+                        res.write()
+                    </span>
+
+                    <span class="method-type">
+                        BODY
+                    </span>
+
+                </div>
+
+                <div class="method-body">
+                    Writes response data.
+                </div>
+
+            </div>
+
+
+            <div class="method">
+
+                <div class="method-head">
+
+                    <span class="method-name">
+                        res.end()
+                    </span>
+
+                    <span class="method-type">
+                        FINISH
+                    </span>
+
+                </div>
+
+                <div class="method-body">
+                    Ends the response.
+                </div>
+
+            </div>
+
+
+            <div class="method">
+
+                <div class="method-head">
+
+                    <span class="method-name">
+                        res.setHeader()
+                    </span>
+
+                    <span class="method-type">
+                        HEADER
+                    </span>
+
+                </div>
+
+                <div class="method-body">
+                    Sets an individual response header.
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="code-box">
+
+<pre>res.writeHead(200, {
+    'Content-Type': 'text/plain'
+});
+
+res.end(
+    'Response sent successfully'
+);</pre>
+
+    </div>
+
+
+    <div class="info">
+
+        <strong>Important:</strong>
+
+        <br>
+
+        A response should eventually be ended using
+        <code>res.end()</code>. Otherwise the connection may
+        remain open waiting for more response data.
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     HTTP METHODS
+     ===================================================== -->
+
+<section id="methods">
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            06 · HTTP Methods
+        </div>
+
+        <h2>HTTP Request Methods</h2>
+
+    </div>
+
+
+    <div class="grid-2">
+
+        <div class="method">
+
+            <div class="method-head">
+                <span class="method-name">GET</span>
+                <span class="method-type">READ</span>
+            </div>
+
+            <div class="method-body">
+                Requests a representation of a resource.
+            </div>
+
+        </div>
+
+
+        <div class="method">
+
+            <div class="method-head">
+                <span class="method-name">POST</span>
+                <span class="method-type">CREATE</span>
+            </div>
+
+            <div class="method-body">
+                Sends data to the server, commonly to create a
+                resource or trigger an operation.
+            </div>
+
+        </div>
+
+
+        <div class="method">
+
+            <div class="method-head">
+                <span class="method-name">PUT</span>
+                <span class="method-type">REPLACE</span>
+            </div>
+
+            <div class="method-body">
+                Commonly used to replace the representation of a
+                resource.
+            </div>
+
+        </div>
+
+
+        <div class="method">
+
+            <div class="method-head">
+                <span class="method-name">PATCH</span>
+                <span class="method-type">UPDATE</span>
+            </div>
+
+            <div class="method-body">
+                Commonly used to partially modify a resource.
+            </div>
+
+        </div>
+
+
+        <div class="method">
+
+            <div class="method-head">
+                <span class="method-name">DELETE</span>
+                <span class="method-type">REMOVE</span>
+            </div>
+
+            <div class="method-body">
+                Requests removal of a resource.
+            </div>
+
+        </div>
+
+
+        <div class="method">
+
+            <div class="method-head">
+                <span class="method-name">HEAD</span>
+                <span class="method-type">METADATA</span>
+            </div>
+
+            <div class="method-body">
+                Similar to GET but asks for response headers
+                without the response body.
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="info">
+
+        <strong>REST connection:</strong>
+
+        <br>
+
+        HTTP methods form an important part of REST-style API
+        design, where URLs identify resources and methods express
+        operations on those resources.
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     STATUS CODES
+     ===================================================== -->
+
+<section id="status">
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            07 · HTTP Responses
+        </div>
+
+        <h2>HTTP Status Codes</h2>
+
+    </div>
+
+
+    <div class="grid-3">
+
+        <div class="status">
+
+            <div class="status-code">
+                200
+            </div>
+
+            <div class="status-name">
+                OK
+            </div>
+
+            <div class="status-desc">
+                Request succeeded.
+            </div>
+
+        </div>
+
+
+        <div class="status">
+
+            <div class="status-code">
+                201
+            </div>
+
+            <div class="status-name">
+                Created
+            </div>
+
+            <div class="status-desc">
+                Resource was successfully created.
+            </div>
+
+        </div>
+
+
+        <div class="status">
+
+            <div class="status-code">
+                204
+            </div>
+
+            <div class="status-name">
+                No Content
+            </div>
+
+            <div class="status-desc">
+                Request succeeded without response content.
+            </div>
+
+        </div>
+
+
+        <div class="status">
+
+            <div class="status-code">
+                400
+            </div>
+
+            <div class="status-name">
+                Bad Request
+            </div>
+
+            <div class="status-desc">
+                Server could not process the request as sent.
+            </div>
+
+        </div>
+
+
+        <div class="status">
+
+            <div class="status-code">
+                401
+            </div>
+
+            <div class="status-name">
+                Unauthorized
+            </div>
+
+            <div class="status-desc">
+                Authentication is required or has failed.
+            </div>
+
+        </div>
+
+
+        <div class="status">
+
+            <div class="status-code">
+                403
+            </div>
+
+            <div class="status-name">
+                Forbidden
+            </div>
+
+            <div class="status-desc">
+                Server refuses the requested action.
+            </div>
+
+        </div>
+
+
+        <div class="status">
+
+            <div class="status-code">
+                404
+            </div>
+
+            <div class="status-name">
+                Not Found
+            </div>
+
+            <div class="status-desc">
+                Requested resource could not be found.
+            </div>
+
+        </div>
+
+
+        <div class="status">
+
+            <div class="status-code">
+                500
+            </div>
+
+            <div class="status-name">
+                Internal Server Error
+            </div>
+
+            <div class="status-desc">
+                Unexpected server-side failure.
+            </div>
+
+        </div>
+
+
+        <div class="status">
+
+            <div class="status-code">
+                503
+            </div>
+
+            <div class="status-name">
+                Service Unavailable
+            </div>
+
+            <div class="status-desc">
+                Server is currently unable to handle the request.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     HEADERS
+     ===================================================== -->
+
+<section id="headers">
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            08 · HTTP Metadata
+        </div>
+
+        <h2>HTTP Headers</h2>
+
+    </div>
+
+
+    <div class="card">
+
+        <p>
+            HTTP headers provide additional information about a
+            request or response.
+        </p>
+
+
+        <div class="message request-message">
+
+            <span class="method-badge">
+                REQUEST
+            </span>
+
+            <br><br>
+
+            Host: example.com
+
+            <br>
+
+            Accept: application/json
+
+            <br>
+
+            User-Agent: Browser
+
+        </div>
+
+
+        <div class="message response-message">
+
+            <strong>
+                RESPONSE
+            </strong>
+
+            <br><br>
+
+            Content-Type: application/json
+
+            <br>
+
+            Content-Length: 128
+
+        </div>
+
+    </div>
+
+
+    <div class="code-box">
+
+<pre>res.writeHead(200, {
+    'Content-Type': 'application/json'
+});
+
+res.end(
+    JSON.stringify({
+        message: 'Hello'
+    })
+);</pre>
+
+    </div>
+
+
+    <div class="info">
+
+        <strong>Content-Type matters:</strong>
+
+        <br>
+
+        It tells the client what kind of data is being returned,
+        such as <code>text/html</code>,
+        <code>text/plain</code> or
+        <code>application/json</code>.
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     URL AND ROUTING
+     ===================================================== -->
+
+<section id="url">
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            09 · Routing
+        </div>
+
+        <h2>URLs and Basic Routing</h2>
+
+    </div>
+
+
+    <div class="card">
+
+        <p>
+            A Node.js HTTP server can inspect
+            <code>req.url</code> and <code>req.method</code>
+            to determine which route should handle the request.
+        </p>
+
+    </div>
+
+
+    <div class="code-box">
+
+<pre>const http = require('http');
+
+const server = http.createServer(
+    (req, res) => {
+
+        if (
+            req.method === 'GET' &&
+            req.url === '/'
+        ) {
+
+            res.writeHead(200, {
+                'Content-Type': 'text/plain'
+            });
+
+            res.end('Home Page');
+
+        } else if (
+            req.method === 'GET' &&
+            req.url === '/about'
+        ) {
+
+            res.writeHead(200, {
+                'Content-Type': 'text/plain'
+            });
+
+            res.end('About Page');
+
+        } else {
+
+            res.writeHead(404, {
+                'Content-Type': 'text/plain'
+            });
+
+            res.end('Page Not Found');
+        }
+
+    }
+);
+
+server.listen(3000);</pre>
+
+    </div>
+
+
+    <div class="route">
+
+        <div class="route-method">
+            GET
+        </div>
+
+        <div class="route-path">
+            /
+        </div>
+
+        <div class="route-result">
+            Home Page
+        </div>
+
+    </div>
+
+
+    <div class="route">
+
+        <div class="route-method">
+            GET
+        </div>
+
+        <div class="route-path">
+            /about
+        </div>
+
+        <div class="route-result">
+            About Page
+        </div>
+
+    </div>
+
+
+    <div class="route">
+
+        <div class="route-method">
+            GET
+        </div>
+
+        <div class="route-path">
+            /unknown
+        </div>
+
+        <div class="route-result">
+            404
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     EVENT DRIVEN
+     ===================================================== -->
+
+<section id="event">
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            10 · Architecture
+        </div>
+
+        <h2>Event-Driven Architecture</h2>
+
+    </div>
+
+
+    <div class="card">
+
+        <p>
+            Node.js uses an event-driven programming model.
+            Instead of continuously waiting for every operation
+            to finish, applications can register handlers that
+            execute when particular events occur.
+        </p>
+
+        <br>
+
+        <p>
+            Examples of events include:
+        </p>
+
+        <ul style="margin:15px 0 0 22px;color:#526174;">
+
+            <li>An HTTP request arrives</li>
+            <li>A file has finished reading</li>
+            <li>A network connection is established</li>
+            <li>A stream receives data</li>
+            <li>A timer expires</li>
+            <li>An application-defined event is emitted</li>
+
+        </ul>
+
+    </div>
+
+
+    <div class="info">
+
+        <strong>Important distinction:</strong>
+
+        <br>
+
+        Event-driven does not mean that JavaScript code runs
+        multiple pieces of JavaScript simultaneously. Node.js
+        coordinates asynchronous work and invokes JavaScript
+        callbacks/handlers when their corresponding operations
+        are ready.
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     EVENT LOOP
+     ===================================================== -->
+
+<section>
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            11 · Runtime
+        </div>
+
+        <h2>Event Loop Connection</h2>
+
+    </div>
+
+
+    <div class="event-loop">
+
+        <div class="event-title">
+            NODE.JS EVENT-DRIVEN FLOW
+        </div>
+
+
+        <div class="event-grid">
+
+            <div class="event-box">
+
+                <h4>1. Call Stack</h4>
+
+                <div class="event-item">
+                    JavaScript
+                </div>
+
+                <div class="event-item">
+                    HTTP handler
+                </div>
+
+            </div>
+
+
+            <div class="event-box">
+
+                <h4>2. Async Work</h4>
+
+                <div class="event-item">
+                    File I/O
+                </div>
+
+                <div class="event-item">
+                    Network I/O
+                </div>
+
+            </div>
+
+
+            <div class="event-box">
+
+                <h4>3. Ready Events</h4>
+
+                <div class="event-item">
+                    Callback
+                </div>
+
+                <div class="event-item">
+                    Promise continuation
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card" style="margin-top:20px;">
+
+        <p>
+            At a high level, Node.js starts asynchronous operations,
+            continues processing other JavaScript work when possible,
+            and later executes the relevant callbacks or promise
+            continuations when their results are ready.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     EVENT EMITTER
+     ===================================================== -->
+
+<section id="emitter">
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            12 · Events API
+        </div>
+
+        <h2>EventEmitter</h2>
+
+    </div>
+
+
+    <div class="card">
+
+        <p>
+            Node.js provides the <code>EventEmitter</code> class
+            through the built-in <code>events</code> module.
+        </p>
+
+        <br>
+
+        <p>
+            An EventEmitter allows code to:
+        </p>
+
+        <ul style="margin:15px 0 0 22px;color:#526174;">
+
+            <li>Register listeners for named events</li>
+            <li>Emit events</li>
+            <li>Pass data to listeners</li>
+            <li>Remove listeners when necessary</li>
+
+        </ul>
+
+    </div>
+
+
+    <div class="emitter">
+
+        <div class="event-wave"></div>
+
+        <div class="emitter-center">
+            EVENT<br>
+            EMITTER
+        </div>
+
+        <div class="listener one">
+            Listener A
+        </div>
+
+        <div class="listener two">
+            Listener B
+        </div>
+
+        <div class="listener three">
+            Listener C
+        </div>
+
+        <div class="listener four">
+            Listener D
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     EVENTEMITTER CODE
+     ===================================================== -->
+
+<section id="events">
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            13 · Practical Events
+        </div>
+
+        <h2>Creating and Listening to Events</h2>
+
+    </div>
+
+
+    <div class="code-box">
+
+<pre>const EventEmitter =
+    require('events');
+
+const emitter =
+    new EventEmitter();
+
+emitter.on(
+    'welcome',
+    (name) => {
+
+        console.log(
+            `Welcome ${name}`
+        );
+
+    }
+);
+
+emitter.emit(
+    'welcome',
+    'Pradeep'
+);</pre>
+
+    </div>
+
+
+    <div class="grid-2">
+
+        <div class="method">
+
+            <div class="method-head">
+
+                <span class="method-name">
+                    emitter.on()
+                </span>
+
+                <span class="method-type">
+                    LISTEN
+                </span>
+
+            </div>
+
+            <div class="method-body">
+                Registers a listener for an event.
+            </div>
+
+        </div>
+
+
+        <div class="method">
+
+            <div class="method-head">
+
+                <span class="method-name">
+                    emitter.emit()
+                </span>
+
+                <span class="method-type">
+                    TRIGGER
+                </span>
+
+            </div>
+
+            <div class="method-body">
+                Emits an event and passes optional arguments to listeners.
+            </div>
+
+        </div>
+
+
+        <div class="method">
+
+            <div class="method-head">
+
+                <span class="method-name">
+                    emitter.once()
+                </span>
+
+                <span class="method-type">
+                    ONE TIME
+                </span>
+
+            </div>
+
+            <div class="method-body">
+                Registers a listener that runs at most once.
+            </div>
+
+        </div>
+
+
+        <div class="method">
+
+            <div class="method-head">
+
+                <span class="method-name">
+                    emitter.off()
+                </span>
+
+                <span class="method-type">
+                    REMOVE
+                </span>
+
+            </div>
+
+            <div class="method-body">
+                Removes a previously registered listener.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ARCHITECTURE
+     ===================================================== -->
+
+<section id="architecture">
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            14 · Complete Architecture
+        </div>
+
+        <h2>How a Node.js HTTP Request Flows</h2>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="http-flow">
+
+            <div class="http-node">
+
+                <strong>Client</strong>
+
+                <small>
+                    Sends request
+                </small>
+
+            </div>
+
+            <div class="http-arrow">→</div>
+
+            <div class="http-node">
+
+                <strong>HTTP Server</strong>
+
+                <small>
+                    Receives request
+                </small>
+
+            </div>
+
+            <div class="http-arrow">→</div>
+
+            <div class="http-node">
+
+                <strong>Route Handler</strong>
+
+                <small>
+                    Decides action
+                </small>
+
+            </div>
+
+            <div class="http-arrow">→</div>
+
+            <div class="http-node">
+
+                <strong>Async Operation</strong>
+
+                <small>
+                    File / DB / Network
+                </small>
+
+            </div>
+
+            <div class="http-arrow">→</div>
+
+            <div class="http-node">
+
+                <strong>Response</strong>
+
+                <small>
+                    Sent to client
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="success">
+
+        <strong>Why this architecture is useful:</strong>
+
+        <br>
+
+        Node.js is designed around non-blocking I/O and an
+        event-driven runtime. This makes it particularly useful
+        for applications that spend significant time waiting for
+        network, filesystem or other I/O operations.
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     INTERACTIVE LAB
+     ===================================================== -->
+
+<section id="visual">
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            15 · Interactive Lab
+        </div>
+
+        <h2>HTTP Request Simulator</h2>
+
+        <p>
+            Select a method and route to see how a basic Node.js
+            server could respond.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <div style="
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            margin-bottom:20px;
+        ">
+
+            <button
+                onclick="simulateRequest('GET','/')"
+                class="lab-btn"
+            >
+                GET /
+            </button>
+
+            <button
+                onclick="simulateRequest('GET','/users')"
+                class="lab-btn"
+            >
+                GET /users
+            </button>
+
+            <button
+                onclick="simulateRequest('POST','/users')"
+                class="lab-btn"
+            >
+                POST /users
+            </button>
+
+            <button
+                onclick="simulateRequest('DELETE','/users/1')"
+                class="lab-btn"
+            >
+                DELETE /users/1
+            </button>
+
+            <button
+                onclick="simulateRequest('GET','/unknown')"
+                class="lab-btn"
+            >
+                GET /unknown
+            </button>
+
+        </div>
+
+
+        <div id="requestResult"
+             style="
+             background:#0f172a;
+             color:#dce8fb;
+             padding:22px;
+             border-radius:10px;
+             font-family:Consolas,monospace;
+             min-height:150px;
+             ">
+
+            Choose a request above...
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     MINI PROJECT
+     ===================================================== -->
+
+<section id="project">
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            16 · Practical Project
+        </div>
+
+        <h2>Mini Project — Node.js REST-Style Server</h2>
+
+        <p>
+            Build a small server that responds differently to
+            multiple API routes.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Project Structure</h3>
+
+        <div class="code-box">
+
+<pre>node-http-project/
+│
+├── server.js
+│
+└── package.json</pre>
+
+        </div>
+
+    </div>
+
+
+    <div class="code-box">
+
+        <div class="code-header">
+            server.js
+            <button
+                class="copy-btn"
+                onclick="copyCode(this)"
+            >
+                Copy
+            </button>
+        </div>
+
+<pre>const http = require('http');
+
+const server =
+    http.createServer((req, res) => {
+
+        res.setHeader(
+            'Content-Type',
+            'application/json'
+        );
+
+        if (
+            req.method === 'GET' &&
+            req.url === '/api/status'
+        ) {
+
+            res.statusCode = 200;
+
+            res.end(
+                JSON.stringify({
+                    status: 'online'
+                })
+            );
+
+            return;
+        }
+
+
+        if (
+            req.method === 'GET' &&
+            req.url === '/api/users'
+        ) {
+
+            res.statusCode = 200;
+
+            res.end(
+                JSON.stringify({
+                    users: [
+                        'Alice',
+                        'Bob',
+                        'Charlie'
+                    ]
+                })
+            );
+
+            return;
+        }
+
+
+        res.statusCode = 404;
+
+        res.end(
+            JSON.stringify({
+                error: 'Route not found'
+            })
+        );
+
+    });
+
+
+server.listen(3000, () => {
+
+    console.log(
+        'API server running on port 3000'
+    );
+
+});</pre>
+
+    </div>
+
+
+    <div class="info">
+
+        <strong>Try these URLs:</strong>
+
+        <br><br>
+
+        <code>http://localhost:3000/api/status</code>
+
+        <br>
+
+        <code>http://localhost:3000/api/users</code>
+
+        <br>
+
+        <code>http://localhost:3000/anything</code>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ERROR HANDLING
+     ===================================================== -->
+
+<section id="errors">
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            17 · Reliability
+        </div>
+
+        <h2>HTTP Server Error Handling</h2>
+
+    </div>
+
+
+    <div class="card">
+
+        <p>
+            A production server should handle errors carefully
+            rather than allowing unexpected failures to produce
+            unclear responses.
+        </p>
+
+
+        <div class="code-box">
+
+<pre>const http = require('http');
+
+const server = http.createServer(
+    (req, res) => {
+
+        try {
+
+            if (req.url === '/error') {
+                throw new Error(
+                    'Something went wrong'
+                );
+            }
+
+            res.statusCode = 200;
+            res.end('Success');
+
+        } catch (error) {
+
+            console.error(error);
+
+            res.statusCode = 500;
+
+            res.end(
+                'Internal Server Error'
+            );
+        }
+    }
+);
+
+server.listen(3000);</pre>
+
+        </div>
+
+        <div class="warning">
+
+            <strong>Production note:</strong>
+
+            <br>
+
+            Error handling strategy becomes more sophisticated
+            in real applications. Frameworks such as Express
+            provide middleware patterns that make centralized
+            HTTP error handling easier.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     HTTP VS EVENT ARCHITECTURE
+     ===================================================== -->
+
+<section>
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            18 · Connecting Concepts
+        </div>
+
+        <h2>HTTP Server + Events</h2>
+
+    </div>
+
+
+    <table class="compare">
+
+        <tr>
+
+            <th>Concept</th>
+            <th>Purpose</th>
+            <th>Example</th>
+
+        </tr>
+
+
+        <tr>
+
+            <td>
+                HTTP Server
+            </td>
+
+            <td>
+                Accepts and responds to HTTP requests
+            </td>
+
+            <td>
+                http.createServer()
+            </td>
+
+        </tr>
+
+
+        <tr>
+
+            <td>
+                Request
+            </td>
+
+            <td>
+                Represents incoming client data
+            </td>
+
+            <td>
+                req.method, req.url
+            </td>
+
+        </tr>
+
+
+        <tr>
+
+            <td>
+                Response
+            </td>
+
+            <td>
+                Sends data back to the client
+            </td>
+
+            <td>
+                res.statusCode, res.end()
+            </td>
+
+        </tr>
+
+
+        <tr>
+
+            <td>
+                EventEmitter
+            </td>
+
+            <td>
+                Implements publish/listen event behavior
+            </td>
+
+            <td>
+                emitter.on(), emitter.emit()
+            </td>
+
+        </tr>
+
+
+        <tr>
+
+            <td>
+                Event Loop
+            </td>
+
+            <td>
+                Coordinates JavaScript execution with asynchronous operations
+            </td>
+
+            <td>
+                Timers, I/O callbacks, promise continuations
+            </td>
+
+        </tr>
+
+    </table>
+
+</section>
+
+
+<!-- =====================================================
+     INTERVIEW
+     ===================================================== -->
+
+<section id="interview">
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            19 · Interview Preparation
+        </div>
+
+        <h2>Professional Interview Questions</h2>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <div class="question"
+             onclick="toggleAccordion(this)">
+
+            What is the http module in Node.js?
+
+            <span class="plus">+</span>
+
+        </div>
+
+        <div class="answer">
+
+            The built-in http module provides APIs for creating
+            HTTP servers and clients. It allows Node.js applications
+            to receive requests and send HTTP responses.
+
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <div class="question"
+             onclick="toggleAccordion(this)">
+
+            What does http.createServer() do?
+
+            <span class="plus">+</span>
+
+        </div>
+
+        <div class="answer">
+
+            It creates an HTTP server. A callback is associated
+            with the server and is invoked for incoming HTTP
+            requests.
+
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <div class="question"
+             onclick="toggleAccordion(this)">
+
+            What is the difference between req and res?
+
+            <span class="plus">+</span>
+
+        </div>
+
+        <div class="answer">
+
+            <code>req</code> represents the incoming client request,
+            while <code>res</code> represents the response that
+            the server sends back.
+
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <div class="question"
+             onclick="toggleAccordion(this)">
+
+            What is routing?
+
+            <span class="plus">+</span>
+
+        </div>
+
+        <div class="answer">
+
+            Routing is the process of determining which server logic
+            should handle an incoming request based on information
+            such as its HTTP method and URL.
+
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <div class="question"
+             onclick="toggleAccordion(this)">
+
+            What is EventEmitter?
+
+            <span class="plus">+</span>
+
+        </div>
+
+        <div class="answer">
+
+            EventEmitter is a Node.js class used to create objects
+            that can emit named events and allow other code to
+            register listeners for those events.
+
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <div class="question"
+             onclick="toggleAccordion(this)">
+
+            What is event-driven architecture?
+
+            <span class="plus">+</span>
+
+        </div>
+
+        <div class="answer">
+
+            It is an architecture where program behavior can be
+            organized around events and handlers. Components emit
+            events when something happens, while listeners respond
+            to those events.
+
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <div class="question"
+             onclick="toggleAccordion(this)">
+
+            Is Node.js completely single-threaded?
+
+            <span class="plus">+</span>
+
+        </div>
+
+        <div class="answer">
+
+            JavaScript execution in a Node.js process is primarily
+            handled by a single main thread, but Node.js can rely
+            on the operating system and libuv mechanisms for
+            asynchronous I/O and certain background operations.
+            Therefore, "Node.js is single-threaded" is an
+            oversimplification.
+
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <div class="question"
+             onclick="toggleAccordion(this)">
+
+            Why is Node.js suitable for I/O-heavy applications?
+
+            <span class="plus">+</span>
+
+        </div>
+
+        <div class="answer">
+
+            Node.js uses non-blocking I/O and an event-driven
+            architecture, allowing the application to continue
+            processing JavaScript work while many I/O operations
+            are waiting for external resources.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     QUIZ
+     ===================================================== -->
+
+<section id="quiz">
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            20 · Knowledge Check
+        </div>
+
+        <h2>Quick Quiz</h2>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>
+            Which built-in module is used to create an HTTP server?
+        </h3>
+
+
+        <div class="quiz-option"
+             onclick="answerQuiz(this,false)">
+            fs
+        </div>
+
+
+        <div class="quiz-option"
+             onclick="answerQuiz(this,true)">
+            http
+        </div>
+
+
+        <div class="quiz-option"
+             onclick="answerQuiz(this,false)">
+            path
+        </div>
+
+
+        <div class="quiz-option"
+             onclick="answerQuiz(this,false)">
+            events
+        </div>
+
+
+        <div id="quizFeedback"
+             class="quiz-feedback">
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>
+            Which method emits an EventEmitter event?
+        </h3>
+
+
+        <div class="quiz-option"
+             onclick="answerQuiz2(this,false)">
+            on()
+        </div>
+
+
+        <div class="quiz-option"
+             onclick="answerQuiz2(this,true)">
+            emit()
+        </div>
+
+
+        <div class="quiz-option"
+             onclick="answerQuiz2(this,false)">
+            listen()
+        </div>
+
+
+        <div class="quiz-option"
+             onclick="answerQuiz2(this,false)">
+            triggerEvent()
+        </div>
+
+
+        <div id="quizFeedback2"
+             class="quiz-feedback">
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>
+            What does HTTP 404 generally mean?
+        </h3>
+
+
+        <div class="quiz-option"
+             onclick="answerQuiz3(this,false)">
+            Server started
+        </div>
+
+
+        <div class="quiz-option"
+             onclick="answerQuiz3(this,true)">
+            Resource not found
+        </div>
+
+
+        <div class="quiz-option"
+             onclick="answerQuiz3(this,false)">
+            Successful creation
+        </div>
+
+
+        <div class="quiz-option"
+             onclick="answerQuiz3(this,false)">
+            Server shutdown
+        </div>
+
+
+        <div id="quizFeedback3"
+             class="quiz-feedback">
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CHALLENGE
+     ===================================================== -->
+
+<section id="challenge">
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            21 · Coding Challenge
+        </div>
+
+        <h2>Build Your Own HTTP Server</h2>
+
+    </div>
+
+
+    <div class="challenge">
+
+        <h3>
+            ZENSUS Backend Challenge
+        </h3>
+
+        <p>
+            Create a Node.js HTTP server with these routes:
+        </p>
+
+        <br>
+
+        <p>
+            <strong>GET /</strong>
+            → "Welcome to ZENSUS"
+        </p>
+
+        <p>
+            <strong>GET /about</strong>
+            → "About ZENSUS"
+        </p>
+
+        <p>
+            <strong>GET /api/status</strong>
+            → JSON response
+        </p>
+
+        <p>
+            Any other route
+            → 404 response
+        </p>
+
+
+        <button
+            class="reveal"
+            onclick="toggleSolution()"
+        >
+            Reveal Solution
+        </button>
+
+
+        <div class="solution"
+             id="solution">
+
+            <div class="code-box">
+
+<pre>const http = require('http');
+
+const server =
+    http.createServer((req, res) => {
+
+        if (
+            req.method === 'GET' &&
+            req.url === '/'
+        ) {
+
+            res.writeHead(200, {
+                'Content-Type':
+                    'text/plain'
+            });
+
+            res.end(
+                'Welcome to ZENSUS'
+            );
+
+            return;
+        }
+
+
+        if (
+            req.method === 'GET' &&
+            req.url === '/about'
+        ) {
+
+            res.writeHead(200, {
+                'Content-Type':
+                    'text/plain'
+            });
+
+            res.end(
+                'About ZENSUS'
+            );
+
+            return;
+        }
+
+
+        if (
+            req.method === 'GET' &&
+            req.url === '/api/status'
+        ) {
+
+            res.writeHead(200, {
+                'Content-Type':
+                    'application/json'
+            });
+
+            res.end(
+                JSON.stringify({
+                    status: 'online'
+                })
+            );
+
+            return;
+        }
+
+
+        res.writeHead(404, {
+            'Content-Type':
+                'text/plain'
+        });
+
+        res.end(
+            '404 - Not Found'
+        );
+
+    });
+
+
+server.listen(3000, () => {
+
+    console.log(
+        'Server running at port 3000'
+    );
+
+});</pre>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CHECKLIST
+     ===================================================== -->
+
+<section>
+
+    <div class="section-heading">
+
+        <div class="section-number">
+            22 · Completion
+        </div>
+
+        <h2>Lesson 07 Checklist</h2>
+
+    </div>
+
+
+    <div class="checklist">
+
+        <label class="check">
+
+            <input
+                type="checkbox"
+                onchange="saveProgress()"
+            >
+
+            I understand HTTP request and response
+
+        </label>
+
+
+        <label class="check">
+
+            <input
+                type="checkbox"
+                onchange="saveProgress()"
+            >
+
+            I can create an HTTP server
+
+        </label>
+
+
+        <label class="check">
+
+            <input
+                type="checkbox"
+                onchange="saveProgress()"
+            >
+
+            I understand req and res
+
+        </label>
+
+
+        <label class="check">
+
+            <input
+                type="checkbox"
+                onchange="saveProgress()"
+            >
+
+            I understand HTTP methods
+
+        </label>
+
+
+        <label class="check">
+
+            <input
+                type="checkbox"
+                onchange="saveProgress()"
+            >
+
+            I understand HTTP status codes
+
+        </label>
+
+
+        <label class="check">
+
+            <input
+                type="checkbox"
+                onchange="saveProgress()"
+            >
+
+            I can implement basic routing
+
+        </label>
+
+
+        <label class="check">
+
+            <input
+                type="checkbox"
+                onchange="saveProgress()"
+            >
+
+            I understand EventEmitter
+
+        </label>
+
+
+        <label class="check">
+
+            <input
+                type="checkbox"
+                onchange="saveProgress()"
+            >
+
+            I understand Node.js event-driven architecture
+
+        </label>
+
+
+        <label class="check">
+
+            <input
+                type="checkbox"
+                onchange="saveProgress()"
+            >
+
+            I completed the HTTP server challenge
+
+        </label>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     NAVIGATION
+     ===================================================== -->
+
+<div class="lesson-nav">
+
+    <a
+        class="nav-btn"
+        href="lesson6.html"
+    >
+        ← Lesson 06
+    </a>
+
+
+    <a
+        class="nav-btn"
+        href="lesson8.html"
+    >
+        Lesson 08 →
+    </a>
+
+</div>
+
+
+</div>
+
+
+<!-- =====================================================
+     FOOTER
+     ===================================================== -->
+
+<footer>
+
+    <strong>ZENSUS</strong>
+
+    <br>
+
+    Node.js Professional Learning Path
+
+    <br>
+
+    <span>
+        Lesson 07 · HTTP Server & Event-Driven Architecture
+    </span>
+
+</footer>
+
+
+<!-- =====================================================
+     JAVASCRIPT
+     ===================================================== -->
+
+<script>
+
+/* =========================================================
+   COPY CODE
+   ========================================================= */
+
+function copyCode(button){
+
+    const codeBox =
+        button.closest('.code-box');
+
+    const code =
+        codeBox.querySelector('pre').innerText;
+
+    navigator.clipboard.writeText(code);
+
+    const original =
+        button.innerText;
+
+    button.innerText =
+        'Copied';
+
+    setTimeout(() => {
+
+        button.innerText =
+            original;
+
+    },1200);
+
+}
+
+
+/* =========================================================
+   ACCORDION
+   ========================================================= */
+
+function toggleAccordion(question){
+
+    const accordion =
+        question.parentElement;
+
+    accordion.classList.toggle('open');
+
+    const plus =
+        question.querySelector('.plus');
+
+    if(
+        accordion.classList.contains('open')
+    ){
+
+        plus.innerText = '−';
+
+    }else{
+
+        plus.innerText = '+';
+
+    }
+
+}
+
+
+/* =========================================================
+   HTTP REQUEST SIMULATOR
+   ========================================================= */
+
+function simulateRequest(method,url){
+
+    const output =
+        document.getElementById(
+            'requestResult'
+        );
+
+
+    let status = 200;
+
+    let statusText = 'OK';
+
+    let body = '';
+
+
+    if(
+        method === 'GET' &&
+        url === '/'
+    ){
+
+        status = 200;
+        statusText = 'OK';
+
+        body =
+            'Welcome to ZENSUS';
+
+    }
+
+    else if(
+        method === 'GET' &&
+        url === '/users'
+    ){
+
+        status = 200;
+        statusText = 'OK';
+
+        body =
+            JSON.stringify(
+                {
+                    users:[
+                        'Alice',
+                        'Bob',
+                        'Charlie'
+                    ]
+                },
+                null,
+                2
+            );
+
+    }
+
+    else if(
+        method === 'POST' &&
+        url === '/users'
+    ){
+
+        status = 201;
+        statusText = 'Created';
+
+        body =
+            'New user created';
+
+    }
+
+    else if(
+        method === 'DELETE' &&
+        url === '/users/1'
+    ){
+
+        status = 204;
+        statusText = 'No Content';
+
+        body =
+            'User deleted';
+
+    }
+
+    else{
+
+        status = 404;
+        statusText = 'Not Found';
+
+        body =
+            'Route not found';
+
+    }
+
+
+    output.innerHTML =
+
+        '<span style="color:#7db4ff;">' +
+        'HTTP REQUEST' +
+        '</span><br><br>' +
+
+        method +
+        ' ' +
+        url +
+
+        '<br><br>' +
+
+        '<span style="color:#7bd88f;">' +
+        'HTTP RESPONSE' +
+        '</span><br><br>' +
+
+        'Status: ' +
+        status +
+        ' ' +
+        statusText +
+
+        '<br>' +
+
+        'Content-Type: text/plain' +
+
+        '<br><br>' +
+
+        'Body: ' +
+        body;
+
+}
+
+
+/* =========================================================
+   QUIZ 1
+   ========================================================= */
+
+function answerQuiz(element,correct){
+
+    const options =
+        element.parentElement
+        .querySelectorAll('.quiz-option');
+
+    options.forEach(option => {
+
+        option.style.pointerEvents =
+            'none';
+
+    });
+
+
+    if(correct){
+
+        element.classList.add(
+            'correct'
+        );
+
+        document.getElementById(
+            'quizFeedback'
+        ).innerText =
+            '✓ Correct — Node.js provides the built-in http module.';
+
+        document.getElementById(
+            'quizFeedback'
+        ).style.color =
+            '#16845b';
+
+    }else{
+
+        element.classList.add(
+            'wrong'
+        );
+
+        document.getElementById(
+            'quizFeedback'
+        ).innerText =
+            '✕ Incorrect. Review the HTTP module section.';
+
+        document.getElementById(
+            'quizFeedback'
+        ).style.color =
+            '#c0392b';
+
+    }
+
+}
+
+
+/* =========================================================
+   QUIZ 2
+   ========================================================= */
+
+function answerQuiz2(element,correct){
+
+    const options =
+        element.parentElement
+        .querySelectorAll('.quiz-option');
+
+    options.forEach(option => {
+
+        option.style.pointerEvents =
+            'none';
+
+    });
+
+
+    if(correct){
+
+        element.classList.add(
+            'correct'
+        );
+
+        document.getElementById(
+            'quizFeedback2'
+        ).innerText =
+            '✓ Correct — emit() triggers a named EventEmitter event.';
+
+        document.getElementById(
+            'quizFeedback2'
+        ).style.color =
+            '#16845b';
+
+    }else{
+
+        element.classList.add(
+            'wrong'
+        );
+
+        document.getElementById(
+            'quizFeedback2'
+        ).innerText =
+            '✕ Incorrect. Review EventEmitter methods.';
+
+        document.getElementById(
+            'quizFeedback2'
+        ).style.color =
+            '#c0392b';
+
+    }
+
+}
+
+
+/* =========================================================
+   QUIZ 3
+   ========================================================= */
+
+function answerQuiz3(element,correct){
+
+    const options =
+        element.parentElement
+        .querySelectorAll('.quiz-option');
+
+    options.forEach(option => {
+
+        option.style.pointerEvents =
+            'none';
+
+    });
+
+
+    if(correct){
+
+        element.classList.add(
+            'correct'
+        );
+
+        document.getElementById(
+            'quizFeedback3'
+        ).innerText =
+            '✓ Correct — 404 indicates that the requested resource was not found.';
+
+        document.getElementById(
+            'quizFeedback3'
+        ).style.color =
+            '#16845b';
+
+    }else{
+
+        element.classList.add(
+            'wrong'
+        );
+
+        document.getElementById(
+            'quizFeedback3'
+        ).innerText =
+            '✕ Incorrect. Review HTTP status codes.';
+
+        document.getElementById(
+            'quizFeedback3'
+        ).style.color =
+            '#c0392b';
+
+    }
+
+}
+
+
+/* =========================================================
+   SOLUTION
+   ========================================================= */
+
+function toggleSolution(){
+
+    const solution =
+        document.getElementById(
+            'solution'
+        );
+
+    if(
+        solution.style.display ===
+        'block'
+    ){
+
+        solution.style.display =
+            'none';
+
+    }else{
+
+        solution.style.display =
+            'block';
+
+    }
+
+}
+
+
+/* =========================================================
+   PROGRESS
+   ========================================================= */
+
+function saveProgress(){
+
+    const checks =
+        document.querySelectorAll(
+            '.check input'
+        );
+
+    let completed = 0;
+
+
+    checks.forEach(check => {
+
+        if(check.checked){
+
+            completed++;
+
+        }
+
+    });
+
+
+    const percentage =
+        Math.round(
+            (
+                completed /
+                checks.length
+            ) * 100
+        );
+
+
+    document.getElementById(
+        'progressBar'
+    ).style.width =
+        percentage + '%';
+
+
+    localStorage.setItem(
+        'zensus_lesson7_progress',
+        percentage
+    );
+
+}
+
+
+/* =========================================================
+   RESTORE PROGRESS
+   ========================================================= */
+
+window.addEventListener(
+    'load',
+    () => {
+
+        const saved =
+            localStorage.getItem(
+                'zensus_lesson7_progress'
+            );
+
+
+        if(saved){
+
+            document.getElementById(
+                'progressBar'
+            ).style.width =
+                saved + '%';
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   ACTIVE TABLE OF CONTENTS
+   ========================================================= */
+
+const sections =
+    document.querySelectorAll(
+        'section'
+    );
+
+const links =
+    document.querySelectorAll(
+        '.toc a'
+    );
+
+
+window.addEventListener(
+    'scroll',
+    () => {
+
+        let current = '';
+
+
+        sections.forEach(section => {
+
+            const top =
+                section.offsetTop - 130;
+
+
+            if(
+                window.scrollY >= top
+            ){
+
+                current =
+                    section.id;
+
+            }
+
+        });
+
+
+        links.forEach(link => {
+
+            link.classList.remove(
+                'active'
+            );
+
+
+            if(
+                link.getAttribute(
+                    'href'
+                ) ===
+                '#' + current
+            ){
+
+                link.classList.add(
+                    'active'
+                );
+
+            }
+
+        });
+
+    }
+);
+
+</script>
+
+
+<!-- =====================================================
+     LAB BUTTON STYLE
+     ===================================================== -->
+
+<style>
+
+.lab-btn{
+    border:1px solid #bfd4ef;
+    background:white;
+    color:#0d47a1;
+    padding:10px 15px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:700;
+    transition:.2s;
+}
+
+.lab-btn:hover{
+    background:#eaf3ff;
+    border-color:#1769e0;
+    transform:translateY(-1px);
+}
+
+</style>
+
+</body>
+</html>

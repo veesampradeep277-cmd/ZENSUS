@@ -1,0 +1,4128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS — Django Lesson 08: Forms & Validation</title>
+
+<style>
+:root{
+  --blue:#2563eb;
+  --blue-dark:#1d4ed8;
+  --blue-light:#eff6ff;
+  --blue-soft:#dbeafe;
+  --blue-border:#bfdbfe;
+  --text:#10213f;
+  --text-light:#5f6f86;
+  --muted:#8b9ab0;
+  --bg:#f7faff;
+  --white:#ffffff;
+  --border:#dce6f2;
+  --green:#16a34a;
+  --green-light:#f0fdf4;
+  --orange:#f59e0b;
+  --orange-light:#fffbeb;
+  --red:#dc2626;
+  --red-light:#fef2f2;
+  --purple:#7c3aed;
+  --shadow:0 12px 35px rgba(37,99,235,.08);
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  font-family:Inter,Segoe UI,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.7;
+}
+
+button,
+input,
+select,
+textarea{
+  font:inherit;
+}
+
+a{
+  text-decoration:none;
+  color:inherit;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar{
+  position:fixed;
+  left:0;
+  top:0;
+  width:280px;
+  height:100vh;
+  background:#fff;
+  border-right:1px solid var(--border);
+  overflow-y:auto;
+  z-index:100;
+}
+
+.brand{
+  padding:25px 22px 20px;
+  border-bottom:1px solid var(--border);
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:23px;
+  font-weight:900;
+  color:var(--blue);
+}
+
+.logo-box{
+  width:38px;
+  height:38px;
+  border-radius:10px;
+  background:var(--blue);
+  color:#fff;
+  display:grid;
+  place-items:center;
+  font-weight:900;
+}
+
+.lesson-label{
+  margin-top:12px;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:1.3px;
+  color:var(--muted);
+}
+
+.lesson-name{
+  font-size:14px;
+  font-weight:700;
+  margin-top:3px;
+}
+
+.nav{
+  padding:18px 13px 30px;
+}
+
+.nav-title{
+  padding:10px 12px;
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:1.4px;
+  color:var(--muted);
+  font-weight:800;
+}
+
+.nav a{
+  display:block;
+  padding:9px 12px;
+  margin:3px 0;
+  border-radius:8px;
+  color:var(--text-light);
+  font-size:13px;
+  transition:.2s;
+}
+
+.nav a:hover{
+  background:var(--blue-light);
+  color:var(--blue);
+}
+
+.nav a.active{
+  background:var(--blue-light);
+  color:var(--blue);
+  font-weight:700;
+  border-left:3px solid var(--blue);
+}
+
+/* =========================
+   MAIN
+========================= */
+
+.main{
+  margin-left:280px;
+  min-height:100vh;
+}
+
+.progress{
+  position:fixed;
+  top:0;
+  left:280px;
+  right:0;
+  height:4px;
+  background:#e8eef7;
+  z-index:200;
+}
+
+.progress-bar{
+  height:100%;
+  width:0;
+  background:linear-gradient(
+    90deg,
+    var(--blue),
+    #60a5fa
+  );
+}
+
+/* =========================
+   HERO
+========================= */
+
+.hero{
+  padding:75px 7% 50px;
+  background:
+    radial-gradient(
+      circle at 85% 20%,
+      #dbeafe 0,
+      transparent 30%
+    ),
+    linear-gradient(
+      135deg,
+      #fff,
+      #f3f8ff
+    );
+  border-bottom:1px solid var(--border);
+}
+
+.hero-inner{
+  max-width:1050px;
+  margin:auto;
+}
+
+.breadcrumb{
+  color:var(--blue);
+  font-size:13px;
+  font-weight:700;
+  margin-bottom:16px;
+}
+
+.hero h1{
+  font-size:clamp(34px,5vw,58px);
+  line-height:1.08;
+  letter-spacing:-2px;
+}
+
+.hero h1 span{
+  color:var(--blue);
+}
+
+.hero p{
+  margin-top:18px;
+  max-width:820px;
+  color:var(--text-light);
+  font-size:17px;
+}
+
+.meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+  margin-top:25px;
+}
+
+.pill{
+  background:#fff;
+  border:1px solid var(--border);
+  padding:7px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  color:var(--text-light);
+}
+
+/* =========================
+   SEARCH
+========================= */
+
+.search-wrap{
+  max-width:1050px;
+  margin:28px auto 0;
+  padding:0 7%;
+}
+
+.search{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#fff;
+  padding:14px 18px;
+  outline:none;
+  color:var(--text);
+}
+
+.search:focus{
+  border-color:var(--blue);
+  box-shadow:
+    0 0 0 4px rgba(37,99,235,.08);
+}
+
+/* =========================
+   CONTENT
+========================= */
+
+.content{
+  max-width:1050px;
+  margin:auto;
+  padding:30px 7% 80px;
+}
+
+.section{
+  margin:55px 0;
+  scroll-margin-top:30px;
+}
+
+.section.hidden{
+  display:none;
+}
+
+.section-head{
+  display:flex;
+  align-items:flex-start;
+  gap:15px;
+  margin-bottom:20px;
+}
+
+.number{
+  min-width:39px;
+  height:39px;
+  border-radius:11px;
+  background:var(--blue-light);
+  color:var(--blue);
+  display:grid;
+  place-items:center;
+  font-weight:900;
+  font-size:13px;
+}
+
+.section h2{
+  font-size:28px;
+  line-height:1.2;
+}
+
+.section h3{
+  font-size:19px;
+  margin:25px 0 10px;
+}
+
+.section p{
+  color:var(--text-light);
+  margin:10px 0;
+}
+
+.card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:24px;
+  box-shadow:var(--shadow);
+  margin:18px 0;
+}
+
+.info{
+  border-left:4px solid var(--blue);
+  background:var(--blue-light);
+  padding:17px 20px;
+  border-radius:0 12px 12px 0;
+  margin:20px 0;
+}
+
+.success{
+  border-left-color:var(--green);
+  background:var(--green-light);
+}
+
+.warning{
+  border-left-color:var(--orange);
+  background:var(--orange-light);
+}
+
+.danger{
+  border-left-color:var(--red);
+  background:var(--red-light);
+}
+
+code{
+  background:#eef4ff;
+  color:#1d4ed8;
+  padding:2px 6px;
+  border-radius:5px;
+  font-size:.9em;
+}
+
+/* =========================
+   PIPELINE
+========================= */
+
+.pipeline{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:12px;
+  margin:28px 0;
+}
+
+.pipe-card{
+  width:145px;
+  min-height:105px;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:14px;
+  box-shadow:var(--shadow);
+  animation:float 3s ease-in-out infinite;
+}
+
+.pipe-card:nth-child(2){
+  animation-delay:.2s;
+}
+
+.pipe-card:nth-child(3){
+  animation-delay:.4s;
+}
+
+.pipe-card:nth-child(4){
+  animation-delay:.6s;
+}
+
+.pipe-card:nth-child(5){
+  animation-delay:.8s;
+}
+
+.pipe-icon{
+  font-size:27px;
+  margin-bottom:7px;
+}
+
+.pipe-card strong{
+  font-size:13px;
+}
+
+.pipe-card small{
+  color:var(--muted);
+  font-size:11px;
+}
+
+.arrow{
+  color:var(--blue);
+  font-size:24px;
+  font-weight:900;
+}
+
+@keyframes float{
+  0%,100%{
+    transform:translateY(0);
+  }
+
+  50%{
+    transform:translateY(-7px);
+  }
+}
+
+/* =========================
+   GRID
+========================= */
+
+.grid2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
+
+.grid3{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+
+.mini-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:19px;
+  transition:.25s;
+}
+
+.mini-card:hover{
+  transform:translateY(-4px);
+  box-shadow:var(--shadow);
+}
+
+.mini-card h4{
+  margin-bottom:6px;
+}
+
+.mini-card p{
+  font-size:13px;
+  margin:0;
+}
+
+/* =========================
+   CODE
+========================= */
+
+.code-wrap{
+  background:#0f172a;
+  border-radius:14px;
+  overflow:hidden;
+  margin:18px 0;
+  box-shadow:
+    0 15px 30px rgba(15,23,42,.12);
+}
+
+.code-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 14px;
+  background:#172033;
+  color:#aebbd0;
+  font-size:12px;
+}
+
+.copy{
+  border:1px solid #3b4a63;
+  background:#23304a;
+  color:#fff;
+  border-radius:7px;
+  padding:6px 10px;
+  cursor:pointer;
+  font-size:11px;
+}
+
+.copy:hover{
+  background:#30415f;
+}
+
+pre{
+  padding:20px;
+  overflow:auto;
+  color:#e6edf7;
+  font-size:13px;
+  line-height:1.7;
+}
+
+/* =========================
+   FORM VISUAL
+========================= */
+
+.form-demo{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:25px;
+  box-shadow:var(--shadow);
+}
+
+.form-demo label{
+  display:block;
+  font-size:13px;
+  font-weight:700;
+  margin-bottom:6px;
+}
+
+.demo-input{
+  width:100%;
+  padding:11px 13px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  outline:none;
+  margin-bottom:15px;
+}
+
+.demo-input:focus{
+  border-color:var(--blue);
+  box-shadow:
+    0 0 0 3px rgba(37,99,235,.08);
+}
+
+.demo-button{
+  border:0;
+  background:var(--blue);
+  color:#fff;
+  padding:11px 18px;
+  border-radius:9px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.demo-button:hover{
+  background:var(--blue-dark);
+}
+
+/* =========================
+   VALIDATION
+========================= */
+
+.validation-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:20px;
+  transition:.25s;
+}
+
+.validation-card:hover{
+  transform:translateY(-4px);
+  box-shadow:var(--shadow);
+}
+
+.validation-icon{
+  width:46px;
+  height:46px;
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+  background:var(--blue-light);
+  font-size:23px;
+  margin-bottom:10px;
+}
+
+/* =========================
+   GET POST
+========================= */
+
+.method-box{
+  border-radius:16px;
+  padding:24px;
+  background:#fff;
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+}
+
+.method-title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.method-badge{
+  padding:6px 10px;
+  border-radius:7px;
+  font-size:11px;
+  font-weight:900;
+  color:#fff;
+}
+
+.get{
+  background:var(--green);
+}
+
+.post{
+  background:var(--blue);
+}
+
+/* =========================
+   FORM FLOW
+========================= */
+
+.form-flow{
+  display:grid;
+  grid-template-columns:1fr 55px 1fr 55px 1fr 55px 1fr;
+  align-items:center;
+  gap:8px;
+  margin:30px 0;
+}
+
+.form-box{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:15px;
+  padding:20px 12px;
+  text-align:center;
+  box-shadow:var(--shadow);
+}
+
+.form-box-icon{
+  font-size:27px;
+  margin-bottom:6px;
+}
+
+.form-arrow{
+  text-align:center;
+  color:var(--blue);
+  font-size:25px;
+  font-weight:900;
+}
+
+/* =========================
+   ERRORS
+========================= */
+
+.error-demo{
+  border:1px solid #fecaca;
+  background:#fff;
+  border-radius:14px;
+  padding:20px;
+}
+
+.error-input{
+  width:100%;
+  padding:11px;
+  border:1px solid #ef4444;
+  border-radius:8px;
+  outline:none;
+}
+
+.error-message{
+  margin-top:6px;
+  color:var(--red);
+  font-size:12px;
+  font-weight:700;
+}
+
+/* =========================
+   TABS
+========================= */
+
+.tabs{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.tab{
+  border:1px solid var(--border);
+  background:#fff;
+  color:var(--text-light);
+  padding:9px 13px;
+  border-radius:8px 8px 0 0;
+  cursor:pointer;
+  font-size:12px;
+  font-weight:700;
+}
+
+.tab.active{
+  background:var(--blue);
+  border-color:var(--blue);
+  color:#fff;
+}
+
+.tab-content{
+  display:none;
+}
+
+.tab-content.active{
+  display:block;
+}
+
+/* =========================
+   CHALLENGE
+========================= */
+
+.challenge{
+  background:
+    linear-gradient(
+      135deg,
+      #eff6ff,
+      #fff
+    );
+  border:1px solid var(--blue-border);
+  border-radius:18px;
+  padding:25px;
+}
+
+.challenge-title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.challenge-icon{
+  width:45px;
+  height:45px;
+  background:var(--blue);
+  color:#fff;
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+  font-size:22px;
+}
+
+/* =========================
+   QUIZ
+========================= */
+
+.quiz{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:24px;
+  margin-bottom:20px;
+}
+
+.option{
+  display:block;
+  width:100%;
+  text-align:left;
+  border:1px solid var(--border);
+  background:#fff;
+  padding:12px 15px;
+  margin:9px 0;
+  border-radius:9px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.option:hover{
+  border-color:var(--blue);
+  background:var(--blue-light);
+}
+
+.option.correct{
+  border-color:#86efac;
+  background:#f0fdf4;
+}
+
+.option.wrong{
+  border-color:#fca5a5;
+  background:#fef2f2;
+}
+
+.quiz-result{
+  margin-top:14px;
+  font-weight:700;
+  color:var(--blue);
+}
+
+/* =========================
+   REVEAL
+========================= */
+
+.reveal{
+  opacity:0;
+  transform:translateY(20px);
+  transition:.6s ease;
+}
+
+.reveal.show{
+  opacity:1;
+  transform:none;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.lesson-footer{
+  border-top:1px solid var(--border);
+  padding:25px 0;
+  margin-top:60px;
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+}
+
+.footer-btn{
+  padding:11px 16px;
+  border:1px solid var(--border);
+  background:#fff;
+  border-radius:9px;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.footer-btn.primary{
+  background:var(--blue);
+  border-color:var(--blue);
+  color:#fff;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:900px){
+
+  .sidebar{
+    position:relative;
+    width:100%;
+    height:auto;
+  }
+
+  .main{
+    margin-left:0;
+  }
+
+  .progress{
+    left:0;
+  }
+
+  .grid2,
+  .grid3{
+    grid-template-columns:1fr;
+  }
+
+  .form-flow{
+    grid-template-columns:1fr;
+  }
+
+  .form-arrow{
+    transform:rotate(90deg);
+  }
+}
+
+@media(max-width:600px){
+
+  .hero{
+    padding:45px 5% 40px;
+  }
+
+  .content,
+  .search-wrap{
+    padding-left:5%;
+    padding-right:5%;
+  }
+
+  .hero h1{
+    font-size:36px;
+  }
+
+  .pipeline{
+    flex-direction:column;
+  }
+
+  .arrow{
+    transform:rotate(90deg);
+  }
+
+  .pipe-card{
+    width:100%;
+  }
+
+  .lesson-footer{
+    flex-direction:column;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =========================
+     SIDEBAR
+========================= -->
+
+<aside class="sidebar">
+
+  <div class="brand">
+
+    <div class="logo">
+      <div class="logo-box">Z</div>
+      ZENSUS
+    </div>
+
+    <div class="lesson-label">
+      LESSON 08
+    </div>
+
+    <div class="lesson-name">
+      Forms & Validation
+    </div>
+
+  </div>
+
+
+  <nav class="nav">
+
+    <div class="nav-title">
+      Lesson Navigation
+    </div>
+
+    <a href="#overview">Overview</a>
+    <a href="#why-forms">Why Forms?</a>
+    <a href="#form-flow">Form Flow</a>
+    <a href="#form-class">Django Form</a>
+    <a href="#fields">Form Fields</a>
+    <a href="#get-post">GET vs POST</a>
+    <a href="#request-post">request.POST</a>
+    <a href="#is-valid">is_valid()</a>
+    <a href="#cleaned-data">cleaned_data</a>
+    <a href="#validators">Validation</a>
+    <a href="#custom-validation">Custom Validation</a>
+    <a href="#errors">Form Errors</a>
+    <a href="#csrf">CSRF Protection</a>
+    <a href="#modelform">ModelForm</a>
+    <a href="#save">Saving ModelForm</a>
+    <a href="#widget">Widgets</a>
+    <a href="#view">Form + View</a>
+    <a href="#template">Form + Template</a>
+    <a href="#practice">Mini Project</a>
+    <a href="#mistakes">Common Mistakes</a>
+    <a href="#quiz">Quiz</a>
+    <a href="#takeaway">Takeaway</a>
+
+  </nav>
+
+</aside>
+
+
+<main class="main">
+
+  <div class="progress">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+
+  <!-- =========================
+       HERO
+  ========================= -->
+
+  <header class="hero">
+
+    <div class="hero-inner">
+
+      <div class="breadcrumb">
+        DJANGO / LESSON 08
+      </div>
+
+      <h1>
+        Forms <span>& Validation</span>
+      </h1>
+
+      <p>
+        Learn how Django receives user input, validates it safely,
+        displays errors, and converts submitted form data into
+        useful application data.
+      </p>
+
+      <div class="meta">
+
+        <span class="pill">
+          Lesson 08 of 15
+        </span>
+
+        <span class="pill">
+          Important
+        </span>
+
+        <span class="pill">
+          Django Forms
+        </span>
+
+        <span class="pill">
+          Validation
+        </span>
+
+        <span class="pill">
+          Security
+        </span>
+
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <div class="search-wrap">
+
+    <input
+      class="search"
+      id="searchInput"
+      type="text"
+      placeholder="Search this lesson... e.g. ModelForm, POST, validation, CSRF"
+    >
+
+  </div>
+
+
+  <div class="content">
+
+
+    <!-- =========================
+         01 OVERVIEW
+    ========================= -->
+
+    <section class="section reveal" id="overview">
+
+      <div class="section-head">
+
+        <div class="number">
+          01
+        </div>
+
+        <div>
+
+          <h2>
+            Why Forms Are Important
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <p>
+        Almost every real web application needs to collect information
+        from users.
+      </p>
+
+
+      <div class="grid3">
+
+        <div class="mini-card">
+
+          <h4>
+            👤 Registration
+          </h4>
+
+          <p>
+            Collect name, email, password and other account information.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            🔐 Login
+          </h4>
+
+          <p>
+            Receive username and password from a user.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            📝 Feedback
+          </h4>
+
+          <p>
+            Allow users to submit comments and feedback.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            🛒 Products
+          </h4>
+
+          <p>
+            Add product information through an administration form.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            🔎 Search
+          </h4>
+
+          <p>
+            Accept search keywords and return matching results.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            📚 Student Portal
+          </h4>
+
+          <p>
+            Register students and update their information.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="info success">
+
+        <strong>
+          Django Forms solve two major problems:
+        </strong>
+
+        <br><br>
+
+        1. Collecting user input
+
+        <br>
+
+        2. Validating user input before using it
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         02 WHY FORMS
+    ========================= -->
+
+    <section class="section reveal" id="why-forms">
+
+      <div class="section-head">
+
+        <div class="number">
+          02
+        </div>
+
+        <div>
+
+          <h2>
+            What is a Django Form?
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <p>
+        A Django Form is a Python class that describes the fields
+        a user should submit and the rules that should be applied
+        to that submitted data.
+      </p>
+
+
+      <div class="info">
+
+        Think of a Django Form as a bridge between:
+
+        <br><br>
+
+        <strong>
+          HTML Form → User Input → Validation → Python Data
+        </strong>
+
+      </div>
+
+
+      <div class="card">
+
+        <h3>
+          Without Django Forms
+        </h3>
+
+        <p>
+          You would manually create HTML fields, read
+          <code>request.POST</code>, check every value, handle errors,
+          and repeat this logic throughout your application.
+        </p>
+
+
+        <h3>
+          With Django Forms
+        </h3>
+
+        <p>
+          Django can generate form fields, validate submitted values,
+          report errors and provide cleaned data.
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         03 FORM FLOW
+    ========================= -->
+
+    <section class="section reveal" id="form-flow">
+
+      <div class="section-head">
+
+        <div class="number">
+          03
+        </div>
+
+        <div>
+
+          <h2>
+            Django Form Request Flow
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="form-flow">
+
+        <div class="form-box">
+
+          <div class="form-box-icon">
+            👤
+          </div>
+
+          <strong>
+            User
+          </strong>
+
+          <p>
+            Enters information
+          </p>
+
+        </div>
+
+
+        <div class="form-arrow">
+          →
+        </div>
+
+
+        <div class="form-box">
+
+          <div class="form-box-icon">
+            📝
+          </div>
+
+          <strong>
+            HTML Form
+          </strong>
+
+          <p>
+            Sends data
+          </p>
+
+        </div>
+
+
+        <div class="form-arrow">
+          →
+        </div>
+
+
+        <div class="form-box">
+
+          <div class="form-box-icon">
+            ⚙️
+          </div>
+
+          <strong>
+            Django View
+          </strong>
+
+          <p>
+            Receives request
+          </p>
+
+        </div>
+
+
+        <div class="form-arrow">
+          →
+        </div>
+
+
+        <div class="form-box">
+
+          <div class="form-box-icon">
+            🛡️
+          </div>
+
+          <strong>
+            Validation
+          </strong>
+
+          <p>
+            Checks input
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="info success">
+
+        If the data is valid, Django gives you
+        <code>cleaned_data</code> that your application can safely
+        process.
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         04 FORM CLASS
+    ========================= -->
+
+    <section class="section reveal" id="form-class">
+
+      <div class="section-head">
+
+        <div class="number">
+          04
+        </div>
+
+        <div>
+
+          <h2>
+            Creating Your First Django Form
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <p>
+        Forms are usually created inside a file called
+        <code>forms.py</code>.
+      </p>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            forms.py
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>from django import forms
+
+
+class StudentForm(forms.Form):
+
+    name = forms.CharField(
+        max_length=100
+    )
+
+    email = forms.EmailField()
+
+    age = forms.IntegerField()</code></pre>
+
+      </div>
+
+
+      <div class="info">
+
+        Here:
+
+        <br><br>
+
+        <code>StudentForm</code> is your form class.
+
+        <br>
+
+        <code>CharField</code> accepts text.
+
+        <br>
+
+        <code>EmailField</code> validates email format.
+
+        <br>
+
+        <code>IntegerField</code> expects an integer.
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         05 FIELDS
+    ========================= -->
+
+    <section class="section reveal" id="fields">
+
+      <div class="section-head">
+
+        <div class="number">
+          05
+        </div>
+
+        <div>
+
+          <h2>
+            Common Django Form Fields
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="grid3">
+
+        <div class="validation-card">
+
+          <div class="validation-icon">
+            🔤
+          </div>
+
+          <h4>
+            CharField
+          </h4>
+
+          <p>
+            Text input.
+          </p>
+
+          <code>
+            forms.CharField()
+          </code>
+
+        </div>
+
+
+        <div class="validation-card">
+
+          <div class="validation-icon">
+            📧
+          </div>
+
+          <h4>
+            EmailField
+          </h4>
+
+          <p>
+            Email input with validation.
+          </p>
+
+          <code>
+            forms.EmailField()
+          </code>
+
+        </div>
+
+
+        <div class="validation-card">
+
+          <div class="validation-icon">
+            🔢
+          </div>
+
+          <h4>
+            IntegerField
+          </h4>
+
+          <p>
+            Integer values.
+          </p>
+
+          <code>
+            forms.IntegerField()
+          </code>
+
+        </div>
+
+
+        <div class="validation-card">
+
+          <div class="validation-icon">
+            🔒
+          </div>
+
+          <h4>
+            BooleanField
+          </h4>
+
+          <p>
+            True or false values.
+          </p>
+
+          <code>
+            forms.BooleanField()
+          </code>
+
+        </div>
+
+
+        <div class="validation-card">
+
+          <div class="validation-icon">
+            📅
+          </div>
+
+          <h4>
+            DateField
+          </h4>
+
+          <p>
+            Date values.
+          </p>
+
+          <code>
+            forms.DateField()
+          </code>
+
+        </div>
+
+
+        <div class="validation-card">
+
+          <div class="validation-icon">
+            📄
+          </div>
+
+          <h4>
+            FileField
+          </h4>
+
+          <p>
+            File uploads.
+          </p>
+
+          <code>
+            forms.FileField()
+          </code>
+
+        </div>
+
+      </div>
+
+
+      <h3>
+        Example
+      </h3>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            Multiple fields
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>from django import forms
+
+
+class StudentForm(forms.Form):
+
+    name = forms.CharField(
+        max_length=100
+    )
+
+    email = forms.EmailField()
+
+    age = forms.IntegerField(
+        min_value=18,
+        max_value=60
+    )
+
+    course = forms.CharField(
+        max_length=100
+    )</code></pre>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         06 GET POST
+    ========================= -->
+
+    <section class="section reveal" id="get-post">
+
+      <div class="section-head">
+
+        <div class="number">
+          06
+        </div>
+
+        <div>
+
+          <h2>
+            GET vs POST
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="grid2">
+
+        <div class="method-box">
+
+          <div class="method-title">
+
+            <span class="method-badge get">
+              GET
+            </span>
+
+            <h3 style="margin:0;">
+              Request Data
+            </h3>
+
+          </div>
+
+          <p>
+            GET is commonly used when retrieving information.
+          </p>
+
+          <div class="code-wrap">
+
+            <div class="code-top">
+              Example
+            </div>
+
+<pre><code>/search/?q=django</code></pre>
+
+          </div>
+
+          <p>
+            Query parameters can appear in the URL.
+          </p>
+
+        </div>
+
+
+        <div class="method-box">
+
+          <div class="method-title">
+
+            <span class="method-badge post">
+              POST
+            </span>
+
+            <h3 style="margin:0;">
+              Submit Data
+            </h3>
+
+          </div>
+
+          <p>
+            POST is commonly used when sending form data to the server.
+          </p>
+
+          <div class="code-wrap">
+
+            <div class="code-top">
+              Example
+            </div>
+
+<pre><code>username=Pradeep
+email=example@email.com</code></pre>
+
+          </div>
+
+          <p>
+            POST data is not normally placed directly in the URL.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="info warning">
+
+        When processing forms that change data on the server,
+        POST is generally the appropriate method.
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         07 REQUEST POST
+    ========================= -->
+
+    <section class="section reveal" id="request-post">
+
+      <div class="section-head">
+
+        <div class="number">
+          07
+        </div>
+
+        <div>
+
+          <h2>
+            request.POST
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <p>
+        Django provides submitted POST data through
+        <code>request.POST</code>.
+      </p>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            views.py
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>def student_register(request):
+
+    if request.method == "POST":
+
+        name = request.POST.get("name")
+
+        email = request.POST.get("email")
+
+        print(name)
+        print(email)
+
+    return render(
+        request,
+        "student_register.html"
+    )</code></pre>
+
+      </div>
+
+
+      <div class="info danger">
+
+        You can read POST data manually, but Django Forms are
+        preferable for structured validation because they provide
+        a consistent validation system.
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         08 IS VALID
+    ========================= -->
+
+    <section class="section reveal" id="is-valid">
+
+      <div class="section-head">
+
+        <div class="number">
+          08
+        </div>
+
+        <div>
+
+          <h2>
+            is_valid()
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <p>
+        After binding submitted data to a form, call
+        <code>is_valid()</code> to run the form's validation.
+      </p>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            views.py
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>def register(request):
+
+    if request.method == "POST":
+
+        form = StudentForm(
+            request.POST
+        )
+
+        if form.is_valid():
+
+            print("Valid data")
+
+    else:
+
+        form = StudentForm()
+
+    return render(
+        request,
+        "register.html",
+        {"form": form}
+    )</code></pre>
+
+      </div>
+
+
+      <div class="info success">
+
+        <strong>
+          is_valid() returns True
+        </strong>
+        when all required validation rules pass.
+
+        <br><br>
+
+        Otherwise it returns
+        <strong>False</strong>
+        and the form contains errors.
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         09 CLEANED DATA
+    ========================= -->
+
+    <section class="section reveal" id="cleaned-data">
+
+      <div class="section-head">
+
+        <div class="number">
+          09
+        </div>
+
+        <div>
+
+          <h2>
+            cleaned_data
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <p>
+        After <code>form.is_valid()</code> returns True,
+        Django provides the validated values through
+        <code>cleaned_data</code>.
+      </p>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            Python
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>if form.is_valid():
+
+    name = form.cleaned_data["name"]
+
+    email = form.cleaned_data["email"]
+
+    age = form.cleaned_data["age"]
+
+    print(name)
+    print(email)
+    print(age)</code></pre>
+
+      </div>
+
+
+      <div class="info">
+
+        <strong>
+          Important:
+        </strong>
+
+        Use <code>cleaned_data</code> after successful validation
+        instead of treating raw input as validated application data.
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         10 VALIDATORS
+    ========================= -->
+
+    <section class="section reveal" id="validators">
+
+      <div class="section-head">
+
+        <div class="number">
+          10
+        </div>
+
+        <div>
+
+          <h2>
+            Built-In Validation
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <p>
+        Django provides many field options and validators that help
+        reject invalid input.
+      </p>
+
+
+      <div class="grid3">
+
+        <div class="validation-card">
+
+          <div class="validation-icon">
+            📏
+          </div>
+
+          <h4>
+            max_length
+          </h4>
+
+          <p>
+            Limits text length.
+          </p>
+
+          <code>
+            max_length=100
+          </code>
+
+        </div>
+
+
+        <div class="validation-card">
+
+          <div class="validation-icon">
+            🔢
+          </div>
+
+          <h4>
+            min_value
+          </h4>
+
+          <p>
+            Sets minimum numeric value.
+          </p>
+
+          <code>
+            min_value=18
+          </code>
+
+        </div>
+
+
+        <div class="validation-card">
+
+          <div class="validation-icon">
+            🔢
+          </div>
+
+          <h4>
+            max_value
+          </h4>
+
+          <p>
+            Sets maximum numeric value.
+          </p>
+
+          <code>
+            max_value=60
+          </code>
+
+        </div>
+
+
+        <div class="validation-card">
+
+          <div class="validation-icon">
+            ⭐
+          </div>
+
+          <h4>
+            required
+          </h4>
+
+          <p>
+            Controls whether input is required.
+          </p>
+
+          <code>
+            required=True
+          </code>
+
+        </div>
+
+
+        <div class="validation-card">
+
+          <div class="validation-icon">
+            📧
+          </div>
+
+          <h4>
+            Email Validation
+          </h4>
+
+          <p>
+            EmailField validates email format.
+          </p>
+
+          <code>
+            EmailField()
+          </code>
+
+        </div>
+
+
+        <div class="validation-card">
+
+          <div class="validation-icon">
+            🛡️
+          </div>
+
+          <h4>
+            Validators
+          </h4>
+
+          <p>
+            Reusable validation rules.
+          </p>
+
+          <code>
+            validators=[...]
+          </code>
+
+        </div>
+
+      </div>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            Example
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>class StudentForm(forms.Form):
+
+    name = forms.CharField(
+        max_length=100,
+        required=True
+    )
+
+    age = forms.IntegerField(
+        min_value=18,
+        max_value=60
+    )</code></pre>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         11 CUSTOM VALIDATION
+    ========================= -->
+
+    <section class="section reveal" id="custom-validation">
+
+      <div class="section-head">
+
+        <div class="number">
+          11
+        </div>
+
+        <div>
+
+          <h2>
+            Custom Validation
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <p>
+        Sometimes built-in validation is not enough. You can write
+        your own validation logic.
+      </p>
+
+
+      <h3>
+        Field-specific clean method
+      </h3>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            forms.py
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>from django import forms
+
+
+class StudentForm(forms.Form):
+
+    name = forms.CharField(
+        max_length=100
+    )
+
+    age = forms.IntegerField()
+
+
+    def clean_age(self):
+
+        age = self.cleaned_data["age"]
+
+        if age &lt; 18:
+
+            raise forms.ValidationError(
+                "Student must be at least 18."
+            )
+
+        return age</code></pre>
+
+      </div>
+
+
+      <div class="info warning">
+
+        A validation error raised inside a clean method is shown
+        to the user as a form error.
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         12 ERRORS
+    ========================= -->
+
+    <section class="section reveal" id="errors">
+
+      <div class="section-head">
+
+        <div class="number">
+          12
+        </div>
+
+        <div>
+
+          <h2>
+            Handling Form Errors
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="error-demo">
+
+        <label>
+          Email
+        </label>
+
+        <input
+          class="error-input"
+          value="wrong-email"
+          readonly
+        >
+
+        <div class="error-message">
+          Enter a valid email address.
+        </div>
+
+      </div>
+
+
+      <p>
+        Django automatically stores validation errors in the form.
+        When the form is rendered again, Django can display those
+        errors near the relevant fields.
+      </p>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            Checking errors
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>if form.errors:
+
+    print(form.errors)</code></pre>
+
+      </div>
+
+
+      <div class="info success">
+
+        A good form experience should clearly tell the user
+        what needs to be corrected.
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         13 CSRF
+    ========================= -->
+
+    <section class="section reveal" id="csrf">
+
+      <div class="section-head">
+
+        <div class="number">
+          13
+        </div>
+
+        <div>
+
+          <h2>
+            CSRF Protection
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <p>
+        Django includes protection against Cross-Site Request Forgery
+        attacks for POST forms.
+      </p>
+
+
+      <p>
+        Inside a Django template form, include:
+      </p>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            template.html
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>&lt;form method="POST"&gt;
+
+    {% csrf_token %}
+
+    &lt;input
+        type="text"
+        name="name"
+    &gt;
+
+    &lt;button type="submit"&gt;
+        Submit
+    &lt;/button&gt;
+
+&lt;/form&gt;</code></pre>
+
+      </div>
+
+
+      <div class="info danger">
+
+        <strong>
+          Important:
+        </strong>
+
+        Do not forget <code>{% csrf_token %}</code> in normal
+        Django POST forms.
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         14 MODEL FORM
+    ========================= -->
+
+    <section class="section reveal" id="modelform">
+
+      <div class="section-head">
+
+        <div class="number">
+          14
+        </div>
+
+        <div>
+
+          <h2>
+            ModelForm
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <p>
+        A <code>ModelForm</code> is useful when a form is directly
+        connected to a Django model.
+      </p>
+
+
+      <div class="info">
+
+        Instead of manually defining every form field,
+        Django can generate form fields from your model.
+
+      </div>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            forms.py
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>from django import forms
+from .models import Student
+
+
+class StudentForm(forms.ModelForm):
+
+    class Meta:
+
+        model = Student
+
+        fields = [
+            "name",
+            "email",
+            "age",
+            "course"
+        ]</code></pre>
+
+      </div>
+
+
+      <div class="grid2">
+
+        <div class="mini-card">
+
+          <h4>
+            forms.Form
+          </h4>
+
+          <p>
+            General-purpose form. You define the fields yourself.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            forms.ModelForm
+          </h4>
+
+          <p>
+            Form connected directly to a Django model.
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         15 SAVE MODEL FORM
+    ========================= -->
+
+    <section class="section reveal" id="save">
+
+      <div class="section-head">
+
+        <div class="number">
+          15
+        </div>
+
+        <div>
+
+          <h2>
+            Saving a ModelForm
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <p>
+        One major advantage of ModelForm is that a valid form can
+        be saved directly to the database.
+      </p>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            views.py
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>def register_student(request):
+
+    if request.method == "POST":
+
+        form = StudentForm(
+            request.POST
+        )
+
+        if form.is_valid():
+
+            form.save()
+
+            return redirect(
+                "success"
+            )
+
+    else:
+
+        form = StudentForm()
+
+    return render(
+        request,
+        "register.html",
+        {"form": form}
+    )</code></pre>
+
+      </div>
+
+
+      <div class="info success">
+
+        <strong>
+          ModelForm flow:
+        </strong>
+
+        <br><br>
+
+        Model → ModelForm → User Input → Validation → save()
+        → Database
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         16 WIDGETS
+    ========================= -->
+
+    <section class="section reveal" id="widget">
+
+      <div class="section-head">
+
+        <div class="number">
+          16
+        </div>
+
+        <div>
+
+          <h2>
+            Form Widgets
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <p>
+        Widgets control how form fields are represented in HTML.
+      </p>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            forms.py
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>class StudentForm(forms.Form):
+
+    name = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "placeholder":
+                "Enter your name"
+            }
+        )
+    )
+
+    message = forms.CharField(
+        widget=forms.Textarea
+    )</code></pre>
+
+      </div>
+
+
+      <div class="grid3">
+
+        <div class="mini-card">
+
+          <h4>
+            TextInput
+          </h4>
+
+          <p>
+            Standard single-line text input.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            Textarea
+          </h4>
+
+          <p>
+            Multi-line text input.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            Select
+          </h4>
+
+          <p>
+            Dropdown-style selection.
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         17 VIEW
+    ========================= -->
+
+    <section class="section reveal" id="view">
+
+      <div class="section-head">
+
+        <div class="number">
+          17
+        </div>
+
+        <div>
+
+          <h2>
+            Connecting Form with View
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <p>
+        The view usually handles two situations:
+      </p>
+
+
+      <div class="grid2">
+
+        <div class="method-box">
+
+          <div class="method-title">
+
+            <span class="method-badge get">
+              GET
+            </span>
+
+            <h3 style="margin:0;">
+              Display Empty Form
+            </h3>
+
+          </div>
+
+          <p>
+            Create an unbound form and show it to the user.
+          </p>
+
+        </div>
+
+
+        <div class="method-box">
+
+          <div class="method-title">
+
+            <span class="method-badge post">
+              POST
+            </span>
+
+            <h3 style="margin:0;">
+              Process Submitted Form
+            </h3>
+
+          </div>
+
+          <p>
+            Bind submitted data, validate it and process the result.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            Complete View Pattern
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>def register(request):
+
+    if request.method == "POST":
+
+        form = StudentForm(
+            request.POST
+        )
+
+        if form.is_valid():
+
+            name = form.cleaned_data["name"]
+
+            email = form.cleaned_data["email"]
+
+            # Process valid data here
+
+            return redirect("success")
+
+    else:
+
+        form = StudentForm()
+
+    return render(
+        request,
+        "register.html",
+        {"form": form}
+    )</code></pre>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         18 TEMPLATE
+    ========================= -->
+
+    <section class="section reveal" id="template">
+
+      <div class="section-head">
+
+        <div class="number">
+          18
+        </div>
+
+        <div>
+
+          <h2>
+            Rendering a Form in a Template
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <p>
+        A Django form can be passed to the template through the
+        context dictionary.
+      </p>
+
+
+      <div class="code-wrap">
+
+        <div class="code-top">
+
+          <span>
+            register.html
+          </span>
+
+          <button class="copy">
+            Copy
+          </button>
+
+        </div>
+
+<pre><code>&lt;h1&gt;Student Registration&lt;/h1&gt;
+
+&lt;form method="POST"&gt;
+
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    &lt;button type="submit"&gt;
+        Register
+    &lt;/button&gt;
+
+&lt;/form&gt;</code></pre>
+
+      </div>
+
+
+      <div class="info">
+
+        <code>{{ form.as_p }}</code> is a convenient way to render
+        the fields as paragraphs.
+
+        <br><br>
+
+        Later, you can render each field separately when you need
+        more control over the design.
+
+      </div>
+
+
+      <div class="form-demo">
+
+        <h3 style="margin-top:0;">
+          Example Form Preview
+        </h3>
+
+        <label>
+          Student Name
+        </label>
+
+        <input
+          class="demo-input"
+          type="text"
+          placeholder="Enter your name"
+        >
+
+        <label>
+          Email
+        </label>
+
+        <input
+          class="demo-input"
+          type="email"
+          placeholder="Enter your email"
+        >
+
+        <label>
+          Age
+        </label>
+
+        <input
+          class="demo-input"
+          type="number"
+          placeholder="Enter your age"
+        >
+
+        <button
+          class="demo-button"
+          onclick="alert('This is a visual demo of a Django form.')"
+        >
+          Register Student
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         19 MINI PROJECT
+    ========================= -->
+
+    <section class="section reveal" id="practice">
+
+      <div class="section-head">
+
+        <div class="number">
+          19
+        </div>
+
+        <div>
+
+          <h2>
+            Mini Project — ZENSUS Student Registration
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="challenge">
+
+        <div class="challenge-title">
+
+          <div class="challenge-icon">
+            🚀
+          </div>
+
+          <h3 style="margin:0;">
+            Build a Complete Student Form
+          </h3>
+
+        </div>
+
+
+        <p>
+          Create a Student registration form using ModelForm.
+        </p>
+
+
+        <h3>
+          Step 1 — Model
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+
+            <span>
+              models.py
+            </span>
+
+            <button class="copy">
+              Copy
+            </button>
+
+          </div>
+
+<pre><code>class Student(models.Model):
+
+    name = models.CharField(
+        max_length=100
+    )
+
+    email = models.EmailField()
+
+    age = models.IntegerField()
+
+    course = models.CharField(
+        max_length=100
+    )</code></pre>
+
+        </div>
+
+
+        <h3>
+          Step 2 — ModelForm
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+
+            <span>
+              forms.py
+            </span>
+
+            <button class="copy">
+              Copy
+            </button>
+
+          </div>
+
+<pre><code>from django import forms
+from .models import Student
+
+
+class StudentForm(forms.ModelForm):
+
+    class Meta:
+
+        model = Student
+
+        fields = [
+            "name",
+            "email",
+            "age",
+            "course"
+        ]</code></pre>
+
+        </div>
+
+
+        <h3>
+          Step 3 — View
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+
+            <span>
+              views.py
+            </span>
+
+            <button class="copy">
+              Copy
+            </button>
+
+          </div>
+
+<pre><code>from django.shortcuts import render
+from django.shortcuts import redirect
+
+from .forms import StudentForm
+
+
+def register(request):
+
+    if request.method == "POST":
+
+        form = StudentForm(
+            request.POST
+        )
+
+        if form.is_valid():
+
+            form.save()
+
+            return redirect(
+                "success"
+            )
+
+    else:
+
+        form = StudentForm()
+
+    return render(
+        request,
+        "register.html",
+        {"form": form}
+    )</code></pre>
+
+        </div>
+
+
+        <h3>
+          Step 4 — Template
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+
+            <span>
+              register.html
+            </span>
+
+            <button class="copy">
+              Copy
+            </button>
+
+          </div>
+
+<pre><code>&lt;h1&gt;ZENSUS Student Registration&lt;/h1&gt;
+
+&lt;form method="POST"&gt;
+
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    &lt;button type="submit"&gt;
+        Register
+    &lt;/button&gt;
+
+&lt;/form&gt;</code></pre>
+
+        </div>
+
+
+        <h3>
+          Step 5 — URL
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+
+            <span>
+              urls.py
+            </span>
+
+            <button class="copy">
+              Copy
+            </button>
+
+          </div>
+
+<pre><code>path(
+    "register/",
+    views.register,
+    name="register"
+)</code></pre>
+
+        </div>
+
+
+        <div class="info success">
+
+          <strong>
+            Complete flow:
+          </strong>
+
+          <br><br>
+
+          User opens
+          <code>/register/</code>
+
+          →
+
+          Django displays form
+
+          →
+
+          User submits form
+
+          →
+
+          POST request
+
+          →
+
+          Django validates
+
+          →
+
+          <code>form.save()</code>
+
+          →
+
+          Student stored in database.
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         20 COMMON MISTAKES
+    ========================= -->
+
+    <section class="section reveal" id="mistakes">
+
+      <div class="section-head">
+
+        <div class="number">
+          20
+        </div>
+
+        <div>
+
+          <h2>
+            Common Mistakes
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="grid2">
+
+        <div class="mini-card">
+
+          <h4>
+            ❌ Forgetting forms.py
+          </h4>
+
+          <p>
+            Keep form definitions in a dedicated forms.py file
+            for clean organization.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            ❌ Forgetting is_valid()
+          </h4>
+
+          <p>
+            Always validate submitted form data before processing it.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            ❌ Reading cleaned_data too early
+          </h4>
+
+          <p>
+            Use cleaned_data after successful validation.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            ❌ Missing csrf_token
+          </h4>
+
+          <p>
+            Normal Django POST forms should include CSRF protection.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            ❌ Wrong request method
+          </h4>
+
+          <p>
+            Check request.method before deciding how to process
+            the form.
+          </p>
+
+        </div>
+
+
+        <div class="mini-card">
+
+          <h4>
+            ❌ Forgetting form context
+          </h4>
+
+          <p>
+            Pass the form to the template through the context.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="info warning">
+
+        <strong>
+          Golden pattern:
+        </strong>
+
+        <br><br>
+
+        GET → Show empty form
+
+        <br>
+
+        POST → Bind submitted data
+
+        <br>
+
+        is_valid() → Validate
+
+        <br>
+
+        cleaned_data / save() → Process
+
+        <br>
+
+        redirect() → Finish successfully
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         21 QUIZ
+    ========================= -->
+
+    <section class="section reveal" id="quiz">
+
+      <div class="section-head">
+
+        <div class="number">
+          21
+        </div>
+
+        <div>
+
+          <h2>
+            Quick Knowledge Check
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="quiz">
+
+        <h3 style="margin-top:0;">
+          1. Which class is used to create a normal Django form?
+        </h3>
+
+        <button
+          class="option"
+          data-answer="wrong"
+        >
+          A. models.Form
+        </button>
+
+        <button
+          class="option"
+          data-answer="correct"
+        >
+          B. forms.Form
+        </button>
+
+        <button
+          class="option"
+          data-answer="wrong"
+        >
+          C. django.Form
+        </button>
+
+        <button
+          class="option"
+          data-answer="wrong"
+        >
+          D. form.Form
+        </button>
+
+        <div class="quiz-result"></div>
+
+      </div>
+
+
+      <div class="quiz">
+
+        <h3 style="margin-top:0;">
+          2. Which method checks whether submitted form data is valid?
+        </h3>
+
+        <button
+          class="option"
+          data-answer="wrong"
+        >
+          A. check()
+        </button>
+
+        <button
+          class="option"
+          data-answer="correct"
+        >
+          B. is_valid()
+        </button>
+
+        <button
+          class="option"
+          data-answer="wrong"
+        >
+          C. validate_form()
+        </button>
+
+        <button
+          class="option"
+          data-answer="wrong"
+        >
+          D. verify()
+        </button>
+
+        <div class="quiz-result"></div>
+
+      </div>
+
+
+      <div class="quiz">
+
+        <h3 style="margin-top:0;">
+          3. Where do validated form values become available?
+        </h3>
+
+        <button
+          class="option"
+          data-answer="wrong"
+        >
+          A. request.data
+        </button>
+
+        <button
+          class="option"
+          data-answer="correct"
+        >
+          B. form.cleaned_data
+        </button>
+
+        <button
+          class="option"
+          data-answer="wrong"
+        >
+          C. form.valid_data
+        </button>
+
+        <button
+          class="option"
+          data-answer="wrong"
+        >
+          D. request.cleaned
+        </button>
+
+        <div class="quiz-result"></div>
+
+      </div>
+
+
+      <div class="quiz">
+
+        <h3 style="margin-top:0;">
+          4. Which class is directly connected to a Django model?
+        </h3>
+
+        <button
+          class="option"
+          data-answer="wrong"
+        >
+          A. forms.Form
+        </button>
+
+        <button
+          class="option"
+          data-answer="correct"
+        >
+          B. forms.ModelForm
+        </button>
+
+        <button
+          class="option"
+          data-answer="wrong"
+        >
+          C. forms.DatabaseForm
+        </button>
+
+        <button
+          class="option"
+          data-answer="wrong"
+        >
+          D. models.Form
+        </button>
+
+        <div class="quiz-result"></div>
+
+      </div>
+
+
+      <div class="quiz">
+
+        <h3 style="margin-top:0;">
+          5. What should normally be included in a Django POST form?
+        </h3>
+
+        <button
+          class="option"
+          data-answer="wrong"
+        >
+          A. {% database %}
+        </button>
+
+        <button
+          class="option"
+          data-answer="correct"
+        >
+          B. {% csrf_token %}
+        </button>
+
+        <button
+          class="option"
+          data-answer="wrong"
+        >
+          C. {% security %}
+        </button>
+
+        <button
+          class="option"
+          data-answer="wrong"
+        >
+          D. {% protect %}
+        </button>
+
+        <div class="quiz-result"></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         22 TAKEAWAY
+    ========================= -->
+
+    <section class="section reveal" id="takeaway">
+
+      <div class="section-head">
+
+        <div class="number">
+          22
+        </div>
+
+        <div>
+
+          <h2>
+            Lesson Takeaway
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="card">
+
+        <h3>
+          Remember this Django Forms pattern
+        </h3>
+
+
+        <div class="pipeline">
+
+          <div class="pipe-card">
+
+            <div class="pipe-icon">
+              👤
+            </div>
+
+            <strong>
+              User
+            </strong>
+
+            <small>
+              Enters data
+            </small>
+
+          </div>
+
+
+          <div class="arrow">
+            →
+          </div>
+
+
+          <div class="pipe-card">
+
+            <div class="pipe-icon">
+              📝
+            </div>
+
+            <strong>
+              Form
+            </strong>
+
+            <small>
+              Receives input
+            </small>
+
+          </div>
+
+
+          <div class="arrow">
+            →
+          </div>
+
+
+          <div class="pipe-card">
+
+            <div class="pipe-icon">
+              🛡️
+            </div>
+
+            <strong>
+              Validation
+            </strong>
+
+            <small>
+              Checks data
+            </small>
+
+          </div>
+
+
+          <div class="arrow">
+            →
+          </div>
+
+
+          <div class="pipe-card">
+
+            <div class="pipe-icon">
+              🗄️
+            </div>
+
+            <strong>
+              Database
+            </strong>
+
+            <small>
+              Saves data
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <div class="info success">
+
+          <strong>
+            Most important concepts:
+          </strong>
+
+          <br><br>
+
+          <code>forms.Form</code>
+          → Create general-purpose forms
+
+          <br>
+
+          <code>forms.ModelForm</code>
+          → Create forms connected to models
+
+          <br>
+
+          <code>request.POST</code>
+          → Access submitted POST data
+
+          <br>
+
+          <code>is_valid()</code>
+          → Validate submitted data
+
+          <br>
+
+          <code>cleaned_data</code>
+          → Access validated values
+
+          <br>
+
+          <code>form.save()</code>
+          → Save a valid ModelForm
+
+          <br>
+
+          <code>{% csrf_token %}</code>
+          → CSRF protection for POST forms
+
+        </div>
+
+
+        <p>
+          In the next lesson, we will move from collecting data to
+          controlling who can access different parts of a Django
+          application.
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         FOOTER
+    ========================= -->
+
+    <div class="lesson-footer">
+
+      <button
+        class="footer-btn"
+        onclick="alert('Previous lesson: Django ORM')"
+      >
+        ← Lesson 07: Django ORM
+      </button>
+
+
+      <button
+        class="footer-btn primary"
+        onclick="alert('Next lesson: Authentication & Authorization')"
+      >
+        Lesson 09: Authentication & Authorization →
+      </button>
+
+    </div>
+
+  </div>
+
+</main>
+
+
+<script>
+
+/* =========================
+   PROGRESS BAR
+========================= */
+
+const progressBar =
+  document.getElementById("progressBar");
+
+window.addEventListener(
+  "scroll",
+  () => {
+
+    const scrollTop =
+      window.scrollY;
+
+    const height =
+      document.documentElement.scrollHeight -
+      document.documentElement.clientHeight;
+
+    const progress =
+      height > 0
+        ? (scrollTop / height) * 100
+        : 0;
+
+    progressBar.style.width =
+      progress + "%";
+
+  }
+);
+
+
+/* =========================
+   COPY BUTTONS
+========================= */
+
+document
+  .querySelectorAll(".copy")
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
+      async () => {
+
+        const code =
+          button
+            .parentElement
+            .nextElementSibling
+            .innerText;
+
+        try{
+
+          await navigator.clipboard.writeText(code);
+
+          const old =
+            button.innerText;
+
+          button.innerText =
+            "Copied!";
+
+          setTimeout(() => {
+
+            button.innerText =
+              old;
+
+          },1200);
+
+        }catch{
+
+          button.innerText =
+            "Copy failed";
+
+          setTimeout(() => {
+
+            button.innerText =
+              "Copy";
+
+          },1200);
+
+        }
+
+      }
+    );
+
+  });
+
+
+/* =========================
+   SCROLL REVEAL
+========================= */
+
+const revealItems =
+  document.querySelectorAll(".reveal");
+
+const revealObserver =
+  new IntersectionObserver(
+    entries => {
+
+      entries.forEach(entry => {
+
+        if(entry.isIntersecting){
+
+          entry.target
+            .classList
+            .add("show");
+
+        }
+
+      });
+
+    },
+    {
+      threshold:.08
+    }
+  );
+
+revealItems.forEach(item => {
+
+  revealObserver.observe(item);
+
+});
+
+
+/* =========================
+   ACTIVE NAV
+========================= */
+
+const sections =
+  document.querySelectorAll(".section");
+
+const navLinks =
+  document.querySelectorAll(".nav a");
+
+const navObserver =
+  new IntersectionObserver(
+    entries => {
+
+      entries.forEach(entry => {
+
+        if(entry.isIntersecting){
+
+          navLinks.forEach(link => {
+
+            link.classList.remove(
+              "active"
+            );
+
+          });
+
+          const active =
+            document.querySelector(
+              '.nav a[href="#' +
+              entry.target.id +
+              '"]'
+            );
+
+          if(active){
+
+            active.classList.add(
+              "active"
+            );
+
+          }
+
+        }
+
+      });
+
+    },
+    {
+      rootMargin:
+        "-25% 0px -65% 0px"
+    }
+  );
+
+
+sections.forEach(section => {
+
+  navObserver.observe(section);
+
+});
+
+
+/* =========================
+   SEARCH
+========================= */
+
+const searchInput =
+  document.getElementById(
+    "searchInput"
+  );
+
+searchInput.addEventListener(
+  "input",
+  () => {
+
+    const query =
+      searchInput.value
+        .trim()
+        .toLowerCase();
+
+    sections.forEach(section => {
+
+      const text =
+        section.innerText
+          .toLowerCase();
+
+      if(
+        !query ||
+        text.includes(query)
+      ){
+
+        section.classList
+          .remove("hidden");
+
+      }else{
+
+        section.classList
+          .add("hidden");
+
+      }
+
+    });
+
+  }
+);
+
+
+/* =========================
+   QUIZ
+========================= */
+
+document
+  .querySelectorAll(".quiz")
+  .forEach(quiz => {
+
+    const options =
+      quiz.querySelectorAll(
+        ".option"
+      );
+
+    const result =
+      quiz.querySelector(
+        ".quiz-result"
+      );
+
+    options.forEach(option => {
+
+      option.addEventListener(
+        "click",
+        () => {
+
+          options.forEach(btn => {
+
+            btn.classList.remove(
+              "correct",
+              "wrong"
+            );
+
+          });
+
+          if(
+            option.dataset.answer ===
+            "correct"
+          ){
+
+            option.classList.add(
+              "correct"
+            );
+
+            result.innerText =
+              "✓ Correct! Excellent.";
+
+          }else{
+
+            option.classList.add(
+              "wrong"
+            );
+
+            result.innerText =
+              "✗ Not quite. Try again.";
+
+          }
+
+        }
+      );
+
+    });
+
+  });
+
+
+/* =========================
+   NAVIGATION
+========================= */
+
+document
+  .querySelectorAll(".nav a")
+  .forEach(link => {
+
+    link.addEventListener(
+      "click",
+      event => {
+
+        event.preventDefault();
+
+        const target =
+          document.querySelector(
+            link.getAttribute("href")
+          );
+
+        if(target){
+
+          target.scrollIntoView({
+            behavior:"smooth",
+            block:"start"
+          });
+
+        }
+
+      }
+    );
+
+  });
+
+</script>
+
+</body>
+</html>

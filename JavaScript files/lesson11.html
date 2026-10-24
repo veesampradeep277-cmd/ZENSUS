@@ -1,0 +1,4906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS | JavaScript DOM</title>
+
+<style>
+/* =========================================================
+   ZENSUS — JAVASCRIPT LESSON 11
+   DOCUMENT OBJECT MODEL (DOM)
+   ========================================================= */
+
+:root {
+    --primary: #4f46e5;
+    --primary-dark: #3730a3;
+    --secondary: #7c3aed;
+    --accent: #06b6d4;
+
+    --bg: #f7f8fc;
+    --surface: #ffffff;
+    --surface-soft: #f1f3f9;
+
+    --text: #172033;
+    --muted: #64748b;
+    --border: #e2e8f0;
+
+    --success: #16a34a;
+    --warning: #d97706;
+    --danger: #dc2626;
+
+    --code-bg: #0d1117;
+    --code-text: #e6edf3;
+
+    --shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
+
+    --radius: 18px;
+}
+
+/* RESET */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+}
+
+/* SCROLLBAR */
+
+::-webkit-scrollbar {
+    width: 9px;
+}
+
+::-webkit-scrollbar-track {
+    background: #eef1f6;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #a5b4fc;
+    border-radius: 20px;
+}
+
+/* PROGRESS */
+
+.progress-line {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 4px;
+    width: 0%;
+    background: linear-gradient(
+        90deg,
+        var(--primary),
+        var(--secondary),
+        var(--accent)
+    );
+    z-index: 9999;
+}
+
+/* SIDEBAR */
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 270px;
+    height: 100vh;
+
+    background: #ffffff;
+    border-right: 1px solid var(--border);
+
+    z-index: 1000;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow-y: auto;
+}
+
+.logo {
+    padding: 25px 22px 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.logo-title {
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: -1px;
+
+    background: linear-gradient(
+        90deg,
+        var(--primary),
+        var(--secondary)
+    );
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+
+.logo-subtitle {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+.course-label {
+    padding: 20px 20px 10px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #94a3b8;
+    font-weight: 800;
+}
+
+.lesson-list {
+    list-style: none;
+    padding: 0 12px 25px;
+}
+
+.lesson-list li {
+    margin: 4px 0;
+}
+
+.lesson-list a {
+    text-decoration: none;
+    color: #64748b;
+
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    padding: 10px 12px;
+
+    border-radius: 12px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    transition: 0.25s ease;
+}
+
+.lesson-list a:hover {
+    background: #f1f3ff;
+    color: var(--primary);
+}
+
+.lesson-list a.active {
+    background: #eef2ff;
+    color: var(--primary);
+    font-weight: 800;
+}
+
+.lesson-number {
+    width: 28px;
+    height: 28px;
+
+    border-radius: 9px;
+
+    display: grid;
+    place-items: center;
+
+    background: #f1f5f9;
+
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.active .lesson-number {
+    background: var(--primary);
+    color: white;
+}
+
+/* MOBILE */
+
+.mobile-header {
+    display: none;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 62px;
+
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(12px);
+
+    border-bottom: 1px solid var(--border);
+
+    z-index: 1100;
+
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 16px;
+}
+
+.mobile-logo {
+    font-weight: 900;
+    color: var(--primary);
+}
+
+.menu-btn {
+    border: 0;
+    background: #eef2ff;
+    color: var(--primary);
+
+    width: 40px;
+    height: 40px;
+
+    border-radius: 10px;
+
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* MAIN */
+
+.main {
+    margin-left: 270px;
+    min-height: 100vh;
+}
+
+.topbar {
+    height: 70px;
+
+    background: rgba(255,255,255,0.86);
+    backdrop-filter: blur(12px);
+
+    border-bottom: 1px solid var(--border);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 42px;
+
+    position: sticky;
+    top: 0;
+
+    z-index: 900;
+}
+
+.breadcrumb {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.breadcrumb strong {
+    color: var(--primary);
+}
+
+.lesson-status {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+}
+
+/* CONTENT */
+
+.content {
+    max-width: 1180px;
+    margin: auto;
+    padding: 42px 34px 80px;
+}
+
+/* HERO */
+
+.hero {
+    position: relative;
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff 0%,
+            #f7f5ff 55%,
+            #eef9ff 100%
+        );
+
+    border: 1px solid #e4e7f0;
+    border-radius: 28px;
+
+    padding: 55px;
+
+    box-shadow: var(--shadow);
+}
+
+.hero::after {
+    content: "</>";
+
+    position: absolute;
+
+    right: 40px;
+    bottom: -10px;
+
+    font-size: 170px;
+    font-weight: 900;
+
+    color: rgba(79,70,229,0.055);
+
+    line-height: 1;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 7px 13px;
+
+    background: #eef2ff;
+    color: var(--primary);
+
+    border-radius: 999px;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    margin-bottom: 18px;
+}
+
+.hero h1 {
+    max-width: 800px;
+
+    font-size: clamp(34px, 5vw, 58px);
+
+    line-height: 1.08;
+
+    letter-spacing: -2px;
+
+    margin-bottom: 18px;
+}
+
+.hero h1 span {
+    color: var(--primary);
+}
+
+.hero p {
+    max-width: 790px;
+
+    font-size: 17px;
+    color: var(--muted);
+
+    margin-bottom: 25px;
+}
+
+.hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.meta-pill {
+    padding: 8px 13px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 999px;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    color: #475569;
+}
+
+/* SECTION */
+
+.section {
+    margin-top: 34px;
+
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius);
+
+    padding: 30px;
+
+    box-shadow: var(--shadow);
+}
+
+.section-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+
+    margin-bottom: 22px;
+}
+
+.section-number {
+    min-width: 42px;
+    height: 42px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 12px;
+
+    background: #eef2ff;
+    color: var(--primary);
+
+    font-weight: 900;
+    font-size: 14px;
+}
+
+.section h2 {
+    font-size: 27px;
+    letter-spacing: -0.7px;
+}
+
+.section h3 {
+    font-size: 20px;
+    margin: 24px 0 10px;
+}
+
+.section p {
+    color: #475569;
+}
+
+.section ul,
+.section ol {
+    margin: 12px 0 12px 22px;
+}
+
+.section li {
+    margin: 6px 0;
+    color: #475569;
+}
+
+/* GRID */
+
+.grid {
+    display: grid;
+    grid-template-columns:
+        repeat(auto-fit, minmax(230px, 1fr));
+
+    gap: 16px;
+}
+
+.info-card {
+    padding: 21px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 15px;
+
+    background: #fbfcff;
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.info-card:hover {
+    transform: translateY(-4px);
+
+    box-shadow:
+        0 15px 30px rgba(15,23,42,0.08);
+
+    border-color: #c7d2fe;
+}
+
+.info-icon {
+    font-size: 26px;
+    margin-bottom: 9px;
+}
+
+.info-card h3 {
+    margin: 0 0 6px;
+    font-size: 17px;
+}
+
+.info-card p {
+    font-size: 14px;
+}
+
+/* CODE */
+
+.code-wrap {
+    position: relative;
+    margin: 18px 0;
+}
+
+.code-label {
+    position: absolute;
+    top: 9px;
+    right: 12px;
+
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+
+    color: #94a3b8;
+}
+
+pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+
+    border-radius: 14px;
+
+    padding: 24px 20px;
+
+    overflow-x: auto;
+
+    font-family:
+        "Cascadia Code",
+        "Consolas",
+        monospace;
+
+    font-size: 14px;
+
+    line-height: 1.65;
+
+    border: 1px solid #202938;
+
+    white-space: pre;
+}
+
+code {
+    color: inherit;
+}
+
+.inline-code {
+    font-family: Consolas, monospace;
+
+    background: #eef2ff;
+
+    color: #4338ca;
+
+    padding: 2px 6px;
+
+    border-radius: 6px;
+
+    font-size: 0.9em;
+}
+
+/* CALLOUTS */
+
+.callout {
+    padding: 17px 18px;
+
+    border-radius: 13px;
+
+    margin: 18px 0;
+
+    border-left: 4px solid;
+}
+
+.callout.tip {
+    background: #eff6ff;
+    border-color: #3b82f6;
+}
+
+.callout.warning {
+    background: #fff7ed;
+    border-color: #f97316;
+}
+
+.callout.success {
+    background: #f0fdf4;
+    border-color: #22c55e;
+}
+
+.callout.danger {
+    background: #fef2f2;
+    border-color: #ef4444;
+}
+
+.callout strong {
+    color: var(--text);
+}
+
+/* FLOW */
+
+.flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    margin: 25px 0;
+}
+
+.flow-box {
+    padding: 14px 18px;
+
+    background: #ffffff;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 12px;
+
+    font-weight: 800;
+
+    color: var(--primary);
+
+    box-shadow: 0 6px 16px rgba(15,23,42,0.05);
+
+    animation: flowPulse 2.5s infinite;
+}
+
+.flow-arrow {
+    color: #94a3b8;
+    font-size: 22px;
+}
+
+@keyframes flowPulse {
+    0%,100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.035);
+    }
+}
+
+/* DOM TREE */
+
+.dom-stage {
+    background:
+        radial-gradient(
+            circle at center,
+            #f5f3ff,
+            #eef2ff 45%,
+            #f8fafc
+        );
+
+    border: 1px solid #dbe2f0;
+
+    border-radius: 20px;
+
+    padding: 35px 20px;
+
+    overflow-x: auto;
+}
+
+.dom-tree {
+    min-width: 700px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.dom-node {
+    padding: 13px 18px;
+
+    border-radius: 12px;
+
+    border: 2px solid #c7d2fe;
+
+    background: white;
+
+    color: var(--primary);
+
+    font-weight: 800;
+
+    box-shadow: 0 8px 20px rgba(79,70,229,0.08);
+
+    position: relative;
+
+    transition: 0.3s;
+}
+
+.dom-node:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 25px rgba(79,70,229,0.15);
+}
+
+.dom-node.root {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.dom-level {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.tree-line {
+    width: 2px;
+    height: 22px;
+    background: #cbd5e1;
+}
+
+/* NODE ANIMATION */
+
+.node-pulse {
+    animation: nodePulse 1.6s ease-in-out infinite;
+}
+
+@keyframes nodePulse {
+    0%,100% {
+        box-shadow: 0 0 0 0 rgba(79,70,229,0.12);
+    }
+
+    50% {
+        box-shadow: 0 0 0 12px rgba(79,70,229,0.03);
+    }
+}
+
+/* COMPARISON */
+
+.table-wrap {
+    overflow-x: auto;
+
+    border: 1px solid var(--border);
+
+    border-radius: 14px;
+
+    margin: 18px 0;
+}
+
+table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    min-width: 650px;
+}
+
+th,
+td {
+    padding: 13px 15px;
+
+    border-bottom: 1px solid var(--border);
+
+    text-align: left;
+}
+
+th {
+    background: #f8fafc;
+
+    color: #334155;
+
+    font-size: 13px;
+}
+
+td {
+    color: #475569;
+
+    font-size: 14px;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+/* LAB */
+
+.lab {
+    background:
+        linear-gradient(
+            145deg,
+            #f8faff,
+            #ffffff
+        );
+
+    border: 1px solid #dbe2f0;
+
+    border-radius: 17px;
+
+    padding: 22px;
+
+    margin-top: 20px;
+}
+
+.lab h3 {
+    margin-top: 0;
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    margin: 15px 0;
+}
+
+button,
+.btn {
+    border: 0;
+
+    background: var(--primary);
+
+    color: white;
+
+    padding: 10px 15px;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    font-weight: 800;
+
+    transition: 0.2s;
+}
+
+button:hover,
+.btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.btn.secondary {
+    background: #eef2ff;
+    color: var(--primary);
+}
+
+.btn.success {
+    background: var(--success);
+}
+
+.btn.danger {
+    background: var(--danger);
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 10px;
+
+    padding: 11px 12px;
+
+    background: white;
+
+    color: var(--text);
+
+    font: inherit;
+
+    outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--primary);
+
+    box-shadow:
+        0 0 0 3px rgba(79,70,229,0.10);
+}
+
+.input-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(180px, 1fr));
+
+    gap: 12px;
+}
+
+.output {
+    background: #0d1117;
+
+    color: #d1fae5;
+
+    padding: 16px;
+
+    border-radius: 12px;
+
+    min-height: 54px;
+
+    margin-top: 15px;
+
+    font-family: Consolas, monospace;
+
+    white-space: pre-wrap;
+}
+
+/* DOM INSPECTOR */
+
+.browser-preview {
+    border: 1px solid #cbd5e1;
+    border-radius: 15px;
+    overflow: hidden;
+    background: white;
+    margin-top: 20px;
+}
+
+.browser-bar {
+    background: #f1f5f9;
+    padding: 11px 15px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    gap: 7px;
+    align-items: center;
+}
+
+.browser-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #cbd5e1;
+}
+
+.browser-content {
+    padding: 30px;
+    text-align: center;
+}
+
+.demo-card {
+    max-width: 430px;
+    margin: auto;
+    padding: 25px;
+    border-radius: 15px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    transition: 0.3s;
+}
+
+.demo-card.highlight {
+    transform: scale(1.03);
+    box-shadow: 0 15px 35px rgba(79,70,229,0.16);
+    border-color: #818cf8;
+}
+
+.demo-title {
+    font-size: 24px;
+    font-weight: 900;
+    margin-bottom: 8px;
+}
+
+.demo-text {
+    color: #64748b;
+    margin-bottom: 15px;
+}
+
+/* DOM ACTION VISUAL */
+
+.action-track {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.action-card {
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: white;
+    text-align: center;
+    transition: 0.3s;
+}
+
+.action-card.active {
+    background: #eef2ff;
+    border-color: #818cf8;
+    transform: translateY(-4px);
+}
+
+.action-icon {
+    font-size: 27px;
+    margin-bottom: 7px;
+}
+
+/* FORM */
+
+.form-demo {
+    max-width: 500px;
+    padding: 22px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    margin-top: 18px;
+}
+
+.form-group {
+    margin-bottom: 14px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+/* QUIZ */
+
+.quiz-question {
+    padding: 20px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 14px;
+
+    margin-bottom: 14px;
+
+    background: #fbfcff;
+}
+
+.quiz-question h4 {
+    margin-bottom: 10px;
+}
+
+.option {
+    display: block;
+
+    padding: 9px 12px;
+
+    border-radius: 9px;
+
+    margin: 5px 0;
+
+    cursor: pointer;
+
+    border: 1px solid transparent;
+}
+
+.option:hover {
+    background: #eef2ff;
+}
+
+.quiz-result {
+    padding: 15px;
+
+    border-radius: 12px;
+
+    margin-top: 15px;
+
+    display: none;
+
+    font-weight: 800;
+}
+
+/* CHECKLIST */
+
+.checklist {
+    display: grid;
+
+    gap: 9px;
+
+    margin-top: 15px;
+}
+
+.check-item {
+    display: flex;
+
+    gap: 10px;
+
+    align-items: center;
+
+    padding: 11px 13px;
+
+    border-radius: 10px;
+
+    background: #f8fafc;
+
+    border: 1px solid var(--border);
+}
+
+.check-item input {
+    width: auto;
+}
+
+/* TAG */
+
+.tag {
+    display: inline-block;
+
+    padding: 4px 9px;
+
+    background: #eef2ff;
+
+    color: var(--primary);
+
+    border-radius: 999px;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    margin: 3px;
+}
+
+/* REVEAL */
+
+.reveal {
+    opacity: 1;
+    transform: none;
+}
+
+.js-enabled .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+
+    transition:
+        opacity 0.6s ease,
+        transform 0.6s ease;
+}
+
+.js-enabled .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* FOOTER */
+
+.lesson-footer {
+    margin-top: 45px;
+
+    padding: 30px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 18px;
+
+    text-align: center;
+}
+
+.next-btn {
+    display: inline-block;
+
+    text-decoration: none;
+
+    margin-top: 15px;
+
+    padding: 12px 20px;
+
+    background: var(--primary);
+
+    color: white;
+
+    border-radius: 11px;
+
+    font-weight: 800;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .mobile-header {
+        display: flex;
+    }
+
+    .main {
+        margin-left: 0;
+    }
+
+    .topbar {
+        display: none;
+    }
+
+    .content {
+        padding: 85px 18px 60px;
+    }
+
+    .hero {
+        padding: 35px 25px;
+    }
+
+    .hero::after {
+        font-size: 100px;
+        right: 10px;
+    }
+
+    .action-track {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .hero h1 {
+        letter-spacing: -1px;
+    }
+
+    .hero p {
+        font-size: 15px;
+    }
+
+    .section {
+        padding: 22px 18px;
+    }
+
+    .section h2 {
+        font-size: 23px;
+    }
+
+    pre {
+        font-size: 12px;
+        padding: 18px 14px;
+    }
+
+    .dom-tree {
+        min-width: 600px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="progress-line" id="progressLine"></div>
+
+<!-- MOBILE HEADER -->
+
+<header class="mobile-header">
+    <div class="mobile-logo">ZENSUS</div>
+
+    <button
+        class="menu-btn"
+        id="menuBtn"
+        aria-label="Open navigation">
+        ☰
+    </button>
+</header>
+
+<!-- SIDEBAR -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="logo">
+        <div class="logo-title">ZENSUS</div>
+
+        <div class="logo-subtitle">
+            Learn. Build. Think.
+        </div>
+    </div>
+
+    <div class="course-label">
+        JavaScript Course
+    </div>
+
+    <ul class="lesson-list">
+
+        <li>
+            <a href="lesson1.html">
+                <span class="lesson-number">01</span>
+                Introduction
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson2.html">
+                <span class="lesson-number">02</span>
+                Variables & Data Types
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson3.html">
+                <span class="lesson-number">03</span>
+                Operators
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson4.html">
+                <span class="lesson-number">04</span>
+                Input & Output
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson5.html">
+                <span class="lesson-number">05</span>
+                Conditional Statements
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson6.html">
+                <span class="lesson-number">06</span>
+                Loops
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson7.html">
+                <span class="lesson-number">07</span>
+                Functions
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson8.html">
+                <span class="lesson-number">08</span>
+                Arrays
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson9.html">
+                <span class="lesson-number">09</span>
+                Objects
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson10.html">
+                <span class="lesson-number">10</span>
+                Strings
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson11.html" class="active">
+                <span class="lesson-number">11</span>
+                DOM
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson12.html">
+                <span class="lesson-number">12</span>
+                Events
+            </a>
+        </li>
+
+    </ul>
+
+</aside>
+
+<!-- MAIN -->
+
+<main class="main">
+
+    <div class="topbar">
+
+        <div class="breadcrumb">
+            JavaScript
+            <span> / </span>
+            <strong>Lesson 11 — DOM</strong>
+        </div>
+
+        <div class="lesson-status">
+            Lesson 11 of JavaScript
+        </div>
+
+    </div>
+
+    <div class="content">
+
+        <!-- HERO -->
+
+        <section class="hero reveal">
+
+            <div class="badge">
+                JAVASCRIPT • LESSON 11
+            </div>
+
+            <h1>
+                JavaScript
+                <span>DOM</span>
+            </h1>
+
+            <p>
+                Learn how JavaScript communicates with HTML,
+                finds elements, changes content and styles,
+                creates and removes elements, manipulates
+                attributes and classes, and turns static pages
+                into dynamic web applications.
+            </p>
+
+            <div class="hero-meta">
+
+                <span class="meta-pill">
+                    🌱 Beginner → Advanced
+                </span>
+
+                <span class="meta-pill">
+                    🌳 DOM Tree
+                </span>
+
+                <span class="meta-pill">
+                    ⚡ Interactive
+                </span>
+
+                <span class="meta-pill">
+                    🎯 Interview Ready
+                </span>
+
+            </div>
+
+        </section>
+
+        <!-- 01 OBJECTIVES -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">01</div>
+
+                <div>
+                    <h2>What You Will Learn</h2>
+
+                    <p>
+                        By the end of this lesson you will understand
+                        how JavaScript controls a web page through
+                        the Document Object Model.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="grid">
+
+                <div class="info-card">
+                    <div class="info-icon">🌳</div>
+                    <h3>DOM Fundamentals</h3>
+                    <p>
+                        Understand the DOM, nodes, elements,
+                        document and tree structure.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">🔎</div>
+                    <h3>Select Elements</h3>
+                    <p>
+                        Learn getElementById, querySelector,
+                        querySelectorAll and more.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">✏️</div>
+                    <h3>Modify Content</h3>
+                    <p>
+                        Change text, HTML, values and attributes.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">🎨</div>
+                    <h3>Modify Styles</h3>
+                    <p>
+                        Control CSS classes, inline styles and
+                        visual states from JavaScript.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">➕</div>
+                    <h3>Create Elements</h3>
+                    <p>
+                        Dynamically create, append, insert and
+                        remove elements.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">🧭</div>
+                    <h3>DOM Traversal</h3>
+                    <p>
+                        Navigate parents, children, siblings
+                        and descendants.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- 02 WHAT IS DOM -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">02</div>
+
+                <div>
+                    <h2>What Is the DOM?</h2>
+                </div>
+
+            </div>
+
+            <p>
+                DOM stands for
+                <strong>Document Object Model</strong>.
+            </p>
+
+            <p style="margin-top:12px;">
+                When a browser loads an HTML document, it creates
+                an in-memory representation of that document as
+                a tree of objects.
+            </p>
+
+            <div class="callout tip">
+
+                <strong>Simple idea:</strong>
+
+                HTML creates the structure.
+                CSS controls the appearance.
+                JavaScript uses the DOM to dynamically
+                read and change that structure and its presentation.
+            </div>
+
+            <div class="flow">
+
+                <div class="flow-box">
+                    HTML
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    Browser
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    DOM Tree
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    JavaScript
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    Updated Page
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- 03 DOM TREE -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">03</div>
+
+                <div>
+                    <h2>Visualizing the DOM Tree</h2>
+
+                    <p>
+                        The DOM represents the page as a hierarchy.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="dom-stage">
+
+                <div class="dom-tree">
+
+                    <div class="dom-node root node-pulse">
+                        document
+                    </div>
+
+                    <div class="tree-line"></div>
+
+                    <div class="dom-level">
+
+                        <div class="dom-node">
+                            &lt;html&gt;
+                        </div>
+
+                    </div>
+
+                    <div class="tree-line"></div>
+
+                    <div class="dom-level">
+
+                        <div class="dom-node">
+                            &lt;head&gt;
+                        </div>
+
+                        <div class="dom-node">
+                            &lt;body&gt;
+                        </div>
+
+                    </div>
+
+                    <div class="tree-line"></div>
+
+                    <div class="dom-level">
+
+                        <div class="dom-node">
+                            &lt;title&gt;
+                        </div>
+
+                        <div class="dom-node">
+                            &lt;h1&gt;
+                        </div>
+
+                        <div class="dom-node">
+                            &lt;p&gt;
+                        </div>
+
+                        <div class="dom-node">
+                            &lt;button&gt;
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="callout success">
+
+                <strong>Important mental model:</strong>
+
+                JavaScript does not directly "edit the HTML file".
+                It interacts with the browser's DOM representation.
+                The browser then updates what the user sees.
+            </div>
+
+        </section>
+
+        <!-- 04 DOCUMENT OBJECT -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">04</div>
+
+                <div>
+                    <h2>The Document Object</h2>
+
+                    <p>
+                        The global <span class="inline-code">document</span>
+                        object represents the loaded web document.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="code-wrap">
+
+                <div class="code-label">
+                    JavaScript
+                </div>
+
+<pre><code>console.log(document);
+
+console.log(document.title);
+
+console.log(document.body);</code></pre>
+
+            </div>
+
+            <p>
+                The <span class="inline-code">document</span> object
+                provides many methods and properties for interacting
+                with the page.
+            </p>
+
+            <div class="grid">
+
+                <div class="info-card">
+                    <h3>document.title</h3>
+                    <p>Reads or changes the page title.</p>
+                </div>
+
+                <div class="info-card">
+                    <h3>document.body</h3>
+                    <p>References the body element.</p>
+                </div>
+
+                <div class="info-card">
+                    <h3>document.head</h3>
+                    <p>References the head element.</p>
+                </div>
+
+                <div class="info-card">
+                    <h3>document.URL</h3>
+                    <p>Returns the current document URL.</p>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- 05 SELECTORS -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">05</div>
+
+                <div>
+                    <h2>Selecting DOM Elements</h2>
+
+                    <p>
+                        Before changing an element, JavaScript
+                        usually needs to find it.
+                    </p>
+                </div>
+
+            </div>
+
+            <h3>1. getElementById()</h3>
+
+            <div class="code-wrap">
+
+<pre><code>const title = document.getElementById("title");
+
+console.log(title);</code></pre>
+
+            </div>
+
+            <h3>2. getElementsByClassName()</h3>
+
+            <div class="code-wrap">
+
+<pre><code>const cards =
+    document.getElementsByClassName("card");
+
+console.log(cards);</code></pre>
+
+            </div>
+
+            <h3>3. getElementsByTagName()</h3>
+
+            <div class="code-wrap">
+
+<pre><code>const paragraphs =
+    document.getElementsByTagName("p");</code></pre>
+
+            </div>
+
+            <h3>4. querySelector()</h3>
+
+            <div class="code-wrap">
+
+<pre><code>const title =
+    document.querySelector("#title");
+
+const card =
+    document.querySelector(".card");
+
+const button =
+    document.querySelector("button");</code></pre>
+
+            </div>
+
+            <h3>5. querySelectorAll()</h3>
+
+            <div class="code-wrap">
+
+<pre><code>const cards =
+    document.querySelectorAll(".card");
+
+cards.forEach(card =&gt; {
+    console.log(card);
+});</code></pre>
+
+            </div>
+
+            <div class="callout tip">
+
+                <strong>Modern recommendation:</strong>
+
+                <span class="inline-code">querySelector()</span>
+                and
+                <span class="inline-code">querySelectorAll()</span>
+                are extremely useful because they support CSS selectors.
+            </div>
+
+        </section>
+
+        <!-- 06 SELECTOR COMPARISON -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">06</div>
+
+                <div>
+                    <h2>DOM Selector Comparison</h2>
+                </div>
+
+            </div>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>Returns</th>
+                            <th>Selector Style</th>
+                            <th>Common Use</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>getElementById()</td>
+                            <td>One element</td>
+                            <td>ID</td>
+                            <td>Unique element</td>
+                        </tr>
+
+                        <tr>
+                            <td>getElementsByClassName()</td>
+                            <td>HTMLCollection</td>
+                            <td>Class</td>
+                            <td>Multiple class elements</td>
+                        </tr>
+
+                        <tr>
+                            <td>getElementsByTagName()</td>
+                            <td>HTMLCollection</td>
+                            <td>Tag</td>
+                            <td>Elements by tag</td>
+                        </tr>
+
+                        <tr>
+                            <td>querySelector()</td>
+                            <td>First matching element</td>
+                            <td>CSS selector</td>
+                            <td>Flexible selection</td>
+                        </tr>
+
+                        <tr>
+                            <td>querySelectorAll()</td>
+                            <td>NodeList</td>
+                            <td>CSS selector</td>
+                            <td>Multiple matches</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+        <!-- 07 TEXT CONTENT -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">07</div>
+
+                <div>
+                    <h2>Changing Text Content</h2>
+
+                    <p>
+                        JavaScript can change the text displayed
+                        by an element.
+                    </p>
+                </div>
+
+            </div>
+
+            <h3>textContent</h3>
+
+            <div class="code-wrap">
+
+<pre><code>const heading =
+    document.querySelector("h1");
+
+heading.textContent = "Welcome to ZENSUS";</code></pre>
+
+            </div>
+
+            <p>
+                <span class="inline-code">textContent</span>
+                treats the assigned value as text.
+            </p>
+
+            <h3>innerHTML</h3>
+
+            <div class="code-wrap">
+
+<pre><code>const box =
+    document.querySelector(".box");
+
+box.innerHTML =
+    "&lt;strong&gt;Hello ZENSUS&lt;/strong&gt;";</code></pre>
+
+            </div>
+
+            <div class="callout danger">
+
+                <strong>Security rule:</strong>
+
+                Do not place untrusted user input directly into
+                <span class="inline-code">innerHTML</span>.
+                Prefer <span class="inline-code">textContent</span>
+                when you only need text.
+            </div>
+
+        </section>
+
+        <!-- 08 INNERHTML VS TEXTCONTENT -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">08</div>
+
+                <div>
+                    <h2>textContent vs innerHTML</h2>
+                </div>
+
+            </div>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>textContent</th>
+                            <th>innerHTML</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Reads text</td>
+                            <td>Yes</td>
+                            <td>Yes, as HTML markup string</td>
+                        </tr>
+
+                        <tr>
+                            <td>Parses HTML</td>
+                            <td>No</td>
+                            <td>Yes</td>
+                        </tr>
+
+                        <tr>
+                            <td>Good for user text</td>
+                            <td>Yes</td>
+                            <td>Use carefully</td>
+                        </tr>
+
+                        <tr>
+                            <td>Creates HTML structure</td>
+                            <td>No</td>
+                            <td>Yes</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+        <!-- 09 VALUE -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">09</div>
+
+                <div>
+                    <h2>Reading Input Values</h2>
+                </div>
+
+            </div>
+
+            <p>
+                Form controls such as input and textarea commonly
+                expose their current value through the
+                <span class="inline-code">value</span> property.
+            </p>
+
+            <div class="code-wrap">
+
+<pre><code>const nameInput =
+    document.querySelector("#name");
+
+console.log(nameInput.value);</code></pre>
+
+            </div>
+
+            <div class="form-demo">
+
+                <div class="form-group">
+
+                    <label for="nameDemo">
+                        Student Name
+                    </label>
+
+                    <input
+                        id="nameDemo"
+                        type="text"
+                        placeholder="Enter your name">
+
+                </div>
+
+                <button onclick="readInput()">
+                    Read Value
+                </button>
+
+                <div class="output" id="inputOutput">
+                    Your input will appear here...
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- 10 ATTRIBUTES -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">10</div>
+
+                <div>
+                    <h2>Working with Attributes</h2>
+
+                    <p>
+                        Attributes provide additional information
+                        about HTML elements.
+                    </p>
+                </div>
+
+            </div>
+
+            <h3>getAttribute()</h3>
+
+            <div class="code-wrap">
+
+<pre><code>const link =
+    document.querySelector("a");
+
+console.log(
+    link.getAttribute("href")
+);</code></pre>
+
+            </div>
+
+            <h3>setAttribute()</h3>
+
+            <div class="code-wrap">
+
+<pre><code>link.setAttribute(
+    "href",
+    "https://example.com"
+);</code></pre>
+
+            </div>
+
+            <h3>removeAttribute()</h3>
+
+            <div class="code-wrap">
+
+<pre><code>link.removeAttribute("target");</code></pre>
+
+            </div>
+
+            <h3>hasAttribute()</h3>
+
+            <div class="code-wrap">
+
+<pre><code>if (button.hasAttribute("disabled")) {
+    console.log("Button is disabled");
+}</code></pre>
+
+            </div>
+
+        </section>
+
+        <!-- 11 CLASSLIST -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">11</div>
+
+                <div>
+                    <h2>classList — The Professional Way to Control CSS</h2>
+
+                    <p>
+                        Instead of repeatedly writing inline styles,
+                        JavaScript can add or remove CSS classes.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="code-wrap">
+
+<pre><code>element.classList.add("active");
+
+element.classList.remove("active");
+
+element.classList.toggle("active");
+
+element.classList.contains("active");</code></pre>
+
+            </div>
+
+            <div class="browser-preview">
+
+                <div class="browser-bar">
+
+                    <span class="browser-dot"></span>
+                    <span class="browser-dot"></span>
+                    <span class="browser-dot"></span>
+
+                    <strong style="margin-left:8px;">
+                        DOM Demo
+                    </strong>
+
+                </div>
+
+                <div class="browser-content">
+
+                    <div
+                        class="demo-card"
+                        id="classDemoCard">
+
+                        <div class="demo-title">
+                            ZENSUS
+                        </div>
+
+                        <div class="demo-text">
+                            This card can be controlled
+                            using classList.
+                        </div>
+
+                        <button onclick="toggleDemoClass()">
+                            Toggle Class
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <style>
+                .demo-card.highlight {
+                    background: #eef2ff;
+                }
+            </style>
+
+        </section>
+
+        <!-- 12 INLINE STYLE -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">12</div>
+
+                <div>
+                    <h2>Changing CSS with JavaScript</h2>
+                </div>
+
+            </div>
+
+            <h3>style property</h3>
+
+            <div class="code-wrap">
+
+<pre><code>const box =
+    document.querySelector(".box");
+
+box.style.color = "white";
+box.style.backgroundColor = "royalblue";
+box.style.padding = "20px";</code></pre>
+
+            </div>
+
+            <div class="callout warning">
+
+                <strong>Best practice:</strong>
+
+                Use <span class="inline-code">classList</span>
+                for reusable UI states.
+                Direct <span class="inline-code">style</span>
+                manipulation is useful for dynamic values and
+                quick changes.
+            </div>
+
+        </section>
+
+        <!-- 13 DOM TRAVERSAL -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">13</div>
+
+                <div>
+                    <h2>DOM Traversal</h2>
+
+                    <p>
+                        DOM traversal means moving through the
+                        DOM tree from one node to another.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="grid">
+
+                <div class="info-card">
+                    <h3>parentElement</h3>
+                    <p>
+                        Moves from an element to its parent element.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3>children</h3>
+                    <p>
+                        Returns child elements.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3>firstElementChild</h3>
+                    <p>
+                        Gets the first child element.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3>lastElementChild</h3>
+                    <p>
+                        Gets the last child element.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3>nextElementSibling</h3>
+                    <p>
+                        Moves to the next sibling element.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3>previousElementSibling</h3>
+                    <p>
+                        Moves to the previous sibling element.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="code-wrap">
+
+<pre><code>const item =
+    document.querySelector(".item");
+
+console.log(item.parentElement);
+
+console.log(item.children);
+
+console.log(item.nextElementSibling);</code></pre>
+
+            </div>
+
+        </section>
+
+        <!-- 14 NODE TYPES -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">14</div>
+
+                <div>
+                    <h2>DOM Nodes</h2>
+                </div>
+
+            </div>
+
+            <p>
+                The DOM is made of different types of nodes.
+            </p>
+
+            <div class="grid">
+
+                <div class="info-card">
+                    <div class="info-icon">📄</div>
+                    <h3>Document Node</h3>
+                    <p>
+                        Represents the complete document.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">🏷️</div>
+                    <h3>Element Node</h3>
+                    <p>
+                        Represents HTML elements such as div, p and button.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">📝</div>
+                    <h3>Text Node</h3>
+                    <p>
+                        Represents text contained within elements.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">💬</div>
+                    <h3>Comment Node</h3>
+                    <p>
+                        Represents HTML comments.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- 15 CREATE ELEMENT -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">15</div>
+
+                <div>
+                    <h2>Creating New DOM Elements</h2>
+
+                    <p>
+                        JavaScript can create completely new elements.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="code-wrap">
+
+<pre><code>const card = document.createElement("div");
+
+card.textContent = "New ZENSUS Card";
+
+card.classList.add("card");
+
+document.body.appendChild(card);</code></pre>
+
+            </div>
+
+            <h3>createElement()</h3>
+
+            <p>
+                Creates a new element object.
+            </p>
+
+            <h3>appendChild()</h3>
+
+            <p>
+                Adds a node as the last child.
+            </p>
+
+            <h3>append()</h3>
+
+            <div class="code-wrap">
+
+<pre><code>const p = document.createElement("p");
+
+p.textContent = "Hello ZENSUS";
+
+container.append(p);</code></pre>
+
+            </div>
+
+            <div class="callout tip">
+
+                <strong>Important:</strong>
+
+                Creating an element in JavaScript does not automatically
+                make it visible. You must insert it into the document.
+            </div>
+
+        </section>
+
+        <!-- 16 INSERT BEFORE -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">16</div>
+
+                <div>
+                    <h2>Inserting Elements</h2>
+                </div>
+
+            </div>
+
+            <h3>append()</h3>
+
+            <div class="code-wrap">
+
+<pre><code>parent.append(newElement);</code></pre>
+
+            </div>
+
+            <h3>prepend()</h3>
+
+            <div class="code-wrap">
+
+<pre><code>parent.prepend(newElement);</code></pre>
+
+            </div>
+
+            <h3>before()</h3>
+
+            <div class="code-wrap">
+
+<pre><code>element.before(newElement);</code></pre>
+
+            </div>
+
+            <h3>after()</h3>
+
+            <div class="code-wrap">
+
+<pre><code>element.after(newElement);</code></pre>
+
+            </div>
+
+            <h3>insertAdjacentHTML()</h3>
+
+            <div class="code-wrap">
+
+<pre><code>element.insertAdjacentHTML(
+    "beforeend",
+    "&lt;p&gt;New content&lt;/p&gt;"
+);</code></pre>
+
+            </div>
+
+        </section>
+
+        <!-- 17 REMOVE -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">17</div>
+
+                <div>
+                    <h2>Removing DOM Elements</h2>
+                </div>
+
+            </div>
+
+            <div class="code-wrap">
+
+<pre><code>const element =
+    document.querySelector(".card");
+
+element.remove();</code></pre>
+
+            </div>
+
+            <p>
+                The modern <span class="inline-code">remove()</span>
+                method directly removes the element from its parent.
+            </p>
+
+            <div class="callout warning">
+
+                <strong>Be careful:</strong>
+
+                Once you remove an element from the DOM, it will no
+                longer be displayed as part of the document.
+            </div>
+
+        </section>
+
+        <!-- 18 DOM ACTION VISUALIZER -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">18</div>
+
+                <div>
+                    <h2>🎮 DOM Action Visualizer</h2>
+
+                    <p>
+                        Watch JavaScript select and modify a real element.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="lab">
+
+                <div class="browser-preview">
+
+                    <div class="browser-bar">
+                        <span class="browser-dot"></span>
+                        <span class="browser-dot"></span>
+                        <span class="browser-dot"></span>
+                    </div>
+
+                    <div class="browser-content">
+
+                        <div
+                            id="visualCard"
+                            class="demo-card">
+
+                            <div
+                                id="visualTitle"
+                                class="demo-title">
+
+                                DOM Element
+
+                            </div>
+
+                            <div
+                                id="visualText"
+                                class="demo-text">
+
+                                I am waiting for JavaScript.
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="action-track">
+
+                    <div
+                        class="action-card"
+                        id="actionSelect">
+
+                        <div class="action-icon">
+                            🔎
+                        </div>
+
+                        <strong>Select</strong>
+
+                    </div>
+
+                    <div
+                        class="action-card"
+                        id="actionModify">
+
+                        <div class="action-icon">
+                            ✏️
+                        </div>
+
+                        <strong>Modify</strong>
+
+                    </div>
+
+                    <div
+                        class="action-card"
+                        id="actionRender">
+
+                        <div class="action-icon">
+                            🖥️
+                        </div>
+
+                        <strong>Render</strong>
+
+                    </div>
+
+                </div>
+
+                <div class="controls">
+
+                    <button onclick="runDOMAnimation()">
+                        Run DOM Animation
+                    </button>
+
+                    <button
+                        class="btn secondary"
+                        onclick="resetDOMAnimation()">
+
+                        Reset
+
+                    </button>
+
+                </div>
+
+                <div
+                    class="output"
+                    id="domAnimationOutput">
+
+                    Click "Run DOM Animation" to see the process.
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- 19 QUERY SELECTOR LAB -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">19</div>
+
+                <div>
+                    <h2>🔎 Selector Playground</h2>
+
+                    <p>
+                        Practice CSS selectors using JavaScript.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="lab">
+
+                <div class="browser-preview">
+
+                    <div class="browser-bar">
+                        <span class="browser-dot"></span>
+                        <span class="browser-dot"></span>
+                        <span class="browser-dot"></span>
+                    </div>
+
+                    <div class="browser-content">
+
+                        <h3 class="selector-item">
+                            JavaScript
+                        </h3>
+
+                        <p class="selector-item">
+                            DOM makes pages interactive.
+                        </p>
+
+                        <button class="selector-item">
+                            Learn
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="input-grid">
+
+                    <input
+                        id="selectorInput"
+                        placeholder="Example: .selector-item">
+
+                </div>
+
+                <div class="controls">
+
+                    <button onclick="runSelector()">
+                        Find Element
+                    </button>
+
+                </div>
+
+                <div
+                    class="output"
+                    id="selectorOutput">
+
+                    Enter a CSS selector.
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- 20 STYLE LAB -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">20</div>
+
+                <div>
+                    <h2>🎨 DOM Style Lab</h2>
+
+                    <p>
+                        Change a real element using JavaScript.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="lab">
+
+                <div
+                    id="styleLabBox"
+                    class="demo-card">
+
+                    <div class="demo-title">
+                        Style Me
+                    </div>
+
+                    <div class="demo-text">
+                        JavaScript can control CSS.
+                    </div>
+
+                </div>
+
+                <div class="controls">
+
+                    <button onclick="changeStyle('primary')">
+                        Primary
+                    </button>
+
+                    <button onclick="changeStyle('success')">
+                        Success
+                    </button>
+
+                    <button onclick="changeStyle('warning')">
+                        Warning
+                    </button>
+
+                    <button
+                        class="btn secondary"
+                        onclick="resetStyle()">
+
+                        Reset
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- 21 TRAVERSAL -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">21</div>
+
+                <div>
+                    <h2>DOM Traversal Visualizer</h2>
+
+                    <p>
+                        Navigate through parent, child and sibling relationships.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="dom-stage">
+
+                <div class="dom-tree">
+
+                    <div class="dom-node">
+                        parent
+                    </div>
+
+                    <div class="tree-line"></div>
+
+                    <div class="dom-level">
+
+                        <div
+                            class="dom-node"
+                            id="travChild1">
+
+                            child 1
+
+                        </div>
+
+                        <div
+                            class="dom-node node-pulse"
+                            id="travChild2">
+
+                            child 2
+
+                        </div>
+
+                        <div
+                            class="dom-node"
+                            id="travChild3">
+
+                            child 3
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="controls">
+
+                <button onclick="highlightTraversal('parent')">
+                    Parent
+                </button>
+
+                <button onclick="highlightTraversal('children')">
+                    Children
+                </button>
+
+                <button onclick="highlightTraversal('sibling')">
+                    Sibling
+                </button>
+
+            </div>
+
+            <div
+                class="output"
+                id="traversalOutput">
+
+                Select a traversal operation.
+
+            </div>
+
+        </section>
+
+        <!-- 22 FORM DOM -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">22</div>
+
+                <div>
+                    <h2>DOM and Forms</h2>
+
+                    <p>
+                        JavaScript can read form values and provide
+                        instant feedback to users.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="code-wrap">
+
+<pre><code>const username =
+    document.querySelector("#username");
+
+const value = username.value;
+
+console.log(value);</code></pre>
+
+            </div>
+
+            <div class="form-demo">
+
+                <div class="form-group">
+
+                    <label for="username">
+                        Username
+                    </label>
+
+                    <input
+                        id="username"
+                        type="text"
+                        placeholder="Enter username">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="email">
+                        Email
+                    </label>
+
+                    <input
+                        id="email"
+                        type="email"
+                        placeholder="Enter email">
+
+                </div>
+
+                <button onclick="validateForm()">
+                    Validate
+                </button>
+
+                <div
+                    class="output"
+                    id="formOutput">
+
+                    Form result will appear here.
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- 23 DOMCONTENTLOADED -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">23</div>
+
+                <div>
+                    <h2>When Should JavaScript Access the DOM?</h2>
+                </div>
+
+            </div>
+
+            <p>
+                If JavaScript runs before the required HTML element
+                has been parsed, a selector may return
+                <span class="inline-code">null</span>.
+            </p>
+
+            <h3>Option 1 — Put script at the end of body</h3>
+
+            <div class="code-wrap">
+
+<pre><code>&lt;body&gt;
+
+    &lt;h1 id="title"&gt;Hello&lt;/h1&gt;
+
+    &lt;script src="app.js"&gt;&lt;/script&gt;
+
+&lt;/body&gt;</code></pre>
+
+            </div>
+
+            <h3>Option 2 — DOMContentLoaded</h3>
+
+            <div class="code-wrap">
+
+<pre><code>document.addEventListener(
+    "DOMContentLoaded",
+    () =&gt; {
+
+        const title =
+            document.querySelector("#title");
+
+        console.log(title);
+    }
+);</code></pre>
+
+            </div>
+
+            <h3>Option 3 — defer</h3>
+
+            <div class="code-wrap">
+
+<pre><code>&lt;script src="app.js" defer&gt;&lt;/script&gt;</code></pre>
+
+            </div>
+
+            <div class="callout success">
+
+                <strong>Modern practice:</strong>
+
+                External scripts commonly use
+                <span class="inline-code">defer</span>
+                when they need the document to be parsed before
+                execution.
+            </div>
+
+        </section>
+
+        <!-- 24 DOM FLOW -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">24</div>
+
+                <div>
+                    <h2>The Complete DOM Workflow</h2>
+
+                    <p>
+                        This is the mental model you should remember.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="flow">
+
+                <div class="flow-box">
+                    Select
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    Read
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    Decide
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    Modify
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    Render
+                </div>
+
+            </div>
+
+            <div class="code-wrap">
+
+<pre><code>// 1. Select
+const button =
+    document.querySelector("#changeBtn");
+
+// 2. Read
+const title =
+    document.querySelector("#title");
+
+// 3. Decide
+if (title) {
+
+    // 4. Modify
+    title.textContent = "Updated!";
+
+    title.classList.add("active");
+}
+
+// 5. Browser renders the result</code></pre>
+
+            </div>
+
+        </section>
+
+        <!-- 25 REAL WORLD -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">25</div>
+
+                <div>
+                    <h2>Real-World Applications of the DOM</h2>
+                </div>
+
+            </div>
+
+            <div class="grid">
+
+                <div class="info-card">
+                    <div class="info-icon">🌙</div>
+                    <h3>Dark Mode</h3>
+                    <p>
+                        Add or remove a dark-theme class.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">🛒</div>
+                    <h3>Shopping Cart</h3>
+                    <p>
+                        Dynamically add products and update totals.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">📝</div>
+                    <h3>Forms</h3>
+                    <p>
+                        Validate and display feedback instantly.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">📊</div>
+                    <h3>Dashboards</h3>
+                    <p>
+                        Update cards, counters and tables dynamically.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">🔍</div>
+                    <h3>Search</h3>
+                    <p>
+                        Filter visible results based on user input.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">🎓</div>
+                    <h3>Learning Platforms</h3>
+                    <p>
+                        Update progress, quizzes, lessons and
+                        interactive visualizations.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- 26 DOM + EVENTS -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">26</div>
+
+                <div>
+                    <h2>DOM and Events — The Connection</h2>
+
+                    <p>
+                        DOM manipulation becomes powerful when combined
+                        with browser events.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="code-wrap">
+
+<pre><code>const button =
+    document.querySelector("#button");
+
+button.addEventListener(
+    "click",
+    () =&gt; {
+
+        document.body.classList.toggle("dark");
+
+    }
+);</code></pre>
+
+            </div>
+
+            <div class="callout tip">
+
+                <strong>Think of the relationship:</strong>
+
+                <br><br>
+
+                <strong>DOM</strong> =
+                What exists on the page
+
+                <br>
+
+                <strong>Events</strong> =
+                What happens on the page
+
+                <br>
+
+                <strong>JavaScript</strong> =
+                What should happen in response
+            </div>
+
+            <p>
+                Events are covered deeply in the next lesson.
+            </p>
+
+        </section>
+
+        <!-- 27 COMMON MISTAKES -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">27</div>
+
+                <div>
+                    <h2>⚠️ Common DOM Mistakes</h2>
+                </div>
+
+            </div>
+
+            <div class="grid">
+
+                <div class="info-card">
+                    <h3>1. Wrong selector</h3>
+                    <p>
+                        <span class="inline-code">querySelector("#box")</span>
+                        requires an element with that ID.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3>2. Element is null</h3>
+                    <p>
+                        The script may execute before the element exists.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3>3. Confusing value and textContent</h3>
+                    <p>
+                        Form controls usually use
+                        <span class="inline-code">value</span>.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3>4. Misusing innerHTML</h3>
+                    <p>
+                        Avoid inserting untrusted content as HTML.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3>5. Overusing inline styles</h3>
+                    <p>
+                        Prefer reusable CSS classes when possible.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3>6. Forgetting querySelectorAll</h3>
+                    <p>
+                        querySelector selects only the first match.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- 28 PERFORMANCE -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">28</div>
+
+                <div>
+                    <h2>DOM Performance</h2>
+                </div>
+
+            </div>
+
+            <p>
+                DOM operations can become expensive when a program
+                performs huge numbers of reads and writes.
+            </p>
+
+            <div class="callout warning">
+
+                <strong>Good habits:</strong>
+
+                <ul>
+
+                    <li>
+                        Cache elements you use repeatedly.
+                    </li>
+
+                    <li>
+                        Avoid unnecessary DOM updates.
+                    </li>
+
+                    <li>
+                        Build larger content before inserting it when appropriate.
+                    </li>
+
+                    <li>
+                        Prefer event delegation for many similar interactive elements.
+                    </li>
+
+                    <li>
+                        Keep rendering work separate from application logic where practical.
+                    </li>
+
+                </ul>
+
+            </div>
+
+            <div class="code-wrap">
+
+<pre><code>// Better when reused many times
+
+const title =
+    document.querySelector("#title");
+
+title.textContent = "One";
+
+title.textContent = "Two";
+
+title.textContent = "Three";</code></pre>
+
+            </div>
+
+        </section>
+
+        <!-- 29 INTERVIEW -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">29</div>
+
+                <div>
+                    <h2>🎯 Interview Questions</h2>
+                </div>
+
+            </div>
+
+            <ol>
+
+                <li>
+                    What is the DOM?
+                </li>
+
+                <li>
+                    How is the DOM different from HTML?
+                </li>
+
+                <li>
+                    What is the document object?
+                </li>
+
+                <li>
+                    Difference between
+                    getElementById() and querySelector().
+                </li>
+
+                <li>
+                    Difference between querySelector()
+                    and querySelectorAll().
+                </li>
+
+                <li>
+                    What is the difference between
+                    innerHTML and textContent?
+                </li>
+
+                <li>
+                    What is DOM traversal?
+                </li>
+
+                <li>
+                    How do you create an element dynamically?
+                </li>
+
+                <li>
+                    Difference between append(),
+                    appendChild() and prepend().
+                </li>
+
+                <li>
+                    How do you remove a DOM element?
+                </li>
+
+                <li>
+                    What is classList?
+                </li>
+
+                <li>
+                    Why should untrusted content not be placed
+                    directly into innerHTML?
+                </li>
+
+                <li>
+                    What is DOMContentLoaded?
+                </li>
+
+                <li>
+                    What does the defer attribute do?
+                </li>
+
+            </ol>
+
+        </section>
+
+        <!-- 30 EXAM -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">30</div>
+
+                <div>
+                    <h2>📝 Exam Preparation</h2>
+                </div>
+
+            </div>
+
+            <h3>5-Mark Question</h3>
+
+            <div class="callout tip">
+
+                <strong>
+                    Explain the Document Object Model.
+                </strong>
+
+                <p style="margin-top:10px;">
+                    The DOM is a programming interface created by
+                    the browser to represent an HTML document as a
+                    hierarchical tree of nodes. JavaScript can use
+                    the document object to select, read, modify,
+                    create and remove elements. This allows
+                    developers to build dynamic and interactive
+                    web pages.
+                </p>
+
+            </div>
+
+            <h3>10-Mark Question</h3>
+
+            <div class="callout success">
+
+                <strong>
+                    Explain DOM manipulation with suitable examples.
+                </strong>
+
+                <p style="margin-top:10px;">
+                    A complete answer should cover:
+                </p>
+
+                <ol>
+
+                    <li>Definition of DOM</li>
+                    <li>DOM tree</li>
+                    <li>Element selection</li>
+                    <li>Content manipulation</li>
+                    <li>Attribute manipulation</li>
+                    <li>Class manipulation</li>
+                    <li>Style manipulation</li>
+                    <li>Creating elements</li>
+                    <li>Removing elements</li>
+                    <li>Real-world application</li>
+
+                </ol>
+
+            </div>
+
+        </section>
+
+        <!-- 31 QUIZ -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">31</div>
+
+                <div>
+                    <h2>🧠 DOM Quiz</h2>
+
+                    <p>
+                        Test your understanding.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="quiz-question">
+
+                <h4>
+                    1. What does DOM stand for?
+                </h4>
+
+                <label class="option">
+                    <input type="radio" name="q1" value="a">
+                    Data Object Model
+                </label>
+
+                <label class="option">
+                    <input type="radio" name="q1" value="b">
+                    Document Object Model
+                </label>
+
+                <label class="option">
+                    <input type="radio" name="q1" value="c">
+                    Document Oriented Model
+                </label>
+
+            </div>
+
+            <div class="quiz-question">
+
+                <h4>
+                    2. Which method selects the first matching CSS selector?
+                </h4>
+
+                <label class="option">
+                    <input type="radio" name="q2" value="a">
+                    querySelector()
+                </label>
+
+                <label class="option">
+                    <input type="radio" name="q2" value="b">
+                    queryAll()
+                </label>
+
+                <label class="option">
+                    <input type="radio" name="q2" value="c">
+                    select()
+                </label>
+
+            </div>
+
+            <div class="quiz-question">
+
+                <h4>
+                    3. Which property is commonly used to read an input's value?
+                </h4>
+
+                <label class="option">
+                    <input type="radio" name="q3" value="a">
+                    text
+                </label>
+
+                <label class="option">
+                    <input type="radio" name="q3" value="b">
+                    value
+                </label>
+
+                <label class="option">
+                    <input type="radio" name="q3" value="c">
+                    content
+                </label>
+
+            </div>
+
+            <div class="quiz-question">
+
+                <h4>
+                    4. Which property is safest for inserting plain user text?
+                </h4>
+
+                <label class="option">
+                    <input type="radio" name="q4" value="a">
+                    innerHTML
+                </label>
+
+                <label class="option">
+                    <input type="radio" name="q4" value="b">
+                    textContent
+                </label>
+
+                <label class="option">
+                    <input type="radio" name="q4" value="c">
+                    htmlText
+                </label>
+
+            </div>
+
+            <div class="quiz-question">
+
+                <h4>
+                    5. Which method creates a new element?
+                </h4>
+
+                <label class="option">
+                    <input type="radio" name="q5" value="a">
+                    createElement()
+                </label>
+
+                <label class="option">
+                    <input type="radio" name="q5" value="b">
+                    newDOM()
+                </label>
+
+                <label class="option">
+                    <input type="radio" name="q5" value="c">
+                    makeElement()
+                </label>
+
+            </div>
+
+            <div class="quiz-question">
+
+                <h4>
+                    6. Which method removes an element?
+                </h4>
+
+                <label class="option">
+                    <input type="radio" name="q6" value="a">
+                    erase()
+                </label>
+
+                <label class="option">
+                    <input type="radio" name="q6" value="b">
+                    remove()
+                </label>
+
+                <label class="option">
+                    <input type="radio" name="q6" value="c">
+                    deleteElement()
+                </label>
+
+            </div>
+
+            <div class="quiz-question">
+
+                <h4>
+                    7. Which property can add/remove CSS classes?
+                </h4>
+
+                <label class="option">
+                    <input type="radio" name="q7" value="a">
+                    classList
+                </label>
+
+                <label class="option">
+                    <input type="radio" name="q7" value="b">
+                    cssList
+                </label>
+
+                <label class="option">
+                    <input type="radio" name="q7" value="c">
+                    styleList
+                </label>
+
+            </div>
+
+            <div class="quiz-question">
+
+                <h4>
+                    8. What does querySelectorAll() return?
+                </h4>
+
+                <label class="option">
+                    <input type="radio" name="q8" value="a">
+                    The first element
+                </label>
+
+                <label class="option">
+                    <input type="radio" name="q8" value="b">
+                    A NodeList of matching elements
+                </label>
+
+                <label class="option">
+                    <input type="radio" name="q8" value="c">
+                    Only an ID
+                </label>
+
+            </div>
+
+            <button onclick="checkQuiz()">
+                Check Answers
+            </button>
+
+            <div
+                class="quiz-result"
+                id="quizResult">
+            </div>
+
+        </section>
+
+        <!-- 32 CODING PRACTICE -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">32</div>
+
+                <div>
+                    <h2>💻 Coding Practice</h2>
+                </div>
+
+            </div>
+
+            <div class="grid">
+
+                <div class="info-card">
+                    <span class="tag">Beginner</span>
+                    <h3>1. Change Heading</h3>
+                    <p>
+                        Select an h1 and change its text.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <span class="tag">Beginner</span>
+                    <h3>2. Change Color</h3>
+                    <p>
+                        Select a paragraph and change its color.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <span class="tag">Beginner</span>
+                    <h3>3. Counter</h3>
+                    <p>
+                        Create a counter using a DOM element.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <span class="tag">Intermediate</span>
+                    <h3>4. Dynamic List</h3>
+                    <p>
+                        Create and append list items using JavaScript.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <span class="tag">Intermediate</span>
+                    <h3>5. Theme Toggle</h3>
+                    <p>
+                        Use classList to create a dark mode.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <span class="tag">Advanced</span>
+                    <h3>6. Live Search</h3>
+                    <p>
+                        Filter a list as the user types.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- 33 MINI PROJECT -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">33</div>
+
+                <div>
+                    <h2>🚀 Mini Project — ZENSUS Dynamic Profile</h2>
+
+                    <p>
+                        Build a small interactive profile using DOM manipulation.
+                    </p>
+                </div>
+
+            </div>
+
+            <h3>Project Requirements</h3>
+
+            <ol>
+
+                <li>Create a profile card.</li>
+
+                <li>Accept student name from an input.</li>
+
+                <li>Accept course or branch.</li>
+
+                <li>Update the profile using DOM.</li>
+
+                <li>Display a skill.</li>
+
+                <li>Allow the user to change the card theme.</li>
+
+                <li>Use classList rather than excessive inline styles.</li>
+
+            </ol>
+
+            <div class="lab">
+
+                <div class="input-grid">
+
+                    <input
+                        id="projectName"
+                        placeholder="Student name">
+
+                    <input
+                        id="projectBranch"
+                        placeholder="Branch">
+
+                    <input
+                        id="projectSkill"
+                        placeholder="Main skill">
+
+                </div>
+
+                <div class="controls">
+
+                    <button onclick="updateProject()">
+                        Update Profile
+                    </button>
+
+                </div>
+
+                <div
+                    id="projectCard"
+                    class="demo-card">
+
+                    <div
+                        id="projectNameOutput"
+                        class="demo-title">
+
+                        ZENSUS Student
+
+                    </div>
+
+                    <div
+                        id="projectBranchOutput"
+                        class="demo-text">
+
+                        Branch: CSE
+
+                    </div>
+
+                    <span
+                        id="projectSkillOutput"
+                        class="tag">
+
+                        JavaScript
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- 34 CHECKLIST -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">34</div>
+
+                <div>
+                    <h2>✅ Lesson 11 Checklist</h2>
+
+                    <p>
+                        Mark each skill when you can perform it without help.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="checklist">
+
+                <label class="check-item">
+                    <input
+                        type="checkbox"
+                        data-check="dom1">
+                    I can explain the DOM.
+                </label>
+
+                <label class="check-item">
+                    <input
+                        type="checkbox"
+                        data-check="dom2">
+                    I understand the DOM tree.
+                </label>
+
+                <label class="check-item">
+                    <input
+                        type="checkbox"
+                        data-check="dom3">
+                    I can select elements.
+                </label>
+
+                <label class="check-item">
+                    <input
+                        type="checkbox"
+                        data-check="dom4">
+                    I can change text with textContent.
+                </label>
+
+                <label class="check-item">
+                    <input
+                        type="checkbox"
+                        data-check="dom5">
+                    I understand innerHTML.
+                </label>
+
+                <label class="check-item">
+                    <input
+                        type="checkbox"
+                        data-check="dom6">
+                    I can work with input values.
+                </label>
+
+                <label class="check-item">
+                    <input
+                        type="checkbox"
+                        data-check="dom7">
+                    I can manipulate attributes.
+                </label>
+
+                <label class="check-item">
+                    <input
+                        type="checkbox"
+                        data-check="dom8">
+                    I can use classList.
+                </label>
+
+                <label class="check-item">
+                    <input
+                        type="checkbox"
+                        data-check="dom9">
+                    I understand DOM traversal.
+                </label>
+
+                <label class="check-item">
+                    <input
+                        type="checkbox"
+                        data-check="dom10">
+                    I can create DOM elements.
+                </label>
+
+                <label class="check-item">
+                    <input
+                        type="checkbox"
+                        data-check="dom11">
+                    I can remove DOM elements.
+                </label>
+
+                <label class="check-item">
+                    <input
+                        type="checkbox"
+                        data-check="dom12">
+                    I understand DOMContentLoaded and defer.
+                </label>
+
+            </div>
+
+        </section>
+
+        <!-- 35 RAPID REVISION -->
+
+        <section class="section reveal">
+
+            <div class="section-head">
+
+                <div class="section-number">35</div>
+
+                <div>
+                    <h2>⚡ Rapid Revision</h2>
+                </div>
+
+            </div>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Concept</th>
+                            <th>Remember</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>DOM</td>
+                            <td>Object representation of the document</td>
+                        </tr>
+
+                        <tr>
+                            <td>document</td>
+                            <td>Entry point for interacting with the document</td>
+                        </tr>
+
+                        <tr>
+                            <td>getElementById()</td>
+                            <td>Select by unique ID</td>
+                        </tr>
+
+                        <tr>
+                            <td>querySelector()</td>
+                            <td>First CSS-selector match</td>
+                        </tr>
+
+                        <tr>
+                            <td>querySelectorAll()</td>
+                            <td>All CSS-selector matches</td>
+                        </tr>
+
+                        <tr>
+                            <td>textContent</td>
+                            <td>Read/write text</td>
+                        </tr>
+
+                        <tr>
+                            <td>innerHTML</td>
+                            <td>Read/write HTML markup</td>
+                        </tr>
+
+                        <tr>
+                            <td>value</td>
+                            <td>Current form control value</td>
+                        </tr>
+
+                        <tr>
+                            <td>classList</td>
+                            <td>Manage CSS classes</td>
+                        </tr>
+
+                        <tr>
+                            <td>createElement()</td>
+                            <td>Create an element</td>
+                        </tr>
+
+                        <tr>
+                            <td>append()</td>
+                            <td>Insert content at the end</td>
+                        </tr>
+
+                        <tr>
+                            <td>remove()</td>
+                            <td>Remove an element</td>
+                        </tr>
+
+                        <tr>
+                            <td>parentElement</td>
+                            <td>Move upward</td>
+                        </tr>
+
+                        <tr>
+                            <td>children</td>
+                            <td>Access child elements</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="callout success">
+
+                <strong>The DOM formula:</strong>
+
+                <br><br>
+
+                <span class="inline-code">
+                    SELECT → READ → DECIDE → MODIFY → RENDER
+                </span>
+
+            </div>
+
+        </section>
+
+        <!-- FOOTER -->
+
+        <footer class="lesson-footer reveal">
+
+            <h2>
+                🎉 You completed Lesson 11
+            </h2>
+
+            <p style="margin-top:8px;color:#64748b;">
+
+                You now understand how JavaScript connects
+                with HTML through the DOM.
+
+            </p>
+
+            <div style="margin-top:18px;">
+
+                <span class="tag">
+                    DOM Tree
+                </span>
+
+                <span class="tag">
+                    Selectors
+                </span>
+
+                <span class="tag">
+                    Manipulation
+                </span>
+
+                <span class="tag">
+                    Traversal
+                </span>
+
+                <span class="tag">
+                    Dynamic Elements
+                </span>
+
+            </div>
+
+            <a
+                href="lesson12.html"
+                class="next-btn">
+
+                Next Lesson →
+                Events
+
+            </a>
+
+        </footer>
+
+    </div>
+
+</main>
+
+<script>
+
+/* =========================================================
+   ZENSUS — LESSON 11 JAVASCRIPT
+   ========================================================= */
+
+document.documentElement.classList.add("js-enabled");
+
+
+/* MOBILE MENU */
+
+const menuBtn =
+    document.getElementById("menuBtn");
+
+const sidebar =
+    document.getElementById("sidebar");
+
+if (menuBtn && sidebar) {
+
+    menuBtn.addEventListener("click", () => {
+
+        sidebar.classList.toggle("open");
+
+    });
+
+}
+
+
+/* CLOSE MOBILE MENU AFTER LINK */
+
+document
+    .querySelectorAll(".lesson-list a")
+    .forEach(link => {
+
+        link.addEventListener("click", () => {
+
+            sidebar.classList.remove("open");
+
+        });
+
+    });
+
+
+/* SCROLL PROGRESS */
+
+window.addEventListener("scroll", () => {
+
+    const scrollTop =
+        window.scrollY;
+
+    const documentHeight =
+        document.documentElement.scrollHeight
+        - window.innerHeight;
+
+    const progress =
+        documentHeight > 0
+            ? (scrollTop / documentHeight) * 100
+            : 0;
+
+    document
+        .getElementById("progressLine")
+        .style.width = progress + "%";
+
+});
+
+
+/* REVEAL ANIMATION */
+
+const revealElements =
+    document.querySelectorAll(".reveal");
+
+const revealObserver =
+    new IntersectionObserver(
+        entries => {
+
+            entries.forEach(entry => {
+
+                if (entry.isIntersecting) {
+
+                    entry.target.classList.add("visible");
+
+                    revealObserver.unobserve(
+                        entry.target
+                    );
+
+                }
+
+            });
+
+        },
+        {
+            threshold: 0.08
+        }
+    );
+
+revealElements.forEach(element => {
+
+    revealObserver.observe(element);
+
+});
+
+
+/* INPUT DEMO */
+
+function readInput() {
+
+    const input =
+        document.getElementById("nameDemo");
+
+    const output =
+        document.getElementById("inputOutput");
+
+    const value =
+        input.value.trim();
+
+    if (!value) {
+
+        output.textContent =
+            "Please enter a name.";
+
+        return;
+
+    }
+
+    output.textContent =
+        "JavaScript read:\n" +
+        value;
+
+}
+
+
+/* CLASSLIST DEMO */
+
+function toggleDemoClass() {
+
+    const card =
+        document.getElementById("classDemoCard");
+
+    card.classList.toggle("highlight");
+
+}
+
+
+/* DOM ANIMATION */
+
+function runDOMAnimation() {
+
+    const output =
+        document.getElementById(
+            "domAnimationOutput"
+        );
+
+    const select =
+        document.getElementById(
+            "actionSelect"
+        );
+
+    const modify =
+        document.getElementById(
+            "actionModify"
+        );
+
+    const render =
+        document.getElementById(
+            "actionRender"
+        );
+
+    const title =
+        document.getElementById(
+            "visualTitle"
+        );
+
+    const text =
+        document.getElementById(
+            "visualText"
+        );
+
+    const card =
+        document.getElementById(
+            "visualCard"
+        );
+
+    select.classList.remove("active");
+    modify.classList.remove("active");
+    render.classList.remove("active");
+
+    title.textContent =
+        "DOM Element";
+
+    text.textContent =
+        "JavaScript is starting...";
+
+    card.classList.remove("highlight");
+
+    setTimeout(() => {
+
+        select.classList.add("active");
+
+        output.textContent =
+            "Step 1: JavaScript selects the element.";
+
+    }, 300);
+
+    setTimeout(() => {
+
+        select.classList.remove("active");
+
+        modify.classList.add("active");
+
+        title.textContent =
+            "Hello from JavaScript";
+
+        text.textContent =
+            "The DOM has been modified.";
+
+        output.textContent =
+            "Step 2: JavaScript changes the DOM.";
+
+    }, 1300);
+
+    setTimeout(() => {
+
+        modify.classList.remove("active");
+
+        render.classList.add("active");
+
+        card.classList.add("highlight");
+
+        output.textContent =
+            "Step 3: The browser renders the updated DOM.";
+
+    }, 2300);
+
+}
+
+
+/* RESET DOM ANIMATION */
+
+function resetDOMAnimation() {
+
+    const title =
+        document.getElementById(
+            "visualTitle"
+        );
+
+    const text =
+        document.getElementById(
+            "visualText"
+        );
+
+    const card =
+        document.getElementById(
+            "visualCard"
+        );
+
+    document
+        .querySelectorAll(".action-card")
+        .forEach(card => {
+
+            card.classList.remove("active");
+
+        });
+
+    title.textContent =
+        "DOM Element";
+
+    text.textContent =
+        "I am waiting for JavaScript.";
+
+    card.classList.remove("highlight");
+
+    document
+        .getElementById(
+            "domAnimationOutput"
+        )
+        .textContent =
+        'Click "Run DOM Animation" to see the process.';
+
+}
+
+
+/* SELECTOR LAB */
+
+function runSelector() {
+
+    const selector =
+        document
+            .getElementById(
+                "selectorInput"
+            )
+            .value
+            .trim();
+
+    const output =
+        document.getElementById(
+            "selectorOutput"
+        );
+
+    if (!selector) {
+
+        output.textContent =
+            "Please enter a CSS selector.";
+
+        return;
+
+    }
+
+    try {
+
+        const element =
+            document.querySelector(selector);
+
+        if (!element) {
+
+            output.textContent =
+                "No matching element found.";
+
+            return;
+
+        }
+
+        output.textContent =
+            "Matched element:\n" +
+            element.tagName.toLowerCase() +
+            "\n\nText:\n" +
+            element.textContent.trim();
+
+    } catch (error) {
+
+        output.textContent =
+            "Invalid CSS selector.";
+
+    }
+
+}
+
+
+/* STYLE LAB */
+
+function changeStyle(type) {
+
+    const box =
+        document.getElementById(
+            "styleLabBox"
+        );
+
+    if (type === "primary") {
+
+        box.style.background =
+            "#eef2ff";
+
+        box.style.borderColor =
+            "#818cf8";
+
+    }
+
+    if (type === "success") {
+
+        box.style.background =
+            "#f0fdf4";
+
+        box.style.borderColor =
+            "#86efac";
+
+    }
+
+    if (type === "warning") {
+
+        box.style.background =
+            "#fff7ed";
+
+        box.style.borderColor =
+            "#fdba74";
+
+    }
+
+}
+
+
+function resetStyle() {
+
+    const box =
+        document.getElementById(
+            "styleLabBox"
+        );
+
+    box.style.background = "";
+    box.style.borderColor = "";
+
+}
+
+
+/* TRAVERSAL */
+
+function clearTraversal() {
+
+    document
+        .querySelectorAll(
+            "#travChild1, #travChild2, #travChild3"
+        )
+        .forEach(element => {
+
+            element.style.background = "";
+            element.style.color = "";
+
+        });
+
+}
+
+
+function highlightTraversal(type) {
+
+    clearTraversal();
+
+    const output =
+        document.getElementById(
+            "traversalOutput"
+        );
+
+    if (type === "parent") {
+
+        output.textContent =
+            "parentElement moves from a child element to its parent.";
+
+        document
+            .getElementById("travChild2")
+            .style.background = "#eef2ff";
+
+    }
+
+    if (type === "children") {
+
+        output.textContent =
+            "children represents the child elements of an element.";
+
+        document
+            .querySelectorAll(
+                "#travChild1, #travChild2, #travChild3"
+            )
+            .forEach(element => {
+
+                element.style.background =
+                    "#f0fdf4";
+
+            });
+
+    }
+
+    if (type === "sibling") {
+
+        output.textContent =
+            "nextElementSibling and previousElementSibling move between sibling elements.";
+
+        document
+            .getElementById("travChild3")
+            .style.background = "#fff7ed";
+
+    }
+
+}
+
+
+/* FORM VALIDATION */
+
+function validateForm() {
+
+    const username =
+        document
+            .getElementById("username")
+            .value
+            .trim();
+
+    const email =
+        document
+            .getElementById("email")
+            .value
+            .trim();
+
+    const output =
+        document.getElementById(
+            "formOutput"
+        );
+
+    const errors = [];
+
+    if (!username) {
+
+        errors.push(
+            "Username is required."
+        );
+
+    }
+
+    if (!email) {
+
+        errors.push(
+            "Email is required."
+        );
+
+    } else if (!email.includes("@")) {
+
+        errors.push(
+            "Enter a valid email address."
+        );
+
+    }
+
+    if (errors.length > 0) {
+
+        output.textContent =
+            errors.join("\n");
+
+        return;
+
+    }
+
+    output.textContent =
+        "Form validation successful!\n\n" +
+        "Username: " +
+        username +
+        "\nEmail: " +
+        email;
+
+}
+
+
+/* MINI PROJECT */
+
+function updateProject() {
+
+    const name =
+        document
+            .getElementById(
+                "projectName"
+            )
+            .value
+            .trim();
+
+    const branch =
+        document
+            .getElementById(
+                "projectBranch"
+            )
+            .value
+            .trim();
+
+    const skill =
+        document
+            .getElementById(
+                "projectSkill"
+            )
+            .value
+            .trim();
+
+    const nameOutput =
+        document.getElementById(
+            "projectNameOutput"
+        );
+
+    const branchOutput =
+        document.getElementById(
+            "projectBranchOutput"
+        );
+
+    const skillOutput =
+        document.getElementById(
+            "projectSkillOutput"
+        );
+
+    nameOutput.textContent =
+        name || "ZENSUS Student";
+
+    branchOutput.textContent =
+        "Branch: " +
+        (branch || "CSE");
+
+    skillOutput.textContent =
+        skill || "JavaScript";
+
+}
+
+
+/* QUIZ */
+
+function checkQuiz() {
+
+    const answers = {
+
+        q1: "b",
+        q2: "a",
+        q3: "b",
+        q4: "b",
+        q5: "a",
+        q6: "b",
+        q7: "a",
+        q8: "b"
+
+    };
+
+    let score = 0;
+
+    const total =
+        Object.keys(answers).length;
+
+    Object.keys(answers).forEach(question => {
+
+        const selected =
+            document.querySelector(
+                `input[name="${question}"]:checked`
+            );
+
+        if (
+            selected &&
+            selected.value === answers[question]
+        ) {
+
+            score++;
+
+        }
+
+    });
+
+    const result =
+        document.getElementById(
+            "quizResult"
+        );
+
+    result.style.display = "block";
+
+    if (score === total) {
+
+        result.style.background =
+            "#f0fdf4";
+
+        result.style.color =
+            "#166534";
+
+        result.textContent =
+            `Excellent! ${score}/${total}. DOM mastery level unlocked. 🚀`;
+
+    } else if (score >= total * 0.6) {
+
+        result.style.background =
+            "#eff6ff";
+
+        result.style.color =
+            "#1d4ed8";
+
+        result.textContent =
+            `Good work! You scored ${score}/${total}. Review the missed concepts once more.`;
+
+    } else {
+
+        result.style.background =
+            "#fff7ed";
+
+        result.style.color =
+            "#9a3412";
+
+        result.textContent =
+            `You scored ${score}/${total}. Revisit the lesson and try again.`;
+
+    }
+
+}
+
+
+/* CHECKLIST STORAGE */
+
+const checklistItems =
+    document.querySelectorAll(
+        ".check-item input[data-check]"
+    );
+
+checklistItems.forEach(item => {
+
+    const key =
+        "zensus-js-lesson11-" +
+        item.dataset.check;
+
+    const saved =
+        localStorage.getItem(key);
+
+    if (saved === "true") {
+
+        item.checked = true;
+
+    }
+
+    item.addEventListener(
+        "change",
+        () => {
+
+            localStorage.setItem(
+                key,
+                item.checked
+            );
+
+        }
+    );
+
+});
+
+
+/* INITIAL STATE */
+
+resetDOMAnimation();
+
+</script>
+
+</body>
+</html>

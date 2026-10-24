@@ -1,0 +1,3518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZENSUS | Lesson 15 - Node.js Full-Stack Projects</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --secondary: #0f172a;
+      --text: #334155;
+      --muted: #64748b;
+      --light: #f8fafc;
+      --border: #e2e8f0;
+      --white: #ffffff;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --purple: #7c3aed;
+      --cyan: #0891b2;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --radius: 16px;
+    }
+
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      background: #f8fafc;
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    code {
+      font-family: "Fira Code", Consolas, monospace;
+    }
+
+    /* NAVBAR */
+
+    .navbar {
+      height: 70px;
+      background: rgba(255,255,255,0.95);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      backdrop-filter: blur(12px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      font-size: 20px;
+      color: var(--secondary);
+      letter-spacing: 1px;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      color: white;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      box-shadow: 0 7px 20px rgba(37,99,235,.25);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .lesson-label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .progress-mini {
+      width: 120px;
+      height: 7px;
+      background: #e2e8f0;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .progress-mini span {
+      display: block;
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #2563eb, #7c3aed);
+      transition: width .4s ease;
+    }
+
+    /* LAYOUT */
+
+    .layout {
+      display: flex;
+      padding-top: 70px;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      bottom: 0;
+      width: 280px;
+      background: white;
+      border-right: 1px solid var(--border);
+      padding: 25px 15px;
+      overflow-y: auto;
+      z-index: 500;
+    }
+
+    .sidebar-title {
+      padding: 0 12px 14px;
+      font-size: 12px;
+      text-transform: uppercase;
+      color: var(--muted);
+      letter-spacing: 1.2px;
+      font-weight: 700;
+    }
+
+    .toc a {
+      display: block;
+      padding: 9px 12px;
+      margin-bottom: 3px;
+      border-radius: 9px;
+      font-size: 13px;
+      color: #475569;
+      transition: .2s;
+    }
+
+    .toc a:hover {
+      background: #eff6ff;
+      color: var(--primary);
+    }
+
+    .toc a.active {
+      background: #dbeafe;
+      color: var(--primary-dark);
+      font-weight: 700;
+      border-left: 3px solid var(--primary);
+    }
+
+    .main {
+      margin-left: 280px;
+      width: calc(100% - 280px);
+      padding: 45px 55px 80px;
+      max-width: 1500px;
+    }
+
+    /* HERO */
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: 25px;
+      padding: 55px;
+      color: white;
+      background:
+        radial-gradient(circle at 90% 20%, rgba(124,58,237,.45), transparent 28%),
+        radial-gradient(circle at 10% 100%, rgba(8,145,178,.35), transparent 30%),
+        linear-gradient(135deg, #0f172a, #172554);
+      box-shadow: 0 20px 50px rgba(15,23,42,.18);
+      margin-bottom: 40px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      right: -90px;
+      bottom: -110px;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 50%;
+      box-shadow:
+        0 0 0 35px rgba(255,255,255,.03),
+        0 0 0 70px rgba(255,255,255,.02);
+    }
+
+    .lesson-number {
+      display: inline-flex;
+      padding: 7px 13px;
+      border-radius: 30px;
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.15);
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 55px);
+      line-height: 1.08;
+      max-width: 850px;
+      margin-bottom: 18px;
+    }
+
+    .hero p {
+      max-width: 850px;
+      color: #cbd5e1;
+      font-size: 17px;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .meta-pill {
+      padding: 8px 13px;
+      border-radius: 30px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.1);
+      font-size: 12px;
+    }
+
+    /* CONTENT */
+
+    section {
+      scroll-margin-top: 90px;
+      margin-bottom: 55px;
+    }
+
+    .section-title {
+      font-size: 29px;
+      color: var(--secondary);
+      margin-bottom: 10px;
+      line-height: 1.25;
+    }
+
+    .section-subtitle {
+      color: var(--muted);
+      margin-bottom: 25px;
+      max-width: 850px;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 26px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .card h3 {
+      color: var(--secondary);
+      margin-bottom: 10px;
+    }
+
+    .card h4 {
+      color: var(--secondary);
+      margin: 18px 0 8px;
+    }
+
+    .info-box {
+      border-left: 4px solid var(--primary);
+      background: #eff6ff;
+      padding: 18px 20px;
+      border-radius: 10px;
+      margin: 18px 0;
+    }
+
+    .success-box {
+      border-left-color: var(--success);
+      background: #f0fdf4;
+    }
+
+    .warning-box {
+      border-left-color: var(--warning);
+      background: #fffbeb;
+    }
+
+    .danger-box {
+      border-left-color: var(--danger);
+      background: #fef2f2;
+    }
+
+    .purple-box {
+      border-left-color: var(--purple);
+      background: #faf5ff;
+    }
+
+    /* OBJECTIVES */
+
+    .objective-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+
+    .objective {
+      padding: 20px;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 14px;
+      transition: .25s;
+    }
+
+    .objective:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+    }
+
+    .objective-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: #eff6ff;
+      color: var(--primary);
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+
+    /* ARCHITECTURE */
+
+    .architecture {
+      background: #0f172a;
+      padding: 30px;
+      border-radius: 18px;
+      overflow-x: auto;
+    }
+
+    .architecture-flow {
+      min-width: 800px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .arch-box {
+      min-width: 150px;
+      padding: 18px;
+      border-radius: 13px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: white;
+      text-align: center;
+    }
+
+    .arch-box strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .arch-box small {
+      color: #94a3b8;
+    }
+
+    .arrow {
+      color: #60a5fa;
+      font-size: 24px;
+      animation: arrowMove 1.4s infinite alternate;
+    }
+
+    @keyframes arrowMove {
+      from { transform: translateX(-3px); }
+      to { transform: translateX(3px); }
+    }
+
+    /* FLOW */
+
+    .step-flow {
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      padding: 10px 0 20px;
+    }
+
+    .flow-step {
+      min-width: 170px;
+      padding: 20px;
+      background: white;
+      border: 1px solid var(--border);
+      position: relative;
+      text-align: center;
+    }
+
+    .flow-step:first-child {
+      border-radius: 14px 0 0 14px;
+    }
+
+    .flow-step:last-child {
+      border-radius: 0 14px 14px 0;
+    }
+
+    .flow-number {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      margin: auto auto 10px;
+      border-radius: 50%;
+      background: #dbeafe;
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    /* TABLE */
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--border);
+      padding: 13px;
+      text-align: left;
+    }
+
+    th {
+      background: #f1f5f9;
+      color: var(--secondary);
+    }
+
+    /* CODE */
+
+    .code-wrapper {
+      background: #0b1120;
+      border-radius: 14px;
+      overflow: hidden;
+      margin: 20px 0;
+      box-shadow: 0 10px 30px rgba(15,23,42,.15);
+    }
+
+    .code-header {
+      padding: 11px 16px;
+      background: #111827;
+      color: #94a3b8;
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .copy-btn {
+      background: #1e293b;
+      color: #cbd5e1;
+      border: 0;
+      border-radius: 6px;
+      padding: 5px 9px;
+      cursor: pointer;
+    }
+
+    pre {
+      padding: 20px;
+      overflow-x: auto;
+      color: #dbeafe;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    /* PROJECT CARDS */
+
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .project-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      transition: .3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .project-card:hover {
+      transform: translateY(-6px);
+    }
+
+    .project-card::before {
+      content: "";
+      position: absolute;
+      height: 4px;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(90deg, #2563eb, #7c3aed);
+    }
+
+    .project-icon {
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 4px 9px;
+      background: #eff6ff;
+      color: var(--primary);
+      border-radius: 20px;
+      font-size: 11px;
+      margin: 4px 3px 0 0;
+    }
+
+    /* INTERACTIVE LAB */
+
+    .lab {
+      background: linear-gradient(135deg, #eff6ff, #faf5ff);
+      border: 1px solid #dbeafe;
+      border-radius: 20px;
+      padding: 30px;
+    }
+
+    .lab-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    .lab-btn {
+      border: 0;
+      background: white;
+      color: var(--secondary);
+      padding: 11px 17px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      font-weight: 600;
+      transition: .2s;
+    }
+
+    .lab-btn:hover,
+    .lab-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .terminal {
+      background: #020617;
+      border-radius: 13px;
+      min-height: 230px;
+      padding: 20px;
+      color: #cbd5e1;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      overflow: hidden;
+    }
+
+    .terminal-line {
+      margin-bottom: 8px;
+    }
+
+    .terminal-success {
+      color: #4ade80;
+    }
+
+    .terminal-blue {
+      color: #60a5fa;
+    }
+
+    .terminal-yellow {
+      color: #facc15;
+    }
+
+    /* API TESTER */
+
+    .api-tester {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 11px 13px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+      font: inherit;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+    }
+
+    .primary-btn {
+      border: 0;
+      padding: 11px 18px;
+      border-radius: 8px;
+      background: var(--primary);
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .response-box {
+      min-height: 200px;
+      padding: 20px;
+      background: #0f172a;
+      color: #cbd5e1;
+      border-radius: 12px;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+    }
+
+    /* CHECKLIST */
+
+    .checklist {
+      display: grid;
+      gap: 10px;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: white;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .check-item input {
+      width: auto;
+    }
+
+    /* ACCORDION */
+
+    .accordion {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      background: white;
+    }
+
+    .accordion button {
+      width: 100%;
+      border: 0;
+      background: white;
+      padding: 17px;
+      text-align: left;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--secondary);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .accordion-content {
+      display: none;
+      padding: 0 17px 17px;
+      color: var(--muted);
+    }
+
+    .accordion.open .accordion-content {
+      display: block;
+    }
+
+    /* QUIZ */
+
+    .quiz-question {
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      margin-bottom: 15px;
+      background: white;
+    }
+
+    .quiz-question h4 {
+      margin-bottom: 12px;
+    }
+
+    .option {
+      display: block;
+      margin: 7px 0;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+
+    .option:hover {
+      background: #f8fafc;
+    }
+
+    .quiz-result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 10px;
+      display: none;
+    }
+
+    /* NAVIGATION */
+
+    .lesson-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      margin-top: 60px;
+    }
+
+    .nav-card {
+      flex: 1;
+      padding: 20px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      transition: .2s;
+    }
+
+    .nav-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-3px);
+    }
+
+    .nav-small {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .nav-title {
+      color: var(--primary);
+      font-weight: 800;
+      margin-top: 5px;
+    }
+
+    /* COMPLETE */
+
+    .complete-box {
+      text-align: center;
+      padding: 45px 25px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #eff6ff, #faf5ff);
+      border: 1px solid #dbeafe;
+    }
+
+    .complete-box h2 {
+      color: var(--secondary);
+      margin-bottom: 10px;
+    }
+
+    .complete-btn {
+      margin-top: 20px;
+      padding: 13px 24px;
+      border: 0;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: white;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(37,99,235,.25);
+    }
+
+    /* RESPONSIVE */
+
+    @media (max-width: 1000px) {
+      .sidebar {
+        display: none;
+      }
+
+      .main {
+        margin-left: 0;
+        width: 100%;
+        padding: 30px 22px;
+      }
+
+      .objective-grid,
+      .project-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .api-tester {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding: 35px 25px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .navbar {
+        padding: 0 15px;
+      }
+
+      .lesson-label {
+        display: none;
+      }
+
+      .main {
+        padding: 20px 14px 50px;
+      }
+
+      .hero h1 {
+        font-size: 34px;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .lesson-nav {
+        flex-direction: column;
+      }
+
+      .architecture-flow {
+        min-width: 700px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+
+  <nav class="navbar">
+    <a href="#" class="brand">
+      <span class="brand-logo">Z</span>
+      ZENSUS
+    </a>
+
+    <div class="nav-right">
+      <span class="lesson-label">Node.js Course • Lesson 15</span>
+      <div class="progress-mini">
+        <span id="topProgress"></span>
+      </div>
+    </div>
+  </nav>
+
+
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+      <div class="sidebar-title">Lesson 15</div>
+
+      <div class="toc">
+
+        <a href="#overview">Overview</a>
+        <a href="#objectives">Learning Objectives</a>
+        <a href="#fullstack">What is Full-Stack?</a>
+        <a href="#architecture">Full-Stack Architecture</a>
+        <a href="#frontend">Frontend Layer</a>
+        <a href="#backend">Backend Layer</a>
+        <a href="#database">Database Layer</a>
+        <a href="#communication">Frontend ↔ Backend</a>
+        <a href="#project1">Project 1: Task Manager</a>
+        <a href="#project2">Project 2: Blog Platform</a>
+        <a href="#project3">Project 3: E-Commerce API</a>
+        <a href="#project4">Project 4: Student Management</a>
+        <a href="#authentication">Authentication</a>
+        <a href="#crud">CRUD Architecture</a>
+        <a href="#api">API Design</a>
+        <a href="#deployment">Deployment</a>
+        <a href="#env">Environment Variables</a>
+        <a href="#production">Production Checklist</a>
+        <a href="#lab">Interactive Full-Stack Lab</a>
+        <a href="#apiTester">API Tester</a>
+        <a href="#mistakes">Common Mistakes</a>
+        <a href="#interview">Interview Questions</a>
+        <a href="#quiz">Quiz</a>
+        <a href="#challenge">Final Challenge</a>
+        <a href="#complete">Complete Lesson</a>
+
+      </div>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+      <!-- HERO -->
+
+      <div class="hero">
+
+        <div class="lesson-number">
+          LESSON 15 • NODE.JS
+        </div>
+
+        <h1>Node.js Full-Stack Projects</h1>
+
+        <p>
+          Learn how to combine frontend applications, Node.js, Express,
+          databases, authentication, APIs and deployment to build complete
+          real-world full-stack applications.
+        </p>
+
+        <div class="hero-meta">
+          <span class="meta-pill">Full-Stack Development</span>
+          <span class="meta-pill">React / HTML / CSS / JS</span>
+          <span class="meta-pill">Node.js + Express</span>
+          <span class="meta-pill">MongoDB</span>
+          <span class="meta-pill">REST APIs</span>
+          <span class="meta-pill">Production</span>
+        </div>
+
+      </div>
+
+
+      <!-- OVERVIEW -->
+
+      <section id="overview">
+
+        <h2 class="section-title">1. Overview</h2>
+
+        <p class="section-subtitle">
+          A full-stack application connects the user interface, server-side
+          business logic and database into one complete system.
+        </p>
+
+        <div class="card">
+
+          <h3>What will you build in this lesson?</h3>
+
+          <p>
+            In the previous lessons, you learned individual Node.js concepts:
+            modules, NPM, asynchronous programming, file systems, HTTP,
+            Express, routing, middleware, REST APIs, MongoDB, authentication
+            and security.
+          </p>
+
+          <p style="margin-top:12px;">
+            Now we combine those concepts into complete applications.
+          </p>
+
+          <div class="info-box success-box">
+
+            <strong>Core idea:</strong>
+
+            A full-stack project is not simply a collection of pages.
+            It is a complete data flow:
+            <strong>User → Frontend → API → Backend → Database → Backend → API → Frontend → User</strong>.
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- OBJECTIVES -->
+
+      <section id="objectives">
+
+        <h2 class="section-title">2. Learning Objectives</h2>
+
+        <p class="section-subtitle">
+          By the end of this lesson, you should be able to design and build
+          a complete Node.js-based full-stack application.
+        </p>
+
+        <div class="objective-grid">
+
+          <div class="objective">
+            <div class="objective-icon">🖥️</div>
+            <h3>Frontend</h3>
+            <p>Connect a frontend application to a Node.js backend.</p>
+          </div>
+
+          <div class="objective">
+            <div class="objective-icon">⚙️</div>
+            <h3>Backend</h3>
+            <p>Build REST APIs using Express.js.</p>
+          </div>
+
+          <div class="objective">
+            <div class="objective-icon">🗄️</div>
+            <h3>Database</h3>
+            <p>Store and retrieve application data using MongoDB.</p>
+          </div>
+
+          <div class="objective">
+            <div class="objective-icon">🔐</div>
+            <h3>Authentication</h3>
+            <p>Protect APIs using authentication and authorization.</p>
+          </div>
+
+          <div class="objective">
+            <div class="objective-icon">🔄</div>
+            <h3>CRUD</h3>
+            <p>Create complete Create, Read, Update and Delete workflows.</p>
+          </div>
+
+          <div class="objective">
+            <div class="objective-icon">🚀</div>
+            <h3>Deployment</h3>
+            <p>Understand how a full-stack application reaches production.</p>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- FULL STACK -->
+
+      <section id="fullstack">
+
+        <h2 class="section-title">3. What is Full-Stack Development?</h2>
+
+        <p class="section-subtitle">
+          Full-stack development means working with both the client side
+          and server side of an application.
+        </p>
+
+        <div class="card">
+
+          <h3>Frontend</h3>
+
+          <p>
+            The frontend is the part users interact with directly.
+          </p>
+
+          <ul>
+            <li>HTML</li>
+            <li>CSS</li>
+            <li>JavaScript</li>
+            <li>React</li>
+            <li>Forms</li>
+            <li>Buttons</li>
+            <li>Dashboards</li>
+          </ul>
+
+        </div>
+
+        <div class="card">
+
+          <h3>Backend</h3>
+
+          <p>
+            The backend processes requests, executes business logic,
+            communicates with databases and returns responses.
+          </p>
+
+          <ul>
+            <li>Node.js</li>
+            <li>Express.js</li>
+            <li>Authentication</li>
+            <li>Authorization</li>
+            <li>Validation</li>
+            <li>Business logic</li>
+            <li>REST APIs</li>
+          </ul>
+
+        </div>
+
+        <div class="card">
+
+          <h3>Database</h3>
+
+          <p>
+            The database stores persistent application information.
+          </p>
+
+          <ul>
+            <li>Users</li>
+            <li>Products</li>
+            <li>Tasks</li>
+            <li>Orders</li>
+            <li>Posts</li>
+            <li>Student records</li>
+          </ul>
+
+        </div>
+
+      </section>
+
+
+      <!-- ARCHITECTURE -->
+
+      <section id="architecture">
+
+        <h2 class="section-title">4. Full-Stack Architecture</h2>
+
+        <p class="section-subtitle">
+          Understand how the major layers communicate with each other.
+        </p>
+
+        <div class="architecture">
+
+          <div class="architecture-flow">
+
+            <div class="arch-box">
+              <strong>Frontend</strong>
+              <small>React / HTML / CSS / JS</small>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="arch-box">
+              <strong>HTTP Request</strong>
+              <small>GET / POST / PUT / DELETE</small>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="arch-box">
+              <strong>Express API</strong>
+              <small>Routes + Middleware</small>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="arch-box">
+              <strong>Business Logic</strong>
+              <small>Services / Controllers</small>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="arch-box">
+              <strong>MongoDB</strong>
+              <small>Persistent Data</small>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="info-box">
+
+          <strong>Remember:</strong>
+
+          The browser should not directly connect to your database.
+          The backend acts as the controlled layer between the client and
+          database.
+
+        </div>
+
+      </section>
+
+
+      <!-- FRONTEND -->
+
+      <section id="frontend">
+
+        <h2 class="section-title">5. Frontend Layer</h2>
+
+        <p class="section-subtitle">
+          The frontend collects user input and displays server responses.
+        </p>
+
+        <div class="card">
+
+          <h3>Example</h3>
+
+          <p>
+            Suppose a user clicks:
+          </p>
+
+          <div class="info-box">
+            <strong>“Add Task”</strong>
+          </div>
+
+          <p>
+            The frontend gathers the task title and sends it to the backend.
+          </p>
+
+          <div class="code-wrapper">
+
+            <div class="code-header">
+              <span>JavaScript Fetch</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>async function addTask() {
+
+  const response = await fetch(
+    "http://localhost:3000/api/tasks",
+    {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        title: "Learn Node.js"
+      })
+    }
+  );
+
+  const data = await response.json();
+
+  console.log(data);
+}</code></pre>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- BACKEND -->
+
+      <section id="backend">
+
+        <h2 class="section-title">6. Backend Layer</h2>
+
+        <div class="card">
+
+          <h3>Express API</h3>
+
+          <p>
+            Express receives HTTP requests and sends HTTP responses.
+          </p>
+
+          <div class="code-wrapper">
+
+            <div class="code-header">
+              <span>server.js</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>const express = require("express");
+
+const app = express();
+
+app.use(express.json());
+
+app.get("/api/tasks", (req, res) => {
+
+  res.json({
+    success: true,
+    tasks: []
+  });
+
+});
+
+app.listen(3000, () => {
+  console.log("Server running on port 3000");
+});</code></pre>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- DATABASE -->
+
+      <section id="database">
+
+        <h2 class="section-title">7. Database Layer</h2>
+
+        <div class="card">
+
+          <h3>MongoDB + Mongoose</h3>
+
+          <p>
+            MongoDB stores application data as documents.
+            Mongoose provides schemas and models that make MongoDB easier
+            to work with from Node.js.
+          </p>
+
+          <div class="code-wrapper">
+
+            <div class="code-header">
+              <span>Task Model</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>const mongoose = require("mongoose");
+
+const taskSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true
+    },
+
+    completed: {
+      type: Boolean,
+      default: false
+    }
+  },
+  {
+    timestamps: true
+  }
+);
+
+module.exports =
+  mongoose.model("Task", taskSchema);</code></pre>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- COMMUNICATION -->
+
+      <section id="communication">
+
+        <h2 class="section-title">8. Frontend ↔ Backend Communication</h2>
+
+        <p class="section-subtitle">
+          The API is the communication bridge between the frontend and backend.
+        </p>
+
+        <div class="step-flow">
+
+          <div class="flow-step">
+            <div class="flow-number">1</div>
+            User clicks button
+          </div>
+
+          <div class="flow-step">
+            <div class="flow-number">2</div>
+            Frontend creates request
+          </div>
+
+          <div class="flow-step">
+            <div class="flow-number">3</div>
+            Express receives request
+          </div>
+
+          <div class="flow-step">
+            <div class="flow-number">4</div>
+            Backend validates data
+          </div>
+
+          <div class="flow-step">
+            <div class="flow-number">5</div>
+            Database operation
+          </div>
+
+          <div class="flow-step">
+            <div class="flow-number">6</div>
+            JSON response
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- PROJECT 1 -->
+
+      <section id="project1">
+
+        <h2 class="section-title">9. Project 1 — Full-Stack Task Manager</h2>
+
+        <p class="section-subtitle">
+          A practical beginner-to-intermediate project that combines most
+          of the Node.js concepts learned so far.
+        </p>
+
+        <div class="project-card">
+
+          <div class="project-icon">✅</div>
+
+          <h3>TaskFlow</h3>
+
+          <p>
+            Users can register, log in, create tasks, update tasks,
+            mark tasks as completed and delete tasks.
+          </p>
+
+          <br>
+
+          <strong>Features</strong>
+
+          <div>
+            <span class="tag">Registration</span>
+            <span class="tag">Login</span>
+            <span class="tag">JWT</span>
+            <span class="tag">CRUD</span>
+            <span class="tag">MongoDB</span>
+            <span class="tag">REST API</span>
+          </div>
+
+        </div>
+
+        <div class="card">
+
+          <h3>API Design</h3>
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Endpoint</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              <tr>
+                <td>POST</td>
+                <td>/api/auth/register</td>
+                <td>Create account</td>
+              </tr>
+
+              <tr>
+                <td>POST</td>
+                <td>/api/auth/login</td>
+                <td>Login</td>
+              </tr>
+
+              <tr>
+                <td>GET</td>
+                <td>/api/tasks</td>
+                <td>Get tasks</td>
+              </tr>
+
+              <tr>
+                <td>POST</td>
+                <td>/api/tasks</td>
+                <td>Create task</td>
+              </tr>
+
+              <tr>
+                <td>PUT</td>
+                <td>/api/tasks/:id</td>
+                <td>Update task</td>
+              </tr>
+
+              <tr>
+                <td>DELETE</td>
+                <td>/api/tasks/:id</td>
+                <td>Delete task</td>
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </section>
+
+
+      <!-- PROJECT 2 -->
+
+      <section id="project2">
+
+        <h2 class="section-title">10. Project 2 — Full-Stack Blog Platform</h2>
+
+        <div class="project-card">
+
+          <div class="project-icon">📝</div>
+
+          <h3>DevBlog</h3>
+
+          <p>
+            A blogging platform where authenticated users can create,
+            edit and delete their own articles.
+          </p>
+
+          <br>
+
+          <strong>Core modules</strong>
+
+          <div>
+            <span class="tag">Users</span>
+            <span class="tag">Posts</span>
+            <span class="tag">Comments</span>
+            <span class="tag">JWT</span>
+            <span class="tag">MongoDB</span>
+          </div>
+
+        </div>
+
+        <div class="card">
+
+          <h3>Possible database structure</h3>
+
+          <div class="code-wrapper">
+
+            <div class="code-header">
+              <span>Collections</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>users
+ ├── _id
+ ├── name
+ ├── email
+ └── passwordHash
+
+posts
+ ├── _id
+ ├── title
+ ├── content
+ ├── authorId
+ └── createdAt
+
+comments
+ ├── _id
+ ├── postId
+ ├── userId
+ └── content</code></pre>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- PROJECT 3 -->
+
+      <section id="project3">
+
+        <h2 class="section-title">11. Project 3 — E-Commerce Application</h2>
+
+        <div class="project-card">
+
+          <div class="project-icon">🛒</div>
+
+          <h3>ShopStack</h3>
+
+          <p>
+            A complete shopping platform with products, users,
+            carts and orders.
+          </p>
+
+          <br>
+
+          <strong>Major modules</strong>
+
+          <div>
+            <span class="tag">Products</span>
+            <span class="tag">Users</span>
+            <span class="tag">Cart</span>
+            <span class="tag">Orders</span>
+            <span class="tag">Admin</span>
+            <span class="tag">Authentication</span>
+          </div>
+
+        </div>
+
+        <div class="card">
+
+          <h3>Typical request flow</h3>
+
+          <div class="step-flow">
+
+            <div class="flow-step">
+              <div class="flow-number">1</div>
+              Browse Products
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">2</div>
+              Add to Cart
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">3</div>
+              Checkout
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">4</div>
+              Create Order
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">5</div>
+              Store Order
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- PROJECT 4 -->
+
+      <section id="project4">
+
+        <h2 class="section-title">12. Project 4 — Student Management System</h2>
+
+        <div class="project-card">
+
+          <div class="project-icon">🎓</div>
+
+          <h3>CampusHub</h3>
+
+          <p>
+            A full-stack student management system for managing students,
+            courses, attendance and academic information.
+          </p>
+
+          <br>
+
+          <div>
+            <span class="tag">Students</span>
+            <span class="tag">Courses</span>
+            <span class="tag">Attendance</span>
+            <span class="tag">Admin</span>
+            <span class="tag">Reports</span>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- AUTHENTICATION -->
+
+      <section id="authentication">
+
+        <h2 class="section-title">13. Authentication in Full-Stack Projects</h2>
+
+        <p class="section-subtitle">
+          Authentication connects the concepts from the previous security lesson
+          to a real application.
+        </p>
+
+        <div class="card">
+
+          <h3>Registration</h3>
+
+          <div class="step-flow">
+
+            <div class="flow-step">
+              <div class="flow-number">1</div>
+              User enters details
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">2</div>
+              Frontend sends POST
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">3</div>
+              Backend validates
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">4</div>
+              Password hashed
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">5</div>
+              User stored
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="card">
+
+          <h3>Login</h3>
+
+          <div class="step-flow">
+
+            <div class="flow-step">
+              <div class="flow-number">1</div>
+              Email + password
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">2</div>
+              Find user
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">3</div>
+              Compare hash
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">4</div>
+              Create token
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">5</div>
+              Access protected API
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- CRUD -->
+
+      <section id="crud">
+
+        <h2 class="section-title">14. CRUD Architecture</h2>
+
+        <p class="section-subtitle">
+          Most business applications contain CRUD operations.
+        </p>
+
+        <div class="card">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Operation</th>
+                <th>HTTP Method</th>
+                <th>Example</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              <tr>
+                <td>Create</td>
+                <td>POST</td>
+                <td>Create a task</td>
+              </tr>
+
+              <tr>
+                <td>Read</td>
+                <td>GET</td>
+                <td>Get all tasks</td>
+              </tr>
+
+              <tr>
+                <td>Update</td>
+                <td>PUT / PATCH</td>
+                <td>Update task</td>
+              </tr>
+
+              <tr>
+                <td>Delete</td>
+                <td>DELETE</td>
+                <td>Delete task</td>
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </section>
+
+
+      <!-- API -->
+
+      <section id="api">
+
+        <h2 class="section-title">15. Designing a Good REST API</h2>
+
+        <div class="card">
+
+          <h3>Use resource-oriented URLs</h3>
+
+          <div class="code-wrapper">
+
+            <div class="code-header">
+              <span>Good API Design</span>
+            </div>
+
+            <pre><code>GET    /api/users
+GET    /api/users/:id
+POST   /api/users
+PUT    /api/users/:id
+DELETE /api/users/:id
+
+GET    /api/products
+POST   /api/products
+
+GET    /api/orders
+POST   /api/orders</code></pre>
+
+          </div>
+
+        </div>
+
+        <div class="info-box">
+
+          <strong>Tip:</strong>
+
+          Keep the API predictable. A developer should be able to understand
+          what an endpoint does from its HTTP method and URL.
+
+        </div>
+
+      </section>
+
+
+      <!-- DEPLOYMENT -->
+
+      <section id="deployment">
+
+        <h2 class="section-title">16. Deployment</h2>
+
+        <p class="section-subtitle">
+          Development happens on your computer. Deployment makes the application
+          available to users through the internet.
+        </p>
+
+        <div class="card">
+
+          <h3>Development Environment</h3>
+
+          <div class="architecture">
+
+            <div class="architecture-flow">
+
+              <div class="arch-box">
+                <strong>Your Laptop</strong>
+                <small>localhost</small>
+              </div>
+
+              <div class="arrow">→</div>
+
+              <div class="arch-box">
+                <strong>Node.js</strong>
+                <small>localhost:3000</small>
+              </div>
+
+              <div class="arrow">→</div>
+
+              <div class="arch-box">
+                <strong>MongoDB</strong>
+                <small>Local database</small>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="card">
+
+          <h3>Production Environment</h3>
+
+          <div class="architecture">
+
+            <div class="architecture-flow">
+
+              <div class="arch-box">
+                <strong>Users</strong>
+                <small>Internet</small>
+              </div>
+
+              <div class="arrow">→</div>
+
+              <div class="arch-box">
+                <strong>Frontend</strong>
+                <small>Hosted application</small>
+              </div>
+
+              <div class="arrow">→</div>
+
+              <div class="arch-box">
+                <strong>Node API</strong>
+                <small>Cloud server</small>
+              </div>
+
+              <div class="arrow">→</div>
+
+              <div class="arch-box">
+                <strong>Cloud DB</strong>
+                <small>MongoDB</small>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ENV -->
+
+      <section id="env">
+
+        <h2 class="section-title">17. Environment Variables</h2>
+
+        <p class="section-subtitle">
+          Production applications should not hardcode secrets and environment-specific
+          configuration inside source code.
+        </p>
+
+        <div class="code-wrapper">
+
+          <div class="code-header">
+            <span>.env</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>PORT=3000
+
+MONGODB_URI=your_database_connection_string
+
+JWT_SECRET=your_long_random_secret
+
+NODE_ENV=production</code></pre>
+
+        </div>
+
+        <div class="code-wrapper">
+
+          <div class="code-header">
+            <span>Node.js</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>require("dotenv").config();
+
+const port = process.env.PORT;
+
+const database =
+  process.env.MONGODB_URI;
+
+const secret =
+  process.env.JWT_SECRET;</code></pre>
+
+        </div>
+
+        <div class="danger-box info-box">
+
+          <strong>Never commit your real .env file to Git.</strong>
+
+          Add it to `.gitignore`.
+
+        </div>
+
+      </section>
+
+
+      <!-- PRODUCTION -->
+
+      <section id="production">
+
+        <h2 class="section-title">18. Production Checklist</h2>
+
+        <div class="checklist">
+
+          <label class="check-item">
+            <input type="checkbox">
+            Use HTTPS
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox">
+            Store secrets in environment variables
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox">
+            Hash passwords securely
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox">
+            Validate incoming data
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox">
+            Use authentication middleware
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox">
+            Use authorization checks
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox">
+            Configure CORS carefully
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox">
+            Add rate limiting
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox">
+            Use security headers
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox">
+            Do not log passwords or tokens
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox">
+            Handle errors properly
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox">
+            Monitor production application
+          </label>
+
+        </div>
+
+      </section>
+
+
+      <!-- INTERACTIVE LAB -->
+
+      <section id="lab">
+
+        <h2 class="section-title">19. Interactive Full-Stack Lab</h2>
+
+        <p class="section-subtitle">
+          Simulate how a request travels through a full-stack application.
+        </p>
+
+        <div class="lab">
+
+          <div class="lab-controls">
+
+            <button class="lab-btn active" onclick="runFlow('login')">
+              Login Flow
+            </button>
+
+            <button class="lab-btn" onclick="runFlow('create')">
+              Create Task
+            </button>
+
+            <button class="lab-btn" onclick="runFlow('read')">
+              Read Tasks
+            </button>
+
+            <button class="lab-btn" onclick="runFlow('update')">
+              Update Task
+            </button>
+
+            <button class="lab-btn" onclick="runFlow('delete')">
+              Delete Task
+            </button>
+
+          </div>
+
+          <div class="terminal" id="terminal">
+
+            <div class="terminal-line terminal-blue">
+              $ ZENSUS Full-Stack Simulator
+            </div>
+
+            <div class="terminal-line">
+              Select a flow above...
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- API TESTER -->
+
+      <section id="apiTester">
+
+        <h2 class="section-title">20. Mini API Tester</h2>
+
+        <p class="section-subtitle">
+          This is a browser-only simulation for understanding request and
+          response structures. It does not contact a real server.
+        </p>
+
+        <div class="card">
+
+          <div class="api-tester">
+
+            <div>
+
+              <div class="input-group">
+
+                <label>HTTP Method</label>
+
+                <select id="method">
+                  <option>GET</option>
+                  <option>POST</option>
+                  <option>PUT</option>
+                  <option>DELETE</option>
+                </select>
+
+              </div>
+
+              <div class="input-group">
+
+                <label>Endpoint</label>
+
+                <input
+                  id="endpoint"
+                  value="/api/tasks"
+                >
+
+              </div>
+
+              <div class="input-group">
+
+                <label>JSON Body</label>
+
+                <textarea id="body" rows="6">{
+  "title": "Learn Node.js",
+  "completed": false
+}</textarea>
+
+              </div>
+
+              <button class="primary-btn" onclick="simulateAPI()">
+                Send Request
+              </button>
+
+            </div>
+
+            <div>
+
+              <strong>Response</strong>
+
+              <div
+                class="response-box"
+                id="apiResponse"
+                style="margin-top:10px;"
+              >
+Awaiting request...
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- PROJECT STRUCTURE -->
+
+      <section id="structure">
+
+        <h2 class="section-title">21. Recommended Project Structure</h2>
+
+        <div class="code-wrapper">
+
+          <div class="code-header">
+            <span>Full-Stack Node.js Structure</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+
+          <pre><code>project/
+│
+├── client/
+│   ├── src/
+│   ├── components/
+│   ├── pages/
+│   └── services/
+│
+├── server/
+│   ├── config/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── models/
+│   ├── routes/
+│   ├── services/
+│   ├── utils/
+│   ├── app.js
+│   └── server.js
+│
+├── .env
+├── .gitignore
+├── package.json
+└── README.md</code></pre>
+
+        </div>
+
+        <div class="info-box">
+
+          <strong>Why separate folders?</strong>
+
+          Separation makes a project easier to understand, test,
+          maintain and scale.
+
+        </div>
+
+      </section>
+
+
+      <!-- REQUEST LIFECYCLE -->
+
+      <section id="lifecycle">
+
+        <h2 class="section-title">22. Complete Request Lifecycle</h2>
+
+        <div class="card">
+
+          <div class="step-flow">
+
+            <div class="flow-step">
+              <div class="flow-number">1</div>
+              User Action
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">2</div>
+              Frontend
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">3</div>
+              HTTP Request
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">4</div>
+              Middleware
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">5</div>
+              Route
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">6</div>
+              Controller
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">7</div>
+              Database
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">8</div>
+              Response
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ERROR HANDLING -->
+
+      <section id="errors">
+
+        <h2 class="section-title">23. Error Handling in Full-Stack Projects</h2>
+
+        <div class="card">
+
+          <h3>Common HTTP Status Codes</h3>
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Meaning</th>
+                <th>Example</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              <tr>
+                <td>200</td>
+                <td>Success</td>
+                <td>Successful GET</td>
+              </tr>
+
+              <tr>
+                <td>201</td>
+                <td>Created</td>
+                <td>New user created</td>
+              </tr>
+
+              <tr>
+                <td>400</td>
+                <td>Bad Request</td>
+                <td>Invalid input</td>
+              </tr>
+
+              <tr>
+                <td>401</td>
+                <td>Unauthorized</td>
+                <td>Missing/invalid authentication</td>
+              </tr>
+
+              <tr>
+                <td>403</td>
+                <td>Forbidden</td>
+                <td>Insufficient permission</td>
+              </tr>
+
+              <tr>
+                <td>404</td>
+                <td>Not Found</td>
+                <td>Resource does not exist</td>
+              </tr>
+
+              <tr>
+                <td>409</td>
+                <td>Conflict</td>
+                <td>Duplicate resource</td>
+              </tr>
+
+              <tr>
+                <td>429</td>
+                <td>Too Many Requests</td>
+                <td>Rate limit exceeded</td>
+              </tr>
+
+              <tr>
+                <td>500</td>
+                <td>Server Error</td>
+                <td>Unexpected backend failure</td>
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </section>
+
+
+      <!-- GIT -->
+
+      <section id="git">
+
+        <h2 class="section-title">24. Version Control & Project Delivery</h2>
+
+        <div class="card">
+
+          <h3>Basic Git workflow</h3>
+
+          <div class="code-wrapper">
+
+            <div class="code-header">
+              <span>Terminal</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>git init
+
+git add .
+
+git commit -m "Initial full-stack project"
+
+git branch -M main
+
+git remote add origin YOUR_REPOSITORY_URL
+
+git push -u origin main</code></pre>
+
+          </div>
+
+          <div class="warning-box info-box">
+
+            Before pushing your project, check that secrets,
+            `.env` files and private credentials are excluded.
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- COMMON MISTAKES -->
+
+      <section id="mistakes">
+
+        <h2 class="section-title">25. Common Full-Stack Mistakes</h2>
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            ❌ Putting database credentials in frontend
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            Database credentials belong on the server.
+            Never expose database connection strings in browser code.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            ❌ Trusting frontend authorization
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            The frontend can hide buttons, but the backend must enforce
+            permissions.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            ❌ No validation
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            Always validate data on the server, even if the frontend already
+            validates it.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            ❌ Hardcoding secrets
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            Use environment variables and secret-management mechanisms.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            ❌ Poor API design
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            Keep endpoints predictable, use appropriate HTTP methods and
+            return meaningful status codes.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            ❌ Ignoring production errors
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            Development and production environments behave differently.
+            Use proper logging, monitoring and configuration.
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- INTERVIEW -->
+
+      <section id="interview">
+
+        <h2 class="section-title">26. Full-Stack Interview Questions</h2>
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            1. What is full-stack development?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            Full-stack development involves building both the client-side
+            interface and server-side application, including database
+            integration and deployment.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            2. Why do we need a backend?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            The backend handles business logic, authentication, validation,
+            database operations and protected application functionality.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            3. Why should the browser not directly access MongoDB?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            Direct database access from browsers would expose database
+            credentials and bypass server-side security and business rules.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            4. What is a REST API?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            A REST API exposes resources through HTTP methods and URLs so
+            different applications can communicate.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            5. What is CRUD?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            CRUD stands for Create, Read, Update and Delete.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            6. What is middleware?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            Middleware is code that runs during the request-response lifecycle.
+            It can perform logging, authentication, validation and other tasks.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            7. How does JWT fit into a full-stack application?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            After successful authentication, the server issues a token.
+            The client presents the token when accessing protected resources,
+            and the server verifies it.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            8. What is deployment?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            Deployment is the process of making an application available in
+            an environment where users or other systems can access it.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            9. Why use environment variables?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            They keep configuration and secrets outside the source code and
+            allow different values for development, testing and production.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            10. What happens when an API request is sent?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            The request reaches the server, passes through middleware,
+            matches a route, executes application logic, may interact with
+            a database and finally returns a response.
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- QUIZ -->
+
+      <section id="quiz">
+
+        <h2 class="section-title">27. Knowledge Check</h2>
+
+        <p class="section-subtitle">
+          Test your understanding of full-stack Node.js development.
+        </p>
+
+        <div class="quiz-question">
+
+          <h4>1. Which layer normally communicates with the database?</h4>
+
+          <label class="option">
+            <input type="radio" name="q1" value="wrong">
+            Browser
+          </label>
+
+          <label class="option">
+            <input type="radio" name="q1" value="correct">
+            Backend
+          </label>
+
+          <label class="option">
+            <input type="radio" name="q1" value="wrong">
+            CSS
+          </label>
+
+        </div>
+
+
+        <div class="quiz-question">
+
+          <h4>2. Which HTTP method is commonly used to create a resource?</h4>
+
+          <label class="option">
+            <input type="radio" name="q2" value="correct">
+            POST
+          </label>
+
+          <label class="option">
+            <input type="radio" name="q2" value="wrong">
+            GET
+          </label>
+
+          <label class="option">
+            <input type="radio" name="q2" value="wrong">
+            DELETE
+          </label>
+
+        </div>
+
+
+        <div class="quiz-question">
+
+          <h4>3. What does CRUD stand for?</h4>
+
+          <label class="option">
+            <input type="radio" name="q3" value="correct">
+            Create, Read, Update, Delete
+          </label>
+
+          <label class="option">
+            <input type="radio" name="q3" value="wrong">
+            Connect, Run, Update, Deploy
+          </label>
+
+          <label class="option">
+            <input type="radio" name="q3" value="wrong">
+            Create, Route, Upload, Download
+          </label>
+
+        </div>
+
+
+        <div class="quiz-question">
+
+          <h4>4. Where should production secrets be stored?</h4>
+
+          <label class="option">
+            <input type="radio" name="q4" value="wrong">
+            Frontend JavaScript
+          </label>
+
+          <label class="option">
+            <input type="radio" name="q4" value="correct">
+            Secure environment/secret configuration
+          </label>
+
+          <label class="option">
+            <input type="radio" name="q4" value="wrong">
+            HTML comments
+          </label>
+
+        </div>
+
+
+        <div class="quiz-question">
+
+          <h4>5. Which component normally protects business logic from direct browser access?</h4>
+
+          <label class="option">
+            <input type="radio" name="q5" value="correct">
+            Backend server
+          </label>
+
+          <label class="option">
+            <input type="radio" name="q5" value="wrong">
+            CSS
+          </label>
+
+          <label class="option">
+            <input type="radio" name="q5" value="wrong">
+            Browser history
+          </label>
+
+        </div>
+
+
+        <button class="primary-btn" onclick="checkQuiz()">
+          Check Answers
+        </button>
+
+        <div id="quizResult" class="quiz-result"></div>
+
+      </section>
+
+
+      <!-- FINAL CHALLENGE -->
+
+      <section id="challenge">
+
+        <h2 class="section-title">28. Final Full-Stack Challenge</h2>
+
+        <p class="section-subtitle">
+          Build a complete application using everything you have learned
+          throughout the Node.js course.
+        </p>
+
+        <div class="card">
+
+          <h3>🚀 Project: DevTask — Full-Stack Task Management Platform</h3>
+
+          <p>
+            Build a production-style task management application with
+            authentication, CRUD operations, database integration and
+            a responsive frontend.
+          </p>
+
+          <h4>Required Features</h4>
+
+          <ul>
+
+            <li>User registration</li>
+
+            <li>User login</li>
+
+            <li>Password hashing</li>
+
+            <li>Authentication</li>
+
+            <li>Protected routes</li>
+
+            <li>Create task</li>
+
+            <li>Read tasks</li>
+
+            <li>Update task</li>
+
+            <li>Delete task</li>
+
+            <li>Mark task as completed</li>
+
+            <li>Filter completed/pending tasks</li>
+
+            <li>MongoDB persistence</li>
+
+            <li>REST API</li>
+
+            <li>Frontend API integration</li>
+
+            <li>Input validation</li>
+
+            <li>Error handling</li>
+
+            <li>Environment variables</li>
+
+            <li>Production deployment</li>
+
+          </ul>
+
+        </div>
+
+
+        <div class="card">
+
+          <h3>Suggested API</h3>
+
+          <div class="code-wrapper">
+
+            <div class="code-header">
+              <span>Endpoints</span>
+            </div>
+
+            <pre><code>POST   /api/auth/register
+POST   /api/auth/login
+
+GET    /api/tasks
+POST   /api/tasks
+
+GET    /api/tasks/:id
+PUT    /api/tasks/:id
+DELETE /api/tasks/:id
+
+PATCH  /api/tasks/:id/complete</code></pre>
+
+          </div>
+
+        </div>
+
+
+        <div class="card">
+
+          <h3>Suggested Technology Stack</h3>
+
+          <div class="objective-grid">
+
+            <div class="objective">
+              <h3>Frontend</h3>
+              <p>React.js or HTML/CSS/JavaScript</p>
+            </div>
+
+            <div class="objective">
+              <h3>Backend</h3>
+              <p>Node.js + Express.js</p>
+            </div>
+
+            <div class="objective">
+              <h3>Database</h3>
+              <p>MongoDB + Mongoose</p>
+            </div>
+
+            <div class="objective">
+              <h3>Authentication</h3>
+              <p>JWT + bcrypt</p>
+            </div>
+
+            <div class="objective">
+              <h3>API</h3>
+              <p>REST</p>
+            </div>
+
+            <div class="objective">
+              <h3>Deployment</h3>
+              <p>Cloud hosting + managed database</p>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- PROJECT ROADMAP -->
+
+      <section id="roadmap">
+
+        <h2 class="section-title">29. Your Node.js Project Roadmap</h2>
+
+        <div class="card">
+
+          <div class="step-flow">
+
+            <div class="flow-step">
+              <div class="flow-number">1</div>
+              Learn Node.js
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">2</div>
+              Learn Express
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">3</div>
+              Build APIs
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">4</div>
+              Add Database
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">5</div>
+              Add Auth
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">6</div>
+              Connect Frontend
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">7</div>
+              Test
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-number">8</div>
+              Deploy
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="success-box info-box">
+
+          <strong>Course milestone:</strong>
+
+          You have now moved from learning individual Node.js concepts
+          to designing complete applications.
+
+        </div>
+
+      </section>
+
+
+      <!-- COMPLETE -->
+
+      <section id="complete">
+
+        <div class="complete-box">
+
+          <h2>🎉 Node.js Course Complete</h2>
+
+          <p>
+            You have reached the final lesson of the ZENSUS Node.js series.
+            You now have the foundation required to design, build, test
+            and deploy Node.js full-stack applications.
+          </p>
+
+          <button class="complete-btn" onclick="completeLesson()">
+            ✓ Mark Lesson 15 Complete
+          </button>
+
+          <p
+            id="completionMessage"
+            style="margin-top:15px;color:#16a34a;font-weight:700;"
+          ></p>
+
+        </div>
+
+      </section>
+
+
+      <!-- NAVIGATION -->
+
+      <div class="lesson-nav">
+
+        <a href="lesson14.html" class="nav-card">
+
+          <div class="nav-small">
+            ← Previous Lesson
+          </div>
+
+          <div class="nav-title">
+            Lesson 14: API Testing, Deployment & Production
+          </div>
+
+        </a>
+
+        <a href="#" class="nav-card" style="text-align:right;">
+
+          <div class="nav-small">
+            Course Complete
+          </div>
+
+          <div class="nav-title">
+            Node.js Full-Stack Projects →
+          </div>
+
+        </a>
+
+      </div>
+
+    </main>
+
+  </div>
+
+
+  <script>
+
+    /* =========================================
+       COPY CODE
+    ========================================= */
+
+    function copyCode(button) {
+
+      const code =
+        button
+          .closest(".code-wrapper")
+          .querySelector("code")
+          .innerText;
+
+      navigator.clipboard.writeText(code);
+
+      const oldText = button.innerText;
+
+      button.innerText = "Copied!";
+
+      setTimeout(() => {
+        button.innerText = oldText;
+      }, 1500);
+    }
+
+
+    /* =========================================
+       INTERACTIVE FULL STACK FLOW
+    ========================================= */
+
+    const flows = {
+
+      login: [
+        "USER → enters email and password",
+        "FRONTEND → POST /api/auth/login",
+        "EXPRESS → receives request",
+        "MIDDLEWARE → validates request",
+        "DATABASE → finds user",
+        "BCRYPT → compares password hash",
+        "JWT → authentication token generated",
+        "RESPONSE → login successful"
+      ],
+
+      create: [
+        "USER → enters a new task",
+        "FRONTEND → POST /api/tasks",
+        "EXPRESS → receives request",
+        "AUTH MIDDLEWARE → verifies user",
+        "CONTROLLER → validates task",
+        "MONGOOSE → creates document",
+        "MONGODB → stores task",
+        "RESPONSE → task created successfully"
+      ],
+
+      read: [
+        "USER → opens task dashboard",
+        "FRONTEND → GET /api/tasks",
+        "EXPRESS → receives request",
+        "AUTH MIDDLEWARE → verifies token",
+        "CONTROLLER → requests tasks",
+        "MONGODB → returns documents",
+        "SERVER → creates JSON response",
+        "FRONTEND → renders tasks"
+      ],
+
+      update: [
+        "USER → edits task",
+        "FRONTEND → PUT /api/tasks/:id",
+        "EXPRESS → receives request",
+        "AUTH → verifies user",
+        "CONTROLLER → validates update",
+        "MONGODB → updates document",
+        "SERVER → returns updated task",
+        "FRONTEND → updates interface"
+      ],
+
+      delete: [
+        "USER → clicks Delete",
+        "FRONTEND → DELETE /api/tasks/:id",
+        "EXPRESS → receives request",
+        "AUTH → verifies user",
+        "CONTROLLER → checks ownership",
+        "MONGODB → removes document",
+        "SERVER → returns success",
+        "FRONTEND → removes task from UI"
+      ]
+
+    };
+
+
+    function runFlow(type) {
+
+      const terminal =
+        document.getElementById("terminal");
+
+      terminal.innerHTML = "";
+
+      const lines = flows[type];
+
+      lines.forEach((line, index) => {
+
+        setTimeout(() => {
+
+          const div =
+            document.createElement("div");
+
+          div.className = "terminal-line";
+
+          if (index === 0) {
+            div.classList.add("terminal-blue");
+          }
+
+          if (line.includes("MONGODB")) {
+            div.classList.add("terminal-yellow");
+          }
+
+          if (line.includes("RESPONSE")) {
+            div.classList.add("terminal-success");
+          }
+
+          div.textContent = "> " + line;
+
+          terminal.appendChild(div);
+
+          terminal.scrollTop =
+            terminal.scrollHeight;
+
+        }, index * 450);
+
+      });
+
+    }
+
+
+    /* =========================================
+       API SIMULATOR
+    ========================================= */
+
+    function simulateAPI() {
+
+      const method =
+        document.getElementById("method").value;
+
+      const endpoint =
+        document.getElementById("endpoint").value;
+
+      let status = "200 OK";
+
+      let response = {
+        success: true
+      };
+
+      if (method === "POST") {
+
+        status = "201 Created";
+
+        response = {
+          success: true,
+          message: "Resource created",
+          data: {
+            id: "task_101",
+            title: "Learn Node.js",
+            completed: false
+          }
+        };
+
+      } else if (method === "PUT") {
+
+        response = {
+          success: true,
+          message: "Resource updated"
+        };
+
+      } else if (method === "DELETE") {
+
+        status = "204 No Content";
+
+        response = {
+          success: true,
+          message: "Resource deleted"
+        };
+
+      } else {
+
+        response = {
+          success: true,
+          data: [
+            {
+              id: "task_101",
+              title: "Learn Node.js",
+              completed: false
+            }
+          ]
+        };
+
+      }
+
+      document.getElementById("apiResponse").textContent =
+`HTTP/1.1 ${status}
+
+Request:
+${method} ${endpoint}
+
+Response:
+${JSON.stringify(response, null, 2)}`;
+
+    }
+
+
+    /* =========================================
+       ACCORDION
+    ========================================= */
+
+    function toggleAccordion(button) {
+
+      const accordion =
+        button.parentElement;
+
+      accordion.classList.toggle("open");
+
+      const symbol =
+        button.querySelector("span");
+
+      if (accordion.classList.contains("open")) {
+        symbol.textContent = "−";
+      } else {
+        symbol.textContent = "+";
+      }
+
+    }
+
+
+    /* =========================================
+       QUIZ
+    ========================================= */
+
+    function checkQuiz() {
+
+      const answers = [
+        "q1",
+        "q2",
+        "q3",
+        "q4",
+        "q5"
+      ];
+
+      let score = 0;
+
+      answers.forEach(name => {
+
+        const selected =
+          document.querySelector(
+            `input[name="${name}"]:checked`
+          );
+
+        if (
+          selected &&
+          selected.value === "correct"
+        ) {
+          score++;
+        }
+
+      });
+
+      const result =
+        document.getElementById("quizResult");
+
+      result.style.display = "block";
+
+      if (score === 5) {
+
+        result.style.background = "#f0fdf4";
+        result.style.color = "#166534";
+
+        result.innerHTML =
+          "🎉 Excellent! You scored 5/5.";
+
+      } else if (score >= 3) {
+
+        result.style.background = "#eff6ff";
+        result.style.color = "#1d4ed8";
+
+        result.innerHTML =
+          `Good work! You scored ${score}/5. Review the sections you missed.`;
+
+      } else {
+
+        result.style.background = "#fff7ed";
+        result.style.color = "#9a3412";
+
+        result.innerHTML =
+          `You scored ${score}/5. Revisit the lesson and try again.`;
+
+      }
+
+    }
+
+
+    /* =========================================
+       LESSON COMPLETION
+    ========================================= */
+
+    function completeLesson() {
+
+      localStorage.setItem(
+        "zensus-node-lesson-15-complete",
+        "true"
+      );
+
+      localStorage.setItem(
+        "zensus-node-lesson-15-progress",
+        "100"
+      );
+
+      document.getElementById(
+        "completionMessage"
+      ).textContent =
+        "✓ Lesson 15 completed! Your progress has been saved.";
+
+      updateProgress();
+
+    }
+
+
+    /* =========================================
+       PROGRESS TRACKING
+    ========================================= */
+
+    const sections =
+      document.querySelectorAll("main section");
+
+    const tocLinks =
+      document.querySelectorAll(".toc a");
+
+    function updateProgress() {
+
+      const saved =
+        localStorage.getItem(
+          "zensus-node-lesson-15-progress"
+        );
+
+      if (saved) {
+
+        document.getElementById(
+          "topProgress"
+        ).style.width =
+          saved + "%";
+
+        return;
+      }
+
+      const scrollTop =
+        window.scrollY;
+
+      const documentHeight =
+        document.documentElement.scrollHeight -
+        window.innerHeight;
+
+      const progress =
+        Math.min(
+          100,
+          Math.max(
+            0,
+            (scrollTop / documentHeight) * 100
+          )
+        );
+
+      document.getElementById(
+        "topProgress"
+      ).style.width =
+        progress + "%";
+
+    }
+
+
+    window.addEventListener(
+      "scroll",
+      updateProgress
+    );
+
+    updateProgress();
+
+
+    /* =========================================
+       ACTIVE TOC
+    ========================================= */
+
+    const observer =
+      new IntersectionObserver(
+        entries => {
+
+          entries.forEach(entry => {
+
+            if (entry.isIntersecting) {
+
+              tocLinks.forEach(link => {
+                link.classList.remove("active");
+              });
+
+              const active =
+                document.querySelector(
+                  `.toc a[href="#${entry.target.id}"]`
+                );
+
+              if (active) {
+                active.classList.add("active");
+              }
+
+            }
+
+          });
+
+        },
+        {
+          rootMargin: "-100px 0px -60% 0px"
+        }
+      );
+
+    sections.forEach(section => {
+      observer.observe(section);
+    });
+
+
+    /* =========================================
+       LOAD COMPLETION STATE
+    ========================================= */
+
+    window.addEventListener("DOMContentLoaded", () => {
+
+      const completed =
+        localStorage.getItem(
+          "zensus-node-lesson-15-complete"
+        );
+
+      if (completed === "true") {
+
+        document.getElementById(
+          "completionMessage"
+        ).textContent =
+          "✓ This lesson is already marked as complete.";
+
+      }
+
+    });
+
+  </script>
+
+</body>
+</html>

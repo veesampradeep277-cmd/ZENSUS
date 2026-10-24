@@ -1,0 +1,4329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS | Lesson 14 - Polymorphism in C++</title>
+
+<style>
+
+/* =========================================================
+   ZENSUS — LESSON 14
+   C++ POLYMORPHISM
+========================================================= */
+
+:root{
+    --primary:#2563eb;
+    --primary-dark:#1d4ed8;
+    --secondary:#7c3aed;
+    --success:#16a34a;
+    --warning:#d97706;
+    --danger:#dc2626;
+
+    --bg:#f7f9fc;
+    --surface:#ffffff;
+    --surface-2:#f1f5f9;
+    --border:#e2e8f0;
+
+    --text:#0f172a;
+    --muted:#64748b;
+
+    --code-bg:#0b1220;
+    --code-text:#e2e8f0;
+
+    --sidebar:280px;
+    --header:72px;
+
+    --shadow:0 10px 30px rgba(15,23,42,.07);
+    --shadow-lg:0 20px 50px rgba(15,23,42,.11);
+
+    --radius:18px;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+    scroll-padding-top:90px;
+}
+
+body{
+    font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+.progress-bar{
+    position:fixed;
+    top:0;
+    left:0;
+    width:0;
+    height:4px;
+    background:linear-gradient(90deg,var(--primary),var(--secondary));
+    z-index:9999;
+}
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    width:var(--sidebar);
+    height:100vh;
+    background:#fff;
+    border-right:1px solid var(--border);
+    overflow-y:auto;
+    z-index:1000;
+}
+
+.brand{
+    height:var(--header);
+    display:flex;
+    align-items:center;
+    padding:0 24px;
+    border-bottom:1px solid var(--border);
+}
+
+.brand-logo{
+    width:40px;
+    height:40px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,var(--primary),var(--secondary));
+    color:#fff;
+    font-weight:900;
+    font-size:18px;
+}
+
+.brand-text{
+    margin-left:12px;
+    font-size:20px;
+    font-weight:900;
+    letter-spacing:.5px;
+}
+
+.lesson-label{
+    padding:20px 24px 10px;
+    color:#94a3b8;
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:1.3px;
+    text-transform:uppercase;
+}
+
+.sidebar nav a{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    margin:3px 12px;
+    padding:10px 13px;
+    border-radius:10px;
+    color:#64748b;
+    text-decoration:none;
+    font-size:13px;
+    font-weight:650;
+    transition:.2s ease;
+}
+
+.sidebar nav a:hover{
+    background:#eff6ff;
+    color:var(--primary);
+}
+
+.sidebar nav a.active{
+    background:#eff6ff;
+    color:var(--primary);
+    font-weight:800;
+}
+
+.nav-number{
+    width:23px;
+    height:23px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:7px;
+    background:#f1f5f9;
+    font-size:10px;
+    font-weight:900;
+}
+
+.active .nav-number{
+    background:var(--primary);
+    color:#fff;
+}
+
+.sidebar-footer{
+    padding:20px;
+    margin-top:20px;
+    border-top:1px solid var(--border);
+}
+
+.progress-card{
+    padding:16px;
+    border:1px solid var(--border);
+    background:#f8fafc;
+    border-radius:14px;
+}
+
+.progress-card-title{
+    font-size:12px;
+    font-weight:900;
+    margin-bottom:9px;
+}
+
+.progress-track{
+    height:7px;
+    background:#e2e8f0;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.progress-fill{
+    width:0;
+    height:100%;
+    background:linear-gradient(90deg,var(--primary),var(--secondary));
+    transition:.4s;
+}
+
+.progress-small{
+    margin-top:8px;
+    color:var(--muted);
+    font-size:11px;
+}
+
+/* =========================================================
+   MAIN / HEADER
+========================================================= */
+
+.main{
+    margin-left:var(--sidebar);
+    min-height:100vh;
+}
+
+.topbar{
+    position:sticky;
+    top:0;
+    height:var(--header);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 34px;
+    background:rgba(255,255,255,.94);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    z-index:900;
+}
+
+.topbar-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.menu-btn{
+    display:none;
+    width:40px;
+    height:40px;
+    border:0;
+    border-radius:10px;
+    background:#eff6ff;
+    color:var(--primary);
+    font-size:20px;
+    cursor:pointer;
+}
+
+.breadcrumb{
+    color:var(--muted);
+    font-size:13px;
+}
+
+.breadcrumb strong{
+    color:var(--text);
+}
+
+.top-actions{
+    display:flex;
+    gap:8px;
+}
+
+.badge{
+    padding:7px 11px;
+    border-radius:30px;
+    background:#eff6ff;
+    color:var(--primary);
+    font-size:11px;
+    font-weight:900;
+}
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.content{
+    max-width:1200px;
+    margin:auto;
+    padding:42px 38px 80px;
+}
+
+.section{
+    margin-top:70px;
+    scroll-margin-top:90px;
+}
+
+.section:first-child{
+    margin-top:0;
+}
+
+.kicker{
+    color:var(--primary);
+    font-size:12px;
+    font-weight:900;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    margin-bottom:9px;
+}
+
+.section-title{
+    font-size:30px;
+    line-height:1.25;
+    letter-spacing:-.5px;
+    margin-bottom:10px;
+}
+
+.section-subtitle{
+    color:var(--muted);
+    margin-bottom:28px;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero{
+    position:relative;
+    overflow:hidden;
+    padding:40px;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:26px;
+    box-shadow:var(--shadow);
+}
+
+.hero::after{
+    content:"";
+    position:absolute;
+    width:350px;
+    height:350px;
+    right:-180px;
+    top:-170px;
+    border-radius:50%;
+    background:#eff6ff;
+}
+
+.hero h1{
+    position:relative;
+    z-index:1;
+    max-width:850px;
+    font-size:clamp(40px,5vw,68px);
+    line-height:1.03;
+    letter-spacing:-2.8px;
+}
+
+.hero h1 span{
+    color:var(--primary);
+}
+
+.hero p{
+    position:relative;
+    z-index:1;
+    max-width:780px;
+    margin-top:18px;
+    color:var(--muted);
+    font-size:16px;
+}
+
+.hero-badges{
+    position:relative;
+    z-index:1;
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    margin-top:24px;
+}
+
+.hero-badge{
+    padding:8px 12px;
+    border:1px solid var(--border);
+    border-radius:30px;
+    background:#f8fafc;
+    font-size:11px;
+    font-weight:800;
+}
+
+/* =========================================================
+   CARDS
+========================================================= */
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+}
+
+.grid-3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.card{
+    padding:24px;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+}
+
+.card h3{
+    margin-bottom:8px;
+    font-size:19px;
+}
+
+.card h4{
+    margin-bottom:7px;
+    font-size:15px;
+}
+
+.card p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+.card ul{
+    padding-left:20px;
+    color:var(--muted);
+    font-size:14px;
+}
+
+.card li{
+    margin:5px 0;
+}
+
+.icon-box{
+    width:45px;
+    height:45px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:15px;
+    border-radius:12px;
+    background:#eff6ff;
+    color:var(--primary);
+    font-weight:900;
+    font-size:18px;
+}
+
+/* =========================================================
+   CODE
+========================================================= */
+
+.code-box{
+    margin:18px 0;
+    overflow:hidden;
+    background:var(--code-bg);
+    border:1px solid #1e293b;
+    border-radius:15px;
+    box-shadow:0 12px 30px rgba(2,6,23,.14);
+}
+
+.code-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 14px;
+    background:#111827;
+    border-bottom:1px solid #1e293b;
+}
+
+.code-title{
+    color:#cbd5e1;
+    font-size:11px;
+    font-weight:800;
+}
+
+.copy-btn{
+    padding:5px 9px;
+    border:0;
+    border-radius:6px;
+    background:#1e293b;
+    color:#cbd5e1;
+    font-size:10px;
+    cursor:pointer;
+}
+
+.copy-btn:hover{
+    background:#334155;
+}
+
+.code-box pre{
+    margin:0;
+    padding:20px;
+    overflow-x:auto;
+    color:var(--code-text);
+    font-family:Consolas,"Courier New",monospace;
+    font-size:13px;
+    line-height:1.75;
+    white-space:pre;
+}
+
+.code-box code{
+    color:var(--code-text);
+    font-family:inherit;
+}
+
+/* =========================================================
+   NOTES
+========================================================= */
+
+.note{
+    margin:18px 0;
+    padding:17px 19px;
+    border-left:4px solid var(--primary);
+    border-radius:13px;
+    background:#eff6ff;
+    color:#334155;
+    font-size:14px;
+}
+
+.note strong{
+    color:#1d4ed8;
+}
+
+.note.success{
+    border-left-color:var(--success);
+    background:#f0fdf4;
+}
+
+.note.success strong{
+    color:#15803d;
+}
+
+.note.warning{
+    border-left-color:var(--warning);
+    background:#fff7ed;
+}
+
+.note.warning strong{
+    color:#c2410c;
+}
+
+.note.danger{
+    border-left-color:var(--danger);
+    background:#fef2f2;
+}
+
+.note.danger strong{
+    color:#b91c1c;
+}
+
+/* =========================================================
+   OBJECTIVES
+========================================================= */
+
+.objectives{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+}
+
+.objective{
+    display:flex;
+    gap:11px;
+    align-items:center;
+    padding:13px 15px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:#fff;
+    font-size:13px;
+}
+
+.check{
+    width:22px;
+    height:22px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    border-radius:50%;
+    background:#dcfce7;
+    color:#15803d;
+    font-weight:900;
+}
+
+/* =========================================================
+   POLYMORPHISM VISUAL
+========================================================= */
+
+.poly-stage{
+    padding:35px;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:20px;
+    box-shadow:var(--shadow);
+}
+
+.poly-flow{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:15px;
+}
+
+.poly-node{
+    min-width:210px;
+    padding:16px 25px;
+    text-align:center;
+    border:2px solid var(--primary);
+    border-radius:14px;
+    background:#eff6ff;
+    font-weight:900;
+    transition:.4s;
+}
+
+.poly-node small{
+    display:block;
+    margin-top:3px;
+    color:var(--muted);
+    font-size:10px;
+    font-weight:600;
+}
+
+.poly-node.active{
+    transform:scale(1.07);
+    box-shadow:0 0 0 7px rgba(37,99,235,.1);
+}
+
+.poly-arrow{
+    color:var(--primary);
+    font-size:25px;
+    font-weight:900;
+}
+
+.poly-children{
+    display:flex;
+    gap:25px;
+    flex-wrap:wrap;
+    justify-content:center;
+}
+
+/* =========================================================
+   COMPARISON TABLE
+========================================================= */
+
+.table-wrap{
+    overflow-x:auto;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:15px;
+    box-shadow:var(--shadow);
+}
+
+table{
+    width:100%;
+    min-width:700px;
+    border-collapse:collapse;
+}
+
+th,
+td{
+    padding:13px 15px;
+    text-align:left;
+    border-bottom:1px solid var(--border);
+    font-size:13px;
+}
+
+th{
+    background:#f8fafc;
+    font-size:12px;
+    font-weight:900;
+}
+
+td{
+    color:#475569;
+}
+
+/* =========================================================
+   TYPE CARDS
+========================================================= */
+
+.type-card{
+    position:relative;
+    overflow:hidden;
+}
+
+.type-number{
+    position:absolute;
+    right:18px;
+    top:10px;
+    color:#f1f5f9;
+    font-size:45px;
+    font-weight:900;
+}
+
+/* =========================================================
+   OVERLOADING LAB
+========================================================= */
+
+.lab{
+    padding:25px;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:20px;
+    box-shadow:var(--shadow);
+}
+
+.lab-screen{
+    min-height:270px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:25px;
+    background:#f8fafc;
+    border:1px dashed #cbd5e1;
+    border-radius:15px;
+}
+
+.lab-controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    margin-top:18px;
+}
+
+.btn{
+    padding:10px 15px;
+    border:0;
+    border-radius:9px;
+    font-size:12px;
+    font-weight:800;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.btn-primary{
+    background:var(--primary);
+    color:#fff;
+}
+
+.btn-primary:hover{
+    background:var(--primary-dark);
+    transform:translateY(-1px);
+}
+
+.btn-light{
+    background:#f1f5f9;
+    color:#334155;
+}
+
+.btn-success{
+    background:#dcfce7;
+    color:#15803d;
+}
+
+/* =========================================================
+   OVERLOAD VISUAL
+========================================================= */
+
+.overload-container{
+    width:min(700px,100%);
+}
+
+.overload-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin:13px 0;
+}
+
+.argument-box{
+    min-width:130px;
+    padding:13px;
+    border-radius:10px;
+    background:#fff;
+    border:1px solid var(--border);
+    text-align:center;
+    font-size:12px;
+    font-weight:800;
+}
+
+.overload-arrow{
+    color:var(--primary);
+    font-size:22px;
+}
+
+.function-box{
+    flex:1;
+    padding:13px;
+    border-radius:10px;
+    background:#eff6ff;
+    border:1px solid #bfdbfe;
+    font-size:12px;
+    font-weight:800;
+    opacity:.35;
+    transition:.4s;
+}
+
+.function-box.active{
+    opacity:1;
+    transform:translateX(6px);
+}
+
+/* =========================================================
+   VIRTUAL DISPATCH
+========================================================= */
+
+.dispatch{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:15px;
+    width:min(800px,100%);
+}
+
+.dispatch-box{
+    width:100%;
+    padding:17px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:#fff;
+    text-align:center;
+    font-size:13px;
+    font-weight:800;
+    transition:.4s;
+}
+
+.dispatch-box.active{
+    background:#eff6ff;
+    border-color:var(--primary);
+    transform:scale(1.03);
+}
+
+.dispatch-arrow{
+    color:var(--primary);
+    font-size:24px;
+}
+
+/* =========================================================
+   DIAGRAM
+========================================================= */
+
+.diagram{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    flex-wrap:wrap;
+    padding:30px;
+}
+
+.diagram-box{
+    min-width:140px;
+    padding:15px;
+    border:2px solid var(--primary);
+    border-radius:12px;
+    background:#fff;
+    text-align:center;
+    font-size:12px;
+    font-weight:900;
+}
+
+.diagram-arrow{
+    color:var(--primary);
+    font-size:24px;
+    font-weight:900;
+}
+
+/* =========================================================
+   QUIZ
+========================================================= */
+
+.quiz-card{
+    margin-bottom:15px;
+    padding:22px;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:16px;
+}
+
+.quiz-question{
+    margin-bottom:14px;
+    font-weight:900;
+}
+
+.option{
+    display:block;
+    width:100%;
+    margin:7px 0;
+    padding:11px 13px;
+    border:1px solid var(--border);
+    border-radius:9px;
+    background:#f8fafc;
+    color:#334155;
+    text-align:left;
+    font-size:13px;
+    cursor:pointer;
+}
+
+.option:hover{
+    border-color:var(--primary);
+    background:#eff6ff;
+}
+
+.option.correct{
+    background:#dcfce7;
+    border-color:#86efac;
+    color:#166534;
+}
+
+.option.wrong{
+    background:#fee2e2;
+    border-color:#fca5a5;
+    color:#991b1b;
+}
+
+/* =========================================================
+   ACCORDION
+========================================================= */
+
+.accordion{
+    margin-bottom:10px;
+    overflow:hidden;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:13px;
+}
+
+.acc-head{
+    width:100%;
+    padding:17px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border:0;
+    background:#fff;
+    color:var(--text);
+    text-align:left;
+    font-weight:800;
+    cursor:pointer;
+}
+
+.acc-body{
+    display:none;
+    padding:0 17px 17px;
+    color:var(--muted);
+    font-size:13px;
+}
+
+.acc-body.open{
+    display:block;
+}
+
+/* =========================================================
+   CHECKLIST
+========================================================= */
+
+.checklist{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+}
+
+.check-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:10px;
+    font-size:13px;
+}
+
+.check-item input{
+    width:17px;
+    height:17px;
+    accent-color:var(--primary);
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.footer{
+    margin-top:80px;
+    padding:35px;
+    background:#0f172a;
+    color:#cbd5e1;
+    border-radius:22px;
+    text-align:center;
+}
+
+.footer strong{
+    color:#fff;
+}
+
+.footer p{
+    margin-top:5px;
+    font-size:12px;
+}
+
+/* =========================================================
+   REVEAL
+========================================================= */
+
+.reveal{
+    opacity:0;
+    transform:translateY(25px);
+    transition:.65s ease;
+}
+
+.reveal.visible{
+    opacity:1;
+    transform:translateY(0);
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:1000px){
+
+    .grid-3{
+        grid-template-columns:1fr 1fr;
+    }
+
+}
+
+@media(max-width:760px){
+
+    .sidebar{
+        transform:translateX(-100%);
+        transition:.3s;
+    }
+
+    .sidebar.open{
+        transform:translateX(0);
+    }
+
+    .main{
+        margin-left:0;
+    }
+
+    .menu-btn{
+        display:block;
+    }
+
+    .topbar{
+        padding:0 15px;
+    }
+
+    .breadcrumb{
+        display:none;
+    }
+
+    .content{
+        padding:25px 15px 60px;
+    }
+
+    .hero{
+        padding:25px;
+    }
+
+    .grid,
+    .grid-3,
+    .objectives,
+    .checklist{
+        grid-template-columns:1fr;
+    }
+
+    .poly-children{
+        flex-direction:column;
+    }
+
+}
+
+@media(prefers-reduced-motion:reduce){
+
+    *{
+        animation:none!important;
+        transition:none!important;
+        scroll-behavior:auto!important;
+    }
+
+    .reveal{
+        opacity:1;
+        transform:none;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- =====================================================
+     SIDEBAR
+===================================================== -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+        <div class="brand-logo">Z</div>
+        <div class="brand-text">ZENSUS</div>
+    </div>
+
+    <div class="lesson-label">
+        Lesson 14 · Polymorphism
+    </div>
+
+    <nav>
+
+        <a href="#top" class="active">
+            <span class="nav-number">01</span>
+            Overview
+        </a>
+
+        <a href="#what">
+            <span class="nav-number">02</span>
+            What is Polymorphism?
+        </a>
+
+        <a href="#types">
+            <span class="nav-number">03</span>
+            Types
+        </a>
+
+        <a href="#compile">
+            <span class="nav-number">04</span>
+            Compile-Time
+        </a>
+
+        <a href="#function-overload">
+            <span class="nav-number">05</span>
+            Function Overloading
+        </a>
+
+        <a href="#operator">
+            <span class="nav-number">06</span>
+            Operator Overloading
+        </a>
+
+        <a href="#runtime">
+            <span class="nav-number">07</span>
+            Runtime
+        </a>
+
+        <a href="#virtual">
+            <span class="nav-number">08</span>
+            Virtual Functions
+        </a>
+
+        <a href="#override">
+            <span class="nav-number">09</span>
+            Override
+        </a>
+
+        <a href="#pure">
+            <span class="nav-number">10</span>
+            Pure Virtual
+        </a>
+
+        <a href="#abstract">
+            <span class="nav-number">11</span>
+            Abstract Classes
+        </a>
+
+        <a href="#dispatch">
+            <span class="nav-number">12</span>
+            Dynamic Dispatch
+        </a>
+
+        <a href="#slicing">
+            <span class="nav-number">13</span>
+            Object Slicing
+        </a>
+
+        <a href="#casting">
+            <span class="nav-number">14</span>
+            Casting
+        </a>
+
+        <a href="#destructor">
+            <span class="nav-number">15</span>
+            Virtual Destructor
+        </a>
+
+        <a href="#lab">
+            <span class="nav-number">16</span>
+            Interactive Lab
+        </a>
+
+        <a href="#exam">
+            <span class="nav-number">17</span>
+            Exam Prep
+        </a>
+
+        <a href="#interview">
+            <span class="nav-number">18</span>
+            Interview
+        </a>
+
+        <a href="#quiz">
+            <span class="nav-number">19</span>
+            Quiz
+        </a>
+
+        <a href="#practice">
+            <span class="nav-number">20</span>
+            Practice
+        </a>
+
+        <a href="#checklist">
+            <span class="nav-number">21</span>
+            Completion
+        </a>
+
+    </nav>
+
+    <div class="sidebar-footer">
+
+        <div class="progress-card">
+
+            <div class="progress-card-title">
+                Lesson Progress
+            </div>
+
+            <div class="progress-track">
+                <div class="progress-fill" id="sideProgress"></div>
+            </div>
+
+            <div class="progress-small">
+                Scroll to complete the lesson
+            </div>
+
+        </div>
+
+    </div>
+
+</aside>
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<main class="main">
+
+<header class="topbar">
+
+    <div class="topbar-left">
+
+        <button class="menu-btn" id="menuBtn">
+            ☰
+        </button>
+
+        <div class="breadcrumb">
+            C++ / OOP /
+            <strong>Polymorphism</strong>
+        </div>
+
+    </div>
+
+    <div class="top-actions">
+
+        <span class="badge">C++</span>
+        <span class="badge">Lesson 14</span>
+
+    </div>
+
+</header>
+
+<div class="content" id="top">
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<section class="hero reveal">
+
+    <div class="kicker">
+        C++ Object-Oriented Programming
+    </div>
+
+    <h1>
+        Master
+        <span>Polymorphism</span>
+    </h1>
+
+    <p>
+        Understand how one interface can represent many forms.
+        Learn compile-time polymorphism, function overloading,
+        operator overloading, runtime polymorphism, virtual
+        functions, pure virtual functions, abstract classes,
+        dynamic dispatch and interview-level concepts.
+    </p>
+
+    <div class="hero-badges">
+
+        <span class="hero-badge">
+            Compile-Time
+        </span>
+
+        <span class="hero-badge">
+            Function Overloading
+        </span>
+
+        <span class="hero-badge">
+            Operator Overloading
+        </span>
+
+        <span class="hero-badge">
+            Runtime
+        </span>
+
+        <span class="hero-badge">
+            Virtual Functions
+        </span>
+
+        <span class="hero-badge">
+            Abstract Classes
+        </span>
+
+        <span class="hero-badge">
+            Dynamic Dispatch
+        </span>
+
+    </div>
+
+    <div class="code-box">
+
+        <div class="code-head">
+
+            <span class="code-title">
+                polymorphism.cpp
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>class Animal {
+
+public:
+
+    virtual void sound() {
+        cout &lt;&lt; "Animal sound";
+    }
+};
+
+class Dog : public Animal {
+
+public:
+
+    void sound() override {
+        cout &lt;&lt; "Dog barks";
+    }
+};
+
+Animal* animal = new Dog();
+
+animal-&gt;sound();
+
+// Output:
+// Dog barks</code></pre>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     OBJECTIVES
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">
+        Learning Objectives
+    </div>
+
+    <h2 class="section-title">
+        What you will master
+    </h2>
+
+    <div class="objectives">
+
+        <div class="objective">
+            <span class="check">✓</span>
+            Understand polymorphism
+        </div>
+
+        <div class="objective">
+            <span class="check">✓</span>
+            Differentiate compile-time and runtime polymorphism
+        </div>
+
+        <div class="objective">
+            <span class="check">✓</span>
+            Implement function overloading
+        </div>
+
+        <div class="objective">
+            <span class="check">✓</span>
+            Understand operator overloading
+        </div>
+
+        <div class="objective">
+            <span class="check">✓</span>
+            Use virtual functions
+        </div>
+
+        <div class="objective">
+            <span class="check">✓</span>
+            Use override correctly
+        </div>
+
+        <div class="objective">
+            <span class="check">✓</span>
+            Understand pure virtual functions
+        </div>
+
+        <div class="objective">
+            <span class="check">✓</span>
+            Build abstract classes
+        </div>
+
+        <div class="objective">
+            <span class="check">✓</span>
+            Understand dynamic dispatch
+        </div>
+
+        <div class="objective">
+            <span class="check">✓</span>
+            Answer interview questions
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     WHAT
+===================================================== -->
+
+<section class="section reveal" id="what">
+
+    <div class="kicker">
+        01 · Foundation
+    </div>
+
+    <h2 class="section-title">
+        What is Polymorphism?
+    </h2>
+
+    <p class="section-subtitle">
+        "Poly" means many and "morph" means forms.
+    </p>
+
+    <div class="grid">
+
+        <div class="card">
+
+            <div class="icon-box">
+                P
+            </div>
+
+            <h3>
+                Simple Definition
+            </h3>
+
+            <p>
+                Polymorphism is the ability of the same interface,
+                function name or operation to behave differently
+                depending on the situation or object.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <div class="icon-box">
+                ∞
+            </div>
+
+            <h3>
+                Real-World Analogy
+            </h3>
+
+            <p>
+                A person may act as a student, employee or customer
+                depending on the context. One person, multiple roles.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="note success">
+
+        <strong>Core idea:</strong>
+        Same interface → different behavior.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     VISUAL
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">
+        Animated Visualization
+    </div>
+
+    <h2 class="section-title">
+        One Interface → Many Forms
+    </h2>
+
+    <div class="poly-stage">
+
+        <div class="poly-flow">
+
+            <div class="poly-node active" id="polyInterface">
+                Animal::sound()
+                <small>Common Interface</small>
+            </div>
+
+            <div class="poly-arrow">
+                ↓
+            </div>
+
+            <div class="poly-children">
+
+                <div class="poly-node">
+                    Dog
+                    <small>sound() → Bark</small>
+                </div>
+
+                <div class="poly-node">
+                    Cat
+                    <small>sound() → Meow</small>
+                </div>
+
+                <div class="poly-node">
+                    Cow
+                    <small>sound() → Moo</small>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     TYPES
+===================================================== -->
+
+<section class="section reveal" id="types">
+
+    <div class="kicker">
+        02 · Classification
+    </div>
+
+    <h2 class="section-title">
+        Types of Polymorphism
+    </h2>
+
+    <div class="grid">
+
+        <div class="card type-card">
+
+            <div class="type-number">
+                01
+            </div>
+
+            <h3>
+                Compile-Time Polymorphism
+            </h3>
+
+            <p>
+                The compiler determines which function or operation
+                to use during compilation.
+            </p>
+
+            <br>
+
+            <ul>
+                <li>Function overloading</li>
+                <li>Operator overloading</li>
+                <li>Templates are another form of compile-time
+                    polymorphic programming</li>
+            </ul>
+
+        </div>
+
+        <div class="card type-card">
+
+            <div class="type-number">
+                02
+            </div>
+
+            <h3>
+                Runtime Polymorphism
+            </h3>
+
+            <p>
+                The function implementation is selected at runtime
+                through virtual dispatch.
+            </p>
+
+            <br>
+
+            <ul>
+                <li>Virtual functions</li>
+                <li>Function overriding</li>
+                <li>Base references/pointers</li>
+            </ul>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     COMPILE TIME
+===================================================== -->
+
+<section class="section reveal" id="compile">
+
+    <div class="kicker">
+        03 · Compile-Time
+    </div>
+
+    <h2 class="section-title">
+        Compile-Time Polymorphism
+    </h2>
+
+    <p class="section-subtitle">
+        The compiler decides which overloaded function matches
+        the call.
+    </p>
+
+    <div class="code-box">
+
+        <div class="code-head">
+
+            <span class="code-title">
+                compile-time.cpp
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>class Calculator {
+
+public:
+
+    int add(int a, int b) {
+        return a + b;
+    }
+
+    double add(double a, double b) {
+        return a + b;
+    }
+
+};
+
+int main() {
+
+    Calculator c;
+
+    cout &lt;&lt; c.add(2, 3) &lt;&lt; '\n';
+
+    cout &lt;&lt; c.add(2.5, 3.5);
+
+}</code></pre>
+
+    </div>
+
+    <div class="note">
+
+        <strong>Decision:</strong>
+
+        <code>add(2,3)</code> matches the integer version.
+
+        <code>add(2.5,3.5)</code> matches the double version.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     FUNCTION OVERLOADING
+===================================================== -->
+
+<section class="section reveal" id="function-overload">
+
+    <div class="kicker">
+        04 · Function Overloading
+    </div>
+
+    <h2 class="section-title">
+        Function Overloading
+    </h2>
+
+    <p class="section-subtitle">
+        Multiple functions have the same name but different
+        parameter lists.
+    </p>
+
+    <div class="code-box">
+
+        <div class="code-head">
+
+            <span class="code-title">
+                function-overloading.cpp
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>class Print {
+
+public:
+
+    void show(int x) {
+        cout &lt;&lt; "Integer";
+    }
+
+    void show(double x) {
+        cout &lt;&lt; "Double";
+    }
+
+    void show(string x) {
+        cout &lt;&lt; "String";
+    }
+
+};
+
+int main() {
+
+    Print p;
+
+    p.show(10);
+    p.show(5.5);
+    p.show("Hello");
+
+}</code></pre>
+
+    </div>
+
+    <div class="note warning">
+
+        <strong>Important:</strong>
+        Function overloading cannot be based only on the return type.
+
+    </div>
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Function</th>
+                    <th>Parameter List</th>
+                    <th>Overload?</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>show(int)</td>
+                    <td>int</td>
+                    <td>Yes</td>
+                </tr>
+
+                <tr>
+                    <td>show(double)</td>
+                    <td>double</td>
+                    <td>Yes</td>
+                </tr>
+
+                <tr>
+                    <td>show(int, int)</td>
+                    <td>two ints</td>
+                    <td>Yes</td>
+                </tr>
+
+                <tr>
+                    <td>show(int) with different return type</td>
+                    <td>same</td>
+                    <td>No</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     OPERATOR
+===================================================== -->
+
+<section class="section reveal" id="operator">
+
+    <div class="kicker">
+        05 · Operator Overloading
+    </div>
+
+    <h2 class="section-title">
+        Operator Overloading
+    </h2>
+
+    <p class="section-subtitle">
+        Give operators meaningful behavior for user-defined types.
+    </p>
+
+    <div class="code-box">
+
+        <div class="code-head">
+
+            <span class="code-title">
+                operator-overloading.cpp
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>class Point {
+
+public:
+
+    int x;
+    int y;
+
+    Point(int a, int b)
+        : x(a), y(b) {}
+
+    Point operator+(const Point&amp; other) {
+
+        return Point(
+            x + other.x,
+            y + other.y
+        );
+    }
+};
+
+int main() {
+
+    Point p1(2, 3);
+    Point p2(4, 5);
+
+    Point p3 = p1 + p2;
+
+    cout &lt;&lt; p3.x &lt;&lt; " "
+         &lt;&lt; p3.y;
+
+}</code></pre>
+
+    </div>
+
+    <div class="note">
+
+        <strong>Meaning:</strong>
+
+        The expression
+
+        <code>p1 + p2</code>
+
+        calls the overloaded <code>operator+</code>.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     OPERATOR RULES
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">
+        Operator Rules
+    </div>
+
+    <h2 class="section-title">
+        What Cannot Be Changed?
+    </h2>
+
+    <div class="grid">
+
+        <div class="card">
+
+            <h3>
+                You cannot create new operators
+            </h3>
+
+            <p>
+                Operator overloading only changes the behavior of
+                existing operators.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>
+                You cannot change precedence
+            </h3>
+
+            <p>
+                Operator precedence and associativity remain unchanged.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>
+                At least one operand must be user-defined
+            </h3>
+
+            <p>
+                You cannot redefine operators only for built-in
+                types.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>
+                Some operators cannot be overloaded
+            </h3>
+
+            <p>
+                Examples include <code>::</code>, <code>.</code>,
+                <code>.*</code>, <code>?:</code> and <code>sizeof</code>.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     RUNTIME
+===================================================== -->
+
+<section class="section reveal" id="runtime">
+
+    <div class="kicker">
+        06 · Runtime Polymorphism
+    </div>
+
+    <h2 class="section-title">
+        Runtime Polymorphism
+    </h2>
+
+    <p class="section-subtitle">
+        The actual object determines which overridden virtual
+        function executes.
+    </p>
+
+    <div class="code-box">
+
+        <div class="code-head">
+
+            <span class="code-title">
+                runtime.cpp
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>class Animal {
+
+public:
+
+    virtual void sound() {
+        cout &lt;&lt; "Animal sound\n";
+    }
+};
+
+class Dog : public Animal {
+
+public:
+
+    void sound() override {
+        cout &lt;&lt; "Dog barks\n";
+    }
+};
+
+int main() {
+
+    Dog d;
+
+    Animal* ptr = &amp;d;
+
+    ptr-&gt;sound();
+
+}</code></pre>
+
+    </div>
+
+    <div class="note success">
+
+        <strong>Output:</strong>
+
+        <code>Dog barks</code>
+
+        because <code>sound()</code> is virtual and the actual object
+        is a Dog.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     VIRTUAL
+===================================================== -->
+
+<section class="section reveal" id="virtual">
+
+    <div class="kicker">
+        07 · Virtual Functions
+    </div>
+
+    <h2 class="section-title">
+        Virtual Functions
+    </h2>
+
+    <p class="section-subtitle">
+        The virtual keyword enables dynamic dispatch through
+        a base pointer or reference.
+    </p>
+
+    <div class="code-box">
+
+<pre><code>class Shape {
+
+public:
+
+    virtual void draw() {
+        cout &lt;&lt; "Drawing Shape";
+    }
+};
+
+class Circle : public Shape {
+
+public:
+
+    void draw() override {
+        cout &lt;&lt; "Drawing Circle";
+    }
+};</code></pre>
+
+    </div>
+
+    <div class="grid">
+
+        <div class="card">
+
+            <h3>
+                Without virtual
+            </h3>
+
+            <p>
+                A base pointer calling a non-virtual function uses
+                static binding based on the pointer/reference type.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>
+                With virtual
+            </h3>
+
+            <p>
+                A base pointer/reference can dispatch to the
+                derived override according to the actual object.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     OVERRIDE
+===================================================== -->
+
+<section class="section reveal" id="override">
+
+    <div class="kicker">
+        08 · Best Practice
+    </div>
+
+    <h2 class="section-title">
+        The override Keyword
+    </h2>
+
+    <div class="code-box">
+
+<pre><code>class Animal {
+
+public:
+
+    virtual void sound() {
+        cout &lt;&lt; "Animal";
+    }
+};
+
+class Dog : public Animal {
+
+public:
+
+    void sound() override {
+        cout &lt;&lt; "Dog";
+    }
+};</code></pre>
+
+    </div>
+
+    <div class="note success">
+
+        <strong>Why use override?</strong>
+
+        It asks the compiler to verify that the derived function
+        really overrides a virtual base function.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     PURE VIRTUAL
+===================================================== -->
+
+<section class="section reveal" id="pure">
+
+    <div class="kicker">
+        09 · Abstraction
+    </div>
+
+    <h2 class="section-title">
+        Pure Virtual Function
+    </h2>
+
+    <p class="section-subtitle">
+        A pure virtual function defines an interface requirement.
+    </p>
+
+    <div class="code-box">
+
+<pre><code>class Shape {
+
+public:
+
+    virtual void draw() = 0;
+};</code></pre>
+
+    </div>
+
+    <div class="note">
+
+        <strong>Meaning:</strong>
+
+        <code>= 0</code> makes the function pure virtual.
+        A class containing a pure virtual function is abstract.
+    </div>
+
+</section>
+
+<!-- =====================================================
+     ABSTRACT
+===================================================== -->
+
+<section class="section reveal" id="abstract">
+
+    <div class="kicker">
+        10 · Abstract Classes
+    </div>
+
+    <h2 class="section-title">
+        Abstract Classes
+    </h2>
+
+    <p class="section-subtitle">
+        Abstract classes provide interfaces that derived classes
+        can implement.
+    </p>
+
+    <div class="code-box">
+
+<pre><code>class Shape {
+
+public:
+
+    virtual double area() const = 0;
+
+    virtual ~Shape() = default;
+};
+
+class Circle : public Shape {
+
+private:
+
+    double radius;
+
+public:
+
+    Circle(double r)
+        : radius(r) {}
+
+    double area() const override {
+
+        return 3.14159 *
+               radius *
+               radius;
+    }
+};</code></pre>
+
+    </div>
+
+    <div class="note warning">
+
+        <strong>Important:</strong>
+        You cannot create an object directly from an abstract class.
+
+        <br><br>
+
+        <code>Shape s;</code> → Error.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     INTERFACE
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">
+        Interface Thinking
+    </div>
+
+    <h2 class="section-title">
+        Interface-Style Design in C++
+    </h2>
+
+    <div class="code-box">
+
+<pre><code>class Payment {
+
+public:
+
+    virtual void pay(double amount) = 0;
+
+    virtual ~Payment() = default;
+};
+
+class UPI : public Payment {
+
+public:
+
+    void pay(double amount) override {
+
+        cout &lt;&lt; "Paid using UPI";
+    }
+};
+
+class Card : public Payment {
+
+public:
+
+    void pay(double amount) override {
+
+        cout &lt;&lt; "Paid using Card";
+    }
+};</code></pre>
+
+    </div>
+
+    <p class="section-subtitle">
+        This allows client code to work with the common Payment
+        interface without depending on one concrete payment type.
+    </p>
+
+</section>
+
+<!-- =====================================================
+     DYNAMIC DISPATCH
+===================================================== -->
+
+<section class="section reveal" id="dispatch">
+
+    <div class="kicker">
+        11 · Runtime Mechanism
+    </div>
+
+    <h2 class="section-title">
+        Dynamic Dispatch
+    </h2>
+
+    <div class="lab">
+
+        <div class="lab-screen">
+
+            <div class="dispatch">
+
+                <div class="dispatch-box" id="dispatch1">
+                    Animal* ptr
+                </div>
+
+                <div class="dispatch-arrow">
+                    ↓
+                </div>
+
+                <div class="dispatch-box" id="dispatch2">
+                    Actual Object = Dog
+                </div>
+
+                <div class="dispatch-arrow">
+                    ↓
+                </div>
+
+                <div class="dispatch-box" id="dispatch3">
+                    virtual sound()
+                </div>
+
+                <div class="dispatch-arrow">
+                    ↓
+                </div>
+
+                <div class="dispatch-box" id="dispatch4">
+                    Dog::sound()
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="lab-controls">
+
+            <button
+                class="btn btn-primary"
+                onclick="runDispatch()">
+                ▶ Run Dynamic Dispatch
+            </button>
+
+            <button
+                class="btn btn-light"
+                onclick="resetDispatch()">
+                Reset
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     OBJECT SLICING
+===================================================== -->
+
+<section class="section reveal" id="slicing">
+
+    <div class="kicker">
+        12 · Important
+    </div>
+
+    <h2 class="section-title">
+        Object Slicing
+    </h2>
+
+    <div class="code-box">
+
+<pre><code>class Animal {
+
+public:
+
+    virtual void sound() {}
+};
+
+class Dog : public Animal {
+
+public:
+
+    void sound() override {}
+};
+
+Dog dog;
+
+Animal animal = dog;</code></pre>
+
+    </div>
+
+    <p class="section-subtitle">
+        When a derived object is copied into a base object by value,
+        the derived-specific portion is sliced away.
+    </p>
+
+    <div class="note success">
+
+        <strong>Better for polymorphism:</strong>
+
+        Use references or pointers.
+
+<pre style="
+    margin-top:10px;
+    color:#334155;
+    font-family:Consolas,monospace;
+">Animal&amp; ref = dog;</pre>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     CASTING
+===================================================== -->
+
+<section class="section reveal" id="casting">
+
+    <div class="kicker">
+        13 · Casting
+    </div>
+
+    <h2 class="section-title">
+        Upcasting and Downcasting
+    </h2>
+
+    <div class="grid">
+
+        <div class="card">
+
+            <h3>
+                Upcasting
+            </h3>
+
+            <p>
+                Derived → Base.
+                Safe and implicit with public inheritance.
+            </p>
+
+            <div class="code-box">
+
+<pre><code>Dog dog;
+
+Animal* animal = &amp;dog;</code></pre>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <h3>
+                Downcasting
+            </h3>
+
+            <p>
+                Base → Derived.
+                Requires care.
+            </p>
+
+            <div class="code-box">
+
+<pre><code>Animal* animal = &amp;dog;
+
+Dog* dogPtr =
+    dynamic_cast&lt;Dog*&gt;(animal);</code></pre>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="note danger">
+
+        <strong>Warning:</strong>
+
+        Never blindly assume a Base object is a particular Derived
+        object. <code>dynamic_cast</code> can perform a checked
+        downcast when the base is polymorphic.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     VIRTUAL DESTRUCTOR
+===================================================== -->
+
+<section class="section reveal" id="destructor">
+
+    <div class="kicker">
+        14 · Interview Essential
+    </div>
+
+    <h2 class="section-title">
+        Virtual Destructor
+    </h2>
+
+    <div class="code-box">
+
+<pre><code>class Base {
+
+public:
+
+    virtual ~Base() = default;
+};
+
+class Derived : public Base {
+
+public:
+
+    ~Derived() {
+        cout &lt;&lt; "Derived destroyed";
+    }
+};</code></pre>
+
+    </div>
+
+    <div class="note success">
+
+        <strong>Rule:</strong>
+
+        If a class is intended to be used polymorphically and an
+        object may be destroyed through a base pointer, give the
+        base class a virtual destructor.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     STATIC VS DYNAMIC
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">
+        Comparison
+    </div>
+
+    <h2 class="section-title">
+        Static vs Dynamic Binding
+    </h2>
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Feature</th>
+                    <th>Static Binding</th>
+                    <th>Dynamic Binding</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>Decision time</td>
+                    <td>Compile time</td>
+                    <td>Runtime</td>
+                </tr>
+
+                <tr>
+                    <td>Common example</td>
+                    <td>Function overloading</td>
+                    <td>Virtual functions</td>
+                </tr>
+
+                <tr>
+                    <td>Inheritance required?</td>
+                    <td>No</td>
+                    <td>Usually yes</td>
+                </tr>
+
+                <tr>
+                    <td>Virtual function</td>
+                    <td>No</td>
+                    <td>Yes</td>
+                </tr>
+
+                <tr>
+                    <td>Typical mechanism</td>
+                    <td>Overload resolution</td>
+                    <td>Virtual dispatch</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     INTERACTIVE LAB
+===================================================== -->
+
+<section class="section reveal" id="lab">
+
+    <div class="kicker">
+        15 · Interactive Lab
+    </div>
+
+    <h2 class="section-title">
+        Function Overloading Simulator
+    </h2>
+
+    <p class="section-subtitle">
+        See how different argument types select different overloads.
+    </p>
+
+    <div class="lab">
+
+        <div class="lab-screen">
+
+            <div class="overload-container">
+
+                <div class="overload-row">
+
+                    <div class="argument-box">
+                        add(2, 3)
+                    </div>
+
+                    <div class="overload-arrow">
+                        →
+                    </div>
+
+                    <div class="function-box" id="overInt">
+                        add(int, int)
+                    </div>
+
+                </div>
+
+                <div class="overload-row">
+
+                    <div class="argument-box">
+                        add(2.5, 3.5)
+                    </div>
+
+                    <div class="overload-arrow">
+                        →
+                    </div>
+
+                    <div class="function-box" id="overDouble">
+                        add(double, double)
+                    </div>
+
+                </div>
+
+                <div class="overload-row">
+
+                    <div class="argument-box">
+                        add("A", "B")
+                    </div>
+
+                    <div class="overload-arrow">
+                        →
+                    </div>
+
+                    <div class="function-box" id="overString">
+                        add(string, string)
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="lab-controls">
+
+            <button
+                class="btn btn-primary"
+                onclick="runOverloading()">
+                ▶ Simulate
+            </button>
+
+            <button
+                class="btn btn-light"
+                onclick="resetOverloading()">
+                Reset
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     REAL WORLD
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">
+        Real-World Applications
+    </div>
+
+    <h2 class="section-title">
+        Where Polymorphism is Used
+    </h2>
+
+    <div class="grid-3">
+
+        <div class="card">
+
+            <h3>
+                Payment Systems
+            </h3>
+
+            <p>
+                Payment → UPI / Card / Wallet
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>
+                Games
+            </h3>
+
+            <p>
+                Character → Warrior / Mage / Archer
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>
+                Graphics
+            </h3>
+
+            <p>
+                Shape → Circle / Rectangle / Triangle
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>
+                Notifications
+            </h3>
+
+            <p>
+                Notification → Email / SMS / Push
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>
+                Databases
+            </h3>
+
+            <p>
+                Database → MySQL / PostgreSQL / SQLite
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>
+                Transportation
+            </h3>
+
+            <p>
+                Vehicle → Car / Bike / Bus
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     COMMON MISTAKES
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">
+        Avoid These
+    </div>
+
+    <h2 class="section-title">
+        Common Polymorphism Mistakes
+    </h2>
+
+    <div class="grid">
+
+        <div class="card">
+
+            <h3>
+                ❌ Same name ≠ overriding
+            </h3>
+
+            <p>
+                A derived function does not automatically create
+                runtime polymorphism. The base function should be
+                virtual for dynamic dispatch.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>
+                ❌ Overloading by return type
+            </h3>
+
+            <p>
+                Two functions cannot be overloaded only because their
+                return types differ.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>
+                ❌ Forgetting override
+            </h3>
+
+            <p>
+                Using override lets the compiler detect accidental
+                signature mismatches.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>
+                ❌ Creating abstract objects
+            </h3>
+
+            <p>
+                A class with a pure virtual function is abstract and
+                cannot be instantiated directly.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>
+                ❌ Object slicing
+            </h3>
+
+            <p>
+                Passing polymorphic objects by value can lose the
+                derived portion.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>
+                ❌ Non-virtual destructor</h3>
+
+            <p>
+                Polymorphic base classes commonly need virtual
+                destructors.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     EXAM
+===================================================== -->
+
+<section class="section reveal" id="exam">
+
+    <div class="kicker">
+        16 · Exam Preparation
+    </div>
+
+    <h2 class="section-title">
+        5-Mark Answer
+    </h2>
+
+    <div class="card">
+
+        <h3>
+            Define polymorphism. Explain its types.
+        </h3>
+
+        <p>
+            Polymorphism is an OOP feature in which the same interface
+            can exhibit different behaviors. The word polymorphism
+            means "many forms".
+        </p>
+
+        <br>
+
+        <p>
+            C++ supports two major forms:
+        </p>
+
+        <ul>
+
+            <li>
+                <strong>Compile-time polymorphism:</strong>
+                achieved mainly through function overloading and
+                operator overloading.
+            </li>
+
+            <li>
+                <strong>Runtime polymorphism:</strong>
+                achieved using inheritance, virtual functions and
+                overriding.
+            </li>
+
+        </ul>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     10 MARK
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">
+        10-Mark Answer
+    </div>
+
+    <h2 class="section-title">
+        How to Write a Full Exam Answer
+    </h2>
+
+    <div class="card">
+
+        <h3>1. Definition</h3>
+
+        <p>
+            Explain the meaning of polymorphism.
+        </p>
+
+        <br>
+
+        <h3>2. Types</h3>
+
+        <p>
+            Explain compile-time and runtime polymorphism.
+        </p>
+
+        <br>
+
+        <h3>3. Function Overloading</h3>
+
+        <p>
+            Give syntax and example.
+        </p>
+
+        <br>
+
+        <h3>4. Operator Overloading</h3>
+
+        <p>
+            Explain with a class example.
+        </p>
+
+        <br>
+
+        <h3>5. Virtual Functions</h3>
+
+        <p>
+            Explain runtime dispatch using a base pointer/reference.
+        </p>
+
+        <br>
+
+        <h3>6. Pure Virtual Functions</h3>
+
+        <p>
+            Explain abstract classes.
+        </p>
+
+        <br>
+
+        <h3>7. Advantages</h3>
+
+        <ul>
+
+            <li>Flexibility</li>
+            <li>Code reuse</li>
+            <li>Extensibility</li>
+            <li>Loose coupling</li>
+            <li>Supports dynamic behavior</li>
+
+        </ul>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     INTERVIEW
+===================================================== -->
+
+<section class="section reveal" id="interview">
+
+    <div class="kicker">
+        17 · Interview Preparation
+    </div>
+
+    <h2 class="section-title">
+        Interview Questions
+    </h2>
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            What is polymorphism?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            Polymorphism allows the same interface or operation to
+            represent different behaviors.
+        </div>
+
+    </div>
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            What are the types of polymorphism in C++?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            The two major categories are compile-time polymorphism
+            and runtime polymorphism.
+        </div>
+
+    </div>
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            What is function overloading?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            Function overloading allows multiple functions with the
+            same name but different parameter lists.
+        </div>
+
+    </div>
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            Can functions be overloaded only by return type?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            No. The parameter list must differ in a way that allows
+            overload resolution to distinguish the functions.
+        </div>
+
+    </div>
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            What is a virtual function?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            A virtual function allows a derived override to be
+            selected dynamically through a base pointer or reference.
+        </div>
+
+    </div>
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            What is a pure virtual function?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            A pure virtual function is declared using = 0 and makes
+            the containing class abstract.
+        </div>
+
+    </div>
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            What is dynamic binding?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            Dynamic binding selects a virtual function implementation
+            according to the actual object at runtime.
+        </div>
+
+    </div>
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            Why is override recommended?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            It asks the compiler to verify that the derived function
+            really overrides a virtual base function.
+        </div>
+
+    </div>
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            What is object slicing?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            Object slicing happens when a derived object is copied
+            into a base object by value, losing the derived-specific
+            portion.
+        </div>
+
+    </div>
+
+    <div class="accordion">
+
+        <button class="acc-head">
+            Why should a polymorphic base destructor be virtual?
+            <span>+</span>
+        </button>
+
+        <div class="acc-body">
+            It allows proper destruction of derived objects when they
+            are destroyed through a base pointer.
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     QUIZ
+===================================================== -->
+
+<section class="section reveal" id="quiz">
+
+    <div class="kicker">
+        18 · Knowledge Check
+    </div>
+
+    <h2 class="section-title">
+        Polymorphism Quiz
+    </h2>
+
+    <div class="quiz-card">
+
+        <div class="quiz-question">
+            1. What does polymorphism mean?
+        </div>
+
+        <button class="option" data-correct="true">
+            Many forms
+        </button>
+
+        <button class="option" data-correct="false">
+            One class
+        </button>
+
+        <button class="option" data-correct="false">
+            Data hiding
+        </button>
+
+        <button class="option" data-correct="false">
+            Memory allocation
+        </button>
+
+    </div>
+
+    <div class="quiz-card">
+
+        <div class="quiz-question">
+            2. Which is compile-time polymorphism?
+        </div>
+
+        <button class="option" data-correct="true">
+            Function overloading
+        </button>
+
+        <button class="option" data-correct="false">
+            Virtual function
+        </button>
+
+        <button class="option" data-correct="false">
+            Dynamic dispatch
+        </button>
+
+        <button class="option" data-correct="false">
+            Pure virtual function
+        </button>
+
+    </div>
+
+    <div class="quiz-card">
+
+        <div class="quiz-question">
+            3. Which keyword enables virtual dispatch?
+        </div>
+
+        <button class="option" data-correct="false">
+            static
+        </button>
+
+        <button class="option" data-correct="true">
+            virtual
+        </button>
+
+        <button class="option" data-correct="false">
+            friend
+        </button>
+
+        <button class="option" data-correct="false">
+            mutable
+        </button>
+
+    </div>
+
+    <div class="quiz-card">
+
+        <div class="quiz-question">
+            4. What makes a function pure virtual?
+        </div>
+
+        <button class="option" data-correct="false">
+            virtual = 1
+        </button>
+
+        <button class="option" data-correct="true">
+            virtual = 0
+        </button>
+
+        <button class="option" data-correct="false">
+            pure virtual
+        </button>
+
+        <button class="option" data-correct="false">
+            abstract
+        </button>
+
+    </div>
+
+    <div class="quiz-card">
+
+        <div class="quiz-question">
+            5. Can functions be overloaded only by return type?
+        </div>
+
+        <button class="option" data-correct="false">
+            Yes
+        </button>
+
+        <button class="option" data-correct="true">
+            No
+        </button>
+
+    </div>
+
+    <div class="quiz-card">
+
+        <div class="quiz-question">
+            6. Which keyword verifies an intended override?
+        </div>
+
+        <button class="option" data-correct="false">
+            overload
+        </button>
+
+        <button class="option" data-correct="true">
+            override
+        </button>
+
+        <button class="option" data-correct="false">
+            extends
+        </button>
+
+        <button class="option" data-correct="false">
+            dynamic
+        </button>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     PRACTICE
+===================================================== -->
+
+<section class="section reveal" id="practice">
+
+    <div class="kicker">
+        19 · Coding Practice
+    </div>
+
+    <h2 class="section-title">
+        Coding Challenges
+    </h2>
+
+    <div class="grid">
+
+        <div class="card">
+
+            <h3>
+                Challenge 1
+            </h3>
+
+            <p>
+                Create a Calculator class with overloaded add()
+                functions for int, double and three integers.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>
+                Challenge 2
+            </h3>
+
+            <p>
+                Create a Point class and overload + to add two points.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>
+                Challenge 3
+            </h3>
+
+            <p>
+                Create Shape as an abstract class and implement
+                Circle, Rectangle and Triangle.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>
+                Challenge 4
+            </h3>
+
+            <p>
+                Create Animal with virtual sound() and implement
+                Dog, Cat and Cow.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     MINI PROJECT
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">
+        Mini Project
+    </div>
+
+    <h2 class="section-title">
+        Payment Processing System
+    </h2>
+
+    <p class="section-subtitle">
+        A practical runtime-polymorphism example.
+    </p>
+
+    <div class="code-box">
+
+        <div class="code-head">
+
+            <span class="code-title">
+                payment-system.cpp
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>#include &lt;iostream&gt;
+
+using namespace std;
+
+class Payment {
+
+public:
+
+    virtual void pay(double amount) = 0;
+
+    virtual ~Payment() = default;
+};
+
+class UPI : public Payment {
+
+public:
+
+    void pay(double amount) override {
+
+        cout &lt;&lt; "UPI payment: ₹"
+             &lt;&lt; amount &lt;&lt; '\n';
+    }
+};
+
+class Card : public Payment {
+
+public:
+
+    void pay(double amount) override {
+
+        cout &lt;&lt; "Card payment: ₹"
+             &lt;&lt; amount &lt;&lt; '\n';
+    }
+};
+
+class Cash : public Payment {
+
+public:
+
+    void pay(double amount) override {
+
+        cout &lt;&lt; "Cash payment: ₹"
+             &lt;&lt; amount &lt;&lt; '\n';
+    }
+};
+
+void processPayment(
+    Payment&amp; payment,
+    double amount
+) {
+
+    payment.pay(amount);
+}
+
+int main() {
+
+    UPI upi;
+    Card card;
+    Cash cash;
+
+    processPayment(upi, 500);
+    processPayment(card, 1000);
+    processPayment(cash, 250);
+
+    return 0;
+}</code></pre>
+
+    </div>
+
+    <div class="note success">
+
+        <strong>What this demonstrates:</strong>
+
+        abstract class → pure virtual function → inheritance →
+        overriding → runtime polymorphism → virtual destructor →
+        common interface.
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     ADVANCED SUMMARY
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">
+        Interview-Level Summary
+    </div>
+
+    <h2 class="section-title">
+        The Complete Polymorphism Map
+    </h2>
+
+    <div class="poly-stage">
+
+        <div class="diagram">
+
+            <div class="diagram-box">
+                Polymorphism
+            </div>
+
+            <div class="diagram-arrow">
+                →
+            </div>
+
+            <div class="diagram-box">
+                Compile-Time
+            </div>
+
+            <div class="diagram-arrow">
+                →
+            </div>
+
+            <div class="diagram-box">
+                Overloading
+            </div>
+
+        </div>
+
+        <div class="diagram">
+
+            <div class="diagram-box">
+                Polymorphism
+            </div>
+
+            <div class="diagram-arrow">
+                →
+            </div>
+
+            <div class="diagram-box">
+                Runtime
+            </div>
+
+            <div class="diagram-arrow">
+                →
+            </div>
+
+            <div class="diagram-box">
+                Virtual Functions
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     RAPID REVISION
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="kicker">
+        Rapid Revision
+    </div>
+
+    <h2 class="section-title">
+        Polymorphism in 60 Seconds
+    </h2>
+
+    <div class="grid-3">
+
+        <div class="card">
+            <h4>Polymorphism</h4>
+            <p>One interface, many forms.</p>
+        </div>
+
+        <div class="card">
+            <h4>Compile-Time</h4>
+            <p>Decision made during compilation.</p>
+        </div>
+
+        <div class="card">
+            <h4>Function Overloading</h4>
+            <p>Same name, different parameter lists.</p>
+        </div>
+
+        <div class="card">
+            <h4>Operator Overloading</h4>
+            <p>Customize operators for user-defined types.</p>
+        </div>
+
+        <div class="card">
+            <h4>Runtime</h4>
+            <p>Behavior selected dynamically.</p>
+        </div>
+
+        <div class="card">
+            <h4>Virtual</h4>
+            <p>Enables dynamic dispatch.</p>
+        </div>
+
+        <div class="card">
+            <h4>Override</h4>
+            <p>Verifies intended overriding.</p>
+        </div>
+
+        <div class="card">
+            <h4>Pure Virtual</h4>
+            <p>Declared using = 0.</p>
+        </div>
+
+        <div class="card">
+            <h4>Abstract Class</h4>
+            <p>Cannot be instantiated directly.</p>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     CHECKLIST
+===================================================== -->
+
+<section class="section reveal" id="checklist">
+
+    <div class="kicker">
+        20 · Completion
+    </div>
+
+    <h2 class="section-title">
+        Lesson Completion Checklist
+    </h2>
+
+    <div class="checklist">
+
+        <label class="check-item">
+            <input type="checkbox" data-check="1">
+            I understand polymorphism
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="2">
+            I know compile-time polymorphism
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="3">
+            I can write overloaded functions
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="4">
+            I understand operator overloading
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="5">
+            I understand runtime polymorphism
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="6">
+            I can use virtual functions
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="7">
+            I can use override
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="8">
+            I understand pure virtual functions
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="9">
+            I understand abstract classes
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="10">
+            I understand dynamic dispatch
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="11">
+            I understand object slicing
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="12">
+            I understand upcasting
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="13">
+            I understand downcasting
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="14">
+            I understand virtual destructors
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="15">
+            I can solve polymorphism problems
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="16">
+            I can answer interview questions
+        </label>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     NEXT LESSON
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="card"
+         style="
+         background:linear-gradient(135deg,#eff6ff,#f5f3ff);
+         border-color:#dbeafe;
+         ">
+
+        <div class="kicker">
+            Next Lesson
+        </div>
+
+        <h2 class="section-title">
+            Lesson 15 → Abstraction
+        </h2>
+
+        <p>
+            Next, learn abstraction, abstract classes, interfaces,
+            pure virtual functions, encapsulation vs abstraction,
+            real-world architecture and professional OOP design.
+        </p>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer class="footer">
+
+    <strong>ZENSUS</strong>
+
+    <p>
+        Learn. Build. Practice. Get Placement Ready.
+    </p>
+
+    <p>
+        C++ Lesson 14 · Polymorphism
+    </p>
+
+</footer>
+
+</div>
+</main>
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+<script>
+
+/* =========================================================
+   MOBILE SIDEBAR
+========================================================= */
+
+const menuBtn =
+    document.getElementById("menuBtn");
+
+const sidebar =
+    document.getElementById("sidebar");
+
+menuBtn.addEventListener("click", () => {
+
+    sidebar.classList.toggle("open");
+
+});
+
+document
+.querySelectorAll(".sidebar nav a")
+.forEach(link => {
+
+    link.addEventListener("click", () => {
+
+        if(window.innerWidth <= 760){
+
+            sidebar.classList.remove("open");
+
+        }
+
+    });
+
+});
+
+/* =========================================================
+   SCROLL PROGRESS
+========================================================= */
+
+function updateProgress(){
+
+    const scrollTop =
+        window.scrollY;
+
+    const docHeight =
+        document.documentElement.scrollHeight -
+        window.innerHeight;
+
+    const percentage =
+        docHeight > 0
+        ? (scrollTop / docHeight) * 100
+        : 0;
+
+    document
+        .getElementById("progressBar")
+        .style.width =
+        percentage + "%";
+
+    document
+        .getElementById("sideProgress")
+        .style.width =
+        percentage + "%";
+}
+
+window.addEventListener(
+    "scroll",
+    updateProgress
+);
+
+updateProgress();
+
+/* =========================================================
+   REVEAL ANIMATION
+========================================================= */
+
+const revealObserver =
+    new IntersectionObserver(
+        entries => {
+
+            entries.forEach(entry => {
+
+                if(entry.isIntersecting){
+
+                    entry.target
+                        .classList
+                        .add("visible");
+
+                    revealObserver
+                        .unobserve(entry.target);
+
+                }
+
+            });
+
+        },
+        {
+            threshold:.12
+        }
+    );
+
+document
+.querySelectorAll(".reveal")
+.forEach(element => {
+
+    revealObserver.observe(element);
+
+});
+
+/* =========================================================
+   ACTIVE SIDEBAR
+========================================================= */
+
+const sections =
+    document.querySelectorAll(
+        "section[id]"
+    );
+
+const navLinks =
+    document.querySelectorAll(
+        ".sidebar nav a"
+    );
+
+const sectionObserver =
+    new IntersectionObserver(
+        entries => {
+
+            entries.forEach(entry => {
+
+                if(entry.isIntersecting){
+
+                    navLinks.forEach(link => {
+
+                        link.classList.remove(
+                            "active"
+                        );
+
+                    });
+
+                    const active =
+                        document.querySelector(
+                            `.sidebar nav a[href="#${entry.target.id}"]`
+                        );
+
+                    if(active){
+
+                        active.classList.add(
+                            "active"
+                        );
+
+                    }
+
+                }
+
+            });
+
+        },
+        {
+            rootMargin:
+                "-20% 0px -65% 0px"
+        }
+    );
+
+sections.forEach(section => {
+
+    sectionObserver.observe(section);
+
+});
+
+/* =========================================================
+   COPY BUTTON
+========================================================= */
+
+document
+.querySelectorAll(".copy-btn")
+.forEach(button => {
+
+    button.addEventListener(
+        "click",
+        async () => {
+
+            const codeBox =
+                button.closest(".code-box");
+
+            const code =
+                codeBox.querySelector("code");
+
+            if(!code) return;
+
+            try{
+
+                await navigator
+                    .clipboard
+                    .writeText(
+                        code.innerText
+                    );
+
+                const oldText =
+                    button.innerText;
+
+                button.innerText =
+                    "Copied!";
+
+                setTimeout(() => {
+
+                    button.innerText =
+                        oldText;
+
+                },1200);
+
+            }catch(error){
+
+                button.innerText =
+                    "Select & Copy";
+
+                setTimeout(() => {
+
+                    button.innerText =
+                        "Copy";
+
+                },1200);
+
+            }
+
+        }
+    );
+
+});
+
+/* =========================================================
+   POLYMORPHISM HERO ANIMATION
+========================================================= */
+
+const polyInterface =
+    document.getElementById(
+        "polyInterface"
+    );
+
+setInterval(() => {
+
+    polyInterface
+        .classList
+        .toggle("active");
+
+},1600);
+
+/* =========================================================
+   DYNAMIC DISPATCH
+========================================================= */
+
+function runDispatch(){
+
+    const steps = [
+
+        document.getElementById(
+            "dispatch1"
+        ),
+
+        document.getElementById(
+            "dispatch2"
+        ),
+
+        document.getElementById(
+            "dispatch3"
+        ),
+
+        document.getElementById(
+            "dispatch4"
+        )
+
+    ];
+
+    steps.forEach(step => {
+
+        step.classList.remove(
+            "active"
+        );
+
+    });
+
+    steps.forEach((step,index) => {
+
+        setTimeout(() => {
+
+            step.classList.add(
+                "active"
+            );
+
+        }, index * 700);
+
+    });
+
+}
+
+function resetDispatch(){
+
+    document
+    .querySelectorAll(".dispatch-box")
+    .forEach(box => {
+
+        box.classList.remove(
+            "active"
+        );
+
+    });
+
+}
+
+/* =========================================================
+   FUNCTION OVERLOADING
+========================================================= */
+
+function runOverloading(){
+
+    const boxes = [
+
+        document.getElementById(
+            "overInt"
+        ),
+
+        document.getElementById(
+            "overDouble"
+        ),
+
+        document.getElementById(
+            "overString"
+        )
+
+    ];
+
+    boxes.forEach(box => {
+
+        box.classList.remove(
+            "active"
+        );
+
+    });
+
+    boxes.forEach((box,index) => {
+
+        setTimeout(() => {
+
+            box.classList.add(
+                "active"
+            );
+
+        },index * 700);
+
+    });
+
+}
+
+function resetOverloading(){
+
+    document
+    .querySelectorAll(".function-box")
+    .forEach(box => {
+
+        box.classList.remove(
+            "active"
+        );
+
+    });
+
+}
+
+/* =========================================================
+   ACCORDION
+========================================================= */
+
+document
+.querySelectorAll(".acc-head")
+.forEach(button => {
+
+    button.addEventListener(
+        "click",
+        () => {
+
+            const body =
+                button.nextElementSibling;
+
+            body.classList.toggle(
+                "open"
+            );
+
+            const icon =
+                button.querySelector(
+                    "span"
+                );
+
+            icon.textContent =
+                body.classList.contains(
+                    "open"
+                )
+                ? "−"
+                : "+";
+
+        }
+    );
+
+});
+
+/* =========================================================
+   QUIZ
+========================================================= */
+
+document
+.querySelectorAll(".quiz-card")
+.forEach(card => {
+
+    const options =
+        card.querySelectorAll(
+            ".option"
+        );
+
+    let answered = false;
+
+    options.forEach(option => {
+
+        option.addEventListener(
+            "click",
+            () => {
+
+                if(answered) return;
+
+                answered = true;
+
+                const correct =
+                    option.dataset.correct
+                    === "true";
+
+                if(correct){
+
+                    option.classList.add(
+                        "correct"
+                    );
+
+                }else{
+
+                    option.classList.add(
+                        "wrong"
+                    );
+
+                    options.forEach(other => {
+
+                        if(
+                            other.dataset.correct
+                            === "true"
+                        ){
+
+                            other.classList.add(
+                                "correct"
+                            );
+
+                        }
+
+                    });
+
+                }
+
+            }
+        );
+
+    });
+
+});
+
+/* =========================================================
+   CHECKLIST LOCAL STORAGE
+========================================================= */
+
+document
+.querySelectorAll("[data-check]")
+.forEach(box => {
+
+    const key =
+        "zensus_lesson14_check_" +
+        box.dataset.check;
+
+    box.checked =
+        localStorage.getItem(key)
+        === "true";
+
+    box.addEventListener(
+        "change",
+        () => {
+
+            localStorage.setItem(
+                key,
+                box.checked
+            );
+
+        }
+    );
+
+});
+
+</script>
+
+</body>
+</html>

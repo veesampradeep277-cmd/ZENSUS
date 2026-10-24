@@ -1,0 +1,3544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS | SQL Lesson 15 — Transactions</title>
+
+<style>
+/* =========================================================
+   ZENSUS SQL LESSON 15
+   TRANSACTIONS
+   Standalone HTML + CSS + JavaScript
+   ========================================================= */
+
+:root{
+    --bg:#f6f8fc;
+    --surface:#ffffff;
+    --surface-2:#f1f4f9;
+    --text:#172033;
+    --muted:#667085;
+    --border:#e4e8f0;
+    --primary:#4f46e5;
+    --primary-dark:#3730a3;
+    --secondary:#7c3aed;
+    --green:#16a34a;
+    --red:#dc2626;
+    --orange:#ea580c;
+    --blue:#2563eb;
+    --shadow:0 10px 30px rgba(15,23,42,.07);
+    --radius:18px;
+    --sidebar:270px;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
+    "Segoe UI",sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+/* =========================================================
+   SCROLL PROGRESS
+   ========================================================= */
+
+.scroll-progress{
+    position:fixed;
+    top:0;
+    left:0;
+    height:4px;
+    width:0%;
+    background:linear-gradient(90deg,var(--primary),var(--secondary));
+    z-index:9999;
+}
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    width:var(--sidebar);
+    height:100vh;
+    background:#fff;
+    border-right:1px solid var(--border);
+    padding:22px 15px;
+    overflow-y:auto;
+    z-index:1000;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    padding:5px 10px 22px;
+    border-bottom:1px solid var(--border);
+    margin-bottom:18px;
+}
+
+.logo{
+    width:42px;
+    height:42px;
+    border-radius:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,var(--primary),var(--secondary));
+    color:white;
+    font-weight:900;
+    letter-spacing:-1px;
+}
+
+.brand-text{
+    font-weight:900;
+    font-size:20px;
+    letter-spacing:.5px;
+}
+
+.brand small{
+    display:block;
+    color:var(--muted);
+    font-size:10px;
+    font-weight:600;
+}
+
+.nav-title{
+    color:#98a2b3;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    font-weight:800;
+    padding:0 10px;
+    margin:17px 0 8px;
+}
+
+.sidebar a{
+    text-decoration:none;
+    color:#475467;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 11px;
+    margin:3px 0;
+    border-radius:11px;
+    font-size:13px;
+    font-weight:650;
+    transition:.2s;
+}
+
+.sidebar a:hover{
+    background:#f2f3ff;
+    color:var(--primary);
+}
+
+.sidebar a.active{
+    background:#eef0ff;
+    color:var(--primary);
+}
+
+.nav-number{
+    width:25px;
+    height:25px;
+    border-radius:8px;
+    background:#f2f4f7;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:11px;
+    font-weight:800;
+}
+
+.sidebar a.active .nav-number{
+    background:var(--primary);
+    color:white;
+}
+
+/* =========================================================
+   MOBILE HEADER
+   ========================================================= */
+
+.mobile-header{
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    height:64px;
+    background:#fff;
+    border-bottom:1px solid var(--border);
+    z-index:1100;
+    padding:10px 15px;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.menu-btn{
+    border:0;
+    background:#f2f4f7;
+    border-radius:10px;
+    padding:9px 12px;
+    cursor:pointer;
+    font-size:18px;
+}
+
+.mobile-brand{
+    font-weight:900;
+    font-size:18px;
+}
+
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+.main{
+    margin-left:var(--sidebar);
+    min-height:100vh;
+}
+
+.container{
+    max-width:1120px;
+    margin:auto;
+    padding:55px 35px 100px;
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:28px;
+    padding:45px;
+    box-shadow:var(--shadow);
+    position:relative;
+    overflow:hidden;
+    margin-bottom:25px;
+}
+
+.hero::after{
+    content:"";
+    position:absolute;
+    width:280px;
+    height:280px;
+    right:-120px;
+    top:-120px;
+    border-radius:50%;
+    background:rgba(79,70,229,.08);
+}
+
+.eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:7px 12px;
+    border-radius:999px;
+    background:#eef0ff;
+    color:var(--primary);
+    font-size:12px;
+    font-weight:800;
+    margin-bottom:18px;
+}
+
+.hero h1{
+    font-size:clamp(32px,5vw,54px);
+    line-height:1.1;
+    letter-spacing:-2px;
+    max-width:800px;
+    margin-bottom:18px;
+}
+
+.hero h1 span{
+    color:var(--primary);
+}
+
+.hero p{
+    max-width:790px;
+    color:var(--muted);
+    font-size:17px;
+}
+
+.hero-meta{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:25px;
+}
+
+.pill{
+    padding:7px 12px;
+    border:1px solid var(--border);
+    background:#fafbfc;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:700;
+}
+
+/* =========================================================
+   SECTIONS
+   ========================================================= */
+
+.section{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:30px;
+    margin:22px 0;
+    box-shadow:0 5px 20px rgba(15,23,42,.035);
+}
+
+.section h2{
+    font-size:28px;
+    line-height:1.25;
+    margin-bottom:12px;
+    letter-spacing:-.7px;
+}
+
+.section h3{
+    font-size:20px;
+    margin:25px 0 10px;
+}
+
+.section p{
+    color:#475467;
+    margin:9px 0;
+}
+
+.section ul,
+.section ol{
+    padding-left:23px;
+    color:#475467;
+}
+
+.section li{
+    margin:7px 0;
+}
+
+.highlight{
+    border-left:4px solid var(--primary);
+    background:#f5f6ff;
+    padding:15px 17px;
+    border-radius:10px;
+    margin:18px 0;
+}
+
+.success-box{
+    border-left:4px solid var(--green);
+    background:#effdf3;
+    padding:15px 17px;
+    border-radius:10px;
+    margin:18px 0;
+}
+
+.warning-box{
+    border-left:4px solid var(--orange);
+    background:#fff7ed;
+    padding:15px 17px;
+    border-radius:10px;
+    margin:18px 0;
+}
+
+.danger-box{
+    border-left:4px solid var(--red);
+    background:#fff1f2;
+    padding:15px 17px;
+    border-radius:10px;
+    margin:18px 0;
+}
+
+/* =========================================================
+   OBJECTIVES
+   ========================================================= */
+
+.objectives{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+    margin-top:18px;
+}
+
+.objective{
+    border:1px solid var(--border);
+    border-radius:13px;
+    padding:15px;
+    background:#fbfcff;
+    display:flex;
+    gap:12px;
+}
+
+.objective-icon{
+    min-width:34px;
+    height:34px;
+    border-radius:10px;
+    background:#eef0ff;
+    color:var(--primary);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:900;
+}
+
+.objective strong{
+    display:block;
+    margin-bottom:2px;
+}
+
+.objective span{
+    color:var(--muted);
+    font-size:13px;
+}
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin:20px 0;
+}
+
+.card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:15px;
+    padding:20px;
+}
+
+.card h3{
+    margin:0 0 7px;
+    font-size:17px;
+}
+
+.card p{
+    font-size:13px;
+}
+
+.card-icon{
+    width:40px;
+    height:40px;
+    border-radius:11px;
+    background:#f0f2ff;
+    color:var(--primary);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:900;
+    margin-bottom:12px;
+}
+
+/* =========================================================
+   CODE
+   ========================================================= */
+
+.code-wrap{
+    margin:18px 0;
+    border-radius:14px;
+    overflow:hidden;
+    border:1px solid #263044;
+    background:#101827;
+}
+
+.code-head{
+    background:#172033;
+    color:#b9c3d4;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:9px 14px;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.4px;
+}
+
+.copy-btn{
+    border:1px solid #3a465d;
+    color:#dce3ef;
+    background:#202a3d;
+    border-radius:7px;
+    padding:4px 9px;
+    cursor:pointer;
+    font-size:11px;
+}
+
+pre{
+    margin:0;
+    padding:20px;
+    overflow:auto;
+    color:#e7edf7;
+    font-family:"Cascadia Code","Consolas","Courier New",monospace;
+    font-size:13px;
+    line-height:1.7;
+}
+
+code{
+    color:#e7edf7;
+}
+
+/* =========================================================
+   FLOW
+   ========================================================= */
+
+.flow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:28px 0;
+}
+
+.flow-box{
+    min-width:145px;
+    padding:15px;
+    text-align:center;
+    border:1px solid var(--border);
+    background:#fbfcff;
+    border-radius:14px;
+    font-weight:800;
+    font-size:13px;
+}
+
+.flow-box small{
+    display:block;
+    color:var(--muted);
+    font-weight:500;
+    margin-top:4px;
+}
+
+.arrow{
+    color:var(--primary);
+    font-size:25px;
+    font-weight:900;
+}
+
+/* =========================================================
+   TRANSACTION VISUALIZER
+   ========================================================= */
+
+.transaction-visual{
+    background:#111827;
+    border-radius:18px;
+    padding:25px;
+    color:white;
+    margin:22px 0;
+}
+
+.tx-status{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.status-badge{
+    display:inline-block;
+    padding:8px 17px;
+    border-radius:999px;
+    background:#273449;
+    font-size:12px;
+    font-weight:900;
+}
+
+.status-badge.active{
+    background:#164e2b;
+    color:#bbf7d0;
+}
+
+.status-badge.committed{
+    background:#064e3b;
+    color:#a7f3d0;
+}
+
+.status-badge.rolledback{
+    background:#571a1a;
+    color:#fecaca;
+}
+
+.bank{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.account{
+    background:#1c2637;
+    border:1px solid #344158;
+    border-radius:15px;
+    padding:20px;
+}
+
+.account-name{
+    color:#b8c3d6;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+}
+
+.balance{
+    font-size:34px;
+    font-weight:900;
+    margin-top:8px;
+}
+
+.tx-buttons{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-top:25px;
+}
+
+.btn{
+    border:0;
+    border-radius:10px;
+    padding:10px 15px;
+    cursor:pointer;
+    font-weight:800;
+    transition:.2s;
+}
+
+.btn:hover{
+    transform:translateY(-1px);
+}
+
+.btn-primary{
+    background:var(--primary);
+    color:#fff;
+}
+
+.btn-success{
+    background:var(--green);
+    color:#fff;
+}
+
+.btn-danger{
+    background:var(--red);
+    color:#fff;
+}
+
+.btn-secondary{
+    background:#eef0ff;
+    color:var(--primary);
+}
+
+/* =========================================================
+   ACID
+   ========================================================= */
+
+.acid-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+    margin-top:20px;
+}
+
+.acid-card{
+    border:1px solid var(--border);
+    border-radius:15px;
+    padding:20px;
+    text-align:center;
+    background:#fff;
+}
+
+.acid-letter{
+    width:55px;
+    height:55px;
+    border-radius:15px;
+    margin:0 auto 12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#eef0ff;
+    color:var(--primary);
+    font-size:25px;
+    font-weight:900;
+}
+
+.acid-card h3{
+    margin:5px 0;
+}
+
+.acid-card p{
+    font-size:12px;
+}
+
+/* =========================================================
+   ISOLATION
+   ========================================================= */
+
+.isolation-table{
+    width:100%;
+    border-collapse:collapse;
+    margin:20px 0;
+    font-size:13px;
+}
+
+.isolation-table th,
+.isolation-table td{
+    border:1px solid var(--border);
+    padding:12px;
+    text-align:left;
+}
+
+.isolation-table th{
+    background:#f4f5f9;
+    font-weight:850;
+}
+
+.tag{
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:7px;
+    font-size:10px;
+    font-weight:800;
+}
+
+.tag.yes{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.tag.no{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.tag.partial{
+    background:#ffedd5;
+    color:#9a3412;
+}
+
+/* =========================================================
+   LOCK VISUAL
+   ========================================================= */
+
+.lock-demo{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+    margin-top:20px;
+}
+
+.lock-box{
+    border:1px solid var(--border);
+    border-radius:15px;
+    padding:20px;
+}
+
+.lock{
+    margin:15px 0;
+    padding:15px;
+    background:#f8fafc;
+    border-radius:12px;
+    text-align:center;
+    font-weight:800;
+}
+
+/* =========================================================
+   LAB
+   ========================================================= */
+
+.lab{
+    background:#0f172a;
+    color:#fff;
+    border-radius:18px;
+    padding:25px;
+    margin-top:20px;
+}
+
+.lab h3{
+    margin-top:0;
+    color:#fff;
+}
+
+.lab p{
+    color:#b9c3d4;
+}
+
+.lab-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.lab-panel{
+    background:#172033;
+    border:1px solid #29364d;
+    border-radius:14px;
+    padding:18px;
+}
+
+.lab select{
+    width:100%;
+    padding:11px;
+    border-radius:9px;
+    border:1px solid #43516b;
+    background:#111827;
+    color:white;
+    margin:8px 0 14px;
+}
+
+.output{
+    min-height:180px;
+    background:#0b1220;
+    border:1px solid #29364d;
+    border-radius:10px;
+    padding:15px;
+    font-family:"Cascadia Code",Consolas,monospace;
+    font-size:12px;
+    white-space:pre-wrap;
+    color:#dce6f5;
+}
+
+/* =========================================================
+   QUIZ
+   ========================================================= */
+
+.quiz-question{
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:20px;
+    margin:15px 0;
+}
+
+.quiz-question h4{
+    margin-bottom:12px;
+}
+
+.option{
+    display:block;
+    padding:10px 12px;
+    border:1px solid var(--border);
+    border-radius:9px;
+    margin:7px 0;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.option:hover{
+    background:#f7f8ff;
+    border-color:#bfc4ff;
+}
+
+.option input{
+    margin-right:8px;
+}
+
+.quiz-result{
+    display:none;
+    margin-top:18px;
+    padding:16px;
+    border-radius:12px;
+    background:#eefcf2;
+    border:1px solid #bbf7d0;
+    color:#166534;
+    font-weight:800;
+}
+
+/* =========================================================
+   CHECKLIST
+   ========================================================= */
+
+.checklist{
+    display:grid;
+    gap:9px;
+    margin-top:18px;
+}
+
+.check-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px;
+    background:#fafbfc;
+    border:1px solid var(--border);
+    border-radius:10px;
+}
+
+.check-item input{
+    width:17px;
+    height:17px;
+    accent-color:var(--primary);
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.next-lesson{
+    background:linear-gradient(135deg,#eef0ff,#f7f3ff);
+    border:1px solid #dfe2ff;
+    border-radius:20px;
+    padding:25px;
+    margin-top:25px;
+}
+
+.footer{
+    text-align:center;
+    color:#98a2b3;
+    font-size:12px;
+    padding:30px 0;
+}
+
+/* =========================================================
+   REVEAL
+   ========================================================= */
+
+.reveal{
+    opacity:1;
+    transform:none;
+}
+
+.reveal.animate{
+    opacity:0;
+    transform:translateY(18px);
+    transition:.6s ease;
+}
+
+.reveal.animate.visible{
+    opacity:1;
+    transform:none;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(max-width:950px){
+
+    :root{
+        --sidebar:235px;
+    }
+
+    .grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .acid-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:760px){
+
+    .sidebar{
+        transform:translateX(-100%);
+        transition:.25s;
+        box-shadow:20px 0 40px rgba(0,0,0,.12);
+    }
+
+    .sidebar.open{
+        transform:translateX(0);
+    }
+
+    .mobile-header{
+        display:flex;
+    }
+
+    .main{
+        margin-left:0;
+    }
+
+    .container{
+        padding:90px 15px 60px;
+    }
+
+    .hero{
+        padding:28px 22px;
+        border-radius:20px;
+    }
+
+    .section{
+        padding:22px 18px;
+    }
+
+    .objectives,
+    .grid,
+    .lab-grid,
+    .lock-demo,
+    .bank{
+        grid-template-columns:1fr;
+    }
+
+    .acid-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .flow{
+        flex-direction:column;
+    }
+
+    .arrow{
+        transform:rotate(90deg);
+    }
+}
+
+@media(max-width:480px){
+
+    .hero h1{
+        font-size:34px;
+    }
+
+    .acid-grid{
+        grid-template-columns:1fr;
+    }
+
+    pre{
+        font-size:11px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="scroll-progress" id="progress"></div>
+
+<!-- =========================================================
+     MOBILE HEADER
+     ========================================================= -->
+
+<header class="mobile-header">
+    <button class="menu-btn" id="menuBtn">☰</button>
+    <div class="mobile-brand">ZENSUS</div>
+    <span style="font-size:12px;color:#667085;">SQL 15</span>
+</header>
+
+<!-- =========================================================
+     SIDEBAR
+     ========================================================= -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+        <div class="logo">Z</div>
+        <div>
+            <div class="brand-text">ZENSUS</div>
+            <small>SQL MASTERY</small>
+        </div>
+    </div>
+
+    <div class="nav-title">Lesson 15</div>
+
+    <a href="#overview" class="active">
+        <span class="nav-number">01</span>
+        Overview
+    </a>
+
+    <a href="#transaction">
+        <span class="nav-number">02</span>
+        Transactions
+    </a>
+
+    <a href="#acid">
+        <span class="nav-number">03</span>
+        ACID
+    </a>
+
+    <a href="#commit">
+        <span class="nav-number">04</span>
+        COMMIT
+    </a>
+
+    <a href="#rollback">
+        <span class="nav-number">05</span>
+        ROLLBACK
+    </a>
+
+    <a href="#savepoint">
+        <span class="nav-number">06</span>
+        SAVEPOINT
+    </a>
+
+    <a href="#isolation">
+        <span class="nav-number">07</span>
+        Isolation
+    </a>
+
+    <a href="#locking">
+        <span class="nav-number">08</span>
+        Locking
+    </a>
+
+    <a href="#deadlocks">
+        <span class="nav-number">09</span>
+        Deadlocks
+    </a>
+
+    <a href="#lab">
+        <span class="nav-number">10</span>
+        Interactive Lab
+    </a>
+
+    <a href="#quiz">
+        <span class="nav-number">11</span>
+        Quiz
+    </a>
+
+    <a href="#interview">
+        <span class="nav-number">12</span>
+        Interview
+    </a>
+
+    <a href="#checklist">
+        <span class="nav-number">13</span>
+        Checklist
+    </a>
+
+</aside>
+
+<!-- =========================================================
+     MAIN
+     ========================================================= -->
+
+<main class="main">
+
+<div class="container">
+
+<!-- =========================================================
+     HERO
+     ========================================================= -->
+
+<section class="hero reveal" id="overview">
+
+    <div class="eyebrow">
+        SQL • LESSON 15
+    </div>
+
+    <h1>
+        SQL <span>Transactions</span>
+    </h1>
+
+    <p>
+        Learn how databases execute multiple SQL operations as one reliable
+        unit of work. Master COMMIT, ROLLBACK, SAVEPOINT, ACID properties,
+        isolation levels, locking, concurrency and deadlocks.
+    </p>
+
+    <div class="hero-meta">
+        <span class="pill">Beginner → Advanced</span>
+        <span class="pill">ACID</span>
+        <span class="pill">Concurrency</span>
+        <span class="pill">Interview Ready</span>
+        <span class="pill">Real-world SQL</span>
+    </div>
+
+</section>
+
+<!-- =========================================================
+     OBJECTIVES
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <h2>🎯 What You Will Learn</h2>
+
+    <p>
+        By the end of this lesson, you should understand how professional
+        databases protect data when multiple operations succeed or fail.
+    </p>
+
+    <div class="objectives">
+
+        <div class="objective">
+            <div class="objective-icon">✓</div>
+            <div>
+                <strong>Transactions</strong>
+                <span>Understand a transaction as a logical unit of work.</span>
+            </div>
+        </div>
+
+        <div class="objective">
+            <div class="objective-icon">A</div>
+            <div>
+                <strong>ACID</strong>
+                <span>Master Atomicity, Consistency, Isolation and Durability.</span>
+            </div>
+        </div>
+
+        <div class="objective">
+            <div class="objective-icon">↶</div>
+            <div>
+                <strong>ROLLBACK</strong>
+                <span>Undo uncommitted changes safely.</span>
+            </div>
+        </div>
+
+        <div class="objective">
+            <div class="objective-icon">✓</div>
+            <div>
+                <strong>COMMIT</strong>
+                <span>Make transaction changes permanent.</span>
+            </div>
+        </div>
+
+        <div class="objective">
+            <div class="objective-icon">S</div>
+            <div>
+                <strong>SAVEPOINT</strong>
+                <span>Partially undo work inside a transaction.</span>
+            </div>
+        </div>
+
+        <div class="objective">
+            <div class="objective-icon">⚡</div>
+            <div>
+                <strong>Concurrency</strong>
+                <span>Understand isolation, locks and deadlocks.</span>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     WHAT IS TRANSACTION
+     ========================================================= -->
+
+<section class="section reveal" id="transaction">
+
+    <h2>1. What Is a Transaction?</h2>
+
+    <p>
+        A <strong>transaction</strong> is a sequence of one or more database
+        operations treated as a single logical unit of work.
+    </p>
+
+    <div class="highlight">
+        <strong>Core idea:</strong>
+        Either all required operations succeed, or the database can undo the
+        incomplete work.
+    </div>
+
+    <h3>🏦 Real-World Example — Bank Transfer</h3>
+
+    <p>
+        Imagine transferring ₹1,000 from Account A to Account B.
+    </p>
+
+    <ol>
+        <li>Subtract ₹1,000 from Account A.</li>
+        <li>Add ₹1,000 to Account B.</li>
+    </ol>
+
+    <p>
+        What happens if step 1 succeeds but the system crashes before step 2?
+    </p>
+
+    <div class="danger-box">
+        Without proper transaction handling, money could disappear from
+        Account A without reaching Account B.
+    </div>
+
+    <p>
+        A transaction ensures the two operations behave as one logical unit.
+    </p>
+
+    <div class="flow">
+
+        <div class="flow-box">
+            START
+            <small>Begin transaction</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            DEBIT
+            <small>Subtract money</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            CREDIT
+            <small>Add money</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            COMMIT
+            <small>Save changes</small>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     TRANSACTION SYNTAX
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <h2>2. Basic Transaction Syntax</h2>
+
+    <p>
+        Common SQL systems provide statements for starting, committing and
+        rolling back transactions. Exact syntax and default behavior can
+        differ between database systems.
+    </p>
+
+    <div class="code-wrap">
+        <div class="code-head">
+            SQL
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+<pre><code>START TRANSACTION;
+
+UPDATE accounts
+SET balance = balance - 1000
+WHERE account_id = 101;
+
+UPDATE accounts
+SET balance = balance + 1000
+WHERE account_id = 202;
+
+COMMIT;</code></pre>
+    </div>
+
+    <div class="success-box">
+        If both updates succeed and the transaction is committed,
+        the changes become durable according to the database's transaction
+        and storage guarantees.
+    </div>
+
+</section>
+
+<!-- =========================================================
+     TRANSACTION STATES
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <h2>3. Transaction Lifecycle</h2>
+
+    <div class="flow">
+
+        <div class="flow-box">
+            ACTIVE
+            <small>Operations execute</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            READY
+            <small>All work succeeded</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            COMMIT
+            <small>Changes accepted</small>
+        </div>
+
+    </div>
+
+    <div class="flow">
+
+        <div class="flow-box">
+            ACTIVE
+            <small>Transaction running</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            ERROR
+            <small>Something failed</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            ROLLBACK
+            <small>Undo changes</small>
+        </div>
+
+    </div>
+
+    <p>
+        A transaction may also become aborted because of a deadlock,
+        constraint violation, connection failure or other database error,
+        depending on the system and statement involved.
+    </p>
+
+</section>
+
+<!-- =========================================================
+     ACID
+     ========================================================= -->
+
+<section class="section reveal" id="acid">
+
+    <h2>4. ACID Properties</h2>
+
+    <p>
+        ACID is the foundation of reliable database transactions.
+    </p>
+
+    <div class="acid-grid">
+
+        <div class="acid-card">
+            <div class="acid-letter">A</div>
+            <h3>Atomicity</h3>
+            <p>
+                The transaction behaves as an all-or-nothing unit.
+            </p>
+        </div>
+
+        <div class="acid-card">
+            <div class="acid-letter">C</div>
+            <h3>Consistency</h3>
+            <p>
+                Transactions preserve defined database rules and constraints.
+            </p>
+        </div>
+
+        <div class="acid-card">
+            <div class="acid-letter">I</div>
+            <h3>Isolation</h3>
+            <p>
+                Concurrent transactions are controlled so their intermediate
+                effects are appropriately hidden according to the isolation level.
+            </p>
+        </div>
+
+        <div class="acid-card">
+            <div class="acid-letter">D</div>
+            <h3>Durability</h3>
+            <p>
+                Committed changes survive failures according to the DBMS
+                durability guarantees.
+            </p>
+        </div>
+
+    </div>
+
+    <h3>Atomicity</h3>
+
+    <p>
+        Suppose an order creation requires:
+    </p>
+
+    <ol>
+        <li>Create order.</li>
+        <li>Insert order items.</li>
+        <li>Reduce inventory.</li>
+        <li>Record payment.</li>
+    </ol>
+
+    <p>
+        If a required operation fails, the application may need the whole
+        transaction rolled back.
+    </p>
+
+    <h3>Consistency</h3>
+
+    <p>
+        Consistency means a successful transaction takes the database from
+        one valid state to another valid state according to constraints,
+        data types, triggers and other enforced rules.
+    </p>
+
+    <h3>Isolation</h3>
+
+    <p>
+        Multiple transactions may run at the same time. Isolation controls
+        what one transaction can observe from another transaction.
+    </p>
+
+    <h3>Durability</h3>
+
+    <p>
+        After a successful commit, the DBMS uses its recovery mechanisms,
+        logging and storage system to make committed data survive failures.
+    </p>
+
+</section>
+
+<!-- =========================================================
+     COMMIT
+     ========================================================= -->
+
+<section class="section reveal" id="commit">
+
+    <h2>5. COMMIT</h2>
+
+    <p>
+        <strong>COMMIT</strong> tells the database to successfully finish the
+        current transaction and make its changes permanent according to the
+        DBMS transaction semantics.
+    </p>
+
+    <div class="code-wrap">
+        <div class="code-head">
+            SQL
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+<pre><code>START TRANSACTION;
+
+UPDATE students
+SET fees_paid = fees_paid + 5000
+WHERE student_id = 101;
+
+COMMIT;</code></pre>
+    </div>
+
+    <div class="highlight">
+        After COMMIT, a normal ROLLBACK cannot simply undo that already
+        committed transaction. A separate compensating transaction may be
+        needed to reverse the business action.
+    </div>
+
+</section>
+
+<!-- =========================================================
+     ROLLBACK
+     ========================================================= -->
+
+<section class="section reveal" id="rollback">
+
+    <h2>6. ROLLBACK</h2>
+
+    <p>
+        <strong>ROLLBACK</strong> cancels the current transaction and undoes
+        its uncommitted changes, subject to the DBMS's transaction semantics.
+    </p>
+
+    <div class="code-wrap">
+        <div class="code-head">
+            SQL
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+<pre><code>START TRANSACTION;
+
+UPDATE accounts
+SET balance = balance - 5000
+WHERE account_id = 101;
+
+-- Something went wrong
+
+ROLLBACK;</code></pre>
+    </div>
+
+    <div class="warning-box">
+        ROLLBACK is not the same as deleting data manually. It reverses
+        changes belonging to the current uncommitted transaction.
+    </div>
+
+</section>
+
+<!-- =========================================================
+     SAVEPOINT
+     ========================================================= -->
+
+<section class="section reveal" id="savepoint">
+
+    <h2>7. SAVEPOINT</h2>
+
+    <p>
+        A <strong>SAVEPOINT</strong> creates a named point inside a transaction
+        that you can roll back to without necessarily cancelling the entire
+        transaction.
+    </p>
+
+    <div class="code-wrap">
+        <div class="code-head">
+            SQL
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+<pre><code>START TRANSACTION;
+
+INSERT INTO orders(order_id, customer_id)
+VALUES (101, 1);
+
+SAVEPOINT order_created;
+
+INSERT INTO order_items(order_id, product_id, quantity)
+VALUES (101, 55, 2);
+
+-- Suppose the item operation needs to be undone
+
+ROLLBACK TO SAVEPOINT order_created;
+
+-- Continue with other work
+
+COMMIT;</code></pre>
+    </div>
+
+    <h3>Important</h3>
+
+    <p>
+        SAVEPOINT behavior and syntax are widely available but details such
+        as naming, nesting and release behavior can vary by DBMS.
+    </p>
+
+</section>
+
+<!-- =========================================================
+     AUTO COMMIT
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <h2>8. Auto-Commit vs Explicit Transactions</h2>
+
+    <div class="grid">
+
+        <div class="card">
+            <div class="card-icon">⚡</div>
+            <h3>Auto-Commit</h3>
+            <p>
+                Individual statements may automatically become their own
+                transactions.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">T</div>
+            <h3>Explicit Transaction</h3>
+            <p>
+                The application explicitly starts and finishes a transaction.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">⚠</div>
+            <h3>Why It Matters</h3>
+            <p>
+                Multi-step business operations often need explicit transaction
+                boundaries.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="code-wrap">
+        <div class="code-head">
+            EXPLICIT TRANSACTION
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+<pre><code>START TRANSACTION;
+
+-- Step 1
+-- Step 2
+-- Step 3
+
+COMMIT;</code></pre>
+    </div>
+
+    <p>
+        The exact auto-commit defaults and transaction commands differ among
+        MySQL, PostgreSQL, SQL Server, Oracle and other systems.
+    </p>
+
+</section>
+
+<!-- =========================================================
+     BANK TRANSACTION ANIMATION
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <h2>9. Transaction Visualizer</h2>
+
+    <p>
+        Use the simulator to understand what happens conceptually when a
+        bank transfer is committed or rolled back.
+    </p>
+
+    <div class="transaction-visual">
+
+        <div class="tx-status">
+            <span class="status-badge" id="txStatus">
+                No Transaction
+            </span>
+        </div>
+
+        <div class="bank">
+
+            <div class="account">
+                <div class="account-name">Account A</div>
+                <div class="balance">₹<span id="balanceA">10000</span></div>
+            </div>
+
+            <div class="account">
+                <div class="account-name">Account B</div>
+                <div class="balance">₹<span id="balanceB">5000</span></div>
+            </div>
+
+        </div>
+
+        <div class="tx-buttons">
+
+            <button class="btn btn-primary" onclick="startTransfer()">
+                Start Transfer
+            </button>
+
+            <button class="btn btn-success" onclick="commitTransfer()">
+                COMMIT
+            </button>
+
+            <button class="btn btn-danger" onclick="rollbackTransfer()">
+                ROLLBACK
+            </button>
+
+            <button class="btn btn-secondary" onclick="resetTransfer()">
+                Reset
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     ISOLATION
+     ========================================================= -->
+
+<section class="section reveal" id="isolation">
+
+    <h2>10. Transaction Isolation</h2>
+
+    <p>
+        Imagine two users modifying or reading the same data at nearly the
+        same time. The DBMS must control what each transaction can see.
+    </p>
+
+    <h3>Why Isolation Matters</h3>
+
+    <p>
+        Poorly controlled concurrency can produce anomalies such as:
+    </p>
+
+    <div class="grid">
+
+        <div class="card">
+            <h3>Dirty Read</h3>
+            <p>
+                Transaction B reads data written by Transaction A before A
+                commits. If A rolls back, B observed data that never became
+                committed.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Non-Repeatable Read</h3>
+            <p>
+                A transaction reads the same row twice and gets different
+                committed values because another transaction changed it.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Phantom Read</h3>
+            <p>
+                Repeating a range query can produce additional or missing rows
+                because another transaction inserted or deleted matching rows.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     ISOLATION LEVEL TABLE
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <h2>11. Isolation Levels</h2>
+
+    <p>
+        SQL standards define isolation concepts, while exact implementation,
+        MVCC behavior and anomaly guarantees can vary between database engines.
+    </p>
+
+    <div style="overflow-x:auto;">
+
+        <table class="isolation-table">
+
+            <thead>
+                <tr>
+                    <th>Isolation Level</th>
+                    <th>Dirty Read</th>
+                    <th>Non-Repeatable Read</th>
+                    <th>Phantom Read</th>
+                    <th>General Idea</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td><strong>Read Uncommitted</strong></td>
+                    <td><span class="tag yes">Possible</span></td>
+                    <td><span class="tag yes">Possible</span></td>
+                    <td><span class="tag yes">Possible</span></td>
+                    <td>Weakest isolation</td>
+                </tr>
+
+                <tr>
+                    <td><strong>Read Committed</strong></td>
+                    <td><span class="tag no">Prevented</span></td>
+                    <td><span class="tag yes">Possible</span></td>
+                    <td><span class="tag yes">Possible</span></td>
+                    <td>Only committed data is read</td>
+                </tr>
+
+                <tr>
+                    <td><strong>Repeatable Read</strong></td>
+                    <td><span class="tag no">Prevented</span></td>
+                    <td><span class="tag no">Generally prevented</span></td>
+                    <td><span class="tag partial">DB-specific</span></td>
+                    <td>Stronger repeatability</td>
+                </tr>
+
+                <tr>
+                    <td><strong>Serializable</strong></td>
+                    <td><span class="tag no">Prevented</span></td>
+                    <td><span class="tag no">Prevented</span></td>
+                    <td><span class="tag no">Prevented</span></td>
+                    <td>Strongest standard isolation</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="warning-box">
+        Do not memorize the table as a promise that every DBMS implements
+        every level identically. PostgreSQL, MySQL/InnoDB, SQL Server and
+        Oracle use different concurrency mechanisms and may expose different
+        behavior.
+    </div>
+
+</section>
+
+<!-- =========================================================
+     MVCC
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <h2>12. MVCC — Multi-Version Concurrency Control</h2>
+
+    <p>
+        Many modern databases use some form of <strong>MVCC</strong> to allow
+        readers and writers to work concurrently using multiple row versions
+        or equivalent mechanisms.
+    </p>
+
+    <div class="flow">
+
+        <div class="flow-box">
+            Transaction A
+            <small>Reads version 1</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            Transaction B
+            <small>Creates new version</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            Commit
+            <small>New version visible according to isolation</small>
+        </div>
+
+    </div>
+
+    <p>
+        MVCC is one reason database concurrency can be more sophisticated than
+        simply “locking every row.”
+    </p>
+
+</section>
+
+<!-- =========================================================
+     LOCKING
+     ========================================================= -->
+
+<section class="section reveal" id="locking">
+
+    <h2>13. Locks</h2>
+
+    <p>
+        Databases use locking and/or version-based techniques to coordinate
+        concurrent access.
+    </p>
+
+    <div class="lock-demo">
+
+        <div class="lock-box">
+
+            <h3>🔓 Shared Lock</h3>
+
+            <p>
+                Conceptually allows compatible reads while protecting data
+                from conflicting modifications.
+            </p>
+
+            <div class="lock">
+                👥 Multiple Readers
+            </div>
+
+        </div>
+
+        <div class="lock-box">
+
+            <h3>🔒 Exclusive Lock</h3>
+
+            <p>
+                Conceptually protects data being modified from conflicting
+                concurrent access.
+            </p>
+
+            <div class="lock">
+                ✍ One Writer
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="highlight">
+        Actual lock modes, compatibility matrices, lock escalation and
+        granularity are DBMS-specific.
+    </div>
+
+</section>
+
+<!-- =========================================================
+     SELECT FOR UPDATE
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <h2>14. SELECT ... FOR UPDATE</h2>
+
+    <p>
+        Some relational databases support row-locking clauses such as
+        <code style="color:#4f46e5;">SELECT ... FOR UPDATE</code>.
+        They can be useful when an application reads rows and then intends
+        to update them safely within a transaction.
+    </p>
+
+    <div class="code-wrap">
+        <div class="code-head">
+            SQL
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+<pre><code>START TRANSACTION;
+
+SELECT balance
+FROM accounts
+WHERE account_id = 101
+FOR UPDATE;
+
+UPDATE accounts
+SET balance = balance - 1000
+WHERE account_id = 101;
+
+COMMIT;</code></pre>
+    </div>
+
+    <p>
+        Exact syntax and behavior vary by DBMS, so always consult the target
+        database documentation.
+    </p>
+
+</section>
+
+<!-- =========================================================
+     DEADLOCK
+     ========================================================= -->
+
+<section class="section reveal" id="deadlocks">
+
+    <h2>15. Deadlocks</h2>
+
+    <p>
+        A <strong>deadlock</strong> occurs when transactions wait for one
+        another in a cycle and none can continue without intervention.
+    </p>
+
+    <div class="flow">
+
+        <div class="flow-box">
+            Transaction A
+            <small>Locks Row 1</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            Wants Row 2
+            <small>But B owns it</small>
+        </div>
+
+        <div class="arrow">↘</div>
+
+        <div class="flow-box">
+            Transaction B
+            <small>Locks Row 2</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            Wants Row 1
+            <small>But A owns it</small>
+        </div>
+
+    </div>
+
+    <div class="danger-box">
+        A → waits for B → waits for A = DEADLOCK
+    </div>
+
+    <h3>How Databases Handle Deadlocks</h3>
+
+    <ul>
+        <li>Detect the cycle.</li>
+        <li>Choose a transaction as a victim.</li>
+        <li>Roll it back.</li>
+        <li>Allow the other transaction to continue.</li>
+    </ul>
+
+    <h3>How Developers Reduce Deadlocks</h3>
+
+    <ul>
+        <li>Access tables and rows in a consistent order.</li>
+        <li>Keep transactions short.</li>
+        <li>Do not hold transactions open unnecessarily.</li>
+        <li>Use appropriate indexes to reduce unnecessary locking work.</li>
+        <li>Retry transactions when the application architecture requires it.</li>
+    </ul>
+
+</section>
+
+<!-- =========================================================
+     SAVEPOINT DEEP DIVE
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <h2>16. SAVEPOINT Flow</h2>
+
+    <div class="flow">
+
+        <div class="flow-box">
+            BEGIN
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            STEP 1
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            SAVEPOINT S1
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            STEP 2
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            ROLLBACK TO S1
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            STEP 3
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            COMMIT
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     TRANSACTION + CONSTRAINTS
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <h2>17. Transactions + Constraints</h2>
+
+    <p>
+        Transactions and constraints work together to protect data integrity.
+    </p>
+
+    <div class="code-wrap">
+        <div class="code-head">
+            SQL
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+<pre><code>START TRANSACTION;
+
+INSERT INTO students(student_id, name, marks)
+VALUES (101, 'Pradeep', 90);
+
+-- This violates a CHECK constraint
+INSERT INTO students(student_id, name, marks)
+VALUES (102, 'Student B', 150);
+
+ROLLBACK;</code></pre>
+    </div>
+
+    <p>
+        If the second operation causes an error, the application can decide
+        whether to roll back the transaction or handle the error and continue,
+        depending on the DBMS and application design.
+    </p>
+
+</section>
+
+<!-- =========================================================
+     TRANSACTION + INDEX
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <h2>18. Transactions + Indexes</h2>
+
+    <p>
+        Indexes can make transactional queries faster, but they also create
+        additional work during INSERT, UPDATE and DELETE operations.
+    </p>
+
+    <div class="grid">
+
+        <div class="card">
+            <h3>Reads</h3>
+            <p>
+                An appropriate index can help locate rows efficiently.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Writes</h3>
+            <p>
+                Modified indexed columns require index maintenance.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Concurrency</h3>
+            <p>
+                Better query plans can reduce the amount of time resources
+                are held, but indexes do not automatically eliminate locking.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     BANK TRANSFER
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <h2>19. Complete Bank Transfer Example</h2>
+
+    <div class="code-wrap">
+        <div class="code-head">
+            SQL
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+<pre><code>START TRANSACTION;
+
+UPDATE accounts
+SET balance = balance - 1000
+WHERE account_id = 101
+  AND balance >= 1000;
+
+UPDATE accounts
+SET balance = balance + 1000
+WHERE account_id = 202;
+
+COMMIT;</code></pre>
+    </div>
+
+    <div class="warning-box">
+        In a real banking system, application logic should verify that the
+        expected rows were actually updated, handle errors, and use the
+        transaction and locking features appropriate to the DBMS.
+    </div>
+
+</section>
+
+<!-- =========================================================
+     E-COMMERCE
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <h2>20. E-Commerce Transaction</h2>
+
+    <p>
+        Creating an order may involve several related operations.
+    </p>
+
+    <div class="flow">
+
+        <div class="flow-box">
+            Create Order
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            Add Items
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            Reserve Stock
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            Record Payment
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            COMMIT
+        </div>
+
+    </div>
+
+    <p>
+        If a critical database operation fails, the application may roll back
+        the transaction so partially-created database state is not left behind.
+    </p>
+
+</section>
+
+<!-- =========================================================
+     TRANSACTION ERRORS
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <h2>21. What Can Cause a Transaction to Fail?</h2>
+
+    <div class="grid">
+
+        <div class="card">
+            <h3>Constraint Error</h3>
+            <p>Duplicate key, foreign-key violation, CHECK failure, etc.</p>
+        </div>
+
+        <div class="card">
+            <h3>Deadlock</h3>
+            <p>Transactions wait for one another in a cycle.</p>
+        </div>
+
+        <div class="card">
+            <h3>Connection Failure</h3>
+            <p>The client or database connection unexpectedly terminates.</p>
+        </div>
+
+        <div class="card">
+            <h3>Timeout</h3>
+            <p>An operation waits longer than the configured limit.</p>
+        </div>
+
+        <div class="card">
+            <h3>Application Error</h3>
+            <p>The application detects a business-rule failure.</p>
+        </div>
+
+        <div class="card">
+            <h3>Database Failure</h3>
+            <p>Hardware, process or infrastructure failures can trigger recovery.</p>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     BEST PRACTICES
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <h2>22. Transaction Best Practices</h2>
+
+    <ol>
+        <li>Keep transactions as short as practical.</li>
+        <li>Do not wait for unnecessary user input inside a transaction.</li>
+        <li>Perform required validation before starting when possible.</li>
+        <li>Use consistent ordering when updating multiple resources.</li>
+        <li>Choose isolation levels according to correctness requirements.</li>
+        <li>Handle deadlocks and transient transaction failures appropriately.</li>
+        <li>Always define what success and failure mean for the business operation.</li>
+        <li>Do not assume every DBMS behaves identically.</li>
+        <li>Test concurrency rather than testing only single-user execution.</li>
+        <li>Monitor slow transactions and lock waits in production.</li>
+    </ol>
+
+</section>
+
+<!-- =========================================================
+     INTERACTIVE LAB
+     ========================================================= -->
+
+<section class="section reveal" id="lab">
+
+    <h2>23. Interactive Transaction Lab</h2>
+
+    <p>
+        This simulator demonstrates transaction concepts. It is a browser
+        simulation, not a real database engine.
+    </p>
+
+    <div class="lab">
+
+        <h3>🧪 Transaction Simulator</h3>
+
+        <p>
+            Select an operation and observe the conceptual transaction state.
+        </p>
+
+        <div class="lab-grid">
+
+            <div class="lab-panel">
+
+                <label>Choose operation</label>
+
+                <select id="operationSelect">
+                    <option value="begin">BEGIN TRANSACTION</option>
+                    <option value="deposit">Deposit ₹1,000</option>
+                    <option value="withdraw">Withdraw ₹500</option>
+                    <option value="savepoint">Create SAVEPOINT</option>
+                    <option value="rollbackSavepoint">
+                        ROLLBACK TO SAVEPOINT
+                    </option>
+                    <option value="commit">COMMIT</option>
+                    <option value="rollback">ROLLBACK</option>
+                </select>
+
+                <button class="btn btn-primary" onclick="runLab()">
+                    Execute
+                </button>
+
+            </div>
+
+            <div class="lab-panel">
+
+                <strong>Transaction Output</strong>
+
+                <div class="output" id="labOutput">
+Transaction not started.
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     LOGICAL FLOW
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <h2>24. Transaction Decision Flow</h2>
+
+    <div class="flow">
+
+        <div class="flow-box">
+            BEGIN
+            <small>Start work</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            Execute SQL
+            <small>Perform operations</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            Success?
+            <small>Validate result</small>
+        </div>
+
+    </div>
+
+    <div class="flow">
+
+        <div class="flow-box">
+            YES
+            <small>Business operation succeeded</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            COMMIT
+            <small>Finish transaction</small>
+        </div>
+
+        <div class="arrow">↔</div>
+
+        <div class="flow-box">
+            NO
+            <small>Error / failure</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            ROLLBACK
+            <small>Undo uncommitted work</small>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     EXAM
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <h2>25. Exam Preparation</h2>
+
+    <h3>⭐ 5-Mark Answer — What is a Transaction?</h3>
+
+    <div class="highlight">
+        A transaction is a logical unit of one or more database operations.
+        It ensures that related operations are handled together. A transaction
+        generally begins with a transaction-start command and ends with COMMIT
+        or ROLLBACK. COMMIT makes successful changes permanent, while ROLLBACK
+        undoes uncommitted changes. Transactions are designed around the ACID
+        properties: Atomicity, Consistency, Isolation and Durability.
+    </div>
+
+    <h3>⭐ 10-Mark Answer — Explain ACID Properties</h3>
+
+    <ol>
+        <li>
+            <strong>Atomicity:</strong> A transaction is treated as an
+            all-or-nothing unit.
+        </li>
+
+        <li>
+            <strong>Consistency:</strong> Successful transactions preserve
+            database rules and integrity constraints.
+        </li>
+
+        <li>
+            <strong>Isolation:</strong> Concurrent transactions are controlled
+            according to the selected isolation level.
+        </li>
+
+        <li>
+            <strong>Durability:</strong> Committed changes are preserved through
+            the DBMS recovery and storage mechanisms.
+        </li>
+    </ol>
+
+</section>
+
+<!-- =========================================================
+     COMMON MISTAKES
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <h2>26. Common Mistakes</h2>
+
+    <div class="danger-box">
+
+        <strong>❌ Mistake 1:</strong>
+        Thinking COMMIT can always be undone using ROLLBACK.
+
+    </div>
+
+    <div class="danger-box">
+
+        <strong>❌ Mistake 2:</strong>
+        Keeping transactions open while waiting for user input.
+
+    </div>
+
+    <div class="danger-box">
+
+        <strong>❌ Mistake 3:</strong>
+        Assuming every database uses the same isolation behavior.
+
+    </div>
+
+    <div class="danger-box">
+
+        <strong>❌ Mistake 4:</strong>
+        Ignoring deadlocks in a concurrent application.
+
+    </div>
+
+    <div class="danger-box">
+
+        <strong>❌ Mistake 5:</strong>
+        Believing ROLLBACK is a substitute for database backups.
+
+    </div>
+
+    <div class="danger-box">
+
+        <strong>❌ Mistake 6:</strong>
+        Assuming a transaction automatically validates every business rule.
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     INTERVIEW
+     ========================================================= -->
+
+<section class="section reveal" id="interview">
+
+    <h2>27. SQL Transaction Interview Questions</h2>
+
+    <h3>1. What is a transaction?</h3>
+    <p>
+        A logical unit of database work consisting of one or more operations.
+    </p>
+
+    <h3>2. What does ACID stand for?</h3>
+    <p>
+        Atomicity, Consistency, Isolation and Durability.
+    </p>
+
+    <h3>3. COMMIT vs ROLLBACK?</h3>
+    <p>
+        COMMIT successfully finishes a transaction; ROLLBACK cancels
+        uncommitted work.
+    </p>
+
+    <h3>4. What is SAVEPOINT?</h3>
+    <p>
+        A named point inside a transaction that allows partial rollback.
+    </p>
+
+    <h3>5. What is a dirty read?</h3>
+    <p>
+        Reading data written by another transaction before that transaction
+        has committed.
+    </p>
+
+    <h3>6. What is a deadlock?</h3>
+    <p>
+        A cyclic waiting situation where transactions hold resources needed
+        by one another.
+    </p>
+
+    <h3>7. What is the strongest standard isolation level?</h3>
+    <p>
+        Serializable.
+    </p>
+
+    <h3>8. Why should transactions be short?</h3>
+    <p>
+        Long transactions can increase lock/resource contention, recovery work,
+        latency and the chance of concurrency problems.
+    </p>
+
+    <h3>9. Does ROLLBACK undo a committed transaction?</h3>
+    <p>
+        No. A committed transaction has completed. Reversal normally requires
+        a new business operation or compensating transaction.
+    </p>
+
+    <h3>10. Why are transactions important in banking?</h3>
+    <p>
+        They ensure related account updates are handled consistently and
+        protect against partial database updates.
+    </p>
+
+</section>
+
+<!-- =========================================================
+     QUIZ
+     ========================================================= -->
+
+<section class="section reveal" id="quiz">
+
+    <h2>28. Quick Quiz</h2>
+
+    <form id="quizForm">
+
+        <div class="quiz-question">
+            <h4>1. What does ACID represent?</h4>
+
+            <label class="option">
+                <input type="radio" name="q1" value="a">
+                Atomicity, Consistency, Isolation, Durability
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q1" value="b">
+                Access, Control, Index, Data
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q1" value="c">
+                Application, Cache, Input, Database
+            </label>
+        </div>
+
+        <div class="quiz-question">
+            <h4>2. Which command makes a transaction successful and complete?</h4>
+
+            <label class="option">
+                <input type="radio" name="q2" value="a">
+                DELETE
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q2" value="b">
+                COMMIT
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q2" value="c">
+                DROP
+            </label>
+        </div>
+
+        <div class="quiz-question">
+            <h4>3. Which command cancels uncommitted transaction work?</h4>
+
+            <label class="option">
+                <input type="radio" name="q3" value="a">
+                ROLLBACK
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q3" value="b">
+                SELECT
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q3" value="c">
+                CREATE
+            </label>
+        </div>
+
+        <div class="quiz-question">
+            <h4>4. Which property deals with concurrent transactions?</h4>
+
+            <label class="option">
+                <input type="radio" name="q4" value="a">
+                Durability
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q4" value="b">
+                Isolation
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q4" value="c">
+                Atomicity
+            </label>
+        </div>
+
+        <div class="quiz-question">
+            <h4>5. Which is the strongest standard isolation level?</h4>
+
+            <label class="option">
+                <input type="radio" name="q5" value="a">
+                Read Uncommitted
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q5" value="b">
+                Read Committed
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q5" value="c">
+                Serializable
+            </label>
+        </div>
+
+        <div class="quiz-question">
+            <h4>6. What is SAVEPOINT used for?</h4>
+
+            <label class="option">
+                <input type="radio" name="q6" value="a">
+                Creating a table
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q6" value="b">
+                Partial rollback inside a transaction
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q6" value="c">
+                Creating an index
+            </label>
+        </div>
+
+        <div class="quiz-question">
+            <h4>7. What is a dirty read?</h4>
+
+            <label class="option">
+                <input type="radio" name="q7" value="a">
+                Reading uncommitted data
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q7" value="b">
+                Reading a deleted table
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q7" value="c">
+                Reading an indexed column
+            </label>
+        </div>
+
+        <div class="quiz-question">
+            <h4>8. What is a deadlock?</h4>
+
+            <label class="option">
+                <input type="radio" name="q8" value="a">
+                A failed SELECT
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q8" value="b">
+                Cyclic waiting between transactions
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q8" value="c">
+                A database backup
+            </label>
+        </div>
+
+        <button type="button" class="btn btn-primary" onclick="checkQuiz()">
+            Check Answers
+        </button>
+
+        <div class="quiz-result" id="quizResult"></div>
+
+    </form>
+
+</section>
+
+<!-- =========================================================
+     PRACTICE
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <h2>29. Practice Challenges</h2>
+
+    <ol>
+
+        <li>
+            Create a transaction that transfers ₹500 between two accounts.
+        </li>
+
+        <li>
+            Write a transaction that creates an order and its order items.
+        </li>
+
+        <li>
+            Demonstrate COMMIT and ROLLBACK using a student fee table.
+        </li>
+
+        <li>
+            Create a SAVEPOINT after inserting an order.
+        </li>
+
+        <li>
+            Explain dirty reads with two concurrent transactions.
+        </li>
+
+        <li>
+            Explain how a deadlock can occur between two transactions.
+        </li>
+
+        <li>
+            Compare Read Committed and Serializable.
+        </li>
+
+    </ol>
+
+</section>
+
+<!-- =========================================================
+     MINI PROJECT
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <h2>30. Mini Project — Banking Transaction System</h2>
+
+    <p>
+        Build a small banking database with:
+    </p>
+
+    <ul>
+        <li>Customers</li>
+        <li>Accounts</li>
+        <li>Transactions</li>
+        <li>Transfers</li>
+    </ul>
+
+    <h3>Required Features</h3>
+
+    <ol>
+        <li>Create account.</li>
+        <li>Deposit money.</li>
+        <li>Withdraw money.</li>
+        <li>Transfer money.</li>
+        <li>Rollback failed transfers.</li>
+        <li>Maintain transaction history.</li>
+        <li>Prevent negative balances where appropriate.</li>
+        <li>Handle concurrency safely.</li>
+    </ol>
+
+    <div class="success-box">
+        <strong>Portfolio Tip:</strong>
+        This project demonstrates much more than basic SELECT queries.
+        It shows that you understand database integrity and transactional
+        application design.
+    </div>
+
+</section>
+
+<!-- =========================================================
+     RAPID REVISION
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <h2>31. Rapid Revision</h2>
+
+    <div class="grid">
+
+        <div class="card">
+            <h3>Transaction</h3>
+            <p>Logical unit of database work.</p>
+        </div>
+
+        <div class="card">
+            <h3>COMMIT</h3>
+            <p>Successfully finish the transaction.</p>
+        </div>
+
+        <div class="card">
+            <h3>ROLLBACK</h3>
+            <p>Undo uncommitted transaction work.</p>
+        </div>
+
+        <div class="card">
+            <h3>SAVEPOINT</h3>
+            <p>Partial rollback point.</p>
+        </div>
+
+        <div class="card">
+            <h3>ACID</h3>
+            <p>Atomicity, Consistency, Isolation, Durability.</p>
+        </div>
+
+        <div class="card">
+            <h3>Deadlock</h3>
+            <p>Cyclic waiting between transactions.</p>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     CHECKLIST
+     ========================================================= -->
+
+<section class="section reveal" id="checklist">
+
+    <h2>32. Lesson Checklist</h2>
+
+    <p>
+        Mark each concept after you understand it. Your progress is saved
+        locally in this browser.
+    </p>
+
+    <div class="checklist">
+
+        <label class="check-item">
+            <input type="checkbox" data-check="transaction">
+            I understand transactions
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="commit">
+            I understand COMMIT
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="rollback">
+            I understand ROLLBACK
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="savepoint">
+            I understand SAVEPOINT
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="acid">
+            I understand ACID
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="isolation">
+            I understand isolation levels
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="locks">
+            I understand locks
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="deadlock">
+            I understand deadlocks
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="practice">
+            I completed the practice challenges
+        </label>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     NEXT LESSON
+     ========================================================= -->
+
+<div class="next-lesson reveal">
+
+    <h2>🚀 Next Lesson</h2>
+
+    <p>
+        <strong>Lesson 16 — Stored Procedures & Functions</strong>
+    </p>
+
+    <p>
+        You will learn how databases can store reusable SQL logic using
+        procedures and functions, including parameters, variables,
+        conditional logic, error handling and practical examples.
+    </p>
+
+</div>
+
+<div class="footer">
+    © 2026 ZENSUS • Learn. Build. Master.
+</div>
+
+</div>
+</main>
+
+<!-- =========================================================
+     JAVASCRIPT
+     ========================================================= -->
+
+<script>
+
+/* =========================================================
+   MOBILE MENU
+   ========================================================= */
+
+const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.getElementById("sidebar");
+
+menuBtn.addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+});
+
+document.querySelectorAll(".sidebar a").forEach(link => {
+    link.addEventListener("click", () => {
+        sidebar.classList.remove("open");
+    });
+});
+
+
+/* =========================================================
+   SCROLL PROGRESS
+   ========================================================= */
+
+window.addEventListener("scroll", () => {
+
+    const scrollTop =
+        document.documentElement.scrollTop || document.body.scrollTop;
+
+    const scrollHeight =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+
+    const percentage =
+        scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+
+    document.getElementById("progress").style.width =
+        percentage + "%";
+});
+
+
+/* =========================================================
+   SIDEBAR ACTIVE LINK
+   ========================================================= */
+
+const sections = document.querySelectorAll("section[id]");
+const navLinks = document.querySelectorAll(".sidebar a");
+
+window.addEventListener("scroll", () => {
+
+    let current = "";
+
+    sections.forEach(section => {
+
+        const top = section.offsetTop - 150;
+
+        if(window.scrollY >= top){
+            current = section.getAttribute("id");
+        }
+
+    });
+
+    navLinks.forEach(link => {
+
+        link.classList.remove("active");
+
+        if(link.getAttribute("href") === "#" + current){
+            link.classList.add("active");
+        }
+
+    });
+
+});
+
+
+/* =========================================================
+   REVEAL ANIMATION
+   ========================================================= */
+
+const revealElements =
+    document.querySelectorAll(".reveal");
+
+if("IntersectionObserver" in window){
+
+    revealElements.forEach(el => {
+        el.classList.add("animate");
+    });
+
+    const observer = new IntersectionObserver(entries => {
+
+        entries.forEach(entry => {
+
+            if(entry.isIntersecting){
+                entry.target.classList.add("visible");
+            }
+
+        });
+
+    },{
+        threshold:.08
+    });
+
+    revealElements.forEach(el => observer.observe(el));
+}
+
+
+/* =========================================================
+   COPY CODE
+   ========================================================= */
+
+function copyCode(button){
+
+    const code =
+        button.parentElement.nextElementSibling.innerText;
+
+    navigator.clipboard.writeText(code).then(() => {
+
+        const oldText = button.innerText;
+
+        button.innerText = "Copied!";
+
+        setTimeout(() => {
+            button.innerText = oldText;
+        },1200);
+
+    });
+
+}
+
+
+/* =========================================================
+   TRANSACTION VISUALIZER
+   ========================================================= */
+
+let balanceA = 10000;
+let balanceB = 5000;
+
+let originalA = balanceA;
+let originalB = balanceB;
+
+let transferActive = false;
+
+const statusElement =
+    document.getElementById("txStatus");
+
+function updateBalances(){
+
+    document.getElementById("balanceA").textContent =
+        balanceA;
+
+    document.getElementById("balanceB").textContent =
+        balanceB;
+}
+
+function setStatus(text,type=""){
+
+    statusElement.textContent = text;
+
+    statusElement.className =
+        "status-badge " + type;
+}
+
+function startTransfer(){
+
+    if(transferActive){
+        setStatus("Transaction Already Active","active");
+        return;
+    }
+
+    originalA = balanceA;
+    originalB = balanceB;
+
+    transferActive = true;
+
+    balanceA -= 1000;
+    balanceB += 1000;
+
+    updateBalances();
+
+    setStatus(
+        "Transaction Active — Changes Not Yet Committed",
+        "active"
+    );
+}
+
+function commitTransfer(){
+
+    if(!transferActive){
+        setStatus("No Active Transaction");
+        return;
+    }
+
+    transferActive = false;
+
+    setStatus(
+        "COMMITTED — Changes Accepted",
+        "committed"
+    );
+}
+
+function rollbackTransfer(){
+
+    if(!transferActive){
+        setStatus("Nothing To Roll Back");
+        return;
+    }
+
+    balanceA = originalA;
+    balanceB = originalB;
+
+    transferActive = false;
+
+    updateBalances();
+
+    setStatus(
+        "ROLLED BACK — Changes Undone",
+        "rolledback"
+    );
+}
+
+function resetTransfer(){
+
+    balanceA = 10000;
+    balanceB = 5000;
+
+    originalA = balanceA;
+    originalB = balanceB;
+
+    transferActive = false;
+
+    updateBalances();
+
+    setStatus("No Transaction");
+}
+
+
+/* =========================================================
+   TRANSACTION LAB
+   ========================================================= */
+
+let labStarted = false;
+let labBalance = 5000;
+let labSavepoint = null;
+
+const labOutput =
+    document.getElementById("labOutput");
+
+function runLab(){
+
+    const operation =
+        document.getElementById("operationSelect").value;
+
+    switch(operation){
+
+        case "begin":
+
+            labStarted = true;
+
+            labOutput.textContent =
+`START TRANSACTION;
+
+Status:
+✓ Transaction started
+✓ Changes are currently uncommitted
+
+Balance: ₹${labBalance}`;
+
+            break;
+
+
+        case "deposit":
+
+            if(!labStarted){
+
+                labOutput.textContent =
+                    "ERROR: Start a transaction first.";
+
+                return;
+            }
+
+            labBalance += 1000;
+
+            labOutput.textContent =
+`UPDATE accounts
+SET balance = balance + 1000;
+
+Result:
++ ₹1,000
+
+Current balance: ₹${labBalance}
+Status: Uncommitted`;
+
+            break;
+
+
+        case "withdraw":
+
+            if(!labStarted){
+
+                labOutput.textContent =
+                    "ERROR: Start a transaction first.";
+
+                return;
+            }
+
+            labBalance -= 500;
+
+            labOutput.textContent =
+`UPDATE accounts
+SET balance = balance - 500;
+
+Result:
+- ₹500
+
+Current balance: ₹${labBalance}
+Status: Uncommitted`;
+
+            break;
+
+
+        case "savepoint":
+
+            if(!labStarted){
+
+                labOutput.textContent =
+                    "ERROR: Start a transaction first.";
+
+                return;
+            }
+
+            labSavepoint = labBalance;
+
+            labOutput.textContent =
+`SAVEPOINT payment_stage;
+
+Savepoint created.
+
+Saved balance: ₹${labSavepoint}`;
+
+            break;
+
+
+        case "rollbackSavepoint":
+
+            if(!labStarted){
+
+                labOutput.textContent =
+                    "ERROR: Start a transaction first.";
+
+                return;
+            }
+
+            if(labSavepoint === null){
+
+                labOutput.textContent =
+                    "ERROR: No SAVEPOINT exists.";
+
+                return;
+            }
+
+            labBalance = labSavepoint;
+
+            labOutput.textContent =
+`ROLLBACK TO SAVEPOINT payment_stage;
+
+Changes after the savepoint
+have been undone.
+
+Current balance: ₹${labBalance}`;
+
+            break;
+
+
+        case "commit":
+
+            if(!labStarted){
+
+                labOutput.textContent =
+                    "ERROR: No active transaction.";
+
+                return;
+            }
+
+            labStarted = false;
+            labSavepoint = null;
+
+            labOutput.textContent =
+`COMMIT;
+
+✓ Transaction completed
+✓ Changes accepted
+
+Final balance: ₹${labBalance}`;
+
+            break;
+
+
+        case "rollback":
+
+            if(!labStarted){
+
+                labOutput.textContent =
+                    "ERROR: No active transaction.";
+
+                return;
+            }
+
+            labBalance = 5000;
+            labStarted = false;
+            labSavepoint = null;
+
+            labOutput.textContent =
+`ROLLBACK;
+
+↶ Transaction cancelled
+↶ Uncommitted changes undone
+
+Balance restored to: ₹${labBalance}`;
+
+            break;
+    }
+
+}
+
+
+/* =========================================================
+   QUIZ
+   ========================================================= */
+
+function checkQuiz(){
+
+    const answers = {
+
+        q1:"a",
+        q2:"b",
+        q3:"a",
+        q4:"b",
+        q5:"c",
+        q6:"b",
+        q7:"a",
+        q8:"b"
+
+    };
+
+    let score = 0;
+
+    Object.keys(answers).forEach(question => {
+
+        const selected =
+            document.querySelector(
+                `input[name="${question}"]:checked`
+            );
+
+        if(selected &&
+           selected.value === answers[question]){
+
+            score++;
+
+        }
+
+    });
+
+    const result =
+        document.getElementById("quizResult");
+
+    result.style.display = "block";
+
+    let message = "";
+
+    if(score === 8){
+
+        message =
+            "🏆 Perfect! 8/8 — Transaction Master.";
+
+    }else if(score >= 6){
+
+        message =
+            "🔥 Excellent! " + score +
+            "/8 — You understand the fundamentals.";
+
+    }else if(score >= 4){
+
+        message =
+            "👍 Good start! " + score +
+            "/8 — Review ACID and isolation once more.";
+
+    }else{
+
+        message =
+            "📚 Score: " + score +
+            "/8 — Revisit the lesson and try again.";
+
+    }
+
+    result.textContent = message;
+
+}
+
+
+/* =========================================================
+   CHECKLIST LOCAL STORAGE
+   ========================================================= */
+
+const checklist =
+    document.querySelectorAll(
+        '.check-item input[type="checkbox"]'
+    );
+
+checklist.forEach(box => {
+
+    const key =
+        "zensus_sql15_" + box.dataset.check;
+
+    box.checked =
+        localStorage.getItem(key) === "true";
+
+    box.addEventListener("change", () => {
+
+        localStorage.setItem(
+            key,
+            box.checked
+        );
+
+    });
+
+});
+
+</script>
+
+</body>
+</html>

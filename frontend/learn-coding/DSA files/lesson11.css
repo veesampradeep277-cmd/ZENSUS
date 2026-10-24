@@ -1,0 +1,2506 @@
+/* =========================================================
+   ZENSUS — LESSON 11
+   BINARY SEARCH TREES
+   Professional EdTech / Developer Learning UI
+   ========================================================= */
+
+
+/* =========================================================
+   01. DESIGN TOKENS
+   ========================================================= */
+
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #eff6ff;
+
+    --purple: #7c3aed;
+    --purple-light: #f5f3ff;
+
+    --success: #059669;
+    --success-light: #ecfdf5;
+
+    --warning: #d97706;
+    --warning-light: #fffbeb;
+
+    --danger: #dc2626;
+    --danger-light: #fef2f2;
+
+    --text: #172033;
+    --text-soft: #526074;
+    --text-muted: #7b8798;
+
+    --bg: #f6f8fc;
+    --surface: #ffffff;
+    --surface-soft: #f8fafc;
+
+    --border: #e5e9f0;
+    --border-strong: #d7dce5;
+
+    --shadow-sm:
+        0 2px 8px rgba(15, 23, 42, 0.04);
+
+    --shadow-md:
+        0 8px 25px rgba(15, 23, 42, 0.07);
+
+    --shadow-lg:
+        0 18px 45px rgba(15, 23, 42, 0.10);
+
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+
+    --sidebar-width: 260px;
+    --topbar-height: 68px;
+}
+
+
+/* =========================================================
+   02. RESET
+   ========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 90px;
+}
+
+body {
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    background: var(--bg);
+    color: var(--text);
+
+    line-height: 1.7;
+
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+
+/* =========================================================
+   03. TOP BAR
+   ========================================================= */
+
+.topbar {
+    height: var(--topbar-height);
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    z-index: 1000;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 28px;
+
+    background: rgba(255, 255, 255, 0.94);
+
+    border-bottom: 1px solid var(--border);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    font-size: 18px;
+    font-weight: 800;
+
+    letter-spacing: -0.4px;
+
+    color: var(--text);
+}
+
+.brand-logo {
+    width: 34px;
+    height: 34px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 10px;
+
+    background: linear-gradient(
+        135deg,
+        var(--primary),
+        var(--purple)
+    );
+
+    color: white;
+
+    font-size: 17px;
+    font-weight: 900;
+
+    box-shadow:
+        0 5px 14px rgba(37, 99, 235, 0.20);
+}
+
+.lesson-label {
+    color: var(--text-muted);
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   04. PAGE LAYOUT
+   ========================================================= */
+
+.page-layout {
+    display: flex;
+
+    min-height: 100vh;
+
+    padding-top: var(--topbar-height);
+}
+
+
+/* =========================================================
+   05. SIDEBAR
+   ========================================================= */
+
+.sidebar {
+    width: var(--sidebar-width);
+
+    position: fixed;
+
+    top: var(--topbar-height);
+    bottom: 0;
+    left: 0;
+
+    overflow-y: auto;
+
+    padding: 25px 16px;
+
+    background: #ffffff;
+
+    border-right: 1px solid var(--border);
+
+    z-index: 900;
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #d9dee8;
+    border-radius: 20px;
+}
+
+.sidebar-title {
+    padding: 0 12px 14px;
+
+    color: var(--text-muted);
+
+    font-size: 11px;
+    font-weight: 800;
+
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.sidebar a {
+    display: block;
+
+    padding: 9px 12px;
+    margin-bottom: 3px;
+
+    border-radius: 9px;
+
+    color: var(--text-soft);
+
+    font-size: 12.5px;
+    font-weight: 600;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.sidebar a:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+
+    transform: translateX(2px);
+}
+
+.sidebar a.active {
+    background: var(--primary-light);
+    color: var(--primary);
+
+    font-weight: 750;
+}
+
+
+/* =========================================================
+   06. MAIN
+   ========================================================= */
+
+.main {
+    width: calc(100% - var(--sidebar-width));
+
+    margin-left: var(--sidebar-width);
+
+    padding: 45px clamp(25px, 5vw, 75px) 80px;
+
+    max-width: 1600px;
+}
+
+
+/* =========================================================
+   07. HERO
+   ========================================================= */
+
+.hero {
+    position: relative;
+
+    overflow: hidden;
+
+    padding: clamp(35px, 6vw, 70px);
+
+    margin-bottom: 65px;
+
+    background: #ffffff;
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius-xl);
+
+    box-shadow: var(--shadow-md);
+}
+
+.hero::before {
+    content: "";
+
+    position: absolute;
+
+    width: 340px;
+    height: 340px;
+
+    right: -130px;
+    top: -170px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(37, 99, 235, 0.08),
+            transparent 68%
+        );
+
+    pointer-events: none;
+}
+
+.hero::after {
+    content: "";
+
+    position: absolute;
+
+    width: 280px;
+    height: 280px;
+
+    left: -170px;
+    bottom: -170px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(124, 58, 237, 0.06),
+            transparent 68%
+        );
+
+    pointer-events: none;
+}
+
+.hero > * {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 7px 12px;
+
+    margin-bottom: 18px;
+
+    border-radius: 999px;
+
+    background: var(--primary-light);
+
+    color: var(--primary);
+
+    font-size: 12px;
+    font-weight: 800;
+
+    letter-spacing: 0.2px;
+}
+
+.hero h1 {
+    max-width: 850px;
+
+    font-size: clamp(38px, 5vw, 68px);
+
+    line-height: 1.04;
+
+    letter-spacing: -2.8px;
+
+    font-weight: 850;
+
+    color: var(--text);
+
+    margin-bottom: 20px;
+}
+
+.hero h1 span {
+    color: var(--primary);
+}
+
+.hero p {
+    max-width: 780px;
+
+    color: var(--text-soft);
+
+    font-size: clamp(15px, 1.5vw, 18px);
+
+    line-height: 1.8;
+}
+
+.hero-stats {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 12px;
+
+    margin-top: 38px;
+}
+
+.hero-stat {
+    padding: 17px;
+
+    border: 1px solid var(--border);
+
+    background: var(--surface-soft);
+
+    border-radius: var(--radius-md);
+}
+
+.hero-stat strong {
+    display: block;
+
+    color: var(--text);
+
+    font-size: 17px;
+
+    margin-bottom: 2px;
+}
+
+.hero-stat span {
+    color: var(--text-muted);
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   08. SECTIONS
+   ========================================================= */
+
+main section {
+    margin-bottom: 75px;
+}
+
+.section-heading {
+    margin-bottom: 25px;
+}
+
+.section-number {
+    display: inline-block;
+
+    margin-bottom: 7px;
+
+    color: var(--primary);
+
+    font-size: 11px;
+    font-weight: 850;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1.1px;
+}
+
+.section-heading h2 {
+    margin-bottom: 8px;
+
+    font-size: clamp(27px, 3vw, 39px);
+
+    line-height: 1.15;
+
+    letter-spacing: -1.1px;
+
+    font-weight: 800;
+}
+
+.section-heading p {
+    max-width: 760px;
+
+    color: var(--text-soft);
+
+    font-size: 15px;
+}
+
+
+/* =========================================================
+   09. CARDS
+   ========================================================= */
+
+.card {
+    padding: clamp(22px, 3vw, 32px);
+
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius-lg);
+
+    box-shadow: var(--shadow-sm);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.card:hover {
+    border-color: var(--border-strong);
+
+    box-shadow: var(--shadow-md);
+}
+
+.card h3 {
+    font-size: 19px;
+
+    line-height: 1.3;
+
+    letter-spacing: -0.35px;
+
+    font-weight: 750;
+}
+
+.card p {
+    color: var(--text-soft);
+
+    font-size: 14px;
+}
+
+.card > p {
+    margin-top: 12px;
+}
+
+
+/* =========================================================
+   10. GRID SYSTEM
+   ========================================================= */
+
+.grid-2 {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 20px;
+}
+
+.grid-3 {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 18px;
+}
+
+
+/* =========================================================
+   11. CALLOUTS
+   ========================================================= */
+
+.callout {
+    padding: 18px 20px;
+
+    margin-top: 18px;
+
+    background: var(--primary-light);
+
+    border: 1px solid #dbeafe;
+
+    border-left: 4px solid var(--primary);
+
+    border-radius: 12px;
+
+    color: #334155;
+
+    font-size: 14px;
+}
+
+.callout strong {
+    color: var(--text);
+}
+
+.callout.success {
+    background: var(--success-light);
+
+    border-color: #bbf7d0;
+
+    border-left-color: var(--success);
+}
+
+.callout.warning {
+    background: var(--warning-light);
+
+    border-color: #fde68a;
+
+    border-left-color: var(--warning);
+}
+
+.callout.danger {
+    background: var(--danger-light);
+
+    border-color: #fecaca;
+
+    border-left-color: var(--danger);
+}
+
+
+/* =========================================================
+   12. TERM CARDS
+   ========================================================= */
+
+.term-card {
+    padding: 22px;
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius-md);
+
+    background: #ffffff;
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.term-card:hover {
+    transform: translateY(-4px);
+
+    box-shadow: var(--shadow-md);
+}
+
+.term-icon {
+    width: 42px;
+    height: 42px;
+
+    display: grid;
+    place-items: center;
+
+    margin-bottom: 15px;
+
+    border-radius: 12px;
+
+    background: var(--primary-light);
+
+    font-size: 20px;
+}
+
+.term-card h3 {
+    margin-bottom: 7px;
+
+    font-size: 16px;
+}
+
+.term-card p {
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   13. FORMULA
+   ========================================================= */
+
+.formula {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 72px;
+
+    margin: 18px 0;
+
+    padding: 15px 20px;
+
+    border-radius: 12px;
+
+    background: #f8fafc;
+
+    border: 1px solid var(--border);
+
+    color: var(--primary);
+
+    font-family:
+        "SFMono-Regular",
+        Consolas,
+        "Liberation Mono",
+        monospace;
+
+    font-size: clamp(16px, 2vw, 21px);
+
+    font-weight: 800;
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   14. TABLE
+   ========================================================= */
+
+.table-wrap {
+    width: 100%;
+
+    overflow-x: auto;
+
+    border: 1px solid var(--border);
+
+    border-radius: 14px;
+}
+
+table {
+    width: 100%;
+
+    min-width: 650px;
+
+    border-collapse: collapse;
+
+    background: white;
+}
+
+th {
+    padding: 15px 17px;
+
+    background: #f8fafc;
+
+    color: var(--text);
+
+    text-align: left;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    border-bottom: 1px solid var(--border);
+}
+
+td {
+    padding: 14px 17px;
+
+    color: var(--text-soft);
+
+    font-size: 13px;
+
+    border-bottom: 1px solid var(--border);
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+tbody tr:hover td {
+    background: #fafcff;
+}
+
+td:first-child {
+    color: var(--text);
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   15. BST MAIN TREE
+   ========================================================= */
+
+.tree-stage {
+    position: relative;
+
+    width: 100%;
+
+    min-height: 470px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    padding: 35px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #fbfdff 0%,
+            #f7f9fc 100%
+        );
+
+    border: 1px solid var(--border);
+
+    border-radius: 18px;
+}
+
+
+/*
+   Tree coordinate system
+
+   Root
+     50
+
+   30        70
+
+ 20 40     60 80
+*/
+
+.tree {
+    position: relative;
+
+    width: 680px;
+    height: 390px;
+
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   TREE NODES
+   ========================================================= */
+
+.node {
+    position: absolute;
+
+    width: 62px;
+    height: 62px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 50%;
+
+    background: #ffffff;
+
+    border: 3px solid var(--primary);
+
+    color: var(--primary);
+
+    font-size: 16px;
+
+    font-weight: 850;
+
+    box-shadow:
+        0 7px 18px rgba(37, 99, 235, 0.12);
+
+    z-index: 5;
+
+    transition:
+        transform 0.3s ease,
+        background 0.3s ease,
+        color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.node:hover {
+    transform: scale(1.08);
+}
+
+
+/* Root */
+
+.n1 {
+    left: 309px;
+    top: 22px;
+}
+
+
+/* Level 2 */
+
+.n2 {
+    left: 159px;
+    top: 145px;
+}
+
+.n3 {
+    left: 459px;
+    top: 145px;
+}
+
+
+/* Level 3 */
+
+.n4 {
+    left: 84px;
+    top: 275px;
+}
+
+.n5 {
+    left: 234px;
+    top: 275px;
+}
+
+.n6 {
+    left: 384px;
+    top: 275px;
+}
+
+.n7 {
+    left: 534px;
+    top: 275px;
+}
+
+
+/* =========================================================
+   TREE EDGES
+   ========================================================= */
+
+.edge {
+    position: absolute;
+
+    height: 3px;
+
+    background: #aebbd0;
+
+    transform-origin: left center;
+
+    z-index: 1;
+
+    border-radius: 5px;
+}
+
+
+/* Root → 30 */
+
+.e1 {
+    width: 170px;
+
+    left: 286px;
+    top: 90px;
+
+    transform:
+        rotate(142deg);
+}
+
+
+/* Root → 70 */
+
+.e2 {
+    width: 170px;
+
+    left: 354px;
+    top: 90px;
+
+    transform:
+        rotate(38deg);
+}
+
+
+/* 30 → 20 */
+
+.e3 {
+    width: 105px;
+
+    left: 184px;
+    top: 201px;
+
+    transform:
+        rotate(144deg);
+}
+
+
+/* 30 → 40 */
+
+.e4 {
+    width: 105px;
+
+    left: 220px;
+    top: 201px;
+
+    transform:
+        rotate(36deg);
+}
+
+
+/* 70 → 60 */
+
+.e5 {
+    width: 105px;
+
+    left: 484px;
+    top: 201px;
+
+    transform:
+        rotate(144deg);
+}
+
+
+/* 70 → 80 */
+
+.e6 {
+    width: 105px;
+
+    left: 520px;
+    top: 201px;
+
+    transform:
+        rotate(36deg);
+}
+
+
+/* =========================================================
+   TREE NODE ACTIVE STATE
+   ========================================================= */
+
+.node.active {
+    background: var(--primary);
+
+    color: white;
+
+    border-color: var(--primary);
+
+    box-shadow:
+        0 0 0 8px rgba(37, 99, 235, 0.10),
+        0 10px 30px rgba(37, 99, 235, 0.25);
+
+    animation:
+        bstNodePulse 0.65s ease;
+}
+
+@keyframes bstNodePulse {
+
+    0% {
+        transform: scale(0.85);
+    }
+
+    55% {
+        transform: scale(1.14);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+
+/* =========================================================
+   16. FLOWCHART
+   ========================================================= */
+
+.flowchart {
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    margin-top: 28px;
+
+    padding: 25px;
+
+    background: #f8fafc;
+
+    border: 1px solid var(--border);
+
+    border-radius: 16px;
+}
+
+.flow-box {
+    width: min(100%, 350px);
+
+    padding: 14px 18px;
+
+    background: white;
+
+    border: 1px solid var(--border-strong);
+
+    border-radius: 11px;
+
+    color: var(--text);
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    text-align: center;
+
+    box-shadow: var(--shadow-sm);
+
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.flow-box:hover {
+    transform: translateY(-2px);
+
+    border-color: #bfdbfe;
+
+    box-shadow: var(--shadow-md);
+}
+
+.flow-arrow {
+    height: 35px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--primary);
+
+    font-size: 20px;
+
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   17. CODE BLOCK
+   ========================================================= */
+
+.code-block {
+    margin-top: 20px;
+
+    overflow: hidden;
+
+    border: 1px solid #1e293b;
+
+    border-radius: 14px;
+
+    background: #0f172a;
+
+    box-shadow:
+        0 12px 30px rgba(15, 23, 42, 0.12);
+}
+
+.code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 11px 16px;
+
+    background: #172033;
+
+    border-bottom: 1px solid #263247;
+
+    color: #cbd5e1;
+
+    font-family:
+        "SFMono-Regular",
+        Consolas,
+        monospace;
+
+    font-size: 11px;
+
+    font-weight: 700;
+}
+
+.code-body {
+    overflow-x: auto;
+
+    padding: 20px;
+}
+
+.code-body pre {
+    margin: 0;
+
+    white-space: pre;
+
+    color: #e2e8f0;
+
+    font-family:
+        "SFMono-Regular",
+        Consolas,
+        "Liberation Mono",
+        monospace;
+
+    font-size: 13px;
+
+    line-height: 1.8;
+}
+
+.code-body code {
+    font-family: inherit;
+}
+
+.keyword {
+    color: #93c5fd;
+}
+
+.function {
+    color: #c4b5fd;
+}
+
+.comment {
+    color: #94a3b8;
+}
+
+.string {
+    color: #86efac;
+}
+
+
+/* =========================================================
+   18. TRAVERSAL CARDS
+   ========================================================= */
+
+.traversal-card {
+    position: relative;
+
+    padding: 25px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 17px;
+
+    box-shadow: var(--shadow-sm);
+
+    overflow: hidden;
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.traversal-card::after {
+    content: "";
+
+    position: absolute;
+
+    width: 120px;
+    height: 120px;
+
+    right: -60px;
+    bottom: -60px;
+
+    border-radius: 50%;
+
+    background: var(--primary-light);
+}
+
+.traversal-card:hover {
+    transform: translateY(-4px);
+
+    border-color: #bfdbfe;
+
+    box-shadow: var(--shadow-md);
+}
+
+.traversal-card > * {
+    position: relative;
+    z-index: 2;
+}
+
+.traversal-badge {
+    display: inline-flex;
+
+    padding: 5px 9px;
+
+    margin-bottom: 12px;
+
+    border-radius: 6px;
+
+    background: var(--primary-light);
+
+    color: var(--primary);
+
+    font-size: 10px;
+
+    font-weight: 850;
+
+    letter-spacing: 0.8px;
+}
+
+.traversal-card h3 {
+    font-size: 17px;
+
+    margin-bottom: 14px;
+}
+
+.traversal-card p {
+    margin-top: 13px;
+
+    font-size: 13px;
+}
+
+.order {
+    padding: 12px;
+
+    overflow-x: auto;
+
+    background: #f8fafc;
+
+    border: 1px solid var(--border);
+
+    border-radius: 9px;
+
+    color: var(--primary);
+
+    font-family:
+        "SFMono-Regular",
+        Consolas,
+        monospace;
+
+    font-size: 12px;
+
+    font-weight: 750;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   19. PROBLEM CARDS
+   ========================================================= */
+
+.problem {
+    padding: 23px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 16px;
+
+    box-shadow: var(--shadow-sm);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.problem:hover {
+    transform: translateY(-4px);
+
+    box-shadow: var(--shadow-md);
+}
+
+.problem h3 {
+    font-size: 17px;
+}
+
+.problem p {
+    margin-top: 8px;
+}
+
+.difficulty {
+    display: inline-flex;
+
+    align-items: center;
+
+    padding: 5px 9px;
+
+    border-radius: 6px;
+
+    font-size: 9px;
+
+    font-weight: 900;
+
+    letter-spacing: 0.8px;
+}
+
+.difficulty.easy {
+    color: var(--success);
+
+    background: var(--success-light);
+}
+
+.difficulty.medium {
+    color: var(--warning);
+
+    background: var(--warning-light);
+}
+
+.difficulty.hard {
+    color: var(--danger);
+
+    background: var(--danger-light);
+}
+
+
+/* =========================================================
+   20. MISTAKES
+   ========================================================= */
+
+.mistake-list {
+    display: grid;
+
+    gap: 12px;
+}
+
+.mistake {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 15px;
+
+    padding: 19px 21px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 14px;
+
+    transition:
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.mistake:hover {
+    border-color: #fecaca;
+
+    transform: translateX(3px);
+}
+
+.mistake-icon {
+    width: 32px;
+    height: 32px;
+
+    flex: 0 0 32px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 9px;
+
+    background: var(--danger-light);
+
+    color: var(--danger);
+
+    font-weight: 900;
+}
+
+.mistake strong {
+    display: block;
+
+    margin-bottom: 3px;
+
+    font-size: 14px;
+}
+
+.mistake p {
+    color: var(--text-soft);
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   21. VISUALIZER
+   ========================================================= */
+
+.visualizer {
+    padding: 25px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius-lg);
+
+    box-shadow: var(--shadow-md);
+}
+
+.controls {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 9px;
+
+    margin-bottom: 22px;
+}
+
+.btn {
+    min-height: 40px;
+
+    padding: 9px 15px;
+
+    border: 1px solid var(--border-strong);
+
+    border-radius: 9px;
+
+    background: white;
+
+    color: var(--text-soft);
+
+    font-size: 12px;
+
+    font-weight: 750;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+
+    border-color: #bfdbfe;
+
+    color: var(--primary);
+
+    box-shadow: var(--shadow-sm);
+}
+
+.btn.primary {
+    background: var(--primary);
+
+    border-color: var(--primary);
+
+    color: white;
+
+    box-shadow:
+        0 5px 14px rgba(37, 99, 235, 0.18);
+}
+
+.btn.primary:hover {
+    background: var(--primary-dark);
+
+    color: white;
+
+    border-color: var(--primary-dark);
+}
+
+
+/* =========================================================
+   VISUALIZER TREE
+   ========================================================= */
+
+.visualizer-wrapper {
+    width: 100%;
+
+    min-height: 440px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow-x: auto;
+
+    padding: 30px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #fbfdff,
+            #f7f9fc
+        );
+
+    border: 1px solid var(--border);
+
+    border-radius: 15px;
+}
+
+.visualizer-tree {
+    position: relative;
+
+    width: 680px;
+    height: 390px;
+
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   VISUALIZER NODES
+   ========================================================= */
+
+.visual-node {
+    position: absolute;
+
+    width: 62px;
+    height: 62px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 50%;
+
+    background: white;
+
+    border: 3px solid #94a3b8;
+
+    color: var(--text);
+
+    font-size: 15px;
+
+    font-weight: 850;
+
+    z-index: 10;
+
+    transition:
+        background 0.3s ease,
+        color 0.3s ease,
+        border-color 0.3s ease,
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.visual-node:hover {
+    transform: scale(1.07);
+
+    border-color: var(--primary);
+}
+
+.visual-node.active {
+    background: var(--primary);
+
+    border-color: var(--primary);
+
+    color: white;
+
+    transform: scale(1.12);
+
+    box-shadow:
+        0 0 0 8px rgba(37, 99, 235, 0.10),
+        0 10px 25px rgba(37, 99, 235, 0.25);
+
+    animation:
+        visualNodeActive 0.65s ease;
+}
+
+@keyframes visualNodeActive {
+
+    0% {
+        transform: scale(0.85);
+    }
+
+    50% {
+        transform: scale(1.16);
+    }
+
+    100% {
+        transform: scale(1.12);
+    }
+}
+
+
+/* Visualizer coordinates */
+
+.vn1 {
+    left: 309px;
+    top: 22px;
+}
+
+.vn2 {
+    left: 159px;
+    top: 145px;
+}
+
+.vn3 {
+    left: 459px;
+    top: 145px;
+}
+
+.vn4 {
+    left: 84px;
+    top: 275px;
+}
+
+.vn5 {
+    left: 234px;
+    top: 275px;
+}
+
+.vn6 {
+    left: 384px;
+    top: 275px;
+}
+
+.vn7 {
+    left: 534px;
+    top: 275px;
+}
+
+
+/* =========================================================
+   VISUALIZER EDGES
+   ========================================================= */
+
+.visual-edge {
+    position: absolute;
+
+    height: 3px;
+
+    background: #aebbd0;
+
+    border-radius: 5px;
+
+    transform-origin: left center;
+
+    z-index: 1;
+}
+
+.ve1 {
+    width: 170px;
+
+    left: 286px;
+    top: 90px;
+
+    transform:
+        rotate(142deg);
+}
+
+.ve2 {
+    width: 170px;
+
+    left: 354px;
+    top: 90px;
+
+    transform:
+        rotate(38deg);
+}
+
+.ve3 {
+    width: 105px;
+
+    left: 184px;
+    top: 201px;
+
+    transform:
+        rotate(144deg);
+}
+
+.ve4 {
+    width: 105px;
+
+    left: 220px;
+    top: 201px;
+
+    transform:
+        rotate(36deg);
+}
+
+.ve5 {
+    width: 105px;
+
+    left: 484px;
+    top: 201px;
+
+    transform:
+        rotate(144deg);
+}
+
+.ve6 {
+    width: 105px;
+
+    left: 520px;
+    top: 201px;
+
+    transform:
+        rotate(36deg);
+}
+
+
+/* =========================================================
+   VISIT OUTPUT
+   ========================================================= */
+
+.visit-output {
+    margin-top: 18px;
+
+    padding: 18px;
+
+    background: #f8fafc;
+
+    border: 1px solid var(--border);
+
+    border-radius: 13px;
+
+    font-size: 13px;
+}
+
+.visit-output > strong {
+    display: block;
+
+    margin-bottom: 10px;
+}
+
+.sequence {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 7px;
+}
+
+.sequence span {
+    min-width: 34px;
+
+    height: 34px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 9px;
+
+    border-radius: 8px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    color: var(--text-muted);
+
+    font-family:
+        "SFMono-Regular",
+        Consolas,
+        monospace;
+
+    font-size: 12px;
+
+    font-weight: 750;
+
+    transition:
+        background 0.3s ease,
+        color 0.3s ease,
+        border-color 0.3s ease,
+        transform 0.3s ease;
+}
+
+.sequence span.active {
+    background: var(--primary);
+
+    color: white;
+
+    border-color: var(--primary);
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 5px 12px rgba(37, 99, 235, 0.18);
+}
+
+
+/* =========================================================
+   22. QUIZ
+   ========================================================= */
+
+.quiz-question {
+    padding: 25px;
+
+    margin-bottom: 18px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 16px;
+
+    box-shadow: var(--shadow-sm);
+}
+
+.quiz-question h3 {
+    font-size: 17px;
+
+    line-height: 1.5;
+
+    margin-bottom: 18px;
+}
+
+.quiz-options {
+    display: grid;
+
+    gap: 9px;
+}
+
+.quiz-option {
+    width: 100%;
+
+    padding: 13px 15px;
+
+    background: #ffffff;
+
+    border: 1px solid var(--border);
+
+    border-radius: 10px;
+
+    color: var(--text-soft);
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    text-align: left;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.quiz-option:hover {
+    background: #f8fafc;
+
+    border-color: #bfdbfe;
+
+    color: var(--primary);
+
+    transform: translateX(3px);
+}
+
+.quiz-option.correct {
+    background: var(--success-light);
+
+    border-color: #86efac;
+
+    color: var(--success);
+}
+
+.quiz-option.wrong {
+    background: var(--danger-light);
+
+    border-color: #fca5a5;
+
+    color: var(--danger);
+}
+
+.answer {
+    display: none;
+
+    margin-top: 15px;
+
+    padding: 13px 15px;
+
+    border-radius: 10px;
+
+    background: var(--success-light);
+
+    border: 1px solid #bbf7d0;
+
+    color: #065f46;
+
+    font-size: 13px;
+}
+
+.answer.show {
+    display: block;
+
+    animation:
+        answerReveal 0.3s ease;
+}
+
+@keyframes answerReveal {
+
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* =========================================================
+   23. ROADMAP
+   ========================================================= */
+
+.roadmap {
+    display: grid;
+
+    grid-template-columns:
+        repeat(6, minmax(0, 1fr));
+
+    gap: 10px;
+
+    position: relative;
+}
+
+.roadmap-step {
+    position: relative;
+
+    min-height: 105px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 15px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 14px;
+
+    text-align: center;
+
+    transition:
+        transform 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.roadmap-step:hover {
+    transform: translateY(-4px);
+
+    box-shadow: var(--shadow-md);
+
+    border-color: #bfdbfe;
+}
+
+.roadmap-step strong {
+    width: 34px;
+    height: 34px;
+
+    display: grid;
+    place-items: center;
+
+    margin-bottom: 8px;
+
+    border-radius: 50%;
+
+    background: #f1f5f9;
+
+    color: var(--text-soft);
+
+    font-size: 11px;
+}
+
+.roadmap-step span {
+    color: var(--text-soft);
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    line-height: 1.35;
+}
+
+.roadmap-step.active {
+    border-color: #bfdbfe;
+
+    background: var(--primary-light);
+
+    box-shadow:
+        0 8px 22px rgba(37, 99, 235, 0.08);
+}
+
+.roadmap-step.active strong {
+    background: var(--primary);
+
+    color: white;
+}
+
+.roadmap-step.active span {
+    color: var(--primary);
+}
+
+
+/* =========================================================
+   24. LISTS
+   ========================================================= */
+
+.card ol,
+.card ul {
+    color: var(--text-soft);
+
+    font-size: 14px;
+}
+
+.card li {
+    margin-bottom: 7px;
+
+    padding-left: 3px;
+}
+
+.card li::marker {
+    color: var(--primary);
+
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   25. STRONG TEXT
+   ========================================================= */
+
+strong {
+    font-weight: 750;
+}
+
+.card strong,
+.callout strong {
+    color: var(--text);
+}
+
+
+/* =========================================================
+   26. FOOTER
+   ========================================================= */
+
+footer {
+    padding: 45px 20px;
+
+    margin-top: 20px;
+
+    border-top: 1px solid var(--border);
+
+    color: var(--text-muted);
+
+    font-size: 12px;
+
+    text-align: center;
+}
+
+footer strong {
+    color: var(--text);
+
+    font-size: 18px;
+
+    letter-spacing: -0.4px;
+}
+
+
+/* =========================================================
+   27. FOCUS ACCESSIBILITY
+   ========================================================= */
+
+button:focus-visible,
+a:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.22);
+
+    outline-offset: 3px;
+}
+
+
+/* =========================================================
+   28. SELECTION
+   ========================================================= */
+
+::selection {
+    background: #dbeafe;
+
+    color: #1e3a8a;
+}
+
+
+/* =========================================================
+   29. SCROLLBAR
+   ========================================================= */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+
+    border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+
+/* =========================================================
+   30. RESPONSIVE — 1200px
+   ========================================================= */
+
+@media (max-width: 1200px) {
+
+    :root {
+        --sidebar-width: 230px;
+    }
+
+    .main {
+        padding-left: 35px;
+        padding-right: 35px;
+    }
+
+    .hero-stats {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .roadmap {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+
+}
+
+
+/* =========================================================
+   31. RESPONSIVE — 900px
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    :root {
+        --sidebar-width: 0px;
+    }
+
+    .sidebar {
+        display: none;
+    }
+
+    .main {
+        width: 100%;
+
+        margin-left: 0;
+
+        padding:
+            35px
+            25px
+            70px;
+    }
+
+    .grid-3 {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .hero {
+        padding: 38px;
+    }
+
+}
+
+
+/* =========================================================
+   32. RESPONSIVE — 700px
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .topbar {
+        padding: 0 16px;
+    }
+
+    .lesson-label {
+        display: none;
+    }
+
+    .main {
+        padding:
+            28px
+            16px
+            60px;
+    }
+
+    .hero {
+        padding: 30px 22px;
+
+        border-radius: 20px;
+
+        margin-bottom: 50px;
+    }
+
+    .hero h1 {
+        font-size: 38px;
+
+        letter-spacing: -1.8px;
+    }
+
+    .hero p {
+        font-size: 14px;
+    }
+
+    .hero-stats {
+        grid-template-columns:
+            1fr 1fr;
+    }
+
+    .grid-2,
+    .grid-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .card {
+        padding: 21px;
+    }
+
+    main section {
+        margin-bottom: 58px;
+    }
+
+    .section-heading h2 {
+        font-size: 28px;
+    }
+
+    .tree-stage {
+        min-height: 420px;
+
+        justify-content: flex-start;
+
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .visualizer {
+        padding: 17px;
+    }
+
+    .visualizer-wrapper {
+        justify-content: flex-start;
+
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .controls {
+        display: grid;
+
+        grid-template-columns:
+            1fr 1fr;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    .roadmap {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .flowchart {
+        padding: 18px;
+    }
+
+}
+
+
+/* =========================================================
+   33. RESPONSIVE — 480px
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+    .brand {
+        font-size: 16px;
+    }
+
+    .brand-logo {
+        width: 31px;
+        height: 31px;
+    }
+
+    .hero h1 {
+        font-size: 33px;
+    }
+
+    .hero-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-stat {
+        padding: 14px;
+    }
+
+    .section-heading h2 {
+        font-size: 25px;
+    }
+
+    .section-heading p {
+        font-size: 13px;
+    }
+
+    .tree-stage {
+        min-height: 370px;
+    }
+
+    .controls {
+        grid-template-columns: 1fr;
+    }
+
+    .roadmap {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .quiz-question {
+        padding: 19px;
+    }
+
+    .quiz-option {
+        font-size: 12px;
+    }
+
+}
+
+
+/* =========================================================
+   34. MOBILE TREE SCALING
+   ========================================================= */
+
+@media (max-width: 560px) {
+
+    .tree,
+    .visualizer-tree {
+        transform:
+            scale(0.78);
+
+        transform-origin:
+            center center;
+
+        margin:
+            -35px
+            -75px;
+    }
+
+    .tree-stage {
+        min-height: 335px;
+    }
+
+    .visualizer-wrapper {
+        min-height: 340px;
+    }
+
+}
+
+
+/* =========================================================
+   35. PRINT
+   ========================================================= */
+
+@media print {
+
+    .topbar,
+    .sidebar,
+    .controls {
+        display: none !important;
+    }
+
+    .page-layout {
+        padding-top: 0;
+    }
+
+    .main {
+        width: 100%;
+
+        margin: 0;
+
+        padding: 20px;
+    }
+
+    .card,
+    .hero,
+    .problem,
+    .quiz-question {
+        box-shadow: none;
+
+        break-inside: avoid;
+    }
+
+}
+
+
+/* =========================================================
+   36. REDUCED MOTION ACCESSIBILITY
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+
+        animation-duration:
+            0.01ms !important;
+
+        animation-iteration-count:
+            1 !important;
+
+        transition-duration:
+            0.01ms !important;
+    }
+
+}
+
+
+/* =========================================================
+   END OF ZENSUS LESSON 11 CSS
+   ========================================================= */

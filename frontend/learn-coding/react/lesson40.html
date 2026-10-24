@@ -1,0 +1,2290 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS React — Lesson 40: Architecture & Best Practices</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+    --bg:#f6f8fc;
+    --panel:#ffffff;
+    --panel-soft:#f9fafb;
+    --border:#e5e7eb;
+    --text:#111827;
+    --muted:#64748b;
+    --primary:#4f46e5;
+    --primary-soft:#eef2ff;
+    --purple:#7c3aed;
+    --green:#16a34a;
+    --green-soft:#ecfdf5;
+    --orange:#ea580c;
+    --orange-soft:#fff7ed;
+    --red:#dc2626;
+    --red-soft:#fef2f2;
+    --blue:#2563eb;
+    --blue-soft:#eff6ff;
+    --shadow:0 12px 35px rgba(15,23,42,.07);
+    --radius:18px;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+button{
+    font:inherit;
+}
+
+code{
+    font-family:"Cascadia Code","Fira Code",Consolas,monospace;
+}
+
+/* HEADER */
+
+header{
+    position:sticky;
+    top:0;
+    z-index:1000;
+    height:64px;
+    background:rgba(255,255,255,.95);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    padding:0 28px;
+    justify-content:space-between;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:800;
+    letter-spacing:.5px;
+}
+
+.logo-box{
+    width:34px;
+    height:34px;
+    border-radius:10px;
+    background:var(--primary);
+    color:white;
+    display:grid;
+    place-items:center;
+    font-weight:900;
+}
+
+.lesson-tag{
+    color:var(--muted);
+    font-size:13px;
+}
+
+/* LAYOUT */
+
+.layout{
+    display:grid;
+    grid-template-columns:270px 1fr;
+    min-height:calc(100vh - 64px);
+}
+
+.sidebar{
+    position:sticky;
+    top:64px;
+    height:calc(100vh - 64px);
+    overflow:auto;
+    background:#fff;
+    border-right:1px solid var(--border);
+    padding:24px 16px;
+}
+
+.sidebar-title{
+    font-size:11px;
+    font-weight:800;
+    color:#94a3b8;
+    letter-spacing:1.2px;
+    margin:0 10px 12px;
+}
+
+.sidebar a{
+    display:block;
+    padding:9px 12px;
+    margin:3px 0;
+    border-radius:9px;
+    color:#64748b;
+    text-decoration:none;
+    font-size:13px;
+    transition:.2s;
+}
+
+.sidebar a:hover,
+.sidebar a.active{
+    background:var(--primary-soft);
+    color:var(--primary);
+    font-weight:700;
+}
+
+.content{
+    max-width:1180px;
+    width:100%;
+    margin:auto;
+    padding:45px 40px 100px;
+}
+
+/* HERO */
+
+.hero{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:26px;
+    padding:55px;
+    box-shadow:var(--shadow);
+    margin-bottom:30px;
+    position:relative;
+    overflow:hidden;
+}
+
+.hero:before{
+    content:"";
+    position:absolute;
+    width:250px;
+    height:250px;
+    border-radius:50%;
+    background:#eef2ff;
+    right:-100px;
+    top:-100px;
+}
+
+.eyebrow{
+    position:relative;
+    color:var(--primary);
+    font-weight:800;
+    font-size:12px;
+    letter-spacing:1.5px;
+    margin-bottom:12px;
+}
+
+.hero h1{
+    position:relative;
+    font-size:clamp(38px,6vw,68px);
+    line-height:1.05;
+    letter-spacing:-2px;
+    margin-bottom:20px;
+}
+
+.hero h1 span{
+    background-image:linear-gradient(90deg,#6366f1,#8b5cf6);
+    background-clip:text;
+    -webkit-background-clip:text;
+    color:transparent;
+    -webkit-text-fill-color:transparent;
+}
+
+.hero p{
+    position:relative;
+    max-width:820px;
+    color:var(--muted);
+    font-size:17px;
+}
+
+/* SECTIONS */
+
+section{
+    scroll-margin-top:90px;
+    margin-top:30px;
+}
+
+.section-card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:30px;
+    box-shadow:0 8px 25px rgba(15,23,42,.04);
+}
+
+h2{
+    font-size:29px;
+    margin-bottom:12px;
+    letter-spacing:-.5px;
+}
+
+h3{
+    font-size:20px;
+    margin-bottom:8px;
+}
+
+p{
+    color:#475569;
+}
+
+.section-intro{
+    color:var(--muted);
+    margin-bottom:22px;
+}
+
+/* CARDS */
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:16px;
+}
+
+.grid-2{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+}
+
+.info-card{
+    background:var(--panel-soft);
+    border:1px solid var(--border);
+    border-radius:15px;
+    padding:20px;
+}
+
+.info-card .icon{
+    width:40px;
+    height:40px;
+    border-radius:11px;
+    display:grid;
+    place-items:center;
+    background:var(--primary-soft);
+    color:var(--primary);
+    font-weight:900;
+    margin-bottom:14px;
+}
+
+.info-card h3{
+    font-size:17px;
+}
+
+.info-card p{
+    font-size:14px;
+}
+
+/* ARCHITECTURE */
+
+.architecture{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:28px 0;
+}
+
+.arch-box{
+    min-width:145px;
+    text-align:center;
+    padding:18px 15px;
+    border:1px solid #c7d2fe;
+    background:var(--primary-soft);
+    border-radius:14px;
+    font-weight:800;
+    color:#3730a3;
+    animation:float 3s ease-in-out infinite;
+}
+
+.arch-box:nth-child(2){animation-delay:.2s}
+.arch-box:nth-child(3){animation-delay:.4s}
+.arch-box:nth-child(4){animation-delay:.6s}
+.arch-box:nth-child(5){animation-delay:.8s}
+
+.arrow{
+    font-size:22px;
+    color:#94a3b8;
+    font-weight:800;
+}
+
+@keyframes float{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-5px)}
+}
+
+/* TREE */
+
+.tree{
+    background:#0f172a;
+    color:#e2e8f0;
+    border-radius:16px;
+    padding:24px;
+    overflow:auto;
+    font-family:"Cascadia Code",Consolas,monospace;
+    font-size:14px;
+    line-height:1.9;
+}
+
+.folder{
+    color:#93c5fd;
+}
+
+.file{
+    color:#cbd5e1;
+}
+
+.comment{
+    color:#64748b;
+}
+
+/* CODE */
+
+.code-box{
+    background:#0b1120;
+    border-radius:16px;
+    overflow:hidden;
+    margin:18px 0;
+    border:1px solid #1e293b;
+}
+
+.code-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 16px;
+    background:#111827;
+    color:#94a3b8;
+    font-size:12px;
+}
+
+.code-header span{
+    color:#cbd5e1;
+    font-weight:700;
+}
+
+pre{
+    padding:20px;
+    overflow:auto;
+    color:#e2e8f0;
+    font-size:13px;
+    line-height:1.8;
+}
+
+/* CALLOUTS */
+
+.callout{
+    border-radius:14px;
+    padding:18px;
+    margin:20px 0;
+    border:1px solid;
+}
+
+.callout strong{
+    display:block;
+    margin-bottom:4px;
+}
+
+.tip{
+    background:var(--green-soft);
+    border-color:#bbf7d0;
+}
+
+.warning{
+    background:var(--orange-soft);
+    border-color:#fed7aa;
+}
+
+.danger{
+    background:var(--red-soft);
+    border-color:#fecaca;
+}
+
+.info{
+    background:var(--blue-soft);
+    border-color:#bfdbfe;
+}
+
+/* FLOW */
+
+.flow{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:10px;
+    margin:25px 0;
+}
+
+.flow-step{
+    position:relative;
+    padding:18px 10px;
+    text-align:center;
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:#fff;
+}
+
+.flow-step strong{
+    display:block;
+    font-size:14px;
+}
+
+.flow-step small{
+    color:var(--muted);
+    font-size:11px;
+}
+
+.flow-step:not(:last-child):after{
+    content:"→";
+    position:absolute;
+    right:-16px;
+    top:50%;
+    transform:translateY(-50%);
+    color:var(--primary);
+    font-weight:900;
+    z-index:2;
+}
+
+/* TABLE */
+
+.table-wrap{
+    overflow:auto;
+    border:1px solid var(--border);
+    border-radius:14px;
+    margin:20px 0;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:650px;
+}
+
+th,td{
+    text-align:left;
+    padding:14px;
+    border-bottom:1px solid var(--border);
+    font-size:13px;
+}
+
+th{
+    background:#f8fafc;
+    color:#334155;
+}
+
+td{
+    color:#64748b;
+}
+
+/* BADGES */
+
+.badge{
+    display:inline-block;
+    padding:5px 9px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:800;
+}
+
+.badge-blue{
+    background:#dbeafe;
+    color:#1d4ed8;
+}
+
+.badge-green{
+    background:#dcfce7;
+    color:#15803d;
+}
+
+.badge-orange{
+    background:#ffedd5;
+    color:#c2410c;
+}
+
+/* CHECKLIST */
+
+.checklist{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+}
+
+.check{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    background:#f8fafc;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:15px;
+}
+
+.check-icon{
+    color:var(--green);
+    font-weight:900;
+}
+
+/* QUIZ */
+
+.quiz-question{
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:20px;
+    margin:14px 0;
+    background:#fff;
+}
+
+.quiz-question button{
+    border:0;
+    background:var(--primary-soft);
+    color:var(--primary);
+    padding:8px 12px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:700;
+    margin-top:10px;
+}
+
+.answer{
+    display:none;
+    margin-top:12px;
+    padding:12px;
+    border-radius:10px;
+    background:var(--green-soft);
+    color:#166534;
+    font-size:14px;
+}
+
+/* REVEAL */
+
+.reveal{
+    opacity:0;
+    transform:translateY(20px);
+    transition:.7s ease;
+}
+
+.reveal.show{
+    opacity:1;
+    transform:translateY(0);
+}
+
+/* FOOTER */
+
+.final-box{
+    margin-top:30px;
+    background:#111827;
+    color:white;
+    border-radius:22px;
+    padding:35px;
+}
+
+.final-box p{
+    color:#cbd5e1;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:1000px){
+    .layout{
+        grid-template-columns:220px 1fr;
+    }
+
+    .grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .flow{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .flow-step:not(:last-child):after{
+        display:none;
+    }
+}
+
+@media(max-width:760px){
+    header{
+        padding:0 16px;
+    }
+
+    .sidebar{
+        display:none;
+    }
+
+    .layout{
+        display:block;
+    }
+
+    .content{
+        padding:25px 16px 70px;
+    }
+
+    .hero{
+        padding:32px 22px;
+    }
+
+    .grid,
+    .grid-2,
+    .checklist,
+    .flow{
+        grid-template-columns:1fr;
+    }
+
+    .section-card{
+        padding:22px;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+    <div class="logo">
+        <div class="logo-box">Z</div>
+        <span>ZENSUS REACT</span>
+    </div>
+    <div class="lesson-tag">PHASE 5 • LESSON 40</div>
+</header>
+
+<div class="layout">
+
+<aside class="sidebar">
+
+<div class="sidebar-title">LESSON 40</div>
+
+<a href="#overview">Architecture</a> <a href="#project">Project Architecture</a> <a href="#folders">Folder Structure</a> <a href="#feature">Feature-Based Architecture</a> <a href="#components">Components</a> <a href="#pages">Pages</a> <a href="#hooks">Hooks</a> <a href="#services">Services</a> <a href="#utilities">Utilities</a> <a href="#context">Context</a> <a href="#state">State Management</a> <a href="#api">API Layer</a> <a href="#reusable">Reusable Components</a> <a href="#separation">Separation of Concerns</a> <a href="#naming">Naming Conventions</a> <a href="#clean">Clean Code</a> <a href="#scale">Scalability</a> <a href="#maintain">Maintainability</a> <a href="#production">Production Checklist</a> <a href="#quiz">Quick Quiz</a>
+
+</aside>
+
+<main class="content">
+
+<!-- HERO -->
+
+<div class="hero reveal" id="overview">
+
+<div class="eyebrow">PHASE 5 • ADVANCED REACT • LESSON 40</div>
+
+<h1>React <span>Architecture</span> & Best Practices</h1>
+
+<p>
+A professional React application is not just a collection of components.
+Architecture determines how your application is organized, how data flows,
+how features communicate, and how easily the project can grow from a small
+prototype into a production system.
+</p>
+
+</div>
+
+<!-- PROJECT ARCHITECTURE -->
+
+<section id="project" class="reveal">
+
+<div class="section-card">
+
+<h2>1. Project Architecture</h2>
+
+<p class="section-intro">
+Project architecture defines how responsibilities are divided inside a React
+application.
+</p>
+
+<div class="architecture">
+
+<div class="arch-box">UI</div>
+<div class="arrow">→</div>
+<div class="arch-box">Features</div>
+<div class="arrow">→</div>
+<div class="arch-box">State</div>
+<div class="arrow">→</div>
+<div class="arch-box">Services</div>
+<div class="arrow">→</div>
+<div class="arch-box">API</div>
+
+</div>
+
+<p>
+The goal is not to create as many folders as possible.
+The goal is to create clear boundaries so developers can quickly understand
+where code belongs.
+</p>
+
+<div class="callout info">
+
+<strong>Professional Principle</strong>
+
+Good architecture answers three questions:
+
+<br>
+
+<strong>Where does this code belong?</strong> <br> <strong>Who is allowed to depend on it?</strong> <br> <strong>How can this feature change without breaking unrelated features?</strong>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- FOLDER STRUCTURE -->
+
+<section id="folders" class="reveal">
+
+<div class="section-card">
+
+<h2>2. Folder Structure</h2>
+
+<p class="section-intro">
+A folder structure should make the application's responsibilities obvious.
+</p>
+
+<div class="tree">
+
+<span class="folder">src/</span> <br>
+├── <span class="folder">app/</span> <br>
+│   ├── <span class="file">App.jsx</span> <br>
+│   ├── <span class="file">router.jsx</span> <br>
+│   └── <span class="file">providers.jsx</span> <br>
+│ <br>
+├── <span class="folder">components/</span> <br>
+│   ├── <span class="folder">ui/</span> <br>
+│   ├── <span class="file">Navbar.jsx</span> <br>
+│   └── <span class="file">Footer.jsx</span> <br>
+│ <br>
+├── <span class="folder">features/</span> <br>
+│   ├── <span class="folder">auth/</span> <br>
+│   ├── <span class="folder">courses/</span> <br>
+│   └── <span class="folder">profile/</span> <br>
+│ <br>
+├── <span class="folder">pages/</span> <br>
+│   ├── <span class="file">Home.jsx</span> <br>
+│   ├── <span class="file">Dashboard.jsx</span> <br>
+│   └── <span class="file">NotFound.jsx</span> <br>
+│ <br>
+├── <span class="folder">hooks/</span> <br>
+├── <span class="folder">services/</span> <br>
+├── <span class="folder">utils/</span> <br>
+├── <span class="folder">context/</span> <br>
+├── <span class="folder">assets/</span> <br>
+└── <span class="file">main.jsx</span>
+
+</div>
+
+<div class="callout tip">
+
+<strong>Remember</strong>
+
+There is no single folder structure that is correct for every React project.
+Choose a structure that makes dependencies and responsibilities easy to understand.
+
+</div>
+
+</div>
+
+</section>
+
+<!-- FEATURE BASED -->
+
+<section id="feature" class="reveal">
+
+<div class="section-card">
+
+<h2>3. Feature-Based Architecture</h2>
+
+<p class="section-intro">
+Feature-based architecture groups code according to business functionality
+instead of only grouping files by technical type.
+</p>
+
+<div class="grid">
+
+<div class="info-card">
+
+<div class="icon">A</div>
+
+<h3>Traditional Structure</h3>
+
+<p>
+All components go into components,
+all hooks into hooks, and all services into services.
+</p>
+
+</div>
+
+<div class="info-card">
+
+<div class="icon">B</div>
+
+<h3>Feature Structure</h3>
+
+<p>
+Authentication, courses, payments,
+profile and other domains own their related code.
+</p>
+
+</div>
+
+<div class="info-card">
+
+<div class="icon">C</div>
+
+<h3>Why It Scales</h3>
+
+<p>
+Developers can work inside one feature
+without searching through unrelated folders.
+</p>
+
+</div>
+
+</div>
+
+<div class="tree">
+
+<span class="folder">features/</span> <br>
+├── <span class="folder">auth/</span> <br>
+│  ├── <span class="file">Login.jsx</span> <br>
+│  ├── <span class="file">Register.jsx</span> <br>
+│  ├── <span class="file">authSlice.js</span> <br>
+│  ├── <span class="file">authApi.js</span> <br>
+│  └── <span class="file">authHooks.js</span> <br>
+│ <br>
+├── <span class="folder">courses/</span> <br>
+│  ├── <span class="file">CourseCard.jsx</span> <br>
+│  ├── <span class="file">CourseDetails.jsx</span> <br>
+│  ├── <span class="file">courseApi.js</span> <br>
+│  └── <span class="file">courseSlice.js</span> <br>
+│ <br>
+└── <span class="folder">profile/</span> <br>
+   ├── <span class="file">Profile.jsx</span> <br>
+   └── <span class="file">profileApi.js</span>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- COMPONENTS -->
+
+<section id="components" class="reveal">
+
+<div class="section-card">
+
+<h2>4. Components</h2>
+
+<p class="section-intro">
+Components should have clear responsibilities and predictable interfaces.
+</p>
+
+<div class="grid">
+
+<div class="info-card">
+<div class="icon">UI</div>
+<h3>Presentational</h3>
+<p>
+Focus primarily on displaying information and responding to props.
+</p>
+</div>
+
+<div class="info-card">
+<div class="icon">F</div>
+<h3>Feature Components</h3>
+<p>
+Combine UI with feature-specific behavior and state.
+</p>
+</div>
+
+<div class="info-card">
+<div class="icon">L</div>
+<h3>Layout Components</h3>
+<p>
+Control common page structures such as headers, sidebars and shells.
+</p>
+</div>
+
+</div>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>Reusable Button</span>
+<span>Button.jsx</span>
+</div>
+
+<pre><code>function Button({
+    children,
+    variant = "primary",
+    onClick,
+    disabled = false
+}) {
+    return (
+        &lt;button
+            className={`btn btn-${variant}`}
+            onClick={onClick}
+            disabled={disabled}
+        &gt;
+            {children}
+        &lt;/button&gt;
+    );
+}
+
+export default Button;</code></pre>
+
+</div>
+
+<div class="callout warning">
+
+<strong>Avoid Giant Components</strong>
+
+If one component contains page layout, API calls, validation,
+business logic, state management and dozens of UI sections,
+it becomes difficult to test and maintain.
+
+</div>
+
+</div>
+
+</section>
+
+<!-- PAGES -->
+
+<section id="pages" class="reveal">
+
+<div class="section-card">
+
+<h2>5. Pages</h2>
+
+<p class="section-intro">
+Pages usually represent complete screens or routes.
+</p>
+
+<div class="architecture">
+
+<div class="arch-box">Route</div>
+<div class="arrow">→</div>
+<div class="arch-box">Page</div>
+<div class="arrow">→</div>
+<div class="arch-box">Feature</div>
+<div class="arrow">→</div>
+<div class="arch-box">UI</div>
+
+</div>
+
+<p>
+For example, a Dashboard page can compose DashboardHeader,
+CourseProgress, RecentActivity and RecommendedCourses rather than
+containing every implementation detail itself.
+</p>
+
+</div>
+
+</section>
+
+<!-- HOOKS -->
+
+<section id="hooks" class="reveal">
+
+<div class="section-card">
+
+<h2>6. Hooks</h2>
+
+<p class="section-intro">
+Custom hooks extract reusable stateful behavior from components.
+</p>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>useFetch Example</span>
+<span>useFetch.js</span>
+</div>
+
+<pre><code>import { useEffect, useState } from "react";
+
+export function useFetch(url) {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() =&gt; {
+        async function load() {
+            try {
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    throw new Error("Request failed");
+                }
+
+                const result = await response.json();
+                setData(result);
+            } catch (err) {
+                setError(err);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        load();
+    }, [url]);
+
+    return { data, loading, error };
+}</code></pre>
+
+</div>
+
+<div class="callout info">
+
+<strong>Hook Rule</strong>
+
+A custom hook should normally represent a reusable behavior,
+not simply become a dumping ground for unrelated logic.
+
+</div>
+
+</div>
+
+</section>
+
+<!-- SERVICES -->
+
+<section id="services" class="reveal">
+
+<div class="section-card">
+
+<h2>7. Services</h2>
+
+<p class="section-intro">
+Services isolate external operations such as API requests,
+authentication calls, file operations or analytics.
+</p>
+
+<div class="flow">
+
+<div class="flow-step">
+<strong>Component</strong>
+<small>User interaction</small>
+</div>
+
+<div class="flow-step">
+<strong>Hook</strong>
+<small>Reusable logic</small>
+</div>
+
+<div class="flow-step">
+<strong>Service</strong>
+<small>External operation</small>
+</div>
+
+<div class="flow-step">
+<strong>API</strong>
+<small>Backend</small>
+</div>
+
+<div class="flow-step">
+<strong>Response</strong>
+<small>Application state</small>
+</div>
+
+</div>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>Course Service</span>
+<span>courseService.js</span>
+</div>
+
+<pre><code>const API_URL = import.meta.env.VITE_API_URL;
+
+export async function getCourses() {
+
+    const response = await fetch(
+        `${API_URL}/courses`
+    );
+
+    if (!response.ok) {
+        throw new Error("Unable to load courses");
+    }
+
+    return response.json();
+}</code></pre>
+
+</div>
+
+<p>
+The component does not need to know how the HTTP request is constructed.
+That responsibility belongs to the service/API layer.
+</p>
+
+</div>
+
+</section>
+
+<!-- UTILITIES -->
+
+<section id="utilities" class="reveal">
+
+<div class="section-card">
+
+<h2>8. Utilities</h2>
+
+<p class="section-intro">
+Utilities contain small, generic functions that do not belong to a particular
+React component.
+</p>
+
+<div class="grid">
+
+<div class="info-card">
+<div class="icon">D</div>
+<h3>Date Utilities</h3>
+<p>Formatting dates and calculating durations.</p>
+</div>
+
+<div class="info-card">
+<div class="icon">V</div>
+<h3>Validation</h3>
+<p>Reusable format and validation helpers.</p>
+</div>
+
+<div class="info-card">
+<div class="icon">F</div>
+<h3>Formatting</h3>
+<p>Currency, numbers and text transformations.</p>
+</div>
+
+</div>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>Utility Function</span>
+<span>formatCurrency.js</span>
+</div>
+
+<pre><code>export function formatCurrency(value) {
+    return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR"
+    }).format(value);
+}</code></pre>
+
+</div>
+
+<div class="callout warning">
+
+<strong>Keep Utilities Generic</strong>
+
+A utility should not secretly depend on component-specific state or UI.
+If it does, it may belong in a feature, hook or service instead.
+
+</div>
+
+</div>
+
+</section>
+
+<!-- CONTEXT -->
+
+<section id="context" class="reveal">
+
+<div class="section-card">
+
+<h2>9. Context</h2>
+
+<p class="section-intro">
+Context provides a way to share values across a component tree without passing
+props through every intermediate component.
+</p>
+
+<div class="architecture">
+
+<div class="arch-box">Provider</div>
+<div class="arrow">→</div>
+<div class="arch-box">Layout</div>
+<div class="arrow">→</div>
+<div class="arch-box">Page</div>
+<div class="arrow">→</div>
+<div class="arch-box">Consumer</div>
+
+</div>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>Theme Context</span>
+<span>ThemeContext.jsx</span>
+</div>
+
+<pre><code>import { createContext, useContext } from "react";
+
+const ThemeContext = createContext(null);
+
+export function ThemeProvider({ children }) {
+
+    const theme = {
+        mode: "light"
+    };
+
+    return (
+        &lt;ThemeContext.Provider value={theme}&gt;
+            {children}
+        &lt;/ThemeContext.Provider&gt;
+    );
+}
+
+export function useTheme() {
+    return useContext(ThemeContext);
+}</code></pre>
+
+</div>
+
+<div class="callout info">
+
+<strong>Do Not Put Everything in Context</strong>
+
+Context is useful for values shared across a component tree.
+It is not automatically a replacement for every state-management solution.
+
+</div>
+
+</div>
+
+</section>
+
+<!-- STATE -->
+
+<section id="state" class="reveal">
+
+<div class="section-card">
+
+<h2>10. State Management</h2>
+
+<p class="section-intro">
+Professional applications distinguish between different types of state.
+</p>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+<tr>
+<th>State Type</th>
+<th>Examples</th>
+<th>Possible Location</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td>Local State</td>
+<td>Modal open, input value</td>
+<td>useState</td>
+</tr>
+
+<tr>
+<td>Shared UI State</td>
+<td>Theme, user preferences</td>
+<td>Context</td>
+</tr>
+
+<tr>
+<td>Complex Local State</td>
+<td>Multi-step workflow</td>
+<td>useReducer</td>
+</tr>
+
+<tr>
+<td>Global Client State</td>
+<td>Cart, session-related UI state</td>
+<td>State store</td>
+</tr>
+
+<tr>
+<td>Server State</td>
+<td>Courses, products, user data</td>
+<td>Server-state solution / cache</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<div class="callout tip">
+
+<strong>Architecture Rule</strong>
+
+Start with the smallest state scope that solves the problem.
+Do not make every value global just because a global store exists.
+
+</div>
+
+</div>
+
+</section>
+
+<!-- API -->
+
+<section id="api" class="reveal">
+
+<div class="section-card">
+
+<h2>11. API Layer</h2>
+
+<p class="section-intro">
+The API layer creates a consistent boundary between frontend features and
+backend communication.
+</p>
+
+<div class="architecture">
+
+<div class="arch-box">UI</div>
+<div class="arrow">→</div>
+<div class="arch-box">Hook</div>
+<div class="arrow">→</div>
+<div class="arch-box">API Service</div>
+<div class="arrow">→</div>
+<div class="arch-box">Backend</div>
+
+</div>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>API Client</span>
+<span>apiClient.js</span>
+</div>
+
+<pre><code>const API_URL = import.meta.env.VITE_API_URL;
+
+export async function apiRequest(
+    endpoint,
+    options = {}
+) {
+
+    const response = await fetch(
+        `${API_URL}${endpoint}`,
+        {
+            ...options,
+            headers: {
+                "Content-Type": "application/json",
+                ...(options.headers || {})
+            }
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            `Request failed: ${response.status}`
+        );
+    }
+
+    return response.json();
+}</code></pre>
+
+</div>
+
+<p>
+Centralizing common API behavior can reduce duplicated request logic.
+Authentication, error normalization, retries and observability can then be
+handled according to the application's requirements.
+</p>
+
+</div>
+
+</section>
+
+<!-- REUSABLE COMPONENTS -->
+
+<section id="reusable" class="reveal">
+
+<div class="section-card">
+
+<h2>12. Reusable Components</h2>
+
+<p class="section-intro">
+Reusable components should have clear APIs and should not depend unnecessarily
+on one specific page.
+</p>
+
+<div class="grid">
+
+<div class="info-card">
+<div class="icon">B</div>
+<h3>Button</h3>
+<p>Reusable interaction component.</p>
+</div>
+
+<div class="info-card">
+<div class="icon">M</div>
+<h3>Modal</h3>
+<p>Reusable overlay and dialog pattern.</p>
+</div>
+
+<div class="info-card">
+<div class="icon">C</div>
+<h3>Card</h3>
+<p>Reusable content presentation.</p>
+</div>
+
+<div class="info-card">
+<div class="icon">T</div>
+<h3>Table</h3>
+<p>Reusable data presentation.</p>
+</div>
+
+<div class="info-card">
+<div class="icon">F</div>
+<h3>Form Field</h3>
+<p>Reusable input and validation UI.</p>
+</div>
+
+<div class="info-card">
+<div class="icon">L</div>
+<h3>Loader</h3>
+<p>Reusable loading feedback.</p>
+</div>
+
+</div>
+
+<div class="callout warning">
+
+<strong>Avoid Premature Abstraction</strong>
+
+Do not create a complicated generic component after seeing the same markup only
+once. Reuse should reduce duplication without making simple code harder to understand.
+
+</div>
+
+</div>
+
+</section>
+
+<!-- SEPARATION -->
+
+<section id="separation" class="reveal">
+
+<div class="section-card">
+
+<h2>13. Separation of Concerns</h2>
+
+<p class="section-intro">
+Each part of the application should have a focused responsibility.
+</p>
+
+<div class="architecture">
+
+<div class="arch-box">UI</div>
+<div class="arrow">→</div>
+<div class="arch-box">Business Logic</div>
+<div class="arrow">→</div>
+<div class="arch-box">Data Access</div>
+<div class="arrow">→</div>
+<div class="arch-box">Backend</div>
+
+</div>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+<tr>
+<th>Layer</th>
+<th>Primary Responsibility</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td>Components</td>
+<td>Render interface and handle UI interactions.</td>
+</tr>
+
+<tr>
+<td>Hooks</td>
+<td>Reusable stateful behavior.</td>
+</tr>
+
+<tr>
+<td>Services</td>
+<td>External operations and API communication.</td>
+</tr>
+
+<tr>
+<td>Utilities</td>
+<td>Generic pure helper functions.</td>
+</tr>
+
+<tr>
+<td>State Layer</td>
+<td>Store and coordinate application state.</td>
+</tr>
+
+<tr>
+<td>Pages</td>
+<td>Compose complete route-level screens.</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<div class="callout tip">
+
+<strong>Think in Responsibilities</strong>
+
+When a file starts doing several unrelated jobs, ask whether part of its
+responsibility should move into another layer.
+
+</div>
+
+</div>
+
+</section>
+
+<!-- NAMING -->
+
+<section id="naming" class="reveal">
+
+<div class="section-card">
+
+<h2>14. Naming Conventions</h2>
+
+<p class="section-intro">
+Good names reduce the amount of explanation developers need.
+</p>
+
+<div class="grid-2">
+
+<div class="info-card">
+
+<h3>Components</h3>
+
+<p>
+Use PascalCase.
+</p>
+
+<div class="code-box">
+<pre><code>CourseCard.jsx
+UserProfile.jsx
+Navbar.jsx</code></pre>
+</div>
+
+</div>
+
+<div class="info-card">
+
+<h3>Functions</h3>
+
+<p>
+Use descriptive camelCase names.
+</p>
+
+<div class="code-box">
+<pre><code>fetchCourses()
+handleSubmit()
+calculateProgress()</code></pre>
+</div>
+
+</div>
+
+<div class="info-card">
+
+<h3>Boolean Values</h3>
+
+<p>
+Use names that communicate true/false meaning.
+</p>
+
+<div class="code-box">
+<pre><code>isLoading
+isAuthenticated
+hasPermission
+canEdit</code></pre>
+</div>
+
+</div>
+
+<div class="info-card">
+
+<h3>Event Handlers</h3>
+
+<p>
+Use names that communicate the event.
+</p>
+
+<div class="code-box">
+<pre><code>handleClick
+handleSubmit
+handleChange
+handleDelete</code></pre>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- CLEAN CODE -->
+
+<section id="clean" class="reveal">
+
+<div class="section-card">
+
+<h2>15. Clean Code</h2>
+
+<p class="section-intro">
+Clean code is code that other developers can understand, modify and test
+without unnecessary mental overhead.
+</p>
+
+<div class="grid">
+
+<div class="info-card">
+<div class="icon">1</div>
+<h3>Small Functions</h3>
+<p>Prefer focused functions with one clear responsibility.</p>
+</div>
+
+<div class="info-card">
+<div class="icon">2</div>
+<h3>Meaningful Names</h3>
+<p>Names should explain intent rather than implementation details.</p>
+</div>
+
+<div class="info-card">
+<div class="icon">3</div>
+<h3>Remove Duplication</h3>
+<p>Extract repeated logic when abstraction genuinely improves the design.</p>
+</div>
+
+<div class="info-card">
+<div class="icon">4</div>
+<h3>Keep Components Focused</h3>
+<p>A component should not become a complete application by itself.</p>
+</div>
+
+<div class="info-card">
+<div class="icon">5</div>
+<h3>Handle Errors</h3>
+<p>Failures should have intentional states and recovery paths.</p>
+</div>
+
+<div class="info-card">
+<div class="icon">6</div>
+<h3>Delete Dead Code</h3>
+<p>Unused code increases maintenance cost and confusion.</p>
+</div>
+
+</div>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>Less Clear</span>
+<span>Before</span>
+</div>
+
+<pre><code>function x(a, b) {
+    return a * b / 100;
+}</code></pre>
+
+</div>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>Clearer</span>
+<span>After</span>
+</div>
+
+<pre><code>function calculatePercentage(value, percentage) {
+    return value * percentage / 100;
+}</code></pre>
+
+</div>
+
+<div class="callout info">
+
+<strong>Clean Code Principle</strong>
+
+Code should communicate intent clearly enough that another developer does not
+need to reverse-engineer every line before modifying it.
+
+</div>
+
+</div>
+
+</section>
+
+<!-- SCALABILITY -->
+
+<section id="scale" class="reveal">
+
+<div class="section-card">
+
+<h2>16. Scalability</h2>
+
+<p class="section-intro">
+Scalability is the ability of an architecture to handle increasing features,
+developers and complexity without becoming unmanageable.
+</p>
+
+<div class="architecture">
+
+<div class="arch-box">Small App</div>
+<div class="arrow">→</div>
+<div class="arch-box">Features</div>
+<div class="arrow">→</div>
+<div class="arch-box">Boundaries</div>
+<div class="arrow">→</div>
+<div class="arch-box">Shared Systems</div>
+<div class="arrow">→</div>
+<div class="arch-box">Large App</div>
+
+</div>
+
+<h3>Scalable Architecture Principles</h3>
+
+<div class="checklist">
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Organize code around meaningful features.</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Keep dependencies between features intentional.</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Separate UI from external data access.</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Keep shared components generic enough to reuse.</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Use state at the smallest sensible scope.</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Make feature boundaries easy to discover.</span>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- MAINTAINABILITY -->
+
+<section id="maintain" class="reveal">
+
+<div class="section-card">
+
+<h2>17. Maintainability</h2>
+
+<p class="section-intro">
+Maintainability measures how easily developers can understand, modify, test
+and extend an application over time.
+</p>
+
+<div class="flow">
+
+<div class="flow-step">
+<strong>Understand</strong>
+<small>Find the code</small>
+</div>
+
+<div class="flow-step">
+<strong>Change</strong>
+<small>Modify safely</small>
+</div>
+
+<div class="flow-step">
+<strong>Test</strong>
+<small>Verify behavior</small>
+</div>
+
+<div class="flow-step">
+<strong>Review</strong>
+<small>Check quality</small>
+</div>
+
+<div class="flow-step">
+<strong>Deploy</strong>
+<small>Release</small>
+</div>
+
+</div>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+<tr>
+<th>Problem</th>
+<th>Architectural Response</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td>Huge components</td>
+<td>Split into focused components and hooks.</td>
+</tr>
+
+<tr>
+<td>Repeated API code</td>
+<td>Create service/API abstraction.</td>
+</tr>
+
+<tr>
+<td>Global state everywhere</td>
+<td>Reduce state scope.</td>
+</tr>
+
+<tr>
+<td>Unclear folders</td>
+<td>Use meaningful feature boundaries.</td>
+</tr>
+
+<tr>
+<td>Duplicated UI</td>
+<td>Extract reusable components when appropriate.</td>
+</tr>
+
+<tr>
+<td>Hard-to-test logic</td>
+<td>Separate pure logic from UI concerns.</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- COMPLETE ARCHITECTURE -->
+
+<section class="reveal">
+
+<div class="section-card">
+
+<h2>18. Complete ZENSUS-Style Architecture</h2>
+
+<p class="section-intro">
+A realistic scalable React application can combine the ideas from this lesson.
+</p>
+
+<div class="tree">
+
+<span class="folder">src/</span> <br>
+├── <span class="folder">app/</span> <br>
+│  ├── <span class="file">App.jsx</span> <br>
+│  ├── <span class="file">router.jsx</span> <br>
+│  └── <span class="file">providers.jsx</span> <br>
+│ <br>
+├── <span class="folder">components/</span> <br>
+│  ├── <span class="folder">ui/</span> <br>
+│  │  ├── <span class="file">Button.jsx</span> <br>
+│  │  ├── <span class="file">Modal.jsx</span> <br>
+│  │  └── <span class="file">Loader.jsx</span> <br>
+│  ├── <span class="file">Navbar.jsx</span> <br>
+│  └── <span class="file">Footer.jsx</span> <br>
+│ <br>
+├── <span class="folder">features/</span> <br>
+│  ├── <span class="folder">auth/</span> <br>
+│  ├── <span class="folder">courses/</span> <br>
+│  ├── <span class="folder">coding/</span> <br>
+│  ├── <span class="folder">hackathons/</span> <br>
+│  └── <span class="folder">profile/</span> <br>
+│ <br>
+├── <span class="folder">pages/</span> <br>
+│  ├── <span class="file">Home.jsx</span> <br>
+│  ├── <span class="file">Dashboard.jsx</span> <br>
+│  └── <span class="file">NotFound.jsx</span> <br>
+│ <br>
+├── <span class="folder">hooks/</span> <br>
+├── <span class="folder">services/</span> <br>
+├── <span class="folder">utils/</span> <br>
+├── <span class="folder">context/</span> <br>
+├── <span class="folder">assets/</span> <br>
+└── <span class="file">main.jsx</span>
+
+</div>
+
+<div class="callout tip">
+
+<strong>The Architecture Flow</strong>
+
+User interaction → Page → Feature Component → Hook/State → Service/API →
+Backend → Response → State Update → UI Re-render.
+
+</div>
+
+</div>
+
+</section>
+
+<!-- PRODUCTION CHECKLIST -->
+
+<section id="production" class="reveal">
+
+<div class="section-card">
+
+<h2>19. Production Checklist</h2>
+
+<p class="section-intro">
+Before calling a React application production-ready, review the architecture
+as well as the visible UI.
+</p>
+
+<div class="checklist">
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Clear folder and feature structure</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Components have focused responsibilities</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Pages compose features instead of containing everything</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Reusable components have clear APIs</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Custom hooks contain reusable behavior</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>API communication is organized consistently</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>State is stored at an appropriate scope</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Environment configuration is separated from source code</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Errors and loading states are handled</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Security practices are applied</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Tests cover important behavior</span>
+</div>
+
+<div class="check">
+<span class="check-icon">✓</span>
+<span>Production build has been tested</span>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- ARCHITECTURE MINDSET -->
+
+<section class="reveal">
+
+<div class="final-box">
+
+<h2>Professional React Architecture Mindset</h2>
+
+<p>
+A professional React developer does not ask only:
+"How can I make this component work?"
+</p>
+
+<br>
+
+<p>
+They also ask:
+</p>
+
+<br>
+
+<p>
+<strong>Where should this code live?</strong><br>
+<strong>Who should own this state?</strong><br>
+<strong>Can this logic be reused?</strong><br>
+<strong>Does this component have too many responsibilities?</strong><br>
+<strong>Will this structure still make sense when the application becomes 10× larger?</strong>
+</p>
+
+<br>
+
+<p>
+The goal of architecture is not complexity.
+The goal is controlled complexity.
+</p>
+
+</div>
+
+</section>
+
+<!-- QUIZ -->
+
+<section id="quiz" class="reveal">
+
+<div class="section-card">
+
+<h2>20. Quick Quiz</h2>
+
+<p class="section-intro">
+Test your understanding of React Architecture and Best Practices.
+</p>
+
+<div class="quiz-question">
+
+<strong>1. What is the primary goal of project architecture?</strong>
+
+<br>
+
+<button onclick="toggleAnswer(1)">Show Answer</button>
+
+<div class="answer" id="answer1">
+To organize responsibilities and dependencies so the application remains understandable,
+maintainable and scalable.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<strong>2. What does feature-based architecture organize code around?</strong>
+
+<br>
+
+<button onclick="toggleAnswer(2)">Show Answer</button>
+
+<div class="answer" id="answer2">
+Business features or domains such as authentication, courses, payments or profiles.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<strong>3. What is the main purpose of a custom hook?</strong>
+
+<br>
+
+<button onclick="toggleAnswer(3)">Show Answer</button>
+
+<div class="answer" id="answer3">
+To extract and reuse stateful or effect-related behavior across components.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<strong>4. Why use a service/API layer?</strong>
+
+<br>
+
+<button onclick="toggleAnswer(4)">Show Answer</button>
+
+<div class="answer" id="answer4">
+To isolate external operations such as API communication from UI components.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<strong>5. Should every piece of state be global?</strong>
+
+<br>
+
+<button onclick="toggleAnswer(5)">Show Answer</button>
+
+<div class="answer" id="answer5">
+No. State should normally live at the smallest sensible scope that satisfies the application's requirements.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<strong>6. What does separation of concerns mean?</strong>
+
+<br>
+
+<button onclick="toggleAnswer(6)">Show Answer</button>
+
+<div class="answer" id="answer6">
+Different parts of the application should have focused responsibilities instead of mixing unrelated concerns.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<strong>7. What makes an application maintainable?</strong>
+
+<br>
+
+<button onclick="toggleAnswer(7)">Show Answer</button>
+
+<div class="answer" id="answer7">
+Clear structure, focused responsibilities, understandable names, reusable abstractions,
+tests and intentional dependency boundaries.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<strong>8. What is one danger of premature abstraction?</strong>
+
+<br>
+
+<button onclick="toggleAnswer(8)">Show Answer</button>
+
+<div class="answer" id="answer8">
+It can make simple code more complicated and create abstractions before a genuine reuse pattern exists.
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+</main>
+</div>
+
+<script>
+
+/* Reveal Animation */
+
+const observer = new IntersectionObserver(
+    entries => {
+        entries.forEach(entry => {
+            if(entry.isIntersecting){
+                entry.target.classList.add("show");
+            }
+        });
+    },
+    {
+        threshold:.08
+    }
+);
+
+document.querySelectorAll(".reveal").forEach(el => {
+    observer.observe(el);
+});
+
+
+/* Quiz */
+
+function toggleAnswer(number){
+
+    const answer =
+        document.getElementById("answer" + number);
+
+    if(answer.style.display === "block"){
+        answer.style.display = "none";
+    }else{
+        answer.style.display = "block";
+    }
+}
+
+
+/* Active Sidebar */
+
+const sections =
+    document.querySelectorAll("section[id], .hero[id]");
+
+const links =
+    document.querySelectorAll(".sidebar a");
+
+window.addEventListener("scroll", () => {
+
+    let current = "";
+
+    sections.forEach(section => {
+
+        const top =
+            section.getBoundingClientRect().top;
+
+        if(top <= 130){
+            current = section.id;
+        }
+
+    });
+
+    links.forEach(link => {
+
+        link.classList.remove("active");
+
+        if(
+            link.getAttribute("href") === "#" + current
+        ){
+            link.classList.add("active");
+        }
+
+    });
+
+});
+
+</script>
+
+</body>
+</html>

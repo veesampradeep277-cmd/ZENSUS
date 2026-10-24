@@ -1,0 +1,5278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS • C++ Lesson 3 — Input & Output</title>
+
+<style>
+/* =========================================================
+   ZENSUS C++ — LESSON 3
+   INPUT & OUTPUT
+========================================================= */
+
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --secondary: #7c3aed;
+
+    --bg: #f7f9fc;
+    --surface: #ffffff;
+    --surface-2: #f1f5f9;
+
+    --text: #172033;
+    --muted: #64748b;
+    --border: #e2e8f0;
+
+    --success: #16a34a;
+    --warning: #d97706;
+    --danger: #dc2626;
+
+    --sidebar: 280px;
+    --header: 72px;
+
+    --radius: 18px;
+    --shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+}
+
+/* =========================================================
+   SCROLL PROGRESS
+========================================================= */
+
+.scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 4px;
+    width: 0%;
+    background: linear-gradient(
+        90deg,
+        var(--primary),
+        var(--secondary)
+    );
+    z-index: 9999;
+}
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--sidebar);
+    height: 100vh;
+
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+
+    z-index: 1000;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.brand {
+    height: var(--header);
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 0 22px;
+
+    border-bottom: 1px solid var(--border);
+}
+
+.brand-logo {
+    width: 38px;
+    height: 38px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 11px;
+
+    color: white;
+    font-weight: 900;
+
+    background: linear-gradient(
+        135deg,
+        var(--primary),
+        var(--secondary)
+    );
+
+    box-shadow: 0 7px 18px rgba(37, 99, 235, 0.25);
+}
+
+.brand-name {
+    font-size: 19px;
+    font-weight: 850;
+    letter-spacing: -0.4px;
+}
+
+.brand-subtitle {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: -4px;
+}
+
+.nav {
+    padding: 18px 12px;
+    overflow-y: auto;
+}
+
+.nav-title {
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.nav a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    text-decoration: none;
+    color: #475569;
+
+    padding: 9px 12px;
+    margin: 2px 0;
+
+    border-radius: 10px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    transition: 0.2s ease;
+}
+
+.nav a:hover {
+    color: var(--primary);
+    background: #eff6ff;
+}
+
+.nav a.active {
+    color: var(--primary);
+    background: #eff6ff;
+    font-weight: 750;
+}
+
+.nav-icon {
+    width: 21px;
+    text-align: center;
+}
+
+.sidebar-bottom {
+    margin-top: auto;
+    padding: 14px;
+    border-top: 1px solid var(--border);
+}
+
+.progress-card {
+    padding: 13px;
+
+    border-radius: 13px;
+    background: var(--surface-2);
+}
+
+.progress-card-title {
+    display: flex;
+    justify-content: space-between;
+
+    font-size: 12px;
+    font-weight: 750;
+
+    margin-bottom: 8px;
+}
+
+.progress-bar {
+    height: 7px;
+    border-radius: 10px;
+    background: #e2e8f0;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+
+    background: linear-gradient(
+        90deg,
+        var(--primary),
+        var(--secondary)
+    );
+
+    transition: width 0.4s ease;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.header {
+    position: fixed;
+    left: var(--sidebar);
+    right: 0;
+    top: 0;
+
+    height: var(--header);
+
+    background: rgba(255,255,255,0.94);
+    backdrop-filter: blur(14px);
+
+    border-bottom: 1px solid var(--border);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 28px;
+
+    z-index: 900;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.menu-btn {
+    display: none;
+
+    border: none;
+    background: var(--surface-2);
+
+    width: 40px;
+    height: 40px;
+
+    border-radius: 10px;
+
+    font-size: 19px;
+    cursor: pointer;
+}
+
+.lesson-label {
+    font-size: 13px;
+    font-weight: 750;
+    color: var(--muted);
+}
+
+.lesson-number {
+    color: var(--primary);
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-badge {
+    padding: 7px 11px;
+
+    border: 1px solid var(--border);
+    border-radius: 9px;
+
+    background: var(--surface);
+
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+}
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.main {
+    margin-left: var(--sidebar);
+    padding-top: calc(var(--header) + 35px);
+}
+
+.container {
+    width: min(1120px, calc(100% - 48px));
+    margin: auto;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 28px;
+
+    padding: 34px;
+
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+    border-radius: 24px;
+
+    box-shadow: var(--shadow);
+
+    overflow: hidden;
+    position: relative;
+}
+
+.hero::after {
+    content: "";
+
+    position: absolute;
+
+    width: 280px;
+    height: 280px;
+
+    border-radius: 50%;
+
+    background: rgba(37,99,235,0.05);
+
+    right: -100px;
+    top: -100px;
+}
+
+.eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    color: var(--primary);
+
+    background: #eff6ff;
+
+    border: 1px solid #dbeafe;
+
+    padding: 7px 11px;
+
+    border-radius: 9px;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+}
+
+.hero h1 {
+    font-size: clamp(34px, 5vw, 54px);
+
+    line-height: 1.05;
+
+    letter-spacing: -2px;
+
+    margin: 20px 0 14px;
+
+    max-width: 700px;
+}
+
+.hero h1 span {
+    color: var(--primary);
+}
+
+.hero-description {
+    color: var(--muted);
+    max-width: 680px;
+    font-size: 16px;
+}
+
+.badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 22px;
+}
+
+.badge {
+    padding: 7px 11px;
+
+    border-radius: 8px;
+
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+
+    font-size: 11px;
+    font-weight: 750;
+    color: #475569;
+}
+
+/* =========================================================
+   CODE WINDOW
+========================================================= */
+
+.code-window {
+    background: #0f172a;
+
+    border-radius: 17px;
+
+    overflow: hidden;
+
+    box-shadow: 0 18px 35px rgba(15,23,42,0.15);
+
+    position: relative;
+    z-index: 2;
+}
+
+.code-top {
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 0 14px;
+
+    background: #111c31;
+
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #64748b;
+}
+
+.code-title {
+    margin-left: 7px;
+
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+pre {
+    overflow-x: auto;
+}
+
+.code-window pre {
+    padding: 21px;
+
+    font-family:
+        "Cascadia Code",
+        "Fira Code",
+        Consolas,
+        monospace;
+
+    font-size: 12.5px;
+
+    line-height: 1.8;
+
+    color: #dbeafe;
+}
+
+.keyword { color: #c084fc; }
+.type { color: #60a5fa; }
+.string { color: #86efac; }
+.number { color: #fbbf24; }
+.comment { color: #64748b; }
+.function { color: #67e8f9; }
+
+/* =========================================================
+   SECTIONS
+========================================================= */
+
+section {
+    scroll-margin-top: 100px;
+}
+
+.section {
+    margin-top: 35px;
+}
+
+.section-header {
+    margin-bottom: 19px;
+}
+
+.section-kicker {
+    color: var(--primary);
+
+    font-size: 11px;
+    font-weight: 850;
+
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.section-title {
+    font-size: 29px;
+    line-height: 1.2;
+    letter-spacing: -0.7px;
+
+    margin-top: 5px;
+}
+
+.section-description {
+    color: var(--muted);
+    margin-top: 6px;
+    max-width: 760px;
+}
+
+/* =========================================================
+   CARDS
+========================================================= */
+
+.card {
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius);
+
+    padding: 25px;
+
+    box-shadow: var(--shadow);
+
+    margin-bottom: 18px;
+}
+
+.card h3 {
+    font-size: 19px;
+    margin-bottom: 9px;
+}
+
+.card p {
+    color: var(--muted);
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+/* =========================================================
+   OBJECTIVES
+========================================================= */
+
+.objective {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+}
+
+.objective-icon {
+    flex: 0 0 auto;
+
+    width: 35px;
+    height: 35px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 10px;
+
+    background: #eff6ff;
+
+    color: var(--primary);
+
+    font-weight: 900;
+}
+
+.objective strong {
+    display: block;
+    margin-bottom: 2px;
+}
+
+.objective span {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* =========================================================
+   FLOWCHART
+========================================================= */
+
+.flowchart {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+
+    gap: 12px;
+
+    padding: 30px 10px;
+}
+
+.flow-node {
+    min-width: 145px;
+
+    padding: 16px;
+
+    text-align: center;
+
+    background: white;
+
+    border: 2px solid #dbeafe;
+
+    border-radius: 14px;
+
+    position: relative;
+
+    animation: floatNode 3s ease-in-out infinite;
+}
+
+.flow-node:nth-child(3) {
+    animation-delay: .2s;
+}
+
+.flow-node:nth-child(5) {
+    animation-delay: .4s;
+}
+
+.flow-node:nth-child(7) {
+    animation-delay: .6s;
+}
+
+.flow-node strong {
+    display: block;
+    color: var(--primary);
+}
+
+.flow-node small {
+    color: var(--muted);
+}
+
+.flow-arrow {
+    font-size: 25px;
+    color: var(--primary);
+    animation: arrowPulse 1.5s infinite;
+}
+
+@keyframes floatNode {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+@keyframes arrowPulse {
+    0%,100% {
+        transform: translateX(0);
+        opacity: .5;
+    }
+    50% {
+        transform: translateX(5px);
+        opacity: 1;
+    }
+}
+
+/* =========================================================
+   TERMINAL
+========================================================= */
+
+.terminal {
+    background: #0f172a;
+
+    border-radius: 15px;
+
+    overflow: hidden;
+
+    margin-top: 15px;
+}
+
+.terminal-head {
+    padding: 11px 15px;
+
+    color: #94a3b8;
+
+    background: #111c31;
+
+    font-size: 11px;
+}
+
+.terminal-body {
+    padding: 18px;
+
+    color: #d1fae5;
+
+    font-family: monospace;
+
+    font-size: 13px;
+
+    min-height: 90px;
+}
+
+.prompt {
+    color: #60a5fa;
+}
+
+.output {
+    color: #86efac;
+}
+
+/* =========================================================
+   INFO BOX
+========================================================= */
+
+.info-box {
+    padding: 17px;
+
+    border-left: 4px solid var(--primary);
+
+    background: #eff6ff;
+
+    border-radius: 10px;
+
+    margin: 16px 0;
+}
+
+.info-box strong {
+    color: var(--primary);
+}
+
+.warning-box {
+    padding: 17px;
+
+    border-left: 4px solid var(--warning);
+
+    background: #fff7ed;
+
+    border-radius: 10px;
+
+    margin: 16px 0;
+}
+
+.success-box {
+    padding: 17px;
+
+    border-left: 4px solid var(--success);
+
+    background: #f0fdf4;
+
+    border-radius: 10px;
+
+    margin: 16px 0;
+}
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 650px;
+}
+
+th,
+td {
+    padding: 13px 15px;
+
+    text-align: left;
+
+    border-bottom: 1px solid var(--border);
+
+    font-size: 13px;
+}
+
+th {
+    background: var(--surface-2);
+
+    color: #334155;
+
+    font-weight: 800;
+}
+
+td {
+    color: #64748b;
+}
+
+code.inline {
+    padding: 3px 7px;
+
+    border-radius: 6px;
+
+    background: #f1f5f9;
+
+    color: #7c3aed;
+
+    font-family: monospace;
+}
+
+/* =========================================================
+   VARIABLE VISUAL
+========================================================= */
+
+.memory-visual {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 20px;
+
+    flex-wrap: wrap;
+
+    padding: 30px;
+}
+
+.memory-type {
+    padding: 15px 22px;
+
+    border-radius: 12px;
+
+    background: #eff6ff;
+
+    color: var(--primary);
+
+    font-weight: 850;
+
+    border: 1px solid #dbeafe;
+}
+
+.memory-arrow {
+    font-size: 25px;
+    color: var(--muted);
+}
+
+.memory-box {
+    min-width: 180px;
+
+    text-align: center;
+
+    border: 2px solid #cbd5e1;
+
+    border-radius: 14px;
+
+    overflow: hidden;
+
+    box-shadow: 0 8px 20px rgba(15,23,42,.06);
+}
+
+.memory-box-title {
+    padding: 10px;
+
+    background: #f8fafc;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.memory-value {
+    padding: 18px;
+
+    font-size: 25px;
+
+    font-weight: 900;
+
+    color: var(--primary);
+
+    background: white;
+}
+
+/* =========================================================
+   CONCEPT CARDS
+========================================================= */
+
+.concept-icon {
+    width: 45px;
+    height: 45px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 12px;
+
+    background: #eff6ff;
+
+    color: var(--primary);
+
+    font-size: 21px;
+
+    margin-bottom: 14px;
+}
+
+.concept-card h3 {
+    margin-bottom: 5px;
+}
+
+/* =========================================================
+   CODE + EXPLANATION
+========================================================= */
+
+.code-explain {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 18px;
+
+    align-items: stretch;
+}
+
+.explain-list {
+    list-style: none;
+}
+
+.explain-list li {
+    padding: 13px 0;
+
+    border-bottom: 1px solid var(--border);
+
+    color: var(--muted);
+
+    font-size: 13px;
+}
+
+.explain-list li:last-child {
+    border-bottom: none;
+}
+
+.line-number {
+    display: inline-block;
+
+    width: 25px;
+
+    color: #94a3b8;
+
+    font-family: monospace;
+}
+
+/* =========================================================
+   INPUT ANIMATION
+========================================================= */
+
+.input-animation {
+    display: grid;
+
+    grid-template-columns: 1fr auto 1fr;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 30px 10px;
+}
+
+.person {
+    text-align: center;
+}
+
+.person-icon {
+    font-size: 52px;
+
+    animation: personMove 2.5s infinite ease-in-out;
+}
+
+.person-label {
+    font-weight: 800;
+    margin-top: 6px;
+}
+
+.data-arrow {
+    font-size: 35px;
+    color: var(--primary);
+
+    animation: dataMove 1.4s infinite;
+}
+
+.computer {
+    padding: 20px;
+
+    background: #0f172a;
+
+    color: #86efac;
+
+    border-radius: 15px;
+
+    font-family: monospace;
+
+    text-align: center;
+}
+
+@keyframes personMove {
+    0%,100% { transform: translateX(0); }
+    50% { transform: translateX(8px); }
+}
+
+@keyframes dataMove {
+    0% {
+        transform: translateX(-10px);
+        opacity: .4;
+    }
+    50% {
+        transform: translateX(10px);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(-10px);
+        opacity: .4;
+    }
+}
+
+/* =========================================================
+   INTERACTIVE LAB
+========================================================= */
+
+.lab {
+    background: #0f172a;
+
+    border-radius: 18px;
+
+    padding: 22px;
+
+    color: white;
+
+    box-shadow: 0 16px 35px rgba(15,23,42,.14);
+}
+
+.lab h3 {
+    color: white;
+}
+
+.lab p {
+    color: #94a3b8;
+}
+
+.lab-controls {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 12px;
+
+    margin-top: 15px;
+}
+
+.lab input,
+.lab select {
+    width: 100%;
+
+    padding: 11px 12px;
+
+    border: 1px solid #334155;
+
+    border-radius: 9px;
+
+    background: #111c31;
+
+    color: white;
+
+    outline: none;
+}
+
+.lab input:focus,
+.lab select:focus {
+    border-color: #60a5fa;
+}
+
+.lab button {
+    padding: 11px 15px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: var(--primary);
+
+    color: white;
+
+    font-weight: 750;
+
+    cursor: pointer;
+
+    margin-top: 12px;
+
+    transition: .2s;
+}
+
+.lab button:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.lab-output {
+    margin-top: 16px;
+
+    padding: 16px;
+
+    min-height: 70px;
+
+    border-radius: 10px;
+
+    background: #020617;
+
+    color: #86efac;
+
+    font-family: monospace;
+}
+
+/* =========================================================
+   QUIZ
+========================================================= */
+
+.quiz-card {
+    padding: 21px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 15px;
+
+    margin-bottom: 14px;
+
+    background: white;
+}
+
+.question {
+    font-weight: 800;
+    margin-bottom: 12px;
+}
+
+.option {
+    display: block;
+
+    padding: 10px 12px;
+
+    margin: 7px 0;
+
+    border: 1px solid var(--border);
+
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    font-size: 13px;
+
+    transition: .2s;
+}
+
+.option:hover {
+    background: #f8fafc;
+    border-color: #bfdbfe;
+}
+
+.option input {
+    margin-right: 8px;
+}
+
+.quiz-result {
+    display: none;
+
+    padding: 20px;
+
+    margin-top: 15px;
+
+    border-radius: 12px;
+
+    background: #eff6ff;
+
+    color: #1e3a8a;
+
+    font-weight: 750;
+}
+
+.quiz-btn {
+    border: none;
+
+    padding: 12px 18px;
+
+    background: var(--primary);
+
+    color: white;
+
+    border-radius: 10px;
+
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+/* =========================================================
+   ACCORDION
+========================================================= */
+
+.accordion {
+    border: 1px solid var(--border);
+
+    border-radius: 13px;
+
+    overflow: hidden;
+
+    margin-bottom: 10px;
+}
+
+.accordion-header {
+    width: 100%;
+
+    padding: 15px 17px;
+
+    border: none;
+
+    background: white;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    font-weight: 800;
+
+    color: var(--text);
+}
+
+.accordion-content {
+    max-height: 0;
+
+    overflow: hidden;
+
+    transition: max-height .3s ease;
+
+    background: #f8fafc;
+}
+
+.accordion-content-inner {
+    padding: 0 17px 17px;
+
+    color: var(--muted);
+
+    font-size: 13px;
+}
+
+.accordion.open .accordion-content {
+    max-height: 500px;
+}
+
+/* =========================================================
+   MISTAKES
+========================================================= */
+
+.mistake {
+    display: flex;
+
+    gap: 14px;
+
+    padding: 15px;
+
+    margin-bottom: 10px;
+
+    border-radius: 12px;
+
+    background: #fff7f7;
+
+    border: 1px solid #fee2e2;
+}
+
+.mistake-icon {
+    color: var(--danger);
+    font-size: 20px;
+}
+
+.mistake strong {
+    display: block;
+    margin-bottom: 2px;
+}
+
+.mistake p {
+    font-size: 13px;
+}
+
+/* =========================================================
+   CHECKLIST
+========================================================= */
+
+.checklist {
+    list-style: none;
+}
+
+.checklist li {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 11px 0;
+
+    border-bottom: 1px solid var(--border);
+
+    font-size: 13px;
+}
+
+.checklist li:last-child {
+    border-bottom: none;
+}
+
+.checklist input {
+    width: 17px;
+    height: 17px;
+
+    accent-color: var(--primary);
+}
+
+/* =========================================================
+   PRACTICE
+========================================================= */
+
+.practice-number {
+    width: 35px;
+    height: 35px;
+
+    display: grid;
+    place-items: center;
+
+    flex: 0 0 auto;
+
+    border-radius: 10px;
+
+    background: #eff6ff;
+
+    color: var(--primary);
+
+    font-weight: 900;
+}
+
+.practice-item {
+    display: flex;
+    gap: 13px;
+
+    padding: 14px 0;
+
+    border-bottom: 1px solid var(--border);
+}
+
+.practice-item:last-child {
+    border-bottom: none;
+}
+
+.practice-item strong {
+    display: block;
+}
+
+.practice-item span {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* =========================================================
+   REVEAL
+========================================================= */
+
+.reveal {
+    opacity: 0;
+
+    transform: translateY(22px);
+
+    transition:
+        opacity .65s ease,
+        transform .65s ease;
+}
+
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.footer {
+    margin-top: 55px;
+
+    padding: 30px 0 45px;
+
+    border-top: 1px solid var(--border);
+
+    text-align: center;
+
+    color: var(--muted);
+
+    font-size: 12px;
+}
+
+.footer strong {
+    color: var(--primary);
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1050px) {
+
+    :root {
+        --sidebar: 240px;
+    }
+
+    .hero {
+        grid-template-columns: 1fr;
+    }
+
+    .grid-3 {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 800px) {
+
+    .sidebar {
+        transform: translateX(-100%);
+
+        transition: transform .3s ease;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .header {
+        left: 0;
+    }
+
+    .menu-btn {
+        display: block;
+    }
+
+    .main {
+        margin-left: 0;
+    }
+
+    .grid-2,
+    .grid-3,
+    .code-explain {
+        grid-template-columns: 1fr;
+    }
+
+    .container {
+        width: min(100% - 30px, 720px);
+    }
+
+    .hero {
+        padding: 24px;
+    }
+
+    .input-animation {
+        grid-template-columns: 1fr;
+    }
+
+    .data-arrow {
+        transform: rotate(90deg);
+    }
+
+    .lab-controls {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 550px) {
+
+    .header {
+        padding: 0 15px;
+    }
+
+    .header-badge {
+        display: none;
+    }
+
+    .container {
+        width: calc(100% - 20px);
+    }
+
+    .hero {
+        padding: 20px;
+        border-radius: 18px;
+    }
+
+    .hero h1 {
+        font-size: 36px;
+        letter-spacing: -1.5px;
+    }
+
+    .card {
+        padding: 18px;
+        border-radius: 15px;
+    }
+
+    .section-title {
+        font-size: 25px;
+    }
+
+    .flowchart {
+        flex-direction: column;
+    }
+
+    .flow-arrow {
+        transform: rotate(90deg);
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- =====================================================
+     SIDEBAR
+===================================================== -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+
+        <div class="brand-logo">
+            Z
+        </div>
+
+        <div>
+            <div class="brand-name">ZENSUS</div>
+            <div class="brand-subtitle">C++ Learning Path</div>
+        </div>
+
+    </div>
+
+    <nav class="nav">
+
+        <div class="nav-title">Lesson 03</div>
+
+        <a href="#overview" class="active">
+            <span class="nav-icon">🎯</span>
+            Overview
+        </a>
+
+        <a href="#what-is-io">
+            <span class="nav-icon">💡</span>
+            What is I/O?
+        </a>
+
+        <a href="#output">
+            <span class="nav-icon">🖥️</span>
+            Output
+        </a>
+
+        <a href="#cout">
+            <span class="nav-icon">📤</span>
+            std::cout
+        </a>
+
+        <a href="#escape">
+            <span class="nav-icon">↩️</span>
+            Escape Sequences
+        </a>
+
+        <a href="#input">
+            <span class="nav-icon">⌨️</span>
+            Input
+        </a>
+
+        <a href="#cin">
+            <span class="nav-icon">📥</span>
+            std::cin
+        </a>
+
+        <a href="#getline">
+            <span class="nav-icon">📝</span>
+            getline()
+        </a>
+
+        <a href="#input-types">
+            <span class="nav-icon">🔢</span>
+            Input Types
+        </a>
+
+        <a href="#formatting">
+            <span class="nav-icon">✨</span>
+            Output Formatting
+        </a>
+
+        <a href="#conversion">
+            <span class="nav-icon">🔄</span>
+            Input & Conversion
+        </a>
+
+        <a href="#lab">
+            <span class="nav-icon">🧪</span>
+            Interactive Lab
+        </a>
+
+        <a href="#mistakes">
+            <span class="nav-icon">⚠️</span>
+            Mistakes
+        </a>
+
+        <a href="#quiz">
+            <span class="nav-icon">🧠</span>
+            Quiz
+        </a>
+
+        <a href="#interview">
+            <span class="nav-icon">💼</span>
+            Interview
+        </a>
+
+        <a href="#practice">
+            <span class="nav-icon">🚀</span>
+            Practice
+        </a>
+
+        <a href="#checklist">
+            <span class="nav-icon">✅</span>
+            Checklist
+        </a>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+
+        <div class="progress-card">
+
+            <div class="progress-card-title">
+                <span>Lesson Progress</span>
+                <span id="progressText">0%</span>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</aside>
+
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
+<header class="header">
+
+    <div class="header-left">
+
+        <button class="menu-btn" id="menuBtn">
+            ☰
+        </button>
+
+        <div class="lesson-label">
+            C++ <span class="lesson-number">• Lesson 03 / 15</span>
+        </div>
+
+    </div>
+
+    <div class="header-right">
+
+        <div class="header-badge">
+            Beginner → Interview
+        </div>
+
+        <div class="header-badge">
+            C++ Core
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<main class="main">
+
+<div class="container">
+
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<section id="overview" class="hero reveal">
+
+    <div>
+
+        <div class="eyebrow">
+            C++ CORE CONCEPT
+        </div>
+
+        <h1>
+            Input & <span>Output</span>
+        </h1>
+
+        <p class="hero-description">
+            Learn how C++ communicates with the outside world.
+            Master <strong>std::cout</strong>, <strong>std::cin</strong>,
+            <strong>getline()</strong>, formatting, escape sequences,
+            input validation concepts and professional console I/O.
+        </p>
+
+        <div class="badges">
+
+            <span class="badge">Beginner Friendly</span>
+            <span class="badge">Core C++</span>
+            <span class="badge">Interactive</span>
+            <span class="badge">Interview Ready</span>
+            <span class="badge">Exam Ready</span>
+
+        </div>
+
+    </div>
+
+
+    <div class="code-window">
+
+        <div class="code-top">
+
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+
+            <span class="code-title">
+                main.cpp
+            </span>
+
+        </div>
+
+<pre><span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">#include</span> &lt;string&gt;
+
+<span class="keyword">int</span> <span class="function">main</span>()
+{
+    <span class="type">std::string</span> name;
+    <span class="type">int</span> age;
+
+    <span class="type">std::cout</span> &lt;&lt; <span class="string">"Enter name: "</span>;
+    <span class="type">std::getline</span>(std::cin, name);
+
+    <span class="type">std::cout</span> &lt;&lt; <span class="string">"Enter age: "</span>;
+    std::cin &gt;&gt; age;
+
+    std::cout &lt;&lt; <span class="string">"Hello "</span>
+              &lt;&lt; name &lt;&lt; <span class="string">"!"</span>;
+
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</pre>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     OBJECTIVES
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-kicker">
+            What you'll learn
+        </div>
+
+        <h2 class="section-title">
+            Learning Objectives
+        </h2>
+
+        <p class="section-description">
+            By the end of this lesson, you should be able to confidently
+            read input from users and display meaningful output in C++.
+        </p>
+
+    </div>
+
+    <div class="grid-2">
+
+        <div class="card objective">
+
+            <div class="objective-icon">01</div>
+
+            <div>
+                <strong>Understand I/O</strong>
+                <span>Learn how programs communicate with users.</span>
+            </div>
+
+        </div>
+
+        <div class="card objective">
+
+            <div class="objective-icon">02</div>
+
+            <div>
+                <strong>Use std::cout</strong>
+                <span>Print text, numbers, variables and expressions.</span>
+            </div>
+
+        </div>
+
+        <div class="card objective">
+
+            <div class="objective-icon">03</div>
+
+            <div>
+                <strong>Use std::cin</strong>
+                <span>Read integers, floating-point values, characters and words.</span>
+            </div>
+
+        </div>
+
+        <div class="card objective">
+
+            <div class="objective-icon">04</div>
+
+            <div>
+                <strong>Master getline()</strong>
+                <span>Read complete lines containing spaces.</span>
+            </div>
+
+        </div>
+
+        <div class="card objective">
+
+            <div class="objective-icon">05</div>
+
+            <div>
+                <strong>Format Output</strong>
+                <span>Control precision, width, decimal formatting and readability.</span>
+            </div>
+
+        </div>
+
+        <div class="card objective">
+
+            <div class="objective-icon">06</div>
+
+            <div>
+                <strong>Avoid Input Bugs</strong>
+                <span>Understand common cin/getline and invalid-input problems.</span>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     WHAT IS I/O
+===================================================== -->
+
+<section id="what-is-io" class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-kicker">
+            01 • Foundation
+        </div>
+
+        <h2 class="section-title">
+            What is Input & Output?
+        </h2>
+
+    </div>
+
+    <div class="card">
+
+        <p>
+            <strong>Input</strong> means data given to a program.
+            <strong>Output</strong> means information produced by a program.
+        </p>
+
+        <div class="input-animation">
+
+            <div class="person">
+
+                <div class="person-icon">
+                    👨‍💻
+                </div>
+
+                <div class="person-label">
+                    User
+                </div>
+
+            </div>
+
+            <div class="data-arrow">
+                →
+            </div>
+
+            <div class="computer">
+
+                INPUT
+                <br><br>
+                <span id="animatedInput">
+                    25
+                </span>
+
+            </div>
+
+            <div class="data-arrow">
+                →
+            </div>
+
+            <div class="person">
+
+                <div class="person-icon">
+                    🖥️
+                </div>
+
+                <div class="person-label">
+                    Output
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="info-box">
+
+            <strong>Real-world example:</strong>
+
+            A banking application takes your account number and PIN
+            as input and displays your account balance as output.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     I/O FLOW
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-kicker">
+            Program Flow
+        </div>
+
+        <h2 class="section-title">
+            How Console I/O Works
+        </h2>
+
+    </div>
+
+    <div class="card">
+
+        <div class="flowchart">
+
+            <div class="flow-node">
+                <strong>👤 User</strong>
+                <small>Provides data</small>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-node">
+                <strong>⌨️ Input</strong>
+                <small>std::cin</small>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-node">
+                <strong>🧠 Program</strong>
+                <small>Processes data</small>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-node">
+                <strong>🖥️ Output</strong>
+                <small>std::cout</small>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     OUTPUT
+===================================================== -->
+
+<section id="output" class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-kicker">
+            02 • Output
+        </div>
+
+        <h2 class="section-title">
+            Displaying Output in C++
+        </h2>
+
+        <p class="section-description">
+            C++ commonly uses <strong>std::cout</strong> to send output
+            to the standard output stream, normally the console.
+        </p>
+
+    </div>
+
+    <div class="code-explain">
+
+        <div class="code-window">
+
+            <div class="code-top">
+
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+
+                <span class="code-title">
+                    output.cpp
+                </span>
+
+            </div>
+
+<pre><span class="keyword">#include</span> &lt;iostream&gt;
+
+<span class="keyword">int</span> <span class="function">main</span>()
+{
+    <span class="type">std::cout</span> &lt;&lt; <span class="string">"Hello, ZENSUS!"</span>;
+
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</pre>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Understanding the statement</h3>
+
+            <ul class="explain-list">
+
+                <li>
+                    <span class="line-number">1</span>
+                    <strong>#include &lt;iostream&gt;</strong>
+                    <br>
+                    Gives access to standard input/output facilities.
+                </li>
+
+                <li>
+                    <span class="line-number">2</span>
+                    <strong>std::cout</strong>
+                    <br>
+                    Refers to the standard output stream.
+                </li>
+
+                <li>
+                    <span class="line-number">3</span>
+                    <strong>&lt;&lt;</strong>
+                    <br>
+                    The insertion operator sends data into the output stream.
+                </li>
+
+                <li>
+                    <span class="line-number">4</span>
+                    <strong>"Hello, ZENSUS!"</strong>
+                    <br>
+                    This is a string literal.
+                </li>
+
+            </ul>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     COUT
+===================================================== -->
+
+<section id="cout" class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-kicker">
+            03 • std::cout
+        </div>
+
+        <h2 class="section-title">
+            Mastering std::cout
+        </h2>
+
+    </div>
+
+    <div class="grid-2">
+
+        <div class="card">
+
+            <div class="concept-icon">📝</div>
+
+            <h3>Print Text</h3>
+
+            <div class="code-window">
+
+<pre>std::cout &lt;&lt; <span class="string">"Welcome to C++"</span>;</pre>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="concept-icon">🔢</div>
+
+            <h3>Print Numbers</h3>
+
+            <div class="code-window">
+
+<pre><span class="keyword">int</span> age = <span class="number">19</span>;
+
+std::cout &lt;&lt; age;</pre>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="concept-icon">🔗</div>
+
+            <h3>Print Multiple Values</h3>
+
+            <div class="code-window">
+
+<pre>std::cout
+    &lt;&lt; <span class="string">"Age: "</span>
+    &lt;&lt; age;</pre>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="concept-icon">➕</div>
+
+            <h3>Print Expressions</h3>
+
+            <div class="code-window">
+
+<pre><span class="keyword">int</span> a = <span class="number">10</span>;
+<span class="keyword">int</span> b = <span class="number">20</span>;
+
+std::cout &lt;&lt; a + b;</pre>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="terminal">
+
+        <div class="terminal-head">
+            Console Output
+        </div>
+
+        <div class="terminal-body">
+
+            <span class="prompt">$</span>
+            ./main
+            <br><br>
+
+            <span class="output">
+                Age: 19
+                <br>
+                10 + 20 = 30
+            </span>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     NEW LINE
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="card">
+
+        <h3>Printing on Multiple Lines</h3>
+
+        <p>
+            You can use <code class="inline">\n</code> to create
+            a new line.
+        </p>
+
+        <div class="code-window">
+
+<pre>std::cout &lt;&lt; <span class="string">"Hello\n"</span>;
+std::cout &lt;&lt; <span class="string">"Welcome to C++\n"</span>;
+std::cout &lt;&lt; <span class="string">"Keep Learning!"</span>;</pre>
+
+        </div>
+
+        <div class="terminal">
+
+            <div class="terminal-head">
+                Output
+            </div>
+
+            <div class="terminal-body">
+
+                <span class="output">
+                    Hello
+                    <br>
+                    Welcome to C++
+                    <br>
+                    Keep Learning!
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ESCAPE SEQUENCES
+===================================================== -->
+
+<section id="escape" class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-kicker">
+            04 • Formatting
+        </div>
+
+        <h2 class="section-title">
+            Escape Sequences
+        </h2>
+
+        <p class="section-description">
+            Escape sequences represent special characters inside
+            character and string literals.
+        </p>
+
+    </div>
+
+    <div class="card">
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Sequence</th>
+                        <th>Meaning</th>
+                        <th>Example</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td><code class="inline">\n</code></td>
+                        <td>New line</td>
+                        <td><code class="inline">"Hello\nWorld"</code></td>
+                    </tr>
+
+                    <tr>
+                        <td><code class="inline">\t</code></td>
+                        <td>Horizontal tab</td>
+                        <td><code class="inline">"A\tB"</code></td>
+                    </tr>
+
+                    <tr>
+                        <td><code class="inline">\\</code></td>
+                        <td>Backslash</td>
+                        <td><code class="inline">"C:\\Users"</code></td>
+                    </tr>
+
+                    <tr>
+                        <td><code class="inline">\"</code></td>
+                        <td>Double quote</td>
+                        <td><code class="inline">"He said \"Hi\""</code></td>
+                    </tr>
+
+                    <tr>
+                        <td><code class="inline">\'</code></td>
+                        <td>Single quote</td>
+                        <td><code class="inline">'\\''</code></td>
+                    </tr>
+
+                    <tr>
+                        <td><code class="inline">\r</code></td>
+                        <td>Carriage return</td>
+                        <td>Special cursor movement</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ENDL
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="grid-2">
+
+        <div class="card">
+
+            <h3>Using '\n'</h3>
+
+            <div class="code-window">
+
+<pre>std::cout
+    &lt;&lt; <span class="string">"Hello\n"</span>;
+
+std::cout
+    &lt;&lt; <span class="string">"World"</span>;</pre>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Using std::endl</h3>
+
+            <div class="code-window">
+
+<pre>std::cout
+    &lt;&lt; <span class="string">"Hello"</span>
+    &lt;&lt; std::endl;
+
+std::cout
+    &lt;&lt; <span class="string">"World"</span>;</pre>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="info-box">
+
+        <strong>Best practice:</strong>
+        <code class="inline">\n</code> is generally preferred when
+        you only need a new line. <code class="inline">std::endl</code>
+        also flushes the output stream, which can be useful when
+        flushing is actually required.
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     INPUT
+===================================================== -->
+
+<section id="input" class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-kicker">
+            05 • Input
+        </div>
+
+        <h2 class="section-title">
+            Taking Input from the User
+        </h2>
+
+        <p class="section-description">
+            Input allows a program to become interactive rather than
+            simply printing fixed information.
+        </p>
+
+    </div>
+
+    <div class="card">
+
+        <div class="memory-visual">
+
+            <div class="memory-type">
+                User types
+            </div>
+
+            <div class="memory-arrow">
+                →
+            </div>
+
+            <div class="memory-box">
+
+                <div class="memory-box-title">
+                    Variable
+                </div>
+
+                <div class="memory-value">
+                    25
+                </div>
+
+            </div>
+
+            <div class="memory-arrow">
+                →
+            </div>
+
+            <div class="memory-type">
+                Program uses it
+            </div>
+
+        </div>
+
+        <div class="info-box">
+
+            <strong>Basic syntax:</strong>
+
+            <div class="code-window" style="margin-top:10px;">
+
+<pre><span class="keyword">int</span> age;
+
+std::cin &gt;&gt; age;</pre>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CIN
+===================================================== -->
+
+<section id="cin" class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-kicker">
+            06 • std::cin
+        </div>
+
+        <h2 class="section-title">
+            Mastering std::cin
+        </h2>
+
+    </div>
+
+    <div class="card">
+
+        <h3>Integer Input</h3>
+
+        <div class="code-window">
+
+<pre><span class="keyword">int</span> age;
+
+std::cout &lt;&lt; <span class="string">"Enter your age: "</span>;
+std::cin &gt;&gt; age;
+
+std::cout &lt;&lt; <span class="string">"Your age is: "</span>
+          &lt;&lt; age;</pre>
+
+        </div>
+
+        <div class="terminal">
+
+            <div class="terminal-head">
+                Example Run
+            </div>
+
+            <div class="terminal-body">
+
+                <span class="prompt">Enter your age:</span>
+                19
+                <br><br>
+
+                <span class="output">
+                    Your age is: 19
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="grid-3">
+
+        <div class="card">
+
+            <h3>int</h3>
+
+<pre style="background:#0f172a;border-radius:10px;color:#dbeafe;padding:15px;">int age;
+cin &gt;&gt; age;</pre>
+
+        </div>
+
+        <div class="card">
+
+            <h3>double</h3>
+
+<pre style="background:#0f172a;border-radius:10px;color:#dbeafe;padding:15px;">double price;
+cin &gt;&gt; price;</pre>
+
+        </div>
+
+        <div class="card">
+
+            <h3>char</h3>
+
+<pre style="background:#0f172a;border-radius:10px;color:#dbeafe;padding:15px;">char grade;
+cin &gt;&gt; grade;</pre>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     MULTIPLE INPUT
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="card">
+
+        <h3>Taking Multiple Inputs</h3>
+
+        <p>
+            The extraction operator can be chained to read multiple values.
+        </p>
+
+        <div class="code-window">
+
+<pre><span class="keyword">int</span> a, b;
+
+std::cout &lt;&lt; <span class="string">"Enter two numbers: "</span>;
+
+std::cin &gt;&gt; a &gt;&gt; b;
+
+std::cout
+    &lt;&lt; <span class="string">"Sum = "</span>
+    &lt;&lt; a + b;</pre>
+
+        </div>
+
+        <div class="terminal">
+
+            <div class="terminal-head">
+                Example
+            </div>
+
+            <div class="terminal-body">
+
+                <span class="prompt">
+                    Enter two numbers:
+                </span>
+                10 20
+
+                <br><br>
+
+                <span class="output">
+                    Sum = 30
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     GETLINE
+===================================================== -->
+
+<section id="getline" class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-kicker">
+            07 • Strings
+        </div>
+
+        <h2 class="section-title">
+            std::getline()
+        </h2>
+
+        <p class="section-description">
+            Use <strong>std::getline()</strong> when you want to read
+            an entire line, including spaces.
+        </p>
+
+    </div>
+
+    <div class="grid-2">
+
+        <div class="card">
+
+            <h3>Problem with cin</h3>
+
+            <div class="code-window">
+
+<pre><span class="type">std::string</span> name;
+
+std::cin &gt;&gt; name;</pre>
+
+            </div>
+
+            <div class="warning-box">
+
+                <strong>Example:</strong>
+
+                If the user enters:
+
+                <br><br>
+
+                <code class="inline">
+                    Venkata Pradeep
+                </code>
+
+                <br><br>
+
+                <code class="inline">cin &gt;&gt; name</code>
+                reads only the first whitespace-delimited word:
+                <strong>Venkata</strong>.
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Solution: getline()</h3>
+
+            <div class="code-window">
+
+<pre><span class="type">std::string</span> name;
+
+std::getline(std::cin, name);
+
+std::cout
+    &lt;&lt; name;</pre>
+
+            </div>
+
+            <div class="success-box">
+
+                <strong>Now:</strong>
+
+                <br><br>
+
+                Input:
+
+                <code class="inline">
+                    Venkata Pradeep
+                </code>
+
+                <br><br>
+
+                Entire line is stored.
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CIN + GETLINE BUG
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="card">
+
+        <h3>Important: cin followed by getline()</h3>
+
+        <p>
+            A common beginner problem occurs when formatted extraction
+            with <code class="inline">std::cin &gt;&gt;</code> is followed
+            immediately by <code class="inline">std::getline()</code>.
+        </p>
+
+        <div class="code-window">
+
+<pre><span class="keyword">int</span> age;
+<span class="type">std::string</span> name;
+
+std::cin &gt;&gt; age;
+
+std::getline(std::cin, name);</pre>
+
+        </div>
+
+        <div class="warning-box">
+
+            The newline left in the input stream can be consumed by
+            <code class="inline">getline()</code>, causing an apparently
+            empty string.
+
+        </div>
+
+        <h3 style="margin-top:20px;">
+            Common solution
+        </h3>
+
+        <div class="code-window">
+
+<pre><span class="keyword">int</span> age;
+<span class="type">std::string</span> name;
+
+std::cin &gt;&gt; age;
+
+std::getline(std::cin &gt;&gt; std::ws, name);</pre>
+
+        </div>
+
+        <p style="margin-top:12px;">
+            <code class="inline">std::ws</code> consumes leading whitespace
+            before <code class="inline">getline()</code> starts reading.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     INPUT TYPES
+===================================================== -->
+
+<section id="input-types" class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-kicker">
+            08 • Data Types
+        </div>
+
+        <h2 class="section-title">
+            Reading Different Data Types
+        </h2>
+
+    </div>
+
+    <div class="card">
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Type</th>
+                        <th>Example Variable</th>
+                        <th>Input Example</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>int</td>
+                        <td>int age;</td>
+                        <td>19</td>
+                    </tr>
+
+                    <tr>
+                        <td>float</td>
+                        <td>float temperature;</td>
+                        <td>36.5</td>
+                    </tr>
+
+                    <tr>
+                        <td>double</td>
+                        <td>double salary;</td>
+                        <td>75000.50</td>
+                    </tr>
+
+                    <tr>
+                        <td>char</td>
+                        <td>char grade;</td>
+                        <td>A</td>
+                    </tr>
+
+                    <tr>
+                        <td>bool</td>
+                        <td>bool passed;</td>
+                        <td>1 / 0</td>
+                    </tr>
+
+                    <tr>
+                        <td>string</td>
+                        <td>std::string name;</td>
+                        <td>Hello World</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     BOOL
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="card">
+
+        <h3>Boolean Input & Output</h3>
+
+        <div class="code-window">
+
+<pre><span class="keyword">bool</span> passed;
+
+std::cin &gt;&gt; passed;
+
+std::cout &lt;&lt; passed;</pre>
+
+        </div>
+
+        <p style="margin-top:12px;">
+            By default, boolean output is usually displayed as
+            <strong>1</strong> for true and <strong>0</strong> for false.
+        </p>
+
+        <div class="code-window" style="margin-top:15px;">
+
+<pre>std::cout &lt;&lt; std::boolalpha;
+
+std::cout &lt;&lt; passed;</pre>
+
+        </div>
+
+        <div class="success-box">
+
+            With <code class="inline">std::boolalpha</code>,
+            output becomes <strong>true</strong> or <strong>false</strong>.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     OUTPUT FORMATTING
+===================================================== -->
+
+<section id="formatting" class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-kicker">
+            09 • Professional Output
+        </div>
+
+        <h2 class="section-title">
+            Output Formatting
+        </h2>
+
+    </div>
+
+    <div class="grid-2">
+
+        <div class="card">
+
+            <h3>Fixed Decimal Places</h3>
+
+            <div class="code-window">
+
+<pre><span class="keyword">double</span> price = <span class="number">99.98765</span>;
+
+std::cout
+    &lt;&lt; std::fixed
+    &lt;&lt; std::setprecision(<span class="number">2</span>)
+    &lt;&lt; price;</pre>
+
+            </div>
+
+            <div class="terminal">
+
+                <div class="terminal-body">
+                    <span class="output">
+                        99.99
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Required Header</h3>
+
+            <div class="code-window">
+
+<pre><span class="keyword">#include</span> &lt;iomanip&gt;</pre>
+
+            </div>
+
+            <p style="margin-top:12px;">
+                Formatting tools such as
+                <code class="inline">std::fixed</code> and
+                <code class="inline">std::setprecision()</code>
+                are provided through <code class="inline">&lt;iomanip&gt;</code>.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     WIDTH / SETW
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="card">
+
+        <h3>Creating Table-Like Output</h3>
+
+        <div class="code-window">
+
+<pre><span class="keyword">#include</span> &lt;iomanip&gt;
+
+std::cout
+    &lt;&lt; std::setw(<span class="number">15</span>)
+    &lt;&lt; <span class="string">"Name"</span>
+    &lt;&lt; std::setw(<span class="number">10</span>)
+    &lt;&lt; <span class="string">"Age"</span>
+    &lt;&lt; <span class="string">"\n"</span>;</pre>
+
+        </div>
+
+        <p style="margin-top:12px;">
+            <code class="inline">std::setw()</code> controls the minimum
+            field width for the next formatted output item.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     STRING LITERALS
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="card">
+
+        <h3>Character vs String Input</h3>
+
+        <div class="grid-2">
+
+            <div>
+
+                <div class="code-window">
+
+<pre><span class="keyword">char</span> grade = <span class="string">'A'</span>;</pre>
+
+                </div>
+
+                <p style="margin-top:8px;">
+                    Character uses <strong>single quotes</strong>.
+                </p>
+
+            </div>
+
+            <div>
+
+                <div class="code-window">
+
+<pre><span class="type">std::string</span> name =
+    <span class="string">"Pradeep"</span>;</pre>
+
+                </div>
+
+                <p style="margin-top:8px;">
+                    String literal uses <strong>double quotes</strong>.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     COMPLETE PROGRAM
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-kicker">
+            Real Example
+        </div>
+
+        <h2 class="section-title">
+            Complete Student Information Program
+        </h2>
+
+    </div>
+
+    <div class="card">
+
+        <div class="code-window">
+
+<pre><span class="keyword">#include</span> &lt;iostream&gt;
+<span class="keyword">#include</span> &lt;string&gt;
+
+<span class="keyword">int</span> <span class="function">main</span>()
+{
+    <span class="type">std::string</span> name;
+    <span class="keyword">int</span> age;
+    <span class="keyword">double</span> cgpa;
+
+    std::cout &lt;&lt; <span class="string">"Enter your name: "</span>;
+    std::getline(std::cin, name);
+
+    std::cout &lt;&lt; <span class="string">"Enter your age: "</span>;
+    std::cin &gt;&gt; age;
+
+    std::cout &lt;&lt; <span class="string">"Enter your CGPA: "</span>;
+    std::cin &gt;&gt; cgpa;
+
+    std::cout &lt;&lt; <span class="string">"\n--- Student Details ---\n"</span>;
+
+    std::cout &lt;&lt; <span class="string">"Name: "</span>
+              &lt;&lt; name &lt;&lt; <span class="string">'\n'</span>;
+
+    std::cout &lt;&lt; <span class="string">"Age: "</span>
+              &lt;&lt; age &lt;&lt; <span class="string">'\n'</span>;
+
+    std::cout &lt;&lt; <span class="string">"CGPA: "</span>
+              &lt;&lt; cgpa &lt;&lt; <span class="string">'\n'</span>;
+
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</pre>
+
+        </div>
+
+        <div class="terminal">
+
+            <div class="terminal-head">
+                Sample Run
+            </div>
+
+            <div class="terminal-body">
+
+                <span class="prompt">
+                    Enter your name:
+                </span>
+                Venkata Pradeep
+
+                <br>
+
+                <span class="prompt">
+                    Enter your age:
+                </span>
+                19
+
+                <br>
+
+                <span class="prompt">
+                    Enter your CGPA:
+                </span>
+                8.63
+
+                <br><br>
+
+                <span class="output">
+                    --- Student Details ---
+                    <br>
+                    Name: Venkata Pradeep
+                    <br>
+                    Age: 19
+                    <br>
+                    CGPA: 8.63
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     INPUT VALIDATION CONCEPT
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="card">
+
+        <h3>What Happens if the User Enters Wrong Input?</h3>
+
+        <p>
+            C++ stream extraction can enter a failed state when the input
+            cannot be interpreted as the requested type.
+        </p>
+
+        <div class="code-window">
+
+<pre><span class="keyword">int</span> age;
+
+std::cin &gt;&gt; age;</pre>
+
+        </div>
+
+        <p style="margin-top:15px;">
+            If the user enters:
+        </p>
+
+        <div class="terminal">
+
+            <div class="terminal-body">
+
+                <span class="prompt">
+                    Enter age:
+                </span>
+                hello
+
+                <br><br>
+
+                <span class="output">
+                    The extraction operation fails.
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="info-box">
+
+            Later lessons can build proper input validation loops using
+            <code class="inline">std::cin.fail()</code>,
+            <code class="inline">clear()</code> and
+            <code class="inline">ignore()</code>.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CONVERSION
+===================================================== -->
+
+<section id="conversion" class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-kicker">
+            10 • Data Processing
+        </div>
+
+        <h2 class="section-title">
+            Input + Calculation + Output
+        </h2>
+
+    </div>
+
+    <div class="card">
+
+        <div class="flowchart">
+
+            <div class="flow-node">
+                <strong>Input</strong>
+                <small>10, 20</small>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-node">
+                <strong>Process</strong>
+                <small>10 + 20</small>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-node">
+                <strong>Output</strong>
+                <small>30</small>
+            </div>
+
+        </div>
+
+        <div class="code-window">
+
+<pre><span class="keyword">int</span> a, b;
+
+std::cin &gt;&gt; a &gt;&gt; b;
+
+<span class="keyword">int</span> sum = a + b;
+
+std::cout
+    &lt;&lt; <span class="string">"Sum = "</span>
+    &lt;&lt; sum;</pre>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     INTERACTIVE LAB
+===================================================== -->
+
+<section id="lab" class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-kicker">
+            11 • Interactive Lab
+        </div>
+
+        <h2 class="section-title">
+            C++ I/O Simulator
+        </h2>
+
+        <p class="section-description">
+            This browser-based simulator demonstrates the logic of
+            C++ input and output. It is a learning simulation, not a
+            full C++ compiler.
+        </p>
+
+    </div>
+
+    <div class="lab">
+
+        <h3>Student Input Simulator</h3>
+
+        <p>
+            Enter values and observe how a C++ program could process them.
+        </p>
+
+        <div class="lab-controls">
+
+            <div>
+                <label>Name</label>
+                <input
+                    type="text"
+                    id="labName"
+                    placeholder="Enter your name"
+                >
+            </div>
+
+            <div>
+                <label>Age</label>
+                <input
+                    type="number"
+                    id="labAge"
+                    placeholder="Enter age"
+                >
+            </div>
+
+            <div>
+                <label>CGPA</label>
+                <input
+                    type="number"
+                    step="0.01"
+                    id="labCgpa"
+                    placeholder="Enter CGPA"
+                >
+            </div>
+
+            <div>
+                <label>Grade</label>
+                <select id="labGrade">
+
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+
+                </select>
+            </div>
+
+        </div>
+
+        <button onclick="runLab()">
+            ▶ Run Program
+        </button>
+
+        <div class="lab-output" id="labOutput">
+
+            Waiting for input...
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     MINI LAB: CIN / GETLINE
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="card">
+
+        <h3>Try to Understand cin vs getline()</h3>
+
+        <div class="grid-2">
+
+            <div>
+
+                <h4>std::cin &gt;&gt;</h4>
+
+                <input
+                    id="wordInput"
+                    type="text"
+                    placeholder="Try: Venkata Pradeep"
+                    style="
+                        width:100%;
+                        padding:11px;
+                        margin:10px 0;
+                        border:1px solid #e2e8f0;
+                        border-radius:9px;
+                    "
+                >
+
+                <button
+                    onclick="simulateCin()"
+                    style="
+                        padding:10px 15px;
+                        border:0;
+                        border-radius:9px;
+                        background:#2563eb;
+                        color:white;
+                        font-weight:700;
+                        cursor:pointer;
+                    "
+                >
+                    Simulate cin
+                </button>
+
+                <div
+                    id="cinResult"
+                    class="terminal"
+                    style="margin-top:12px;"
+                >
+
+                    <div class="terminal-body">
+                        Result appears here...
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <h4>std::getline()</h4>
+
+                <input
+                    id="lineInput"
+                    type="text"
+                    placeholder="Try: Venkata Pradeep"
+                    style="
+                        width:100%;
+                        padding:11px;
+                        margin:10px 0;
+                        border:1px solid #e2e8f0;
+                        border-radius:9px;
+                    "
+                >
+
+                <button
+                    onclick="simulateGetline()"
+                    style="
+                        padding:10px 15px;
+                        border:0;
+                        border-radius:9px;
+                        background:#7c3aed;
+                        color:white;
+                        font-weight:700;
+                        cursor:pointer;
+                    "
+                >
+                    Simulate getline
+                </button>
+
+                <div
+                    id="getlineResult"
+                    class="terminal"
+                    style="margin-top:12px;"
+                >
+
+                    <div class="terminal-body">
+                        Result appears here...
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     COMMON MISTAKES
+===================================================== -->
+
+<section id="mistakes" class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-kicker">
+            12 • Debugging
+        </div>
+
+        <h2 class="section-title">
+            Common Beginner Mistakes
+        </h2>
+
+    </div>
+
+
+    <div class="mistake">
+
+        <div class="mistake-icon">✕</div>
+
+        <div>
+
+            <strong>Forgetting &lt;iostream&gt;</strong>
+
+            <p>
+                If you use standard stream objects such as
+                <code class="inline">std::cin</code> and
+                <code class="inline">std::cout</code>, include
+                <code class="inline">&lt;iostream&gt;</code>.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="mistake">
+
+        <div class="mistake-icon">✕</div>
+
+        <div>
+
+            <strong>Using &lt;&lt; with cin</strong>
+
+            <p>
+                Output normally uses <code class="inline">&lt;&lt;</code>,
+                while input extraction uses <code class="inline">&gt;&gt;</code>.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="mistake">
+
+        <div class="mistake-icon">✕</div>
+
+        <div>
+
+            <strong>Using cin for a full name</strong>
+
+            <p>
+                <code class="inline">std::cin &gt;&gt; name</code> stops at
+                whitespace. Use <code class="inline">std::getline()</code>
+                for complete lines.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="mistake">
+
+        <div class="mistake-icon">✕</div>
+
+        <div>
+
+            <strong>Mixing cin and getline incorrectly</strong>
+
+            <p>
+                Handle the remaining newline/whitespace appropriately,
+                for example with <code class="inline">std::ws</code>.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="mistake">
+
+        <div class="mistake-icon">✕</div>
+
+        <div>
+
+            <strong>Missing semicolon</strong>
+
+            <p>
+                Statements such as
+                <code class="inline">std::cout &lt;&lt; "Hello";</code>
+                require a semicolon.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="mistake">
+
+        <div class="mistake-icon">✕</div>
+
+        <div>
+
+            <strong>Wrong quotes</strong>
+
+            <p>
+                Characters use single quotes:
+                <code class="inline">'A'</code>.
+                Strings use double quotes:
+                <code class="inline">"Hello"</code>.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     EXAM QUESTIONS
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-kicker">
+            University Preparation
+        </div>
+
+        <h2 class="section-title">
+            Exam-Oriented Questions
+        </h2>
+
+    </div>
+
+    <div class="accordion">
+
+        <button class="accordion-header">
+            What is input and output in C++?
+            <span>+</span>
+        </button>
+
+        <div class="accordion-content">
+
+            <div class="accordion-content-inner">
+
+                Input is the process of providing data to a program.
+                Output is the process of displaying or producing
+                information from a program. C++ provides stream-based
+                facilities such as <code class="inline">std::cin</code>
+                and <code class="inline">std::cout</code>.
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <button class="accordion-header">
+            Explain std::cin with syntax and example.
+            <span>+</span>
+        </button>
+
+        <div class="accordion-content">
+
+            <div class="accordion-content-inner">
+
+                <code class="inline">
+                    std::cin &gt;&gt; variable;
+                </code>
+
+                <br><br>
+
+                Example:
+
+                <pre style="background:#0f172a;color:#dbeafe;padding:14px;border-radius:9px;margin-top:10px;">int age;
+std::cin &gt;&gt; age;</pre>
+
+                It extracts formatted input from the standard input stream.
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <button class="accordion-header">
+            Explain std::cout.
+            <span>+</span>
+        </button>
+
+        <div class="accordion-content">
+
+            <div class="accordion-content-inner">
+
+                <code class="inline">
+                    std::cout &lt;&lt; expression;
+                </code>
+
+                <br><br>
+
+                It inserts data into the standard output stream.
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <button class="accordion-header">
+            Differentiate cin and getline().
+            <span>+</span>
+        </button>
+
+        <div class="accordion-content">
+
+            <div class="accordion-content-inner">
+
+                <strong>std::cin &gt;&gt;</strong> performs formatted
+                extraction and, for strings, normally reads one
+                whitespace-delimited token.
+
+                <br><br>
+
+                <strong>std::getline()</strong> reads characters up to
+                the delimiter, usually the newline, and can therefore
+                capture spaces in a line.
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     QUIZ
+===================================================== -->
+
+<section id="quiz" class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-kicker">
+            Knowledge Check
+        </div>
+
+        <h2 class="section-title">
+            C++ Input & Output Quiz
+        </h2>
+
+        <p class="section-description">
+            Test yourself before moving to the next lesson.
+        </p>
+
+    </div>
+
+
+    <div class="quiz-card">
+
+        <div class="question">
+            1. Which object is commonly used for standard output?
+        </div>
+
+        <label class="option">
+            <input type="radio" name="q1" value="a">
+            std::cin
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q1" value="b">
+            std::cout
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q1" value="c">
+            std::input
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q1" value="d">
+            std::printScreen
+        </label>
+
+    </div>
+
+
+    <div class="quiz-card">
+
+        <div class="question">
+            2. Which operator is normally used with std::cin?
+        </div>
+
+        <label class="option">
+            <input type="radio" name="q2" value="a">
+            &lt;&lt;
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q2" value="b">
+            &gt;&gt;
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q2" value="c">
+            ==
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q2" value="d">
+            ++
+        </label>
+
+    </div>
+
+
+    <div class="quiz-card">
+
+        <div class="question">
+            3. Which function reads an entire line including spaces?
+        </div>
+
+        <label class="option">
+            <input type="radio" name="q3" value="a">
+            cinWord()
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q3" value="b">
+            readLine()
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q3" value="c">
+            std::getline()
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q3" value="d">
+            inputLine()
+        </label>
+
+    </div>
+
+
+    <div class="quiz-card">
+
+        <div class="question">
+            4. Which header provides std::cout and std::cin?
+        </div>
+
+        <label class="option">
+            <input type="radio" name="q4" value="a">
+            &lt;string&gt;
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q4" value="b">
+            &lt;iostream&gt;
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q4" value="c">
+            &lt;cmath&gt;
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q4" value="d">
+            &lt;vector&gt;
+        </label>
+
+    </div>
+
+
+    <div class="quiz-card">
+
+        <div class="question">
+            5. What does \n represent?
+        </div>
+
+        <label class="option">
+            <input type="radio" name="q5" value="a">
+            Space
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q5" value="b">
+            Tab
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q5" value="c">
+            New line
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q5" value="d">
+            Backslash
+        </label>
+
+    </div>
+
+
+    <div class="quiz-card">
+
+        <div class="question">
+            6. Which is correct for a character?
+        </div>
+
+        <label class="option">
+            <input type="radio" name="q6" value="a">
+            "A"
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q6" value="b">
+            'A'
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q6" value="c">
+            (A)
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q6" value="d">
+            {A}
+        </label>
+
+    </div>
+
+
+    <div class="quiz-card">
+
+        <div class="question">
+            7. Which manipulator can set decimal precision?
+        </div>
+
+        <label class="option">
+            <input type="radio" name="q7" value="a">
+            std::setprecision
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q7" value="b">
+            std::decimal
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q7" value="c">
+            std::precisionSet
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q7" value="d">
+            std::fixedpoint
+        </label>
+
+    </div>
+
+
+    <div class="quiz-card">
+
+        <div class="question">
+            8. Which header is needed for std::setprecision?
+        </div>
+
+        <label class="option">
+            <input type="radio" name="q8" value="a">
+            &lt;iomanip&gt;
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q8" value="b">
+            &lt;iostream&gt;
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q8" value="c">
+            &lt;string&gt;
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q8" value="d">
+            &lt;array&gt;
+        </label>
+
+    </div>
+
+
+    <div class="quiz-card">
+
+        <div class="question">
+            9. What does std::boolalpha change?
+        </div>
+
+        <label class="option">
+            <input type="radio" name="q9" value="a">
+            Makes integers larger
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q9" value="b">
+            Displays bool values as true/false
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q9" value="c">
+            Reads strings
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q9" value="d">
+            Creates a boolean variable
+        </label>
+
+    </div>
+
+
+    <div class="quiz-card">
+
+        <div class="question">
+            10. What is a common issue when cin is immediately followed by getline?
+        </div>
+
+        <label class="option">
+            <input type="radio" name="q10" value="a">
+            Program automatically closes
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q10" value="b">
+            The leftover newline/whitespace may be consumed
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q10" value="c">
+            cout stops working
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q10" value="d">
+            int becomes string
+        </label>
+
+    </div>
+
+
+    <button class="quiz-btn" onclick="checkQuiz()">
+        Check My Score
+    </button>
+
+    <div class="quiz-result" id="quizResult"></div>
+
+</section>
+
+
+<!-- =====================================================
+     INTERVIEW
+===================================================== -->
+
+<section id="interview" class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-kicker">
+            Placement Preparation
+        </div>
+
+        <h2 class="section-title">
+            Interview Questions
+        </h2>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <button class="accordion-header">
+            What are std::cin and std::cout?
+            <span>+</span>
+        </button>
+
+        <div class="accordion-content">
+
+            <div class="accordion-content-inner">
+
+                <strong>std::cin</strong> is the standard input stream
+                object commonly used for reading formatted input from
+                the console.
+
+                <br><br>
+
+                <strong>std::cout</strong> is the standard output stream
+                object commonly used for writing output to the console.
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <button class="accordion-header">
+            Why is &lt;&lt; used with cout?
+            <span>+</span>
+        </button>
+
+        <div class="accordion-content">
+
+            <div class="accordion-content-inner">
+
+                The insertion operator <code class="inline">&lt;&lt;</code>
+                inserts data into an output stream. It can be chained
+                to send multiple values to <code class="inline">std::cout</code>.
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <button class="accordion-header">
+            Why is &gt;&gt; used with cin?
+            <span>+</span>
+        </button>
+
+        <div class="accordion-content">
+
+            <div class="accordion-content-inner">
+
+                The extraction operator
+                <code class="inline">&gt;&gt;</code> extracts formatted
+                data from an input stream and stores it in a variable.
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <button class="accordion-header">
+            Difference between endl and \n?
+            <span>+</span>
+        </button>
+
+        <div class="accordion-content">
+
+            <div class="accordion-content-inner">
+
+                Both can produce a new line. <code class="inline">std::endl</code>
+                also flushes the output stream. <code class="inline">\n</code>
+                only represents the newline character, so it is generally
+                preferable when no explicit flush is needed.
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <button class="accordion-header">
+            When should you use getline()?
+            <span>+</span>
+        </button>
+
+        <div class="accordion-content">
+
+            <div class="accordion-content-inner">
+
+                Use <code class="inline">std::getline()</code> when you
+                need to read an entire line, especially when the input
+                can contain spaces.
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <button class="accordion-header">
+            What is std::ws?
+            <span>+</span>
+        </button>
+
+        <div class="accordion-content">
+
+            <div class="accordion-content-inner">
+
+                <code class="inline">std::ws</code> is a stream manipulator
+                that consumes leading whitespace from an input stream.
+                It is often useful when switching from formatted extraction
+                to <code class="inline">getline()</code>.
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     PRACTICE
+===================================================== -->
+
+<section id="practice" class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-kicker">
+            Hands-On Practice
+        </div>
+
+        <h2 class="section-title">
+            Coding Practice
+        </h2>
+
+        <p class="section-description">
+            Solve these in your own C++ compiler. Start from Level 1
+            and gradually increase the difficulty.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="practice-item">
+
+            <div class="practice-number">1</div>
+
+            <div>
+
+                <strong>Print your profile</strong>
+
+                <span>
+                    Print your name, age, college and branch.
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="practice-item">
+
+            <div class="practice-number">2</div>
+
+            <div>
+
+                <strong>Add two numbers</strong>
+
+                <span>
+                    Take two integers as input and print their sum.
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="practice-item">
+
+            <div class="practice-number">3</div>
+
+            <div>
+
+                <strong>Calculate average</strong>
+
+                <span>
+                    Read three numbers and calculate their average.
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="practice-item">
+
+            <div class="practice-number">4</div>
+
+            <div>
+
+                <strong>Student details</strong>
+
+                <span>
+                    Read name, age and CGPA and display them neatly.
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="practice-item">
+
+            <div class="practice-number">5</div>
+
+            <div>
+
+                <strong>Area of rectangle</strong>
+
+                <span>
+                    Read length and width and calculate the area.
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="practice-item">
+
+            <div class="practice-number">6</div>
+
+            <div>
+
+                <strong>Simple interest</strong>
+
+                <span>
+                    Read principal, rate and time and calculate SI.
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="practice-item">
+
+            <div class="practice-number">7</div>
+
+            <div>
+
+                <strong>Full name input</strong>
+
+                <span>
+                    Use getline() to read a person's complete name.
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="practice-item">
+
+            <div class="practice-number">8</div>
+
+            <div>
+
+                <strong>Formatted marks</strong>
+
+                <span>
+                    Display percentage with exactly two decimal places.
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="practice-item">
+
+            <div class="practice-number">9</div>
+
+            <div>
+
+                <strong>Mini calculator</strong>
+
+                <span>
+                    Read two numbers and display sum, difference,
+                    product and quotient.
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="practice-item">
+
+            <div class="practice-number">10</div>
+
+            <div>
+
+                <strong>Student report</strong>
+
+                <span>
+                    Read student information and marks, then print a
+                    professional console report.
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CHECKLIST
+===================================================== -->
+
+<section id="checklist" class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-kicker">
+            Completion
+        </div>
+
+        <h2 class="section-title">
+            Lesson 3 Checklist
+        </h2>
+
+        <p class="section-description">
+            Check each concept after you understand and practice it.
+        </p>
+
+    </div>
+
+    <div class="card">
+
+        <ul class="checklist">
+
+            <li>
+                <input type="checkbox" class="lesson-check">
+                I understand input and output.
+            </li>
+
+            <li>
+                <input type="checkbox" class="lesson-check">
+                I can use std::cout.
+            </li>
+
+            <li>
+                <input type="checkbox" class="lesson-check">
+                I understand the &lt;&lt; operator.
+            </li>
+
+            <li>
+                <input type="checkbox" class="lesson-check">
+                I can use newline and escape sequences.
+            </li>
+
+            <li>
+                <input type="checkbox" class="lesson-check">
+                I can use std::cin.
+            </li>
+
+            <li>
+                <input type="checkbox" class="lesson-check">
+                I understand the &gt;&gt; operator.
+            </li>
+
+            <li>
+                <input type="checkbox" class="lesson-check">
+                I know the difference between cin and getline().
+            </li>
+
+            <li>
+                <input type="checkbox" class="lesson-check">
+                I understand the cin + getline issue.
+            </li>
+
+            <li>
+                <input type="checkbox" class="lesson-check">
+                I can format floating-point output.
+            </li>
+
+            <li>
+                <input type="checkbox" class="lesson-check">
+                I completed the practice problems.
+            </li>
+
+            <li>
+                <input type="checkbox" class="lesson-check">
+                I completed the quiz.
+            </li>
+
+        </ul>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     RAPID REVISION
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-kicker">
+            Last-Minute Revision
+        </div>
+
+        <h2 class="section-title">
+            C++ I/O Cheat Sheet
+        </h2>
+
+    </div>
+
+    <div class="card">
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Task</th>
+                        <th>Syntax</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>Print text</td>
+                        <td>std::cout &lt;&lt; "Hello";</td>
+                    </tr>
+
+                    <tr>
+                        <td>Print variable</td>
+                        <td>std::cout &lt;&lt; age;</td>
+                    </tr>
+
+                    <tr>
+                        <td>Input value</td>
+                        <td>std::cin &gt;&gt; age;</td>
+                    </tr>
+
+                    <tr>
+                        <td>Multiple input</td>
+                        <td>std::cin &gt;&gt; a &gt;&gt; b;</td>
+                    </tr>
+
+                    <tr>
+                        <td>Full line</td>
+                        <td>std::getline(std::cin, name);</td>
+                    </tr>
+
+                    <tr>
+                        <td>New line</td>
+                        <td>\n</td>
+                    </tr>
+
+                    <tr>
+                        <td>Boolean output</td>
+                        <td>std::boolalpha</td>
+                    </tr>
+
+                    <tr>
+                        <td>Decimal precision</td>
+                        <td>std::setprecision(2)</td>
+                    </tr>
+
+                    <tr>
+                        <td>Fixed decimals</td>
+                        <td>std::fixed</td>
+                    </tr>
+
+                    <tr>
+                        <td>Field width</td>
+                        <td>std::setw(10)</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     NEXT LESSON
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="card" style="
+        background:linear-gradient(
+            135deg,
+            #eff6ff,
+            #f5f3ff
+        );
+        border-color:#dbeafe;
+    ">
+
+        <div class="section-kicker">
+            NEXT STEP
+        </div>
+
+        <h2 class="section-title">
+            You're Ready for Operators ⚡
+        </h2>
+
+        <p style="margin-top:10px;">
+            Now that you know how to store data and communicate with
+            users, the next step is learning how C++ manipulates that data
+            using arithmetic, relational, logical, assignment and other
+            operators.
+        </p>
+
+        <div class="badges" style="margin-top:18px;">
+
+            <span class="badge">
+                Arithmetic Operators
+            </span>
+
+            <span class="badge">
+                Relational Operators
+            </span>
+
+            <span class="badge">
+                Logical Operators
+            </span>
+
+            <span class="badge">
+                Assignment Operators
+            </span>
+
+            <span class="badge">
+                Increment / Decrement
+            </span>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer class="footer">
+
+    <p>
+        <strong>ZENSUS</strong> • C++ Learning Path
+    </p>
+
+    <p style="margin-top:5px;">
+        Learn → Practice → Build → Master
+    </p>
+
+</footer>
+
+
+</div>
+</main>
+
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+<script>
+
+/* =========================================================
+   MOBILE MENU
+========================================================= */
+
+const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.getElementById("sidebar");
+
+menuBtn.addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+});
+
+
+/* =========================================================
+   CLOSE MOBILE SIDEBAR
+========================================================= */
+
+document.querySelectorAll(".nav a").forEach(link => {
+
+    link.addEventListener("click", () => {
+
+        if (window.innerWidth <= 800) {
+            sidebar.classList.remove("open");
+        }
+
+    });
+
+});
+
+
+/* =========================================================
+   SCROLL PROGRESS
+========================================================= */
+
+window.addEventListener("scroll", () => {
+
+    const scrollTop = window.scrollY;
+
+    const height =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+
+    const progress =
+        height > 0
+        ? (scrollTop / height) * 100
+        : 0;
+
+    document.getElementById("scrollProgress").style.width =
+        progress + "%";
+
+});
+
+
+/* =========================================================
+   REVEAL ANIMATION
+========================================================= */
+
+const observer =
+    new IntersectionObserver(
+        entries => {
+
+            entries.forEach(entry => {
+
+                if (entry.isIntersecting) {
+
+                    entry.target.classList.add("visible");
+
+                }
+
+            });
+
+        },
+        {
+            threshold: 0.12
+        }
+    );
+
+
+document.querySelectorAll(".reveal")
+    .forEach(element => observer.observe(element));
+
+
+/* =========================================================
+   ACTIVE NAVIGATION
+========================================================= */
+
+const sections =
+    document.querySelectorAll("section[id]");
+
+const navLinks =
+    document.querySelectorAll(".nav a");
+
+window.addEventListener("scroll", () => {
+
+    let current = "";
+
+    sections.forEach(section => {
+
+        const top =
+            section.offsetTop - 150;
+
+        if (window.scrollY >= top) {
+            current = section.id;
+        }
+
+    });
+
+    navLinks.forEach(link => {
+
+        link.classList.remove("active");
+
+        if (
+            link.getAttribute("href") ===
+            "#" + current
+        ) {
+            link.classList.add("active");
+        }
+
+    });
+
+});
+
+
+/* =========================================================
+   ANIMATED INPUT VALUE
+========================================================= */
+
+const animatedInput =
+    document.getElementById("animatedInput");
+
+const values = [
+    "25",
+    "8.63",
+    "\"C++\"",
+    "'A'",
+    "true",
+    "Hello"
+];
+
+let valueIndex = 0;
+
+setInterval(() => {
+
+    valueIndex =
+        (valueIndex + 1) %
+        values.length;
+
+    animatedInput.textContent =
+        values[valueIndex];
+
+}, 1300);
+
+
+/* =========================================================
+   INTERACTIVE LAB
+========================================================= */
+
+function runLab() {
+
+    const name =
+        document.getElementById("labName").value.trim();
+
+    const age =
+        document.getElementById("labAge").value;
+
+    const cgpa =
+        document.getElementById("labCgpa").value;
+
+    const grade =
+        document.getElementById("labGrade").value;
+
+    const output =
+        document.getElementById("labOutput");
+
+    if (!name || !age || !cgpa) {
+
+        output.innerHTML =
+            "⚠ Please enter name, age and CGPA.";
+
+        return;
+    }
+
+    output.innerHTML = `
+        <span style="color:#60a5fa;">
+        $ ./student_program
+        </span>
+        <br><br>
+
+        <span style="color:#86efac;">
+        --- Student Details ---
+        <br>
+        Name: ${escapeHtml(name)}
+        <br>
+        Age: ${escapeHtml(age)}
+        <br>
+        CGPA: ${escapeHtml(cgpa)}
+        <br>
+        Grade: ${escapeHtml(grade)}
+        </span>
+    `;
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHtml(value) {
+
+    return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+/* =========================================================
+   CIN SIMULATOR
+========================================================= */
+
+function simulateCin() {
+
+    const value =
+        document.getElementById("wordInput")
+        .value
+        .trim();
+
+    const result =
+        document.getElementById("cinResult");
+
+    if (!value) {
+
+        result.innerHTML =
+            `<div class="terminal-body">
+                Enter something first.
+            </div>`;
+
+        return;
+    }
+
+    const firstWord =
+        value.split(/\s+/)[0];
+
+    result.innerHTML =
+        `<div class="terminal-body">
+            <span class="output">
+                cin &gt;&gt; variable
+                <br><br>
+                Stored value:
+                ${escapeHtml(firstWord)}
+            </span>
+        </div>`;
+
+}
+
+
+/* =========================================================
+   GETLINE SIMULATOR
+========================================================= */
+
+function simulateGetline() {
+
+    const value =
+        document.getElementById("lineInput")
+        .value;
+
+    const result =
+        document.getElementById("getlineResult");
+
+    if (!value.trim()) {
+
+        result.innerHTML =
+            `<div class="terminal-body">
+                Enter something first.
+            </div>`;
+
+        return;
+    }
+
+    result.innerHTML =
+        `<div class="terminal-body">
+            <span class="output">
+                getline(cin, variable)
+                <br><br>
+                Stored value:
+                ${escapeHtml(value)}
+            </span>
+        </div>`;
+
+}
+
+
+/* =========================================================
+   ACCORDION
+========================================================= */
+
+document.querySelectorAll(".accordion-header")
+.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        const accordion =
+            button.parentElement;
+
+        const isOpen =
+            accordion.classList.contains("open");
+
+        document.querySelectorAll(".accordion")
+        .forEach(item => {
+            item.classList.remove("open");
+
+            const span =
+                item.querySelector(".accordion-header span");
+
+            if (span) {
+                span.textContent = "+";
+            }
+        });
+
+        if (!isOpen) {
+
+            accordion.classList.add("open");
+
+            const span =
+                button.querySelector("span");
+
+            if (span) {
+                span.textContent = "−";
+            }
+
+        }
+
+    });
+
+});
+
+
+/* =========================================================
+   QUIZ
+========================================================= */
+
+function checkQuiz() {
+
+    const answers = {
+
+        q1: "b",
+        q2: "b",
+        q3: "c",
+        q4: "b",
+        q5: "c",
+        q6: "b",
+        q7: "a",
+        q8: "a",
+        q9: "b",
+        q10: "b"
+
+    };
+
+    let score = 0;
+
+    let answered = 0;
+
+    Object.keys(answers).forEach(question => {
+
+        const selected =
+            document.querySelector(
+                `input[name="${question}"]:checked`
+            );
+
+        if (selected) {
+
+            answered++;
+
+            if (
+                selected.value ===
+                answers[question]
+            ) {
+                score++;
+            }
+
+        }
+
+    });
+
+    const result =
+        document.getElementById("quizResult");
+
+    result.style.display = "block";
+
+    if (answered < 10) {
+
+        result.innerHTML = `
+            ⚠ You answered ${answered}/10 questions.
+            Please answer all questions before checking your final score.
+        `;
+
+        return;
+    }
+
+    const percentage =
+        score * 10;
+
+    let message = "";
+
+    if (score === 10) {
+
+        message =
+            "🏆 Perfect! You have mastered C++ Input & Output.";
+
+    } else if (score >= 8) {
+
+        message =
+            "🔥 Excellent! Your fundamentals are strong.";
+
+    } else if (score >= 6) {
+
+        message =
+            "👍 Good job! Review the missed concepts once.";
+
+    } else {
+
+        message =
+            "📚 Keep practicing. Revisit std::cin, std::cout and getline().";
+
+    }
+
+    result.innerHTML = `
+        <strong>Score: ${score}/10 (${percentage}%)</strong>
+        <br><br>
+        ${message}
+    `;
+
+}
+
+
+/* =========================================================
+   CHECKLIST + LOCAL STORAGE
+========================================================= */
+
+const checks =
+    document.querySelectorAll(".lesson-check");
+
+const saved =
+    JSON.parse(
+        localStorage.getItem(
+            "zensus_cpp_lesson3_checks"
+        ) || "[]"
+    );
+
+checks.forEach((checkbox, index) => {
+
+    checkbox.checked =
+        saved[index] || false;
+
+    checkbox.addEventListener("change", () => {
+
+        saveChecklist();
+
+    });
+
+});
+
+
+function saveChecklist() {
+
+    const states =
+        Array.from(checks)
+        .map(check => check.checked);
+
+    localStorage.setItem(
+        "zensus_cpp_lesson3_checks",
+        JSON.stringify(states)
+    );
+
+    updateProgress();
+
+}
+
+
+/* =========================================================
+   LESSON PROGRESS
+========================================================= */
+
+function updateProgress() {
+
+    const total =
+        checks.length;
+
+    const completed =
+        Array.from(checks)
+        .filter(check => check.checked)
+        .length;
+
+    const percentage =
+        Math.round(
+            (completed / total) * 100
+        );
+
+    document.getElementById("progressFill")
+        .style.width =
+        percentage + "%";
+
+    document.getElementById("progressText")
+        .textContent =
+        percentage + "%";
+
+}
+
+updateProgress();
+
+
+/* =========================================================
+   KEYBOARD ACCESSIBILITY
+========================================================= */
+
+document.addEventListener("keydown", event => {
+
+    if (event.key === "Escape") {
+
+        sidebar.classList.remove("open");
+
+    }
+
+});
+
+
+</script>
+
+</body>
+</html>

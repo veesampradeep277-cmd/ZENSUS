@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENSUS React — Lesson 22: useReducer()</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root{
+    --bg:#f5f7fb;
+    --card:#ffffff;
+    --text:#172033;
+    --muted:#64748b;
+    --border:#e2e8f0;
+    --blue:#2563eb;
+    --purple:#7c3aed;
+    --green:#16a34a;
+    --red:#dc2626;
+    --orange:#ea580c;
+    --dark:#111827;
+    --dark2:#1e293b;
+    --shadow:0 10px 30px rgba(15,23,42,.08);
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+.topbar{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    height:68px;
+    background:#fff;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 28px;
+    z-index:1000;
+}
+
+.logo{
+    font-size:24px;
+    font-weight:900;
+    letter-spacing:-1px;
+}
+
+.logo span{
+    color:var(--blue);
+}
+
+.lesson-badge{
+    padding:8px 15px;
+    border-radius:999px;
+    background:#eff6ff;
+    color:#1d4ed8;
+    font-size:13px;
+    font-weight:700;
+}
+
+.layout{
+    display:flex;
+    padding-top:68px;
+}
+
+.sidebar{
+    width:270px;
+    position:fixed;
+    top:68px;
+    bottom:0;
+    overflow-y:auto;
+    background:#fff;
+    border-right:1px solid var(--border);
+    padding:25px 16px;
+}
+
+.sidebar h3{
+    font-size:12px;
+    text-transform:uppercase;
+    color:#94a3b8;
+    margin:10px 12px;
+    letter-spacing:1px;
+}
+
+.sidebar a{
+    display:block;
+    text-decoration:none;
+    color:#475569;
+    padding:9px 12px;
+    border-radius:8px;
+    font-size:14px;
+    margin-bottom:3px;
+}
+
+.sidebar a:hover,
+.sidebar a.active{
+    background:#eff6ff;
+    color:var(--blue);
+    font-weight:700;
+}
+
+.main{
+    margin-left:270px;
+    width:calc(100% - 270px);
+    max-width:1250px;
+    padding:35px;
+}
+
+.hero{
+    background:linear-gradient(135deg,#111827,#1e293b);
+    color:#fff;
+    border-radius:22px;
+    padding:55px;
+    margin-bottom:30px;
+    position:relative;
+    overflow:hidden;
+}
+
+.hero:after{
+    content:"useReducer()";
+    position:absolute;
+    right:-20px;
+    bottom:-40px;
+    font-size:120px;
+    font-weight:900;
+    color:rgba(255,255,255,.035);
+}
+
+.hero small{
+    color:#93c5fd;
+    font-weight:700;
+}
+
+.hero h1{
+    font-size:48px;
+    line-height:1.1;
+    margin:12px 0 18px;
+}
+
+.hero p{
+    max-width:780px;
+    color:#cbd5e1;
+    font-size:18px;
+}
+
+.card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:30px;
+    margin-bottom:25px;
+    box-shadow:var(--shadow);
+}
+
+h2{
+    font-size:30px;
+    margin-bottom:15px;
+}
+
+h3{
+    font-size:21px;
+    margin:22px 0 10px;
+}
+
+p{
+    margin-bottom:14px;
+}
+
+.highlight{
+    background:#eff6ff;
+    border-left:4px solid var(--blue);
+    padding:17px 20px;
+    border-radius:10px;
+    margin:20px 0;
+}
+
+.warning{
+    background:#fff7ed;
+    border-left:4px solid var(--orange);
+    padding:17px 20px;
+    border-radius:10px;
+    margin:20px 0;
+}
+
+.success{
+    background:#f0fdf4;
+    border-left:4px solid var(--green);
+    padding:17px 20px;
+    border-radius:10px;
+    margin:20px 0;
+}
+
+.danger{
+    background:#fef2f2;
+    border-left:4px solid var(--red);
+    padding:17px 20px;
+    border-radius:10px;
+    margin:20px 0;
+}
+
+pre{
+    background:#0f172a;
+    color:#e2e8f0;
+    padding:22px;
+    border-radius:13px;
+    overflow-x:auto;
+    font-size:14px;
+    line-height:1.65;
+    margin:18px 0;
+}
+
+code{
+    font-family:Consolas,Monaco,monospace;
+}
+
+.inline{
+    background:#eef2ff;
+    padding:2px 6px;
+    border-radius:5px;
+    color:#4338ca;
+    font-family:Consolas,monospace;
+}
+
+.flow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:12px;
+    margin:30px 0;
+}
+
+.flow-box{
+    padding:18px 22px;
+    background:#fff;
+    border:2px solid #cbd5e1;
+    border-radius:13px;
+    font-weight:800;
+    min-width:140px;
+    text-align:center;
+    transition:.3s;
+}
+
+.flow-box.active{
+    transform:translateY(-8px);
+    border-color:var(--blue);
+    box-shadow:0 12px 25px rgba(37,99,235,.18);
+}
+
+.arrow{
+    font-size:24px;
+    color:#64748b;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:18px;
+}
+
+.mini-card{
+    padding:20px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:#fff;
+}
+
+.mini-card strong{
+    display:block;
+    margin-bottom:7px;
+}
+
+.visualizer{
+    background:#f8fafc;
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:25px;
+    margin-top:20px;
+}
+
+.state-box{
+    padding:25px;
+    background:#fff;
+    border:2px solid #cbd5e1;
+    border-radius:14px;
+    text-align:center;
+    font-size:22px;
+    font-weight:800;
+    margin:15px auto;
+    max-width:300px;
+}
+
+.action-box{
+    padding:20px;
+    background:#eff6ff;
+    border:2px solid #93c5fd;
+    border-radius:14px;
+    text-align:center;
+    max-width:300px;
+    margin:15px auto;
+}
+
+button{
+    border:none;
+    background:var(--blue);
+    color:#fff;
+    padding:10px 16px;
+    border-radius:9px;
+    cursor:pointer;
+    font-weight:700;
+    margin:5px;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+button.secondary{
+    background:#475569;
+}
+
+button.green{
+    background:var(--green);
+}
+
+button.red{
+    background:var(--red);
+}
+
+input,select{
+    width:100%;
+    padding:11px 13px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+    margin:7px 0 12px;
+    font-size:15px;
+}
+
+label{
+    font-weight:700;
+    font-size:14px;
+}
+
+.cart-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:15px;
+    border-bottom:1px solid var(--border);
+}
+
+.cart-total{
+    font-size:24px;
+    font-weight:900;
+    text-align:right;
+    margin-top:20px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin:20px 0;
+}
+
+th,td{
+    border:1px solid var(--border);
+    padding:13px;
+    text-align:left;
+}
+
+th{
+    background:#f8fafc;
+}
+
+.quiz-option{
+    display:block;
+    width:100%;
+    text-align:left;
+    background:#f8fafc;
+    color:var(--text);
+    border:1px solid var(--border);
+    margin:8px 0;
+}
+
+.quiz-option:hover{
+    background:#eff6ff;
+    color:var(--blue);
+}
+
+.quiz-answer{
+    display:none;
+    margin-top:12px;
+    padding:15px;
+    background:#f0fdf4;
+    border-radius:10px;
+}
+
+.tag{
+    display:inline-block;
+    padding:5px 9px;
+    border-radius:6px;
+    background:#f1f5f9;
+    font-size:12px;
+    margin:3px;
+    font-weight:700;
+}
+
+@media(max-width:900px){
+    .sidebar{
+        display:none;
+    }
+
+    .main{
+        margin-left:0;
+        width:100%;
+        padding:18px;
+    }
+
+    .hero{
+        padding:35px 25px;
+    }
+
+    .hero h1{
+        font-size:36px;
+    }
+
+    .topbar{
+        padding:0 15px;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="logo">ZEN<span>SUS</span></div>
+    <div class="lesson-badge">React • Lesson 22</div>
+</header>
+
+<div class="layout">
+
+<aside class="sidebar">
+    <h3>Lesson 22</h3>
+    <a href="#intro">Introduction</a>
+    <a href="#state-reducer">State vs Reducer</a>
+    <a href="#reducer">Reducer Function</a>
+    <a href="#actions">Actions</a>
+    <a href="#dispatch">Dispatch</a>
+    <a href="#initial">Initial State</a>
+    <a href="#transition">State Transitions</a>
+    <a href="#complex">Complex State</a>
+    <a href="#forms">Forms</a>
+    <a href="#cart">Shopping Cart</a>
+    <a href="#best">Best Practices</a>
+    <a href="#mistakes">Common Mistakes</a>
+    <a href="#cheat">Cheat Sheet</a>
+    <a href="#quiz">Quick Quiz</a>
+</aside>
+
+<main class="main">
+
+<section class="hero">
+    <small>REACT STATE MANAGEMENT</small>
+    <h1>useReducer()</h1>
+    <p>
+        Manage complex state using a predictable system of
+        <strong>state + actions + reducer + dispatch</strong>.
+        Learn how React turns user events into controlled state transitions.
+    </p>
+</section>
+
+<section class="card" id="intro">
+<h2>1. What is useReducer()?</h2>
+
+<p>
+    <span class="inline">useReducer()</span> is a React Hook used to manage
+    state through a <strong>reducer function</strong>.
+</p>
+
+<p>
+    It is especially useful when state contains multiple related values
+    or when many different actions can change the same state.
+</p>
+
+<pre><code>const [state, dispatch] = useReducer(reducer, initialState);</code></pre>
+
+<div class="grid">
+    <div class="mini-card">
+        <strong>state</strong>
+        Current state value.
+    </div>
+
+```
+<div class="mini-card">
+    <strong>dispatch</strong>
+    Sends an action describing what happened.
+</div>
+
+<div class="mini-card">
+    <strong>reducer</strong>
+    Calculates the next state.
+</div>
+
+<div class="mini-card">
+    <strong>initialState</strong>
+    Starting state.
+</div>
+```
+
+</div>
+
+<div class="highlight">
+    <strong>Mental Model:</strong>
+    Instead of directly saying “change this state,” you say
+    “this happened.” The reducer decides how state should change.
+</div>
+
+<div class="flow">
+    <div class="flow-box">User Event</div>
+    <div class="arrow">→</div>
+    <div class="flow-box">dispatch(action)</div>
+    <div class="arrow">→</div>
+    <div class="flow-box">Reducer</div>
+    <div class="arrow">→</div>
+    <div class="flow-box">New State</div>
+    <div class="arrow">→</div>
+    <div class="flow-box">UI Re-renders</div>
+</div>
+
+<h3>Basic Example</h3>
+
+<pre><code>import { useReducer } from "react";
+
+function reducer(state, action) {
+    if (action.type === "increment") {
+        return { count: state.count + 1 };
+    }
+
+    return state;
+}
+
+function Counter() {
+    const [state, dispatch] = useReducer(
+        reducer,
+        { count: 0 }
+    );
+
+    return (
+        &lt;button onClick={() =&gt;
+            dispatch({ type: "increment" })
+        }&gt;
+            Count: {state.count}
+        &lt;/button&gt;
+    );
+}</code></pre>
+
+</section>
+
+<section class="card" id="state-reducer">
+<h2>2. State vs Reducer</h2>
+
+<p>
+    Understanding the difference between <strong>state</strong> and
+    <strong>reducer logic</strong> is fundamental.
+</p>
+
+<table>
+<tr>
+<th>Concept</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>State</td>
+<td>Stores the current data.</td>
+</tr>
+<tr>
+<td>Action</td>
+<td>Describes what happened.</td>
+</tr>
+<tr>
+<td>Reducer</td>
+<td>Calculates the next state.</td>
+</tr>
+<tr>
+<td>Dispatch</td>
+<td>Sends an action to the reducer.</td>
+</tr>
+</table>
+
+<div class="highlight">
+    <strong>Important:</strong>
+    A reducer does not directly update the existing state.
+    It returns the next state.
+</div>
+
+<h3>useState vs useReducer</h3>
+
+<table>
+<tr>
+<th>useState</th>
+<th>useReducer</th>
+</tr>
+<tr>
+<td>Simple state</td>
+<td>Complex state logic</td>
+</tr>
+<tr>
+<td>Direct setters</td>
+<td>Actions + dispatch</td>
+</tr>
+<tr>
+<td>Logic often inside handlers</td>
+<td>Logic centralized in reducer</td>
+</tr>
+<tr>
+<td>Easy for small components</td>
+<td>Useful for many related transitions</td>
+</tr>
+</table>
+
+<p>
+    <strong>Rule of thumb:</strong> Don't replace every
+    <span class="inline">useState()</span> with
+    <span class="inline">useReducer()</span>. Choose the simpler tool
+    when it is sufficient.
+</p>
+
+</section>
+
+<section class="card" id="reducer">
+<h2>3. Reducer Function</h2>
+
+<p>
+    A reducer is a JavaScript function that receives the current
+    <strong>state</strong> and an <strong>action</strong>, then returns
+    the next state.
+</p>
+
+<pre><code>function reducer(state, action) {
+    // calculate next state
+
+    return nextState;
+}</code></pre>
+
+<p>The conceptual signature is:</p>
+
+<pre><code>reducer(currentState, action) → nextState</code></pre>
+
+<h3>Example</h3>
+
+<pre><code>function reducer(state, action) {
+
+    switch (action.type) {
+
+        case "increment":
+            return {
+                ...state,
+                count: state.count + 1
+            };
+
+        case "decrement":
+            return {
+                ...state,
+                count: state.count - 1
+            };
+
+        default:
+            return state;
+    }
+}</code></pre>
+
+<div class="success">
+    A good reducer is predictable: the same state and same action
+    should produce the same next state.
+</div>
+
+</section>
+
+<section class="card" id="actions">
+<h2>4. Actions</h2>
+
+<p>
+    An <strong>action</strong> is an object describing what happened.
+</p>
+
+<pre><code>{ type: "increment" }</code></pre>
+
+<p>
+    Actions can also carry additional information using a
+    <span class="inline">payload</span>.
+</p>
+
+<pre><code>{
+    type: "add",
+    payload: 5
+}</code></pre>
+
+<h3>Action Types</h3>
+
+<pre><code>const actions = {
+    ADD_ITEM: "ADD_ITEM",
+    REMOVE_ITEM: "REMOVE_ITEM",
+    CLEAR_CART: "CLEAR_CART"
+};</code></pre>
+
+<p>
+    Many projects use uppercase action constants, while others use
+    lowercase strings. Both are valid conventions.
+</p>
+
+<div class="grid">
+    <div class="mini-card">
+        <strong>increment</strong>
+        Describe the event.
+    </div>
+
+```
+<div class="mini-card">
+    <strong>setName</strong>
+    Describe the state transition.
+</div>
+
+<div class="mini-card">
+    <strong>removeItem</strong>
+    Describes an operation.
+</div>
+
+<div class="mini-card">
+    <strong>updateQuantity</strong>
+    Can carry a payload.
+</div>
+```
+
+</div>
+
+</section>
+
+<section class="card" id="dispatch">
+<h2>5. Dispatch</h2>
+
+<p>
+    <span class="inline">dispatch()</span> sends an action to the reducer.
+</p>
+
+<pre><code>dispatch({
+    type: "increment"
+});</code></pre>
+
+<p>
+    With payload:
+</p>
+
+<pre><code>dispatch({
+    type: "add",
+    payload: 10
+});</code></pre>
+
+<div class="flow">
+    <div class="flow-box">Button Click</div>
+    <div class="arrow">→</div>
+    <div class="flow-box">dispatch()</div>
+    <div class="arrow">→</div>
+    <div class="flow-box">Action</div>
+    <div class="arrow">→</div>
+    <div class="flow-box">Reducer</div>
+</div>
+
+<h3>Interactive Dispatch Simulator</h3>
+
+<div class="visualizer">
+    <div class="state-box" id="counterState">Count: 0</div>
+
+```
+<div style="text-align:center">
+    <button onclick="runReducer('increment')">Dispatch Increment</button>
+    <button class="secondary" onclick="runReducer('decrement')">
+        Dispatch Decrement
+    </button>
+    <button class="red" onclick="runReducer('reset')">
+        Dispatch Reset
+    </button>
+</div>
+
+<p id="actionLog" style="text-align:center;margin-top:15px">
+    No action dispatched yet.
+</p>
+```
+
+</div>
+
+</section>
+
+<section class="card" id="initial">
+<h2>6. Initial State</h2>
+
+<p>
+    The second argument of <span class="inline">useReducer()</span>
+    provides the initial state.
+</p>
+
+<pre><code>const initialState = {
+    count: 0,
+    username: "",
+    loading: false
+};
+
+const [state, dispatch] =
+    useReducer(reducer, initialState);</code></pre>
+
+<p>
+    Initial state can be a primitive, object, array, or another
+    appropriate JavaScript value.
+</p>
+
+<h3>Object State</h3>
+
+<pre><code>const initialState = {
+    name: "",
+    email: "",
+    password: "",
+    errors: {}
+};</code></pre>
+
+<p>
+    The advantage becomes clear when many related values must change
+    according to different events.
+</p>
+
+</section>
+
+<section class="card" id="transition">
+<h2>7. State Transitions</h2>
+
+<p>
+    A reducer can be understood as a <strong>state transition machine</strong>.
+</p>
+
+<div class="flow">
+    <div class="flow-box">State A</div>
+    <div class="arrow">+</div>
+    <div class="flow-box">Action</div>
+    <div class="arrow">→</div>
+    <div class="flow-box">Reducer</div>
+    <div class="arrow">→</div>
+    <div class="flow-box">State B</div>
+</div>
+
+<h3>Example: Authentication</h3>
+
+<pre><code>const initialState = {
+    status: "loggedOut",
+    user: null
+};
+
+function reducer(state, action) {
+
+    switch (action.type) {
+
+        case "login":
+            return {
+                status: "loggedIn",
+                user: action.payload
+            };
+
+        case "logout":
+            return {
+                status: "loggedOut",
+                user: null
+            };
+
+        default:
+            return state;
+    }
+}</code></pre>
+
+<p>Possible transitions:</p>
+
+<div class="grid">
+    <div class="mini-card">
+        <strong>loggedOut</strong>
+        ↓ login
+    </div>
+
+```
+<div class="mini-card">
+    <strong>loggedIn</strong>
+    ↓ logout
+</div>
+
+<div class="mini-card">
+    <strong>loading</strong>
+    ↓ success
+</div>
+
+<div class="mini-card">
+    <strong>loading</strong>
+    ↓ error
+</div>
+```
+
+</div>
+
+<div class="highlight">
+    Think of each action as an event and the reducer as the rulebook
+    that determines the next state.
+</div>
+
+</section>
+
+<section class="card" id="complex">
+<h2>8. Managing Complex State</h2>
+
+<p>
+    Consider a dashboard containing:
+</p>
+
+<div class="grid">
+    <div class="mini-card">User information</div>
+    <div class="mini-card">Loading status</div>
+    <div class="mini-card">Error message</div>
+    <div class="mini-card">Notifications</div>
+    <div class="mini-card">Selected item</div>
+    <div class="mini-card">Filters</div>
+</div>
+
+<p>
+    Managing every transition independently with many setters can make
+    the event handlers difficult to follow.
+</p>
+
+<p>
+    A reducer can centralize the transition rules.
+</p>
+
+<pre><code>const initialState = {
+    data: [],
+    loading: false,
+    error: null,
+    selectedId: null
+};
+
+function reducer(state, action) {
+
+    switch (action.type) {
+
+        case "fetchStart":
+            return {
+                ...state,
+                loading: true,
+                error: null
+            };
+
+        case "fetchSuccess":
+            return {
+                ...state,
+                loading: false,
+                data: action.payload
+            };
+
+        case "fetchError":
+            return {
+                ...state,
+                loading: false,
+                error: action.payload
+            };
+
+        case "select":
+            return {
+                ...state,
+                selectedId: action.payload
+            };
+
+        default:
+            return state;
+    }
+}</code></pre>
+
+</section>
+
+<section class="card" id="forms">
+<h2>9. Forms with useReducer()</h2>
+
+<p>
+    Forms can have many related state values:
+</p>
+
+<ul>
+<li>name</li>
+<li>email</li>
+<li>password</li>
+<li>validation errors</li>
+<li>submitting status</li>
+<li>success state</li>
+</ul>
+
+<h3>Reducer-Based Form</h3>
+
+<pre><code>const initialState = {
+    name: "",
+    email: "",
+    password: "",
+    errors: {},
+    submitting: false
+};
+
+function reducer(state, action) {
+
+    switch (action.type) {
+
+        case "fieldChange":
+            return {
+                ...state,
+                [action.field]: action.value
+            };
+
+        case "submitStart":
+            return {
+                ...state,
+                submitting: true
+            };
+
+        case "submitSuccess":
+            return {
+                ...initialState
+            };
+
+        case "setErrors":
+            return {
+                ...state,
+                errors: action.payload,
+                submitting: false
+            };
+
+        default:
+            return state;
+    }
+}</code></pre>
+
+<h3>Dispatching a Field Change</h3>
+
+<pre><code>dispatch({
+    type: "fieldChange",
+    field: "email",
+    value: e.target.value
+});</code></pre>
+
+<div class="highlight">
+    The action says <strong>what happened</strong>.
+    The reducer decides <strong>how the state changes</strong>.
+</div>
+
+<h3>Mini Form Demo</h3>
+
+<div class="visualizer">
+
+<label>Name</label> <input id="formName" placeholder="Enter your name"
+    oninput="formDispatch('name',this.value)">
+
+<label>Email</label> <input id="formEmail" placeholder="Enter your email"
+    oninput="formDispatch('email',this.value)">
+
+<div class="state-box" id="formState"
+     style="font-size:16px;text-align:left">
+    Name: —<br>
+    Email: —
+</div>
+
+</div>
+
+</section>
+
+<section class="card" id="cart">
+<h2>10. Shopping Cart Example</h2>
+
+<p>
+    A shopping cart is a classic example of state with multiple related
+    transitions.
+</p>
+
+<p>Possible actions:</p>
+
+<span class="tag">ADD_ITEM</span> <span class="tag">REMOVE_ITEM</span> <span class="tag">INCREASE_QTY</span> <span class="tag">DECREASE_QTY</span> <span class="tag">CLEAR_CART</span>
+
+<h3>Cart State</h3>
+
+<pre><code>const initialState = {
+    items: []
+};</code></pre>
+
+<h3>Cart Reducer</h3>
+
+<pre><code>function reducer(state, action) {
+
+    switch (action.type) {
+
+        case "ADD_ITEM":
+            return {
+                ...state,
+                items: [
+                    ...state.items,
+                    action.payload
+                ]
+            };
+
+        case "REMOVE_ITEM":
+            return {
+                ...state,
+                items: state.items.filter(
+                    item => item.id !== action.payload
+                )
+            };
+
+        case "CLEAR_CART":
+            return {
+                ...state,
+                items: []
+            };
+
+        default:
+            return state;
+    }
+}</code></pre>
+
+<h3>Interactive Shopping Cart</h3>
+
+<div class="visualizer">
+
+<div class="cart-item">
+    <div>
+        <strong>React Course</strong><br>
+        ₹499
+    </div>
+    <button onclick="addProduct('React Course',499)">
+        Add
+    </button>
+</div>
+
+<div class="cart-item">
+    <div>
+        <strong>Python Course</strong><br>
+        ₹399
+    </div>
+    <button onclick="addProduct('Python Course',399)">
+        Add
+    </button>
+</div>
+
+<div class="cart-item">
+    <div>
+        <strong>DSA Course</strong><br>
+        ₹599
+    </div>
+    <button onclick="addProduct('DSA Course',599)">
+        Add
+    </button>
+</div>
+
+<div id="cartItems"></div>
+
+<div class="cart-total" id="cartTotal">
+    Total: ₹0
+</div>
+
+<div style="text-align:right">
+    <button class="red" onclick="clearCartDemo()">
+        Clear Cart
+    </button>
+</div>
+
+</div>
+
+<h3>Production-Style Architecture</h3>
+
+<pre><code>function cartReducer(state, action) {
+
+    switch (action.type) {
+
+        case "ADD_ITEM":
+            return addItem(state, action.payload);
+
+        case "REMOVE_ITEM":
+            return removeItem(state, action.payload);
+
+        case "INCREASE_QTY":
+            return increaseQuantity(
+                state,
+                action.payload
+            );
+
+        case "DECREASE_QTY":
+            return decreaseQuantity(
+                state,
+                action.payload
+            );
+
+        case "CLEAR_CART":
+            return {
+                ...state,
+                items: []
+            };
+
+        default:
+            return state;
+    }
+}</code></pre>
+
+</section>
+
+<section class="card" id="best">
+<h2>11. Reducer Best Practices</h2>
+
+<div class="grid">
+
+<div class="mini-card">
+<strong>1. Keep reducers pure</strong>
+A reducer should calculate state, not perform side effects.
+</div>
+
+<div class="mini-card">
+<strong>2. Don't mutate state</strong>
+Return new objects/arrays when state changes.
+</div>
+
+<div class="mini-card">
+<strong>3. Use descriptive actions</strong>
+Actions should clearly communicate what happened.
+</div>
+
+<div class="mini-card">
+<strong>4. Handle unknown actions</strong>
+Usually return the existing state.
+</div>
+
+<div class="mini-card">
+<strong>5. Keep related state together</strong>
+Reducers are useful when multiple values change together.
+</div>
+
+<div class="mini-card">
+<strong>6. Avoid giant reducers</strong>
+Split unrelated state domains when necessary.
+</div>
+
+</div>
+
+<h3>Pure Reducer</h3>
+
+<pre><code>function reducer(state, action) {
+
+    switch (action.type) {
+
+        case "increment":
+            return {
+                ...state,
+                count: state.count + 1
+            };
+
+        default:
+            return state;
+    }
+}</code></pre>
+
+<h3>Do Not Perform Side Effects</h3>
+
+<div class="danger">
+    Avoid API calls, timers, DOM manipulation, random side effects,
+    or other external effects inside reducers.
+</div>
+
+<p>
+    Side effects belong in appropriate places such as event handlers or
+    <span class="inline">useEffect()</span>, depending on the situation.
+</p>
+
+</section>
+
+<section class="card" id="mistakes">
+<h2>12. Common Mistakes</h2>
+
+<h3>❌ Mistake 1 — Mutating State</h3>
+
+<pre><code>state.items.push(action.payload);
+
+return state;</code></pre>
+
+<p>
+    This mutates the existing array.
+</p>
+
+<p>Prefer:</p>
+
+<pre><code>return {
+    ...state,
+    items: [
+        ...state.items,
+        action.payload
+    ]
+};</code></pre>
+
+<h3>❌ Mistake 2 — Forgetting to Return State</h3>
+
+<pre><code>case "increment":
+    state.count++;
+    break;</code></pre>
+
+<p>
+    A reducer must return the next state.
+</p>
+
+<h3>❌ Mistake 3 — Performing API Calls in Reducer</h3>
+
+<pre><code>case "load":
+    fetch("/api/users"); // ❌
+    return state;</code></pre>
+
+<p>
+    Reducers should remain pure.
+</p>
+
+<h3>❌ Mistake 4 — Unknown Action Returns undefined</h3>
+
+<pre><code>default:
+    return state;</code></pre>
+
+<p>
+    Returning the current state for an unrecognized action is the normal
+    pattern.
+</p>
+
+<h3>❌ Mistake 5 — Using useReducer for Everything</h3>
+
+<p>
+    A simple boolean such as:
+</p>
+
+<pre><code>const [open, setOpen] = useState(false);</code></pre>
+
+<p>
+    usually does not need a reducer.
+</p>
+
+<div class="warning">
+    <strong>Don't add abstraction without a reason.</strong>
+    useReducer is useful when the state logic benefits from explicit
+    transitions and centralized update rules.
+</div>
+
+</section>
+
+<section class="card">
+<h2>13. Reducer Decision Guide</h2>
+
+<table>
+<tr>
+<th>Situation</th>
+<th>Typical Choice</th>
+</tr>
+<tr>
+<td>One simple value</td>
+<td>useState</td>
+</tr>
+<tr>
+<td>Simple independent values</td>
+<td>useState</td>
+</tr>
+<tr>
+<td>Many related state transitions</td>
+<td>useReducer</td>
+</tr>
+<tr>
+<td>Complex form state</td>
+<td>useReducer can help</td>
+</tr>
+<tr>
+<td>Shopping cart</td>
+<td>useReducer can help</td>
+</tr>
+<tr>
+<td>Complex workflow/state machine-like transitions</td>
+<td>useReducer can help</td>
+</tr>
+</table>
+
+</section>
+
+<section class="card">
+<h2>14. Complete React Example</h2>
+
+<pre><code>import { useReducer } from "react";
+
+const initialState = {
+    count: 0
+};
+
+function reducer(state, action) {
+
+    switch (action.type) {
+
+        case "increment":
+            return {
+                ...state,
+                count: state.count + 1
+            };
+
+        case "decrement":
+            return {
+                ...state,
+                count: state.count - 1
+            };
+
+        case "add":
+            return {
+                ...state,
+                count: state.count + action.payload
+            };
+
+        case "reset":
+            return initialState;
+
+        default:
+            return state;
+    }
+}
+
+export default function Counter() {
+
+    const [state, dispatch] =
+        useReducer(reducer, initialState);
+
+    return (
+        &lt;div&gt;
+
+            &lt;h1&gt;Count: {state.count}&lt;/h1&gt;
+
+            &lt;button onClick={() =&gt;
+                dispatch({ type: "increment" })
+            }&gt;
+                +1
+            &lt;/button&gt;
+
+            &lt;button onClick={() =&gt;
+                dispatch({ type: "decrement" })
+            }&gt;
+                -1
+            &lt;/button&gt;
+
+            &lt;button onClick={() =&gt;
+                dispatch({
+                    type: "add",
+                    payload: 5
+                })
+            }&gt;
+                +5
+            &lt;/button&gt;
+
+            &lt;button onClick={() =&gt;
+                dispatch({ type: "reset" })
+            }&gt;
+                Reset
+            &lt;/button&gt;
+
+        &lt;/div&gt;
+    );
+}</code></pre>
+
+<div class="success">
+    Notice the separation:
+    <strong>UI dispatches events → reducer owns transition logic → state drives UI.</strong>
+</div>
+
+</section>
+
+<section class="card">
+<h2>15. The Complete useReducer Mental Model</h2>
+
+<div class="flow">
+    <div class="flow-box">Initial State</div>
+    <div class="arrow">→</div>
+    <div class="flow-box">UI</div>
+    <div class="arrow">→</div>
+    <div class="flow-box">Event</div>
+    <div class="arrow">→</div>
+    <div class="flow-box">Dispatch</div>
+    <div class="arrow">→</div>
+    <div class="flow-box">Action</div>
+    <div class="arrow">→</div>
+    <div class="flow-box">Reducer</div>
+    <div class="arrow">→</div>
+    <div class="flow-box">Next State</div>
+    <div class="arrow">→</div>
+    <div class="flow-box">Render</div>
+</div>
+
+<div class="highlight">
+    <strong>Remember this sentence:</strong><br><br>
+    “An action describes what happened, dispatch sends that action,
+    the reducer calculates the next state, and React renders the UI
+    from that state.”
+</div>
+
+</section>
+
+<section class="card" id="cheat">
+<h2>16. useReducer() Cheat Sheet</h2>
+
+<table>
+<tr>
+<th>Concept</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>useReducer()</td>
+<td>Hook for reducer-based state management</td>
+</tr>
+
+<tr>
+<td>state</td>
+<td>Current state</td>
+</tr>
+
+<tr>
+<td>reducer</td>
+<td>Function that calculates next state</td>
+</tr>
+
+<tr>
+<td>action</td>
+<td>Description of what happened</td>
+</tr>
+
+<tr>
+<td>dispatch</td>
+<td>Sends an action</td>
+</tr>
+
+<tr>
+<td>payload</td>
+<td>Additional action data</td>
+</tr>
+
+<tr>
+<td>initialState</td>
+<td>Starting state</td>
+</tr>
+
+<tr>
+<td>pure reducer</td>
+<td>Predictable state calculation without side effects</td>
+</tr>
+</table>
+
+<pre><code>const [state, dispatch] =
+    useReducer(reducer, initialState);
+
+dispatch({
+    type: "ACTION_TYPE",
+    payload: data
+});
+
+function reducer(state, action) {
+
+    switch (action.type) {
+
+        case "ACTION_TYPE":
+            return {
+                ...state,
+                value: action.payload
+            };
+
+        default:
+            return state;
+    }
+}</code></pre>
+
+</section>
+
+<section class="card" id="quiz">
+<h2>17. Quick Quiz</h2>
+
+<div>
+    <h3>1. What does a reducer return?</h3>
+
+```
+<button class="quiz-option" onclick="showAnswer('q1','The reducer returns the next state.')">
+    A. The next state
+</button>
+
+<button class="quiz-option" onclick="showAnswer('q1','A reducer returns state, not JSX.')">
+    B. JSX
+</button>
+
+<button class="quiz-option" onclick="showAnswer('q1','A reducer does not directly return an event handler.')">
+    C. An event handler
+</button>
+
+<button class="quiz-option" onclick="showAnswer('q1','A reducer does not normally return a DOM element.')">
+    D. A DOM element
+</button>
+
+<div class="quiz-answer" id="q1"></div>
+```
+
+</div>
+
+<div>
+    <h3>2. Which function sends an action?</h3>
+
+```
+<button class="quiz-option" onclick="showAnswer('q2','dispatch() sends an action to the reducer.')">
+    A. dispatch()
+</button>
+
+<button class="quiz-option" onclick="showAnswer('q2','The reducer receives the action rather than sending it.')">
+    B. reducer()
+</button>
+
+<button class="quiz-option" onclick="showAnswer('q2','render() is not the useReducer action-sending function.')">
+    C. render()
+</button>
+
+<button class="quiz-option" onclick="showAnswer('q2','state() is not a useReducer API.')">
+    D. state()
+</button>
+
+<div class="quiz-answer" id="q2"></div>
+```
+
+</div>
+
+<div>
+    <h3>3. What should a reducer generally avoid?</h3>
+
+```
+<button class="quiz-option" onclick="showAnswer('q3','Reducers should avoid side effects such as API calls.')">
+    A. Side effects
+</button>
+
+<button class="quiz-option" onclick="showAnswer('q3','Reducers commonly use switch statements.')">
+    B. switch statements
+</button>
+
+<button class="quiz-option" onclick="showAnswer('q3','Actions are fundamental to reducer logic.')">
+    C. Actions
+</button>
+
+<button class="quiz-option" onclick="showAnswer('q3','Reducers receive state as an input.')">
+    D. State
+</button>
+
+<div class="quiz-answer" id="q3"></div>
+```
+
+</div>
+
+<div>
+    <h3>4. What does an action usually describe?</h3>
+
+```
+<button class="quiz-option" onclick="showAnswer('q4','An action describes an event or state transition request.')">
+    A. What happened
+</button>
+
+<button class="quiz-option" onclick="showAnswer('q4','The reducer calculates the next state.')">
+    B. The entire UI
+</button>
+
+<button class="quiz-option" onclick="showAnswer('q4','The action is not the component tree.')">
+    C. The DOM tree
+</button>
+
+<button class="quiz-option" onclick="showAnswer('q4','The action is not a CSS rule.')">
+    D. A CSS style
+</button>
+
+<div class="quiz-answer" id="q4"></div>
+```
+
+</div>
+
+<div>
+    <h3>5. Which situation is commonly suitable for useReducer()?</h3>
+
+```
+<button class="quiz-option" onclick="showAnswer('q5','Complex related state transitions are a common use case for useReducer().')">
+    A. Complex related state transitions
+</button>
+
+<button class="quiz-option" onclick="showAnswer('q5','A simple boolean can usually be handled more simply with useState().')">
+    B. Every single boolean
+</button>
+
+<button class="quiz-option" onclick="showAnswer('q5','Static text does not require reducer state.')">
+    C. Static text
+</button>
+
+<button class="quiz-option" onclick="showAnswer('q5','A CSS color does not inherently require reducer state.')">
+    D. A static CSS color
+</button>
+
+<div class="quiz-answer" id="q5"></div>
+```
+
+</div>
+
+</section>
+
+<section class="card">
+<h2>Lesson 22 Complete</h2>
+
+<div class="success">
+    You now understand the complete reducer cycle:
+    <br><br>
+    <strong>
+    State → Event → Action → Dispatch → Reducer → Next State → Render
+    </strong>
+</div>
+
+<p>
+    In the next stage of React, reducer-based state becomes especially
+    powerful when combined with other React architecture patterns.
+</p>
+
+</section>
+
+</main>
+</div>
+
+<script>
+
+let counter = 0;
+
+function runReducer(action){
+
+    if(action === "increment"){
+        counter++;
+    }
+
+    if(action === "decrement"){
+        counter--;
+    }
+
+    if(action === "reset"){
+        counter = 0;
+    }
+
+    document.getElementById("counterState").textContent =
+        "Count: " + counter;
+
+    document.getElementById("actionLog").textContent =
+        "dispatch({ type: '" + action + "' }) → reducer → Count: " + counter;
+}
+
+
+let formState = {
+    name:"",
+    email:""
+};
+
+function formDispatch(field,value){
+
+    formState = {
+        ...formState,
+        [field]:value
+    };
+
+    document.getElementById("formState").innerHTML =
+        "Name: " + (formState.name || "—") +
+        "<br>Email: " + (formState.email || "—");
+}
+
+
+let cart = [];
+
+function addProduct(name,price){
+
+    cart = [
+        ...cart,
+        {
+            id:Date.now() + Math.random(),
+            name:name,
+            price:price
+        }
+    ];
+
+    renderCart();
+}
+
+function removeProduct(id){
+
+    cart = cart.filter(item => item.id !== id);
+
+    renderCart();
+}
+
+function clearCartDemo(){
+
+    cart = [];
+
+    renderCart();
+}
+
+function renderCart(){
+
+    const container =
+        document.getElementById("cartItems");
+
+    container.innerHTML = "";
+
+    let total = 0;
+
+    cart.forEach(item => {
+
+        total += item.price;
+
+        const div = document.createElement("div");
+
+        div.className = "cart-item";
+
+        div.innerHTML = `
+            <div>
+                <strong>${item.name}</strong><br>
+                ₹${item.price}
+            </div>
+
+            <button class="red"
+                onclick="removeProduct(${item.id})">
+                Remove
+            </button>
+        `;
+
+        container.appendChild(div);
+    });
+
+    document.getElementById("cartTotal").textContent =
+        "Total: ₹" + total;
+}
+
+
+function showAnswer(id,message){
+
+    const element = document.getElementById(id);
+
+    element.style.display = "block";
+
+    element.textContent = message;
+}
+
+
+const links = document.querySelectorAll(".sidebar a");
+
+links.forEach(link => {
+
+    link.addEventListener("click",function(){
+
+        links.forEach(l => l.classList.remove("active"));
+
+        this.classList.add("active");
+
+    });
+
+});
+
+</script>
+
+</body>
+</html>

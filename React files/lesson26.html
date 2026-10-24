@@ -1,0 +1,4073 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS React — Lesson 26: Authentication & Protected Routes</title>
+
+<style>
+
+/* =====================================================
+   RESET
+===================================================== */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg: #f5f7fb;
+    --surface: #ffffff;
+    --surface-soft: #f8fafc;
+    --border: #e4e7ec;
+    --text: #172033;
+    --muted: #667085;
+    --primary: #4f46e5;
+    --primary-soft: #eef2ff;
+    --blue: #2563eb;
+    --green: #059669;
+    --green-soft: #ecfdf5;
+    --orange: #d97706;
+    --orange-soft: #fff7ed;
+    --red: #dc2626;
+    --red-soft: #fef2f2;
+    --dark: #0f172a;
+    --dark-soft: #172033;
+    --shadow: 0 8px 25px rgba(15, 23, 42, .07);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family:
+        Inter,
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background: var(--bg);
+    color: var(--text);
+
+    line-height: 1.7;
+}
+
+/* =====================================================
+   TOP BAR
+===================================================== */
+
+.topbar {
+    height: 64px;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    z-index: 1000;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 24px;
+
+    background: rgba(255,255,255,.96);
+
+    border-bottom: 1px solid var(--border);
+
+    backdrop-filter: blur(12px);
+}
+
+.logo {
+    font-size: 21px;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.logo span {
+    color: var(--text);
+}
+
+.lesson-label {
+    margin-left: 28px;
+
+    color: var(--muted);
+
+    font-size: 14px;
+}
+
+/* =====================================================
+   SIDEBAR
+===================================================== */
+
+.sidebar {
+    position: fixed;
+
+    top: 64px;
+    left: 0;
+    bottom: 0;
+
+    width: 260px;
+
+    padding: 24px 16px;
+
+    background: white;
+
+    border-right: 1px solid var(--border);
+
+    overflow-y: auto;
+}
+
+.sidebar-title {
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 1px;
+
+    color: #98a2b3;
+
+    margin: 0 12px 12px;
+}
+
+.sidebar a {
+    display: block;
+
+    text-decoration: none;
+
+    color: #475467;
+
+    font-size: 13px;
+
+    padding: 9px 12px;
+
+    border-radius: 8px;
+
+    margin-bottom: 3px;
+
+    transition: .2s;
+}
+
+.sidebar a:hover {
+    background: var(--primary-soft);
+
+    color: var(--primary);
+}
+
+/* =====================================================
+   MAIN
+===================================================== */
+
+.main {
+    margin-left: 260px;
+
+    padding:
+        92px
+        42px
+        80px;
+
+    max-width: 1450px;
+}
+
+.section {
+    margin-bottom: 52px;
+
+    scroll-margin-top: 85px;
+}
+
+.section h2 {
+    font-size: 29px;
+
+    letter-spacing: -.7px;
+
+    margin-bottom: 12px;
+}
+
+.section h3 {
+    font-size: 20px;
+
+    margin: 25px 0 10px;
+}
+
+.section > p {
+    max-width: 950px;
+
+    color: #475467;
+}
+
+/* =====================================================
+   HERO
+===================================================== */
+
+.hero {
+    position: relative;
+
+    overflow: hidden;
+
+    padding: 48px;
+
+    border-radius: 20px;
+
+    color: white;
+
+    background:
+        linear-gradient(
+            135deg,
+            #111827,
+            #1e293b
+        );
+
+    margin-bottom: 36px;
+}
+
+.hero::before {
+    content: "";
+
+    position: absolute;
+
+    width: 300px;
+    height: 300px;
+
+    right: -100px;
+    top: -120px;
+
+    border-radius: 50%;
+
+    border: 1px solid rgba(255,255,255,.1);
+
+    animation: pulseRing 5s infinite ease-in-out;
+}
+
+.hero::after {
+    content: "🔐";
+
+    position: absolute;
+
+    right: 100px;
+    top: 55px;
+
+    font-size: 70px;
+
+    opacity: .08;
+
+    animation: lockFloat 4s infinite ease-in-out;
+}
+
+@keyframes pulseRing {
+
+    0%,100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes lockFloat {
+
+    0%,100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.badge {
+    display: inline-block;
+
+    padding: 6px 12px;
+
+    border-radius: 999px;
+
+    background: rgba(255,255,255,.1);
+
+    border: 1px solid rgba(255,255,255,.15);
+
+    font-size: 12px;
+
+    margin-bottom: 16px;
+}
+
+.hero h1 {
+    position: relative;
+
+    z-index: 2;
+
+    font-size:
+        clamp(34px, 4vw, 52px);
+
+    line-height: 1.1;
+
+    letter-spacing: -1.5px;
+
+    margin-bottom: 18px;
+}
+
+.hero p {
+    position: relative;
+
+    z-index: 2;
+
+    max-width: 850px;
+
+    color: #cbd5e1;
+
+    font-size: 16px;
+}
+
+/* =====================================================
+   CARDS
+===================================================== */
+
+.card {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 15px;
+
+    padding: 24px;
+
+    box-shadow: var(--shadow);
+
+    margin-top: 20px;
+}
+
+.grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0,1fr));
+
+    gap: 20px;
+
+    margin-top: 20px;
+}
+
+.grid-3 {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0,1fr));
+
+    gap: 18px;
+
+    margin-top: 20px;
+}
+
+.info-card {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 14px;
+
+    padding: 22px;
+}
+
+.info-card h3 {
+    margin-top: 0;
+}
+
+.info-card p {
+    color: var(--muted);
+
+    font-size: 14px;
+}
+
+/* =====================================================
+   CALLOUTS
+===================================================== */
+
+.callout {
+    margin: 20px 0;
+
+    padding: 18px 20px;
+
+    border-left: 4px solid var(--primary);
+
+    border-radius: 10px;
+
+    background: var(--primary-soft);
+}
+
+.success {
+    border-left-color: var(--green);
+
+    background: var(--green-soft);
+}
+
+.warning {
+    border-left-color: var(--orange);
+
+    background: var(--orange-soft);
+}
+
+.danger {
+    border-left-color: var(--red);
+
+    background: var(--red-soft);
+}
+
+/* =====================================================
+   CODE
+===================================================== */
+
+.code {
+    margin-top: 16px;
+
+    padding: 20px;
+
+    background: #0f172a;
+
+    color: #dbeafe;
+
+    border-radius: 13px;
+
+    overflow-x: auto;
+
+    font-family:
+        Consolas,
+        Monaco,
+        monospace;
+
+    font-size: 13px;
+
+    line-height: 1.75;
+}
+
+.inline-code {
+    padding: 2px 6px;
+
+    border-radius: 5px;
+
+    background: #f1f5f9;
+
+    font-family: Consolas, monospace;
+
+    font-size: .9em;
+}
+
+/* =====================================================
+   ARCHITECTURE
+===================================================== */
+
+.architecture {
+    margin-top: 22px;
+
+    padding: 30px;
+
+    border-radius: 16px;
+
+    background: #0b1220;
+
+    overflow: hidden;
+}
+
+.arch-title {
+    text-align: center;
+
+    color: #e2e8f0;
+
+    font-weight: 700;
+
+    margin-bottom: 24px;
+}
+
+.flow {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-wrap: wrap;
+
+    gap: 12px;
+}
+
+.flow-box {
+    min-width: 145px;
+
+    padding: 15px;
+
+    text-align: center;
+
+    border-radius: 10px;
+
+    border: 1px solid #334155;
+
+    background: #172033;
+
+    color: #e2e8f0;
+
+    animation: flowFloat 3s infinite ease-in-out;
+}
+
+.flow-box:nth-child(2) {
+    animation-delay: .3s;
+}
+
+.flow-box:nth-child(3) {
+    animation-delay: .6s;
+}
+
+.flow-box:nth-child(4) {
+    animation-delay: .9s;
+}
+
+.flow-box:nth-child(5) {
+    animation-delay: 1.2s;
+}
+
+@keyframes flowFloat {
+
+    0%,100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+.flow-arrow {
+    color: #94a3b8;
+
+    font-size: 22px;
+}
+
+/* =====================================================
+   AUTH FLOW
+===================================================== */
+
+.auth-flow {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    margin-top: 20px;
+}
+
+.auth-node {
+    padding: 15px 20px;
+
+    border-radius: 12px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    box-shadow: var(--shadow);
+
+    font-weight: 700;
+
+    transition: .3s;
+}
+
+.auth-node.active {
+    transform: translateY(-7px) scale(1.03);
+
+    border-color: var(--primary);
+
+    background: var(--primary-soft);
+
+    color: var(--primary);
+}
+
+.auth-arrow {
+    font-size: 22px;
+
+    color: #98a2b3;
+}
+
+/* =====================================================
+   TABLE
+===================================================== */
+
+table {
+    width: 100%;
+
+    margin-top: 18px;
+
+    border-collapse: collapse;
+
+    background: white;
+
+    border-radius: 12px;
+
+    overflow: hidden;
+}
+
+th,
+td {
+    border: 1px solid var(--border);
+
+    padding: 13px;
+
+    text-align: left;
+
+    font-size: 14px;
+}
+
+th {
+    background: #f8fafc;
+}
+
+/* =====================================================
+   DEMO
+===================================================== */
+
+.demo {
+    margin-top: 20px;
+
+    padding: 24px;
+
+    border-radius: 14px;
+
+    border: 1px solid var(--border);
+
+    background: #f8fafc;
+}
+
+.demo-controls {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    margin-bottom: 20px;
+}
+
+button {
+    border: none;
+
+    cursor: pointer;
+
+    padding: 10px 16px;
+
+    border-radius: 9px;
+
+    background: var(--primary);
+
+    color: white;
+
+    font-weight: 700;
+
+    transition: .2s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+
+    opacity: .92;
+}
+
+button.secondary {
+    background: #e2e8f0;
+
+    color: #334155;
+}
+
+button.danger-btn {
+    background: var(--red);
+}
+
+.status-box {
+    padding: 20px;
+
+    background: white;
+
+    border: 1px dashed #cbd5e1;
+
+    border-radius: 12px;
+}
+
+.status {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 7px 12px;
+
+    border-radius: 999px;
+
+    font-size: 13px;
+
+    font-weight: 700;
+}
+
+.status.logged-out {
+    background: var(--red-soft);
+
+    color: var(--red);
+}
+
+.status.logged-in {
+    background: var(--green-soft);
+
+    color: var(--green);
+}
+
+/* =====================================================
+   TOKEN VISUAL
+===================================================== */
+
+.token-box {
+    padding: 20px;
+
+    border-radius: 12px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    margin-top: 18px;
+}
+
+.token-bar {
+    height: 22px;
+
+    display: flex;
+
+    overflow: hidden;
+
+    border-radius: 7px;
+
+    margin-top: 14px;
+}
+
+.token-part {
+    flex: 1;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    font-size: 11px;
+
+    font-weight: 700;
+}
+
+.token-header {
+    background: #dbeafe;
+}
+
+.token-payload {
+    background: #e0e7ff;
+}
+
+.token-signature {
+    background: #dcfce7;
+}
+
+/* =====================================================
+   SECURITY MATRIX
+===================================================== */
+
+.security-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0,1fr));
+
+    gap: 16px;
+
+    margin-top: 20px;
+}
+
+.security-item {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 13px;
+
+    padding: 20px;
+}
+
+.security-item strong {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: var(--primary);
+}
+
+/* =====================================================
+   MISTAKES
+===================================================== */
+
+.mistake {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 13px;
+
+    padding: 20px;
+
+    margin-top: 14px;
+}
+
+.mistake strong {
+    color: var(--red);
+}
+
+/* =====================================================
+   QUIZ
+===================================================== */
+
+.quiz-question {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 13px;
+
+    padding: 20px;
+
+    margin-top: 15px;
+}
+
+.quiz-question p {
+    font-weight: 700;
+
+    margin-bottom: 10px;
+}
+
+.quiz-question label {
+    display: block;
+
+    padding: 7px 0;
+
+    color: #475467;
+}
+
+.answer {
+    display: none;
+
+    margin-top: 12px;
+
+    padding: 12px;
+
+    border-radius: 8px;
+
+    background: var(--green-soft);
+
+    color: #065f46;
+}
+
+/* =====================================================
+   CHEAT SHEET
+===================================================== */
+
+.cheat {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0,1fr));
+
+    gap: 14px;
+
+    margin-top: 20px;
+}
+
+.cheat-item {
+    padding: 15px;
+
+    border-radius: 10px;
+
+    border: 1px solid var(--border);
+
+    background: white;
+}
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+.footer {
+    text-align: center;
+
+    color: #98a2b3;
+
+    padding: 40px 0;
+
+    border-top: 1px solid var(--border);
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media(max-width:1000px) {
+
+    .sidebar {
+        display: none;
+    }
+
+    .main {
+        margin-left: 0;
+
+        padding:
+            88px
+            20px
+            60px;
+    }
+
+    .grid,
+    .grid-3,
+    .security-grid,
+    .cheat {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media(max-width:600px) {
+
+    .hero {
+        padding: 30px 22px;
+    }
+
+    .hero h1 {
+        font-size: 34px;
+    }
+
+    .section h2 {
+        font-size: 25px;
+    }
+
+    .flow,
+    .auth-flow {
+        flex-direction: column;
+    }
+
+    .flow-arrow,
+    .auth-arrow {
+        transform: rotate(90deg);
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     TOP BAR
+===================================================== -->
+
+<header class="topbar">
+
+    <div class="logo">
+        ZENSUS<span>.</span>
+    </div>
+
+    <div class="lesson-label">
+        React Course / Lesson 26
+    </div>
+
+</header>
+
+
+<!-- =====================================================
+     SIDEBAR
+===================================================== -->
+
+<aside class="sidebar">
+
+    <div class="sidebar-title">
+        LESSON CONTENTS
+    </div>
+
+    <a href="#auth-vs-authz">
+        Authentication vs Authorization
+    </a>
+
+    <a href="#login">
+        Login
+    </a>
+
+    <a href="#signup">
+        Signup
+    </a>
+
+    <a href="#logout">
+        Logout
+    </a>
+
+    <a href="#auth-state">
+        Authentication State
+    </a>
+
+    <a href="#tokens">
+        Token Basics
+    </a>
+
+    <a href="#access-token">
+        Access Tokens
+    </a>
+
+    <a href="#refresh-token">
+        Refresh Tokens
+    </a>
+
+    <a href="#storage">
+        Local Storage
+    </a>
+
+    <a href="#cookies">
+        Cookies
+    </a>
+
+    <a href="#protected">
+        Protected Routes
+    </a>
+
+    <a href="#auth-context">
+        Auth Context
+    </a>
+
+    <a href="#redirects">
+        Redirects
+    </a>
+
+    <a href="#session">
+        Session Handling
+    </a>
+
+    <a href="#logout-flow">
+        Logout Flow
+    </a>
+
+    <a href="#security">
+        Authentication Security
+    </a>
+
+    <a href="#architecture">
+        Complete Architecture
+    </a>
+
+    <a href="#mistakes">
+        Common Mistakes
+    </a>
+
+    <a href="#cheat">
+        Cheat Sheet
+    </a>
+
+    <a href="#quiz">
+        Quick Quiz
+    </a>
+
+</aside>
+
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<main class="main">
+
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<section class="hero">
+
+    <div class="badge">
+        LESSON 26 · AUTHENTICATION
+    </div>
+
+    <h1>
+        Authentication & Protected Routes
+    </h1>
+
+    <p>
+        Learn how modern React applications identify users, maintain
+        authentication state, handle login and logout, manage sessions,
+        protect routes and communicate securely with a backend.
+    </p>
+
+</section>
+
+
+<!-- =====================================================
+     1 AUTHENTICATION VS AUTHORIZATION
+===================================================== -->
+
+<section class="section" id="auth-vs-authz">
+
+<h2>
+1. Authentication vs Authorization
+</h2>
+
+<p>
+These two concepts are related, but they solve different problems.
+</p>
+
+<div class="grid">
+
+<div class="info-card">
+
+<h3>
+Authentication
+</h3>
+
+<p>
+Authentication answers:
+<strong>“Who are you?”</strong>
+</p>
+
+<br>
+
+<p>
+Examples:
+</p>
+
+<p>
+• Login with email and password
+<br>
+• Sign in with Google
+<br>
+• Multi-factor authentication
+<br>
+• Session establishment
+</p>
+
+</div>
+
+<div class="info-card">
+
+<h3>
+Authorization
+</h3>
+
+<p>
+Authorization answers:
+<strong>“What are you allowed to do?”</strong>
+</p>
+
+<br>
+
+<p>
+Examples:
+</p>
+
+<p>
+• Student can view courses
+<br>
+• Instructor can create lessons
+<br>
+• Admin can manage users
+</p>
+
+</div>
+
+</div>
+
+<div class="architecture">
+
+<div class="arch-title">
+Authentication → Authorization
+</div>
+
+<div class="flow">
+
+    <div class="flow-box">
+        User
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Authenticate
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Identity
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Authorization
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Allowed Resource
+    </div>
+
+</div>
+
+</div>
+
+<div class="callout warning">
+
+A user being authenticated does not automatically mean the user has
+permission to perform every action.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     2 LOGIN
+===================================================== -->
+
+<section class="section" id="login">
+
+<h2>
+2. Login
+</h2>
+
+<p>
+A login flow normally sends credentials to a backend authentication service.
+The backend verifies them and establishes an authenticated session or issues
+tokens according to the application's authentication design.
+</p>
+
+<div class="code">
+
+async function login(email, password) {
+
+    const response = await fetch(
+        "/api/auth/login",
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
+
+            body: JSON.stringify({
+                email,
+                password
+            })
+        }
+    );
+
+
+    if (!response.ok) {
+        throw new Error(
+            "Login failed"
+        );
+    }
+
+
+    return response.json();
+
+}
+
+</div>
+
+<div class="architecture">
+
+<div class="arch-title">
+Login Flow
+</div>
+
+<div class="flow">
+
+    <div class="flow-box">
+        Login Form
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Backend
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Verify Credentials
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Session / Tokens
+    </div>
+
+</div>
+
+</div>
+
+<div class="callout danger">
+
+Never trust the frontend to verify passwords.
+Password verification belongs on the server using a suitable password
+hashing system.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     3 SIGNUP
+===================================================== -->
+
+<section class="section" id="signup">
+
+<h2>
+3. Signup
+</h2>
+
+<p>
+Signup creates a user account. A production application normally validates
+the submitted data on both the client and server.
+</p>
+
+<div class="code">
+
+async function signup(
+    name,
+    email,
+    password
+) {
+
+    const response = await fetch(
+        "/api/auth/signup",
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
+
+            body: JSON.stringify({
+                name,
+                email,
+                password
+            })
+        }
+    );
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Signup failed"
+        );
+
+    }
+
+
+    return response.json();
+
+}
+
+</div>
+
+<div class="callout">
+
+Client-side validation improves user experience.
+Server-side validation is still required because the client cannot be trusted.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     4 LOGOUT
+===================================================== -->
+
+<section class="section" id="logout">
+
+<h2>
+4. Logout
+</h2>
+
+<p>
+Logout ends the application's authenticated session according to the
+authentication mechanism being used.
+</p>
+
+<div class="code">
+
+async function logout() {
+
+    await fetch(
+        "/api/auth/logout",
+        {
+            method: "POST",
+            credentials: "include"
+        }
+    );
+
+}
+
+</div>
+
+<p>
+The frontend should then clear its authentication state and update the UI.
+</p>
+
+<div class="callout success">
+
+A good logout experience should update both:
+
+<br><br>
+
+<strong>
+Server-side session/token state where applicable
+</strong>
+
+<br>
+
+and
+
+<br>
+
+<strong>
+Client-side authentication state.
+</strong>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     5 AUTH STATE
+===================================================== -->
+
+<section class="section" id="auth-state">
+
+<h2>
+5. Authentication State
+</h2>
+
+<p>
+React needs to know whether the application currently considers the user
+authenticated.
+</p>
+
+Typical state may look like:
+</p>
+
+<div class="code">
+
+const [auth, setAuth] = useState({
+
+    status: "loading",
+
+    user: null
+
+});
+
+</div>
+
+<p>
+Possible states:
+</p>
+
+<div class="grid-3">
+
+<div class="info-card">
+
+<h3>
+Loading
+</h3>
+
+<p>
+The application is checking whether an existing session is valid.
+</p>
+
+</div>
+
+<div class="info-card">
+
+<h3>
+Authenticated
+</h3>
+
+<p>
+A valid authenticated identity is available.
+</p>
+
+</div>
+
+<div class="info-card">
+
+<h3>
+Unauthenticated
+</h3>
+
+<p>
+No valid authenticated session is available.
+</p>
+
+</div>
+
+</div>
+
+<div class="architecture">
+
+<div class="arch-title">
+Authentication State Machine
+</div>
+
+<div class="flow">
+
+    <div class="flow-box">
+        Loading
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Session Check
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Authenticated
+    </div>
+
+</div>
+
+<br>
+
+<div class="flow">
+
+    <div class="flow-box">
+        Loading
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Session Check
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Unauthenticated
+    </div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     6 TOKEN BASICS
+===================================================== -->
+
+<section class="section" id="tokens">
+
+<h2>
+6. Token Basics
+</h2>
+
+<p>
+A token is a credential-like value that an application can use to represent
+an authenticated session or authorize requests.
+</p>
+
+<p>
+One common token format is JWT (JSON Web Token).
+</p>
+
+<div class="token-box">
+
+<strong>
+JWT Structure
+</strong>
+
+<div class="token-bar">
+
+<div class="token-part token-header">
+Header
+</div>
+
+<div class="token-part token-payload">
+Payload
+</div>
+
+<div class="token-part token-signature">
+Signature
+</div>
+
+</div>
+
+</div>
+
+<div class="code">
+
+xxxxx.yyyyy.zzzzz
+
+</div>
+
+<p>
+The three sections are commonly represented as:
+</p>
+
+<div class="grid-3">
+
+<div class="info-card">
+
+<h3>
+Header
+</h3>
+
+<p>
+Contains metadata such as the token type and signing algorithm.
+</p>
+
+</div>
+
+<div class="info-card">
+
+<h3>
+Payload
+</h3>
+
+<p>
+Contains claims such as subject or expiration information.
+</p>
+
+</div>
+
+<div class="info-card">
+
+<h3>
+Signature
+</h3>
+
+<p>
+Allows the server to verify that the signed token has not been altered.
+</p>
+
+</div>
+
+</div>
+
+<div class="callout danger">
+
+JWT payload data should not be treated as secret merely because it is inside
+a token. A typical JWT payload is encoded, not encrypted.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     7 ACCESS TOKENS
+===================================================== -->
+
+<section class="section" id="access-token">
+
+<h2>
+7. Access Tokens
+</h2>
+
+<p>
+An access token is generally used to authorize requests to protected APIs.
+</p>
+
+<div class="architecture">
+
+<div class="arch-title">
+Access Token Request
+</div>
+
+<div class="flow">
+
+    <div class="flow-box">
+        React App
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Access Token
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Protected API
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Response
+    </div>
+
+</div>
+
+</div>
+
+<p>
+Access tokens are commonly short-lived so that exposure has a limited
+lifetime.
+</p>
+
+<div class="callout">
+
+The exact token lifetime and storage strategy depend on the authentication
+architecture and threat model of the application.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     8 REFRESH TOKENS
+===================================================== -->
+
+<section class="section" id="refresh-token">
+
+<h2>
+8. Refresh Tokens
+</h2>
+
+<p>
+A refresh token can be used by an authentication system to obtain a new
+access token without requiring the user to enter credentials again.
+</p>
+
+<div class="architecture">
+
+<div class="arch-title">
+Access + Refresh Token Model
+</div>
+
+<div class="flow">
+
+    <div class="flow-box">
+        Login
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Access Token
+    </div>
+
+    <div class="flow-arrow">
+        +
+    </div>
+
+    <div class="flow-box">
+        Refresh Token
+    </div>
+
+</div>
+
+<br>
+
+<div class="flow">
+
+    <div class="flow-box">
+        Access Token Expires
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Refresh
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        New Access Token
+    </div>
+
+</div>
+
+</div>
+
+<div class="callout warning">
+
+Refresh tokens are highly sensitive credentials. Production systems commonly
+use secure server-managed mechanisms, such as HttpOnly Secure cookies, and
+may use rotation and server-side revocation controls.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     9 LOCAL STORAGE
+===================================================== -->
+
+<section class="section" id="storage">
+
+<h2>
+9. Local Storage
+</h2>
+
+<p>
+localStorage is a browser storage mechanism that persists data across browser
+sessions until it is removed.
+</p>
+
+<div class="code">
+
+localStorage.setItem(
+    "theme",
+    "dark"
+);
+
+
+const theme =
+    localStorage.getItem(
+        "theme"
+    );
+
+
+localStorage.removeItem(
+    "theme"
+);
+
+</div>
+
+<h3>Authentication and localStorage</h3>
+
+<p>
+Developers sometimes store tokens in localStorage because it is convenient.
+However, tokens stored there are accessible to JavaScript running in the
+origin. If an application has an XSS vulnerability, an attacker may be able
+to access such credentials.
+</p>
+
+<div class="callout danger">
+
+Do not teach “localStorage = secure authentication storage.”
+It is convenient, but it has important security trade-offs.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     10 COOKIES
+===================================================== -->
+
+<section class="section" id="cookies">
+
+<h2>
+10. Cookies
+</h2>
+
+<p>
+Cookies can be used by web applications to maintain authentication sessions.
+Security-sensitive cookies can use browser controls such as:
+</p>
+
+<div class="security-grid">
+
+<div class="security-item">
+
+<strong>
+HttpOnly
+</strong>
+
+The cookie cannot be read by normal client-side JavaScript.
+
+</div>
+
+<div class="security-item">
+
+<strong>
+Secure
+</strong>
+
+The cookie is sent only over HTTPS connections.
+
+</div>
+
+<div class="security-item">
+
+<strong>
+SameSite
+</strong>
+
+Controls how cookies are sent in cross-site contexts and can help reduce
+certain CSRF risks.
+
+</div>
+
+</div>
+
+<div class="callout warning">
+
+Cookies do not automatically make an application secure.
+Cookie-based authentication also requires appropriate CSRF defenses and
+careful server configuration.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     11 PROTECTED ROUTES
+===================================================== -->
+
+<section class="section" id="protected">
+
+<h2>
+11. Protected Routes
+</h2>
+
+<p>
+A protected route decides whether a user should be shown a particular
+application screen based on the current authentication state.
+</p>
+
+<div class="architecture">
+
+<div class="arch-title">
+Protected Route Decision
+</div>
+
+<div class="flow">
+
+    <div class="flow-box">
+        Request /dashboard
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Check Auth State
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Authenticated?
+    </div>
+
+</div>
+
+<br>
+
+<div class="flow">
+
+    <div class="flow-box">
+        YES
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Dashboard
+    </div>
+
+</div>
+
+<br>
+
+<div class="flow">
+
+    <div class="flow-box">
+        NO
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Login
+    </div>
+
+</div>
+
+</div>
+
+<h3>
+ProtectedRoute Component
+</h3>
+
+<div class="code">
+
+import {
+    Navigate,
+    useLocation
+} from "react-router-dom";
+
+
+function ProtectedRoute({
+    isAuthenticated,
+    children
+}) {
+
+    const location =
+        useLocation();
+
+
+    if (!isAuthenticated) {
+
+        return (
+
+            &lt;Navigate
+                to="/login"
+                replace
+                state={{
+                    from:
+                        location.pathname
+                }}
+            /&gt;
+
+        );
+
+    }
+
+
+    return children;
+
+}
+
+</div>
+
+<div class="callout danger">
+
+This protects the frontend experience, not the backend.
+A user can still directly call an API, so the server must independently
+authenticate and authorize protected requests.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     12 AUTH CONTEXT
+===================================================== -->
+
+<section class="section" id="auth-context">
+
+<h2>
+12. Auth Context
+</h2>
+
+<p>
+Authentication state is often needed by many components:
+navigation bars, dashboards, profile menus, protected routes and logout buttons.
+Context can make this state available without manually passing it through
+many component levels.
+</p>
+
+<div class="code">
+
+import {
+    createContext,
+    useContext,
+    useState
+} from "react";
+
+
+const AuthContext =
+    createContext(null);
+
+
+export function AuthProvider({
+    children
+}) {
+
+    const [user, setUser] =
+        useState(null);
+
+
+    const value = {
+
+        user,
+
+        isAuthenticated:
+            Boolean(user),
+
+        login(userData) {
+
+            setUser(userData);
+
+        },
+
+        logout() {
+
+            setUser(null);
+
+        }
+
+    };
+
+
+    return (
+
+        &lt;AuthContext.Provider
+            value={value}
+        &gt;
+
+            {children}
+
+        &lt;/AuthContext.Provider&gt;
+
+    );
+
+}
+
+
+export function useAuth() {
+
+    return useContext(
+        AuthContext
+    );
+
+}
+
+</div>
+
+<div class="architecture">
+
+<div class="arch-title">
+Auth Context Architecture
+</div>
+
+<div class="flow">
+
+    <div class="flow-box">
+        AuthProvider
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Auth State
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        useAuth()
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Components
+    </div>
+
+</div>
+
+</div>
+
+<div class="callout warning">
+
+Context distributes authentication state to React components.
+It does not itself authenticate the user and is not a security boundary.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     13 REDIRECTS
+===================================================== -->
+
+<section class="section" id="redirects">
+
+<h2>
+13. Redirects
+</h2>
+
+<p>
+Authentication commonly requires redirects in both directions.
+</p>
+
+<div class="grid">
+
+<div class="info-card">
+
+<h3>
+Unauthenticated → Login
+</h3>
+
+<p>
+A user tries to open a protected dashboard.
+</p>
+
+<div class="code">
+
+return (
+    &lt;Navigate
+        to="/login"
+        replace
+    /&gt;
+);
+
+</div>
+
+</div>
+
+<div class="info-card">
+
+<h3>
+Authenticated → Dashboard
+</h3>
+
+<p>
+A signed-in user attempts to open the login page again.
+</p>
+
+<div class="code">
+
+if (user) {
+
+    return (
+        &lt;Navigate
+            to="/dashboard"
+            replace
+        /&gt;
+    );
+
+}
+
+</div>
+
+</div>
+
+</div>
+
+<h3>
+Preserving the Intended Destination
+</h3>
+
+<p>
+A polished application can remember where the user wanted to go before
+redirecting to login.
+</p>
+
+<div class="code">
+
+Navigate
+
+to="/login"
+
+state={{
+    from: location.pathname
+}}
+
+</div>
+
+<p>
+After successful authentication, the application can navigate back to the
+original destination if appropriate.
+</p>
+
+</section>
+
+
+<!-- =====================================================
+     14 SESSION HANDLING
+===================================================== -->
+
+<section class="section" id="session">
+
+<h2>
+14. Session Handling
+</h2>
+
+<p>
+Authentication state should not simply begin as “logged out” while the
+application silently checks whether a valid session already exists.
+</p>
+
+<p>
+A useful model is:
+</p>
+
+<div class="auth-flow">
+
+<div class="auth-node" id="node-loading">
+Loading
+</div>
+
+<div class="auth-arrow">
+→
+</div>
+
+<div class="auth-node" id="node-check">
+Session Check
+</div>
+
+<div class="auth-arrow">
+→
+</div>
+
+<div class="auth-node" id="node-result">
+Authenticated / Guest
+</div>
+
+</div>
+
+<div class="code">
+
+function AuthProvider({
+    children
+}) {
+
+    const [status, setStatus] =
+        useState("loading");
+
+    const [user, setUser] =
+        useState(null);
+
+
+    useEffect(() =&gt; {
+
+        async function restoreSession() {
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/auth/me",
+                        {
+                            credentials:
+                                "include"
+                        }
+                    );
+
+
+                if (!response.ok) {
+
+                    setUser(null);
+
+                    setStatus(
+                        "unauthenticated"
+                    );
+
+                    return;
+
+                }
+
+
+                const userData =
+                    await response.json();
+
+
+                setUser(userData);
+
+                setStatus(
+                    "authenticated"
+                );
+
+            }
+
+            catch {
+
+                setUser(null);
+
+                setStatus(
+                    "unauthenticated"
+                );
+
+            }
+
+        }
+
+
+        restoreSession();
+
+    }, []);
+
+
+    if (status === "loading") {
+
+        return &lt;LoadingScreen /&gt;;
+
+    }
+
+
+    return children;
+
+}
+
+</div>
+
+<div class="callout">
+
+The exact session restoration mechanism depends on the backend authentication
+architecture. The important React concept is to represent the initial
+“checking” state explicitly.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     15 LOGOUT FLOW
+===================================================== -->
+
+<section class="section" id="logout-flow">
+
+<h2>
+15. Complete Logout Flow
+</h2>
+
+<div class="architecture">
+
+<div class="arch-title">
+Production-Oriented Logout Model
+</div>
+
+<div class="flow">
+
+    <div class="flow-box">
+        User Clicks Logout
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Server Logout
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Invalidate Session
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Clear Client Auth State
+    </div>
+
+</div>
+
+<br>
+
+<div class="flow">
+
+    <div class="flow-box">
+        Navigate to Login / Home
+    </div>
+
+</div>
+
+</div>
+
+<div class="code">
+
+async function handleLogout() {
+
+    try {
+
+        await fetch(
+            "/api/auth/logout",
+            {
+                method: "POST",
+                credentials: "include"
+            }
+        );
+
+    }
+
+    finally {
+
+        logoutFromAuthContext();
+
+        navigate("/login", {
+            replace: true
+        });
+
+    }
+
+}
+
+</div>
+
+<div class="callout warning">
+
+The exact server-side invalidation behavior depends on whether the application
+uses sessions, refresh tokens, token rotation, or another authentication
+mechanism.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     16 INTERACTIVE AUTH SIMULATOR
+===================================================== -->
+
+<section class="section">
+
+<h2>
+16. Interactive Authentication Simulator
+</h2>
+
+<p>
+This simulator demonstrates the frontend state transitions of a typical
+authentication flow. It is only a learning visualization — it does not
+perform real authentication.
+</p>
+
+<div class="demo">
+
+<div class="demo-controls">
+
+<button onclick="authAction('login')">
+Login
+</button>
+
+<button onclick="authAction('refresh')">
+Restore Session
+</button>
+
+<button onclick="authAction('protected')">
+Open Dashboard
+</button>
+
+<button class="danger-btn"
+        onclick="authAction('logout')">
+Logout
+</button>
+
+</div>
+
+<div class="status-box">
+
+<div id="authStatus"
+     class="status logged-out">
+
+● Logged Out
+
+</div>
+
+<h3 id="authTitle">
+Authentication Required
+</h3>
+
+<p id="authMessage">
+You are not authenticated. Protected routes should redirect to login.
+</p>
+
+<div class="route-path"
+     id="authRoute">
+/login
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     17 LOCAL STORAGE VS COOKIES
+===================================================== -->
+
+<section class="section">
+
+<h2>
+17. Local Storage vs Cookies
+</h2>
+
+<table>
+
+<tr>
+
+<th>
+Characteristic
+</th>
+
+<th>
+localStorage
+</th>
+
+<th>
+HttpOnly Cookie
+</th>
+
+</tr>
+
+<tr>
+
+<td>
+Accessible to JavaScript
+</td>
+
+<td>
+Yes
+</td>
+
+<td>
+No for HttpOnly cookies
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+Automatically sent with requests
+</td>
+
+<td>
+No
+</td>
+
+<td>
+Yes, according to cookie rules
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+Persistent storage
+</td>
+
+<td>
+Yes
+</td>
+
+<td>
+Depends on cookie configuration
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+XSS token exposure concern
+</td>
+
+<td>
+Higher
+</td>
+
+<td>
+HttpOnly reduces direct JavaScript access
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+CSRF concern
+</td>
+
+<td>
+Different threat profile
+</td>
+
+<td>
+Must be addressed for cookie-based auth
+</td>
+
+</tr>
+
+</table>
+
+<div class="callout success">
+
+There is no universal “one storage option is always correct” rule.
+Authentication architecture should be designed around the application's
+threat model, backend, deployment environment and security requirements.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     18 COMPLETE AUTH ARCHITECTURE
+===================================================== -->
+
+<section class="section" id="architecture">
+
+<h2>
+18. Complete React Authentication Architecture
+</h2>
+
+<p>
+A production application separates authentication responsibilities instead
+of putting everything into one component.
+</p>
+
+<div class="code">
+
+src/
+│
+├── auth/
+│   ├── AuthContext.jsx
+│   ├── AuthProvider.jsx
+│   ├── ProtectedRoute.jsx
+│   └── authApi.js
+│
+├── pages/
+│   ├── Login.jsx
+│   ├── Signup.jsx
+│   ├── Dashboard.jsx
+│   └── Profile.jsx
+│
+├── components/
+│   ├── Navbar.jsx
+│   └── UserMenu.jsx
+│
+├── services/
+│   └── api.js
+│
+└── App.jsx
+
+</div>
+
+<div class="architecture">
+
+<div class="arch-title">
+Full Authentication Architecture
+</div>
+
+<div class="flow">
+
+    <div class="flow-box">
+        Login / Signup
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Auth API
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Backend
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Session / Token
+    </div>
+
+</div>
+
+<br>
+
+<div class="flow">
+
+    <div class="flow-box">
+        AuthProvider
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        ProtectedRoute
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Dashboard
+    </div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     19 AUTH CONTEXT + ROUTER
+===================================================== -->
+
+<section class="section">
+
+<h2>
+19. Auth Context + React Router
+</h2>
+
+<p>
+The concepts from Lessons 21–25 now come together.
+</p>
+
+<div class="code">
+
+function App() {
+
+    return (
+
+        &lt;BrowserRouter&gt;
+
+            &lt;AuthProvider&gt;
+
+                &lt;Routes&gt;
+
+                    &lt;Route
+                        path="/login"
+                        element={&lt;Login /&gt;}
+                    /&gt;
+
+                    &lt;Route
+                        path="/signup"
+                        element={&lt;Signup /&gt;}
+                    /&gt;
+
+                    &lt;Route
+                        path="/dashboard"
+                        element={
+                            &lt;ProtectedRoute&gt;
+
+                                &lt;Dashboard /&gt;
+
+                            &lt;/ProtectedRoute&gt;
+                        }
+                    /&gt;
+
+                &lt;/Routes&gt;
+
+            &lt;/AuthProvider&gt;
+
+        &lt;/BrowserRouter&gt;
+
+    );
+
+}
+
+</div>
+
+<div class="callout">
+
+Notice the separation:
+
+<br><br>
+
+<strong>React Router</strong>
+→ decides which UI should render.
+
+<br><br>
+
+<strong>Auth Context</strong>
+→ distributes authentication state.
+
+<br><br>
+
+<strong>Backend</strong>
+→ actually verifies identity and enforces authorization.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     20 AUTHORIZATION
+===================================================== -->
+
+<section class="section">
+
+<h2>
+20. Authentication Is Not Authorization
+</h2>
+
+<p>
+Suppose a ZENSUS application has three roles:
+</p>
+
+<div class="grid-3">
+
+<div class="info-card">
+
+<h3>
+Student
+</h3>
+
+<p>
+Can access courses and personal learning progress.
+</p>
+
+</div>
+
+<div class="info-card">
+
+<h3>
+Instructor
+</h3>
+
+<p>
+Can create or manage assigned educational content.
+</p>
+
+</div>
+
+<div class="info-card">
+
+<h3>
+Admin
+</h3>
+
+<p>
+Can perform administrative operations.
+</p>
+
+</div>
+
+</div>
+
+<p>
+The frontend can conditionally render navigation, but the backend must
+enforce these permissions.
+</p>
+
+<div class="code">
+
+if (user.role === "admin") {
+
+    return &lt;AdminPanel /&gt;;
+
+}
+
+return &lt;AccessDenied /&gt;;
+
+</div>
+
+<div class="callout danger">
+
+Never rely on hiding a button or React route as the only authorization
+mechanism. The server must check permissions before performing sensitive
+operations.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     21 AUTH SECURITY
+===================================================== -->
+
+<section class="section" id="security">
+
+<h2>
+21. Authentication Security Fundamentals
+</h2>
+
+<div class="security-grid">
+
+<div class="security-item">
+
+<strong>
+HTTPS
+</strong>
+
+Use HTTPS in production to protect data in transit.
+
+</div>
+
+<div class="security-item">
+
+<strong>
+Password Hashing
+</strong>
+
+Passwords should be handled and stored by the backend using an appropriate
+password hashing algorithm, never as plaintext.
+
+</div>
+
+<div class="security-item">
+
+<strong>
+Short-Lived Access Tokens
+</strong>
+
+Short lifetimes can reduce the useful lifetime of an exposed access token.
+
+</div>
+
+<div class="security-item">
+
+<strong>
+Refresh Token Protection
+</strong>
+
+Refresh credentials require stronger protection and lifecycle controls.
+
+</div>
+
+<div class="security-item">
+
+<strong>
+XSS Prevention
+</strong>
+
+Prevent untrusted content from becoming executable script.
+
+</div>
+
+<div class="security-item">
+
+<strong>
+CSRF Protection
+</strong>
+
+Cookie-based authentication needs appropriate CSRF defenses.
+
+</div>
+
+<div class="security-item">
+
+<strong>
+Server Authorization
+</strong>
+
+Sensitive operations must be authorized by the backend.
+
+</div>
+
+<div class="security-item">
+
+<strong>
+Session Expiration
+</strong>
+
+Applications should handle expired sessions predictably.
+
+</div>
+
+<div class="security-item">
+
+<strong>
+Logout
+</strong>
+
+Authentication state should be cleared appropriately on logout.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     22 AUTH FLOW
+===================================================== -->
+
+<section class="section">
+
+<h2>
+22. Complete Authentication Flow
+</h2>
+
+<div class="architecture">
+
+<div class="arch-title">
+From Signup to Protected Application
+</div>
+
+<div class="flow">
+
+    <div class="flow-box">
+        Signup
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Account Created
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Login
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Session
+    </div>
+
+</div>
+
+<br>
+
+<div class="flow">
+
+    <div class="flow-box">
+        Auth State
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Protected Route
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Dashboard
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Logout
+    </div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     23 COMMON MISTAKES
+===================================================== -->
+
+<section class="section" id="mistakes">
+
+<h2>
+23. Common Authentication Mistakes
+</h2>
+
+<div class="mistake">
+
+<strong>
+Mistake 1 — Storing Passwords in React State Permanently
+</strong>
+
+<p>
+Passwords should be submitted to the authentication backend and should not
+be treated as application state that persists after authentication.
+</p>
+
+</div>
+
+<div class="mistake">
+
+<strong>
+Mistake 2 — Storing Sensitive Tokens Without Understanding the Risk
+</strong>
+
+<p>
+Using localStorage is convenient, but JavaScript-accessible credentials have
+XSS exposure considerations.
+</p>
+
+</div>
+
+<div class="mistake">
+
+<strong>
+Mistake 3 — Treating ProtectedRoute as Security
+</strong>
+
+<p>
+A frontend route guard cannot replace backend authentication and authorization.
+</p>
+
+</div>
+
+<div class="mistake">
+
+<strong>
+Mistake 4 — No Loading State
+</strong>
+
+<p>
+Immediately assuming “logged out” while restoring a session can cause
+incorrect redirects or UI flicker.
+</p>
+
+</div>
+
+<div class="mistake">
+
+<strong>
+Mistake 5 — Forgetting Session Expiration
+</strong>
+
+<p>
+Applications need a strategy for expired or invalid authentication.
+</p>
+
+</div>
+
+<div class="mistake">
+
+<strong>
+Mistake 6 — Authentication ≠ Authorization
+</strong>
+
+<p>
+Knowing who the user is does not determine what that user is permitted to do.
+</p>
+
+</div>
+
+<div class="mistake">
+
+<strong>
+Mistake 7 — Trusting Role Information From the Client
+</strong>
+
+<p>
+Client-side role checks are useful for UI decisions, but the server must
+enforce permissions.
+</p>
+
+</div>
+
+<div class="mistake">
+
+<strong>
+Mistake 8 — Sending Credentials Over Insecure Connections
+</strong>
+
+<p>
+Production authentication should use HTTPS.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     24 PROFESSIONAL DECISION GUIDE
+===================================================== -->
+
+<section class="section">
+
+<h2>
+24. Professional Authentication Decision Guide
+</h2>
+
+<table>
+
+<tr>
+
+<th>
+Question
+</th>
+
+<th>
+Think About
+</th>
+
+</tr>
+
+<tr>
+
+<td>
+Who is the user?
+</td>
+
+<td>
+Authentication
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+What can the user access?
+</td>
+
+<td>
+Authorization
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+How does the browser prove authentication?
+</td>
+
+<td>
+Session or token mechanism
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+Where should credentials be stored?
+</td>
+
+<td>
+Threat model + architecture + browser security controls
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+How does React know the user state?
+</td>
+
+<td>
+Auth Context / application state
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+How are screens protected?
+</td>
+
+<td>
+React Router guards for UI + backend enforcement
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+What happens after expiration?
+</td>
+
+<td>
+Session restoration / refresh / re-authentication
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+What happens during logout?
+</td>
+
+<td>
+Invalidate appropriate server-side state + clear client state
+</td>
+
+</tr>
+
+</table>
+
+</section>
+
+
+<!-- =====================================================
+     25 CHEAT SHEET
+===================================================== -->
+
+<section class="section" id="cheat">
+
+<h2>
+25. Authentication Cheat Sheet
+</h2>
+
+<div class="cheat">
+
+<div class="cheat-item">
+
+<strong>
+Authentication
+</strong>
+
+<br>
+
+Who is the user?
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+Authorization
+</strong>
+
+<br>
+
+What can the user do?
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+Login
+</strong>
+
+<br>
+
+Establish authenticated state.
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+Signup
+</strong>
+
+<br>
+
+Create an account.
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+Logout
+</strong>
+
+<br>
+
+End the authenticated session.
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+Access Token
+</strong>
+
+<br>
+
+Credential commonly used for protected API requests.
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+Refresh Token
+</strong>
+
+<br>
+
+Credential used to obtain a new access token in systems that use refresh tokens.
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+Auth Context
+</strong>
+
+<br>
+
+Shares authentication state across React components.
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+ProtectedRoute
+</strong>
+
+<br>
+
+Controls frontend access to protected UI.
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+Navigate
+</strong>
+
+<br>
+
+Redirects users between routes.
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+HttpOnly Cookie
+</strong>
+
+<br>
+
+Prevents ordinary JavaScript from reading the cookie.
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+Backend
+</strong>
+
+<br>
+
+The actual security boundary for protected resources.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     26 QUICK QUIZ
+===================================================== -->
+
+<section class="section" id="quiz">
+
+<h2>
+26. Quick Quiz
+</h2>
+
+<p>
+Test your understanding before moving to the next React lesson.
+</p>
+
+
+<!-- Q1 -->
+
+<div class="quiz-question">
+
+<p>
+1. What does authentication answer?
+</p>
+
+<label>
+<input type="radio" name="q1">
+What is the user's role?
+</label>
+
+<label>
+<input type="radio" name="q1">
+Who is the user?
+</label>
+
+<label>
+<input type="radio" name="q1">
+Which CSS should be used?
+</label>
+
+<label>
+<input type="radio" name="q1">
+Which component should render?
+</label>
+
+<button onclick="showAnswer('answer1')">
+Show Answer
+</button>
+
+<div class="answer" id="answer1">
+
+Authentication answers:
+<strong>“Who are you?”</strong>
+
+</div>
+
+</div>
+
+
+<!-- Q2 -->
+
+<div class="quiz-question">
+
+<p>
+2. What does authorization determine?
+</p>
+
+<label>
+<input type="radio" name="q2">
+Whether a password is hashed
+</label>
+
+<label>
+<input type="radio" name="q2">
+What an authenticated user is allowed to do
+</label>
+
+<label>
+<input type="radio" name="q2">
+Whether React is installed
+</label>
+
+<label>
+<input type="radio" name="q2">
+Whether a route exists
+</label>
+
+<button onclick="showAnswer('answer2')">
+Show Answer
+</button>
+
+<div class="answer" id="answer2">
+
+Authorization determines what resources or operations an authenticated
+user is permitted to access.
+
+</div>
+
+</div>
+
+
+<!-- Q3 -->
+
+<div class="quiz-question">
+
+<p>
+3. Why is a frontend ProtectedRoute not sufficient security?
+</p>
+
+<label>
+<input type="radio" name="q3">
+React cannot render components
+</label>
+
+<label>
+<input type="radio" name="q3">
+Users can still potentially call backend APIs directly
+</label>
+
+<label>
+<input type="radio" name="q3">
+Routes cannot contain parameters
+</label>
+
+<label>
+<input type="radio" name="q3">
+Context cannot store values
+</label>
+
+<button onclick="showAnswer('answer3')">
+Show Answer
+</button>
+
+<div class="answer" id="answer3">
+
+Frontend route guards control the UI. The backend must independently
+authenticate requests and authorize sensitive operations.
+
+</div>
+
+</div>
+
+
+<!-- Q4 -->
+
+<div class="quiz-question">
+
+<p>
+4. What is a major security consideration when storing tokens in
+localStorage?
+</p>
+
+<label>
+<input type="radio" name="q4">
+CSS cannot access it
+</label>
+
+<label>
+<input type="radio" name="q4">
+JavaScript can access it, so XSS can expose stored credentials
+</label>
+
+<label>
+<input type="radio" name="q4">
+It automatically becomes encrypted
+</label>
+
+<label>
+<input type="radio" name="q4">
+It can only be accessed by the server
+</label>
+
+<button onclick="showAnswer('answer4')">
+Show Answer
+</button>
+
+<div class="answer" id="answer4">
+
+JavaScript running in the origin can access localStorage. Therefore,
+XSS vulnerabilities can create a serious credential-exposure risk.
+
+</div>
+
+</div>
+
+
+<!-- Q5 -->
+
+<div class="quiz-question">
+
+<p>
+5. What is Auth Context mainly useful for?
+</p>
+
+<label>
+<input type="radio" name="q5">
+Replacing the backend
+</label>
+
+<label>
+<input type="radio" name="q5">
+Encrypting passwords
+</label>
+
+<label>
+<input type="radio" name="q5">
+Sharing authentication state across React components
+</label>
+
+<label>
+<input type="radio" name="q5">
+Creating database tables
+</label>
+
+<button onclick="showAnswer('answer5')">
+Show Answer
+</button>
+
+<div class="answer" id="answer5">
+
+Auth Context allows authentication-related application state and actions
+to be shared across components without manually passing them through every
+component level.
+
+</div>
+
+</div>
+
+
+</section>
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<div class="footer">
+
+<strong>
+ZENSUS React — Lesson 26
+</strong>
+
+<br>
+
+Authentication & Protected Routes
+
+<br><br>
+
+React UI protection is not a replacement for backend security.
+
+</div>
+
+
+</main>
+
+
+<script>
+
+/* =====================================================
+   AUTHENTICATION SIMULATOR
+===================================================== */
+
+let authenticated = false;
+
+
+function authAction(action) {
+
+    const status =
+        document.getElementById(
+            "authStatus"
+        );
+
+    const title =
+        document.getElementById(
+            "authTitle"
+        );
+
+    const message =
+        document.getElementById(
+            "authMessage"
+        );
+
+    const route =
+        document.getElementById(
+            "authRoute"
+        );
+
+
+    if (action === "login") {
+
+        authenticated = true;
+
+        status.textContent =
+            "● Authenticated";
+
+        status.className =
+            "status logged-in";
+
+        title.textContent =
+            "Welcome Back";
+
+        message.textContent =
+            "Authentication succeeded. Protected UI can now be displayed.";
+
+        route.textContent =
+            "/dashboard";
+
+    }
+
+
+    else if (action === "refresh") {
+
+        title.textContent =
+            "Restoring Session";
+
+        message.textContent =
+            "The application is checking whether an existing session is valid.";
+
+        route.textContent =
+            "/session-check";
+
+    }
+
+
+    else if (action === "protected") {
+
+        if (authenticated) {
+
+            status.textContent =
+                "● Authenticated";
+
+            status.className =
+                "status logged-in";
+
+            title.textContent =
+                "Dashboard Access Granted";
+
+            message.textContent =
+                "The frontend authentication state allows the protected screen to render.";
+
+            route.textContent =
+                "/dashboard";
+
+        }
+
+        else {
+
+            status.textContent =
+                "● Logged Out";
+
+            status.className =
+                "status logged-out";
+
+            title.textContent =
+                "Redirect Required";
+
+            message.textContent =
+                "The user is not authenticated, so the protected route should redirect to login.";
+
+            route.textContent =
+                "/login";
+
+        }
+
+    }
+
+
+    else if (action === "logout") {
+
+        authenticated = false;
+
+        status.textContent =
+            "● Logged Out";
+
+        status.className =
+            "status logged-out";
+
+        title.textContent =
+            "Logged Out";
+
+        message.textContent =
+            "Client authentication state has been cleared. A real application should also handle the appropriate server-side session/token invalidation.";
+
+        route.textContent =
+            "/login";
+
+    }
+
+}
+
+
+/* =====================================================
+   QUIZ ANSWERS
+===================================================== */
+
+function showAnswer(id) {
+
+    const answer =
+        document.getElementById(id);
+
+
+    if (answer.style.display === "block") {
+
+        answer.style.display = "none";
+
+    }
+
+    else {
+
+        answer.style.display = "block";
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
+

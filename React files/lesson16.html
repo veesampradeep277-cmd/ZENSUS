@@ -1,0 +1,2612 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS React — Lesson 16: useMemo()</title>
+
+<style>
+:root{
+    --bg:#f5f7fb;
+    --card:#ffffff;
+    --text:#172033;
+    --muted:#667085;
+    --border:#e4e7ec;
+    --primary:#4f46e5;
+    --primary-light:#eef2ff;
+    --dark:#101828;
+    --dark2:#172554;
+    --green:#16a34a;
+    --green-light:#f0fdf4;
+    --orange:#ea580c;
+    --orange-light:#fff7ed;
+    --red:#dc2626;
+    --red-light:#fef2f2;
+    --cyan:#0891b2;
+    --shadow:0 10px 30px rgba(15,23,42,.07);
+    --radius:18px;
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+button,input,select{
+    font:inherit;
+}
+
+/* ================= TOP BAR ================= */
+
+.topbar{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    height:64px;
+    background:rgba(255,255,255,.95);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 28px;
+    z-index:1000;
+}
+
+.logo{
+    font-size:23px;
+    font-weight:900;
+    letter-spacing:-1px;
+}
+
+.logo span{
+    color:var(--primary);
+}
+
+.badge{
+    padding:7px 14px;
+    border-radius:999px;
+    background:var(--primary-light);
+    color:#4338ca;
+    font-size:13px;
+    font-weight:800;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar{
+    position:fixed;
+    top:64px;
+    left:0;
+    width:270px;
+    height:calc(100vh - 64px);
+    background:#fff;
+    border-right:1px solid var(--border);
+    padding:25px 17px;
+    overflow-y:auto;
+}
+
+.sidebar-title{
+    color:#98a2b3;
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:1.3px;
+    margin:12px 10px;
+    text-transform:uppercase;
+}
+
+.sidebar a{
+    display:block;
+    text-decoration:none;
+    color:#475467;
+    font-size:14px;
+    padding:9px 11px;
+    border-radius:9px;
+    margin:3px 0;
+    transition:.2s;
+}
+
+.sidebar a:hover{
+    background:#f2f4f7;
+    color:var(--primary);
+    transform:translateX(3px);
+}
+
+.sidebar a.active{
+    background:var(--primary-light);
+    color:var(--primary);
+    font-weight:800;
+}
+
+/* ================= MAIN ================= */
+
+.main{
+    margin-left:270px;
+    padding-top:64px;
+}
+
+.container{
+    max-width:1180px;
+    margin:auto;
+    padding:42px 30px 90px;
+}
+
+/* ================= HERO ================= */
+
+.hero{
+    background:linear-gradient(135deg,var(--dark),var(--dark2));
+    color:white;
+    padding:65px 55px;
+    border-radius:28px;
+    position:relative;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+}
+
+.hero::before,
+.hero::after{
+    content:"";
+    position:absolute;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:50%;
+}
+
+.hero::before{
+    width:450px;
+    height:450px;
+    right:-190px;
+    top:-220px;
+}
+
+.hero::after{
+    width:270px;
+    height:270px;
+    right:120px;
+    bottom:-190px;
+}
+
+.hero-content{
+    position:relative;
+    z-index:2;
+    max-width:790px;
+}
+
+.hero-label{
+    display:inline-block;
+    padding:7px 13px;
+    border-radius:999px;
+    background:rgba(255,255,255,.1);
+    border:1px solid rgba(255,255,255,.12);
+    font-size:12px;
+    font-weight:800;
+    margin-bottom:18px;
+}
+
+.hero h1{
+    font-size:48px;
+    line-height:1.12;
+    letter-spacing:-2px;
+    margin-bottom:18px;
+}
+
+.hero h1 span{
+    color:#a5b4fc;
+}
+
+.hero p{
+    color:#cbd5e1;
+    font-size:17px;
+    max-width:730px;
+}
+
+/* ================= SECTIONS ================= */
+
+.section{
+    margin-top:42px;
+}
+
+.section-head{
+    margin-bottom:20px;
+}
+
+.section-head h2{
+    font-size:30px;
+    line-height:1.25;
+    letter-spacing:-.8px;
+}
+
+.section-head p{
+    color:var(--muted);
+    margin-top:7px;
+}
+
+.card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:27px;
+    box-shadow:var(--shadow);
+    margin-bottom:20px;
+}
+
+.card h3{
+    font-size:20px;
+    margin-bottom:9px;
+}
+
+.card p{
+    color:#475467;
+}
+
+.highlight{
+    border-left:4px solid var(--primary);
+    background:var(--primary-light);
+    padding:18px 20px;
+    border-radius:12px;
+    margin:18px 0;
+}
+
+.success{
+    border-left:4px solid var(--green);
+    background:var(--green-light);
+    padding:18px 20px;
+    border-radius:12px;
+    margin:18px 0;
+}
+
+.warning{
+    border-left:4px solid var(--orange);
+    background:var(--orange-light);
+    padding:18px 20px;
+    border-radius:12px;
+    margin:18px 0;
+}
+
+.danger{
+    border-left:4px solid var(--red);
+    background:var(--red-light);
+    padding:18px 20px;
+    border-radius:12px;
+    margin:18px 0;
+}
+
+/* ================= CODE ================= */
+
+.code-wrap{
+    background:#0b1220;
+    border:1px solid #1e293b;
+    border-radius:14px;
+    overflow:hidden;
+    margin:18px 0;
+}
+
+.code-title{
+    padding:10px 16px;
+    background:#111827;
+    color:#94a3b8;
+    font-size:12px;
+    font-weight:700;
+    border-bottom:1px solid #1f2937;
+}
+
+pre{
+    padding:20px;
+    overflow-x:auto;
+    font-family:Consolas,Monaco,monospace;
+    font-size:13px;
+    line-height:1.75;
+    color:#e5e7eb;
+}
+
+.keyword{color:#c084fc}
+.function{color:#60a5fa}
+.string{color:#86efac}
+.comment{color:#64748b}
+.number{color:#fbbf24}
+
+/* ================= GRID ================= */
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+}
+
+.grid-3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.mini-card{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:22px;
+    box-shadow:var(--shadow);
+}
+
+.mini-card h4{
+    margin-bottom:7px;
+}
+
+.mini-card p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+/* ================= MEMO VISUAL ================= */
+
+.memo-stage{
+    background:#0f172a;
+    border-radius:18px;
+    padding:30px;
+    color:white;
+}
+
+.memo-flow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.flow-box{
+    min-width:145px;
+    text-align:center;
+    padding:18px 15px;
+    border-radius:14px;
+    background:#1e293b;
+    border:1px solid #334155;
+    transition:.4s;
+}
+
+.flow-box.active{
+    transform:translateY(-8px);
+    border-color:#818cf8;
+    box-shadow:0 12px 25px rgba(99,102,241,.2);
+}
+
+.flow-box strong{
+    display:block;
+    color:#a5b4fc;
+}
+
+.flow-box small{
+    color:#94a3b8;
+}
+
+.arrow{
+    color:#94a3b8;
+    font-size:25px;
+}
+
+/* ================= INTERACTIVE ================= */
+
+.demo{
+    background:#f8fafc;
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:24px;
+    margin-top:18px;
+}
+
+.demo-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.demo input,
+.demo select{
+    padding:10px 13px;
+    border:1px solid #cbd5e1;
+    border-radius:9px;
+    outline:none;
+    background:#fff;
+}
+
+.demo input:focus,
+.demo select:focus{
+    border-color:var(--primary);
+    box-shadow:0 0 0 3px rgba(79,70,229,.1);
+}
+
+.btn{
+    border:none;
+    border-radius:9px;
+    padding:10px 16px;
+    background:var(--primary);
+    color:#fff;
+    font-weight:700;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.btn:hover{
+    transform:translateY(-2px);
+}
+
+.btn.secondary{
+    background:#e2e8f0;
+    color:#334155;
+}
+
+.status{
+    margin-top:15px;
+    padding:13px 15px;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:10px;
+    font-family:Consolas,monospace;
+    font-size:13px;
+}
+
+/* ================= CALCULATION DEMO ================= */
+
+.calc-result{
+    font-size:38px;
+    font-weight:900;
+    color:var(--primary);
+    text-align:center;
+    margin:15px;
+}
+
+.calc-meter{
+    height:12px;
+    background:#e5e7eb;
+    border-radius:999px;
+    overflow:hidden;
+    margin-top:15px;
+}
+
+.calc-bar{
+    height:100%;
+    width:0%;
+    background:var(--primary);
+    transition:width .5s;
+}
+
+/* ================= RENDER DEMO ================= */
+
+.render-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+}
+
+.render-panel{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:15px;
+    padding:22px;
+}
+
+.render-number{
+    font-size:40px;
+    font-weight:900;
+    color:var(--primary);
+    text-align:center;
+}
+
+.render-label{
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
+}
+
+/* ================= TABLE ================= */
+
+.table-wrap{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th,
+td{
+    padding:13px;
+    border-bottom:1px solid var(--border);
+    text-align:left;
+    font-size:14px;
+}
+
+th{
+    background:#f8fafc;
+    font-weight:800;
+}
+
+/* ================= QUIZ ================= */
+
+.quiz{
+    background:#111827;
+    color:white;
+    border-radius:18px;
+    padding:30px;
+}
+
+.question{
+    background:#1f2937;
+    padding:20px;
+    border-radius:13px;
+    margin-bottom:15px;
+}
+
+.question h4{
+    margin-bottom:13px;
+}
+
+.option{
+    display:block;
+    width:100%;
+    text-align:left;
+    padding:11px 13px;
+    margin:7px 0;
+    background:#111827;
+    color:#e5e7eb;
+    border:1px solid #374151;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.option:hover{
+    background:#273449;
+}
+
+.option.correct{
+    background:#14532d;
+    border-color:#22c55e;
+}
+
+.option.wrong{
+    background:#7f1d1d;
+    border-color:#ef4444;
+}
+
+.quiz-result{
+    margin-top:20px;
+    font-size:19px;
+    font-weight:800;
+    color:#a5b4fc;
+}
+
+/* ================= FOOTER ================= */
+
+.footer{
+    margin-top:55px;
+    padding:30px;
+    text-align:center;
+    color:#667085;
+    border-top:1px solid var(--border);
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:900px){
+
+    .sidebar{
+        display:none;
+    }
+
+    .main{
+        margin-left:0;
+    }
+
+    .grid,
+    .grid-3,
+    .render-grid{
+        grid-template-columns:1fr;
+    }
+
+    .hero{
+        padding:45px 30px;
+    }
+
+    .hero h1{
+        font-size:37px;
+    }
+}
+
+@media(max-width:600px){
+
+    .container{
+        padding:25px 15px 60px;
+    }
+
+    .topbar{
+        padding:0 15px;
+    }
+
+    .hero{
+        border-radius:20px;
+        padding:35px 22px;
+    }
+
+    .hero h1{
+        font-size:31px;
+    }
+
+    .section-head h2{
+        font-size:25px;
+    }
+
+    .card{
+        padding:20px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <div class="logo">
+        ZEN<span>SUS</span>
+    </div>
+
+    <div class="badge">
+        React • Lesson 16
+    </div>
+
+</header>
+
+
+<aside class="sidebar">
+
+    <div class="sidebar-title">Lesson 16</div>
+
+    <a href="#intro" class="active">What is Memoization?</a>
+    <a href="#performance">Performance Optimization</a>
+    <a href="#usememo">useMemo()</a>
+    <a href="#expensive">Expensive Calculations</a>
+    <a href="#dependencies">Dependency Array</a>
+    <a href="#memoized">Memoized Values</a>
+    <a href="#rerender">Re-rendering</a>
+    <a href="#when">When to Use</a>
+    <a href="#not-when">When NOT to Use</a>
+    <a href="#tradeoffs">Performance Trade-offs</a>
+    <a href="#mistakes">Common Mistakes</a>
+    <a href="#quiz">Quick Quiz</a>
+
+</aside>
+
+
+<main class="main">
+
+<div class="container">
+
+
+<!-- ================= HERO ================= -->
+
+<section class="hero" id="intro">
+
+    <div class="hero-content">
+
+        <div class="hero-label">
+            ZENSUS REACT • LESSON 16
+        </div>
+
+        <h1>
+            <span>useMemo()</span> & Performance Optimization
+        </h1>
+
+        <p>
+            Learn how React can cache expensive calculations,
+            how dependency arrays control recalculation,
+            why memoization is not automatically faster,
+            and how to optimize components without sacrificing clarity.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- ================= MEMOIZATION ================= -->
+
+<section class="section">
+
+<div class="section-head">
+
+    <h2>1. What is Memoization?</h2>
+
+    <p>
+        Memoization is a technique for avoiding repeated work.
+    </p>
+
+</div>
+
+
+<div class="card">
+
+<p>
+    <strong>Memoization</strong> means remembering the result of a
+    calculation so that the same calculation does not have to be
+    performed again when the relevant inputs have not changed.
+</p>
+
+<div class="highlight">
+
+<strong>Simple idea:</strong>
+
+<br><br>
+
+Without memoization:<br>
+
+Input → Calculate → Result
+
+<br><br>
+
+With memoization:<br>
+
+Input → Check Cache → Reuse Result OR Calculate → Store Result
+
+</div>
+
+
+<div class="memo-stage">
+
+<div class="memo-flow">
+
+    <div class="flow-box">
+        <strong>Input</strong>
+        <small>values</small>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        <strong>Dependency Check</strong>
+        <small>changed?</small>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        <strong>Cache</strong>
+        <small>previous result</small>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        <strong>Result</strong>
+        <small>reuse / recalculate</small>
+    </div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================= PERFORMANCE ================= -->
+
+<section class="section" id="performance">
+
+<div class="section-head">
+
+    <h2>2. Why Performance Optimization?</h2>
+
+    <p>
+        React applications can perform a large amount of work during rendering.
+    </p>
+
+</div>
+
+
+<div class="card">
+
+<p>
+    A React component may re-render because its state changes,
+    its parent renders, or its context changes. During a render,
+    JavaScript calculations inside the component can run again.
+</p>
+
+
+<div class="grid">
+
+<div class="mini-card">
+
+<h4>Small Calculation</h4>
+
+<p>
+A simple addition or string operation usually costs very little.
+Memoizing it may add unnecessary complexity.
+</p>
+
+</div>
+
+
+<div class="mini-card">
+
+<h4>Expensive Calculation</h4>
+
+<p>
+Large filtering, sorting, parsing, or computational work may be
+worth optimizing when it measurably affects performance.
+</p>
+
+</div>
+
+
+<div class="mini-card">
+
+<h4>Frequent Rendering</h4>
+
+<p>
+An expensive calculation becomes more important when the component
+renders frequently.
+</p>
+
+</div>
+
+
+<div class="mini-card">
+
+<h4>Measurement Matters</h4>
+
+<p>
+Optimization should be based on actual performance evidence,
+not simply assumptions.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================= USEMEMO ================= -->
+
+<section class="section" id="usememo">
+
+<div class="section-head">
+
+    <h2>3. What is useMemo()?</h2>
+
+    <p>
+        useMemo caches the result of a calculation between renders.
+    </p>
+
+</div>
+
+
+<div class="card">
+
+<div class="code-wrap">
+
+<div class="code-title">
+Basic Syntax
+</div>
+
+<pre><code><span class="keyword">const</span> cachedValue =
+    <span class="function">useMemo</span>(() =&gt; {
+
+        <span class="keyword">return</span> expensiveCalculation();
+
+    }, [dependency]);</code></pre>
+
+</div>
+
+
+<p>
+The first argument is a calculation function.
+The second argument is the dependency array.
+React can reuse the previously calculated value when the dependencies
+have not changed.
+</p>
+
+
+<div class="success">
+
+<strong>Important:</strong>
+
+useMemo is a performance optimization.
+Your component should remain correct even if the calculation were
+performed again.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================= EXPENSIVE ================= -->
+
+<section class="section" id="expensive">
+
+<div class="section-head">
+
+    <h2>4. Expensive Calculations</h2>
+
+    <p>
+        Memoization becomes useful when repeated computation has a meaningful cost.
+    </p>
+
+</div>
+
+
+<div class="card">
+
+<h3>Example: Large Calculation</h3>
+
+
+<div class="code-wrap">
+
+<div class="code-title">
+Without useMemo
+</div>
+
+<pre><code><span class="keyword">function</span> <span class="function">ProductList</span>({ products, search }) {
+
+    <span class="keyword">const</span> filteredProducts =
+        products
+            .<span class="function">filter</span>(product =&gt;
+                product.name
+                    .<span class="function">toLowerCase</span>()
+                    .<span class="function">includes</span>(
+                        search.<span class="function">toLowerCase</span>()
+                    )
+            )
+            .<span class="function">sort</span>((a, b) =&gt;
+                a.price - b.price
+            );
+
+    <span class="keyword">return</span> (...);
+
+}</code></pre>
+
+</div>
+
+
+<div class="code-wrap">
+
+<div class="code-title">
+With useMemo
+</div>
+
+<pre><code><span class="keyword">import</span> { useMemo } <span class="keyword">from</span> <span class="string">"react"</span>;
+
+<span class="keyword">function</span> <span class="function">ProductList</span>({ products, search }) {
+
+    <span class="keyword">const</span> filteredProducts =
+        <span class="function">useMemo</span>(() =&gt; {
+
+            <span class="keyword">return</span> products
+                .<span class="function">filter</span>(product =&gt;
+                    product.name
+                        .<span class="function">toLowerCase</span>()
+                        .<span class="function">includes</span>(
+                            search.<span class="function">toLowerCase</span>()
+                        )
+                )
+                .<span class="function">sort</span>((a, b) =&gt;
+                    a.price - b.price
+                );
+
+        }, [products, search]);
+
+    <span class="keyword">return</span> (...);
+
+}</code></pre>
+
+</div>
+
+
+<div class="warning">
+
+Do not conclude that every filter or sort needs useMemo().
+The optimization is useful only when the computation is sufficiently
+expensive and repeated rendering makes the cost meaningful.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================= INTERACTIVE CALC ================= -->
+
+<section class="section">
+
+<div class="section-head">
+
+    <h2>5. Interactive Expensive Calculation</h2>
+
+    <p>
+        Simulate repeated computational work.
+    </p>
+
+</div>
+
+
+<div class="card">
+
+<div class="demo">
+
+<div class="demo-row">
+
+<label>
+Work amount:
+</label>
+
+<input
+    type="number"
+    id="workAmount"
+    min="1"
+    max="100"
+    value="50"
+>
+
+<button class="btn" onclick="runCalculation()">
+    Run Calculation
+</button>
+
+</div>
+
+
+<div class="calc-result" id="calcResult">
+    0
+</div>
+
+<div class="calc-meter">
+    <div class="calc-bar" id="calcBar"></div>
+</div>
+
+
+<div class="status" id="calcStatus">
+Ready to calculate...
+</div>
+
+</div>
+
+<div class="highlight">
+
+This browser demo illustrates the idea of computation cost.
+React's useMemo() should be used based on real component behavior
+and measured performance—not because a calculation merely looks large.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================= DEPENDENCIES ================= -->
+
+<section class="section" id="dependencies">
+
+<div class="section-head">
+
+    <h2>6. Dependency Array</h2>
+
+    <p>
+        Dependencies tell React which reactive values the calculation depends on.
+    </p>
+
+</div>
+
+
+<div class="card">
+
+<div class="code-wrap">
+
+<div class="code-title">
+Dependency Example
+</div>
+
+<pre><code><span class="keyword">const</span> result =
+    <span class="function">useMemo</span>(() =&gt; {
+
+        <span class="keyword">return</span> price * quantity;
+
+    }, [price, quantity]);</code></pre>
+
+</div>
+
+
+<p>
+If <strong>price</strong> or <strong>quantity</strong> changes,
+React needs to calculate the value again.
+If neither dependency changes, React may reuse the previously
+calculated result.
+</p>
+
+
+<div class="grid">
+
+<div class="mini-card">
+
+<h4>Initial Render</h4>
+
+<p>
+The calculation runs to obtain the initial memoized value.
+</p>
+
+</div>
+
+
+<div class="mini-card">
+
+<h4>Dependency Changed</h4>
+
+<p>
+The calculation runs again using the new dependency values.
+</p>
+
+</div>
+
+
+<div class="mini-card">
+
+<h4>Dependencies Same</h4>
+
+<p>
+React can reuse the cached calculation result.
+</p>
+
+</div>
+
+
+<div class="mini-card">
+
+<h4>Dependency Missing</h4>
+
+<p>
+The memoized result can become stale or the code can violate
+the intended dependency relationship.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================= MEMOIZED VALUES ================= -->
+
+<section class="section" id="memoized">
+
+<div class="section-head">
+
+    <h2>7. Memoized Values</h2>
+
+    <p>
+        useMemo returns the calculated value—not a function.
+    </p>
+
+</div>
+
+
+<div class="card">
+
+<div class="code-wrap">
+
+<div class="code-title">
+Value vs Function
+</div>
+
+<pre><code><span class="keyword">const</span> total =
+    <span class="function">useMemo</span>(() =&gt; {
+
+        <span class="keyword">return</span> price * quantity;
+
+    }, [price, quantity]);
+
+console.<span class="function">log</span>(total);
+
+<span class="comment">// total is the calculated value</span></code></pre>
+
+</div>
+
+
+<div class="highlight">
+
+<strong>Remember:</strong>
+
+<br><br>
+
+useMemo → caches a <strong>value</strong><br>
+useCallback → caches a <strong>function</strong>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================= RERENDER ================= -->
+
+<section class="section" id="rerender">
+
+<div class="section-head">
+
+    <h2>8. Re-rendering & useMemo()</h2>
+
+    <p>
+        A component can render again without every calculation needing to run again.
+    </p>
+
+</div>
+
+
+<div class="card">
+
+<div class="render-grid">
+
+<div class="render-panel">
+
+<h3>Component Render</h3>
+
+<div class="render-number" id="renderCount">
+0
+</div>
+
+<div class="render-label">
+Times the component simulation rendered
+</div>
+
+</div>
+
+
+<div class="render-panel">
+
+<h3>Memoized Calculation</h3>
+
+<div class="render-number" id="memoCount">
+0
+</div>
+
+<div class="render-label">
+Times the expensive calculation ran
+</div>
+
+</div>
+
+</div>
+
+
+<div class="demo">
+
+<div class="demo-row">
+
+<button class="btn" onclick="simulateRender()">
+Re-render
+</button>
+
+<button class="btn secondary" onclick="changeDependency()">
+Change Dependency
+</button>
+
+<button class="btn secondary" onclick="resetRenderDemo()">
+Reset
+</button>
+
+</div>
+
+
+<div class="status" id="renderStatus">
+Render simulation ready.
+</div>
+
+</div>
+
+
+<div class="success">
+
+<strong>Simulation:</strong>
+
+Clicking "Re-render" represents a render where the dependency
+does not change. Clicking "Change Dependency" represents a render
+where the memoized calculation must be recalculated.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================= WHEN USE ================= -->
+
+<section class="section" id="when">
+
+<div class="section-head">
+
+    <h2>9. When to Use useMemo()</h2>
+
+    <p>
+        Use it when it solves a demonstrated performance problem.
+    </p>
+
+</div>
+
+
+<div class="card">
+
+<div class="grid-3">
+
+<div class="mini-card">
+
+<h4>Expensive Computation</h4>
+
+<p>
+The calculation genuinely consumes noticeable CPU time.
+</p>
+
+</div>
+
+
+<div class="mini-card">
+
+<h4>Frequent Re-renders</h4>
+
+<p>
+The component renders often while the expensive inputs remain unchanged.
+</p>
+
+</div>
+
+
+<div class="mini-card">
+
+<h4>Stable Derived Data</h4>
+
+<p>
+A derived value can be reused safely until relevant dependencies change.
+</p>
+
+</div>
+
+
+<div class="mini-card">
+
+<h4>Large Filtering</h4>
+
+<p>
+Filtering or transforming a sufficiently large dataset repeatedly
+may benefit from memoization.
+</p>
+
+</div>
+
+
+<div class="mini-card">
+
+<h4>Large Sorting</h4>
+
+<p>
+Repeated sorting of large collections can be a meaningful optimization target.
+</p>
+
+</div>
+
+
+<div class="mini-card">
+
+<h4>Measured Bottleneck</h4>
+
+<p>
+Profiling identifies the calculation as a performance bottleneck.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================= WHEN NOT ================= -->
+
+<section class="section" id="not-when">
+
+<div class="section-head">
+
+    <h2>10. When NOT to Use useMemo()</h2>
+
+    <p>
+        Memoization has a cost too.
+    </p>
+
+</div>
+
+
+<div class="card">
+
+<div class="danger">
+
+<strong>Do not memoize every calculation.</strong>
+
+<p>
+For simple calculations, the overhead and complexity of memoization
+may provide little or no benefit.
+</p>
+
+</div>
+
+
+<div class="grid">
+
+<div class="mini-card">
+
+<h4>Simple Arithmetic</h4>
+
+<div class="code-wrap">
+<pre><code><span class="keyword">const</span> total =
+    price * quantity;</code></pre>
+</div>
+
+<p>
+Usually no memoization is needed.
+</p>
+
+</div>
+
+
+<div class="mini-card">
+
+<h4>Simple String Operation</h4>
+
+<div class="code-wrap">
+<pre><code><span class="keyword">const</span> fullName =
+    firstName + <span class="string">" "</span> + lastName;</code></pre>
+</div>
+
+<p>
+The calculation is typically trivial.
+</p>
+
+</div>
+
+
+<div class="mini-card">
+
+<h4>Premature Optimization</h4>
+
+<p>
+Adding useMemo before identifying a performance problem can make
+code harder to understand.
+</p>
+
+</div>
+
+
+<div class="mini-card">
+
+<h4>Unnecessary Dependencies</h4>
+
+<p>
+If dependencies change frequently, the calculation may run frequently
+anyway.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================= TRADEOFFS ================= -->
+
+<section class="section" id="tradeoffs">
+
+<div class="section-head">
+
+    <h2>11. Performance Trade-offs</h2>
+
+    <p>
+        Optimization is about balancing computation, memory, complexity, and maintainability.
+    </p>
+
+</div>
+
+
+<div class="card">
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Factor</th>
+<th>Without Memoization</th>
+<th>With useMemo()</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td>Calculation</td>
+<td>Can run on every render</td>
+<td>Can be reused when dependencies are unchanged</td>
+</tr>
+
+<tr>
+<td>Memory</td>
+<td>No memoized result to retain</td>
+<td>React retains the memoized value</td>
+</tr>
+
+<tr>
+<td>Code complexity</td>
+<td>Usually simpler</td>
+<td>Higher</td>
+</tr>
+
+<tr>
+<td>Dependency management</td>
+<td>Not applicable to the calculation</td>
+<td>Important</td>
+</tr>
+
+<tr>
+<td>Performance benefit</td>
+<td>None from memoization</td>
+<td>Depends on actual workload and render pattern</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+
+<div class="highlight">
+
+<strong>Professional rule:</strong>
+
+Don't ask "Can I use useMemo here?"
+
+Ask:
+
+<strong>
+"Is this calculation expensive enough, and does this component
+re-render often enough, that avoiding the calculation provides
+a measurable benefit?"
+</strong>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================= REFERENCE IDENTITY ================= -->
+
+<section class="section">
+
+<div class="section-head">
+
+    <h2>12. Referential Identity</h2>
+
+    <p>
+        Memoized values can also help maintain a stable object or array reference.
+    </p>
+
+</div>
+
+
+<div class="card">
+
+<div class="code-wrap">
+
+<div class="code-title">
+Object Example
+</div>
+
+<pre><code><span class="keyword">const</span> options =
+    <span class="function">useMemo</span>(() =&gt; ({
+
+        sortBy: <span class="string">"price"</span>,
+        direction: <span class="string">"ascending"</span>
+
+    }), []);</code></pre>
+
+</div>
+
+
+<p>
+JavaScript objects and arrays are reference values.
+Creating a new object during every render creates a new reference.
+useMemo can preserve a reference between renders when its dependencies
+remain unchanged.
+</p>
+
+
+<div class="warning">
+
+This matters especially when a child component or another Hook
+uses reference equality to decide whether something changed.
+Do not memoize objects automatically; use it when reference stability
+is actually useful.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================= COMMON MISTAKES ================= -->
+
+<section class="section" id="mistakes">
+
+<div class="section-head">
+
+    <h2>13. Common useMemo() Mistakes</h2>
+
+    <p>
+        Avoid these patterns in professional React applications.
+    </p>
+
+</div>
+
+
+<div class="card">
+
+<div class="danger">
+
+<h3>Mistake 1 — Memoizing Everything</h3>
+
+<div class="code-wrap">
+
+<pre><code><span class="keyword">const</span> answer =
+    <span class="function">useMemo</span>(() =&gt;
+        <span class="number">2</span> + <span class="number">2</span>,
+        []
+    );</code></pre>
+
+</div>
+
+<p>
+This adds complexity without a meaningful computational benefit.
+</p>
+
+</div>
+
+
+<div class="danger">
+
+<h3>Mistake 2 — Missing Dependencies</h3>
+
+<div class="code-wrap">
+
+<pre><code><span class="keyword">const</span> total =
+    <span class="function">useMemo</span>(() =&gt;
+        price * quantity,
+        [price]
+    );</code></pre>
+
+</div>
+
+<p>
+The calculation also reads quantity, so the dependency relationship
+is incomplete.
+</p>
+
+</div>
+
+
+<div class="danger">
+
+<h3>Mistake 3 — Thinking useMemo Prevents Re-renders</h3>
+
+<p>
+useMemo does not prevent the component itself from rendering.
+It memoizes a calculation's result.
+</p>
+
+</div>
+
+
+<div class="danger">
+
+<h3>Mistake 4 — Using useMemo for Side Effects</h3>
+
+<div class="code-wrap">
+
+<pre><code><span class="comment">// Wrong concept</span>
+
+<span class="function">useMemo</span>(() =&gt; {
+
+    <span class="function">fetch</span>(<span class="string">"/api/data"</span>);
+
+}, []);</code></pre>
+
+</div>
+
+<p>
+Side effects such as data fetching belong in the appropriate
+effect/event architecture, not in useMemo.
+</p>
+
+</div>
+
+
+<div class="danger">
+
+<h3>Mistake 5 — Treating useMemo as a Correctness Requirement</h3>
+
+<p>
+Your component should produce correct behavior without depending
+on memoization for semantic correctness.
+</p>
+
+</div>
+
+
+<div class="danger">
+
+<h3>Mistake 6 — Ignoring Measurement</h3>
+
+<p>
+If there is no meaningful performance problem, useMemo may only
+increase code complexity.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================= USEMEMO VS USECALLBACK ================= -->
+
+<section class="section">
+
+<div class="section-head">
+
+    <h2>14. useMemo() vs useCallback()</h2>
+
+    <p>
+        These Hooks are related but cache different things.
+    </p>
+
+</div>
+
+
+<div class="card">
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+<tr>
+<th>Hook</th>
+<th>What it caches</th>
+<th>Typical purpose</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td><strong>useMemo()</strong></td>
+<td>A calculated value</td>
+<td>Avoid repeated expensive calculations</td>
+</tr>
+
+<tr>
+<td><strong>useCallback()</strong></td>
+<td>A function reference</td>
+<td>Keep a callback reference stable</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+
+<div class="code-wrap">
+
+<div class="code-title">
+Comparison
+</div>
+
+<pre><code><span class="comment">// Memoized VALUE</span>
+
+<span class="keyword">const</span> total =
+    <span class="function">useMemo</span>(() =&gt;
+        price * quantity,
+        [price, quantity]
+    );
+
+
+<span class="comment">// Memoized FUNCTION</span>
+
+<span class="keyword">const</span> handleClick =
+    <span class="function">useCallback</span>(() =&gt; {
+
+        console.<span class="function">log</span>(<span class="string">"Clicked"</span>);
+
+    }, []);</code></pre>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================= COMPLETE EXAMPLE ================= -->
+
+<section class="section">
+
+<div class="section-head">
+
+    <h2>15. Complete Real-World Example</h2>
+
+    <p>
+        Search and filter a large student dataset.
+    </p>
+
+</div>
+
+
+<div class="card">
+
+<div class="code-wrap">
+
+<div class="code-title">
+StudentList.jsx
+</div>
+
+<pre><code><span class="keyword">import</span> {
+    useMemo,
+    useState
+} <span class="keyword">from</span> <span class="string">"react"</span>;
+
+<span class="keyword">function</span> <span class="function">StudentList</span>({ students }) {
+
+    <span class="keyword">const</span> [search, setSearch] =
+        <span class="function">useState</span>(<span class="string">""</span>);
+
+    <span class="keyword">const</span> filteredStudents =
+        <span class="function">useMemo</span>(() =&gt; {
+
+            <span class="keyword">return</span> students.<span class="function">filter</span>(
+                student =&gt;
+                    student.name
+                        .<span class="function">toLowerCase</span>()
+                        .<span class="function">includes</span>(
+                            search.<span class="function">toLowerCase</span>()
+                        )
+            );
+
+        }, [students, search]);
+
+    <span class="keyword">return</span> (
+        &lt;&gt;
+
+            &lt;input
+                value={search}
+                onChange={e =&gt;
+                    setSearch(e.target.value)
+                }
+            /&gt;
+
+            &lt;ul&gt;
+
+                {filteredStudents.map(student =&gt;
+                    &lt;li key={student.id}&gt;
+                        {student.name}
+                    &lt;/li&gt;
+                )}
+
+            &lt;/ul&gt;
+
+        &lt;/&gt;
+    );
+}</code></pre>
+
+</div>
+
+
+<div class="success">
+
+<strong>Architecture:</strong>
+
+<br><br>
+
+User types → state changes → component renders →
+useMemo checks dependencies → search changed →
+filter runs → filtered list returned → UI renders.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================= DECISION GUIDE ================= -->
+
+<section class="section">
+
+<div class="section-head">
+
+    <h2>16. useMemo() Decision Guide</h2>
+
+</div>
+
+
+<div class="card">
+
+<div class="memo-stage">
+
+<div class="memo-flow">
+
+    <div class="flow-box">
+        <strong>Calculation</strong>
+        <small>Is it expensive?</small>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        <strong>Re-renders</strong>
+        <small>Does it repeat?</small>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        <strong>Measure</strong>
+        <small>Is it a bottleneck?</small>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        <strong>useMemo</strong>
+        <small>Optimize carefully</small>
+    </div>
+
+</div>
+
+</div>
+
+
+<div class="highlight">
+
+If the calculation is cheap → keep the code simple.
+
+<br><br>
+
+If the calculation is expensive but rarely repeated → memoization
+may not matter.
+
+<br><br>
+
+If the calculation is expensive and repeated frequently with
+unchanged dependencies → useMemo may be valuable.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================= CHEAT SHEET ================= -->
+
+<section class="section">
+
+<div class="section-head">
+
+    <h2>17. useMemo() Cheat Sheet</h2>
+
+</div>
+
+
+<div class="card">
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+<tr>
+<th>Concept</th>
+<th>Remember</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td>Memoization</td>
+<td>Remembering a previous calculation result</td>
+</tr>
+
+<tr>
+<td>useMemo</td>
+<td>Memoizes a calculated value</td>
+</tr>
+
+<tr>
+<td>First argument</td>
+<td>Calculation function</td>
+</tr>
+
+<tr>
+<td>Second argument</td>
+<td>Dependency array</td>
+</tr>
+
+<tr>
+<td>Dependencies unchanged</td>
+<td>Cached result can be reused</td>
+</tr>
+
+<tr>
+<td>Dependency changed</td>
+<td>Calculation runs again</td>
+</tr>
+
+<tr>
+<td>Simple calculation</td>
+<td>Usually don't memoize</td>
+</tr>
+
+<tr>
+<td>Expensive repeated calculation</td>
+<td>Potential useMemo candidate</td>
+</tr>
+
+<tr>
+<td>Side effects</td>
+<td>Do not put them in useMemo</td>
+</tr>
+
+<tr>
+<td>Function memoization</td>
+<td>useCallback</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================= MASTER MENTAL MODEL ================= -->
+
+<section class="section">
+
+<div class="section-head">
+
+    <h2>18. Master Mental Model</h2>
+
+    <p>
+        The professional way to think about useMemo().
+    </p>
+
+</div>
+
+
+<div class="card">
+
+<div class="memo-stage">
+
+<div class="memo-flow">
+
+    <div class="flow-box">
+        <strong>Render</strong>
+        <small>Component runs</small>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        <strong>Dependencies</strong>
+        <small>Compare values</small>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        <strong>Cache</strong>
+        <small>Reusable?</small>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        <strong>Value</strong>
+        <small>Reuse / calculate</small>
+    </div>
+
+</div>
+
+</div>
+
+
+<div class="success">
+
+<strong>Final mental model:</strong>
+
+<br><br>
+
+React component renders → calculation has inputs →
+useMemo tracks dependencies → dependencies unchanged →
+previous result can be reused → dependency changed →
+calculation runs again.
+
+</div>
+
+
+<div class="highlight">
+
+<strong>Most important lesson:</strong>
+
+<br><br>
+
+useMemo is not a magic "make React faster" button.
+
+It is a performance optimization for specific calculations where
+avoiding repeated work is actually beneficial.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================= QUIZ ================= -->
+
+<section class="section" id="quiz">
+
+<div class="section-head">
+
+    <h2>19. Quick Quiz</h2>
+
+    <p>
+        Test your understanding of useMemo() and performance optimization.
+    </p>
+
+</div>
+
+
+<div class="quiz">
+
+
+<div class="question">
+
+<h4>1. What does useMemo() primarily memoize?</h4>
+
+<button class="option" onclick="answer(this,false)">
+A. A component
+</button>
+
+<button class="option" onclick="answer(this,true)">
+B. A calculated value
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. A DOM element
+</button>
+
+<button class="option" onclick="answer(this,false)">
+D. An event listener
+</button>
+
+</div>
+
+
+<div class="question">
+
+<h4>2. What determines when a memoized calculation needs to be recalculated?</h4>
+
+<button class="option" onclick="answer(this,false)">
+A. The browser window size
+</button>
+
+<button class="option" onclick="answer(this,true)">
+B. Its dependency values
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. CSS styles
+</button>
+
+<button class="option" onclick="answer(this,false)">
+D. The number of JSX elements
+</button>
+
+</div>
+
+
+<div class="question">
+
+<h4>3. Which situation is a reasonable useMemo candidate?</h4>
+
+<button class="option" onclick="answer(this,false)">
+A. Adding two numbers
+</button>
+
+<button class="option" onclick="answer(this,true)">
+B. A costly calculation repeated during frequent renders
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. Displaying static text
+</button>
+
+<button class="option" onclick="answer(this,false)">
+D. Writing a CSS class
+</button>
+
+</div>
+
+
+<div class="question">
+
+<h4>4. Does useMemo() prevent the component itself from rendering?</h4>
+
+<button class="option" onclick="answer(this,false)">
+A. Yes, always
+</button>
+
+<button class="option" onclick="answer(this,true)">
+B. No
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. Only during development
+</button>
+
+<button class="option" onclick="answer(this,false)">
+D. Only when state exists
+</button>
+
+</div>
+
+
+<div class="question">
+
+<h4>5. What does useCallback() primarily memoize?</h4>
+
+<button class="option" onclick="answer(this,false)">
+A. A number
+</button>
+
+<button class="option" onclick="answer(this,true)">
+B. A function reference
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. A DOM measurement
+</button>
+
+<button class="option" onclick="answer(this,false)">
+D. A CSS property
+</button>
+
+</div>
+
+
+<div class="question">
+
+<h4>6. Which is generally true about useMemo()?</h4>
+
+<button class="option" onclick="answer(this,true)">
+A. It is a performance optimization and should be used when beneficial
+</button>
+
+<button class="option" onclick="answer(this,false)">
+B. Every calculation should use it
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. It replaces useState
+</button>
+
+<button class="option" onclick="answer(this,false)">
+D. It is required for correct rendering
+</button>
+
+</div>
+
+
+<div class="question">
+
+<h4>7. Where should side effects such as data fetching normally be handled?</h4>
+
+<button class="option" onclick="answer(this,false)">
+A. useMemo
+</button>
+
+<button class="option" onclick="answer(this,true)">
+B. An appropriate Effect or event handler
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. A CSS selector
+</button>
+
+<button class="option" onclick="answer(this,false)">
+D. A memoized calculation
+</button>
+
+</div>
+
+
+<div class="question">
+
+<h4>8. What happens when a relevant useMemo dependency changes?</h4>
+
+<button class="option" onclick="answer(this,false)">
+A. React permanently deletes the component
+</button>
+
+<button class="option" onclick="answer(this,true)">
+B. The calculation is evaluated again to obtain the new value
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. The dependency is ignored
+</button>
+
+<button class="option" onclick="answer(this,false)">
+D. The application automatically switches to useCallback
+</button>
+
+</div>
+
+
+<div class="quiz-result" id="quizResult">
+Score: 0 / 8
+</div>
+
+</div>
+
+</section>
+
+
+<div class="footer">
+
+<strong>ZENSUS React • Lesson 16</strong>
+
+<br>
+
+useMemo() → Memoization → Dependencies → Expensive Calculations → Performance
+
+</div>
+
+
+</div>
+
+</main>
+
+
+<script>
+
+/* ================= SIDEBAR ================= */
+
+const links = document.querySelectorAll(".sidebar a");
+
+links.forEach(link => {
+
+    link.addEventListener("click", () => {
+
+        links.forEach(item =>
+            item.classList.remove("active")
+        );
+
+        link.classList.add("active");
+
+    });
+
+});
+
+
+/* ================= MEMO FLOW ================= */
+
+const flowBoxes =
+    document.querySelectorAll(".flow-box");
+
+let flowIndex = 0;
+
+setInterval(() => {
+
+    flowBoxes.forEach(box =>
+        box.classList.remove("active")
+    );
+
+    if(flowBoxes.length){
+
+        flowBoxes[
+            flowIndex % flowBoxes.length
+        ].classList.add("active");
+
+        flowIndex++;
+
+    }
+
+},900);
+
+
+/* ================= CALCULATION DEMO ================= */
+
+function runCalculation(){
+
+    const amount =
+        Number(document.getElementById("workAmount").value);
+
+    const safeAmount =
+        Math.max(1, Math.min(100, amount));
+
+    const start = performance.now();
+
+    let result = 0;
+
+    const iterations =
+        safeAmount * 150000;
+
+    for(let i = 0; i < iterations; i++){
+
+        result += Math.sqrt(i % 1000);
+
+    }
+
+    const elapsed =
+        performance.now() - start;
+
+    document.getElementById("calcResult").textContent =
+        Math.round(result).toLocaleString();
+
+    document.getElementById("calcBar").style.width =
+        safeAmount + "%";
+
+    document.getElementById("calcStatus").textContent =
+        "Calculation completed in " +
+        elapsed.toFixed(2) +
+        " ms";
+
+}
+
+
+/* ================= RENDER DEMO ================= */
+
+let renderCount = 0;
+let memoCount = 0;
+
+function simulateRender(){
+
+    renderCount++;
+
+    document.getElementById("renderCount").textContent =
+        renderCount;
+
+    document.getElementById("renderStatus").textContent =
+        "Component rendered again. Dependency unchanged, so cached calculation can be reused.";
+
+}
+
+function changeDependency(){
+
+    renderCount++;
+    memoCount++;
+
+    document.getElementById("renderCount").textContent =
+        renderCount;
+
+    document.getElementById("memoCount").textContent =
+        memoCount;
+
+    document.getElementById("renderStatus").textContent =
+        "Dependency changed → memoized calculation evaluated again.";
+
+}
+
+function resetRenderDemo(){
+
+    renderCount = 0;
+    memoCount = 0;
+
+    document.getElementById("renderCount").textContent =
+        "0";
+
+    document.getElementById("memoCount").textContent =
+        "0";
+
+    document.getElementById("renderStatus").textContent =
+        "Render simulation ready.";
+
+}
+
+
+/* ================= QUIZ ================= */
+
+let score = 0;
+let answered = 0;
+
+function answer(button, correct){
+
+    if(button.dataset.answered === "true"){
+        return;
+    }
+
+    button.dataset.answered = "true";
+
+    answered++;
+
+    if(correct){
+
+        button.classList.add("correct");
+        score++;
+
+    }else{
+
+        button.classList.add("wrong");
+
+    }
+
+    document.getElementById("quizResult").textContent =
+        "Score: " + score + " / 8";
+
+}
+
+</script>
+
+</body>
+</html>
+```

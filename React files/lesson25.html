@@ -1,0 +1,3559 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS React — Lesson 25: React Router & Navigation</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg: #f5f7fb;
+    --surface: #ffffff;
+    --surface-soft: #f8fafc;
+    --border: #e4e7ec;
+    --text: #172033;
+    --muted: #667085;
+    --primary: #4f46e5;
+    --primary-soft: #eef2ff;
+    --blue: #2563eb;
+    --green: #059669;
+    --orange: #d97706;
+    --red: #dc2626;
+    --dark: #0f172a;
+    --dark-soft: #172033;
+    --shadow: 0 8px 25px rgba(15, 23, 42, 0.07);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: Inter, Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+}
+
+/* TOP BAR */
+
+.topbar {
+    height: 64px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 24px;
+
+    background: rgba(255,255,255,.96);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+}
+
+.logo {
+    font-size: 21px;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.logo span {
+    color: var(--text);
+}
+
+.lesson-label {
+    margin-left: 28px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+/* SIDEBAR */
+
+.sidebar {
+    position: fixed;
+
+    top: 64px;
+    left: 0;
+    bottom: 0;
+
+    width: 260px;
+
+    padding: 24px 16px;
+
+    background: white;
+    border-right: 1px solid var(--border);
+
+    overflow-y: auto;
+}
+
+.sidebar-title {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #98a2b3;
+
+    margin: 0 12px 12px;
+}
+
+.sidebar a {
+    display: block;
+
+    text-decoration: none;
+
+    color: #475467;
+
+    font-size: 13px;
+
+    padding: 9px 12px;
+
+    border-radius: 8px;
+
+    margin-bottom: 3px;
+
+    transition: .2s;
+}
+
+.sidebar a:hover {
+    background: var(--primary-soft);
+    color: var(--primary);
+}
+
+/* MAIN */
+
+.main {
+    margin-left: 260px;
+
+    padding: 92px 42px 80px;
+
+    max-width: 1450px;
+}
+
+.section {
+    margin-bottom: 50px;
+    scroll-margin-top: 85px;
+}
+
+.section h2 {
+    font-size: 29px;
+    letter-spacing: -.7px;
+    margin-bottom: 12px;
+}
+
+.section h3 {
+    font-size: 20px;
+    margin: 25px 0 10px;
+}
+
+.section > p {
+    max-width: 950px;
+    color: #475467;
+}
+
+/* HERO */
+
+.hero {
+    position: relative;
+    overflow: hidden;
+
+    padding: 48px;
+
+    border-radius: 20px;
+
+    color: white;
+
+    background:
+        linear-gradient(135deg, #111827, #1e293b);
+
+    margin-bottom: 36px;
+}
+
+.hero::before,
+.hero::after {
+    content: "";
+
+    position: absolute;
+
+    border: 1px solid rgba(255,255,255,.09);
+
+    border-radius: 50%;
+}
+
+.hero::before {
+    width: 260px;
+    height: 260px;
+
+    right: -70px;
+    top: -90px;
+
+    animation: orbit 7s infinite ease-in-out;
+}
+
+.hero::after {
+    width: 150px;
+    height: 150px;
+
+    right: 60px;
+    top: 30px;
+
+    animation: orbitReverse 5s infinite ease-in-out;
+}
+
+@keyframes orbit {
+    0%,100% {
+        transform: rotate(0deg) scale(1);
+    }
+
+    50% {
+        transform: rotate(180deg) scale(1.08);
+    }
+}
+
+@keyframes orbitReverse {
+    0%,100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+.badge {
+    display: inline-block;
+
+    padding: 6px 12px;
+
+    border-radius: 999px;
+
+    background: rgba(255,255,255,.1);
+
+    border: 1px solid rgba(255,255,255,.15);
+
+    font-size: 12px;
+
+    margin-bottom: 16px;
+}
+
+.hero h1 {
+    position: relative;
+    z-index: 2;
+
+    font-size: clamp(34px, 4vw, 52px);
+
+    line-height: 1.1;
+
+    letter-spacing: -1.5px;
+
+    margin-bottom: 18px;
+}
+
+.hero p {
+    position: relative;
+    z-index: 2;
+
+    max-width: 850px;
+
+    color: #cbd5e1;
+
+    font-size: 16px;
+}
+
+/* CARDS */
+
+.card {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 15px;
+
+    padding: 24px;
+
+    box-shadow: var(--shadow);
+
+    margin-top: 20px;
+}
+
+.grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0,1fr));
+
+    gap: 20px;
+
+    margin-top: 20px;
+}
+
+.grid-3 {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0,1fr));
+
+    gap: 18px;
+
+    margin-top: 20px;
+}
+
+.info-card {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 14px;
+
+    padding: 22px;
+}
+
+.info-card h3 {
+    margin-top: 0;
+}
+
+.info-card p {
+    color: var(--muted);
+
+    font-size: 14px;
+}
+
+/* CALLOUTS */
+
+.callout {
+    margin: 20px 0;
+
+    padding: 18px 20px;
+
+    border-left: 4px solid var(--primary);
+
+    border-radius: 10px;
+
+    background: var(--primary-soft);
+}
+
+.success {
+    border-left-color: var(--green);
+    background: #ecfdf5;
+}
+
+.warning {
+    border-left-color: var(--orange);
+    background: #fff7ed;
+}
+
+.danger {
+    border-left-color: var(--red);
+    background: #fef2f2;
+}
+
+/* CODE */
+
+.code {
+    margin-top: 16px;
+
+    padding: 20px;
+
+    background: #0f172a;
+
+    color: #dbeafe;
+
+    border-radius: 13px;
+
+    overflow-x: auto;
+
+    font-family:
+        Consolas,
+        Monaco,
+        monospace;
+
+    font-size: 13px;
+
+    line-height: 1.75;
+}
+
+code {
+    font-family: Consolas, Monaco, monospace;
+}
+
+.inline-code {
+    padding: 2px 6px;
+
+    border-radius: 5px;
+
+    background: #f1f5f9;
+
+    font-family: Consolas, monospace;
+
+    font-size: .9em;
+}
+
+/* ARCHITECTURE */
+
+.architecture {
+    margin-top: 22px;
+
+    padding: 30px;
+
+    border-radius: 16px;
+
+    background: #0b1220;
+
+    overflow: hidden;
+}
+
+.arch-title {
+    text-align: center;
+
+    color: #e2e8f0;
+
+    font-weight: 700;
+
+    margin-bottom: 24px;
+}
+
+.flow {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-wrap: wrap;
+
+    gap: 12px;
+}
+
+.flow-box {
+    min-width: 145px;
+
+    padding: 15px;
+
+    text-align: center;
+
+    border-radius: 10px;
+
+    border: 1px solid #334155;
+
+    background: #172033;
+
+    color: #e2e8f0;
+
+    animation: flowFloat 3s infinite ease-in-out;
+}
+
+.flow-box:nth-child(2) {
+    animation-delay: .3s;
+}
+
+.flow-box:nth-child(3) {
+    animation-delay: .6s;
+}
+
+.flow-box:nth-child(4) {
+    animation-delay: .9s;
+}
+
+.flow-box:nth-child(5) {
+    animation-delay: 1.2s;
+}
+
+@keyframes flowFloat {
+
+    0%,100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+.flow-arrow {
+    color: #94a3b8;
+
+    font-size: 22px;
+}
+
+/* TABLE */
+
+table {
+    width: 100%;
+
+    margin-top: 18px;
+
+    border-collapse: collapse;
+
+    background: white;
+
+    overflow: hidden;
+
+    border-radius: 12px;
+}
+
+th,
+td {
+    border: 1px solid var(--border);
+
+    padding: 13px;
+
+    text-align: left;
+
+    font-size: 14px;
+}
+
+th {
+    background: #f8fafc;
+}
+
+/* DEMO */
+
+.demo {
+    margin-top: 20px;
+
+    padding: 24px;
+
+    border-radius: 14px;
+
+    border: 1px solid var(--border);
+
+    background: #f8fafc;
+}
+
+.demo-controls {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    margin-bottom: 20px;
+}
+
+button {
+    border: none;
+
+    cursor: pointer;
+
+    padding: 10px 16px;
+
+    border-radius: 9px;
+
+    background: var(--primary);
+
+    color: white;
+
+    font-weight: 700;
+
+    transition: .2s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+
+    opacity: .92;
+}
+
+button.secondary {
+    background: #e2e8f0;
+
+    color: #334155;
+}
+
+button.danger-btn {
+    background: var(--red);
+}
+
+.route-preview {
+    min-height: 160px;
+
+    padding: 22px;
+
+    background: white;
+
+    border: 1px dashed #cbd5e1;
+
+    border-radius: 12px;
+}
+
+.route-path {
+    display: inline-block;
+
+    padding: 8px 12px;
+
+    border-radius: 7px;
+
+    background: var(--primary-soft);
+
+    color: var(--primary);
+
+    font-family: Consolas, monospace;
+
+    margin-top: 10px;
+}
+
+/* NAV DEMO */
+
+.nav-demo {
+    padding: 14px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 12px;
+
+    display: flex;
+
+    gap: 8px;
+
+    flex-wrap: wrap;
+}
+
+.nav-demo a {
+    padding: 8px 13px;
+
+    text-decoration: none;
+
+    color: #475467;
+
+    border-radius: 8px;
+}
+
+.nav-demo a.active {
+    background: var(--primary-soft);
+
+    color: var(--primary);
+
+    font-weight: 700;
+}
+
+/* PARAMETER */
+
+.parameter-box {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0,1fr));
+
+    gap: 14px;
+
+    margin-top: 20px;
+}
+
+.parameter-item {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    padding: 18px;
+
+    border-radius: 12px;
+}
+
+.parameter-item strong {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: var(--primary);
+}
+
+/* MISTAKES */
+
+.mistake {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 13px;
+
+    padding: 20px;
+
+    margin-top: 14px;
+}
+
+.mistake strong {
+    color: var(--red);
+}
+
+/* QUIZ */
+
+.quiz-question {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 13px;
+
+    padding: 20px;
+
+    margin-top: 15px;
+}
+
+.quiz-question p {
+    font-weight: 700;
+
+    margin-bottom: 10px;
+}
+
+.quiz-question label {
+    display: block;
+
+    padding: 7px 0;
+
+    color: #475467;
+}
+
+.answer {
+    display: none;
+
+    margin-top: 12px;
+
+    padding: 12px;
+
+    border-radius: 8px;
+
+    background: #ecfdf5;
+
+    color: #065f46;
+}
+
+/* CHEAT */
+
+.cheat {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0,1fr));
+
+    gap: 14px;
+
+    margin-top: 20px;
+}
+
+.cheat-item {
+    padding: 15px;
+
+    border-radius: 10px;
+
+    border: 1px solid var(--border);
+
+    background: white;
+}
+
+/* FOOTER */
+
+.footer {
+    text-align: center;
+
+    color: #98a2b3;
+
+    padding: 40px 0;
+
+    border-top: 1px solid var(--border);
+}
+
+/* RESPONSIVE */
+
+@media(max-width:1000px) {
+
+    .sidebar {
+        display: none;
+    }
+
+    .main {
+        margin-left: 0;
+
+        padding:
+            88px
+            20px
+            60px;
+    }
+
+    .grid,
+    .grid-3,
+    .parameter-box,
+    .cheat {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media(max-width:600px) {
+
+    .hero {
+        padding: 30px 22px;
+    }
+
+    .hero h1 {
+        font-size: 34px;
+    }
+
+    .section h2 {
+        font-size: 25px;
+    }
+
+    .flow {
+        flex-direction: column;
+    }
+
+    .flow-arrow {
+        transform: rotate(90deg);
+    }
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     TOPBAR
+===================================================== -->
+
+<header class="topbar">
+
+    <div class="logo">
+        ZENSUS<span>.</span>
+    </div>
+
+    <div class="lesson-label">
+        React Course / Lesson 25
+    </div>
+
+</header>
+
+
+<!-- =====================================================
+     SIDEBAR
+===================================================== -->
+
+<aside class="sidebar">
+
+    <div class="sidebar-title">
+        Lesson Contents
+    </div>
+
+    <a href="#client-routing">
+        Client-Side Routing
+    </a>
+
+    <a href="#why-routing">
+        Why Routing?
+    </a>
+
+    <a href="#router">
+        React Router
+    </a>
+
+    <a href="#browser-router">
+        BrowserRouter
+    </a>
+
+    <a href="#routes">
+        Routes & Route
+    </a>
+
+    <a href="#links">
+        Link
+    </a>
+
+    <a href="#navlink">
+        NavLink
+    </a>
+
+    <a href="#dynamic">
+        Dynamic Routes
+    </a>
+
+    <a href="#params">
+        URL Parameters
+    </a>
+
+    <a href="#query">
+        Query Parameters
+    </a>
+
+    <a href="#nested">
+        Nested Routes
+    </a>
+
+    <a href="#layout">
+        Layout Routes
+    </a>
+
+    <a href="#navigation">
+        Navigation
+    </a>
+
+    <a href="#navigate">
+        useNavigate()
+    </a>
+
+    <a href="#useparams">
+        useParams()
+    </a>
+
+    <a href="#uselocation">
+        useLocation()
+    </a>
+
+    <a href="#notfound">
+        404 Pages
+    </a>
+
+    <a href="#protected">
+        Protected Routes
+    </a>
+
+    <a href="#mistakes">
+        Common Mistakes
+    </a>
+
+    <a href="#cheat">
+        Cheat Sheet
+    </a>
+
+    <a href="#quiz">
+        Quick Quiz
+    </a>
+
+</aside>
+
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<main class="main">
+
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<section class="hero">
+
+    <div class="badge">
+        LESSON 25 · REACT ROUTING
+    </div>
+
+    <h1>
+        React Router & Navigation
+    </h1>
+
+    <p>
+        Learn how React applications manage URLs, pages, navigation,
+        dynamic resources, nested layouts, protected screens and
+        browser history without requiring a full page reload for
+        every navigation.
+    </p>
+
+</section>
+
+
+<!-- =====================================================
+     1 CLIENT SIDE ROUTING
+===================================================== -->
+
+<section class="section" id="client-routing">
+
+<h2>
+1. What is Client-Side Routing?
+</h2>
+
+<p>
+Traditional websites often request a new HTML document from the server
+when the user navigates to another page. In a client-side routed React
+application, JavaScript can update the displayed UI in response to the URL
+while the application remains loaded in the browser.
+</p>
+
+<div class="architecture">
+
+<div class="arch-title">
+Traditional Navigation vs Client-Side Routing
+</div>
+
+<div class="flow">
+
+    <div class="flow-box">
+        URL
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Router
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Match Route
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Render UI
+    </div>
+
+</div>
+
+</div>
+
+<div class="callout">
+
+<strong>Important:</strong>
+Client-side routing does not mean the server becomes irrelevant.
+The server still needs to correctly serve the application entry point
+for URLs that the client router handles, depending on the deployment setup.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     2 WHY ROUTING
+===================================================== -->
+
+<section class="section" id="why-routing">
+
+<h2>
+2. Why Routing?
+</h2>
+
+<p>
+Real applications usually contain multiple screens and resources.
+For example, ZENSUS might contain a dashboard, courses, individual lessons,
+projects, profile pages and authentication screens.
+</p>
+
+<div class="grid-3">
+
+<div class="info-card">
+
+<h3>
+Dashboard
+</h3>
+
+<p>
+/dashboard
+</p>
+
+</div>
+
+<div class="info-card">
+
+<h3>
+Courses
+</h3>
+
+<p>
+/courses
+</p>
+
+</div>
+
+<div class="info-card">
+
+<h3>
+Lesson
+</h3>
+
+<p>
+/courses/react/lesson/25
+</p>
+
+</div>
+
+</div>
+
+<div class="callout success">
+
+Routing gives different URLs meaningful application states.
+Users can bookmark, refresh and navigate between those states.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     3 REACT ROUTER
+===================================================== -->
+
+<section class="section" id="router">
+
+<h2>
+3. React Router
+</h2>
+
+<p>
+React Router is a routing library used to connect URL paths with React UI.
+It provides components and hooks for declaring routes, navigating between
+locations and reading URL information.
+</p>
+
+<h3>Install</h3>
+
+<div class="code">
+
+npm install react-router-dom
+
+</div>
+
+<p>
+A modern React application can then import routing APIs from
+react-router-dom.
+</p>
+
+</section>
+
+
+<!-- =====================================================
+     4 BROWSER ROUTER
+===================================================== -->
+
+<section class="section" id="browser-router">
+
+<h2>
+4. BrowserRouter
+</h2>
+
+<p>
+BrowserRouter provides browser-history based routing context to the
+React application.
+</p>
+
+<div class="code">
+
+import {
+    BrowserRouter
+} from "react-router-dom";
+
+
+function App() {
+
+    return (
+
+        &lt;BrowserRouter&gt;
+
+            &lt;AppRoutes /&gt;
+
+        &lt;/BrowserRouter&gt;
+
+    );
+}
+
+</div>
+
+<div class="architecture">
+
+<div class="arch-title">
+BrowserRouter as the Routing Boundary
+</div>
+
+<div class="flow">
+
+    <div class="flow-box">
+        Browser URL
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        BrowserRouter
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Routes
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        React UI
+    </div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     5 ROUTES AND ROUTE
+===================================================== -->
+
+<section class="section" id="routes">
+
+<h2>
+5. Routes & Route
+</h2>
+
+<p>
+Routes contains the route definitions. Each Route connects a URL pattern
+to an element that should be rendered when that pattern matches.
+</p>
+
+<div class="code">
+
+import {
+    BrowserRouter,
+    Routes,
+    Route
+} from "react-router-dom";
+
+
+function App() {
+
+    return (
+
+        &lt;BrowserRouter&gt;
+
+            &lt;Routes&gt;
+
+                &lt;Route
+                    path="/"
+                    element={&lt;Home /&gt;}
+                /&gt;
+
+                &lt;Route
+                    path="/courses"
+                    element={&lt;Courses /&gt;}
+                /&gt;
+
+                &lt;Route
+                    path="/about"
+                    element={&lt;About /&gt;}
+                /&gt;
+
+            &lt;/Routes&gt;
+
+        &lt;/BrowserRouter&gt;
+
+    );
+}
+
+</div>
+
+<div class="callout">
+Think of a Route as a mapping:
+<strong>URL pattern → React element.</strong>
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     6 LINK
+===================================================== -->
+
+<section class="section" id="links">
+
+<h2>
+6. Link
+</h2>
+
+<p>
+Link creates navigation between routes without requiring developers to
+manually manipulate browser URLs.
+</p>
+
+<div class="code">
+
+import {
+    Link
+} from "react-router-dom";
+
+
+function Navigation() {
+
+    return (
+
+        &lt;nav&gt;
+
+            &lt;Link to="/"&gt;
+                Home
+            &lt;/Link&gt;
+
+            &lt;Link to="/courses"&gt;
+                Courses
+            &lt;/Link&gt;
+
+            &lt;Link to="/about"&gt;
+                About
+            &lt;/Link&gt;
+
+        &lt;/nav&gt;
+
+    );
+}
+
+</div>
+
+<div class="callout warning">
+
+Avoid using ordinary anchor navigation for internal SPA routes when you want
+React Router to handle the transition. Use Router navigation components such
+as Link for internal application navigation.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     7 NAVLINK
+===================================================== -->
+
+<section class="section" id="navlink">
+
+<h2>
+7. NavLink
+</h2>
+
+<p>
+NavLink is similar to Link but provides information about whether the link
+matches the current route, which is especially useful for navigation menus.
+</p>
+
+<div class="code">
+
+import {
+    NavLink
+} from "react-router-dom";
+
+
+&lt;NavLink
+    to="/courses"
+    className={({ isActive }) =&gt;
+        isActive
+            ? "active"
+            : ""
+    }
+&gt;
+
+    Courses
+
+&lt;/NavLink&gt;
+
+</div>
+
+<div class="demo">
+
+<h3>
+NavLink Visual Demo
+</h3>
+
+<div class="nav-demo">
+
+<a href="#nav-home" onclick="activateNav(this)">
+Home
+</a>
+
+<a href="#nav-courses" onclick="activateNav(this)">
+Courses
+</a>
+
+<a href="#nav-projects" onclick="activateNav(this)">
+Projects
+</a>
+
+<a href="#nav-profile" onclick="activateNav(this)">
+Profile
+</a>
+
+</div>
+
+</div>
+
+<div class="callout success">
+
+<strong>Link:</strong> navigate.
+
+<br><br>
+
+<strong>NavLink:</strong> navigate + know whether the destination is active.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     8 DYNAMIC ROUTES
+===================================================== -->
+
+<section class="section" id="dynamic">
+
+<h2>
+8. Dynamic Routes
+</h2>
+
+<p>
+Dynamic routes allow one route definition to represent many related URLs.
+A segment beginning with a colon represents a dynamic parameter.
+</p>
+
+<div class="code">
+
+&lt;Route
+    path="/courses/:courseId"
+    element={&lt;Course /&gt;}
+/&gt;
+
+</div>
+
+<p>
+The same route can match:
+</p>
+
+<div class="grid-3">
+
+<div class="info-card">
+
+<h3>
+React
+</h3>
+
+<p>
+/courses/react
+</p>
+
+</div>
+
+<div class="info-card">
+
+<h3>
+Python
+</h3>
+
+<p>
+/courses/python
+</p>
+
+</div>
+
+<div class="info-card">
+
+<h3>
+Java
+</h3>
+
+<p>
+/courses/java
+</p>
+
+</div>
+
+</div>
+
+<div class="callout">
+
+The route pattern is reusable because <span class="inline-code">:courseId</span>
+changes according to the URL.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     9 URL PARAMS
+===================================================== -->
+
+<section class="section" id="params">
+
+<h2>
+9. URL Parameters
+</h2>
+
+<p>
+useParams() reads dynamic parameters from the matched URL.
+</p>
+
+<div class="code">
+
+import {
+    useParams
+} from "react-router-dom";
+
+
+function Course() {
+
+    const {
+        courseId
+    } = useParams();
+
+
+    return (
+
+        &lt;div&gt;
+
+            &lt;h1&gt;
+                Course: {courseId}
+            &lt;/h1&gt;
+
+        &lt;/div&gt;
+
+    );
+}
+
+</div>
+
+<div class="parameter-box">
+
+<div class="parameter-item">
+
+<strong>
+URL
+</strong>
+
+<code>
+/courses/react
+</code>
+
+</div>
+
+<div class="parameter-item">
+
+<strong>
+Route
+</strong>
+
+<code>
+/courses/:courseId
+</code>
+
+</div>
+
+<div class="parameter-item">
+
+<strong>
+useParams()
+</strong>
+
+<code>
+courseId = "react"
+</code>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     10 QUERY PARAMETERS
+===================================================== -->
+
+<section class="section" id="query">
+
+<h2>
+10. Query Parameters
+</h2>
+
+<p>
+Query parameters are values placed after a question mark in a URL.
+They are useful for filters, searches, sorting and optional UI state.
+</p>
+
+<div class="code">
+
+/courses?category=react&amp;level=beginner
+
+</div>
+
+<p>
+A component can read the current location and search string.
+</p>
+
+<div class="code">
+
+import {
+    useSearchParams
+} from "react-router-dom";
+
+
+function Courses() {
+
+    const [
+        searchParams
+    ] = useSearchParams();
+
+
+    const category =
+        searchParams.get("category");
+
+
+    const level =
+        searchParams.get("level");
+
+
+    return (
+
+        &lt;p&gt;
+
+            Category:
+            {category}
+
+            &lt;br /&gt;
+
+            Level:
+            {level}
+
+        &lt;/p&gt;
+
+    );
+}
+
+</div>
+
+<div class="callout success">
+
+<strong>Path parameter:</strong>
+
+<code>/courses/react</code>
+
+usually identifies a resource.
+
+<br><br>
+
+<strong>Query parameter:</strong>
+
+<code>/courses?level=beginner</code>
+
+usually modifies how a resource collection is displayed or filtered.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     11 NESTED ROUTES
+===================================================== -->
+
+<section class="section" id="nested">
+
+<h2>
+11. Nested Routes
+</h2>
+
+<p>
+Nested routes allow child routes to render inside a parent route's UI.
+This is especially useful for dashboards and course systems.
+</p>
+
+<div class="code">
+
+&lt;Route
+    path="/dashboard"
+    element={&lt;DashboardLayout /&gt;}
+&gt;
+
+    &lt;Route
+        path="overview"
+        element={&lt;Overview /&gt;}
+    /&gt;
+
+    &lt;Route
+        path="courses"
+        element={&lt;DashboardCourses /&gt;}
+    /&gt;
+
+    &lt;Route
+        path="profile"
+        element={&lt;Profile /&gt;}
+    /&gt;
+
+&lt;/Route&gt;
+
+</div>
+
+<p>
+The parent layout renders an Outlet where the matched child route appears.
+</p>
+
+<div class="code">
+
+import {
+    Outlet
+} from "react-router-dom";
+
+
+function DashboardLayout() {
+
+    return (
+
+        &lt;div&gt;
+
+            &lt;Sidebar /&gt;
+
+            &lt;main&gt;
+
+                &lt;Outlet /&gt;
+
+            &lt;/main&gt;
+
+        &lt;/div&gt;
+
+    );
+}
+
+</div>
+
+<div class="architecture">
+
+<div class="arch-title">
+Nested Route Rendering
+</div>
+
+<div class="flow">
+
+    <div class="flow-box">
+        /dashboard
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        DashboardLayout
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Outlet
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Child Route
+    </div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     12 LAYOUT ROUTES
+===================================================== -->
+
+<section class="section" id="layout">
+
+<h2>
+12. Layout Routes
+</h2>
+
+<p>
+A layout route provides shared UI around a group of related routes.
+The layout can contain navigation, headers, sidebars, footers and an Outlet.
+</p>
+
+<div class="code">
+
+&lt;Route
+    element={&lt;MainLayout /&gt;}
+&gt;
+
+    &lt;Route
+        path="/"
+        element={&lt;Home /&gt;}
+    /&gt;
+
+    &lt;Route
+        path="/courses"
+        element={&lt;Courses /&gt;}
+    /&gt;
+
+    &lt;Route
+        path="/projects"
+        element={&lt;Projects /&gt;}
+    /&gt;
+
+&lt;/Route&gt;
+
+</div>
+
+<div class="architecture">
+
+<div class="arch-title">
+Professional Layout Architecture
+</div>
+
+<div class="flow">
+
+    <div class="flow-box">
+        MainLayout
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Header
+    </div>
+
+    <div class="flow-arrow">
+        +
+    </div>
+
+    <div class="flow-box">
+        Sidebar
+    </div>
+
+    <div class="flow-arrow">
+        +
+    </div>
+
+    <div class="flow-box">
+        Outlet
+    </div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     13 NAVIGATION
+===================================================== -->
+
+<section class="section" id="navigation">
+
+<h2>
+13. Navigation
+</h2>
+
+<p>
+Navigation can happen through visible links or programmatically in response
+to an application event.
+</p>
+
+<div class="grid">
+
+<div class="info-card">
+
+<h3>
+Declarative Navigation
+</h3>
+
+<p>
+Use Link or NavLink when the user should click a visible navigation element.
+</p>
+
+<div class="code">
+
+&lt;Link to="/courses"&gt;
+    Courses
+&lt;/Link&gt;
+
+</div>
+
+</div>
+
+<div class="info-card">
+
+<h3>
+Programmatic Navigation
+</h3>
+
+<p>
+Use useNavigate when navigation occurs as part of application logic.
+</p>
+
+<div class="code">
+
+navigate("/dashboard");
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     14 USENAVIGATE
+===================================================== -->
+
+<section class="section" id="navigate">
+
+<h2>
+14. useNavigate()
+</h2>
+
+<p>
+useNavigate() returns a function that can change the current location
+programmatically.
+</p>
+
+<div class="code">
+
+import {
+    useNavigate
+} from "react-router-dom";
+
+
+function Login() {
+
+    const navigate =
+        useNavigate();
+
+
+    function handleLogin() {
+
+        // Authentication logic...
+
+        navigate("/dashboard");
+
+    }
+
+
+    return (
+
+        &lt;button onClick={handleLogin}&gt;
+
+            Login
+
+        &lt;/button&gt;
+
+    );
+
+}
+
+</div>
+
+<h3>Going Back</h3>
+
+<div class="code">
+
+navigate(-1);
+
+</div>
+
+<h3>Going Forward</h3>
+
+<div class="code">
+
+navigate(1);
+
+</div>
+
+<div class="callout warning">
+
+Do not use programmatic navigation for every link.
+If the user is simply choosing a destination from a menu,
+a Link or NavLink usually communicates the intent more clearly.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     15 USEPARAMS
+===================================================== -->
+
+<section class="section" id="useparams">
+
+<h2>
+15. useParams()
+</h2>
+
+<p>
+useParams reads the dynamic segments defined in the matched route.
+</p>
+
+<div class="code">
+
+&lt;Route
+    path="/students/:studentId"
+    element={&lt;Student /&gt;}
+/&gt;
+
+
+function Student() {
+
+    const {
+        studentId
+    } = useParams();
+
+
+    return (
+
+        &lt;h1&gt;
+
+            Student:
+            {studentId}
+
+        &lt;/h1&gt;
+
+    );
+
+}
+
+</div>
+
+<div class="callout">
+
+Route definition:
+
+<br><br>
+
+<code>
+/students/:studentId
+</code>
+
+<br><br>
+
+URL:
+
+<br><br>
+
+<code>
+/students/1024
+</code>
+
+<br><br>
+
+Parameter:
+
+<br><br>
+
+<code>
+studentId = "1024"
+</code>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     16 USELOCATION
+===================================================== -->
+
+<section class="section" id="uselocation">
+
+<h2>
+16. useLocation()
+</h2>
+
+<p>
+useLocation gives access to information about the current location.
+It is useful when application logic needs to react to changes in the URL.
+</p>
+
+<div class="code">
+
+import {
+    useLocation
+} from "react-router-dom";
+
+
+function CurrentPage() {
+
+    const location =
+        useLocation();
+
+
+    return (
+
+        &lt;div&gt;
+
+            &lt;p&gt;
+                Path:
+                {location.pathname}
+            &lt;/p&gt;
+
+            &lt;p&gt;
+                Search:
+                {location.search}
+            &lt;/p&gt;
+
+        &lt;/div&gt;
+
+    );
+
+}
+
+</div>
+
+<div class="parameter-box">
+
+<div class="parameter-item">
+
+<strong>
+pathname
+</strong>
+
+<code>
+/courses/react
+</code>
+
+</div>
+
+<div class="parameter-item">
+
+<strong>
+search
+</strong>
+
+<code>
+?level=beginner
+</code>
+
+</div>
+
+<div class="parameter-item">
+
+<strong>
+hash
+</strong>
+
+<code>
+#lessons
+</code>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     17 INTERACTIVE ROUTER
+===================================================== -->
+
+<section class="section">
+
+<h2>
+17. Interactive Routing Simulator
+</h2>
+
+<p>
+Use the controls below to visualize how different URL patterns can map
+to different application screens.
+</p>
+
+<div class="demo">
+
+<div class="demo-controls">
+
+<button onclick="simulateRoute('/')">
+Home
+</button>
+
+<button onclick="simulateRoute('/courses')">
+Courses
+</button>
+
+<button onclick="simulateRoute('/courses/react')">
+React Course
+</button>
+
+<button onclick="simulateRoute('/courses/react/lesson/25')">
+Lesson 25
+</button>
+
+<button onclick="simulateRoute('/profile')">
+Profile
+</button>
+
+<button class="danger-btn" onclick="simulateRoute('/unknown-page')">
+Unknown
+</button>
+
+</div>
+
+<div class="route-preview">
+
+<h3 id="routeTitle">
+Home
+</h3>
+
+<p id="routeDescription">
+The root route renders the application home page.
+</p>
+
+<div class="route-path" id="routePath">
+/
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     18 404
+===================================================== -->
+
+<section class="section" id="notfound">
+
+<h2>
+18. 404 Pages
+</h2>
+
+<p>
+A catch-all route can provide a custom interface when no defined route matches.
+</p>
+
+<div class="code">
+
+&lt;Routes&gt;
+
+    &lt;Route
+        path="/"
+        element={&lt;Home /&gt;}
+    /&gt;
+
+    &lt;Route
+        path="/courses"
+        element={&lt;Courses /&gt;}
+    /&gt;
+
+    &lt;Route
+        path="*"
+        element={&lt;NotFound /&gt;}
+    /&gt;
+
+&lt;/Routes&gt;
+
+</div>
+
+<h3>Example NotFound Component</h3>
+
+<div class="code">
+
+function NotFound() {
+
+    return (
+
+        &lt;div&gt;
+
+            &lt;h1&gt;
+                404
+            &lt;/h1&gt;
+
+            &lt;p&gt;
+                Page not found.
+            &lt;/p&gt;
+
+            &lt;Link to="/"&gt;
+                Return Home
+            &lt;/Link&gt;
+
+        &lt;/div&gt;
+
+    );
+
+}
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     19 PROTECTED ROUTES
+===================================================== -->
+
+<section class="section" id="protected">
+
+<h2>
+19. Protected Routes
+</h2>
+
+<p>
+Protected routing is a UI/navigation pattern where access to certain routes
+depends on application authentication or authorization state.
+</p>
+
+<div class="architecture">
+
+<div class="arch-title">
+Protected Route Decision
+</div>
+
+<div class="flow">
+
+    <div class="flow-box">
+        User Requests Route
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Auth State
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Authenticated?
+    </div>
+
+</div>
+
+<br>
+
+<div class="flow">
+
+    <div class="flow-box">
+        YES → Protected UI
+    </div>
+
+    <div class="flow-arrow">
+        |
+    </div>
+
+    <div class="flow-box">
+        NO → Login
+    </div>
+
+</div>
+
+</div>
+
+<h3>Simple Protected Route</h3>
+
+<div class="code">
+
+import {
+    Navigate
+} from "react-router-dom";
+
+
+function ProtectedRoute({
+    isAuthenticated,
+    children
+}) {
+
+    if (!isAuthenticated) {
+
+        return (
+            &lt;Navigate
+                to="/login"
+                replace
+            /&gt;
+        );
+
+    }
+
+
+    return children;
+
+}
+
+</div>
+
+<h3>Usage</h3>
+
+<div class="code">
+
+&lt;Route
+    path="/dashboard"
+    element={
+
+        &lt;ProtectedRoute
+            isAuthenticated={isAuthenticated}
+        &gt;
+
+            &lt;Dashboard /&gt;
+
+        &lt;/ProtectedRoute&gt;
+
+    }
+/&gt;
+
+</div>
+
+<div class="callout danger">
+
+<strong>Security warning:</strong>
+
+A client-side protected route is not a security boundary.
+A user interface can hide a screen, but sensitive data and privileged
+operations must also be protected by the backend/server.
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     20 REAL WORLD ZENSUS ROUTING
+===================================================== -->
+
+<section class="section">
+
+<h2>
+20. Real-World ZENSUS Routing Architecture
+</h2>
+
+<p>
+Imagine ZENSUS has authentication, courses, individual lessons,
+projects and a student dashboard.
+</p>
+
+<div class="code">
+
+/                       → Home
+
+/login                  → Login
+
+/register               → Register
+
+/dashboard              → Dashboard
+
+/courses                → Course List
+
+/courses/react          → React Course
+
+/courses/react/lesson/25
+                        → React Lesson 25
+
+/projects               → Projects
+
+/projects/:projectId    → Project Details
+
+/profile                → Student Profile
+
+/settings               → Settings
+
+/*                      → 404
+
+</div>
+
+<div class="architecture">
+
+<div class="arch-title">
+ZENSUS Route Tree
+</div>
+
+<div class="flow">
+
+    <div class="flow-box">
+        App Router
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Public Routes
+    </div>
+
+    <div class="flow-arrow">
+        +
+    </div>
+
+    <div class="flow-box">
+        Protected Routes
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Nested Features
+    </div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     21 COMPLETE ROUTER EXAMPLE
+===================================================== -->
+
+<section class="section">
+
+<h2>
+21. Complete React Router Example
+</h2>
+
+<p>
+The following example combines the major concepts introduced in this lesson.
+</p>
+
+<div class="code">
+
+import {
+
+    BrowserRouter,
+    Routes,
+    Route,
+    Link,
+    NavLink,
+    Outlet,
+    useParams,
+    useNavigate,
+    Navigate
+
+} from "react-router-dom";
+
+
+function App() {
+
+    return (
+
+        &lt;BrowserRouter&gt;
+
+            &lt;Routes&gt;
+
+                &lt;Route
+                    element={&lt;MainLayout /&gt;}
+                &gt;
+
+                    &lt;Route
+                        path="/"
+                        element={&lt;Home /&gt;}
+                    /&gt;
+
+                    &lt;Route
+                        path="/courses"
+                        element={&lt;Courses /&gt;}
+                    /&gt;
+
+                    &lt;Route
+                        path="/courses/:courseId"
+                        element={&lt;Course /&gt;}
+                    /&gt;
+
+                    &lt;Route
+                        path="/login"
+                        element={&lt;Login /&gt;}
+                    /&gt;
+
+                    &lt;Route
+                        path="/dashboard"
+                        element={
+                            &lt;ProtectedRoute&gt;
+                                &lt;Dashboard /&gt;
+                            &lt;/ProtectedRoute&gt;
+                        }
+                    /&gt;
+
+                    &lt;Route
+                        path="*"
+                        element={&lt;NotFound /&gt;}
+                    /&gt;
+
+                &lt;/Route&gt;
+
+            &lt;/Routes&gt;
+
+        &lt;/BrowserRouter&gt;
+
+    );
+}
+
+
+function MainLayout() {
+
+    return (
+
+        &lt;&gt;
+
+            &lt;nav&gt;
+
+                &lt;NavLink to="/"&gt;
+                    Home
+                &lt;/NavLink&gt;
+
+                &lt;NavLink to="/courses"&gt;
+                    Courses
+                &lt;/NavLink&gt;
+
+                &lt;NavLink to="/dashboard"&gt;
+                    Dashboard
+                &lt;/NavLink&gt;
+
+            &lt;/nav&gt;
+
+            &lt;main&gt;
+
+                &lt;Outlet /&gt;
+
+            &lt;/main&gt;
+
+        &lt;/&gt;
+
+    );
+}
+
+
+function Course() {
+
+    const {
+        courseId
+    } = useParams();
+
+
+    const navigate =
+        useNavigate();
+
+
+    return (
+
+        &lt;div&gt;
+
+            &lt;h1&gt;
+                {courseId}
+            &lt;/h1&gt;
+
+            &lt;button
+                onClick={() =&gt;
+                    navigate("/courses")
+                }
+            &gt;
+
+                Back to Courses
+
+            &lt;/button&gt;
+
+        &lt;/div&gt;
+
+    );
+}
+
+
+function ProtectedRoute({
+    children
+}) {
+
+    const isAuthenticated = true;
+
+
+    if (!isAuthenticated) {
+
+        return (
+            &lt;Navigate
+                to="/login"
+                replace
+            /&gt;
+        );
+
+    }
+
+
+    return children;
+
+}
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     22 ROUTING MENTAL MODEL
+===================================================== -->
+
+<section class="section">
+
+<h2>
+22. Routing Mental Model
+</h2>
+
+<div class="architecture">
+
+<div class="arch-title">
+Understand React Router as a URL → UI System
+</div>
+
+<div class="flow">
+
+    <div class="flow-box">
+        Browser URL
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Route Matching
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Params / Query
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        Component
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        UI
+    </div>
+
+</div>
+
+</div>
+
+<div class="callout success">
+
+If you understand this flow, React Router becomes much easier:
+
+<br><br>
+
+<strong>
+URL → Match → Read Parameters → Render Component → Navigate
+</strong>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     23 COMMON MISTAKES
+===================================================== -->
+
+<section class="section" id="mistakes">
+
+<h2>
+23. Common React Router Mistakes
+</h2>
+
+<div class="mistake">
+
+<strong>
+Mistake 1 — Forgetting BrowserRouter
+</strong>
+
+<p>
+Router hooks and components need the appropriate routing context.
+</p>
+
+</div>
+
+<div class="mistake">
+
+<strong>
+Mistake 2 — Using the Wrong Navigation Mechanism
+</strong>
+
+<p>
+Use Link or NavLink for normal internal navigation instead of manually
+changing the browser location.
+</p>
+
+</div>
+
+<div class="mistake">
+
+<strong>
+Mistake 3 — Confusing Params and Query Parameters
+</strong>
+
+<p>
+A path such as /courses/react uses a route segment, while
+/courses?level=beginner uses a query string.
+</p>
+
+</div>
+
+<div class="mistake">
+
+<strong>
+Mistake 4 — Forgetting Outlet
+</strong>
+
+<p>
+Nested child routes need an Outlet in the parent UI where the child content
+should render.
+</p>
+
+</div>
+
+<div class="mistake">
+
+<strong>
+Mistake 5 — Making Every Route Protected
+</strong>
+
+<p>
+Public pages such as login and registration generally need to remain accessible
+before authentication.
+</p>
+
+</div>
+
+<div class="mistake">
+
+<strong>
+Mistake 6 — Treating Client Routing as Security
+</strong>
+
+<p>
+Frontend route guards improve user experience and navigation, but backend
+authorization must enforce access to protected data and operations.
+</p>
+
+</div>
+
+<div class="mistake">
+
+<strong>
+Mistake 7 — Ignoring Server Configuration
+</strong>
+
+<p>
+A deployed SPA needs server configuration that can return the application
+entry point for client-managed URLs when users directly visit or refresh them.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     24 ROUTER API TABLE
+===================================================== -->
+
+<section class="section">
+
+<h2>
+24. React Router API at a Glance
+</h2>
+
+<table>
+
+<tr>
+
+<th>
+API
+</th>
+
+<th>
+Purpose
+</th>
+
+</tr>
+
+<tr>
+
+<td>
+BrowserRouter
+</td>
+
+<td>
+Provides browser-based routing context.
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+Routes
+</td>
+
+<td>
+Contains route definitions and performs route matching.
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+Route
+</td>
+
+<td>
+Maps a path pattern to an element.
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+Link
+</td>
+
+<td>
+Declarative navigation.
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+NavLink
+</td>
+
+<td>
+Navigation with active-state information.
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+Outlet
+</td>
+
+<td>
+Placeholder where a matched child route renders.
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+useNavigate()
+</td>
+
+<td>
+Programmatic navigation.
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+useParams()
+</td>
+
+<td>
+Reads dynamic URL parameters.
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+useLocation()
+</td>
+
+<td>
+Reads current location information.
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+Navigate
+</td>
+
+<td>
+Declaratively redirects to another location.
+</td>
+
+</tr>
+
+</table>
+
+</section>
+
+
+<!-- =====================================================
+     25 CHEAT SHEET
+===================================================== -->
+
+<section class="section" id="cheat">
+
+<h2>
+25. React Router Cheat Sheet
+</h2>
+
+<div class="cheat">
+
+<div class="cheat-item">
+
+<strong>
+BrowserRouter
+</strong>
+
+<br>
+
+Routing context for browser applications.
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+Routes
+</strong>
+
+<br>
+
+Container for route definitions.
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+Route
+</strong>
+
+<br>
+
+URL pattern → React element.
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+Link
+</strong>
+
+<br>
+
+Normal internal navigation.
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+NavLink
+</strong>
+
+<br>
+
+Navigation with active state.
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+:parameter
+</strong>
+
+<br>
+
+Dynamic URL segment.
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+useParams()
+</strong>
+
+<br>
+
+Read dynamic route parameters.
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+useSearchParams()
+</strong>
+
+<br>
+
+Read and update query parameters.
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+useLocation()
+</strong>
+
+<br>
+
+Read current URL location data.
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+useNavigate()
+</strong>
+
+<br>
+
+Navigate from application logic.
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+Outlet
+</strong>
+
+<br>
+
+Render nested child routes.
+
+</div>
+
+<div class="cheat-item">
+
+<strong>
+*
+</strong>
+
+<br>
+
+Catch-all route for unmatched paths.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     26 QUIZ
+===================================================== -->
+
+<section class="section" id="quiz">
+
+<h2>
+26. Quick Quiz
+</h2>
+
+<p>
+Check whether you understand the core routing concepts before moving forward.
+</p>
+
+
+<div class="quiz-question">
+
+<p>
+1. What is the primary purpose of a React Router Route?
+</p>
+
+<label>
+<input type="radio" name="q1">
+Store component state
+</label>
+
+<label>
+<input type="radio" name="q1">
+Map a URL pattern to UI
+</label>
+
+<label>
+<input type="radio" name="q1">
+Fetch data from an API
+</label>
+
+<label>
+<input type="radio" name="q1">
+Create CSS styles
+</label>
+
+<button onclick="showAnswer('answer1')">
+Show Answer
+</button>
+
+<div class="answer" id="answer1">
+
+A Route connects a URL pattern with the React element that should render
+when that route matches.
+
+</div>
+
+</div>
+
+
+<div class="quiz-question">
+
+<p>
+2. Which component is useful for navigation links that need an active state?
+</p>
+
+<label>
+<input type="radio" name="q2">
+Route
+</label>
+
+<label>
+<input type="radio" name="q2">
+Outlet
+</label>
+
+<label>
+<input type="radio" name="q2">
+NavLink
+</label>
+
+<label>
+<input type="radio" name="q2">
+BrowserRouter
+</label>
+
+<button onclick="showAnswer('answer2')">
+Show Answer
+</button>
+
+<div class="answer" id="answer2">
+
+NavLink provides navigation and information about whether its destination
+matches the current route.
+
+</div>
+
+</div>
+
+
+<div class="quiz-question">
+
+<p>
+3. Given the route /courses/:courseId and the URL /courses/react,
+what does useParams() provide for courseId?
+</p>
+
+<label>
+<input type="radio" name="q3">
+"courses"
+</label>
+
+<label>
+<input type="radio" name="q3">
+"react"
+</label>
+
+<label>
+<input type="radio" name="q3">
+"/courses"
+</label>
+
+<label>
+<input type="radio" name="q3">
+"courseId"
+</label>
+
+<button onclick="showAnswer('answer3')">
+Show Answer
+</button>
+
+<div class="answer" id="answer3">
+
+The dynamic segment :courseId matches the value react in the URL.
+
+</div>
+
+</div>
+
+
+<div class="quiz-question">
+
+<p>
+4. What does Outlet do in a nested routing structure?
+</p>
+
+<label>
+<input type="radio" name="q4">
+Stores URL parameters
+</label>
+
+<label>
+<input type="radio" name="q4">
+Renders the matched child route
+</label>
+
+<label>
+<input type="radio" name="q4">
+Creates browser history
+</label>
+
+<label>
+<input type="radio" name="q4">
+Validates forms
+</label>
+
+<button onclick="showAnswer('answer4')">
+Show Answer
+</button>
+
+<div class="answer" id="answer4">
+
+Outlet is the location in a parent route's UI where the matched nested
+child route is rendered.
+
+</div>
+
+</div>
+
+
+<div class="quiz-question">
+
+<p>
+5. Which hook is designed for programmatic navigation?
+</p>
+
+<label>
+<input type="radio" name="q5">
+useParams()
+</label>
+
+<label>
+<input type="radio" name="q5">
+useLocation()
+</label>
+
+<label>
+<input type="radio" name="q5">
+useNavigate()
+</label>
+
+<label>
+<input type="radio" name="q5">
+useState()
+</label>
+
+<button onclick="showAnswer('answer5')">
+Show Answer
+</button>
+
+<div class="answer" id="answer5">
+
+useNavigate() returns a navigation function that can change the current
+location from application logic.
+
+</div>
+
+</div>
+
+
+</section>
+
+
+<!-- FOOTER -->
+
+<div class="footer">
+
+<strong>
+ZENSUS React — Lesson 25
+</strong>
+
+<br>
+
+React Router & Navigation
+
+</div>
+
+
+</main>
+
+
+<script>
+
+/* =====================================================
+   ROUTING SIMULATOR
+===================================================== */
+
+function simulateRoute(path) {
+
+    const title =
+        document.getElementById("routeTitle");
+
+    const description =
+        document.getElementById("routeDescription");
+
+    const routePath =
+        document.getElementById("routePath");
+
+
+    routePath.textContent = path;
+
+
+    if (path === "/") {
+
+        title.textContent = "Home";
+
+        description.textContent =
+            "The root route renders the application home page.";
+
+    }
+
+    else if (path === "/courses") {
+
+        title.textContent = "Courses";
+
+        description.textContent =
+            "The courses route renders the available learning paths.";
+
+    }
+
+    else if (path === "/courses/react") {
+
+        title.textContent = "React Course";
+
+        description.textContent =
+            "A dynamic route can use courseId = react.";
+
+    }
+
+    else if (path === "/courses/react/lesson/25") {
+
+        title.textContent = "React Lesson 25";
+
+        description.textContent =
+            "Multiple dynamic segments can represent deeper resources.";
+
+    }
+
+    else if (path === "/profile") {
+
+        title.textContent = "Profile";
+
+        description.textContent =
+            "The profile route renders the student's profile screen.";
+
+    }
+
+    else {
+
+        title.textContent = "404 — Page Not Found";
+
+        description.textContent =
+            "No configured route matches this URL.";
+
+    }
+
+}
+
+
+/* =====================================================
+   NAVLINK DEMO
+===================================================== */
+
+function activateNav(element) {
+
+    const links =
+        document.querySelectorAll(".nav-demo a");
+
+    links.forEach(link => {
+
+        link.classList.remove("active");
+
+    });
+
+    element.classList.add("active");
+
+}
+
+
+/* =====================================================
+   QUIZ ANSWERS
+===================================================== */
+
+function showAnswer(id) {
+
+    const answer =
+        document.getElementById(id);
+
+
+    if (answer.style.display === "block") {
+
+        answer.style.display = "none";
+
+    } else {
+
+        answer.style.display = "block";
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,2729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS | REST API Lesson 07</title>
+
+<style>
+:root{
+    --blue:#2563eb;
+    --blue-dark:#1d4ed8;
+    --blue-light:#eff6ff;
+    --blue-soft:#dbeafe;
+    --blue-border:#bfdbfe;
+    --text:#10213f;
+    --text-light:#5f6f86;
+    --muted:#8b9ab0;
+    --bg:#f7faff;
+    --white:#ffffff;
+    --border:#dce6f2;
+    --green:#16a34a;
+    --green-light:#f0fdf4;
+    --orange:#ea580c;
+    --orange-light:#fff7ed;
+    --red:#dc2626;
+    --red-light:#fef2f2;
+    --purple:#7c3aed;
+    --shadow:0 12px 35px rgba(37,99,235,.08);
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    width:270px;
+    height:100vh;
+    background:#fff;
+    border-right:1px solid var(--border);
+    padding:25px 18px;
+    overflow-y:auto;
+    z-index:1000;
+}
+
+.logo{
+    font-size:25px;
+    font-weight:900;
+    color:var(--blue);
+    letter-spacing:1px;
+    padding:0 12px;
+}
+
+.lesson-label{
+    font-size:11px;
+    font-weight:800;
+    color:var(--muted);
+    letter-spacing:1.5px;
+    padding:8px 12px 15px;
+}
+
+.nav a{
+    display:block;
+    text-decoration:none;
+    color:var(--text-light);
+    font-size:14px;
+    padding:10px 13px;
+    margin:3px 0;
+    border-radius:9px;
+    transition:.25s;
+}
+
+.nav a:hover,
+.nav a.active{
+    background:var(--blue-light);
+    color:var(--blue);
+    font-weight:700;
+}
+
+.main{
+    margin-left:270px;
+    padding:35px 45px 90px;
+    max-width:1450px;
+}
+
+.progress-container{
+    position:fixed;
+    top:0;
+    left:270px;
+    right:0;
+    height:4px;
+    background:#eaf0f8;
+    z-index:2000;
+}
+
+.progress-bar{
+    width:0%;
+    height:100%;
+    background:var(--blue);
+}
+
+.hero{
+    background:linear-gradient(135deg,#ffffff,#eff6ff);
+    border:1px solid var(--blue-border);
+    border-radius:24px;
+    padding:45px;
+    box-shadow:var(--shadow);
+    margin-bottom:30px;
+}
+
+.badges{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    margin-bottom:18px;
+}
+
+.badge{
+    padding:6px 11px;
+    border-radius:20px;
+    background:var(--blue-light);
+    color:var(--blue);
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.5px;
+}
+
+.hero h1{
+    font-size:42px;
+    line-height:1.15;
+    margin-bottom:15px;
+}
+
+.hero p{
+    max-width:950px;
+    color:var(--text-light);
+    font-size:17px;
+}
+
+.search-box{
+    margin:25px 0;
+}
+
+.search-box input{
+    width:100%;
+    padding:15px 18px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    font-size:15px;
+    outline:none;
+    background:#fff;
+}
+
+.search-box input:focus{
+    border-color:var(--blue);
+    box-shadow:0 0 0 3px var(--blue-soft);
+}
+
+section{
+    margin:35px 0;
+    scroll-margin-top:25px;
+}
+
+.section-card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:30px;
+    box-shadow:var(--shadow);
+}
+
+.section-title{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:18px;
+}
+
+.section-number{
+    width:40px;
+    height:40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--blue);
+    color:#fff;
+    border-radius:10px;
+    font-weight:800;
+    flex-shrink:0;
+}
+
+h2{
+    font-size:27px;
+}
+
+h3{
+    margin:15px 0 8px;
+}
+
+p{
+    color:var(--text-light);
+}
+
+ul{
+    margin:15px 0 15px 22px;
+}
+
+li{
+    margin:7px 0;
+    color:var(--text-light);
+}
+
+strong{
+    color:var(--text);
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+    gap:18px;
+    margin-top:22px;
+}
+
+.info-card{
+    border:1px solid var(--border);
+    border-radius:15px;
+    padding:20px;
+    background:#fff;
+    transition:.25s;
+}
+
+.info-card:hover{
+    transform:translateY(-4px);
+    border-color:var(--blue-border);
+    box-shadow:0 10px 25px rgba(37,99,235,.08);
+}
+
+.info-icon{
+    font-size:28px;
+    margin-bottom:8px;
+}
+
+.info-card h3{
+    margin-top:0;
+}
+
+.info-card p{
+    font-size:14px;
+}
+
+.flow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin:25px 0;
+}
+
+.flow-box{
+    min-width:145px;
+    padding:18px;
+    text-align:center;
+    border:1px solid var(--blue-border);
+    background:var(--blue-light);
+    border-radius:14px;
+    font-weight:800;
+    color:var(--blue-dark);
+    animation:floatBox 2.5s ease-in-out infinite;
+}
+
+.flow-box:nth-child(2){
+    animation-delay:.3s;
+}
+
+.flow-box:nth-child(3){
+    animation-delay:.6s;
+}
+
+.flow-box:nth-child(4){
+    animation-delay:.9s;
+}
+
+@keyframes floatBox{
+    0%,100%{
+        transform:translateY(0);
+    }
+
+    50%{
+        transform:translateY(-6px);
+    }
+}
+
+.arrow{
+    font-size:25px;
+    color:var(--blue);
+    font-weight:900;
+}
+
+.code-box{
+    background:#0f172a;
+    color:#e2e8f0;
+    border-radius:14px;
+    overflow:hidden;
+    margin:20px 0;
+}
+
+.code-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 15px;
+    background:#1e293b;
+    color:#cbd5e1;
+    font-size:12px;
+    font-weight:700;
+}
+
+.copy-btn{
+    border:0;
+    background:#334155;
+    color:#fff;
+    padding:6px 10px;
+    border-radius:7px;
+    cursor:pointer;
+}
+
+.copy-btn:hover{
+    background:var(--blue);
+}
+
+pre{
+    padding:20px;
+    overflow-x:auto;
+    font-size:14px;
+    line-height:1.7;
+}
+
+.note{
+    padding:18px;
+    border-radius:13px;
+    background:var(--blue-light);
+    border-left:5px solid var(--blue);
+    margin:20px 0;
+}
+
+.success{
+    padding:18px;
+    border-radius:13px;
+    background:var(--green-light);
+    border-left:5px solid var(--green);
+    margin:20px 0;
+}
+
+.warning{
+    padding:18px;
+    border-radius:13px;
+    background:var(--orange-light);
+    border-left:5px solid var(--orange);
+    margin:20px 0;
+}
+
+.url-builder{
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:25px;
+    background:#fff;
+    margin-top:20px;
+}
+
+.url-display{
+    background:#0f172a;
+    color:#93c5fd;
+    padding:20px;
+    border-radius:12px;
+    font-family:monospace;
+    font-size:17px;
+    overflow-x:auto;
+    margin:18px 0;
+}
+
+.url-part{
+    display:inline-block;
+    padding:3px 7px;
+    border-radius:5px;
+}
+
+.url-base{
+    color:#60a5fa;
+}
+
+.url-path{
+    color:#4ade80;
+}
+
+.url-id{
+    color:#facc15;
+}
+
+.url-query{
+    color:#f472b6;
+}
+
+.part-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:15px;
+}
+
+.part{
+    border:1px solid var(--border);
+    border-radius:13px;
+    padding:17px;
+}
+
+.part h3{
+    margin-top:0;
+    color:var(--blue);
+}
+
+.endpoint-card{
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:20px;
+    background:#fff;
+    margin:15px 0;
+    transition:.25s;
+}
+
+.endpoint-card:hover{
+    border-color:var(--blue-border);
+    transform:translateX(4px);
+}
+
+.method{
+    display:inline-block;
+    padding:5px 9px;
+    border-radius:7px;
+    font-size:11px;
+    font-weight:900;
+    background:var(--blue-light);
+    color:var(--blue);
+    margin-right:8px;
+}
+
+.endpoint-url{
+    font-family:monospace;
+    font-weight:700;
+    color:var(--text);
+}
+
+.param{
+    color:#d97706;
+}
+
+.table-wrap{
+    overflow-x:auto;
+    margin-top:20px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:700px;
+}
+
+th,
+td{
+    padding:13px 15px;
+    border-bottom:1px solid var(--border);
+    text-align:left;
+}
+
+th{
+    background:var(--blue-light);
+    color:var(--blue-dark);
+    font-size:14px;
+}
+
+td{
+    color:var(--text-light);
+    font-size:14px;
+}
+
+.route-tester{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:25px;
+    margin-top:20px;
+}
+
+.route-buttons{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:18px 0;
+}
+
+.route-btn{
+    border:1px solid var(--blue-border);
+    background:var(--blue-light);
+    color:var(--blue-dark);
+    padding:10px 14px;
+    border-radius:9px;
+    cursor:pointer;
+    font-weight:700;
+}
+
+.route-btn:hover,
+.route-btn.selected{
+    background:var(--blue);
+    color:#fff;
+}
+
+.route-result{
+    background:#0f172a;
+    color:#cbd5e1;
+    border-radius:12px;
+    padding:20px;
+    min-height:120px;
+    font-family:monospace;
+    white-space:pre-wrap;
+}
+
+.quiz{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:25px;
+    margin-top:20px;
+}
+
+.option{
+    border:1px solid var(--border);
+    padding:13px 16px;
+    border-radius:10px;
+    margin:9px 0;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.option:hover{
+    background:var(--blue-light);
+    border-color:var(--blue-border);
+}
+
+.option.correct{
+    background:var(--green-light);
+    border-color:var(--green);
+}
+
+.option.wrong{
+    background:var(--red-light);
+    border-color:var(--red);
+}
+
+.quiz-result{
+    margin-top:14px;
+    font-weight:800;
+}
+
+.takeaway{
+    background:linear-gradient(135deg,#eff6ff,#ffffff);
+    border:1px solid var(--blue-border);
+    border-radius:20px;
+    padding:30px;
+}
+
+.takeaway li{
+    color:var(--text);
+}
+
+.reveal{
+    opacity:0;
+    transform:translateY(20px);
+    transition:.7s ease;
+}
+
+.reveal.show{
+    opacity:1;
+    transform:translateY(0);
+}
+
+@media(max-width:900px){
+
+    .sidebar{
+        position:relative;
+        width:100%;
+        height:auto;
+        border-right:none;
+        border-bottom:1px solid var(--border);
+    }
+
+    .main{
+        margin-left:0;
+        padding:25px 18px 60px;
+    }
+
+    .progress-container{
+        left:0;
+    }
+
+    .hero{
+        padding:28px;
+    }
+
+    .hero h1{
+        font-size:32px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+</div>
+
+
+<!-- SIDEBAR -->
+
+<aside class="sidebar">
+
+    <div class="logo">ZENSUS</div>
+
+    <div class="lesson-label">
+        REST API • LESSON 07 / 15
+    </div>
+
+    <nav class="nav">
+
+        <a href="#overview">Overview</a>
+        <a href="#endpoint">What is an Endpoint?</a>
+        <a href="#url">What is a URL?</a>
+        <a href="#base">Base URL</a>
+        <a href="#resource">Resources</a>
+        <a href="#path">URL Path</a>
+        <a href="#parameters">Parameters</a>
+        <a href="#pathparams">Path Parameters</a>
+        <a href="#queryparams">Query Parameters</a>
+        <a href="#combination">Path + Query</a>
+        <a href="#methods">Endpoints & HTTP Methods</a>
+        <a href="#versioning">API Versioning</a>
+        <a href="#design">URL Design</a>
+        <a href="#flow">Request Routing Flow</a>
+        <a href="#tester">Endpoint Tester</a>
+        <a href="#practice">Practice</a>
+        <a href="#quiz">Quiz</a>
+        <a href="#takeaway">Takeaway</a>
+
+    </nav>
+
+</aside>
+
+
+<main class="main">
+
+
+<!-- HERO -->
+
+<section id="overview" class="hero reveal">
+
+    <div class="badges">
+
+        <span class="badge">LESSON 07 OF 15</span>
+        <span class="badge">REST API</span>
+        <span class="badge">ENDPOINTS</span>
+        <span class="badge">URL STRUCTURE</span>
+        <span class="badge">BEGINNER</span>
+
+    </div>
+
+    <h1>API Endpoints & URL Structure</h1>
+
+    <p>
+        Learn how REST APIs identify resources using URLs and
+        endpoints. Understand base URLs, paths, path parameters,
+        query parameters, API versioning and clean REST URL design.
+    </p>
+
+</section>
+
+
+<!-- SEARCH -->
+
+<div class="search-box">
+
+    <input
+        type="text"
+        id="searchInput"
+        placeholder="Search this lesson..."
+    >
+
+</div>
+
+
+<!-- 01 -->
+
+<section id="endpoint" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">01</div>
+
+    <h2>What is an API Endpoint?</h2>
+
+</div>
+
+<p>
+An <strong>API endpoint</strong> is a specific URL through which
+a client can communicate with a particular resource or operation
+provided by an API.
+</p>
+
+<div class="note">
+
+<strong>Simple definition:</strong>
+
+<br><br>
+
+An endpoint is a specific address where an API provides access
+to a particular resource.
+
+</div>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>Example Endpoint</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>https://api.example.com/students/</pre>
+
+</div>
+
+<p>
+In this example, the endpoint can represent a collection of
+students.
+</p>
+
+<div class="flow">
+
+    <div class="flow-box">
+        Client
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        API Endpoint
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        Student Resource
+    </div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 02 -->
+
+<section id="url" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">02</div>
+
+    <h2>What is a URL?</h2>
+
+</div>
+
+<p>
+A <strong>URL</strong> stands for
+<strong>Uniform Resource Locator</strong>.
+It identifies the location of a resource on a network.
+</p>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>Example URL</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>https://api.zensus.com/v1/students/101/</pre>
+
+</div>
+
+<p>
+A URL can contain several important parts.
+</p>
+
+<div class="part-grid">
+
+    <div class="part">
+
+        <h3>https://</h3>
+
+        <p>
+            Protocol used to communicate securely with the server.
+        </p>
+
+    </div>
+
+    <div class="part">
+
+        <h3>api.zensus.com</h3>
+
+        <p>
+            Domain or host where the API is available.
+        </p>
+
+    </div>
+
+    <div class="part">
+
+        <h3>/v1/</h3>
+
+        <p>
+            API version.
+        </p>
+
+    </div>
+
+    <div class="part">
+
+        <h3>/students/101/</h3>
+
+        <p>
+            Resource path identifying a student.
+        </p>
+
+    </div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 03 -->
+
+<section id="base" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">03</div>
+
+    <h2>Base URL</h2>
+
+</div>
+
+<p>
+The <strong>base URL</strong> is the common starting part of
+an API's URLs.
+</p>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>Base URL</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>https://api.zensus.com/</pre>
+
+</div>
+
+<p>
+Endpoints are built by adding resource paths to the base URL.
+</p>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+    <th>Base URL</th>
+    <th>Resource Path</th>
+    <th>Complete Endpoint</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+    <td>https://api.zensus.com</td>
+    <td>/students/</td>
+    <td>https://api.zensus.com/students/</td>
+</tr>
+
+<tr>
+    <td>https://api.zensus.com</td>
+    <td>/courses/</td>
+    <td>https://api.zensus.com/courses/</td>
+</tr>
+
+<tr>
+    <td>https://api.zensus.com</td>
+    <td>/teachers/</td>
+    <td>https://api.zensus.com/teachers/</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 04 -->
+
+<section id="resource" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">04</div>
+
+    <h2>Resources</h2>
+
+</div>
+
+<p>
+In REST APIs, URLs generally represent
+<strong>resources</strong>.
+A resource can be a collection or an individual item.
+</p>
+
+<div class="grid">
+
+    <div class="info-card">
+
+        <div class="info-icon">👨‍🎓</div>
+
+        <h3>Students</h3>
+
+        <p>
+            <code>/students/</code>
+        </p>
+
+        <p>
+            Represents the student collection.
+        </p>
+
+    </div>
+
+    <div class="info-card">
+
+        <div class="info-icon">📚</div>
+
+        <h3>Courses</h3>
+
+        <p>
+            <code>/courses/</code>
+        </p>
+
+        <p>
+            Represents the course collection.
+        </p>
+
+    </div>
+
+    <div class="info-card">
+
+        <div class="info-icon">📝</div>
+
+        <h3>Assignments</h3>
+
+        <p>
+            <code>/assignments/</code>
+        </p>
+
+        <p>
+            Represents assignments.
+        </p>
+
+    </div>
+
+</div>
+
+<div class="note">
+
+<strong>Collection vs Individual Resource:</strong>
+
+<br><br>
+
+<code>/students/</code> → collection of students
+
+<br><br>
+
+<code>/students/101/</code> → one specific student
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 05 -->
+
+<section id="path" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">05</div>
+
+    <h2>URL Path</h2>
+
+</div>
+
+<p>
+The <strong>path</strong> identifies which resource the client
+wants to access.
+</p>
+
+<div class="url-builder">
+
+<div class="url-display">
+
+<span class="url-base">https://api.zensus.com</span><span class="url-path">/students</span><span class="url-id">/101</span><span class="url-query">?course=python</span>
+
+</div>
+
+<div class="part-grid">
+
+    <div class="part">
+
+        <h3>Base</h3>
+
+        <p>
+            <code>https://api.zensus.com</code>
+        </p>
+
+    </div>
+
+    <div class="part">
+
+        <h3>Resource</h3>
+
+        <p>
+            <code>/students</code>
+        </p>
+
+    </div>
+
+    <div class="part">
+
+        <h3>ID</h3>
+
+        <p>
+            <code>/101</code>
+        </p>
+
+    </div>
+
+    <div class="part">
+
+        <h3>Query</h3>
+
+        <p>
+            <code>?course=python</code>
+        </p>
+
+    </div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 06 -->
+
+<section id="parameters" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">06</div>
+
+    <h2>What are URL Parameters?</h2>
+
+</div>
+
+<p>
+Parameters allow the client to provide additional information
+to the API.
+</p>
+
+<div class="grid">
+
+    <div class="info-card">
+
+        <div class="info-icon">🎯</div>
+
+        <h3>Path Parameter</h3>
+
+        <p>
+            Identifies a specific resource.
+        </p>
+
+        <code>/students/101/</code>
+
+    </div>
+
+    <div class="info-card">
+
+        <div class="info-icon">🔎</div>
+
+        <h3>Query Parameter</h3>
+
+        <p>
+            Filters, searches or modifies a request.
+        </p>
+
+        <code>?course=python</code>
+
+    </div>
+
+</div>
+
+<div class="note">
+
+The most important difference is:
+
+<br><br>
+
+<strong>Path parameter</strong> → usually identifies
+<strong>which resource</strong>.
+
+<br><br>
+
+<strong>Query parameter</strong> → usually controls
+<strong>how the collection is filtered, searched, sorted or paginated</strong>.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 07 -->
+
+<section id="pathparams" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">07</div>
+
+    <h2>Path Parameters</h2>
+
+</div>
+
+<p>
+A path parameter is a dynamic value included directly inside
+the URL path.
+</p>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>Collection</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>GET /students/</pre>
+
+</div>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>Specific Student</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>GET /students/101/</pre>
+
+</div>
+
+<p>
+Here, <strong>101</strong> is the identifier of the requested
+student.
+</p>
+
+<div class="endpoint-card">
+
+<span class="method">GET</span>
+
+<span class="endpoint-url">
+/students/<span class="param">{id}</span>/
+</span>
+
+<p>
+The <code>{id}</code> part is dynamic.
+</p>
+
+</div>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>Examples</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>/students/101/
+/students/102/
+/students/103/</pre>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 08 -->
+
+<section id="queryparams" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">08</div>
+
+    <h2>Query Parameters</h2>
+
+</div>
+
+<p>
+Query parameters are added after a <strong>?</strong> in the URL.
+They are commonly used for filtering, searching, sorting and
+pagination.
+</p>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>Filtering</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>GET /students/?course=python</pre>
+
+</div>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>Search</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>GET /students/?search=pradeep</pre>
+
+</div>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>Pagination</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>GET /students/?page=2</pre>
+
+</div>
+
+<h3>Multiple Query Parameters</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>Multiple Parameters</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>GET /students/?course=python&page=2&limit=10</pre>
+
+</div>
+
+<p>
+The first query parameter starts after <strong>?</strong>.
+Additional parameters are separated using <strong>&amp;</strong>.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- 09 -->
+
+<section id="combination" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">09</div>
+
+    <h2>Path + Query Parameters</h2>
+
+</div>
+
+<p>
+Path parameters and query parameters can be used together.
+</p>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>Example</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>GET /students/101/courses/?page=2</pre>
+
+</div>
+
+<p>Here:</p>
+
+<ul>
+
+<li>
+<code>101</code> identifies a specific student.
+</li>
+
+<li>
+<code>courses</code> identifies the related resource.
+</li>
+
+<li>
+<code>?page=2</code> is a query parameter.
+</li>
+
+</ul>
+
+<div class="url-display">
+
+/students/<span class="url-id">101</span>/courses/<span class="url-query">?page=2</span>
+
+</div>
+
+<div class="note">
+
+A useful mental model:
+
+<br><br>
+
+<strong>Path</strong> → "Which resource?"
+
+<br><br>
+
+<strong>Query</strong> → "How should I retrieve it?"
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 10 -->
+
+<section id="methods" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">10</div>
+
+    <h2>Endpoints & HTTP Methods</h2>
+
+</div>
+
+<p>
+The same endpoint can perform different operations depending on
+the HTTP method.
+</p>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+    <th>Method</th>
+    <th>Endpoint</th>
+    <th>Typical Meaning</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+    <td><strong>GET</strong></td>
+    <td>/students/</td>
+    <td>Get students</td>
+</tr>
+
+<tr>
+    <td><strong>POST</strong></td>
+    <td>/students/</td>
+    <td>Create a student</td>
+</tr>
+
+<tr>
+    <td><strong>GET</strong></td>
+    <td>/students/101/</td>
+    <td>Get student 101</td>
+</tr>
+
+<tr>
+    <td><strong>PUT</strong></td>
+    <td>/students/101/</td>
+    <td>Replace student 101</td>
+</tr>
+
+<tr>
+    <td><strong>PATCH</strong></td>
+    <td>/students/101/</td>
+    <td>Partially update student 101</td>
+</tr>
+
+<tr>
+    <td><strong>DELETE</strong></td>
+    <td>/students/101/</td>
+    <td>Delete student 101</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<div class="success">
+
+<strong>Important:</strong>
+
+<br><br>
+
+The endpoint identifies the resource.
+The HTTP method describes the intended operation.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 11 -->
+
+<section id="versioning" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">11</div>
+
+    <h2>API Versioning</h2>
+
+</div>
+
+<p>
+APIs may evolve over time. Versioning helps developers maintain
+different versions while reducing the risk of breaking existing
+clients.
+</p>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>Version 1</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>https://api.zensus.com/v1/students/</pre>
+
+</div>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>Version 2</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>https://api.zensus.com/v2/students/</pre>
+
+</div>
+
+<p>
+The exact versioning strategy depends on the API design and
+organization. A common approach is including the version in the
+URL path.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- 12 -->
+
+<section id="design" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">12</div>
+
+    <h2>Good REST URL Design</h2>
+
+</div>
+
+<div class="grid">
+
+    <div class="info-card">
+
+        <div class="info-icon">✓</div>
+
+        <h3>Use Nouns</h3>
+
+        <p>
+            Represent resources using nouns.
+        </p>
+
+        <code>/students/</code>
+
+    </div>
+
+    <div class="info-card">
+
+        <div class="info-icon">✓</div>
+
+        <h3>Use Consistent Naming</h3>
+
+        <p>
+            Keep resource naming predictable.
+        </p>
+
+        <code>/students/</code>
+
+    </div>
+
+    <div class="info-card">
+
+        <div class="info-icon">✓</div>
+
+        <h3>Use IDs for Items</h3>
+
+        <p>
+            Identify individual resources clearly.
+        </p>
+
+        <code>/students/101/</code>
+
+    </div>
+
+    <div class="info-card">
+
+        <div class="info-icon">✓</div>
+
+        <h3>Use Query Parameters</h3>
+
+        <p>
+            Use queries for filtering and searching.
+        </p>
+
+        <code>?course=python</code>
+
+    </div>
+
+</div>
+
+<h3>Prefer Resource-Oriented URLs</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>Recommended Style</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>GET    /students/
+GET    /students/101/
+POST   /students/
+PATCH  /students/101/
+DELETE /students/101/</pre>
+
+</div>
+
+<div class="warning">
+
+Avoid putting the operation itself into every URL when the HTTP
+method can express the operation.
+
+<br><br>
+
+For example, instead of designing:
+
+<code>/getStudents/</code>
+
+use a resource-oriented endpoint such as:
+
+<code>/students/</code>
+
+with the appropriate HTTP method.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 13 -->
+
+<section id="flow" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">13</div>
+
+    <h2>Request Routing Flow</h2>
+
+</div>
+
+<p>
+When a client calls an endpoint, the request travels through the
+API system and is routed to the appropriate backend logic.
+</p>
+
+<div class="flow">
+
+    <div class="flow-box">
+        Client
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        URL
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        Endpoint Router
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        Controller / View
+    </div>
+
+</div>
+
+<div class="flow">
+
+    <div class="flow-box">
+        Controller
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        Business Logic
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        Database
+    </div>
+
+</div>
+
+<div class="flow">
+
+    <div class="flow-box">
+        Database
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        API Response
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        Client
+    </div>
+
+</div>
+
+<div class="note">
+
+<strong>Example:</strong>
+
+<br><br>
+
+A request such as
+
+<code>GET /students/101/</code>
+
+can be routed to backend logic that retrieves student 101 and
+returns its information as JSON.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 14 -->
+
+<section id="tester" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">14</div>
+
+    <h2>Interactive Endpoint Tester</h2>
+
+</div>
+
+<p>
+Click an endpoint to understand what that URL represents.
+This is a learning simulator — it does not send a real network
+request.
+</p>
+
+<div class="route-tester">
+
+    <h3>Select an Endpoint</h3>
+
+    <div class="route-buttons">
+
+        <button
+            class="route-btn"
+            onclick="testEndpoint('GET','/students/')"
+        >
+            GET /students/
+        </button>
+
+        <button
+            class="route-btn"
+            onclick="testEndpoint('POST','/students/')"
+        >
+            POST /students/
+        </button>
+
+        <button
+            class="route-btn"
+            onclick="testEndpoint('GET','/students/101/')"
+        >
+            GET /students/101/
+        </button>
+
+        <button
+            class="route-btn"
+            onclick="testEndpoint('PATCH','/students/101/')"
+        >
+            PATCH /students/101/
+        </button>
+
+        <button
+            class="route-btn"
+            onclick="testEndpoint('DELETE','/students/101/')"
+        >
+            DELETE /students/101/
+        </button>
+
+        <button
+            class="route-btn"
+            onclick="testEndpoint('GET','/students/?course=python')"
+        >
+            GET /students/?course=python
+        </button>
+
+    </div>
+
+    <div
+        class="route-result"
+        id="routeResult"
+    >
+Select an endpoint above...
+    </div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 15 -->
+
+<section id="practice" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">15</div>
+
+    <h2>Practice Challenge</h2>
+
+</div>
+
+<p>
+Design REST API endpoints for an online learning platform.
+The platform has:
+</p>
+
+<ul>
+
+<li>Students</li>
+<li>Courses</li>
+<li>Lessons</li>
+<li>Assignments</li>
+
+</ul>
+
+<h3>Try to design endpoints for:</h3>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+    <th>Requirement</th>
+    <th>Your Endpoint</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+    <td>Get all students</td>
+    <td>/students/</td>
+</tr>
+
+<tr>
+    <td>Get student 101</td>
+    <td>/students/101/</td>
+</tr>
+
+<tr>
+    <td>Get all courses</td>
+    <td>/courses/</td>
+</tr>
+
+<tr>
+    <td>Get course 5</td>
+    <td>/courses/5/</td>
+</tr>
+
+<tr>
+    <td>Find Python courses</td>
+    <td>/courses/?search=python</td>
+</tr>
+
+<tr>
+    <td>Get lessons for course 5</td>
+    <td>/courses/5/lessons/</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<div class="success">
+
+<strong>Practice rule:</strong>
+
+<br><br>
+
+Start by identifying the resource.
+Then decide whether you need a collection, a specific item,
+or a query parameter.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- QUIZ -->
+
+<section id="quiz" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">16</div>
+
+    <h2>Quick Knowledge Check</h2>
+
+</div>
+
+
+<div class="quiz">
+
+<h3>
+What is an API endpoint?
+</h3>
+
+<div
+    class="option"
+    data-correct="true"
+    onclick="checkAnswer(this)"
+>
+A. A specific URL through which an API provides access to a resource
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+B. A database table only
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+C. A programming language
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+D. A web browser
+</div>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<h3>
+Which part identifies a specific student?
+</h3>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+A. /students/
+</div>
+
+<div
+    class="option"
+    data-correct="true"
+    onclick="checkAnswer(this)"
+>
+B. /students/101/
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+C. /api/
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+D. https://
+</div>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<h3>
+Which symbol starts a query string?
+</h3>
+
+<div
+    class="option"
+    data-correct="true"
+    onclick="checkAnswer(this)"
+>
+A. ?
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+B. #
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+C. &
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+D. :
+</div>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<h3>
+What is commonly used to separate multiple query parameters?
+</h3>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+A. :
+</div>
+
+<div
+    class="option"
+    data-correct="true"
+    onclick="checkAnswer(this)"
+>
+B. &
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+C. /
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+D. #
+</div>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<h3>
+Which URL is more resource-oriented?
+</h3>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+A. /getStudents/
+</div>
+
+<div
+    class="option"
+    data-correct="true"
+    onclick="checkAnswer(this)"
+>
+B. /students/
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+C. /performGetStudents/
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+D. /doStudentOperation/
+</div>
+
+<div class="quiz-result"></div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- TAKEAWAY -->
+
+<section id="takeaway" class="reveal">
+
+<div class="takeaway">
+
+<div class="section-title">
+
+    <div class="section-number">17</div>
+
+    <h2>Lesson Takeaway</h2>
+
+</div>
+
+<ul>
+
+<li>
+An <strong>API endpoint</strong> is a specific URL used to access
+an API resource.
+</li>
+
+<li>
+A <strong>URL</strong> identifies the location of a resource.
+</li>
+
+<li>
+The <strong>base URL</strong> is the common starting point of an API.
+</li>
+
+<li>
+REST APIs commonly organize URLs around resources such as
+<code>/students/</code> and <code>/courses/</code>.
+</li>
+
+<li>
+A collection can be represented by <code>/students/</code>.
+</li>
+
+<li>
+A specific resource can be represented by
+<code>/students/101/</code>.
+</li>
+
+<li>
+Path parameters usually identify a specific resource.
+</li>
+
+<li>
+Query parameters are commonly used for filtering, searching,
+sorting and pagination.
+</li>
+
+<li>
+Multiple query parameters can be combined using <code>&amp;</code>.
+</li>
+
+<li>
+The HTTP method and endpoint work together to describe an API operation.
+</li>
+
+<li>
+API versioning can help manage changes over time.
+</li>
+
+<li>
+Good REST URLs are predictable, consistent and resource-oriented.
+</li>
+
+</ul>
+
+<div class="success">
+
+<strong>Next Lesson:</strong>
+
+<br><br>
+
+CRUD Operations
+
+</div>
+
+</div>
+
+</section>
+
+
+</main>
+
+
+<script>
+
+/* =========================================================
+   PROGRESS BAR
+========================================================= */
+
+window.addEventListener("scroll",function(){
+
+    var scrollTop =
+        document.documentElement.scrollTop ||
+        document.body.scrollTop;
+
+    var documentHeight =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+
+    var percentage = 0;
+
+    if(documentHeight > 0){
+
+        percentage =
+            (scrollTop / documentHeight) * 100;
+
+    }
+
+    document.getElementById("progressBar").style.width =
+        percentage + "%";
+
+});
+
+
+/* =========================================================
+   COPY CODE
+========================================================= */
+
+function copyCode(button){
+
+    var codeBox =
+        button.parentElement.parentElement;
+
+    var pre =
+        codeBox.querySelector("pre");
+
+    if(!pre){
+        return;
+    }
+
+    var code =
+        pre.innerText;
+
+    if(navigator.clipboard){
+
+        navigator.clipboard.writeText(code)
+        .then(function(){
+
+            showCopied(button);
+
+        })
+        .catch(function(){
+
+            fallbackCopy(code,button);
+
+        });
+
+    }else{
+
+        fallbackCopy(code,button);
+
+    }
+
+}
+
+
+function fallbackCopy(text,button){
+
+    var textarea =
+        document.createElement("textarea");
+
+    textarea.value = text;
+
+    document.body.appendChild(textarea);
+
+    textarea.select();
+
+    document.execCommand("copy");
+
+    document.body.removeChild(textarea);
+
+    showCopied(button);
+
+}
+
+
+function showCopied(button){
+
+    var oldText =
+        button.innerText;
+
+    button.innerText =
+        "Copied!";
+
+    setTimeout(function(){
+
+        button.innerText =
+            oldText;
+
+    },1200);
+
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+var searchInput =
+    document.getElementById("searchInput");
+
+searchInput.addEventListener("input",function(){
+
+    var query =
+        searchInput.value.toLowerCase().trim();
+
+    var sections =
+        document.querySelectorAll("section");
+
+    sections.forEach(function(section){
+
+        var text =
+            section.innerText.toLowerCase();
+
+        if(query === ""){
+
+            section.style.display = "";
+
+        }
+        else if(text.indexOf(query) !== -1){
+
+            section.style.display = "";
+
+        }
+        else{
+
+            section.style.display = "none";
+
+        }
+
+    });
+
+});
+
+
+/* =========================================================
+   ENDPOINT TESTER
+========================================================= */
+
+function testEndpoint(method,url){
+
+    var result =
+        document.getElementById("routeResult");
+
+    var meaning = "";
+
+    if(
+        method === "GET" &&
+        url === "/students/"
+    ){
+
+        meaning =
+            "Returns the collection of students.";
+
+    }
+    else if(
+        method === "POST" &&
+        url === "/students/"
+    ){
+
+        meaning =
+            "Creates a new student.";
+
+    }
+    else if(
+        method === "GET" &&
+        url === "/students/101/"
+    ){
+
+        meaning =
+            "Returns the student whose ID is 101.";
+
+    }
+    else if(
+        method === "PATCH" &&
+        url === "/students/101/"
+    ){
+
+        meaning =
+            "Partially updates student 101.";
+
+    }
+    else if(
+        method === "DELETE" &&
+        url === "/students/101/"
+    ){
+
+        meaning =
+            "Deletes student 101.";
+
+    }
+    else if(
+        method === "GET" &&
+        url === "/students/?course=python"
+    ){
+
+        meaning =
+            "Returns students filtered by the Python course.";
+
+    }
+
+    result.innerText =
+        "METHOD\n" +
+        method +
+        "\n\n" +
+        "ENDPOINT\n" +
+        url +
+        "\n\n" +
+        "MEANING\n" +
+        meaning;
+
+    document.querySelectorAll(".route-btn").forEach(function(btn){
+
+        btn.classList.remove("selected");
+
+    });
+
+    event.target.classList.add("selected");
+
+}
+
+
+/* =========================================================
+   QUIZ
+========================================================= */
+
+function checkAnswer(option){
+
+    var quiz =
+        option.parentElement;
+
+    var options =
+        quiz.querySelectorAll(".option");
+
+    var result =
+        quiz.querySelector(".quiz-result");
+
+    options.forEach(function(item){
+
+        item.style.pointerEvents =
+            "none";
+
+    });
+
+    var correct =
+        option.getAttribute("data-correct") === "true";
+
+    if(correct){
+
+        option.classList.add("correct");
+
+        result.innerText =
+            "✓ Correct! Excellent.";
+
+        result.style.color =
+            "#16a34a";
+
+    }
+    else{
+
+        option.classList.add("wrong");
+
+        result.innerText =
+            "✗ Incorrect. Review this concept.";
+
+        result.style.color =
+            "#dc2626";
+
+    }
+
+}
+
+
+/* =========================================================
+   SCROLL REVEAL
+========================================================= */
+
+var revealElements =
+    document.querySelectorAll(".reveal");
+
+var observer =
+    new IntersectionObserver(function(entries){
+
+        entries.forEach(function(entry){
+
+            if(entry.isIntersecting){
+
+                entry.target.classList.add("show");
+
+            }
+
+        });
+
+    },{
+        threshold:.08
+    });
+
+
+revealElements.forEach(function(element){
+
+    observer.observe(element);
+
+});
+
+
+/* =========================================================
+   ACTIVE SIDEBAR
+========================================================= */
+
+var navLinks =
+    document.querySelectorAll(".nav a");
+
+var sections =
+    document.querySelectorAll("section[id]");
+
+var navObserver =
+    new IntersectionObserver(function(entries){
+
+        entries.forEach(function(entry){
+
+            if(entry.isIntersecting){
+
+                navLinks.forEach(function(link){
+
+                    link.classList.remove("active");
+
+                    if(
+                        link.getAttribute("href") ===
+                        "#" + entry.target.id
+                    ){
+
+                        link.classList.add("active");
+
+                    }
+
+                });
+
+            }
+
+        });
+
+    },{
+        rootMargin:"-20% 0px -65% 0px"
+    });
+
+
+sections.forEach(function(section){
+
+    navObserver.observe(section);
+
+});
+
+</script>
+
+</body>
+</html>

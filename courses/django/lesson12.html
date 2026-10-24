@@ -1,0 +1,2822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENSUS — Django Lesson 12: File & Image Uploads</title>
+
+<style>
+:root{
+  --blue:#2563eb;
+  --blue-dark:#1d4ed8;
+  --blue-light:#eff6ff;
+  --blue-soft:#dbeafe;
+  --blue-border:#bfdbfe;
+  --text:#10213f;
+  --text-light:#5f6f86;
+  --muted:#8b9ab0;
+  --bg:#f7faff;
+  --white:#fff;
+  --border:#dce6f2;
+  --green:#16a34a;
+  --green-light:#f0fdf4;
+  --orange:#f59e0b;
+  --orange-light:#fffbeb;
+  --red:#dc2626;
+  --red-light:#fef2f2;
+  --purple:#7c3aed;
+  --shadow:0 12px 35px rgba(37,99,235,.08);
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  font-family:Inter,Segoe UI,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.7;
+}
+
+.progress{
+  position:fixed;
+  top:0;
+  left:0;
+  height:4px;
+  width:0;
+  background:var(--blue);
+  z-index:9999;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+  position:fixed;
+  left:0;
+  top:0;
+  width:280px;
+  height:100vh;
+  background:#fff;
+  border-right:1px solid var(--border);
+  padding:24px 18px;
+  overflow-y:auto;
+  z-index:1000;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:25px;
+  padding:5px 8px;
+}
+
+.logo{
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  background:linear-gradient(135deg,var(--blue),#60a5fa);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  font-size:17px;
+}
+
+.brand h2{
+  font-size:20px;
+}
+
+.brand small{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+  letter-spacing:1px;
+}
+
+.lesson-label{
+  margin:0 8px 12px;
+  font-size:11px;
+  color:var(--muted);
+  font-weight:800;
+  letter-spacing:1.4px;
+}
+
+.nav{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.nav a{
+  text-decoration:none;
+  color:var(--text-light);
+  padding:9px 12px;
+  border-radius:9px;
+  font-size:13px;
+  transition:.2s;
+}
+
+.nav a:hover,
+.nav a.active{
+  background:var(--blue-light);
+  color:var(--blue);
+  font-weight:700;
+}
+
+/* MAIN */
+
+.main{
+  margin-left:280px;
+  padding:55px 6%;
+  max-width:1500px;
+}
+
+/* HERO */
+
+.hero{
+  background:linear-gradient(135deg,#eff6ff,#ffffff);
+  border:1px solid var(--blue-border);
+  border-radius:25px;
+  padding:42px;
+  box-shadow:var(--shadow);
+  position:relative;
+  overflow:hidden;
+}
+
+.hero:after{
+  content:"";
+  position:absolute;
+  width:240px;
+  height:240px;
+  border-radius:50%;
+  background:rgba(37,99,235,.08);
+  right:-80px;
+  top:-100px;
+}
+
+.badges{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:18px;
+}
+
+.badge{
+  padding:5px 10px;
+  border-radius:20px;
+  background:#fff;
+  border:1px solid var(--blue-border);
+  color:var(--blue);
+  font-size:12px;
+  font-weight:700;
+}
+
+.hero h1{
+  font-size:clamp(30px,5vw,52px);
+  line-height:1.15;
+  margin-bottom:14px;
+}
+
+.hero p{
+  color:var(--text-light);
+  max-width:850px;
+  font-size:17px;
+}
+
+/* SEARCH */
+
+.search-box{
+  margin:25px 0;
+}
+
+.search-box input{
+  width:100%;
+  border:1px solid var(--border);
+  background:#fff;
+  padding:15px 18px;
+  border-radius:13px;
+  outline:none;
+  font-size:14px;
+  box-shadow:var(--shadow);
+}
+
+.search-box input:focus{
+  border-color:var(--blue);
+}
+
+/* SECTIONS */
+
+section{
+  margin-top:65px;
+  scroll-margin-top:30px;
+}
+
+.section-title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:15px;
+}
+
+.number{
+  width:35px;
+  height:35px;
+  border-radius:10px;
+  background:var(--blue);
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  font-size:14px;
+}
+
+h2{
+  font-size:28px;
+}
+
+h3{
+  margin:18px 0 9px;
+  font-size:19px;
+}
+
+p{
+  color:var(--text-light);
+  margin:9px 0;
+}
+
+/* CARDS */
+
+.card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:25px;
+  box-shadow:var(--shadow);
+  margin-top:18px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:18px;
+}
+
+.grid3{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+
+.info-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:21px;
+  transition:.25s;
+}
+
+.info-card:hover{
+  transform:translateY(-4px);
+  border-color:var(--blue-border);
+  box-shadow:var(--shadow);
+}
+
+.icon{
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:12px;
+  background:var(--blue-light);
+  color:var(--blue);
+  font-weight:800;
+  margin-bottom:12px;
+}
+
+/* CODE */
+
+.code{
+  position:relative;
+  background:#0f172a;
+  color:#dbeafe;
+  border-radius:15px;
+  padding:22px;
+  margin-top:15px;
+  overflow:auto;
+  font-family:Consolas,Monaco,monospace;
+  font-size:13px;
+  line-height:1.7;
+}
+
+.code button{
+  position:absolute;
+  top:10px;
+  right:10px;
+  border:1px solid #334155;
+  background:#1e293b;
+  color:#fff;
+  padding:6px 10px;
+  border-radius:7px;
+  cursor:pointer;
+  font-size:11px;
+}
+
+.code button:hover{
+  background:#334155;
+}
+
+/* NOTES */
+
+.note{
+  padding:17px 20px;
+  border-radius:13px;
+  margin-top:18px;
+  border-left:4px solid var(--blue);
+  background:var(--blue-light);
+}
+
+.warning{
+  background:var(--orange-light);
+  border-left-color:var(--orange);
+}
+
+.success{
+  background:var(--green-light);
+  border-left-color:var(--green);
+}
+
+.danger{
+  background:var(--red-light);
+  border-left-color:var(--red);
+}
+
+/* FLOW */
+
+.flow{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:10px;
+  margin:25px 0;
+}
+
+.flow-box{
+  min-width:145px;
+  text-align:center;
+  background:#fff;
+  border:1px solid var(--blue-border);
+  border-radius:15px;
+  padding:18px 12px;
+  box-shadow:var(--shadow);
+  animation:float 3s ease-in-out infinite;
+}
+
+.flow-box:nth-child(2){animation-delay:.3s}
+.flow-box:nth-child(3){animation-delay:.6s}
+.flow-box:nth-child(4){animation-delay:.9s}
+.flow-box:nth-child(5){animation-delay:1.2s}
+
+.arrow{
+  color:var(--blue);
+  font-size:22px;
+  font-weight:bold;
+}
+
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-5px)}
+}
+
+/* UPLOAD VISUAL */
+
+.upload-box{
+  border:2px dashed var(--blue-border);
+  border-radius:18px;
+  background:var(--blue-light);
+  padding:35px;
+  text-align:center;
+  margin-top:20px;
+}
+
+.upload-icon{
+  width:65px;
+  height:65px;
+  margin:auto;
+  border-radius:18px;
+  background:white;
+  color:var(--blue);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  box-shadow:var(--shadow);
+}
+
+.upload-box h3{
+  margin-top:15px;
+}
+
+.upload-box p{
+  max-width:500px;
+  margin:8px auto;
+}
+
+/* IMAGE PREVIEW */
+
+.preview{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+  margin-top:20px;
+}
+
+.preview-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:15px;
+  overflow:hidden;
+}
+
+.preview-image{
+  height:130px;
+  background:linear-gradient(135deg,#dbeafe,#eff6ff);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--blue);
+  font-size:35px;
+}
+
+.preview-info{
+  padding:13px;
+}
+
+.preview-info strong{
+  display:block;
+  font-size:13px;
+}
+
+.preview-info span{
+  color:var(--muted);
+  font-size:11px;
+}
+
+/* TABLE */
+
+.table-wrap{
+  overflow-x:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:18px;
+  background:#fff;
+}
+
+th,td{
+  padding:13px;
+  border:1px solid var(--border);
+  text-align:left;
+  font-size:13px;
+}
+
+th{
+  background:var(--blue-light);
+  color:var(--blue-dark);
+}
+
+/* FILE STRUCTURE */
+
+.structure{
+  background:#0f172a;
+  color:#dbeafe;
+  border-radius:15px;
+  padding:22px;
+  font-family:Consolas,monospace;
+  overflow:auto;
+  font-size:13px;
+  line-height:1.8;
+}
+
+/* CHECKLIST */
+
+.checklist{
+  list-style:none;
+  margin-top:12px;
+}
+
+.checklist li{
+  padding:9px 0;
+  border-bottom:1px dashed var(--border);
+}
+
+.checklist li:before{
+  content:"✓";
+  color:var(--green);
+  font-weight:900;
+  margin-right:10px;
+}
+
+/* QUIZ */
+
+.quiz{
+  border:1px solid var(--blue-border);
+  background:#fff;
+  padding:25px;
+  border-radius:17px;
+  margin-top:18px;
+}
+
+.option{
+  display:block;
+  border:1px solid var(--border);
+  padding:12px 15px;
+  border-radius:10px;
+  margin:8px 0;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.option:hover{
+  border-color:var(--blue);
+  background:var(--blue-light);
+}
+
+.option.correct{
+  background:var(--green-light);
+  border-color:var(--green);
+}
+
+.option.wrong{
+  background:var(--red-light);
+  border-color:var(--red);
+}
+
+.quiz-result{
+  margin-top:12px;
+  font-weight:700;
+}
+
+/* REVEAL */
+
+.reveal{
+  opacity:0;
+  transform:translateY(20px);
+  transition:.7s;
+}
+
+.reveal.visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* FOOTER */
+
+.next{
+  margin-top:80px;
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  flex-wrap:wrap;
+}
+
+.next-btn{
+  padding:13px 18px;
+  border-radius:10px;
+  text-decoration:none;
+  border:1px solid var(--blue-border);
+  color:var(--blue);
+  background:white;
+  font-weight:700;
+}
+
+.next-btn.primary{
+  color:#fff;
+  background:var(--blue);
+}
+
+.footer{
+  margin-top:80px;
+  padding:35px;
+  text-align:center;
+  border-top:1px solid var(--border);
+  color:var(--muted);
+}
+
+/* RESPONSIVE */
+
+@media(max-width:900px){
+
+  .sidebar{
+    width:220px;
+  }
+
+  .main{
+    margin-left:220px;
+    padding:35px 4%;
+  }
+
+  .grid,
+  .grid3{
+    grid-template-columns:1fr;
+  }
+
+  .preview{
+    grid-template-columns:1fr;
+  }
+
+}
+
+@media(max-width:650px){
+
+  .sidebar{
+    position:relative;
+    width:100%;
+    height:auto;
+    border-right:0;
+    border-bottom:1px solid var(--border);
+  }
+
+  .nav{
+    max-height:280px;
+    overflow-y:auto;
+  }
+
+  .main{
+    margin-left:0;
+    padding:25px 16px;
+  }
+
+  .hero{
+    padding:28px 22px;
+  }
+
+  .flow{
+    flex-direction:column;
+  }
+
+  .arrow{
+    transform:rotate(90deg);
+  }
+
+}
+</style>
+</head>
+
+<body>
+
+<div class="progress" id="progress"></div>
+
+<aside class="sidebar">
+
+  <div class="brand">
+
+    <div class="logo">Z</div>
+
+    <div>
+      <h2>ZENSUS</h2>
+      <small>LEARNING PLATFORM</small>
+    </div>
+
+  </div>
+
+  <div class="lesson-label">
+    LESSON 12 / 15
+  </div>
+
+  <nav class="nav">
+
+    <a href="#overview">Overview</a>
+    <a href="#concept">What Are Uploads?</a>
+    <a href="#fileimage">File vs Image</a>
+    <a href="#media">MEDIA_ROOT & MEDIA_URL</a>
+    <a href="#model">FileField & ImageField</a>
+    <a href="#migrations">Migrations</a>
+    <a href="#form">Upload Form</a>
+    <a href="#enctype">multipart/form-data</a>
+    <a href="#view">Upload View</a>
+    <a href="#files">request.FILES</a>
+    <a href="#template">Display Uploads</a>
+    <a href="#image">ImageField</a>
+    <a href="#validation">Validation</a>
+    <a href="#multiple">Multiple Files</a>
+    <a href="#flow">Complete Flow</a>
+    <a href="#practice">Mini Project</a>
+    <a href="#security">Security</a>
+    <a href="#mistakes">Common Mistakes</a>
+    <a href="#quiz">Quiz</a>
+    <a href="#takeaway">Takeaway</a>
+
+  </nav>
+
+</aside>
+
+
+<main class="main">
+
+<header class="hero reveal" id="overview">
+
+  <div class="badges">
+    <span class="badge">LESSON 12 OF 15</span>
+    <span class="badge">IMPORTANT</span>
+    <span class="badge">FILE UPLOADS</span>
+    <span class="badge">IMAGE UPLOADS</span>
+  </div>
+
+  <h1>File & Image Uploads</h1>
+
+  <p>
+    Learn how Django receives files from a browser, stores them on the server,
+    saves their paths in the database, validates uploads, and displays uploaded
+    files and images inside templates.
+  </p>
+
+</header>
+
+
+<div class="search-box">
+
+  <input
+    type="text"
+    id="searchInput"
+    placeholder="Search this lesson... e.g. MEDIA_ROOT, ImageField, request.FILES"
+  >
+
+</div>
+
+
+<!-- 01 -->
+
+<section id="concept" class="reveal">
+
+  <div class="section-title">
+    <div class="number">01</div>
+    <h2>What Are File Uploads?</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      A file upload happens when a user selects a file on their device and
+      sends it to a web server through a form.
+    </p>
+
+    <p>
+      Examples include:
+    </p>
+
+    <div class="grid3">
+
+      <div class="info-card">
+
+        <div class="icon">PDF</div>
+
+        <h3>Documents</h3>
+
+        <p>
+          Resumes, certificates, reports and assignments.
+        </p>
+
+      </div>
+
+      <div class="info-card">
+
+        <div class="icon">IMG</div>
+
+        <h3>Images</h3>
+
+        <p>
+          Profile photos, product images and project pictures.
+        </p>
+
+      </div>
+
+      <div class="info-card">
+
+        <div class="icon">ZIP</div>
+
+        <h3>Other Files</h3>
+
+        <p>
+          Archives, spreadsheets and other supported files.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="upload-box">
+
+      <div class="upload-icon">↑</div>
+
+      <h3>Select a File</h3>
+
+      <p>
+        Browser → Django → Storage → Database reference
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 02 -->
+
+<section id="fileimage" class="reveal">
+
+  <div class="section-title">
+    <div class="number">02</div>
+    <h2>FileField vs ImageField</h2>
+  </div>
+
+  <div class="card">
+
+    <div class="table-wrap">
+
+      <table>
+
+        <tr>
+          <th>Field</th>
+          <th>Purpose</th>
+          <th>Example</th>
+        </tr>
+
+        <tr>
+          <td>FileField</td>
+          <td>Stores uploaded files</td>
+          <td>PDF, DOCX, ZIP</td>
+        </tr>
+
+        <tr>
+          <td>ImageField</td>
+          <td>Stores uploaded images</td>
+          <td>JPG, PNG, WebP</td>
+        </tr>
+
+      </table>
+
+    </div>
+
+
+    <div class="note">
+
+      <strong>Important:</strong>
+
+      <code>ImageField</code> requires the Pillow image library because Django
+      uses Pillow for image handling.
+
+    </div>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>pip install Pillow</pre>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 03 -->
+
+<section id="media" class="reveal">
+
+  <div class="section-title">
+    <div class="number">03</div>
+    <h2>MEDIA_ROOT and MEDIA_URL</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      Django uses two important settings for uploaded media:
+      <strong>MEDIA_ROOT</strong> and <strong>MEDIA_URL</strong>.
+    </p>
+
+
+    <div class="grid">
+
+      <div class="info-card">
+
+        <div class="icon">DIR</div>
+
+        <h3>MEDIA_ROOT</h3>
+
+        <p>
+          Defines the filesystem location where uploaded media files are stored.
+        </p>
+
+      </div>
+
+
+      <div class="info-card">
+
+        <div class="icon">URL</div>
+
+        <h3>MEDIA_URL</h3>
+
+        <p>
+          Defines the URL prefix used to access uploaded media during development.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <h3>settings.py</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>MEDIA_URL = "/media/"
+
+MEDIA_ROOT = BASE_DIR / "media"</pre>
+
+    </div>
+
+
+    <div class="structure">
+project/
+│
+├── manage.py
+├── db.sqlite3
+│
+├── media/
+│   ├── documents/
+│   ├── images/
+│   └── profiles/
+│
+└── app/
+    ├── models.py
+    ├── forms.py
+    ├── views.py
+    └── templates/
+    </div>
+
+
+    <div class="note warning">
+
+      <strong>Remember:</strong>
+
+      Media files are different from static files. Static files are application
+      assets such as CSS and JavaScript; media files are generally user-uploaded
+      content.
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 04 -->
+
+<section id="model" class="reveal">
+
+  <div class="section-title">
+    <div class="number">04</div>
+    <h2>Creating FileField and ImageField</h2>
+  </div>
+
+  <div class="card">
+
+    <h3>Example — Student Profile</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>from django.db import models
+
+class Student(models.Model):
+
+    name = models.CharField(
+        max_length=100
+    )
+
+    resume = models.FileField(
+        upload_to="resumes/"
+    )
+
+    profile_image = models.ImageField(
+        upload_to="profiles/"
+    )</pre>
+
+    </div>
+
+
+    <h3>What does upload_to mean?</h3>
+
+    <p>
+      The <code>upload_to</code> value tells Django which directory under
+      <code>MEDIA_ROOT</code> should contain the uploaded file.
+    </p>
+
+
+    <div class="code">
+
+<pre>upload_to="resumes/"</pre>
+
+    </div>
+
+    <p>
+      A file may therefore be stored under:
+    </p>
+
+    <div class="code">
+
+<pre>media/resumes/example.pdf</pre>
+
+    </div>
+
+    <p>
+      An image may be stored under:
+    </p>
+
+    <div class="code">
+
+<pre>media/profiles/student.jpg</pre>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 05 -->
+
+<section id="migrations" class="reveal">
+
+  <div class="section-title">
+    <div class="number">05</div>
+    <h2>Run Migrations</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      After adding FileField or ImageField to a model, create and apply migrations.
+    </p>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>python manage.py makemigrations
+
+python manage.py migrate</pre>
+
+    </div>
+
+
+    <div class="flow">
+
+      <div class="flow-box">
+        <strong>models.py</strong>
+        <br>
+        <small>Change Model</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>makemigrations</strong>
+        <br>
+        <small>Create Migration</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>migrate</strong>
+        <br>
+        <small>Apply Changes</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>Database</strong>
+        <br>
+        <small>Updated Schema</small>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 06 -->
+
+<section id="form" class="reveal">
+
+  <div class="section-title">
+    <div class="number">06</div>
+    <h2>Creating an Upload Form</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      Django forms can be used to create a clean upload interface.
+    </p>
+
+
+    <h3>forms.py</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>from django import forms
+from .models import Student
+
+class StudentForm(forms.ModelForm):
+
+    class Meta:
+
+        model = Student
+
+        fields = [
+            "name",
+            "resume",
+            "profile_image"
+        ]</pre>
+
+    </div>
+
+
+    <h3>Why ModelForm?</h3>
+
+    <p>
+      A ModelForm can generate form fields from a Django model and can save
+      submitted data back to that model.
+    </p>
+
+  </div>
+
+</section>
+
+
+<!-- 07 -->
+
+<section id="enctype" class="reveal">
+
+  <div class="section-title">
+    <div class="number">07</div>
+    <h2>multipart/form-data</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      This is one of the most important details when uploading files.
+    </p>
+
+    <p>
+      The HTML form must use:
+    </p>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>&lt;form method="POST"
+      enctype="multipart/form-data"&gt;
+
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    &lt;button type="submit"&gt;
+        Upload
+    &lt;/button&gt;
+
+&lt;/form&gt;</pre>
+
+    </div>
+
+
+    <div class="note danger">
+
+      <strong>Critical:</strong>
+
+      If you forget
+
+      <code>enctype="multipart/form-data"</code>,
+
+      uploaded files will not be sent correctly with the form.
+
+    </div>
+
+
+    <div class="grid">
+
+      <div class="info-card">
+
+        <div class="icon">POST</div>
+
+        <h3>method="POST"</h3>
+
+        <p>
+          Sends submitted form data to the server.
+        </p>
+
+      </div>
+
+
+      <div class="info-card">
+
+        <div class="icon">FILE</div>
+
+        <h3>multipart/form-data</h3>
+
+        <p>
+          Allows files to be included in the request.
+        </p>
+
+      </div>
+
+
+      <div class="info-card">
+
+        <div class="icon">CSRF</div>
+
+        <h3>{% csrf_token %}</h3>
+
+        <p>
+          Protects the POST form against CSRF attacks.
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 08 -->
+
+<section id="view" class="reveal">
+
+  <div class="section-title">
+    <div class="number">08</div>
+    <h2>Handling Uploads in the View</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      The view receives normal form data through <code>request.POST</code> and
+      uploaded files through <code>request.FILES</code>.
+    </p>
+
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>from django.shortcuts import render
+from .forms import StudentForm
+
+def upload_student(request):
+
+    if request.method == "POST":
+
+        form = StudentForm(
+            request.POST,
+            request.FILES
+        )
+
+        if form.is_valid():
+
+            form.save()
+
+    else:
+
+        form = StudentForm()
+
+    return render(
+        request,
+        "upload.html",
+        {"form": form}
+    )</pre>
+
+    </div>
+
+
+    <div class="flow">
+
+      <div class="flow-box">
+        <strong>request.POST</strong>
+        <br>
+        <small>Text Data</small>
+      </div>
+
+      <div class="arrow">+</div>
+
+      <div class="flow-box">
+        <strong>request.FILES</strong>
+        <br>
+        <small>Uploaded Files</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>ModelForm</strong>
+        <br>
+        <small>Validate</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>form.save()</strong>
+        <br>
+        <small>Store</small>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 09 -->
+
+<section id="files" class="reveal">
+
+  <div class="section-title">
+    <div class="number">09</div>
+    <h2>Understanding request.FILES</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      <code>request.FILES</code> contains uploaded files from the request.
+    </p>
+
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>uploaded_file = request.FILES.get(
+    "resume"
+)</pre>
+
+    </div>
+
+
+    <p>
+      You can inspect basic information about the uploaded file:
+    </p>
+
+    <div class="code">
+
+<pre>uploaded_file.name
+uploaded_file.size
+uploaded_file.content_type</pre>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+      <table>
+
+        <tr>
+          <th>Property</th>
+          <th>Meaning</th>
+        </tr>
+
+        <tr>
+          <td>name</td>
+          <td>Original filename</td>
+        </tr>
+
+        <tr>
+          <td>size</td>
+          <td>File size in bytes</td>
+        </tr>
+
+        <tr>
+          <td>content_type</td>
+          <td>Reported MIME/content type</td>
+        </tr>
+
+      </table>
+
+    </div>
+
+
+    <div class="note warning">
+
+      For important security decisions, do not rely only on a browser-supplied
+      filename or content type. Validate uploads on the server.
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 10 -->
+
+<section id="template" class="reveal">
+
+  <div class="section-title">
+    <div class="number">10</div>
+    <h2>Displaying Uploaded Files</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      After saving an uploaded file, Django provides a URL through the model's
+      file field.
+    </p>
+
+
+    <h3>Template</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>&lt;h2&gt;{{ student.name }}&lt;/h2&gt;
+
+&lt;p&gt;
+    &lt;a href="{{ student.resume.url }}"&gt;
+        Download Resume
+    &lt;/a&gt;
+&lt;/p&gt;</pre>
+
+    </div>
+
+
+    <h3>Image</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>&lt;img
+    src="{{ student.profile_image.url }}"
+    alt="{{ student.name }}"
+&gt;</pre>
+
+    </div>
+
+
+    <div class="preview">
+
+      <div class="preview-card">
+
+        <div class="preview-image">
+          PDF
+        </div>
+
+        <div class="preview-info">
+          <strong>resume.pdf</strong>
+          <span>Download file</span>
+        </div>
+
+      </div>
+
+
+      <div class="preview-card">
+
+        <div class="preview-image">
+          IMG
+        </div>
+
+        <div class="preview-info">
+          <strong>profile.jpg</strong>
+          <span>Display image</span>
+        </div>
+
+      </div>
+
+
+      <div class="preview-card">
+
+        <div class="preview-image">
+          DOC
+        </div>
+
+        <div class="preview-info">
+          <strong>certificate.pdf</strong>
+          <span>Uploaded document</span>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 11 -->
+
+<section id="image" class="reveal">
+
+  <div class="section-title">
+    <div class="number">11</div>
+    <h2>Working with ImageField</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      ImageField is designed specifically for image uploads.
+    </p>
+
+
+    <h3>Model</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>from django.db import models
+
+class Profile(models.Model):
+
+    name = models.CharField(
+        max_length=100
+    )
+
+    photo = models.ImageField(
+        upload_to="profiles/"
+    )</pre>
+
+    </div>
+
+
+    <h3>Template</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>&lt;img
+    src="{{ profile.photo.url }}"
+    alt="{{ profile.name }}"
+    width="200"
+&gt;</pre>
+
+    </div>
+
+
+    <div class="note success">
+
+      <strong>Remember:</strong>
+
+      ImageField stores the path/reference to the uploaded image in the model
+      while the actual image file is stored in the configured media storage.
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 12 -->
+
+<section id="validation" class="reveal">
+
+  <div class="section-title">
+    <div class="number">12</div>
+    <h2>File Upload Validation</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      File uploads should be validated before accepting them.
+    </p>
+
+
+    <div class="grid3">
+
+      <div class="info-card">
+
+        <div class="icon">SIZE</div>
+
+        <h3>File Size</h3>
+
+        <p>
+          Restrict unusually large uploads where appropriate.
+        </p>
+
+      </div>
+
+
+      <div class="info-card">
+
+        <div class="icon">TYPE</div>
+
+        <h3>File Type</h3>
+
+        <p>
+          Allow only file types your application actually needs.
+        </p>
+
+      </div>
+
+
+      <div class="info-card">
+
+        <div class="icon">IMG</div>
+
+        <h3>Image Validation</h3>
+
+        <p>
+          Check dimensions and image validity when necessary.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <h3>Example Form Validation</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>from django import forms
+from .models import Student
+
+class StudentForm(forms.ModelForm):
+
+    class Meta:
+
+        model = Student
+
+        fields = [
+            "name",
+            "resume"
+        ]
+
+    def clean_resume(self):
+
+        file = self.cleaned_data.get(
+            "resume"
+        )
+
+        if file:
+
+            if file.size > 5 * 1024 * 1024:
+
+                raise forms.ValidationError(
+                    "File must be smaller than 5 MB."
+                )
+
+        return file</pre>
+
+    </div>
+
+
+    <div class="note danger">
+
+      <strong>Security:</strong>
+
+      Never blindly trust uploaded files. Validate what your application accepts
+      and configure production storage and serving securely.
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 13 -->
+
+<section id="multiple" class="reveal">
+
+  <div class="section-title">
+    <div class="number">13</div>
+    <h2>Multiple File Uploads</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      A form can allow users to select multiple files using the HTML
+      <code>multiple</code> attribute.
+    </p>
+
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>&lt;input
+    type="file"
+    name="documents"
+    multiple
+&gt;</pre>
+
+    </div>
+
+
+    <p>
+      In the view, multiple uploaded files can be retrieved using:
+    </p>
+
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>files = request.FILES.getlist(
+    "documents"
+)
+
+for file in files:
+
+    print(file.name)</pre>
+
+    </div>
+
+
+    <div class="note">
+
+      Handling multiple uploads usually requires a model design that can store
+      each uploaded file as its own database record, rather than trying to put
+      many files into one FileField.
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 14 -->
+
+<section id="flow" class="reveal">
+
+  <div class="section-title">
+    <div class="number">14</div>
+    <h2>Complete File Upload Flow</h2>
+  </div>
+
+  <div class="card">
+
+    <div class="flow">
+
+      <div class="flow-box">
+        <strong>1. Browser</strong>
+        <br>
+        <small>Select File</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>2. Form</strong>
+        <br>
+        <small>multipart/form-data</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>3. Django</strong>
+        <br>
+        <small>request.FILES</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>4. Validation</strong>
+        <br>
+        <small>Check File</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>5. Storage</strong>
+        <br>
+        <small>Save File</small>
+      </div>
+
+    </div>
+
+
+    <div class="flow">
+
+      <div class="flow-box">
+        <strong>Database</strong>
+        <br>
+        <small>Stores File Reference</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>MEDIA_ROOT</strong>
+        <br>
+        <small>Stores File</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>Template</strong>
+        <br>
+        <small>.url</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>Browser</strong>
+        <br>
+        <small>Display / Download</small>
+      </div>
+
+    </div>
+
+
+    <div class="note success">
+
+      <strong>Memorize this:</strong>
+
+      <br><br>
+
+      Browser → Form → <code>request.FILES</code> → Validation →
+      Storage → Database Reference → Template → Browser
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 15 -->
+
+<section id="practice" class="reveal">
+
+  <div class="section-title">
+    <div class="number">15</div>
+    <h2>Mini Project — ZENSUS Student Profile</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      Build a student profile system where a student can upload a resume and
+      profile image.
+    </p>
+
+
+    <h3>1. Install Pillow</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>pip install Pillow</pre>
+
+    </div>
+
+
+    <h3>2. Model</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>from django.db import models
+
+class Student(models.Model):
+
+    name = models.CharField(
+        max_length=100
+    )
+
+    email = models.EmailField()
+
+    resume = models.FileField(
+        upload_to="resumes/"
+    )
+
+    profile_image = models.ImageField(
+        upload_to="profiles/"
+    )
+
+    def __str__(self):
+
+        return self.name</pre>
+
+    </div>
+
+
+    <h3>3. Settings</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>MEDIA_URL = "/media/"
+
+MEDIA_ROOT = BASE_DIR / "media"</pre>
+
+    </div>
+
+
+    <h3>4. Form</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>from django import forms
+from .models import Student
+
+class StudentForm(forms.ModelForm):
+
+    class Meta:
+
+        model = Student
+
+        fields = [
+            "name",
+            "email",
+            "resume",
+            "profile_image"
+        ]</pre>
+
+    </div>
+
+
+    <h3>5. View</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>from django.shortcuts import render
+from .forms import StudentForm
+
+def upload_student(request):
+
+    if request.method == "POST":
+
+        form = StudentForm(
+            request.POST,
+            request.FILES
+        )
+
+        if form.is_valid():
+
+            student = form.save()
+
+            return render(
+                request,
+                "success.html",
+                {"student": student}
+            )
+
+    else:
+
+        form = StudentForm()
+
+    return render(
+        request,
+        "upload.html",
+        {"form": form}
+    )</pre>
+
+    </div>
+
+
+    <h3>6. URL</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>from django.urls import path
+from . import views
+
+urlpatterns = [
+
+    path(
+        "upload/",
+        views.upload_student,
+        name="upload-student"
+    ),
+
+]</pre>
+
+    </div>
+
+
+    <h3>7. Upload Template</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>&lt;h1&gt;Student Profile&lt;/h1&gt;
+
+&lt;form
+    method="POST"
+    enctype="multipart/form-data"
+&gt;
+
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    &lt;button type="submit"&gt;
+        Upload Profile
+    &lt;/button&gt;
+
+&lt;/form&gt;</pre>
+
+    </div>
+
+
+    <h3>8. Display Template</h3>
+
+    <div class="code">
+
+      <button onclick="copyCode(this)">Copy</button>
+
+<pre>&lt;h1&gt;
+    {{ student.name }}
+&lt;/h1&gt;
+
+&lt;img
+    src="{{ student.profile_image.url }}"
+    width="200"
+&gt;
+
+&lt;p&gt;
+    &lt;a href="{{ student.resume.url }}"&gt;
+        Download Resume
+    &lt;/a&gt;
+&lt;/p&gt;</pre>
+
+    </div>
+
+
+    <div class="note success">
+
+      <strong>Practice challenge:</strong>
+
+      Add a second document field called
+      <code>certificate</code> and allow the student to upload it along with
+      the resume and profile image.
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 16 -->
+
+<section id="security" class="reveal">
+
+  <div class="section-title">
+    <div class="number">16</div>
+    <h2>File Upload Security</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      Upload functionality must be designed carefully because users can submit
+      files to your application.
+    </p>
+
+
+    <div class="grid">
+
+      <div class="info-card">
+
+        <div class="icon">01</div>
+
+        <h3>Limit File Size</h3>
+
+        <p>
+          Set reasonable application and server-side upload limits.
+        </p>
+
+      </div>
+
+
+      <div class="info-card">
+
+        <div class="icon">02</div>
+
+        <h3>Validate File Types</h3>
+
+        <p>
+          Accept only the file formats your application needs.
+        </p>
+
+      </div>
+
+
+      <div class="info-card">
+
+        <div class="icon">03</div>
+
+        <h3>Use Safe Storage</h3>
+
+        <p>
+          Configure production storage carefully instead of exposing arbitrary
+          filesystem paths.
+        </p>
+
+      </div>
+
+
+      <div class="info-card">
+
+        <div class="icon">04</div>
+
+        <h3>Validate Images</h3>
+
+        <p>
+          Make sure uploaded images are actually valid images and apply
+          appropriate dimension or size restrictions.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="note danger">
+
+      Never assume a filename extension alone proves that a file is safe.
+      Production applications should use layered validation and secure storage
+      and serving practices.
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 17 -->
+
+<section id="mistakes" class="reveal">
+
+  <div class="section-title">
+    <div class="number">17</div>
+    <h2>Common Mistakes</h2>
+  </div>
+
+
+  <div class="grid">
+
+    <div class="info-card">
+
+      <div class="icon">01</div>
+
+      <h3>Missing enctype</h3>
+
+      <p>
+        Forgetting <code>multipart/form-data</code> prevents files from being
+        submitted correctly.
+      </p>
+
+    </div>
+
+
+    <div class="info-card">
+
+      <div class="icon">02</div>
+
+      <h3>Missing request.FILES</h3>
+
+      <p>
+        Uploaded files must be passed from <code>request.FILES</code> to the
+        form when handling uploads.
+      </p>
+
+    </div>
+
+
+    <div class="info-card">
+
+      <div class="icon">03</div>
+
+      <h3>Forgetting Pillow</h3>
+
+      <p>
+        ImageField requires Pillow.
+      </p>
+
+    </div>
+
+
+    <div class="info-card">
+
+      <div class="icon">04</div>
+
+      <h3>Wrong Media Settings</h3>
+
+      <p>
+        Check MEDIA_ROOT and MEDIA_URL carefully.
+      </p>
+
+    </div>
+
+
+    <div class="info-card">
+
+      <div class="icon">05</div>
+
+      <h3>Forgetting Migrations</h3>
+
+      <p>
+        Model changes require makemigrations and migrate.
+      </p>
+
+    </div>
+
+
+    <div class="info-card">
+
+      <div class="icon">06</div>
+
+      <h3>Unsafe Uploads</h3>
+
+      <p>
+        Never accept arbitrary files without appropriate validation and
+        production storage controls.
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 18 -->
+
+<section id="quiz" class="reveal">
+
+  <div class="section-title">
+    <div class="number">18</div>
+    <h2>Quick Knowledge Check</h2>
+  </div>
+
+
+  <div class="quiz">
+
+    <h3>Question 1</h3>
+
+    <p>
+      Which model field is commonly used for uploaded documents?
+    </p>
+
+    <div class="option" onclick="answer(this,true)">
+      A. FileField
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      B. TextFieldOnly
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      C. DocumentField
+    </div>
+
+    <div class="quiz-result"></div>
+
+  </div>
+
+
+  <div class="quiz">
+
+    <h3>Question 2</h3>
+
+    <p>
+      Which field is specifically designed for image uploads?
+    </p>
+
+    <div class="option" onclick="answer(this,false)">
+      A. FileField
+    </div>
+
+    <div class="option" onclick="answer(this,true)">
+      B. ImageField
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      C. PhotoField
+    </div>
+
+    <div class="quiz-result"></div>
+
+  </div>
+
+
+  <div class="quiz">
+
+    <h3>Question 3</h3>
+
+    <p>
+      Which setting defines where uploaded media is stored?
+    </p>
+
+    <div class="option" onclick="answer(this,true)">
+      A. MEDIA_ROOT
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      B. STATIC_URL
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      C. FILE_ROOT
+    </div>
+
+    <div class="quiz-result"></div>
+
+  </div>
+
+
+  <div class="quiz">
+
+    <h3>Question 4</h3>
+
+    <p>
+      Where are uploaded files available in a Django request?
+    </p>
+
+    <div class="option" onclick="answer(this,false)">
+      A. request.POST only
+    </div>
+
+    <div class="option" onclick="answer(this,true)">
+      B. request.FILES
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      C. request.MEDIA
+    </div>
+
+    <div class="quiz-result"></div>
+
+  </div>
+
+
+  <div class="quiz">
+
+    <h3>Question 5</h3>
+
+    <p>
+      Which form encoding is required for file uploads?
+    </p>
+
+    <div class="option" onclick="answer(this,false)">
+      A. text/plain
+    </div>
+
+    <div class="option" onclick="answer(this,true)">
+      B. multipart/form-data
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      C. application/file
+    </div>
+
+    <div class="quiz-result"></div>
+
+  </div>
+
+
+  <div class="quiz">
+
+    <h3>Question 6</h3>
+
+    <p>
+      Which library is needed for Django ImageField?
+    </p>
+
+    <div class="option" onclick="answer(this,true)">
+      A. Pillow
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      B. NumPy
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      C. Requests
+    </div>
+
+    <div class="quiz-result"></div>
+
+  </div>
+
+</section>
+
+
+<!-- 19 -->
+
+<section id="takeaway" class="reveal">
+
+  <div class="section-title">
+    <div class="number">19</div>
+    <h2>Lesson Takeaway</h2>
+  </div>
+
+
+  <div class="card">
+
+    <ul class="checklist">
+
+      <li>
+        Django uses FileField for general file uploads.
+      </li>
+
+      <li>
+        Django uses ImageField for image uploads.
+      </li>
+
+      <li>
+        ImageField requires Pillow.
+      </li>
+
+      <li>
+        MEDIA_ROOT defines the filesystem location for uploaded media.
+      </li>
+
+      <li>
+        MEDIA_URL defines the media URL prefix.
+      </li>
+
+      <li>
+        upload_to controls the upload directory beneath the media storage.
+      </li>
+
+      <li>
+        File upload forms need <code>multipart/form-data</code>.
+      </li>
+
+      <li>
+        Uploaded files are available through <code>request.FILES</code>.
+      </li>
+
+      <li>
+        ModelForm can simplify upload form handling.
+      </li>
+
+      <li>
+        Uploaded file URLs can be accessed using the field's <code>.url</code>.
+      </li>
+
+      <li>
+        File size, type and content should be validated appropriately.
+      </li>
+
+      <li>
+        Production applications need secure media storage and serving practices.
+      </li>
+
+    </ul>
+
+
+    <div class="note success">
+
+      <strong>Core concept:</strong>
+
+      <br><br>
+
+      User selects file
+      → multipart/form-data
+      → request.FILES
+      → Form Validation
+      → File Storage
+      → Database File Reference
+      → Template
+      → Browser
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<div class="next">
+
+  <a class="next-btn" href="#overview">
+    ↑ Back to Top
+  </a>
+
+  <a class="next-btn primary" href="#takeaway">
+    Complete Lesson 12 ✓
+  </a>
+
+</div>
+
+
+<footer class="footer">
+
+  <strong>ZENSUS</strong>
+  — Django Course · Lesson 12 of 15
+
+  <br>
+
+  File & Image Uploads
+
+</footer>
+
+</main>
+
+
+<script>
+
+/* Progress */
+
+window.addEventListener("scroll",function(){
+
+  const scrollTop =
+    document.documentElement.scrollTop ||
+    document.body.scrollTop;
+
+  const height =
+    document.documentElement.scrollHeight -
+    document.documentElement.clientHeight;
+
+  const progress =
+    height > 0
+      ? (scrollTop / height) * 100
+      : 0;
+
+  document.getElementById("progress").style.width =
+    progress + "%";
+
+});
+
+
+/* Copy Code */
+
+function copyCode(button){
+
+  const code =
+    button.parentElement.querySelector("pre").innerText;
+
+  navigator.clipboard.writeText(code)
+  .then(function(){
+
+    const oldText =
+      button.innerText;
+
+    button.innerText =
+      "Copied!";
+
+    setTimeout(function(){
+
+      button.innerText =
+        oldText;
+
+    },1500);
+
+  })
+  .catch(function(){
+
+    const area =
+      document.createElement("textarea");
+
+    area.value =
+      code;
+
+    document.body.appendChild(area);
+
+    area.select();
+
+    document.execCommand("copy");
+
+    area.remove();
+
+    button.innerText =
+      "Copied!";
+
+    setTimeout(function(){
+
+      button.innerText =
+        "Copy";
+
+    },1500);
+
+  });
+
+}
+
+
+/* Quiz */
+
+function answer(option,correct){
+
+  const quiz =
+    option.closest(".quiz");
+
+  const options =
+    quiz.querySelectorAll(".option");
+
+  options.forEach(function(item){
+
+    item.style.pointerEvents =
+      "none";
+
+  });
+
+  const result =
+    quiz.querySelector(".quiz-result");
+
+  if(correct){
+
+    option.classList.add("correct");
+
+    result.textContent =
+      "✓ Correct! Well done.";
+
+    result.style.color =
+      "#16a34a";
+
+  }else{
+
+    option.classList.add("wrong");
+
+    result.textContent =
+      "✗ Not quite. Review this section and try again.";
+
+    result.style.color =
+      "#dc2626";
+
+  }
+
+}
+
+
+/* Search */
+
+const searchInput =
+  document.getElementById("searchInput");
+
+searchInput.addEventListener("input",function(){
+
+  const query =
+    this.value.toLowerCase().trim();
+
+  const sections =
+    document.querySelectorAll("section");
+
+  sections.forEach(function(section){
+
+    if(!query){
+
+      section.style.display =
+        "";
+
+      return;
+
+    }
+
+    const text =
+      section.innerText.toLowerCase();
+
+    section.style.display =
+      text.includes(query)
+        ? ""
+        : "none";
+
+  });
+
+});
+
+
+/* Reveal */
+
+const revealObserver =
+  new IntersectionObserver(function(entries){
+
+    entries.forEach(function(entry){
+
+      if(entry.isIntersecting){
+
+        entry.target.classList.add("visible");
+
+      }
+
+    });
+
+  },{
+    threshold:.08
+  });
+
+
+document.querySelectorAll(".reveal")
+.forEach(function(element){
+
+  revealObserver.observe(element);
+
+});
+
+
+/* Active Navigation */
+
+const navLinks =
+  document.querySelectorAll(".nav a");
+
+const sections =
+  document.querySelectorAll("section");
+
+const navObserver =
+  new IntersectionObserver(function(entries){
+
+    entries.forEach(function(entry){
+
+      if(entry.isIntersecting){
+
+        navLinks.forEach(function(link){
+
+          link.classList.remove("active");
+
+          if(
+            link.getAttribute("href") ===
+            "#" + entry.target.id
+          ){
+
+            link.classList.add("active");
+
+          }
+
+        });
+
+      }
+
+    });
+
+  },{
+    rootMargin:"-20% 0px -70% 0px"
+  });
+
+
+sections.forEach(function(section){
+
+  navObserver.observe(section);
+
+});
+
+</script>
+
+</body>
+</html>

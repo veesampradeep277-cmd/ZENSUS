@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENSUS React — Lesson 20: Component Communication</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+    --bg:#f5f7fb;
+    --card:#ffffff;
+    --text:#172033;
+    --muted:#667085;
+    --border:#e5e7eb;
+    --primary:#4f46e5;
+    --secondary:#7c3aed;
+    --dark:#101828;
+    --green:#059669;
+    --orange:#d97706;
+    --red:#dc2626;
+    --blue:#2563eb;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+.topbar{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    height:68px;
+    background:#fff;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 28px;
+    z-index:1000;
+}
+
+.logo{
+    font-size:23px;
+    font-weight:800;
+    color:var(--primary);
+    letter-spacing:-.5px;
+}
+
+.lesson-badge{
+    background:#eef2ff;
+    color:var(--primary);
+    padding:7px 13px;
+    border-radius:20px;
+    font-size:13px;
+    font-weight:700;
+}
+
+.layout{
+    display:flex;
+    padding-top:68px;
+}
+
+.sidebar{
+    width:270px;
+    height:calc(100vh - 68px);
+    position:fixed;
+    left:0;
+    top:68px;
+    background:#fff;
+    border-right:1px solid var(--border);
+    overflow-y:auto;
+    padding:22px 15px;
+}
+
+.sidebar h3{
+    font-size:12px;
+    text-transform:uppercase;
+    color:#98a2b3;
+    letter-spacing:1px;
+    margin:8px 12px 14px;
+}
+
+.sidebar a{
+    display:block;
+    padding:9px 12px;
+    margin:3px 0;
+    border-radius:8px;
+    color:#475467;
+    text-decoration:none;
+    font-size:14px;
+    transition:.2s;
+}
+
+.sidebar a:hover{
+    background:#f2f4f7;
+    color:var(--primary);
+}
+
+.sidebar a.active{
+    background:#eef2ff;
+    color:var(--primary);
+    font-weight:700;
+}
+
+.main{
+    margin-left:270px;
+    width:calc(100% - 270px);
+    padding:35px;
+}
+
+.hero{
+    background:linear-gradient(135deg,#111827,#1e1b4b);
+    color:#fff;
+    border-radius:20px;
+    padding:55px;
+    margin-bottom:30px;
+    overflow:hidden;
+    position:relative;
+}
+
+.hero:after{
+    content:"";
+    position:absolute;
+    width:300px;
+    height:300px;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:50%;
+    right:-100px;
+    top:-100px;
+}
+
+.hero .eyebrow{
+    color:#a5b4fc;
+    font-weight:700;
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+}
+
+.hero h1{
+    font-size:44px;
+    line-height:1.15;
+    margin:12px 0 15px;
+    max-width:800px;
+}
+
+.hero p{
+    color:#cbd5e1;
+    max-width:850px;
+    font-size:17px;
+}
+
+.section{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:32px;
+    margin-bottom:25px;
+}
+
+.section h2{
+    font-size:27px;
+    margin-bottom:12px;
+}
+
+.section h3{
+    font-size:20px;
+    margin:25px 0 10px;
+}
+
+.section p{
+    color:#475467;
+    margin:10px 0;
+}
+
+.info{
+    padding:18px 20px;
+    border-left:4px solid var(--primary);
+    background:#f5f7ff;
+    border-radius:8px;
+    margin:20px 0;
+}
+
+.warning{
+    border-left-color:var(--orange);
+    background:#fff8eb;
+}
+
+.success{
+    border-left-color:var(--green);
+    background:#ecfdf3;
+}
+
+.danger{
+    border-left-color:var(--red);
+    background:#fff1f2;
+}
+
+code{
+    background:#eef2f6;
+    padding:2px 6px;
+    border-radius:5px;
+    color:#be185d;
+    font-family:Consolas,monospace;
+}
+
+pre{
+    background:#0b1220;
+    color:#e5e7eb;
+    padding:22px;
+    border-radius:12px;
+    overflow-x:auto;
+    margin:18px 0;
+    font-family:Consolas,monospace;
+    font-size:14px;
+    line-height:1.65;
+}
+
+.keyword{color:#c4b5fd}
+.string{color:#86efac}
+.comment{color:#94a3b8}
+.function{color:#93c5fd}
+
+.flow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:12px;
+    margin:28px 0;
+}
+
+.node{
+    padding:14px 20px;
+    background:#fff;
+    border:2px solid #c7d2fe;
+    border-radius:12px;
+    font-weight:700;
+    min-width:130px;
+    text-align:center;
+    position:relative;
+}
+
+.node.parent{border-color:#6366f1}
+.node.child{border-color:#8b5cf6}
+.node.state{border-color:#059669}
+
+.arrow{
+    font-size:25px;
+    color:var(--primary);
+    animation:pulseArrow 1.3s infinite;
+}
+
+@keyframes pulseArrow{
+    0%,100%{transform:translateX(0);opacity:.55}
+    50%{transform:translateX(5px);opacity:1}
+}
+
+.tree{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    margin:30px 0;
+}
+
+.tree-row{
+    display:flex;
+    justify-content:center;
+    gap:35px;
+    margin-top:25px;
+}
+
+.tree-node{
+    padding:15px 24px;
+    border-radius:12px;
+    background:#eef2ff;
+    border:2px solid #818cf8;
+    font-weight:700;
+    position:relative;
+}
+
+.tree-line{
+    width:2px;
+    height:25px;
+    background:#a5b4fc;
+}
+
+.compare{
+    width:100%;
+    border-collapse:collapse;
+    margin:20px 0;
+}
+
+.compare th,
+.compare td{
+    border:1px solid var(--border);
+    padding:13px;
+    text-align:left;
+    font-size:14px;
+}
+
+.compare th{
+    background:#f8fafc;
+}
+
+.demo{
+    background:#f8fafc;
+    border:1px solid var(--border);
+    padding:24px;
+    border-radius:14px;
+    margin:20px 0;
+}
+
+.demo h4{
+    margin-bottom:12px;
+}
+
+button{
+    border:0;
+    background:var(--primary);
+    color:#fff;
+    padding:10px 16px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:700;
+    margin:4px;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+.output{
+    background:#111827;
+    color:#d1fae5;
+    padding:15px;
+    border-radius:9px;
+    margin-top:12px;
+    font-family:Consolas,monospace;
+    min-height:45px;
+}
+
+.card-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+    gap:18px;
+    margin:22px 0;
+}
+
+.mini-card{
+    padding:20px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:#fff;
+}
+
+.mini-card h4{
+    margin-bottom:7px;
+}
+
+.badge{
+    display:inline-block;
+    padding:4px 9px;
+    border-radius:15px;
+    background:#eef2ff;
+    color:var(--primary);
+    font-size:12px;
+    font-weight:700;
+}
+
+.mistake{
+    border:1px solid #fecaca;
+    background:#fffafa;
+    border-radius:12px;
+    padding:20px;
+    margin:15px 0;
+}
+
+.mistake strong{
+    color:var(--red);
+}
+
+.quiz-question{
+    padding:20px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    margin:15px 0;
+}
+
+.quiz-question button{
+    background:#fff;
+    color:var(--text);
+    border:1px solid var(--border);
+    display:block;
+    width:100%;
+    text-align:left;
+    margin:7px 0;
+}
+
+.quiz-question button.correct{
+    background:#ecfdf3;
+    border-color:#10b981;
+}
+
+.quiz-question button.wrong{
+    background:#fff1f2;
+    border-color:#ef4444;
+}
+
+.answer{
+    display:none;
+    margin-top:10px;
+    padding:12px;
+    background:#f8fafc;
+    border-radius:8px;
+}
+
+.cheat{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:15px;
+}
+
+.cheat div{
+    padding:18px;
+    border:1px solid var(--border);
+    border-radius:12px;
+}
+
+footer{
+    text-align:center;
+    padding:30px;
+    color:#98a2b3;
+}
+
+@media(max-width:900px){
+    .sidebar{
+        display:none;
+    }
+
+    .main{
+        margin-left:0;
+        width:100%;
+        padding:18px;
+    }
+
+    .hero{
+        padding:35px 25px;
+    }
+
+    .hero h1{
+        font-size:32px;
+    }
+
+    .topbar{
+        padding:0 18px;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="logo">ZENSUS</div>
+    <div class="lesson-badge">React • Lesson 20</div>
+</header>
+
+<div class="layout">
+
+<aside class="sidebar">
+
+<h3>Lesson 20</h3>
+
+<a href="#intro" class="active">Introduction</a> <a href="#parent-child">Parent → Child</a> <a href="#props">Props</a> <a href="#child-parent">Child → Parent</a> <a href="#callback">Callback Functions</a> <a href="#siblings">Sibling Communication</a> <a href="#shared-state">Shared Parent State</a> <a href="#children">children</a> <a href="#context">Context</a> <a href="#events">Event Communication</a> <a href="#dataflow">Data Flow</a> <a href="#mistakes">Common Mistakes</a> <a href="#cheatsheet">Cheat Sheet</a> <a href="#quiz">Quick Quiz</a>
+
+</aside>
+
+<main class="main">
+
+<section class="hero" id="intro">
+
+<div class="eyebrow">ZENSUS React Mastery • Lesson 20</div>
+
+<h1>Component Communication</h1>
+
+<p>
+How React components exchange information using Props, Callback Functions,
+Shared State, children, Context, and Events — from simple parent-child
+communication to scalable application architecture.
+</p>
+
+</section>
+
+<section class="section">
+
+<h2>🧠 Why Component Communication Matters</h2>
+
+<p>
+React applications are built from components. Real applications rarely contain
+isolated components. Components need to exchange information, notify one another,
+share state, and coordinate UI behavior.
+</p>
+
+<div class="flow">
+
+<div class="node parent">Parent</div>
+
+<div class="arrow">→</div>
+
+<div class="node child">Child</div>
+
+<div class="arrow">→</div>
+
+<div class="node child">Another Child</div>
+
+</div>
+
+<p>
+The important question is not simply <b>“How do I send data?”</b>.
+The better question is:
+</p>
+
+<div class="info success">
+<b>“Where should the data live, and which communication mechanism matches
+the relationship between the components?”</b>
+</div>
+
+<div class="card-grid">
+
+<div class="mini-card">
+<span class="badge">Parent → Child</span>
+<h4>Props</h4>
+<p>Pass information downward.</p>
+</div>
+
+<div class="mini-card">
+<span class="badge">Child → Parent</span>
+<h4>Callbacks</h4>
+<p>Child triggers a function supplied by the parent.</p>
+</div>
+
+<div class="mini-card">
+<span class="badge">Sibling ↔ Sibling</span>
+<h4>Shared Parent State</h4>
+<p>Move shared state to their common parent.</p>
+</div>
+
+<div class="mini-card">
+<span class="badge">Deep Tree</span>
+<h4>Context</h4>
+<p>Provide values to descendants without manually passing every level.</p>
+</div>
+
+</div>
+
+</section>
+
+<section class="section" id="parent-child">
+
+<h2>1. Parent → Child Communication</h2>
+
+<p>
+The most fundamental communication pattern in React is passing data from a
+parent component to a child through <b>props</b>.
+</p>
+
+<div class="flow">
+
+<div class="node parent">Parent State</div>
+<div class="arrow">→</div>
+<div class="node">Props</div>
+<div class="arrow">→</div>
+<div class="node child">Child</div>
+
+</div>
+
+<h3>Example</h3>
+
+<pre>
+function App() {
+  const username = "Pradeep";
+
+  return &lt;Profile name={username} /&gt;;
+}
+
+function Profile({ name }) {
+  return &lt;h2&gt;Welcome, {name}&lt;/h2&gt;;
+}
+</pre>
+
+<p>
+Here, <code>App</code> owns the value and passes it to <code>Profile</code>.
+The child receives the value through its props.
+</p>
+
+<div class="info">
+<b>Important:</b> Props are read-only from the receiving component's point
+of view. A child should not mutate its props.
+</div>
+
+</section>
+
+<section class="section" id="props">
+
+<h2>2. Props — The Main Communication Channel</h2>
+
+<p>
+Props are values passed from a parent to a child. They can contain strings,
+numbers, booleans, arrays, objects, functions, React elements, and more.
+</p>
+
+<pre>
+function App() {
+
+  const student = {
+    name: "Pradeep",
+    course: "React"
+  };
+
+  return (
+    &lt;StudentCard
+      name={student.name}
+      course={student.course}
+      active={true}
+    /&gt;
+  );
+}
+
+function StudentCard({ name, course, active }) {
+
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;{name}&lt;/h2&gt;
+      &lt;p&gt;Course: {course}&lt;/p&gt;
+      &lt;p&gt;Status: {active ? "Active" : "Inactive"}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+</pre>
+
+<h3>Props Can Carry Different Types</h3>
+
+<div class="card-grid">
+
+<div class="mini-card">
+<h4>String</h4>
+<code>name="Pradeep"</code>
+</div>
+
+<div class="mini-card">
+<h4>Number</h4>
+<code>age={19}</code>
+</div>
+
+<div class="mini-card">
+<h4>Boolean</h4>
+<code>active={true}</code>
+</div>
+
+<div class="mini-card">
+<h4>Array</h4>
+<code>items={items}</code>
+</div>
+
+<div class="mini-card">
+<h4>Object</h4>
+<code>user={user}</code>
+</div>
+
+<div class="mini-card">
+<h4>Function</h4>
+<code>onSave={handleSave}</code>
+</div>
+
+</div>
+
+</section>
+
+<section class="section" id="child-parent">
+
+<h2>3. Child → Parent Communication</h2>
+
+<p>
+React does not provide a direct “send state upward” mechanism.
+Instead, the parent gives the child a function.
+The child calls that function when something happens.
+</p>
+
+<div class="flow">
+
+<div class="node parent">Parent</div>
+<div class="arrow">↓</div>
+<div class="node">Callback Prop</div>
+<div class="arrow">↓</div>
+<div class="node child">Child</div>
+
+</div>
+
+<div class="flow">
+
+<div class="node child">Child Event</div>
+<div class="arrow">→</div>
+<div class="node">Callback</div>
+<div class="arrow">→</div>
+<div class="node parent">Parent State Update</div>
+
+</div>
+
+<h3>Example</h3>
+
+<pre>
+function App() {
+
+  const [message, setMessage] = useState("");
+
+  function handleMessage(newMessage) {
+    setMessage(newMessage);
+  }
+
+  return (
+    &lt;&gt;
+      &lt;Child onMessage={handleMessage} /&gt;
+      &lt;p&gt;{message}&lt;/p&gt;
+    &lt;/&gt;
+  );
+}
+
+function Child({ onMessage }) {
+
+  return (
+    &lt;button onClick={() =&gt; onMessage("Hello Parent!")}&gt;
+      Send Message
+    &lt;/button&gt;
+  );
+}
+</pre>
+
+<div class="info success">
+<b>Remember:</b> The child does not directly modify the parent's state.
+It requests a change by calling a callback provided by the parent.
+</div>
+
+</section>
+
+<section class="section" id="callback">
+
+<h2>4. Callback Functions</h2>
+
+<p>
+A callback prop is simply a function passed from one component to another so
+that the receiving component can notify the component that owns the logic.
+</p>
+
+<pre>
+function Parent() {
+
+  function handleDelete(id) {
+    console.log("Delete:", id);
+  }
+
+  return &lt;Child onDelete={handleDelete} /&gt;;
+}
+
+function Child({ onDelete }) {
+
+  return (
+    &lt;button onClick={() =&gt; onDelete(42)}&gt;
+      Delete
+    &lt;/button&gt;
+  );
+}
+</pre>
+
+<h3>Data Can Travel Up Through Arguments</h3>
+
+<div class="flow">
+
+<div class="node child">Child Input</div>
+<div class="arrow">→</div>
+<div class="node">Callback(value)</div>
+<div class="arrow">→</div>
+<div class="node parent">Parent State</div>
+
+</div>
+
+<p>
+This is why callbacks are often described as a communication bridge.
+The function travels down as a prop, while information can travel back up
+when the child calls that function with arguments.
+</p>
+
+</section>
+
+<section class="section" id="siblings">
+
+<h2>5. Sibling Communication</h2>
+
+<p>
+Two sibling components should generally not try to communicate by directly
+accessing each other's state.
+Instead, move the shared state to their closest common parent.
+</p>
+
+<div class="tree">
+
+<div class="tree-node">Common Parent</div>
+<div class="tree-line"></div>
+
+<div class="tree-row">
+
+<div class="tree-node">Sibling A</div>
+<div class="tree-node">Sibling B</div>
+
+</div>
+
+</div>
+
+<h3>Architecture</h3>
+
+<pre>
+function App() {
+
+  const [message, setMessage] = useState("");
+
+  return (
+    &lt;&gt;
+      &lt;Sender onSend={setMessage} /&gt;
+      &lt;Receiver message={message} /&gt;
+    &lt;/&gt;
+  );
+}
+</pre>
+
+<div class="info">
+<b>Pattern:</b>
+Sibling A → Common Parent State → Sibling B
+</div>
+
+</section>
+
+<section class="section" id="shared-state">
+
+<h2>6. Shared Parent State</h2>
+
+<p>
+When multiple components need to coordinate around the same piece of information,
+the common parent can own that state.
+</p>
+
+<div class="demo">
+
+<h4>Interactive Sibling Communication</h4>
+
+<button onclick="sendSiblingMessage('Hello from Component A!')">
+Component A → Send
+</button>
+
+<button onclick="sendSiblingMessage('Data updated by Component A')">
+Update Data
+</button>
+
+<div class="output" id="siblingOutput">
+Waiting for Component A...
+</div>
+
+</div>
+
+<pre>
+function App() {
+
+  const [message, setMessage] = useState("");
+
+  return (
+    &lt;Parent&gt;
+      &lt;Sender onSend={setMessage} /&gt;
+      &lt;Receiver message={message} /&gt;
+    &lt;/Parent&gt;
+  );
+}
+</pre>
+
+<p>
+This is the same fundamental principle as <b>lifting state up</b>.
+The state belongs to the lowest common ancestor that needs to coordinate it.
+</p>
+
+</section>
+
+<section class="section">
+
+<h2>7. Communication Through State</h2>
+
+<p>
+State itself is not “sent” between components. Instead, the component that owns
+state renders children with values derived from that state.
+</p>
+
+<div class="flow">
+
+<div class="node state">State Owner</div>
+<div class="arrow">→</div>
+<div class="node">Render</div>
+<div class="arrow">→</div>
+<div class="node child">Child Props</div>
+
+</div>
+
+<p>
+When the owner updates its state, React renders again and the new values flow
+down to the relevant children.
+</p>
+
+</section>
+
+<section class="section" id="children">
+
+<h2>8. The <code>children</code> Prop</h2>
+
+<p>
+React automatically provides content placed between a component's opening and
+closing tags through the special <code>children</code> prop.
+</p>
+
+<pre>
+function Card({ children }) {
+
+  return (
+    &lt;div className="card"&gt;
+      {children}
+    &lt;/div&gt;
+  );
+}
+
+function App() {
+
+  return (
+    &lt;Card&gt;
+      &lt;h2&gt;React Course&lt;/h2&gt;
+      &lt;p&gt;Learn component communication.&lt;/p&gt;
+    &lt;/Card&gt;
+  );
+}
+</pre>
+
+<h3>Visual Model</h3>
+
+<div class="flow">
+
+<div class="node">Content</div>
+<div class="arrow">→</div>
+<div class="node">children</div>
+<div class="arrow">→</div>
+<div class="node">Wrapper Component</div>
+
+</div>
+
+<div class="info success">
+<b>Key idea:</b> <code>children</code> is useful for composition.
+The wrapper decides where the supplied content is rendered.
+</div>
+
+<h3>Real-World Uses</h3>
+
+<div class="card-grid">
+
+<div class="mini-card">
+<h4>Modal</h4>
+<p>Put arbitrary content inside a reusable modal.</p>
+</div>
+
+<div class="mini-card">
+<h4>Card</h4>
+<p>Reuse the same container around different content.</p>
+</div>
+
+<div class="mini-card">
+<h4>Layout</h4>
+<p>Build reusable page structures.</p>
+</div>
+
+<div class="mini-card">
+<h4>Panel</h4>
+<p>Allow consumers to control panel contents.</p>
+</div>
+
+</div>
+
+</section>
+
+<section class="section" id="context">
+
+<h2>9. Context</h2>
+
+<p>
+Context provides a way to make a value available to components deeper in a
+component tree without manually passing that value through every intermediate
+component.
+</p>
+
+<div class="tree">
+
+<div class="tree-node">Context Provider</div>
+<div class="tree-line"></div>
+
+<div class="tree-row">
+
+<div class="tree-node">Layout</div>
+
+</div>
+
+<div class="tree-line"></div>
+
+<div class="tree-row">
+
+<div class="tree-node">Navbar</div>
+<div class="tree-node">Dashboard</div>
+
+</div>
+
+</div>
+
+<p>
+A deeply nested component can read the context value when it is within the
+corresponding provider.
+</p>
+
+<h3>Example</h3>
+
+<pre>
+const ThemeContext = createContext(null);
+
+function App() {
+
+  return (
+    &lt;ThemeContext.Provider value="dark"&gt;
+      &lt;Dashboard /&gt;
+    &lt;/ThemeContext.Provider&gt;
+  );
+}
+
+function Dashboard() {
+  return &lt;Toolbar /&gt;;
+}
+
+function Toolbar() {
+
+  const theme = useContext(ThemeContext);
+
+  return &lt;p&gt;Theme: {theme}&lt;/p&gt;;
+}
+</pre>
+
+<h3>When Context Helps</h3>
+
+<div class="card-grid">
+
+<div class="mini-card">
+<h4>Theme</h4>
+<p>Light/dark theme information.</p>
+</div>
+
+<div class="mini-card">
+<h4>Authentication</h4>
+<p>Current user information available across a tree.</p>
+</div>
+
+<div class="mini-card">
+<h4>Language</h4>
+<p>Application-wide locale or translation configuration.</p>
+</div>
+
+<div class="mini-card">
+<h4>Settings</h4>
+<p>Configuration shared by many descendants.</p>
+</div>
+
+</div>
+
+<div class="info warning">
+<b>Important:</b> Context is not automatically a replacement for every form
+of state management. Use it when many components in a tree need access to
+the same value and prop passing becomes cumbersome.
+</div>
+
+</section>
+
+<section class="section" id="events">
+
+<h2>10. Event Communication</h2>
+
+<p>
+Events are often the trigger that starts communication between components.
+A user interacts with a child, the child invokes a callback, and the owner
+updates state.
+</p>
+
+<div class="flow">
+
+<div class="node">User Click</div>
+<div class="arrow">→</div>
+<div class="node child">Child Event</div>
+<div class="arrow">→</div>
+<div class="node">Callback</div>
+<div class="arrow">→</div>
+<div class="node state">State Update</div>
+<div class="arrow">→</div>
+<div class="node">Re-render</div>
+
+</div>
+
+<h3>Example</h3>
+
+<pre>
+function Parent() {
+
+  const [count, setCount] = useState(0);
+
+  function increase() {
+    setCount(c =&gt; c + 1);
+  }
+
+  return (
+    &lt;&gt;
+      &lt;CounterButton onIncrease={increase} /&gt;
+      &lt;p&gt;Count: {count}&lt;/p&gt;
+    &lt;/&gt;
+  );
+}
+
+function CounterButton({ onIncrease }) {
+
+  return (
+    &lt;button onClick={onIncrease}&gt;
+      Increase
+    &lt;/button&gt;
+  );
+}
+</pre>
+
+<div class="info">
+The child owns the <b>interaction</b>, while the parent owns the
+<b>state</b>.
+</div>
+
+</section>
+
+<section class="section" id="dataflow">
+
+<h2>11. One-Way Data Flow</h2>
+
+<p>
+React follows a one-way data-flow model. Data generally flows from a component
+that owns it down through props to descendants.
+</p>
+
+<div class="flow">
+
+<div class="node state">State</div>
+<div class="arrow">↓</div>
+<div class="node">Parent</div>
+<div class="arrow">↓</div>
+<div class="node">Child</div>
+<div class="arrow">↓</div>
+<div class="node">Grandchild</div>
+
+</div>
+
+<p>
+When a child needs to influence state owned higher in the tree, it uses a
+callback supplied through props.
+</p>
+
+<div class="flow">
+
+<div class="node child">Child Event</div>
+<div class="arrow">↑</div>
+<div class="node">Callback</div>
+<div class="arrow">↑</div>
+<div class="node state">State Owner</div>
+
+</div>
+
+<h3>The Complete Mental Model</h3>
+
+<div class="info success">
+
+<b>
+State Owner → Props Down → User Event → Callback Up → State Update → Re-render → Props Down
+</b>
+
+</div>
+
+<p>
+This pattern gives React applications predictable data flow. Instead of arbitrary
+components changing each other's state directly, ownership remains explicit.
+</p>
+
+</section>
+
+<section class="section">
+
+<h2>12. Props vs Callback vs Context</h2>
+
+<table class="compare">
+
+<tr>
+<th>Mechanism</th>
+<th>Direction / Reach</th>
+<th>Typical Purpose</th>
+</tr>
+
+<tr>
+<td>Props</td>
+<td>Parent → Child</td>
+<td>Pass data/configuration</td>
+</tr>
+
+<tr>
+<td>Callback Props</td>
+<td>Child → Parent interaction</td>
+<td>Notify owner / request state update</td>
+</tr>
+
+<tr>
+<td>Shared Parent State</td>
+<td>Sibling coordination</td>
+<td>Keep related components synchronized</td>
+</tr>
+
+<tr>
+<td>children</td>
+<td>Parent → Component composition</td>
+<td>Inject nested UI/content</td>
+</tr>
+
+<tr>
+<td>Context</td>
+<td>Provider → Descendants</td>
+<td>Avoid repetitive prop passing through deep trees</td>
+</tr>
+
+</table>
+
+</section>
+
+<section class="section">
+
+<h2>13. Complete Communication Architecture</h2>
+
+<div class="tree">
+
+<div class="tree-node">App / State Owner</div>
+<div class="tree-line"></div>
+
+<div class="tree-row">
+
+<div class="tree-node">Header</div>
+<div class="tree-node">Main</div>
+<div class="tree-node">Sidebar</div>
+
+</div>
+
+<div class="tree-line"></div>
+
+<div class="tree-row">
+
+<div class="tree-node">Search</div>
+<div class="tree-node">ProductList</div>
+<div class="tree-node">Cart</div>
+
+</div>
+
+</div>
+
+<p>
+Imagine an e-commerce application:
+</p>
+
+<div class="card-grid">
+
+<div class="mini-card">
+<h4>Search</h4>
+<p>User types a search query.</p>
+</div>
+
+<div class="mini-card">
+<h4>ProductList</h4>
+<p>Receives the current search criteria and displays products.</p>
+</div>
+
+<div class="mini-card">
+<h4>ProductCard</h4>
+<p>Calls an add-to-cart callback.</p>
+</div>
+
+<div class="mini-card">
+<h4>Cart</h4>
+<p>Displays cart data owned by the appropriate state owner.</p>
+</div>
+
+</div>
+
+<div class="info">
+The architecture is based on explicit ownership rather than components
+reaching directly into one another.
+</div>
+
+</section>
+
+<section class="section">
+
+<h2>14. Interactive Communication Simulator</h2>
+
+<div class="demo">
+
+<h4>Parent State</h4>
+
+<p>
+Current message:
+<strong id="parentMessage">Nothing received</strong>
+</p>
+
+<button onclick="childSend('Hello Parent')">
+Child sends "Hello Parent"
+</button>
+
+<button onclick="childSend('React is powerful!')">
+Child sends another value
+</button>
+
+<div class="output" id="communicationLog">
+System: Waiting for child event...
+</div>
+
+</div>
+
+<p>
+Notice the architecture:
+</p>
+
+<div class="flow">
+
+<div class="node child">Child Event</div>
+<div class="arrow">→</div>
+<div class="node">Callback</div>
+<div class="arrow">→</div>
+<div class="node state">Parent State</div>
+<div class="arrow">→</div>
+<div class="node">UI</div>
+
+</div>
+
+</section>
+
+<section class="section">
+
+<h2>15. Practical Example — Shopping Cart</h2>
+
+<pre>
+function App() {
+
+  const [cart, setCart] = useState([]);
+
+  function addToCart(product) {
+    setCart(currentCart =&gt; [
+      ...currentCart,
+      product
+    ]);
+  }
+
+  return (
+    &lt;&gt;
+      &lt;ProductList onAddToCart={addToCart} /&gt;
+      &lt;Cart items={cart} /&gt;
+    &lt;/&gt;
+  );
+}
+
+function ProductList({ onAddToCart }) {
+
+  return (
+    &lt;ProductCard
+      product={{ id: 1, name: "Laptop" }}
+      onAddToCart={onAddToCart}
+    /&gt;
+  );
+}
+
+function ProductCard({ product, onAddToCart }) {
+
+  return (
+    &lt;button onClick={() =&gt; onAddToCart(product)}&gt;
+      Add {product.name}
+    &lt;/button&gt;
+  );
+}
+
+function Cart({ items }) {
+
+  return &lt;p&gt;Items in cart: {items.length}&lt;/p&gt;;
+}
+</pre>
+
+<div class="info success">
+
+<b>Communication chain:</b><br><br>
+
+ProductCard<br>
+↓<br>
+onAddToCart(product)<br>
+↓<br>
+ProductList / Parent callback<br>
+↓<br>
+App updates cart state<br>
+↓<br>
+Cart receives updated items<br>
+↓<br>
+React renders the new UI
+
+</div>
+
+</section>
+
+<section class="section" id="mistakes">
+
+<h2>16. Common Component Communication Mistakes</h2>
+
+<div class="mistake">
+<strong>❌ Mistake 1 — Mutating Props</strong>
+<pre>
+props.name = "New Name";
+</pre>
+<p>
+Props should be treated as read-only by the receiving component.
+</p>
+</div>
+
+<div class="mistake">
+<strong>❌ Mistake 2 — Calling a Callback During Render</strong>
+<pre>
+&lt;button onClick={handleClick()}&gt;
+</pre>
+
+<p>
+This invokes the function immediately. Usually you want to pass the function:
+</p>
+
+<pre>
+&lt;button onClick={handleClick}&gt;
+</pre>
+
+</div>
+
+<div class="mistake">
+<strong>❌ Mistake 3 — Duplicating Shared State</strong>
+<p>
+If two components independently maintain copies of the same concept,
+those values can become inconsistent.
+</p>
+</div>
+
+<div class="mistake">
+<strong>❌ Mistake 4 — Direct Sibling Access</strong>
+<p>
+Sibling components should normally coordinate through their common parent
+rather than trying to access each other's internal state.
+</p>
+</div>
+
+<div class="mistake">
+<strong>❌ Mistake 5 — Using Context for Everything</strong>
+<p>
+Context can reduce prop passing, but excessive Context usage can make
+dependencies harder to see and can cause broader updates than necessary.
+</p>
+</div>
+
+<div class="mistake">
+<strong>❌ Mistake 6 — Making Everything Global</strong>
+<p>
+Keep state local when only one component needs it. Lift it when coordination
+requires it.
+</p>
+</div>
+
+<div class="mistake">
+<strong>❌ Mistake 7 — Confusing Props With State</strong>
+<p>
+Props are inputs received from a parent. State is data managed by a component
+using React state mechanisms.
+</p>
+</div>
+
+</section>
+
+<section class="section">
+
+<h2>17. Communication Decision Guide</h2>
+
+<table class="compare">
+
+<tr>
+<th>Question</th>
+<th>Use</th>
+</tr>
+
+<tr>
+<td>Does a parent need to give data to a child?</td>
+<td>Props</td>
+</tr>
+
+<tr>
+<td>Does a child need to notify its parent?</td>
+<td>Callback prop</td>
+</tr>
+
+<tr>
+<td>Do siblings need synchronized information?</td>
+<td>Shared state in common parent</td>
+</tr>
+
+<tr>
+<td>Do you want reusable nested content?</td>
+<td>children</td>
+</tr>
+
+<tr>
+<td>Do many descendants need the same value?</td>
+<td>Context may help</td>
+</tr>
+
+<tr>
+<td>Only one component needs the state?</td>
+<td>Keep it local</td>
+</tr>
+
+</table>
+
+</section>
+
+<section class="section" id="cheatsheet">
+
+<h2>18. ZENSUS Component Communication Cheat Sheet</h2>
+
+<div class="cheat">
+
+<div>
+<h4>Parent → Child</h4>
+<code>&lt;Child data={data} /&gt;</code>
+</div>
+
+<div>
+<h4>Child → Parent</h4>
+<code>&lt;Child onChange={handleChange} /&gt;</code>
+</div>
+
+<div>
+<h4>Callback With Data</h4>
+<code>onChange(value)</code>
+</div>
+
+<div>
+<h4>Shared State</h4>
+<p>Move state to common parent.</p>
+</div>
+
+<div>
+<h4>Nested Content</h4>
+<code>{children}</code>
+</div>
+
+<div>
+<h4>Deep Tree</h4>
+<p>Consider Context.</p>
+</div>
+
+<div>
+<h4>Core Principle</h4>
+<p>Keep ownership explicit.</p>
+</div>
+
+<div>
+<h4>Data Flow</h4>
+<p>Down through props, upward influence through callbacks.</p>
+</div>
+
+</div>
+
+</section>
+
+<section class="section">
+
+<h2>19. Master Mental Model</h2>
+
+<div class="flow">
+
+<div class="node state">State Owner</div>
+<div class="arrow">↓</div>
+<div class="node">Props</div>
+<div class="arrow">↓</div>
+<div class="node child">Child</div>
+
+</div>
+
+<div class="flow">
+
+<div class="node child">User Event</div>
+<div class="arrow">↑</div>
+<div class="node">Callback</div>
+<div class="arrow">↑</div>
+<div class="node state">State Owner</div>
+
+</div>
+
+<div class="info success">
+
+<h3>Remember this forever:</h3>
+
+<p>
+<b>
+Find the owner → pass data down → let children interact → use callbacks
+to request changes → update the owner's state → React re-renders →
+new data flows down again.
+</b>
+</p>
+
+</div>
+
+</section>
+
+<section class="section" id="quiz">
+
+<h2>20. Quick Quiz</h2>
+
+<div class="quiz-question">
+<p><b>1. What is the standard way to pass data from a parent to a child?</b></p>
+
+<button onclick="answer(this,true,1)">Props</button> <button onclick="answer(this,false,1)">Direct DOM access</button> <button onclick="answer(this,false,1)">Global variables</button> <button onclick="answer(this,false,1)">Sibling state</button>
+
+<div class="answer" id="ans1">
+Props are the standard parent-to-child communication mechanism.
+</div>
+</div>
+
+<div class="quiz-question">
+<p><b>2. How can a child notify a parent that an event occurred?</b></p>
+
+<button onclick="answer(this,false,2)">By directly changing parent state</button> <button onclick="answer(this,true,2)">By calling a callback passed as a prop</button> <button onclick="answer(this,false,2)">By changing the parent's props</button> <button onclick="answer(this,false,2)">By modifying the DOM</button>
+
+<div class="answer" id="ans2">
+The parent passes a callback function and the child invokes it when appropriate.
+</div>
+</div>
+
+<div class="quiz-question">
+<p><b>3. What is a common solution when two siblings need shared state?</b></p>
+
+<button onclick="answer(this,false,3)">Give each sibling duplicate state</button> <button onclick="answer(this,true,3)">Move the state to their common parent</button> <button onclick="answer(this,false,3)">Mutate sibling props</button> <button onclick="answer(this,false,3)">Use direct DOM communication</button>
+
+<div class="answer" id="ans3">
+Shared state can be lifted to the closest common parent that needs to coordinate it.
+</div>
+</div>
+
+<div class="quiz-question">
+<p><b>4. What does the special children prop represent?</b></p>
+
+<button onclick="answer(this,false,4)">Only strings passed to a component</button> <button onclick="answer(this,true,4)">Content nested between a component's opening and closing tags</button> <button onclick="answer(this,false,4)">Only component state</button> <button onclick="answer(this,false,4)">The component's DOM node</button>
+
+<div class="answer" id="ans4">
+The children prop represents the nested React content supplied to the component.
+</div>
+</div>
+
+<div class="quiz-question">
+<p><b>5. What problem can Context help reduce?</b></p>
+
+<button onclick="answer(this,true,5)">Passing the same value through many intermediate components</button> <button onclick="answer(this,false,5)">All React rendering</button> <button onclick="answer(this,false,5)">JavaScript execution</button> <button onclick="answer(this,false,5)">Every form of state management</button>
+
+<div class="answer" id="ans5">
+Context can make values available to descendants without manually forwarding them through every intermediate component.
+</div>
+</div>
+
+<div class="quiz-question">
+<p><b>6. Which statement best describes React's typical data-flow model?</b></p>
+
+<button onclick="answer(this,false,6)">Data randomly moves between components</button> <button onclick="answer(this,true,6)">Data generally flows down through the component tree</button> <button onclick="answer(this,false,6)">Children directly control all parent state</button> <button onclick="answer(this,false,6)">Components communicate only through the DOM</button>
+
+<div class="answer" id="ans6">
+React generally uses one-way data flow, with values moving down through props.
+</div>
+</div>
+
+<div class="quiz-question">
+<p><b>7. What should you generally do when a child needs to request a parent-owned state change?</b></p>
+
+<button onclick="answer(this,false,7)">Mutate the parent's state directly</button> <button onclick="answer(this,true,7)">Call a callback supplied by the parent</button> <button onclick="answer(this,false,7)">Change the parent's props</button> <button onclick="answer(this,false,7)">Create a duplicate state value</button>
+
+<div class="answer" id="ans7">
+A callback gives the child a controlled way to notify the component that owns the state.
+</div>
+</div>
+
+</section>
+
+<section class="section">
+
+<h2>🚀 Lesson 20 Complete</h2>
+
+<p>
+You now have the complete React component communication model:
+</p>
+
+<div class="card-grid">
+
+<div class="mini-card">
+<h4>Props</h4>
+<p>Parent → Child</p>
+</div>
+
+<div class="mini-card">
+<h4>Callbacks</h4>
+<p>Child → Parent interaction</p>
+</div>
+
+<div class="mini-card">
+<h4>Shared State</h4>
+<p>Sibling coordination</p>
+</div>
+
+<div class="mini-card">
+<h4>children</h4>
+<p>Component composition</p>
+</div>
+
+<div class="mini-card">
+<h4>Context</h4>
+<p>Provider → Descendants</p>
+</div>
+
+<div class="mini-card">
+<h4>One-Way Flow</h4>
+<p>Predictable architecture</p>
+</div>
+
+</div>
+
+<div class="info success">
+<b>Next-level React thinking:</b>
+Don't ask only “How can I pass this value?”
+Ask “Which component should own this value, and what is the simplest
+communication mechanism that keeps that ownership clear?”
+</div>
+
+</section>
+
+<footer>
+ZENSUS • Learn. Build. Master.
+</footer>
+
+</main>
+</div>
+
+<script>
+
+function sendSiblingMessage(message){
+    document.getElementById("siblingOutput").textContent =
+        "Parent state updated → " + message;
+}
+
+function childSend(message){
+
+    document.getElementById("parentMessage").textContent = message;
+
+    document.getElementById("communicationLog").textContent =
+        "Child → callback → parent state → UI: " + message;
+}
+
+function answer(button, correct, id){
+
+    const container = button.parentElement;
+
+    container.querySelectorAll("button").forEach(btn=>{
+        btn.disabled = true;
+    });
+
+    if(correct){
+        button.classList.add("correct");
+    }else{
+        button.classList.add("wrong");
+    }
+
+    document.getElementById("ans"+id).style.display="block";
+}
+
+const sections = document.querySelectorAll("section[id]");
+const links = document.querySelectorAll(".sidebar a");
+
+window.addEventListener("scroll",()=>{
+
+    let current="";
+
+    sections.forEach(section=>{
+        const top = section.offsetTop - 120;
+
+        if(window.scrollY >= top){
+            current = section.id;
+        }
+    });
+
+    links.forEach(link=>{
+        link.classList.remove("active");
+
+        if(link.getAttribute("href") === "#"+current){
+            link.classList.add("active");
+        }
+    });
+});
+
+</script>
+
+</body>
+</html>

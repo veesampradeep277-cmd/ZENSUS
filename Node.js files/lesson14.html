@@ -1,0 +1,4541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>ZENSUS | Lesson 14 - API Testing, Deployment & Production</title>
+
+  <meta
+    name="description"
+    content="ZENSUS Node.js Lesson 14 - API Testing, Deployment & Production"
+  />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --cyan: #0891b2;
+      --green: #16a34a;
+      --green-light: #f0fdf4;
+      --orange: #ea580c;
+      --orange-light: #fff7ed;
+      --red: #dc2626;
+      --red-light: #fef2f2;
+      --purple: #7c3aed;
+      --purple-light: #f5f3ff;
+
+      --navy: #0f172a;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --code-bg: #0b1220;
+
+      --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 20px 50px rgba(15, 23, 42, 0.12);
+
+      --sidebar-width: 285px;
+      --topbar-height: 68px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 85px;
+    }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background: #f8fafc;
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* =========================
+       TOP NAVIGATION
+    ========================== */
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--topbar-height);
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 1000;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      font-size: 20px;
+      color: var(--navy);
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #2563eb, #06b6d4);
+      color: white;
+      font-size: 17px;
+      box-shadow: 0 7px 20px rgba(37, 99, 235, 0.25);
+    }
+
+    .lesson-label {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .top-progress {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 190px;
+    }
+
+    .progress-track {
+      width: 130px;
+      height: 7px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #2563eb, #06b6d4);
+      border-radius: inherit;
+      transition: width 0.4s ease;
+    }
+
+    .progress-text {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    /* =========================
+       SIDEBAR
+    ========================== */
+
+    .sidebar {
+      position: fixed;
+      top: var(--topbar-height);
+      left: 0;
+      bottom: 0;
+      width: var(--sidebar-width);
+      background: white;
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 22px 15px 30px;
+      z-index: 900;
+    }
+
+    .sidebar-title {
+      font-size: 11px;
+      font-weight: 800;
+      color: #94a3b8;
+      letter-spacing: 1.3px;
+      text-transform: uppercase;
+      padding: 0 12px 12px;
+    }
+
+    .toc {
+      list-style: none;
+    }
+
+    .toc li {
+      margin-bottom: 3px;
+    }
+
+    .toc a {
+      display: block;
+      padding: 9px 12px;
+      border-radius: 8px;
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 500;
+      transition: 0.2s ease;
+    }
+
+    .toc a:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .toc a.active {
+      background: #eff6ff;
+      color: var(--primary);
+      font-weight: 700;
+      border-left: 3px solid var(--primary);
+    }
+
+    /* =========================
+       MAIN
+    ========================== */
+
+    .main {
+      margin-left: var(--sidebar-width);
+      padding-top: var(--topbar-height);
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: auto;
+      padding: 35px 32px 70px;
+    }
+
+    /* =========================
+       HERO
+    ========================== */
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 90% 20%, rgba(37, 99, 235, 0.18), transparent 30%),
+        radial-gradient(circle at 10% 90%, rgba(6, 182, 212, 0.12), transparent 30%),
+        #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 55px 50px;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 30px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 40px;
+      align-items: center;
+    }
+
+    .lesson-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 13px;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #2563eb;
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 18px;
+      border: 1px solid #dbeafe;
+    }
+
+    .hero h1 {
+      font-size: clamp(32px, 4vw, 54px);
+      line-height: 1.08;
+      letter-spacing: -2px;
+      color: var(--navy);
+      margin-bottom: 18px;
+    }
+
+    .hero h1 span {
+      color: var(--primary);
+    }
+
+    .hero p {
+      color: var(--muted);
+      max-width: 750px;
+      font-size: 16px;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 23px;
+    }
+
+    .meta {
+      padding: 7px 11px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: white;
+      color: #475569;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .hero-visual {
+      min-height: 280px;
+      border-radius: 20px;
+      background: #0f172a;
+      padding: 20px;
+      color: white;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.22);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .server-window {
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 16px;
+      height: 100%;
+      background: rgba(255,255,255,0.025);
+    }
+
+    .window-dots {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .window-dots span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #64748b;
+    }
+
+    .terminal-line {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      margin: 10px 0;
+      opacity: 0;
+      animation: terminalIn 0.6s forwards;
+    }
+
+    .terminal-line:nth-child(2) { animation-delay: .3s; }
+    .terminal-line:nth-child(3) { animation-delay: .7s; }
+    .terminal-line:nth-child(4) { animation-delay: 1.1s; }
+    .terminal-line:nth-child(5) { animation-delay: 1.5s; }
+    .terminal-line:nth-child(6) { animation-delay: 1.9s; }
+
+    .terminal-green {
+      color: #4ade80;
+    }
+
+    .terminal-blue {
+      color: #60a5fa;
+    }
+
+    .terminal-cyan {
+      color: #22d3ee;
+    }
+
+    @keyframes terminalIn {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      from {
+        opacity: 0;
+        transform: translateX(-12px);
+      }
+    }
+
+    /* =========================
+       CONTENT SECTIONS
+    ========================== */
+
+    section {
+      scroll-margin-top: 85px;
+    }
+
+    .section {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .section-number {
+      display: inline-block;
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 7px;
+    }
+
+    .section h2 {
+      color: var(--navy);
+      font-size: 27px;
+      letter-spacing: -0.6px;
+      margin-bottom: 12px;
+    }
+
+    .section h3 {
+      color: var(--navy);
+      font-size: 19px;
+      margin: 25px 0 10px;
+    }
+
+    .section h4 {
+      color: var(--navy);
+      margin: 18px 0 7px;
+    }
+
+    .section p {
+      color: #475569;
+      margin-bottom: 12px;
+    }
+
+    .section ul,
+    .section ol {
+      padding-left: 22px;
+      color: #475569;
+      margin-bottom: 15px;
+    }
+
+    .section li {
+      margin: 7px 0;
+    }
+
+    /* =========================
+       CALLOUTS
+    ========================== */
+
+    .callout {
+      border-radius: 12px;
+      padding: 17px 18px;
+      margin: 20px 0;
+      border-left: 4px solid;
+    }
+
+    .callout strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .callout.info {
+      background: var(--primary-light);
+      border-color: var(--primary);
+    }
+
+    .callout.success {
+      background: var(--green-light);
+      border-color: var(--green);
+    }
+
+    .callout.warning {
+      background: var(--orange-light);
+      border-color: var(--orange);
+    }
+
+    .callout.danger {
+      background: var(--red-light);
+      border-color: var(--red);
+    }
+
+    /* =========================
+       CARDS
+    ========================== */
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .grid.two {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      background: #fff;
+      transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: #bfdbfe;
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 18px;
+      margin-bottom: 13px;
+    }
+
+    .card h3 {
+      margin: 0 0 7px;
+      font-size: 16px;
+    }
+
+    .card p {
+      font-size: 13px;
+      margin: 0;
+    }
+
+    /* =========================
+       TABLE
+    ========================== */
+
+    .table-wrap {
+      overflow-x: auto;
+      margin: 18px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 13px 15px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    th {
+      background: #f8fafc;
+      color: var(--navy);
+      font-weight: 800;
+    }
+
+    td {
+      color: #475569;
+    }
+
+    code.inline {
+      font-family: "JetBrains Mono", monospace;
+      background: #f1f5f9;
+      color: #0f172a;
+      border-radius: 5px;
+      padding: 2px 6px;
+      font-size: 12px;
+    }
+
+    /* =========================
+       CODE
+    ========================== */
+
+    .code-box {
+      background: var(--code-bg);
+      border-radius: 13px;
+      overflow: hidden;
+      margin: 17px 0;
+      box-shadow: 0 12px 30px rgba(15,23,42,.12);
+    }
+
+    .code-header {
+      height: 43px;
+      padding: 0 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #94a3b8;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .code-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .code-dots {
+      display: flex;
+      gap: 5px;
+    }
+
+    .code-dots span {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #475569;
+    }
+
+    .copy-btn {
+      border: 0;
+      background: rgba(255,255,255,.07);
+      color: #cbd5e1;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255,255,255,.14);
+    }
+
+    pre {
+      margin: 0;
+      padding: 20px;
+      overflow-x: auto;
+      color: #dbeafe;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      line-height: 1.75;
+    }
+
+    .output-box {
+      background: #020617;
+      border: 1px solid #1e293b;
+      color: #86efac;
+      border-radius: 10px;
+      padding: 15px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      margin: 12px 0 20px;
+      white-space: pre-wrap;
+    }
+
+    /* =========================
+       FLOW DIAGRAM
+    ========================== */
+
+    .flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 25px 0;
+    }
+
+    .flow-node {
+      min-width: 125px;
+      padding: 15px;
+      text-align: center;
+      border-radius: 12px;
+      border: 1px solid #dbeafe;
+      background: #eff6ff;
+      color: #1e40af;
+      font-weight: 700;
+      font-size: 13px;
+      position: relative;
+    }
+
+    .flow-node small {
+      display: block;
+      color: #64748b;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .flow-arrow {
+      font-size: 20px;
+      color: #94a3b8;
+    }
+
+    /* =========================
+       API TESTER
+    ========================== */
+
+    .api-tester {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      background: white;
+      margin-top: 22px;
+    }
+
+    .tester-header {
+      padding: 15px 17px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .tester-title {
+      font-weight: 800;
+      color: var(--navy);
+    }
+
+    .tester-body {
+      padding: 18px;
+    }
+
+    .request-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 13px;
+    }
+
+    .method-select {
+      width: 110px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      color: var(--primary);
+      font-weight: 800;
+      background: white;
+    }
+
+    .url-input {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      outline: none;
+    }
+
+    .url-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px #dbeafe;
+    }
+
+    .send-btn {
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 18px;
+      background: var(--primary);
+      color: white;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .send-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    .tester-output {
+      margin-top: 15px;
+      border-radius: 11px;
+      padding: 15px;
+      background: #0f172a;
+      color: #cbd5e1;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      min-height: 120px;
+      white-space: pre-wrap;
+    }
+
+    /* =========================
+       STATUS VISUALIZER
+    ========================== */
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .status-card {
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+
+    .status-card:hover,
+    .status-card.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      transform: translateY(-2px);
+    }
+
+    .status-code {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .status-name {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .status-detail {
+      margin-top: 15px;
+      padding: 15px;
+      background: #f8fafc;
+      border-radius: 10px;
+      color: #475569;
+      font-size: 13px;
+      min-height: 50px;
+    }
+
+    /* =========================
+       DEPLOYMENT PIPELINE
+    ========================== */
+
+    .pipeline {
+      margin: 30px 0;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+    }
+
+    .pipeline-step {
+      text-align: center;
+      padding: 16px 8px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: white;
+      position: relative;
+      opacity: .45;
+      transition: .4s ease;
+    }
+
+    .pipeline-step.active {
+      opacity: 1;
+      transform: translateY(-5px);
+      border-color: #93c5fd;
+      box-shadow: 0 10px 25px rgba(37,99,235,.12);
+      background: #eff6ff;
+    }
+
+    .pipeline-number {
+      width: 30px;
+      height: 30px;
+      margin: auto auto 8px;
+      border-radius: 50%;
+      background: #dbeafe;
+      color: var(--primary);
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .pipeline-step strong {
+      display: block;
+      font-size: 11px;
+      color: var(--navy);
+    }
+
+    .pipeline-step span {
+      display: block;
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .run-pipeline {
+      border: 0;
+      border-radius: 9px;
+      padding: 10px 17px;
+      color: white;
+      background: var(--primary);
+      font-weight: 800;
+      cursor: pointer;
+      display: block;
+      margin: 10px auto;
+    }
+
+    /* =========================
+       ARCHITECTURE
+    ========================== */
+
+    .architecture {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin: 25px 0;
+    }
+
+    .arch-box {
+      width: min(560px, 90%);
+      border: 1px solid #bfdbfe;
+      background: #eff6ff;
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+      font-weight: 800;
+      color: #1e40af;
+      transition: .25s;
+    }
+
+    .arch-box:hover {
+      transform: scale(1.015);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .arch-box small {
+      display: block;
+      color: var(--muted);
+      font-weight: 500;
+      margin-top: 3px;
+    }
+
+    .arch-arrow {
+      color: #94a3b8;
+      font-size: 20px;
+    }
+
+    /* =========================
+       CHECKLIST
+    ========================== */
+
+    .checklist {
+      display: grid;
+      gap: 9px;
+      margin-top: 17px;
+    }
+
+    .check-item {
+      display: flex;
+      gap: 11px;
+      align-items: flex-start;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: white;
+      cursor: pointer;
+    }
+
+    .check-item input {
+      margin-top: 5px;
+      accent-color: var(--primary);
+    }
+
+    .check-item.checked {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+
+    .check-item span {
+      font-size: 13px;
+      color: #475569;
+    }
+
+    /* =========================
+       ACCORDION
+    ========================== */
+
+    .accordion {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 9px 0;
+    }
+
+    .accordion button {
+      width: 100%;
+      border: 0;
+      background: white;
+      padding: 16px;
+      text-align: left;
+      font-weight: 700;
+      color: var(--navy);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .accordion button:hover {
+      background: #f8fafc;
+    }
+
+    .accordion-content {
+      display: none;
+      padding: 0 16px 16px;
+      color: #64748b;
+      font-size: 13px;
+      border-top: 1px solid var(--border);
+    }
+
+    .accordion.open .accordion-content {
+      display: block;
+    }
+
+    /* =========================
+       QUIZ
+    ========================== */
+
+    .quiz-question {
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 13px;
+    }
+
+    .quiz-question h4 {
+      margin: 0 0 12px;
+    }
+
+    .quiz-options {
+      display: grid;
+      gap: 7px;
+    }
+
+    .quiz-option {
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      text-align: left;
+      color: #475569;
+      font-size: 13px;
+    }
+
+    .quiz-option:hover {
+      border-color: #93c5fd;
+      background: #eff6ff;
+    }
+
+    .quiz-option.correct {
+      background: #f0fdf4;
+      border-color: #86efac;
+      color: #166534;
+    }
+
+    .quiz-option.wrong {
+      background: #fef2f2;
+      border-color: #fca5a5;
+      color: #991b1b;
+    }
+
+    .quiz-result {
+      padding: 15px;
+      background: #f8fafc;
+      border-radius: 10px;
+      font-weight: 700;
+      margin-top: 12px;
+    }
+
+    /* =========================
+       CHALLENGE
+    ========================== */
+
+    .challenge {
+      background: linear-gradient(135deg, #0f172a, #172554);
+      color: white;
+      border-radius: 18px;
+      padding: 30px;
+      margin-top: 18px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .challenge::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.08);
+      right: -90px;
+      top: -100px;
+    }
+
+    .challenge h3 {
+      color: white;
+      margin-top: 0;
+    }
+
+    .challenge p,
+    .challenge li {
+      color: #cbd5e1;
+    }
+
+    .challenge code {
+      color: #93c5fd;
+    }
+
+    /* =========================
+       NAVIGATION
+    ========================== */
+
+    .lesson-nav {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 30px;
+    }
+
+    .nav-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: white;
+      padding: 18px;
+      transition: .2s;
+    }
+
+    .nav-card:hover {
+      border-color: #93c5fd;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nav-card.next {
+      text-align: right;
+    }
+
+    .nav-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #94a3b8;
+      font-weight: 800;
+      letter-spacing: .7px;
+    }
+
+    .nav-title {
+      margin-top: 5px;
+      font-weight: 800;
+      color: var(--navy);
+    }
+
+    /* =========================
+       COMPLETE BUTTON
+    ========================== */
+
+    .complete-area {
+      margin-top: 25px;
+      padding: 30px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #eff6ff, #ecfeff);
+      border: 1px solid #bfdbfe;
+      text-align: center;
+    }
+
+    .complete-btn {
+      margin-top: 15px;
+      border: 0;
+      background: var(--primary);
+      color: white;
+      padding: 12px 23px;
+      border-radius: 9px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .complete-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .complete-btn.completed {
+      background: var(--green);
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================== */
+
+    @media (max-width: 1050px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .pipeline {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .status-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 850px) {
+      .sidebar {
+        display: none;
+      }
+
+      .main {
+        margin-left: 0;
+      }
+
+      .container {
+        padding: 22px 17px 55px;
+      }
+
+      .hero {
+        padding: 35px 25px;
+      }
+
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .top-progress {
+        min-width: auto;
+      }
+
+      .lesson-label {
+        display: none;
+      }
+    }
+
+    @media (max-width: 650px) {
+      .topbar {
+        padding: 0 13px;
+      }
+
+      .brand {
+        font-size: 17px;
+      }
+
+      .progress-track {
+        width: 80px;
+      }
+
+      .section {
+        padding: 22px 18px;
+      }
+
+      .grid,
+      .grid.two {
+        grid-template-columns: 1fr;
+      }
+
+      .pipeline {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .status-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .request-row {
+        flex-direction: column;
+      }
+
+      .method-select,
+      .send-btn {
+        width: 100%;
+      }
+
+      .lesson-nav {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-card.next {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================
+       TOP BAR
+  ========================== -->
+
+  <header class="topbar">
+    <a href="#" class="brand">
+      <span class="brand-mark">Z</span>
+      <span>ZENSUS</span>
+    </a>
+
+    <div class="lesson-label">
+      Node.js Backend Engineering
+    </div>
+
+    <div class="top-progress">
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <span class="progress-text" id="progressText">0%</span>
+    </div>
+  </header>
+
+
+  <!-- =========================
+       SIDEBAR
+  ========================== -->
+
+  <aside class="sidebar">
+
+    <div class="sidebar-title">
+      Lesson Contents
+    </div>
+
+    <ul class="toc">
+
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#objectives">Learning Objectives</a></li>
+      <li><a href="#api-testing">API Testing</a></li>
+      <li><a href="#testing-methods">Testing Methods</a></li>
+      <li><a href="#http-methods">HTTP Methods</a></li>
+      <li><a href="#status-codes">Status Codes</a></li>
+      <li><a href="#postman">Postman</a></li>
+      <li><a href="#automated-testing">Automated Testing</a></li>
+      <li><a href="#environment">Environment Variables</a></li>
+      <li><a href="#production">Production Preparation</a></li>
+      <li><a href="#architecture">Production Architecture</a></li>
+      <li><a href="#deployment">Deployment Pipeline</a></li>
+      <li><a href="#database-production">Production Database</a></li>
+      <li><a href="#logging">Logging & Monitoring</a></li>
+      <li><a href="#security">Production Security</a></li>
+      <li><a href="#versioning">API Versioning</a></li>
+      <li><a href="#health">Health Checks</a></li>
+      <li><a href="#full-api">Production API Example</a></li>
+      <li><a href="#interactive">Interactive API Lab</a></li>
+      <li><a href="#mistakes">Common Mistakes</a></li>
+      <li><a href="#checklist">Production Checklist</a></li>
+      <li><a href="#interview">Interview Questions</a></li>
+      <li><a href="#quiz">Quiz</a></li>
+      <li><a href="#challenge">Coding Challenge</a></li>
+      <li><a href="#complete">Complete Lesson</a></li>
+
+    </ul>
+
+  </aside>
+
+
+  <!-- =========================
+       MAIN
+  ========================== -->
+
+  <main class="main">
+
+    <div class="container">
+
+
+      <!-- =========================
+           HERO
+      ========================== -->
+
+      <section class="hero" id="overview">
+
+        <div class="hero-grid">
+
+          <div>
+
+            <div class="lesson-badge">
+              LESSON 14
+              <span>•</span>
+              BACKEND ENGINEERING
+            </div>
+
+            <h1>
+              API Testing,
+              <span>Deployment & Production</span>
+            </h1>
+
+            <p>
+              Learn how to test Node.js and Express APIs, automate API tests,
+              configure production environments, deploy backend applications,
+              connect production databases, monitor applications, and prepare
+              an API for real-world production usage.
+            </p>
+
+            <div class="hero-meta">
+              <span class="meta">Node.js</span>
+              <span class="meta">Express.js</span>
+              <span class="meta">REST APIs</span>
+              <span class="meta">Postman</span>
+              <span class="meta">Jest</span>
+              <span class="meta">Supertest</span>
+              <span class="meta">Deployment</span>
+              <span class="meta">Production</span>
+            </div>
+
+          </div>
+
+
+          <div class="hero-visual">
+
+            <div class="server-window">
+
+              <div class="window-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+
+              <div class="terminal-line terminal-blue">
+                $ npm test
+              </div>
+
+              <div class="terminal-line terminal-green">
+                ✓ API tests passed
+              </div>
+
+              <div class="terminal-line terminal-cyan">
+                ✓ Database connected
+              </div>
+
+              <div class="terminal-line terminal-blue">
+                $ npm start
+              </div>
+
+              <div class="terminal-line terminal-green">
+                ✓ Server running
+              </div>
+
+              <div class="terminal-line terminal-cyan">
+                → Production ready
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           OBJECTIVES
+      ========================== -->
+
+      <section class="section" id="objectives">
+
+        <span class="section-number">01 • Learning Objectives</span>
+
+        <h2>What You Will Learn</h2>
+
+        <p>
+          A backend application is not finished when the API works on
+          localhost. A professional application must be tested, configured,
+          secured, deployed, monitored, and maintained.
+        </p>
+
+        <div class="grid">
+
+          <div class="card">
+            <div class="card-icon">🧪</div>
+            <h3>API Testing</h3>
+            <p>
+              Test requests, responses, authentication, validation,
+              errors, and edge cases.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-icon">⚙️</div>
+            <h3>Automation</h3>
+            <p>
+              Write automated API tests using Jest and Supertest.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-icon">🚀</div>
+            <h3>Deployment</h3>
+            <p>
+              Understand how an API moves from localhost to production.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-icon">🔐</div>
+            <h3>Production Security</h3>
+            <p>
+              Protect production APIs using HTTPS, CORS, Helmet,
+              rate limiting, and environment variables.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-icon">📊</div>
+            <h3>Monitoring</h3>
+            <p>
+              Understand logs, health checks, error tracking,
+              and application monitoring.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-icon">🌐</div>
+            <h3>Production Architecture</h3>
+            <p>
+              Understand the complete flow between clients,
+              servers, APIs, and databases.
+            </p>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           API TESTING
+      ========================== -->
+
+      <section class="section" id="api-testing">
+
+        <span class="section-number">02 • API Testing</span>
+
+        <h2>What Is API Testing?</h2>
+
+        <p>
+          API testing is the process of sending requests to an API and
+          checking whether the server returns the expected result.
+        </p>
+
+        <p>
+          Instead of testing only the user interface, API testing directly
+          tests the backend logic, database operations, authentication,
+          validation, error handling, and response structure.
+        </p>
+
+        <div class="callout info">
+          <strong>Simple Definition</strong>
+          API testing means:
+          <b>Send a request → Receive a response → Verify the response.</b>
+        </div>
+
+        <div class="flow">
+
+          <div class="flow-node">
+            Client
+            <small>Request</small>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            Express API
+            <small>Process</small>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            Database
+            <small>Read / Write</small>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            Response
+            <small>JSON</small>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            Test
+            <small>Verify</small>
+          </div>
+
+        </div>
+
+
+        <h3>Why Do We Test APIs?</h3>
+
+        <ul>
+          <li>To verify that endpoints work correctly.</li>
+          <li>To detect bugs before deployment.</li>
+          <li>To verify HTTP status codes.</li>
+          <li>To check response data.</li>
+          <li>To test invalid input.</li>
+          <li>To verify authentication and authorization.</li>
+          <li>To test database operations.</li>
+          <li>To prevent previously fixed bugs from returning.</li>
+        </ul>
+
+      </section>
+
+
+      <!-- =========================
+           TESTING METHODS
+      ========================== -->
+
+      <section class="section" id="testing-methods">
+
+        <span class="section-number">03 • Testing Methods</span>
+
+        <h2>Manual vs Automated API Testing</h2>
+
+        <div class="grid two">
+
+          <div class="card">
+
+            <div class="card-icon">👨‍💻</div>
+
+            <h3>Manual Testing</h3>
+
+            <p>
+              A developer manually sends API requests using tools such as
+              Postman or Thunder Client.
+            </p>
+
+            <h4>Example</h4>
+
+            <p>
+              Send:
+              <code class="inline">GET /api/users</code>
+            </p>
+
+            <p>
+              Then inspect the response manually.
+            </p>
+
+            <strong>Useful for:</strong>
+
+            <ul>
+              <li>Exploration</li>
+              <li>Debugging</li>
+              <li>Quick checks</li>
+              <li>Learning APIs</li>
+            </ul>
+
+          </div>
+
+
+          <div class="card">
+
+            <div class="card-icon">🤖</div>
+
+            <h3>Automated Testing</h3>
+
+            <p>
+              Code automatically sends requests and checks whether
+              the expected results are returned.
+            </p>
+
+            <h4>Example</h4>
+
+            <p>
+              The test automatically verifies:
+            </p>
+
+            <ul>
+              <li>Status code = 200</li>
+              <li>Response contains users</li>
+              <li>Response is JSON</li>
+              <li>Required properties exist</li>
+            </ul>
+
+          </div>
+
+        </div>
+
+
+        <div class="callout success">
+
+          <strong>Professional Workflow</strong>
+
+          Use manual testing while developing and debugging,
+          then use automated tests to repeatedly verify important
+          functionality.
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           HTTP METHODS
+      ========================== -->
+
+      <section class="section" id="http-methods">
+
+        <span class="section-number">04 • HTTP Methods</span>
+
+        <h2>Testing REST API Operations</h2>
+
+        <p>
+          REST APIs commonly use HTTP methods to describe what operation
+          should be performed.
+        </p>
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Purpose</th>
+                <th>Example</th>
+                <th>Typical Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              <tr>
+                <td><b>GET</b></td>
+                <td>Read data</td>
+                <td>/api/users</td>
+                <td>200</td>
+              </tr>
+
+              <tr>
+                <td><b>POST</b></td>
+                <td>Create data</td>
+                <td>/api/users</td>
+                <td>201</td>
+              </tr>
+
+              <tr>
+                <td><b>PUT</b></td>
+                <td>Replace data</td>
+                <td>/api/users/123</td>
+                <td>200</td>
+              </tr>
+
+              <tr>
+                <td><b>PATCH</b></td>
+                <td>Partially update data</td>
+                <td>/api/users/123</td>
+                <td>200</td>
+              </tr>
+
+              <tr>
+                <td><b>DELETE</b></td>
+                <td>Delete data</td>
+                <td>/api/users/123</td>
+                <td>204</td>
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+
+        <h3>Example POST Request</h3>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">
+              <div class="code-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+              request.json
+            </div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>{
+  "name": "Pradeep",
+  "email": "user@example.com"
+}</pre>
+
+        </div>
+
+
+        <h3>Example Response</h3>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">
+              response.json
+            </div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>{
+  "success": true,
+  "message": "User created successfully",
+  "user": {
+    "id": "64abc123",
+    "name": "Pradeep",
+    "email": "user@example.com"
+  }
+}</pre>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           STATUS CODES
+      ========================== -->
+
+      <section class="section" id="status-codes">
+
+        <span class="section-number">05 • HTTP Status Codes</span>
+
+        <h2>Understanding API Status Codes</h2>
+
+        <p>
+          HTTP status codes tell the client what happened to the request.
+        </p>
+
+        <div class="status-grid">
+
+          <div class="status-card" onclick="showStatus(200, this)">
+            <div class="status-code">200</div>
+            <div class="status-name">OK</div>
+          </div>
+
+          <div class="status-card" onclick="showStatus(201, this)">
+            <div class="status-code">201</div>
+            <div class="status-name">Created</div>
+          </div>
+
+          <div class="status-card" onclick="showStatus(204, this)">
+            <div class="status-code">204</div>
+            <div class="status-name">No Content</div>
+          </div>
+
+          <div class="status-card" onclick="showStatus(400, this)">
+            <div class="status-code">400</div>
+            <div class="status-name">Bad Request</div>
+          </div>
+
+          <div class="status-card" onclick="showStatus(401, this)">
+            <div class="status-code">401</div>
+            <div class="status-name">Unauthorized</div>
+          </div>
+
+          <div class="status-card" onclick="showStatus(403, this)">
+            <div class="status-code">403</div>
+            <div class="status-name">Forbidden</div>
+          </div>
+
+          <div class="status-card" onclick="showStatus(404, this)">
+            <div class="status-code">404</div>
+            <div class="status-name">Not Found</div>
+          </div>
+
+          <div class="status-card" onclick="showStatus(409, this)">
+            <div class="status-code">409</div>
+            <div class="status-name">Conflict</div>
+          </div>
+
+          <div class="status-card" onclick="showStatus(429, this)">
+            <div class="status-code">429</div>
+            <div class="status-name">Too Many</div>
+          </div>
+
+          <div class="status-card" onclick="showStatus(500, this)">
+            <div class="status-code">500</div>
+            <div class="status-name">Server Error</div>
+          </div>
+
+        </div>
+
+        <div class="status-detail" id="statusDetail">
+          Click a status code above to understand when it is used.
+        </div>
+
+
+        <div class="callout warning">
+
+          <strong>Important: 401 vs 403</strong>
+
+          <b>401</b> means the client has not successfully authenticated.
+
+          <br><br>
+
+          <b>403</b> means the client is authenticated but does not
+          have permission to perform the operation.
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           POSTMAN
+      ========================== -->
+
+      <section class="section" id="postman">
+
+        <span class="section-number">06 • Postman</span>
+
+        <h2>Testing APIs with Postman</h2>
+
+        <p>
+          Postman is one of the most commonly used tools for manually
+          testing APIs. It allows developers to create requests, send them
+          to servers, inspect responses, organize endpoints into collections,
+          and automate tests.
+        </p>
+
+
+        <h3>Basic Postman Workflow</h3>
+
+        <div class="flow">
+
+          <div class="flow-node">
+            Select Method
+            <small>GET / POST</small>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            Enter URL
+            <small>API endpoint</small>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            Add Data
+            <small>Body / Headers</small>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            Send
+            <small>Request</small>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            Verify
+            <small>Response</small>
+          </div>
+
+        </div>
+
+
+        <h3>Important Postman Features</h3>
+
+        <div class="grid">
+
+          <div class="card">
+            <h3>Collections</h3>
+            <p>
+              Group related API requests together.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Environments</h3>
+            <p>
+              Store variables such as base URLs and tokens.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Variables</h3>
+            <p>
+              Reuse values such as
+              <code class="inline">{{baseUrl}}</code>.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Authorization</h3>
+            <p>
+              Send Bearer tokens, API keys, Basic Auth, etc.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Tests</h3>
+            <p>
+              Automatically verify response conditions.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Runner</h3>
+            <p>
+              Execute multiple requests and tests together.
+            </p>
+          </div>
+
+        </div>
+
+
+        <h3>Example Postman Test</h3>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">
+              Postman Test
+            </div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>pm.test("Status code is 200", function () {
+  pm.response.to.have.status(200);
+});
+
+pm.test("Response is JSON", function () {
+  pm.response.to.be.json;
+});
+
+pm.test("User object exists", function () {
+  const data = pm.response.json();
+
+  pm.expect(data).to.have.property("user");
+});</pre>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           AUTOMATED TESTING
+      ========================== -->
+
+      <section class="section" id="automated-testing">
+
+        <span class="section-number">07 • Automated Testing</span>
+
+        <h2>Jest + Supertest</h2>
+
+        <p>
+          Manual testing is useful, but manually repeating hundreds of
+          requests becomes inefficient. Automated testing solves this problem.
+        </p>
+
+        <h3>Jest</h3>
+
+        <p>
+          Jest is a JavaScript testing framework used to create and execute
+          automated tests.
+        </p>
+
+        <h3>Supertest</h3>
+
+        <p>
+          Supertest allows us to send HTTP requests directly to an Express
+          application during testing.
+        </p>
+
+
+        <h3>Install Testing Packages</h3>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">Terminal</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>npm install --save-dev jest supertest</pre>
+
+        </div>
+
+
+        <h3>Example Test</h3>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">user.test.js</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>const request = require("supertest");
+const app = require("../app");
+
+describe("User API", () => {
+
+  test("GET /api/users should return 200", async () => {
+
+    const response = await request(app)
+      .get("/api/users");
+
+    expect(response.statusCode).toBe(200);
+
+    expect(response.body)
+      .toHaveProperty("users");
+
+  });
+
+});</pre>
+
+        </div>
+
+
+        <h3>Run Tests</h3>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">Terminal</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>npx jest</pre>
+
+        </div>
+
+
+        <div class="output-box">PASS  tests/user.test.js
+
+✓ GET /api/users should return 200
+
+Test Suites: 1 passed
+Tests:       1 passed</div>
+
+
+        <h3>Positive and Negative Tests</h3>
+
+        <div class="grid two">
+
+          <div class="card">
+
+            <h3>Positive Test</h3>
+
+            <p>
+              Verify that valid input produces the expected successful result.
+            </p>
+
+            <p>
+              Example:
+              valid login → <b>200 OK</b>
+            </p>
+
+          </div>
+
+          <div class="card">
+
+            <h3>Negative Test</h3>
+
+            <p>
+              Verify that invalid input is rejected correctly.
+            </p>
+
+            <p>
+              Example:
+              invalid login → <b>401 Unauthorized</b>
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           ENVIRONMENT
+      ========================== -->
+
+      <section class="section" id="environment">
+
+        <span class="section-number">08 • Configuration</span>
+
+        <h2>Environment Variables</h2>
+
+        <p>
+          Applications usually require configuration values that should not
+          be written directly into source code.
+        </p>
+
+        <p>
+          Examples include database URLs, JWT secrets, API keys,
+          ports, and third-party credentials.
+        </p>
+
+
+        <h3>.env File</h3>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">.env</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>PORT=3000
+NODE_ENV=development
+
+MONGODB_URI=mongodb://127.0.0.1:27017/zensus
+
+JWT_SECRET=replace_with_a_strong_random_secret</pre>
+
+        </div>
+
+
+        <h3>Load Environment Variables</h3>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">server.js</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>require("dotenv").config();
+
+const PORT = process.env.PORT || 3000;
+
+console.log(`Server running on port ${PORT}`);</pre>
+
+        </div>
+
+
+        <div class="callout danger">
+
+          <strong>Never Commit Secrets</strong>
+
+          Never upload your real passwords, database credentials,
+          JWT secrets, private keys, or API keys to GitHub.
+
+        </div>
+
+
+        <h3>.gitignore</h3>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">.gitignore</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>node_modules/
+.env
+logs/
+coverage/</pre>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           PRODUCTION
+      ========================== -->
+
+      <section class="section" id="production">
+
+        <span class="section-number">09 • Production Preparation</span>
+
+        <h2>Preparing an API for Production</h2>
+
+        <p>
+          Development environments are designed for fast development.
+          Production environments require additional reliability,
+          security, monitoring, and performance considerations.
+        </p>
+
+
+        <div class="grid">
+
+          <div class="card">
+            <h3>Development</h3>
+            <p>
+              Debugging enabled, local database, frequent code changes.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Testing</h3>
+            <p>
+              Automated tests, controlled test database,
+              repeatable test scenarios.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Production</h3>
+            <p>
+              HTTPS, monitoring, secure secrets, reliable database,
+              optimized configuration.
+            </p>
+          </div>
+
+        </div>
+
+
+        <h3>NODE_ENV</h3>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">Environment Check</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>if (process.env.NODE_ENV === "production") {
+  console.log("Production mode enabled");
+}</pre>
+
+        </div>
+
+
+        <h3>Production Error Handling</h3>
+
+        <p>
+          Detailed internal errors should not be exposed to users.
+          A production API should log the real error internally and
+          return a safe message to the client.
+        </p>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">errorHandler.js</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>function errorHandler(err, req, res, next) {
+
+  console.error(err);
+
+  res.status(500).json({
+    success: false,
+    message: "Internal server error"
+  });
+}
+
+module.exports = errorHandler;</pre>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           ARCHITECTURE
+      ========================== -->
+
+      <section class="section" id="architecture">
+
+        <span class="section-number">10 • Production Architecture</span>
+
+        <h2>How a Production API Works</h2>
+
+        <p>
+          A production API is usually more than a Node.js process.
+          Requests often pass through several layers before reaching
+          application code.
+        </p>
+
+
+        <div class="architecture">
+
+          <div class="arch-box">
+            🌐 Client
+            <small>Browser / Mobile App / Frontend</small>
+          </div>
+
+          <div class="arch-arrow">↓</div>
+
+          <div class="arch-box">
+            🔒 HTTPS
+            <small>Encrypted network communication</small>
+          </div>
+
+          <div class="arch-arrow">↓</div>
+
+          <div class="arch-box">
+            🛡️ Reverse Proxy / Load Balancer
+            <small>Traffic management</small>
+          </div>
+
+          <div class="arch-arrow">↓</div>
+
+          <div class="arch-box">
+            🚀 Node.js + Express
+            <small>Application server</small>
+          </div>
+
+          <div class="arch-arrow">↓</div>
+
+          <div class="arch-box">
+            🔐 Middleware
+            <small>Auth / validation / security</small>
+          </div>
+
+          <div class="arch-arrow">↓</div>
+
+          <div class="arch-box">
+            🧠 Controllers + Services
+            <small>Business logic</small>
+          </div>
+
+          <div class="arch-arrow">↓</div>
+
+          <div class="arch-box">
+            🗄️ Database
+            <small>MongoDB / PostgreSQL / etc.</small>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           DEPLOYMENT
+      ========================== -->
+
+      <section class="section" id="deployment">
+
+        <span class="section-number">11 • Deployment</span>
+
+        <h2>From Localhost to Production</h2>
+
+        <p>
+          Deployment means making your application available on a
+          production server so users can access it over the internet.
+        </p>
+
+
+        <div class="pipeline" id="pipeline">
+
+          <div class="pipeline-step">
+            <div class="pipeline-number">1</div>
+            <strong>Develop</strong>
+            <span>Write API</span>
+          </div>
+
+          <div class="pipeline-step">
+            <div class="pipeline-number">2</div>
+            <strong>Test</strong>
+            <span>Run tests</span>
+          </div>
+
+          <div class="pipeline-step">
+            <div class="pipeline-number">3</div>
+            <strong>Git</strong>
+            <span>Version control</span>
+          </div>
+
+          <div class="pipeline-step">
+            <div class="pipeline-number">4</div>
+            <strong>Build</strong>
+            <span>Prepare app</span>
+          </div>
+
+          <div class="pipeline-step">
+            <div class="pipeline-number">5</div>
+            <strong>Deploy</strong>
+            <span>Production server</span>
+          </div>
+
+          <div class="pipeline-step">
+            <div class="pipeline-number">6</div>
+            <strong>Monitor</strong>
+            <span>Observe system</span>
+          </div>
+
+        </div>
+
+        <button class="run-pipeline" onclick="runPipeline()">
+          ▶ Run Deployment Pipeline
+        </button>
+
+
+        <h3>Typical Deployment Flow</h3>
+
+        <div class="flow">
+
+          <div class="flow-node">
+            Local Project
+            <small>localhost:3000</small>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            Git Repository
+            <small>Version control</small>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            Hosting
+            <small>Cloud server</small>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            Production API
+            <small>HTTPS URL</small>
+          </div>
+
+        </div>
+
+
+        <h3>Production Start Command</h3>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">package.json</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>{
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "test": "jest"
+  }
+}</pre>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           DATABASE
+      ========================== -->
+
+      <section class="section" id="database-production">
+
+        <span class="section-number">12 • Production Database</span>
+
+        <h2>Using a Production Database</h2>
+
+        <p>
+          A production application should not normally depend on a database
+          running only on the developer's personal computer.
+        </p>
+
+        <p>
+          A managed database service such as MongoDB Atlas can provide
+          a hosted MongoDB environment that the deployed application can
+          connect to.
+        </p>
+
+        <h3>Development</h3>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">Local MongoDB</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>mongodb://127.0.0.1:27017/zensus</pre>
+
+        </div>
+
+        <h3>Production</h3>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">Environment Variable</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/zensus</pre>
+
+        </div>
+
+        <div class="callout warning">
+
+          <strong>Never expose the production connection string</strong>
+
+          Treat database connection strings as credentials. Store them
+          as protected environment variables on the deployment platform.
+
+        </div>
+
+
+        <h3>Production Database Considerations</h3>
+
+        <ul>
+          <li>Authentication and access control</li>
+          <li>Backups</li>
+          <li>Connection limits</li>
+          <li>Indexes</li>
+          <li>Monitoring</li>
+          <li>Data recovery</li>
+          <li>Least-privilege database users</li>
+        </ul>
+
+      </section>
+
+
+      <!-- =========================
+           LOGGING
+      ========================== -->
+
+      <section class="section" id="logging">
+
+        <span class="section-number">13 • Monitoring</span>
+
+        <h2>Logging & Monitoring</h2>
+
+        <p>
+          Once an application is deployed, you need a way to understand
+          what is happening inside it.
+        </p>
+
+        <h3>Logging</h3>
+
+        <p>
+          Logging records useful information about application behavior.
+        </p>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">Basic Logging</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>console.log("Server started");
+
+console.log("User login successful");
+
+console.error("Database connection failed");</pre>
+
+        </div>
+
+        <p>
+          In larger applications, structured logging libraries are commonly
+          used instead of relying only on <code class="inline">console.log()</code>.
+        </p>
+
+
+        <h3>What Should Be Monitored?</h3>
+
+        <div class="grid">
+
+          <div class="card">
+            <h3>Availability</h3>
+            <p>
+              Is the API running and reachable?
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Error Rate</h3>
+            <p>
+              How many requests are failing?
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Latency</h3>
+            <p>
+              How long are API requests taking?
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>CPU</h3>
+            <p>
+              Is the server using excessive CPU?
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Memory</h3>
+            <p>
+              Is memory usage increasing unexpectedly?
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Database</h3>
+            <p>
+              Are database connections and queries healthy?
+            </p>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           SECURITY
+      ========================== -->
+
+      <section class="section" id="security">
+
+        <span class="section-number">14 • Production Security</span>
+
+        <h2>Production Security Checklist</h2>
+
+        <p>
+          A working API is not automatically a secure API. Production
+          security requires multiple layers of protection.
+        </p>
+
+
+        <h3>Helmet</h3>
+
+        <p>
+          Helmet helps configure several security-related HTTP headers.
+        </p>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">Install</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>npm install helmet</pre>
+
+        </div>
+
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">server.js</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>const helmet = require("helmet");
+
+app.use(helmet());</pre>
+
+        </div>
+
+
+        <h3>Rate Limiting</h3>
+
+        <p>
+          Rate limiting restricts how frequently clients can make requests.
+          It is particularly useful for authentication and other sensitive
+          endpoints.
+        </p>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">Install</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>npm install express-rate-limit</pre>
+
+        </div>
+
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">Rate Limiter</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>const rateLimit = require("express-rate-limit");
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  message: {
+    message: "Too many login attempts. Try again later."
+  }
+});
+
+app.use("/api/auth/login", loginLimiter);</pre>
+
+        </div>
+
+
+        <h3>CORS</h3>
+
+        <p>
+          Cross-Origin Resource Sharing controls which browser origins
+          are allowed to make cross-origin requests.
+        </p>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">Example</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>const cors = require("cors");
+
+app.use(cors({
+  origin: "https://your-frontend.example"
+}));</pre>
+
+        </div>
+
+
+        <div class="callout danger">
+
+          <strong>Production Rule</strong>
+
+          Avoid blindly allowing every origin with permissive CORS
+          configuration. Configure allowed origins according to your
+          application architecture.
+
+        </div>
+
+
+        <h3>HTTPS</h3>
+
+        <p>
+          HTTPS encrypts communication between the client and server.
+          Production applications should use HTTPS so credentials,
+          tokens, and application data are protected while traveling
+          across the network.
+        </p>
+
+      </section>
+
+
+      <!-- =========================
+           VERSIONING
+      ========================== -->
+
+      <section class="section" id="versioning">
+
+        <span class="section-number">15 • API Versioning</span>
+
+        <h2>API Versioning</h2>
+
+        <p>
+          APIs evolve over time. Changing an existing response structure
+          can break older clients.
+        </p>
+
+        <p>
+          API versioning allows different versions to coexist while
+          clients migrate.
+        </p>
+
+
+        <h3>Example</h3>
+
+        <div class="flow">
+
+          <div class="flow-node">
+            /api/v1/users
+            <small>Older API</small>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            /api/v2/users
+            <small>New API</small>
+          </div>
+
+        </div>
+
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">Express Routes</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>app.use("/api/v1/users", userRoutesV1);
+
+app.use("/api/v2/users", userRoutesV2);</pre>
+
+        </div>
+
+
+        <div class="callout info">
+
+          <strong>Why Version?</strong>
+
+          Versioning provides a controlled way to introduce breaking
+          changes without immediately breaking existing clients.
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           HEALTH
+      ========================== -->
+
+      <section class="section" id="health">
+
+        <span class="section-number">16 • Health Checks</span>
+
+        <h2>Health Check Endpoint</h2>
+
+        <p>
+          A health-check endpoint gives monitoring systems and deployment
+          infrastructure a simple way to determine whether the application
+          is running.
+        </p>
+
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">GET /health</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>app.get("/health", (req, res) => {
+
+  res.status(200).json({
+    status: "ok",
+    service: "zensus-api",
+    timestamp: new Date().toISOString()
+  });
+
+});</pre>
+
+        </div>
+
+
+        <h3>Example Response</h3>
+
+        <div class="output-box">{
+  "status": "ok",
+  "service": "zensus-api",
+  "timestamp": "2026-09-20T09:00:00.000Z"
+}</div>
+
+
+        <div class="callout success">
+
+          <strong>Why Health Checks Matter</strong>
+
+          If a deployment platform or monitoring system cannot reach
+          the health endpoint, it can detect that the application may
+          be unavailable.
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           FULL API
+      ========================== -->
+
+      <section class="section" id="full-api">
+
+        <span class="section-number">17 • Production Example</span>
+
+        <h2>Production-Style Express API</h2>
+
+        <p>
+          The following example combines several concepts from this lesson:
+          environment configuration, Express, security middleware,
+          validation, health checks, error handling, and API routes.
+        </p>
+
+
+        <h3>Install Dependencies</h3>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">Terminal</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>npm init -y
+
+npm install express dotenv helmet cors
+
+npm install express-rate-limit</pre>
+
+        </div>
+
+
+        <h3>server.js</h3>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">server.js</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>require("dotenv").config();
+
+const express = require("express");
+const helmet = require("helmet");
+const cors = require("cors");
+const rateLimit = require("express-rate-limit");
+
+const app = express();
+
+const PORT = process.env.PORT || 3000;
+
+
+/* -------------------------
+   Security Middleware
+-------------------------- */
+
+app.use(helmet());
+
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:5173"
+}));
+
+
+/* -------------------------
+   Request Parsing
+-------------------------- */
+
+app.use(express.json({
+  limit: "1mb"
+}));
+
+
+/* -------------------------
+   Rate Limiting
+-------------------------- */
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100
+});
+
+app.use("/api", apiLimiter);
+
+
+/* -------------------------
+   Health Check
+-------------------------- */
+
+app.get("/health", (req, res) => {
+
+  res.status(200).json({
+    status: "ok",
+    service: "zensus-api",
+    timestamp: new Date().toISOString()
+  });
+
+});
+
+
+/* -------------------------
+   Example API
+-------------------------- */
+
+app.get("/api/users", (req, res) => {
+
+  res.status(200).json({
+    success: true,
+    users: []
+  });
+
+});
+
+
+app.post("/api/users", (req, res) => {
+
+  const { name, email } = req.body;
+
+  if (!name || !email) {
+
+    return res.status(400).json({
+      success: false,
+      message: "Name and email are required"
+    });
+
+  }
+
+  res.status(201).json({
+    success: true,
+    message: "User created",
+    user: {
+      name,
+      email
+    }
+  });
+
+});
+
+
+/* -------------------------
+   404 Handler
+-------------------------- */
+
+app.use((req, res) => {
+
+  res.status(404).json({
+    success: false,
+    message: "Route not found"
+  });
+
+});
+
+
+/* -------------------------
+   Global Error Handler
+-------------------------- */
+
+app.use((err, req, res, next) => {
+
+  console.error(err);
+
+  res.status(500).json({
+    success: false,
+    message: "Internal server error"
+  });
+
+});
+
+
+/* -------------------------
+   Start Server
+-------------------------- */
+
+app.listen(PORT, () => {
+
+  console.log(
+    `Server running on port ${PORT}`
+  );
+
+});</pre>
+
+        </div>
+
+
+        <h3>Run the API</h3>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">Terminal</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>node server.js</pre>
+
+        </div>
+
+
+        <div class="output-box">Server running on port 3000</div>
+
+
+        <h3>Test Health Endpoint</h3>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">Browser / Postman</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>GET http://localhost:3000/health</pre>
+
+        </div>
+
+
+        <h3>Test User Endpoint</h3>
+
+        <div class="code-box">
+
+          <div class="code-header">
+            <div class="code-title">Postman</div>
+
+            <button class="copy-btn" onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+<pre>POST http://localhost:3000/api/users
+
+Content-Type: application/json
+
+{
+  "name": "Pradeep",
+  "email": "user@example.com"
+}</pre>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           INTERACTIVE API LAB
+      ========================== -->
+
+      <section class="section" id="interactive">
+
+        <span class="section-number">18 • Interactive Lab</span>
+
+        <h2>API Request Simulator</h2>
+
+        <p>
+          This simulator demonstrates the basic structure of an API request.
+          It does not send a real network request. It is a safe local
+          visualization for understanding request and response behavior.
+        </p>
+
+
+        <div class="api-tester">
+
+          <div class="tester-header">
+            <div class="tester-title">
+              ZENSUS API Tester
+            </div>
+
+            <span class="meta">Simulation</span>
+          </div>
+
+          <div class="tester-body">
+
+            <div class="request-row">
+
+              <select id="methodSelect" class="method-select">
+
+                <option>GET</option>
+                <option>POST</option>
+                <option>PUT</option>
+                <option>PATCH</option>
+                <option>DELETE</option>
+
+              </select>
+
+              <input
+                id="urlInput"
+                class="url-input"
+                value="/api/users"
+              />
+
+              <button class="send-btn" onclick="simulateRequest()">
+                Send
+              </button>
+
+            </div>
+
+            <div class="tester-output" id="testerOutput">
+Click "Send" to simulate an API request...
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           COMMON MISTAKES
+      ========================== -->
+
+      <section class="section" id="mistakes">
+
+        <span class="section-number">19 • Common Mistakes</span>
+
+        <h2>Common API Testing & Deployment Mistakes</h2>
+
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            Testing only successful requests
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            <p>
+              Production APIs must also be tested with invalid input,
+              missing fields, unauthorized requests, nonexistent resources,
+              duplicate records, and unexpected conditions.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            Hardcoding production secrets
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            <p>
+              Database passwords, JWT secrets, and API keys should not be
+              hardcoded into source files. Use environment configuration
+              and protected deployment secrets.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            No automated tests
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            <p>
+              If important functionality is tested only manually,
+              regressions can easily be missed after future changes.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            Using localhost database in production
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            <p>
+              A deployed application cannot normally use a database that
+              exists only on your development machine. Configure a
+              production-accessible database.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            Returning internal errors to clients
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            <p>
+              Stack traces and internal implementation details should not
+              normally be exposed to end users in production.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            No monitoring after deployment
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            <p>
+              Deployment is not the end of the process. Applications need
+              logs, health checks, monitoring, alerting, and maintenance.
+            </p>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           CHECKLIST
+      ========================== -->
+
+      <section class="section" id="checklist">
+
+        <span class="section-number">20 • Production Checklist</span>
+
+        <h2>Production Readiness Checklist</h2>
+
+        <p>
+          Select each item as you understand or complete it.
+        </p>
+
+
+        <div class="checklist">
+
+          <label class="check-item">
+            <input type="checkbox" onchange="updateChecklist(this)">
+            <span>API endpoints have been manually tested.</span>
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox" onchange="updateChecklist(this)">
+            <span>Automated API tests are available.</span>
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox" onchange="updateChecklist(this)">
+            <span>Invalid input is handled correctly.</span>
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox" onchange="updateChecklist(this)">
+            <span>Authentication and authorization are tested.</span>
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox" onchange="updateChecklist(this)">
+            <span>Secrets are stored outside source code.</span>
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox" onchange="updateChecklist(this)">
+            <span>.env is included in .gitignore.</span>
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox" onchange="updateChecklist(this)">
+            <span>Production database is configured securely.</span>
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox" onchange="updateChecklist(this)">
+            <span>HTTPS is enabled in production.</span>
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox" onchange="updateChecklist(this)">
+            <span>CORS is explicitly configured.</span>
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox" onchange="updateChecklist(this)">
+            <span>Security headers are configured.</span>
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox" onchange="updateChecklist(this)">
+            <span>Rate limiting is configured where appropriate.</span>
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox" onchange="updateChecklist(this)">
+            <span>Health-check endpoint exists.</span>
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox" onchange="updateChecklist(this)">
+            <span>Application logs are available.</span>
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox" onchange="updateChecklist(this)">
+            <span>Database backups and recovery are considered.</span>
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox" onchange="updateChecklist(this)">
+            <span>Production API has been tested after deployment.</span>
+          </label>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           INTERVIEW
+      ========================== -->
+
+      <section class="section" id="interview">
+
+        <span class="section-number">21 • Interview Preparation</span>
+
+        <h2>Important Interview Questions</h2>
+
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            1. What is API testing?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            <p>
+              API testing verifies whether an API correctly processes
+              requests and returns the expected responses.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            2. What is the difference between manual and automated testing?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            <p>
+              Manual testing is performed by a person using a tool.
+              Automated testing uses code to execute and verify tests
+              repeatedly.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            3. What is Postman?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            <p>
+              Postman is an API development and testing tool used to create
+              requests, inspect responses, organize collections, and run
+              API tests.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            4. What is Jest?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            <p>
+              Jest is a JavaScript testing framework used to create and
+              execute automated tests.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            5. What is Supertest?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            <p>
+              Supertest is a library commonly used to test HTTP servers
+              and Express applications by sending requests programmatically.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            6. What is deployment?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            <p>
+              Deployment is the process of making an application available
+              in an environment where users or other systems can access it.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            7. Why are environment variables important?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            <p>
+              They keep environment-specific configuration and sensitive
+              values outside the application source code.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            8. What is CORS?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            <p>
+              CORS is a browser security mechanism that controls which
+              origins may make cross-origin requests to a server.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            9. Why use HTTPS?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            <p>
+              HTTPS encrypts communication between clients and servers,
+              helping protect credentials and application data during
+              network transmission.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            10. Why is monitoring important after deployment?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            <p>
+              Monitoring helps detect failures, increased latency,
+              abnormal resource usage, database problems, and other
+              production issues.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            11. What is a health-check endpoint?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            <p>
+              It is a lightweight endpoint used to indicate whether
+              an application is running and reachable.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="accordion">
+
+          <button onclick="toggleAccordion(this)">
+            12. Why should APIs be versioned?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            <p>
+              Versioning allows an API to evolve while reducing the risk
+              of breaking existing clients.
+            </p>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           QUIZ
+      ========================== -->
+
+      <section class="section" id="quiz">
+
+        <span class="section-number">22 • Knowledge Check</span>
+
+        <h2>Lesson Quiz</h2>
+
+        <p>
+          Test your understanding of API testing, deployment,
+          and production engineering.
+        </p>
+
+
+        <div class="quiz-question">
+
+          <h4>1. Which HTTP method is normally used to create a resource?</h4>
+
+          <div class="quiz-options">
+
+            <button class="quiz-option" onclick="answerQuiz(this, false)">
+              GET
+            </button>
+
+            <button class="quiz-option" onclick="answerQuiz(this, true)">
+              POST
+            </button>
+
+            <button class="quiz-option" onclick="answerQuiz(this, false)">
+              DELETE
+            </button>
+
+            <button class="quiz-option" onclick="answerQuiz(this, false)">
+              OPTIONS
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="quiz-question">
+
+          <h4>2. Which status code means "Created"?</h4>
+
+          <div class="quiz-options">
+
+            <button class="quiz-option" onclick="answerQuiz(this, false)">
+              200
+            </button>
+
+            <button class="quiz-option" onclick="answerQuiz(this, true)">
+              201
+            </button>
+
+            <button class="quiz-option" onclick="answerQuiz(this, false)">
+              404
+            </button>
+
+            <button class="quiz-option" onclick="answerQuiz(this, false)">
+              500
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="quiz-question">
+
+          <h4>3. Which tool is commonly used for manual API testing?</h4>
+
+          <div class="quiz-options">
+
+            <button class="quiz-option" onclick="answerQuiz(this, true)">
+              Postman
+            </button>
+
+            <button class="quiz-option" onclick="answerQuiz(this, false)">
+              MongoDB
+            </button>
+
+            <button class="quiz-option" onclick="answerQuiz(this, false)">
+              Mongoose
+            </button>
+
+            <button class="quiz-option" onclick="answerQuiz(this, false)">
+              npm-cache
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="quiz-question">
+
+          <h4>4. Why should .env normally not be committed to Git?</h4>
+
+          <div class="quiz-options">
+
+            <button class="quiz-option" onclick="answerQuiz(this, false)">
+              It makes JavaScript slower
+            </button>
+
+            <button class="quiz-option" onclick="answerQuiz(this, true)">
+              It may contain sensitive secrets
+            </button>
+
+            <button class="quiz-option" onclick="answerQuiz(this, false)">
+              Node.js cannot read it
+            </button>
+
+            <button class="quiz-option" onclick="answerQuiz(this, false)">
+              Express does not support it
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="quiz-question">
+
+          <h4>5. What is the purpose of a health-check endpoint?</h4>
+
+          <div class="quiz-options">
+
+            <button class="quiz-option" onclick="answerQuiz(this, true)">
+              Check whether the application is reachable
+            </button>
+
+            <button class="quiz-option" onclick="answerQuiz(this, false)">
+              Delete the database
+            </button>
+
+            <button class="quiz-option" onclick="answerQuiz(this, false)">
+              Encrypt passwords
+            </button>
+
+            <button class="quiz-option" onclick="answerQuiz(this, false)">
+              Create users
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="quiz-result" id="quizResult">
+          Score: 0 / 5
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           CODING CHALLENGE
+      ========================== -->
+
+      <section class="section" id="challenge">
+
+        <span class="section-number">23 • Practical Challenge</span>
+
+        <h2>Build a Production-Ready API</h2>
+
+        <div class="challenge">
+
+          <h3>🚀 ZENSUS Backend Challenge</h3>
+
+          <p>
+            Build a small Express API and prepare it for production.
+          </p>
+
+          <h4>Requirements</h4>
+
+          <ol>
+            <li>Create a Node.js + Express application.</li>
+            <li>Add a <code>/health</code> endpoint.</li>
+            <li>Create <code>GET /api/users</code>.</li>
+            <li>Create <code>POST /api/users</code>.</li>
+            <li>Validate required request fields.</li>
+            <li>Return correct HTTP status codes.</li>
+            <li>Add centralized error handling.</li>
+            <li>Add Helmet.</li>
+            <li>Add CORS configuration.</li>
+            <li>Add rate limiting.</li>
+            <li>Move configuration into environment variables.</li>
+            <li>Create automated tests with Jest and Supertest.</li>
+            <li>Test both successful and failed requests.</li>
+            <li>Connect the application to a production database.</li>
+            <li>Deploy the API.</li>
+            <li>Test the deployed API URL.</li>
+          </ol>
+
+          <h4>Bonus Tasks</h4>
+
+          <ul>
+            <li>Add authentication.</li>
+            <li>Add JWT authorization.</li>
+            <li>Add API versioning.</li>
+            <li>Add structured logging.</li>
+            <li>Add monitoring.</li>
+            <li>Add automated deployment.</li>
+          </ul>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           BIG PICTURE
+      ========================== -->
+
+      <section class="section">
+
+        <span class="section-number">24 • Big Picture</span>
+
+        <h2>From Code to Production</h2>
+
+        <p>
+          You have now reached the stage where the backend is treated
+          as a real software system rather than simply a collection
+          of JavaScript files.
+        </p>
+
+        <div class="flow">
+
+          <div class="flow-node">
+            Code
+            <small>Build features</small>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            Test
+            <small>Find bugs</small>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            Secure
+            <small>Protect API</small>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            Deploy
+            <small>Go online</small>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            Monitor
+            <small>Observe</small>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="flow-node">
+            Maintain
+            <small>Improve</small>
+          </div>
+
+        </div>
+
+
+        <div class="callout success">
+
+          <strong>Key Idea</strong>
+
+          Production engineering is a continuous cycle:
+
+          <b>
+            Build → Test → Secure → Deploy → Monitor → Improve
+          </b>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           COMPLETE
+      ========================== -->
+
+      <section class="section" id="complete">
+
+        <div class="complete-area">
+
+          <h2>🎯 Complete Lesson 14</h2>
+
+          <p>
+            Mark this lesson complete after understanding API testing,
+            automated tests, deployment, production configuration,
+            security, monitoring, and production readiness.
+          </p>
+
+          <button
+            class="complete-btn"
+            id="completeBtn"
+            onclick="completeLesson()"
+          >
+            Mark Lesson Complete
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           NAVIGATION
+      ========================== -->
+
+      <div class="lesson-nav">
+
+        <a href="lesson13.html" class="nav-card">
+
+          <div class="nav-label">
+            ← Previous Lesson
+          </div>
+
+          <div class="nav-title">
+            Lesson 13 — Authentication, JWT & Security
+          </div>
+
+        </a>
+
+
+        <a href="lesson15.html" class="nav-card next">
+
+          <div class="nav-label">
+            Next Lesson →
+          </div>
+
+          <div class="nav-title">
+            Lesson 15 — Advanced Node.js Concepts
+          </div>
+
+        </a>
+
+      </div>
+
+    </div>
+
+  </main>
+
+
+  <!-- =========================
+       JAVASCRIPT
+  ========================== -->
+
+  <script>
+
+    /* =========================
+       COPY CODE
+    ========================== */
+
+    function copyCode(button) {
+
+      const codeBox = button.closest(".code-box");
+
+      const code = codeBox.querySelector("pre").innerText;
+
+      navigator.clipboard.writeText(code);
+
+      const original = button.innerText;
+
+      button.innerText = "Copied!";
+
+      setTimeout(() => {
+        button.innerText = original;
+      }, 1500);
+    }
+
+
+    /* =========================
+       STATUS CODE VISUALIZER
+    ========================== */
+
+    const statusDescriptions = {
+
+      200:
+        "200 OK — The request was successful.",
+
+      201:
+        "201 Created — A new resource was successfully created.",
+
+      204:
+        "204 No Content — The request succeeded but there is no response body.",
+
+      400:
+        "400 Bad Request — The server could not process invalid or malformed client input.",
+
+      401:
+        "401 Unauthorized — Authentication is missing or invalid.",
+
+      403:
+        "403 Forbidden — The client is authenticated but does not have permission.",
+
+      404:
+        "404 Not Found — The requested resource or route does not exist.",
+
+      409:
+        "409 Conflict — The request conflicts with the current resource state.",
+
+      429:
+        "429 Too Many Requests — The client has exceeded an allowed request rate.",
+
+      500:
+        "500 Internal Server Error — The server encountered an unexpected problem."
+
+    };
+
+
+    function showStatus(code, element) {
+
+      document
+        .querySelectorAll(".status-card")
+        .forEach(card => card.classList.remove("active"));
+
+      element.classList.add("active");
+
+      document.getElementById("statusDetail").innerHTML =
+        "<strong>" + code + "</strong> — " +
+        statusDescriptions[code];
+    }
+
+
+    /* =========================
+       DEPLOYMENT PIPELINE
+    ========================== */
+
+    let pipelineTimer;
+
+    function runPipeline() {
+
+      clearInterval(pipelineTimer);
+
+      const steps =
+        document.querySelectorAll(".pipeline-step");
+
+      steps.forEach(step => {
+        step.classList.remove("active");
+      });
+
+      let current = 0;
+
+      pipelineTimer = setInterval(() => {
+
+        if (current >= steps.length) {
+          clearInterval(pipelineTimer);
+          return;
+        }
+
+        steps[current].classList.add("active");
+
+        current++;
+
+      }, 700);
+    }
+
+
+    /* =========================
+       API SIMULATOR
+    ========================== */
+
+    function simulateRequest() {
+
+      const method =
+        document.getElementById("methodSelect").value;
+
+      const url =
+        document.getElementById("urlInput").value;
+
+      const output =
+        document.getElementById("testerOutput");
+
+      output.innerText =
+`Sending request...
+
+${method} ${url}
+
+→ Connecting to API...
+→ Express router matched
+→ Middleware executed
+→ Controller executed
+→ Response generated
+
+HTTP/1.1 200 OK
+
+{
+  "success": true,
+  "message": "Request processed successfully",
+  "method": "${method}",
+  "endpoint": "${url}"
+}
+
+✓ Response received`;
+
+    }
+
+
+    /* =========================
+       ACCORDION
+    ========================== */
+
+    function toggleAccordion(button) {
+
+      const accordion =
+        button.parentElement;
+
+      accordion.classList.toggle("open");
+
+      const symbol =
+        button.querySelector("span");
+
+      if (accordion.classList.contains("open")) {
+        symbol.textContent = "−";
+      } else {
+        symbol.textContent = "+";
+      }
+
+    }
+
+
+    /* =========================
+       QUIZ
+    ========================== */
+
+    let quizScore = 0;
+
+    const answeredQuestions =
+      new Set();
+
+
+    function answerQuiz(button, correct) {
+
+      const question =
+        button.closest(".quiz-question");
+
+      const options =
+        question.querySelectorAll(".quiz-option");
+
+      if (question.dataset.answered) {
+        return;
+      }
+
+      question.dataset.answered = "true";
+
+      options.forEach(option => {
+        option.disabled = true;
+      });
+
+      if (correct) {
+
+        button.classList.add("correct");
+
+        quizScore++;
+
+      } else {
+
+        button.classList.add("wrong");
+
+        options.forEach(option => {
+
+          if (
+            option.getAttribute("onclick") &&
+            option.getAttribute("onclick").includes("true")
+          ) {
+            option.classList.add("correct");
+          }
+
+        });
+
+      }
+
+      document.getElementById("quizResult").innerText =
+        "Score: " + quizScore + " / 5";
+
+    }
+
+
+    /* =========================
+       CHECKLIST
+    ========================== */
+
+    function updateChecklist(input) {
+
+      const item =
+        input.closest(".check-item");
+
+      if (input.checked) {
+        item.classList.add("checked");
+      } else {
+        item.classList.remove("checked");
+      }
+
+    }
+
+
+    /* =========================
+       LESSON COMPLETION
+    ========================== */
+
+    function completeLesson() {
+
+      localStorage.setItem(
+        "zensus-node-lesson-14-complete",
+        "true"
+      );
+
+      localStorage.setItem(
+        "zensus-node-lesson-14-progress",
+        "100"
+      );
+
+      document
+        .getElementById("progressFill")
+        .style.width = "100%";
+
+      document
+        .getElementById("progressText")
+        .innerText = "100%";
+
+      const button =
+        document.getElementById("completeBtn");
+
+      button.innerText =
+        "✓ Lesson Completed";
+
+      button.classList.add("completed");
+
+    }
+
+
+    /* =========================
+       SCROLL PROGRESS
+    ========================== */
+
+    const sections =
+      document.querySelectorAll("section[id]");
+
+    const tocLinks =
+      document.querySelectorAll(".toc a");
+
+    function updateScrollProgress() {
+
+      const scrollTop =
+        window.scrollY;
+
+      const documentHeight =
+        document.documentElement.scrollHeight -
+        window.innerHeight;
+
+      const percentage =
+        Math.min(
+          100,
+          Math.max(
+            0,
+            Math.round(
+              (scrollTop / documentHeight) * 100
+            )
+          )
+        );
+
+      const completed =
+        localStorage.getItem(
+          "zensus-node-lesson-14-complete"
+        );
+
+      if (completed !== "true") {
+
+        document.getElementById(
+          "progressFill"
+        ).style.width = percentage + "%";
+
+        document.getElementById(
+          "progressText"
+        ).innerText = percentage + "%";
+
+      }
+
+      let currentId = "";
+
+      sections.forEach(section => {
+
+        const top =
+          section.offsetTop - 130;
+
+        if (scrollTop >= top) {
+          currentId = section.id;
+        }
+
+      });
+
+      tocLinks.forEach(link => {
+
+        link.classList.remove("active");
+
+        if (
+          link.getAttribute("href") ===
+          "#" + currentId
+        ) {
+          link.classList.add("active");
+        }
+
+      });
+
+    }
+
+
+    window.addEventListener(
+      "scroll",
+      updateScrollProgress
+    );
+
+
+    /* =========================
+       RESTORE COMPLETION
+    ========================== */
+
+    window.addEventListener("DOMContentLoaded", () => {
+
+      const completed =
+        localStorage.getItem(
+          "zensus-node-lesson-14-complete"
+        );
+
+      if (completed === "true") {
+
+        document.getElementById(
+          "progressFill"
+        ).style.width = "100%";
+
+        document.getElementById(
+          "progressText"
+        ).innerText = "100%";
+
+        const button =
+          document.getElementById("completeBtn");
+
+        button.innerText =
+          "✓ Lesson Completed";
+
+        button.classList.add("completed");
+
+      } else {
+
+        updateScrollProgress();
+
+      }
+
+    });
+
+  </script>
+
+</body>
+</html>

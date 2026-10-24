@@ -1,0 +1,5330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="description"
+    content="ZENSUS AI - Node.js Lesson 13: Authentication, JWT & Security"
+  />
+  <title>ZENSUS | Lesson 13 - Authentication, JWT & Security</title>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --navy: #0f172a;
+      --text: #334155;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --bg: #f8fafc;
+      --white: #ffffff;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --purple: #7c3aed;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 90px;
+    }
+
+    body {
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    code {
+      font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+    }
+
+    /* =========================
+       TOPBAR
+    ========================== */
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+    }
+
+    .topbar-inner {
+      width: min(1500px, 94%);
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--navy);
+      font-weight: 900;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), #60a5fa);
+      color: white;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+    }
+
+    .brand span {
+      font-size: 18px;
+    }
+
+    .top-progress {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .progress-track {
+      width: 150px;
+      height: 7px;
+      background: #e5e7eb;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), #60a5fa);
+      border-radius: inherit;
+      transition: width 0.4s ease;
+    }
+
+    .progress-label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    /* =========================
+       LAYOUT
+    ========================== */
+
+    .page {
+      width: min(1500px, 94%);
+      margin: 0 auto;
+      padding-top: 92px;
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr);
+      gap: 28px;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 90px;
+      height: calc(100vh - 110px);
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .sidebar-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .toc {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .toc a {
+      padding: 9px 12px;
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      transition: 0.2s;
+    }
+
+    .toc a:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .toc a.active {
+      background: #dbeafe;
+      color: var(--primary-dark);
+      font-weight: 800;
+      border-left: 3px solid var(--primary);
+    }
+
+    .content {
+      min-width: 0;
+    }
+
+    /* =========================
+       HERO
+    ========================== */
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(
+          circle at 85% 20%,
+          rgba(96, 165, 250, 0.2),
+          transparent 30%
+        ),
+        radial-gradient(
+          circle at 15% 80%,
+          rgba(37, 99, 235, 0.08),
+          transparent 35%
+        ),
+        var(--white);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 54px;
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      right: -80px;
+      bottom: -90px;
+      border-radius: 50%;
+      border: 35px solid rgba(37, 99, 235, 0.06);
+    }
+
+    .lesson-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #dbeafe;
+      color: var(--primary-dark);
+      border-radius: 999px;
+      padding: 7px 13px;
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 18px;
+    }
+
+    .hero h1 {
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1.05;
+      color: var(--navy);
+      max-width: 900px;
+      letter-spacing: -1.5px;
+    }
+
+    .hero h1 span {
+      color: var(--primary);
+    }
+
+    .hero-subtitle {
+      margin-top: 18px;
+      max-width: 900px;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .hero-meta {
+      margin-top: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .meta {
+      padding: 8px 13px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: white;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* =========================
+       SECTIONS
+    ========================== */
+
+    .section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 34px;
+      margin-bottom: 24px;
+      box-shadow: 0 5px 20px rgba(15, 23, 42, 0.035);
+    }
+
+    .section-header {
+      margin-bottom: 24px;
+    }
+
+    .section-number {
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .section h2 {
+      margin-top: 4px;
+      color: var(--navy);
+      font-size: 28px;
+      line-height: 1.2;
+    }
+
+    .section h3 {
+      color: var(--navy);
+      margin: 25px 0 10px;
+      font-size: 20px;
+    }
+
+    .section p {
+      margin-bottom: 14px;
+    }
+
+    .section ul,
+    .section ol {
+      margin: 12px 0 18px 22px;
+    }
+
+    .section li {
+      margin-bottom: 8px;
+    }
+
+    strong {
+      color: var(--navy);
+    }
+
+    /* =========================
+       CARDS
+    ========================== */
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .info-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      background: #fff;
+      transition:
+        transform 0.2s,
+        box-shadow 0.2s,
+        border 0.2s;
+    }
+
+    .info-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+      border-color: #bfdbfe;
+    }
+
+    .icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 20px;
+      margin-bottom: 13px;
+    }
+
+    .info-card h4 {
+      color: var(--navy);
+      margin-bottom: 7px;
+    }
+
+    .info-card p {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0;
+    }
+
+    /* =========================
+       CALLOUTS
+    ========================== */
+
+    .callout {
+      padding: 18px 20px;
+      border-radius: 12px;
+      margin: 18px 0;
+      border-left: 4px solid;
+    }
+
+    .callout.info {
+      background: #eff6ff;
+      border-color: var(--primary);
+    }
+
+    .callout.success {
+      background: #f0fdf4;
+      border-color: var(--success);
+    }
+
+    .callout.warning {
+      background: #fffbeb;
+      border-color: var(--warning);
+    }
+
+    .callout.danger {
+      background: #fef2f2;
+      border-color: var(--danger);
+    }
+
+    .callout strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* =========================
+       CODE
+    ========================== */
+
+    .code-wrap {
+      margin: 18px 0;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #0b1220;
+      border: 1px solid #1e293b;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+    }
+
+    .code-top {
+      background: #111827;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #94a3b8;
+      font-size: 12px;
+    }
+
+    .code-top button {
+      border: 1px solid #334155;
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 5px 9px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    pre {
+      margin: 0;
+      padding: 20px;
+      overflow-x: auto;
+      color: #dbeafe;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .inline-code {
+      background: #eff6ff;
+      color: #1d4ed8;
+      padding: 2px 6px;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 0.92em;
+    }
+
+    /* =========================
+       OBJECTIVES
+    ========================== */
+
+    .objective {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .objective:last-child {
+      border-bottom: none;
+    }
+
+    .check {
+      width: 25px;
+      height: 25px;
+      flex: 0 0 25px;
+      border-radius: 50%;
+      background: #dcfce7;
+      color: var(--success);
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 13px;
+    }
+
+    /* =========================
+       FLOW
+    ========================== */
+
+    .flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 28px 0;
+    }
+
+    .flow-node {
+      padding: 15px 19px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: white;
+      color: var(--navy);
+      font-weight: 800;
+      font-size: 13px;
+      box-shadow: 0 5px 15px rgba(15, 23, 42, 0.05);
+      text-align: center;
+    }
+
+    .flow-node.active {
+      background: #dbeafe;
+      border-color: #93c5fd;
+      color: var(--primary-dark);
+    }
+
+    .flow-arrow {
+      color: var(--primary);
+      font-size: 20px;
+    }
+
+    /* =========================
+       AUTH FLOW
+    ========================== */
+
+    .auth-flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      align-items: center;
+      margin: 30px 0;
+    }
+
+    .auth-step {
+      position: relative;
+      padding: 20px 12px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      text-align: center;
+      min-height: 130px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .auth-step-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #dbeafe;
+      color: var(--primary);
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      margin-bottom: 9px;
+    }
+
+    .auth-step strong {
+      display: block;
+      font-size: 13px;
+    }
+
+    .auth-step small {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    /* =========================
+       COMPARISON TABLE
+    ========================== */
+
+    .table-wrap {
+      overflow-x: auto;
+      margin: 18px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 650px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--border);
+      padding: 13px 14px;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f8fafc;
+      color: var(--navy);
+      font-weight: 800;
+    }
+
+    tr:hover td {
+      background: #fafcff;
+    }
+
+    /* =========================
+       JWT VISUALIZER
+    ========================== */
+
+    .jwt-card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+
+    .jwt-header {
+      padding: 14px 18px;
+      background: #f8fafc;
+      color: var(--navy);
+      font-weight: 900;
+    }
+
+    .jwt-token {
+      padding: 22px;
+      background: #0b1220;
+      font-family: monospace;
+      line-height: 1.9;
+      word-break: break-all;
+      font-size: 13px;
+    }
+
+    .jwt-part {
+      cursor: pointer;
+      padding: 3px 5px;
+      border-radius: 4px;
+      transition: 0.2s;
+    }
+
+    .jwt-part:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .jwt-part.header {
+      color: #fca5a5;
+    }
+
+    .jwt-part.payload {
+      color: #93c5fd;
+    }
+
+    .jwt-part.signature {
+      color: #86efac;
+    }
+
+    .jwt-info {
+      padding: 18px;
+      background: white;
+      min-height: 80px;
+      color: var(--muted);
+    }
+
+    /* =========================
+       PASSWORD DEMO
+    ========================== */
+
+    .security-demo {
+      background:
+        linear-gradient(135deg, #f8fbff, #eff6ff);
+      border: 1px solid #bfdbfe;
+      border-radius: 18px;
+      padding: 24px;
+    }
+
+    .demo-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 14px;
+      margin: 18px 0;
+    }
+
+    .demo-box {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      min-height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-family: monospace;
+      word-break: break-all;
+    }
+
+    .demo-arrow {
+      color: var(--primary);
+      font-size: 25px;
+    }
+
+    /* =========================
+       SECURITY GRID
+    ========================== */
+
+    .threat-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      background: white;
+    }
+
+    .threat-card .threat {
+      color: var(--danger);
+      font-weight: 900;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+    }
+
+    .threat-card .defense {
+      color: var(--success);
+      font-weight: 900;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      margin-top: 12px;
+    }
+
+    /* =========================
+       INTERACTIVE AUTH LAB
+    ========================== */
+
+    .lab {
+      background:
+        linear-gradient(135deg, #f8fbff, #eff6ff);
+      border: 1px solid #bfdbfe;
+      border-radius: 18px;
+      padding: 24px;
+    }
+
+    .lab-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .lab input,
+    .lab select {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      background: white;
+      border-radius: 9px;
+      padding: 10px 12px;
+      outline: none;
+    }
+
+    .btn {
+      border: none;
+      background: var(--primary);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-weight: 800;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn.secondary {
+      background: white;
+      color: var(--primary);
+      border: 1px solid #bfdbfe;
+    }
+
+    .auth-result {
+      background: #0b1220;
+      color: #dbeafe;
+      border-radius: 12px;
+      padding: 18px;
+      min-height: 150px;
+      font-family: monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+
+    /* =========================
+       QUIZ
+    ========================== */
+
+    .quiz-question {
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 14px;
+    }
+
+    .quiz-question h4 {
+      color: var(--navy);
+      margin-bottom: 12px;
+    }
+
+    .option {
+      display: block;
+      width: 100%;
+      text-align: left;
+      border: 1px solid var(--border);
+      background: white;
+      padding: 10px 12px;
+      border-radius: 9px;
+      margin: 7px 0;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    .option:hover {
+      border-color: #93c5fd;
+      background: #f8fbff;
+    }
+
+    .option.correct {
+      background: #dcfce7;
+      border-color: #86efac;
+      color: #166534;
+    }
+
+    .option.wrong {
+      background: #fee2e2;
+      border-color: #fca5a5;
+      color: #991b1b;
+    }
+
+    .quiz-result {
+      display: none;
+      margin-top: 18px;
+      padding: 18px;
+      background: #eff6ff;
+      border-radius: 12px;
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    /* =========================
+       ACCORDION
+    ========================== */
+
+    .accordion {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .accordion-btn {
+      width: 100%;
+      border: none;
+      background: white;
+      padding: 16px 18px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      color: var(--navy);
+      font-weight: 800;
+    }
+
+    .accordion-content {
+      display: none;
+      padding: 0 18px 18px;
+      color: var(--muted);
+      background: #fbfdff;
+    }
+
+    .accordion.open .accordion-content {
+      display: block;
+    }
+
+    /* =========================
+       CHALLENGE
+    ========================== */
+
+    .challenge {
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 18px;
+      padding: 28px;
+    }
+
+    .challenge h3 {
+      color: white;
+      margin-top: 0;
+    }
+
+    .challenge strong {
+      color: white;
+    }
+
+    .challenge code {
+      color: #bfdbfe;
+    }
+
+    .challenge ul {
+      margin-left: 20px;
+    }
+
+    /* =========================
+       COMPLETION
+    ========================== */
+
+    .completion {
+      text-align: center;
+      padding: 38px;
+      background:
+        radial-gradient(
+          circle at top,
+          rgba(96, 165, 250, 0.18),
+          transparent 40%
+        ),
+        white;
+    }
+
+    .completion-icon {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #dcfce7;
+      color: var(--success);
+      font-size: 30px;
+    }
+
+    .completion h2 {
+      margin-bottom: 10px;
+    }
+
+    .completion p {
+      color: var(--muted);
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    /* =========================
+       MOBILE
+    ========================== */
+
+    .mobile-toc {
+      display: none;
+      margin-bottom: 18px;
+    }
+
+    .mobile-toc button {
+      width: 100%;
+      background: white;
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 800;
+      color: var(--navy);
+    }
+
+    @media (max-width: 1100px) {
+      .page {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .mobile-toc {
+        display: block;
+      }
+
+      .grid-3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .auth-flow {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 720px) {
+      .top-progress {
+        display: none;
+      }
+
+      .hero {
+        padding: 30px 22px;
+      }
+
+      .section {
+        padding: 23px 18px;
+      }
+
+      .grid-2,
+      .grid-3,
+      .auth-flow,
+      .demo-row {
+        grid-template-columns: 1fr;
+      }
+
+      .lab-controls {
+        grid-template-columns: 1fr;
+      }
+
+      .demo-arrow {
+        transform: rotate(90deg);
+        text-align: center;
+      }
+
+      .nav-buttons {
+        flex-direction: column;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================
+       TOP BAR
+  ========================== -->
+
+  <header class="topbar">
+    <div class="topbar-inner">
+
+      <a href="#" class="brand">
+        <div class="brand-mark">Z</div>
+        <span>ZENSUS</span>
+      </a>
+
+      <div class="top-progress">
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="progress-label" id="progressLabel">
+          0% Complete
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+
+  <div class="page">
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <aside class="sidebar">
+
+      <div class="sidebar-title">
+        Lesson 13 Contents
+      </div>
+
+      <nav class="toc" id="toc">
+
+        <a href="#overview">Overview</a>
+        <a href="#objectives">Learning Objectives</a>
+        <a href="#authentication">Authentication</a>
+        <a href="#authorization">Authorization</a>
+        <a href="#auth-flow">Authentication Flow</a>
+        <a href="#passwords">Password Security</a>
+        <a href="#hashing">Hashing & bcrypt</a>
+        <a href="#jwt">What Is JWT?</a>
+        <a href="#jwt-structure">JWT Structure</a>
+        <a href="#jwt-flow">JWT Authentication Flow</a>
+        <a href="#jwt-create">Creating JWT</a>
+        <a href="#jwt-verify">Verifying JWT</a>
+        <a href="#middleware">Auth Middleware</a>
+        <a href="#protected">Protected Routes</a>
+        <a href="#cookies">Cookies & Tokens</a>
+        <a href="#sessions">Sessions vs JWT</a>
+        <a href="#security">Node.js Security</a>
+        <a href="#attacks">Common Attacks</a>
+        <a href="#helmet">Helmet & Security Headers</a>
+        <a href="#rate-limit">Rate Limiting</a>
+        <a href="#env">Environment Variables</a>
+        <a href="#complete-api">Complete Auth API</a>
+        <a href="#interactive">Interactive JWT Lab</a>
+        <a href="#mistakes">Common Mistakes</a>
+        <a href="#interview">Interview Questions</a>
+        <a href="#quiz">Quiz</a>
+        <a href="#challenge">Coding Challenge</a>
+        <a href="#complete">Complete Lesson</a>
+
+      </nav>
+
+    </aside>
+
+
+    <!-- =========================
+         MAIN
+    ========================== -->
+
+    <main class="content">
+
+      <div class="mobile-toc">
+        <button
+          onclick="
+            document.querySelector('.sidebar').style.display =
+            document.querySelector('.sidebar').style.display === 'block'
+              ? 'none'
+              : 'block'
+          "
+        >
+          ☰ Lesson Contents
+        </button>
+      </div>
+
+
+      <!-- =========================
+           HERO
+      ========================== -->
+
+      <section class="hero" id="overview" data-section>
+
+        <div class="lesson-badge">
+          NODE.JS • LESSON 13
+        </div>
+
+        <h1>
+          Authentication, <span>JWT</span> & Security
+        </h1>
+
+        <p class="hero-subtitle">
+          Learn how real-world Node.js applications identify users,
+          protect passwords, issue authentication tokens, secure API routes,
+          implement authorization, and defend against common web security
+          problems.
+        </p>
+
+        <div class="hero-meta">
+          <div class="meta">🔐 Authentication</div>
+          <div class="meta">🎫 JWT</div>
+          <div class="meta">🔑 bcrypt</div>
+          <div class="meta">🛡 Security</div>
+          <div class="meta">🍪 Cookies</div>
+          <div class="meta">⚡ Express</div>
+          <div class="meta">🗄 MongoDB</div>
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           OBJECTIVES
+      ========================== -->
+
+      <section class="section" id="objectives" data-section>
+
+        <div class="section-header">
+          <div class="section-number">
+            01 • Learning Goals
+          </div>
+
+          <h2>
+            What You Will Learn
+          </h2>
+        </div>
+
+        <div class="objective">
+          <div class="check">✓</div>
+          <div>
+            Understand authentication and authorization.
+          </div>
+        </div>
+
+        <div class="objective">
+          <div class="check">✓</div>
+          <div>
+            Understand why passwords must never be stored as plain text.
+          </div>
+        </div>
+
+        <div class="objective">
+          <div class="check">✓</div>
+          <div>
+            Learn password hashing with bcrypt.
+          </div>
+        </div>
+
+        <div class="objective">
+          <div class="check">✓</div>
+          <div>
+            Understand JSON Web Tokens and their three-part structure.
+          </div>
+        </div>
+
+        <div class="objective">
+          <div class="check">✓</div>
+          <div>
+            Create and verify JWTs in Node.js.
+          </div>
+        </div>
+
+        <div class="objective">
+          <div class="check">✓</div>
+          <div>
+            Build authentication middleware.
+          </div>
+        </div>
+
+        <div class="objective">
+          <div class="check">✓</div>
+          <div>
+            Protect Express routes.
+          </div>
+        </div>
+
+        <div class="objective">
+          <div class="check">✓</div>
+          <div>
+            Understand cookies, sessions, token storage, and security headers.
+          </div>
+        </div>
+
+        <div class="objective">
+          <div class="check">✓</div>
+          <div>
+            Understand common attacks such as XSS, CSRF, brute force,
+            injection, and credential theft.
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           AUTHENTICATION
+      ========================== -->
+
+      <section class="section" id="authentication" data-section>
+
+        <div class="section-header">
+          <div class="section-number">
+            02 • Core Concept
+          </div>
+
+          <h2>
+            What Is Authentication?
+          </h2>
+        </div>
+
+        <p>
+          <strong>Authentication</strong> is the process of verifying
+          who a user is.
+        </p>
+
+        <p>
+          For example, when you log into a website using an email and password,
+          the server checks whether those credentials belong to a valid account.
+        </p>
+
+        <div class="callout info">
+          <strong>Simple Question</strong>
+          Authentication answers:
+          <strong>"Who are you?"</strong>
+        </div>
+
+        <div class="grid grid-3">
+
+          <div class="info-card">
+
+            <div class="icon">
+              👤
+            </div>
+
+            <h4>
+              Identity
+            </h4>
+
+            <p>
+              The user claims an identity, usually through an email,
+              username, or other identifier.
+            </p>
+
+          </div>
+
+          <div class="info-card">
+
+            <div class="icon">
+              🔑
+            </div>
+
+            <h4>
+              Credentials
+            </h4>
+
+            <p>
+              The user proves their identity using a password,
+              token, passkey, or another authentication factor.
+            </p>
+
+          </div>
+
+          <div class="info-card">
+
+            <div class="icon">
+              ✅
+            </div>
+
+            <h4>
+              Verification
+            </h4>
+
+            <p>
+              The server verifies the provided credentials.
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           AUTHORIZATION
+      ========================== -->
+
+      <section class="section" id="authorization" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            03 • Access Control
+          </div>
+
+          <h2>
+            Authentication vs Authorization
+          </h2>
+
+        </div>
+
+        <p>
+          These two terms are closely related but mean different things.
+        </p>
+
+        <div class="grid grid-2">
+
+          <div class="info-card">
+
+            <div class="icon">
+              🔐
+            </div>
+
+            <h4>
+              Authentication
+            </h4>
+
+            <p>
+              Determines <strong>who the user is</strong>.
+            </p>
+
+            <br />
+
+            <p>
+              Example:
+              "This is user Asha."
+            </p>
+
+          </div>
+
+          <div class="info-card">
+
+            <div class="icon">
+              🛡️
+            </div>
+
+            <h4>
+              Authorization
+            </h4>
+
+            <p>
+              Determines <strong>what the authenticated user is allowed to do</strong>.
+            </p>
+
+            <br />
+
+            <p>
+              Example:
+              "Asha is an administrator and can delete users."
+            </p>
+
+          </div>
+
+        </div>
+
+        <div class="callout success">
+
+          <strong>Easy way to remember</strong>
+
+          Authentication =
+          <strong>Who are you?</strong>
+
+          Authorization =
+          <strong>What are you allowed to do?</strong>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           AUTH FLOW
+      ========================== -->
+
+      <section class="section" id="auth-flow" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            04 • Authentication Process
+          </div>
+
+          <h2>
+            Typical Login Flow
+          </h2>
+
+        </div>
+
+        <p>
+          A typical email/password authentication system works approximately
+          like this:
+        </p>
+
+        <div class="auth-flow">
+
+          <div class="auth-step">
+            <div class="auth-step-number">1</div>
+
+            <strong>User Login</strong>
+
+            <small>
+              Email + password
+            </small>
+          </div>
+
+          <div class="auth-step">
+            <div class="auth-step-number">2</div>
+
+            <strong>Server</strong>
+
+            <small>
+              Find user
+            </small>
+          </div>
+
+          <div class="auth-step">
+            <div class="auth-step-number">3</div>
+
+            <strong>Password Check</strong>
+
+            <small>
+              Compare hash
+            </small>
+          </div>
+
+          <div class="auth-step">
+            <div class="auth-step-number">4</div>
+
+            <strong>Token / Session</strong>
+
+            <small>
+              Authentication state
+            </small>
+          </div>
+
+          <div class="auth-step">
+            <div class="auth-step-number">5</div>
+
+            <strong>Protected API</strong>
+
+            <small>
+              Authorized request
+            </small>
+          </div>
+
+        </div>
+
+        <div class="callout info">
+
+          <strong>Important</strong>
+
+          The password should not be sent back to the client or stored
+          as plain text in the database.
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           PASSWORDS
+      ========================== -->
+
+      <section class="section" id="passwords" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            05 • Password Security
+          </div>
+
+          <h2>
+            Why Passwords Must Be Protected
+          </h2>
+
+        </div>
+
+        <p>
+          Imagine a database contains:
+        </p>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>❌ Unsafe database</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+          <pre><code>{
+  "email": "asha@example.com",
+  "password": "Asha123"
+}</code></pre>
+
+        </div>
+
+        <p>
+          If an attacker gains access to the database,
+          the actual password is immediately exposed.
+        </p>
+
+        <p>
+          Instead, applications should store a
+          <strong>password hash</strong>.
+        </p>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>✓ Safer representation</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+          <pre><code>{
+  "email": "asha@example.com",
+  "password": "$2b$12$..."
+}</code></pre>
+
+        </div>
+
+        <div class="callout danger">
+
+          <strong>Never do this</strong>
+
+          Never store passwords directly in MongoDB,
+          PostgreSQL, files, or JavaScript variables as plain text.
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           HASHING
+      ========================== -->
+
+      <section class="section" id="hashing" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            06 • Password Hashing
+          </div>
+
+          <h2>
+            Hashing with bcrypt
+          </h2>
+
+        </div>
+
+        <p>
+          A password hash is produced by a one-way password hashing function.
+          The purpose is to make recovering the original password from the
+          stored value computationally difficult.
+        </p>
+
+        <p>
+          In Node.js applications, <strong>bcrypt</strong> is a commonly taught
+          password-hashing library.
+        </p>
+
+        <h3>
+          Install bcrypt
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>Terminal</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+          <pre><code>npm install bcrypt</code></pre>
+
+        </div>
+
+        <h3>
+          Hashing a Password
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>password.js</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+          <pre><code>const bcrypt = require("bcrypt");
+
+const password = "Asha123";
+
+const hashedPassword =
+  await bcrypt.hash(password, 12);
+
+console.log(hashedPassword);</code></pre>
+
+        </div>
+
+        <h3>
+          Comparing Passwords
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>Login</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+          <pre><code>const isMatch =
+  await bcrypt.compare(
+    password,
+    user.password
+  );
+
+if (!isMatch) {
+  return res.status(401).json({
+    message: "Invalid credentials"
+  });
+}</code></pre>
+
+        </div>
+
+        <div class="security-demo">
+
+          <h3 style="margin-top: 0;">
+            Password Transformation
+          </h3>
+
+          <div class="demo-row">
+
+            <div class="demo-box">
+              Asha123
+            </div>
+
+            <div class="demo-arrow">
+              →
+            </div>
+
+            <div class="demo-box">
+              bcrypt hash
+            </div>
+
+          </div>
+
+          <div class="demo-row">
+
+            <div class="demo-box">
+              Login password
+            </div>
+
+            <div class="demo-arrow">
+              →
+            </div>
+
+            <div class="demo-box">
+              bcrypt.compare()
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="callout warning">
+
+          <strong>Important</strong>
+
+          Password hashing is not the same thing as encryption.
+          Password hashes are designed for verification rather than
+          recovering the original password.
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           JWT
+      ========================== -->
+
+      <section class="section" id="jwt" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            07 • Token Authentication
+          </div>
+
+          <h2>
+            What Is JWT?
+          </h2>
+
+        </div>
+
+        <p>
+          <strong>JWT</strong> stands for
+          <strong>JSON Web Token</strong>.
+        </p>
+
+        <p>
+          A JWT is a compact token format that can carry claims between
+          parties. It is commonly used in web applications as part of
+          token-based authentication.
+        </p>
+
+        <div class="callout info">
+
+          <strong>Important Security Concept</strong>
+
+          A JWT is generally <strong>signed</strong>, not automatically
+          encrypted. Its payload should not contain sensitive secrets merely
+          because it is inside a JWT.
+
+        </div>
+
+        <p>
+          A simplified JWT looks like:
+        </p>
+
+        <div class="jwt-card">
+
+          <div class="jwt-header">
+            JWT Example Structure
+          </div>
+
+          <div class="jwt-token">
+
+            <span
+              class="jwt-part header"
+              onclick="showJWTPart('header')"
+            >
+              eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+            </span>
+
+            <span>.</span>
+
+            <span
+              class="jwt-part payload"
+              onclick="showJWTPart('payload')"
+            >
+              eyJzdWIiOiIxMjMiLCJyb2xlIjoiYWRtaW4ifQ
+            </span>
+
+            <span>.</span>
+
+            <span
+              class="jwt-part signature"
+              onclick="showJWTPart('signature')"
+            >
+              SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+            </span>
+
+          </div>
+
+          <div class="jwt-info" id="jwtInfo">
+            Click a JWT section to understand it.
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           JWT STRUCTURE
+      ========================== -->
+
+      <section class="section" id="jwt-structure" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            08 • JWT Anatomy
+          </div>
+
+          <h2>
+            Header, Payload & Signature
+          </h2>
+
+        </div>
+
+        <div class="grid grid-3">
+
+          <div class="info-card">
+
+            <div class="icon">
+              ①
+            </div>
+
+            <h4>
+              Header
+            </h4>
+
+            <p>
+              Contains information such as the token type and signing
+              algorithm.
+            </p>
+
+          </div>
+
+          <div class="info-card">
+
+            <div class="icon">
+              ②
+            </div>
+
+            <h4>
+              Payload
+            </h4>
+
+            <p>
+              Contains claims such as user ID, role, issuer, or expiration.
+            </p>
+
+          </div>
+
+          <div class="info-card">
+
+            <div class="icon">
+              ③
+            </div>
+
+            <h4>
+              Signature
+            </h4>
+
+            <p>
+              Helps verify that the token was signed with the expected
+              secret or key.
+            </p>
+
+          </div>
+
+        </div>
+
+        <h3>
+          Example Payload
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>JWT payload</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+          <pre><code>{
+  "sub": "665ab123...",
+  "role": "admin",
+  "iat": 1720000000,
+  "exp": 1720003600
+}</code></pre>
+
+        </div>
+
+        <p>
+          Common claims include:
+        </p>
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+
+              <tr>
+                <th>Claim</th>
+                <th>Meaning</th>
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              <tr>
+                <td>sub</td>
+                <td>Subject, often the user identifier.</td>
+              </tr>
+
+              <tr>
+                <td>iat</td>
+                <td>Issued-at time.</td>
+              </tr>
+
+              <tr>
+                <td>exp</td>
+                <td>Expiration time.</td>
+              </tr>
+
+              <tr>
+                <td>iss</td>
+                <td>Issuer.</td>
+              </tr>
+
+              <tr>
+                <td>aud</td>
+                <td>Audience.</td>
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           JWT FLOW
+      ========================== -->
+
+      <section class="section" id="jwt-flow" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            09 • Token Flow
+          </div>
+
+          <h2>
+            JWT Authentication Flow
+          </h2>
+
+        </div>
+
+        <div class="auth-flow">
+
+          <div class="auth-step">
+
+            <div class="auth-step-number">
+              1
+            </div>
+
+            <strong>
+              Login
+            </strong>
+
+            <small>
+              Email + password
+            </small>
+
+          </div>
+
+          <div class="auth-step">
+
+            <div class="auth-step-number">
+              2
+            </div>
+
+            <strong>
+              Verify
+            </strong>
+
+            <small>
+              bcrypt.compare()
+            </small>
+
+          </div>
+
+          <div class="auth-step">
+
+            <div class="auth-step-number">
+              3
+            </div>
+
+            <strong>
+              Sign JWT
+            </strong>
+
+            <small>
+              Server creates token
+            </small>
+
+          </div>
+
+          <div class="auth-step">
+
+            <div class="auth-step-number">
+              4
+            </div>
+
+            <strong>
+              Client Stores
+            </strong>
+
+            <small>
+              According to app design
+            </small>
+
+          </div>
+
+          <div class="auth-step">
+
+            <div class="auth-step-number">
+              5
+            </div>
+
+            <strong>
+              API Request
+            </strong>
+
+            <small>
+              Token presented
+            </small>
+
+          </div>
+
+        </div>
+
+        <div class="flow">
+
+          <div class="flow-node">
+            Login
+          </div>
+
+          <div class="flow-arrow">
+            →
+          </div>
+
+          <div class="flow-node">
+            Verify Password
+          </div>
+
+          <div class="flow-arrow">
+            →
+          </div>
+
+          <div class="flow-node active">
+            JWT
+          </div>
+
+          <div class="flow-arrow">
+            →
+          </div>
+
+          <div class="flow-node">
+            Middleware
+          </div>
+
+          <div class="flow-arrow">
+            →
+          </div>
+
+          <div class="flow-node">
+            Protected Route
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           JWT CREATE
+      ========================== -->
+
+      <section class="section" id="jwt-create" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            10 • JWT Creation
+          </div>
+
+          <h2>
+            Creating a JWT in Node.js
+          </h2>
+
+        </div>
+
+        <h3>
+          Install jsonwebtoken
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>Terminal</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+          <pre><code>npm install jsonwebtoken</code></pre>
+
+        </div>
+
+        <h3>
+          Sign a Token
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>auth.js</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+          <pre><code>const jwt = require("jsonwebtoken");
+
+const token = jwt.sign(
+  {
+    sub: user._id.toString(),
+    role: user.role
+  },
+  process.env.JWT_SECRET,
+  {
+    expiresIn: "15m"
+  }
+);
+
+console.log(token);</code></pre>
+
+        </div>
+
+        <p>
+          The server signs the token using a secret key.
+        </p>
+
+        <div class="callout danger">
+
+          <strong>
+            Protect JWT secrets
+          </strong>
+
+          Never commit your production JWT secret into a public Git repository.
+          Store secrets using environment variables or an appropriate secret
+          management system.
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           JWT VERIFY
+      ========================== -->
+
+      <section class="section" id="jwt-verify" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            11 • Verification
+          </div>
+
+          <h2>
+            Verifying a JWT
+          </h2>
+
+        </div>
+
+        <p>
+          When a client accesses a protected API, the server needs to verify
+          the token before allowing the request to continue.
+        </p>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>verify-token.js</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+
+          </div>
+
+          <pre><code>const jwt = require("jsonwebtoken");
+
+try {
+  const decoded = jwt.verify(
+    token,
+    process.env.JWT_SECRET
+  );
+
+  console.log(decoded);
+
+} catch (error) {
+  console.log("Invalid or expired token");
+}</code></pre>
+
+        </div>
+
+        <p>
+          Verification checks the token against the expected signing key and
+          validates relevant registered claims such as expiration.
+        </p>
+
+      </section>
+
+
+      <!-- =========================
+           MIDDLEWARE
+      ========================== -->
+
+      <section class="section" id="middleware" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            12 • Middleware
+          </div>
+
+          <h2>
+            Authentication Middleware
+          </h2>
+
+        </div>
+
+        <p>
+          Instead of repeating JWT verification inside every protected route,
+          create reusable middleware.
+        </p>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>middleware/auth.js</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+
+          </div>
+
+          <pre><code>const jwt = require("jsonwebtoken");
+
+function authenticateToken(req, res, next) {
+
+  const authHeader =
+    req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({
+      message: "Authentication required"
+    });
+  }
+
+  const token =
+    authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({
+      message: "Token missing"
+    });
+  }
+
+  try {
+
+    const decoded =
+      jwt.verify(
+        token,
+        process.env.JWT_SECRET
+      );
+
+    req.user = decoded;
+
+    next();
+
+  } catch (error) {
+
+    return res.status(401).json({
+      message: "Invalid or expired token"
+    });
+
+  }
+}
+
+module.exports = authenticateToken;</code></pre>
+
+        </div>
+
+        <h3>
+          Authorization Header
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>HTTP Request</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+
+          </div>
+
+          <pre><code>Authorization: Bearer YOUR_JWT_TOKEN</code></pre>
+
+        </div>
+
+        <div class="callout info">
+
+          <strong>
+            What does Bearer mean?
+          </strong>
+
+          The client is presenting a token as the credential used to access
+          the protected resource.
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           PROTECTED ROUTES
+      ========================== -->
+
+      <section class="section" id="protected" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            13 • Protected APIs
+          </div>
+
+          <h2>
+            Protecting Express Routes
+          </h2>
+
+        </div>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>server.js</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+
+          </div>
+
+          <pre><code>const authenticateToken =
+  require("./middleware/auth");
+
+app.get(
+  "/api/profile",
+  authenticateToken,
+  async (req, res) => {
+
+    res.json({
+      message: "Protected profile",
+      user: req.user
+    });
+
+  }
+);</code></pre>
+
+        </div>
+
+        <p>
+          The request reaches the route handler only after
+          <span class="inline-code">authenticateToken</span>
+          successfully calls <span class="inline-code">next()</span>.
+        </p>
+
+        <div class="flow">
+
+          <div class="flow-node">
+            Request
+          </div>
+
+          <div class="flow-arrow">
+            →
+          </div>
+
+          <div class="flow-node">
+            JWT Middleware
+          </div>
+
+          <div class="flow-arrow">
+            →
+          </div>
+
+          <div class="flow-node active">
+            Verified?
+          </div>
+
+          <div class="flow-arrow">
+            →
+          </div>
+
+          <div class="flow-node">
+            Controller
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           COOKIES
+      ========================== -->
+
+      <section class="section" id="cookies" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            14 • Token Storage
+          </div>
+
+          <h2>
+            Cookies, Tokens & Security
+          </h2>
+
+        </div>
+
+        <p>
+          After authentication, an application needs a way to maintain
+          authenticated state between requests.
+        </p>
+
+        <p>
+          One common approach is to use cookies.
+        </p>
+
+        <h3>
+          Important Cookie Flags
+        </h3>
+
+        <div class="grid grid-3">
+
+          <div class="info-card">
+
+            <div class="icon">
+              🔒
+            </div>
+
+            <h4>
+              HttpOnly
+            </h4>
+
+            <p>
+              Prevents JavaScript running in the browser from directly reading
+              the cookie.
+            </p>
+
+          </div>
+
+          <div class="info-card">
+
+            <div class="icon">
+              🛡
+            </div>
+
+            <h4>
+              Secure
+            </h4>
+
+            <p>
+              Sends the cookie over HTTPS connections.
+            </p>
+
+          </div>
+
+          <div class="info-card">
+
+            <div class="icon">
+              🌐
+            </div>
+
+            <h4>
+              SameSite
+            </h4>
+
+            <p>
+              Controls how cookies are sent in cross-site contexts.
+            </p>
+
+          </div>
+
+        </div>
+
+        <h3>
+          Example Cookie
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>Express</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+          </div>
+
+          <pre><code>res.cookie("token", token, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "lax",
+  maxAge: 15 * 60 * 1000
+});</code></pre>
+
+        </div>
+
+        <div class="callout warning">
+
+          <strong>
+            HTTPS matters
+          </strong>
+
+          The Secure cookie flag is intended for secure HTTPS transport.
+          Local development setups may require different configuration.
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           SESSIONS
+      ========================== -->
+
+      <section class="section" id="sessions" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            15 • Authentication Models
+          </div>
+
+          <h2>
+            Sessions vs JWT
+          </h2>
+
+        </div>
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+
+              <tr>
+                <th>Feature</th>
+                <th>Session-based</th>
+                <th>JWT-based</th>
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              <tr>
+                <td>State</td>
+                <td>Session state is typically maintained server-side.</td>
+                <td>Token carries signed claims.</td>
+              </tr>
+
+              <tr>
+                <td>Client</td>
+                <td>Usually receives a session identifier.</td>
+                <td>Receives/presents a token.</td>
+              </tr>
+
+              <tr>
+                <td>Revocation</td>
+                <td>Can be straightforward by invalidating server session.</td>
+                <td>Often requires additional design such as short expiry,
+                    rotation, or a revocation strategy.</td>
+              </tr>
+
+              <tr>
+                <td>Scaling</td>
+                <td>May require shared session storage in distributed systems.</td>
+                <td>Can reduce server-side session state for access tokens,
+                    but introduces other security and lifecycle concerns.</td>
+              </tr>
+
+              <tr>
+                <td>Use case</td>
+                <td>Traditional web applications.</td>
+                <td>APIs and distributed applications can use tokens.</td>
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+        <div class="callout info">
+
+          <strong>
+            Important
+          </strong>
+
+          JWT is not automatically "more secure" than sessions.
+          Security depends on how either mechanism is designed and implemented.
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           SECURITY
+      ========================== -->
+
+      <section class="section" id="security" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            16 • Application Security
+          </div>
+
+          <h2>
+            Node.js Security Fundamentals
+          </h2>
+
+        </div>
+
+        <p>
+          Authentication is only one part of application security.
+          A secure backend also protects input, secrets, sessions,
+          database queries, HTTP responses, and dependencies.
+        </p>
+
+        <div class="grid grid-3">
+
+          <div class="info-card">
+
+            <div class="icon">
+              🔐
+            </div>
+
+            <h4>
+              Protect Secrets
+            </h4>
+
+            <p>
+              Use environment variables or secret-management systems.
+            </p>
+
+          </div>
+
+          <div class="info-card">
+
+            <div class="icon">
+              🧹
+            </div>
+
+            <h4>
+              Validate Input
+            </h4>
+
+            <p>
+              Never assume user-provided data is safe or correctly formatted.
+            </p>
+
+          </div>
+
+          <div class="info-card">
+
+            <div class="icon">
+              🚦
+            </div>
+
+            <h4>
+              Rate Limit
+            </h4>
+
+            <p>
+              Reduce abuse of login and other sensitive endpoints.
+            </p>
+
+          </div>
+
+          <div class="info-card">
+
+            <div class="icon">
+              🪖
+            </div>
+
+            <h4>
+              Security Headers
+            </h4>
+
+            <p>
+              Configure HTTP security headers appropriately.
+            </p>
+
+          </div>
+
+          <div class="info-card">
+
+            <div class="icon">
+              📦
+            </div>
+
+            <h4>
+              Dependencies
+            </h4>
+
+            <p>
+              Keep dependencies updated and audit them regularly.
+            </p>
+
+          </div>
+
+          <div class="info-card">
+
+            <div class="icon">
+              🔎
+            </div>
+
+            <h4>
+              Logging
+            </h4>
+
+            <p>
+              Log useful security events without exposing passwords or tokens.
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           ATTACKS
+      ========================== -->
+
+      <section class="section" id="attacks" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            17 • Threat Awareness
+          </div>
+
+          <h2>
+            Common Web Security Attacks
+          </h2>
+
+        </div>
+
+        <div class="grid grid-2">
+
+          <div class="threat-card">
+
+            <div class="threat">
+              XSS
+            </div>
+
+            <h3>
+              Cross-Site Scripting
+            </h3>
+
+            <p>
+              An attacker attempts to inject executable content into a web
+              page that other users may load.
+            </p>
+
+            <div class="defense">
+              Defense
+            </div>
+
+            <p>
+              Proper output encoding, safe rendering, input validation,
+              Content Security Policy, and secure framework practices.
+            </p>
+
+          </div>
+
+
+          <div class="threat-card">
+
+            <div class="threat">
+              CSRF
+            </div>
+
+            <h3>
+              Cross-Site Request Forgery
+            </h3>
+
+            <p>
+              A malicious site attempts to cause a user's browser to perform
+              an unwanted authenticated action.
+            </p>
+
+            <div class="defense">
+              Defense
+            </div>
+
+            <p>
+              SameSite cookies, CSRF tokens where appropriate, origin checks,
+              and correct application design.
+            </p>
+
+          </div>
+
+
+          <div class="threat-card">
+
+            <div class="threat">
+              Brute Force
+            </div>
+
+            <h3>
+              Password Guessing
+            </h3>
+
+            <p>
+              An attacker repeatedly tries credentials against an authentication
+              endpoint.
+            </p>
+
+            <div class="defense">
+              Defense
+            </div>
+
+            <p>
+              Rate limiting, strong password policies, account protection,
+              monitoring, and MFA where appropriate.
+            </p>
+
+          </div>
+
+
+          <div class="threat-card">
+
+            <div class="threat">
+              Injection
+            </div>
+
+            <h3>
+              Malicious Input
+            </h3>
+
+            <p>
+              Specially crafted input attempts to manipulate a database query
+              or command.
+            </p>
+
+            <div class="defense">
+              Defense
+            </div>
+
+            <p>
+              Use safe query APIs, validation, least privilege, and avoid
+              constructing commands or queries unsafely from strings.
+            </p>
+
+          </div>
+
+
+          <div class="threat-card">
+
+            <div class="threat">
+              Credential Theft
+            </div>
+
+            <h3>
+              Stolen Credentials
+            </h3>
+
+            <p>
+              Passwords, tokens, or session identifiers may be stolen through
+              phishing, malware, unsafe storage, or application vulnerabilities.
+            </p>
+
+            <div class="defense">
+              Defense
+            </div>
+
+            <p>
+              HTTPS, secure cookies, short token lifetimes where appropriate,
+              MFA, secure storage, and careful logging.
+            </p>
+
+          </div>
+
+
+          <div class="threat-card">
+
+            <div class="threat">
+              Data Exposure
+            </div>
+
+            <h3>
+              Excessive API Data
+            </h3>
+
+            <p>
+              An API may accidentally return passwords, internal fields,
+              secrets, or unnecessary private information.
+            </p>
+
+            <div class="defense">
+              Defense
+            </div>
+
+            <p>
+              Explicit response fields, DTOs/serializers, schema controls,
+              and careful API design.
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           HELMET
+      ========================== -->
+
+      <section class="section" id="helmet" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            18 • Security Headers
+          </div>
+
+          <h2>
+            Helmet & Security Headers
+          </h2>
+
+        </div>
+
+        <p>
+          Express applications can use the
+          <strong>Helmet</strong> package to help configure a number of
+          HTTP security-related headers.
+        </p>
+
+        <h3>
+          Install Helmet
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>Terminal</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+
+          </div>
+
+          <pre><code>npm install helmet</code></pre>
+
+        </div>
+
+        <h3>
+          Basic Usage
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>server.js</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+
+          </div>
+
+          <pre><code>const helmet = require("helmet");
+
+app.use(helmet());</code></pre>
+
+        </div>
+
+        <div class="callout success">
+
+          <strong>
+            Security Principle
+          </strong>
+
+          Security middleware helps, but it does not replace secure
+          authentication logic, authorization, input validation, safe database
+          access, dependency management, and correct application design.
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           RATE LIMIT
+      ========================== -->
+
+      <section class="section" id="rate-limit" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            19 • Abuse Prevention
+          </div>
+
+          <h2>
+            Rate Limiting
+          </h2>
+
+        </div>
+
+        <p>
+          Rate limiting restricts how frequently a client can call an endpoint
+          during a given period.
+        </p>
+
+        <p>
+          It is especially useful for sensitive endpoints such as:
+        </p>
+
+        <ul>
+          <li>Login</li>
+          <li>Password reset</li>
+          <li>OTP verification</li>
+          <li>Account creation</li>
+          <li>Expensive API operations</li>
+        </ul>
+
+        <h3>
+          Example Package
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>Terminal</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+
+          </div>
+
+          <pre><code>npm install express-rate-limit</code></pre>
+
+        </div>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>server.js</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+
+          </div>
+
+          <pre><code>const rateLimit =
+  require("express-rate-limit");
+
+const loginLimiter =
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 10,
+    message: {
+      message: "Too many login attempts"
+    }
+  });
+
+app.use(
+  "/api/login",
+  loginLimiter
+);</code></pre>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           ENVIRONMENT
+      ========================== -->
+
+      <section class="section" id="env" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            20 • Secrets
+          </div>
+
+          <h2>
+            Environment Variables
+          </h2>
+
+        </div>
+
+        <p>
+          Authentication systems commonly require secrets such as:
+        </p>
+
+        <ul>
+          <li>MongoDB connection string</li>
+          <li>JWT signing secret</li>
+          <li>OAuth credentials</li>
+          <li>API keys</li>
+        </ul>
+
+        <p>
+          These values should not be hard-coded into source files.
+        </p>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>.env</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+
+          </div>
+
+          <pre><code>MONGODB_URI=mongodb://127.0.0.1:27017/myapp
+
+JWT_SECRET=replace-with-a-strong-random-secret</code></pre>
+
+        </div>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>.gitignore</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+
+          </div>
+
+          <pre><code>node_modules/
+.env</code></pre>
+
+        </div>
+
+        <div class="callout danger">
+
+          <strong>
+            Never commit production secrets
+          </strong>
+
+          If a secret is accidentally exposed, rotate/revoke it rather than
+          assuming that deleting the file or commit makes the secret safe.
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           COMPLETE AUTH API
+      ========================== -->
+
+      <section class="section" id="complete-api" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            21 • Complete Project
+          </div>
+
+          <h2>
+            Complete JWT Authentication API
+          </h2>
+
+        </div>
+
+        <p>
+          Now combine MongoDB, Mongoose, bcrypt, JWT, and Express into
+          a complete educational authentication API.
+        </p>
+
+        <h3>
+          Install Dependencies
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>Terminal</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+
+          </div>
+
+          <pre><code>npm install express mongoose bcrypt jsonwebtoken dotenv helmet express-rate-limit</code></pre>
+
+        </div>
+
+        <h3>
+          Project Structure
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>Project</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+
+          </div>
+
+          <pre><code>auth-api/
+│
+├── models/
+│   └── User.js
+│
+├── middleware/
+│   └── auth.js
+│
+├── .env
+├── .gitignore
+├── server.js
+└── package.json</code></pre>
+
+        </div>
+
+        <h3>
+          User Model
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>models/User.js</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+
+          </div>
+
+          <pre><code>const mongoose = require("mongoose");
+
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true
+    },
+
+    password: {
+      type: String,
+      required: true,
+      minlength: 8
+    },
+
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user"
+    }
+  },
+  {
+    timestamps: true
+  }
+);
+
+module.exports =
+  mongoose.model("User", userSchema);</code></pre>
+
+        </div>
+
+        <h3>
+          Authentication Middleware
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>middleware/auth.js</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+
+          </div>
+
+          <pre><code>const jwt = require("jsonwebtoken");
+
+function authenticateToken(req, res, next) {
+
+  const authHeader =
+    req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({
+      message: "Authentication required"
+    });
+  }
+
+  const [scheme, token] =
+    authHeader.split(" ");
+
+  if (scheme !== "Bearer" || !token) {
+    return res.status(401).json({
+      message: "Invalid authorization header"
+    });
+  }
+
+  try {
+
+    const decoded =
+      jwt.verify(
+        token,
+        process.env.JWT_SECRET
+      );
+
+    req.user = decoded;
+
+    next();
+
+  } catch (error) {
+
+    return res.status(401).json({
+      message: "Invalid or expired token"
+    });
+
+  }
+}
+
+module.exports =
+  authenticateToken;</code></pre>
+
+        </div>
+
+        <h3>
+          Complete Server
+        </h3>
+
+        <div class="code-wrap">
+
+          <div class="code-top">
+            <span>server.js</span>
+
+            <button onclick="copyCode(this)">
+              Copy
+            </button>
+
+          </div>
+
+          <pre><code>require("dotenv").config();
+
+const express = require("express");
+const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const helmet = require("helmet");
+const rateLimit =
+  require("express-rate-limit");
+
+const User = require("./models/User");
+
+const authenticateToken =
+  require("./middleware/auth");
+
+const app = express();
+
+/* =========================
+   GLOBAL MIDDLEWARE
+========================= */
+
+app.use(helmet());
+app.use(express.json());
+
+/* =========================
+   DATABASE
+========================= */
+
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log("MongoDB connected");
+  })
+  .catch((error) => {
+    console.error(
+      "MongoDB connection failed:",
+      error
+    );
+  });
+
+/* =========================
+   LOGIN RATE LIMIT
+========================= */
+
+const loginLimiter =
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 10,
+    message: {
+      message: "Too many login attempts"
+    }
+  });
+
+/* =========================
+   REGISTER
+========================= */
+
+app.post(
+  "/api/register",
+  async (req, res) => {
+
+    try {
+
+      const {
+        name,
+        email,
+        password
+      } = req.body;
+
+      if (
+        !name ||
+        !email ||
+        !password
+      ) {
+        return res.status(400).json({
+          message:
+            "Name, email and password are required"
+        });
+      }
+
+      if (password.length < 8) {
+        return res.status(400).json({
+          message:
+            "Password must contain at least 8 characters"
+        });
+      }
+
+      const existingUser =
+        await User.findOne({ email });
+
+      if (existingUser) {
+        return res.status(409).json({
+          message: "User already exists"
+        });
+      }
+
+      const hashedPassword =
+        await bcrypt.hash(
+          password,
+          12
+        );
+
+      const user =
+        await User.create({
+          name,
+          email,
+          password: hashedPassword
+        });
+
+      res.status(201).json({
+        message:
+          "Registration successful",
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
+      });
+
+    } catch (error) {
+
+      res.status(500).json({
+        message:
+          "Registration failed"
+      });
+
+    }
+
+  }
+);
+
+/* =========================
+   LOGIN
+========================= */
+
+app.post(
+  "/api/login",
+  loginLimiter,
+  async (req, res) => {
+
+    try {
+
+      const {
+        email,
+        password
+      } = req.body;
+
+      if (!email || !password) {
+        return res.status(400).json({
+          message:
+            "Email and password are required"
+        });
+      }
+
+      const user =
+        await User.findOne({ email });
+
+      if (!user) {
+        return res.status(401).json({
+          message:
+            "Invalid credentials"
+        });
+      }
+
+      const passwordMatch =
+        await bcrypt.compare(
+          password,
+          user.password
+        );
+
+      if (!passwordMatch) {
+        return res.status(401).json({
+          message:
+            "Invalid credentials"
+        });
+      }
+
+      const token =
+        jwt.sign(
+          {
+            sub: user._id.toString(),
+            role: user.role
+          },
+          process.env.JWT_SECRET,
+          {
+            expiresIn: "15m"
+          }
+        );
+
+      res.status(200).json({
+        message:
+          "Login successful",
+        token
+      });
+
+    } catch (error) {
+
+      res.status(500).json({
+        message:
+          "Login failed"
+      });
+
+    }
+
+  }
+);
+
+/* =========================
+   PROTECTED PROFILE
+========================= */
+
+app.get(
+  "/api/profile",
+  authenticateToken,
+  async (req, res) => {
+
+    try {
+
+      const user =
+        await User.findById(
+          req.user.sub
+        ).select(
+          "-password"
+        );
+
+      if (!user) {
+        return res.status(404).json({
+          message:
+            "User not found"
+        });
+      }
+
+      res.status(200).json({
+        user
+      });
+
+    } catch (error) {
+
+      res.status(500).json({
+        message:
+          "Failed to load profile"
+      });
+
+    }
+
+  }
+);
+
+/* =========================
+   ADMIN AUTHORIZATION
+========================= */
+
+app.get(
+  "/api/admin",
+  authenticateToken,
+  async (req, res) => {
+
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        message:
+          "Admin access required"
+      });
+    }
+
+    res.json({
+      message:
+        "Welcome to the admin area"
+    });
+
+  }
+);
+
+/* =========================
+   SERVER
+========================= */
+
+app.listen(
+  3000,
+  () => {
+    console.log(
+      "Server running on port 3000"
+    );
+  }
+);</code></pre>
+
+        </div>
+
+        <div class="callout success">
+
+          <strong>
+            Complete Authentication Pipeline
+          </strong>
+
+          Register →
+          Hash Password →
+          Store User →
+          Login →
+          Compare Password →
+          Create JWT →
+          Send Token →
+          Authenticate Middleware →
+          Authorization →
+          Protected Resource
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           INTERACTIVE LAB
+      ========================== -->
+
+      <section class="section" id="interactive" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            22 • Interactive Lab
+          </div>
+
+          <h2>
+            JWT Authentication Simulator
+          </h2>
+
+        </div>
+
+        <p>
+          This simulator does not create a real JWT or connect to MongoDB.
+          It demonstrates the logical sequence of an authentication system.
+        </p>
+
+        <div class="lab">
+
+          <div class="lab-controls">
+
+            <input
+              id="demoEmail"
+              type="email"
+              value="asha@example.com"
+              placeholder="Email"
+            />
+
+            <select id="demoAction">
+
+              <option value="login">
+                Login
+              </option>
+
+              <option value="protected">
+                Access Protected API
+              </option>
+
+              <option value="admin">
+                Access Admin API
+              </option>
+
+              <option value="logout">
+                Logout
+              </option>
+
+            </select>
+
+            <button
+              class="btn"
+              onclick="runAuthDemo()"
+            >
+              Execute
+            </button>
+
+          </div>
+
+          <div
+            class="auth-result"
+            id="authResult"
+          >
+Authentication Simulator Ready
+
+Try Login first.
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           SECURITY CHECKLIST
+      ========================== -->
+
+      <section class="section" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            23 • Production Checklist
+          </div>
+
+          <h2>
+            Authentication Security Checklist
+          </h2>
+
+        </div>
+
+        <div class="grid grid-2">
+
+          <div class="info-card">
+            <h4>✓ Passwords</h4>
+            <p>
+              Hash passwords with a suitable password hashing algorithm.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <h4>✓ HTTPS</h4>
+            <p>
+              Protect credentials and tokens in transit.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <h4>✓ JWT Expiration</h4>
+            <p>
+              Use appropriate lifetimes and have a token lifecycle strategy.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <h4>✓ Authorization</h4>
+            <p>
+              Do not confuse a valid login with permission to perform every action.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <h4>✓ Input Validation</h4>
+            <p>
+              Validate all untrusted input on the server.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <h4>✓ Rate Limiting</h4>
+            <p>
+              Protect sensitive endpoints from excessive automated requests.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <h4>✓ Security Headers</h4>
+            <p>
+              Configure appropriate HTTP security headers.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <h4>✓ Secrets</h4>
+            <p>
+              Keep keys and credentials outside source control.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <h4>✓ Safe Responses</h4>
+            <p>
+              Never return passwords or sensitive internal fields.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <h4>✓ Dependencies</h4>
+            <p>
+              Audit and update dependencies regularly.
+            </p>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           COMMON MISTAKES
+      ========================== -->
+
+      <section class="section" id="mistakes" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            24 • Debugging
+          </div>
+
+          <h2>
+            Common Authentication Mistakes
+          </h2>
+
+        </div>
+
+        <div class="grid grid-2">
+
+          <div class="info-card">
+
+            <h4>
+              ❌ Storing Plain Passwords
+            </h4>
+
+            <p>
+              Never save the original password in the database.
+            </p>
+
+          </div>
+
+          <div class="info-card">
+
+            <h4>
+              ❌ Putting Password in JWT
+            </h4>
+
+            <p>
+              JWT payloads should not contain passwords or unnecessary secrets.
+            </p>
+
+          </div>
+
+          <div class="info-card">
+
+            <h4>
+              ❌ Never Expiring Tokens
+            </h4>
+
+            <p>
+              Consider appropriate expiration and token lifecycle strategies.
+            </p>
+
+          </div>
+
+          <div class="info-card">
+
+            <h4>
+              ❌ Trusting req.body
+            </h4>
+
+            <p>
+              Client input is untrusted and must be validated.
+            </p>
+
+          </div>
+
+          <div class="info-card">
+
+            <h4>
+              ❌ Checking Authentication Only
+            </h4>
+
+            <p>
+              A logged-in user may still not have permission for a particular
+              resource.
+            </p>
+
+          </div>
+
+          <div class="info-card">
+
+            <h4>
+              ❌ Hard-Coded JWT Secret
+            </h4>
+
+            <p>
+              Keep production secrets outside the source code.
+            </p>
+
+          </div>
+
+          <div class="info-card">
+
+            <h4>
+              ❌ Returning Passwords
+            </h4>
+
+            <p>
+              Explicitly exclude password fields from API responses.
+            </p>
+
+          </div>
+
+          <div class="info-card">
+
+            <h4>
+              ❌ No Rate Limiting
+            </h4>
+
+            <p>
+              Login endpoints can become targets for automated guessing.
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           INTERVIEW
+      ========================== -->
+
+      <section class="section" id="interview" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            25 • Interview Preparation
+          </div>
+
+          <h2>
+            Authentication & Security Interview Questions
+          </h2>
+
+        </div>
+
+        <div class="accordion">
+
+          <button class="accordion-btn">
+            What is authentication?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            Authentication is the process of verifying the identity of
+            a user or system.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button class="accordion-btn">
+            What is authorization?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            Authorization determines what an authenticated user is allowed
+            to access or perform.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button class="accordion-btn">
+            What is JWT?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            JSON Web Token is a compact token format used to carry signed
+            claims between parties. It is commonly used for token-based
+            authentication.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button class="accordion-btn">
+            What are the three parts of a JWT?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            Header, payload, and signature.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button class="accordion-btn">
+            Is JWT encrypted?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            A standard signed JWT is not automatically encrypted. Its payload
+            can generally be decoded, so sensitive secrets should not be placed
+            inside it merely because it is a JWT.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button class="accordion-btn">
+            Why use bcrypt?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            bcrypt is a password hashing algorithm/library commonly used to
+            transform passwords into hashes suitable for password storage.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button class="accordion-btn">
+            Hashing vs encryption?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            Hashing is designed as a one-way transformation for verification.
+            Encryption is designed to allow authorized parties to recover the
+            original data using a key.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button class="accordion-btn">
+            What is middleware in authentication?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            Authentication middleware can verify credentials or tokens before
+            allowing the request to reach a protected route.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button class="accordion-btn">
+            What is a Bearer token?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            It is a common HTTP authorization scheme where the client presents
+            a token as the credential, typically using:
+            Authorization: Bearer TOKEN.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button class="accordion-btn">
+            What is 401?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            HTTP 401 indicates that the request lacks valid authentication
+            credentials.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button class="accordion-btn">
+            What is 403?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            HTTP 403 indicates that the server understood the request but
+            refuses to authorize the action.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button class="accordion-btn">
+            Why use rate limiting?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            Rate limiting restricts excessive requests and can reduce abuse,
+            including automated login attempts.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button class="accordion-btn">
+            What does HttpOnly do?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            It prevents client-side JavaScript from directly reading the cookie.
+          </div>
+
+        </div>
+
+        <div class="accordion">
+
+          <button class="accordion-btn">
+            Why should secrets be stored in environment variables?
+            <span>+</span>
+          </button>
+
+          <div class="accordion-content">
+            This keeps sensitive configuration outside application source code
+            and makes it easier to provide different values for different
+            environments.
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           QUIZ
+      ========================== -->
+
+      <section class="section" id="quiz" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            26 • Knowledge Check
+          </div>
+
+          <h2>
+            Lesson Quiz
+          </h2>
+
+        </div>
+
+        <div id="quizContainer">
+
+          <div class="quiz-question">
+
+            <h4>
+              1. What does authentication determine?
+            </h4>
+
+            <button class="option" data-answer="correct">
+              Who the user is
+            </button>
+
+            <button class="option" data-answer="wrong">
+              Which database to use
+            </button>
+
+            <button class="option" data-answer="wrong">
+              Which CSS file is loaded
+            </button>
+
+          </div>
+
+
+          <div class="quiz-question">
+
+            <h4>
+              2. What does authorization determine?
+            </h4>
+
+            <button class="option" data-answer="wrong">
+              The user's password hash
+            </button>
+
+            <button class="option" data-answer="correct">
+              What the authenticated user is allowed to do
+            </button>
+
+            <button class="option" data-answer="wrong">
+              The user's browser version
+            </button>
+
+          </div>
+
+
+          <div class="quiz-question">
+
+            <h4>
+              3. What are the three parts of a JWT?
+            </h4>
+
+            <button class="option" data-answer="correct">
+              Header, Payload, Signature
+            </button>
+
+            <button class="option" data-answer="wrong">
+              User, Server, Database
+            </button>
+
+            <button class="option" data-answer="wrong">
+              Request, Response, Cookie
+            </button>
+
+          </div>
+
+
+          <div class="quiz-question">
+
+            <h4>
+              4. What should normally be stored in a user database?
+            </h4>
+
+            <button class="option" data-answer="wrong">
+              Plain-text password
+            </button>
+
+            <button class="option" data-answer="correct">
+              Password hash
+            </button>
+
+            <button class="option" data-answer="wrong">
+              JWT secret
+            </button>
+
+          </div>
+
+
+          <div class="quiz-question">
+
+            <h4>
+              5. Which status code normally represents authentication failure?
+            </h4>
+
+            <button class="option" data-answer="wrong">
+              201
+            </button>
+
+            <button class="option" data-answer="correct">
+              401
+            </button>
+
+            <button class="option" data-answer="wrong">
+              304
+            </button>
+
+          </div>
+
+
+          <div class="quiz-question">
+
+            <h4>
+              6. What does bcrypt.compare() do?
+            </h4>
+
+            <button class="option" data-answer="correct">
+              Checks a supplied password against a stored password hash
+            </button>
+
+            <button class="option" data-answer="wrong">
+              Creates a JWT
+            </button>
+
+            <button class="option" data-answer="wrong">
+              Connects to MongoDB
+            </button>
+
+          </div>
+
+
+          <div class="quiz-question">
+
+            <h4>
+              7. What is the purpose of JWT verification?
+            </h4>
+
+            <button class="option" data-answer="wrong">
+              Format HTML
+            </button>
+
+            <button class="option" data-answer="correct">
+              Verify the token and its relevant claims
+            </button>
+
+            <button class="option" data-answer="wrong">
+              Encrypt MongoDB
+            </button>
+
+          </div>
+
+
+          <div class="quiz-question">
+
+            <h4>
+              8. Which header commonly carries a Bearer token?
+            </h4>
+
+            <button class="option" data-answer="correct">
+              Authorization
+            </button>
+
+            <button class="option" data-answer="wrong">
+              Content-Length
+            </button>
+
+            <button class="option" data-answer="wrong">
+              Hostname
+            </button>
+
+          </div>
+
+        </div>
+
+        <button
+          class="btn"
+          onclick="finishQuiz()"
+        >
+          Check Quiz
+        </button>
+
+        <div
+          class="quiz-result"
+          id="quizResult"
+        ></div>
+
+      </section>
+
+
+      <!-- =========================
+           CHALLENGE
+      ========================== -->
+
+      <section class="section" id="challenge" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            27 • Practical Challenge
+          </div>
+
+          <h2>
+            Build a Secure Authentication System
+          </h2>
+
+        </div>
+
+        <div class="challenge">
+
+          <h3>
+            Your Task
+          </h3>
+
+          <p>
+            Build a Node.js authentication backend using:
+          </p>
+
+          <ul>
+            <li>Express</li>
+            <li>MongoDB</li>
+            <li>Mongoose</li>
+            <li>bcrypt</li>
+            <li>jsonwebtoken</li>
+            <li>dotenv</li>
+            <li>Helmet</li>
+            <li>Rate limiting</li>
+          </ul>
+
+          <p>
+            Implement:
+          </p>
+
+          <ul>
+
+            <li>
+              POST <code>/api/register</code>
+            </li>
+
+            <li>
+              POST <code>/api/login</code>
+            </li>
+
+            <li>
+              GET <code>/api/profile</code>
+            </li>
+
+            <li>
+              GET <code>/api/admin</code>
+            </li>
+
+          </ul>
+
+          <p>
+            Requirements:
+          </p>
+
+          <ul>
+
+            <li>
+              Hash passwords before saving them.
+            </li>
+
+            <li>
+              Never return the password field.
+            </li>
+
+            <li>
+              Return 401 for invalid authentication.
+            </li>
+
+            <li>
+              Return 403 when an authenticated user lacks permission.
+            </li>
+
+            <li>
+              Create an expiring JWT after successful login.
+            </li>
+
+            <li>
+              Verify the JWT through reusable middleware.
+            </li>
+
+            <li>
+              Add rate limiting to the login endpoint.
+            </li>
+
+            <li>
+              Store secrets in environment variables.
+            </li>
+
+            <li>
+              Add appropriate security headers.
+            </li>
+
+          </ul>
+
+          <p>
+            <strong>
+              Bonus:
+            </strong>
+            Add refresh-token handling, logout/revocation strategy,
+            password reset, email verification, and multi-factor authentication.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           REVISION
+      ========================== -->
+
+      <section class="section" data-section>
+
+        <div class="section-header">
+
+          <div class="section-number">
+            28 • Quick Revision
+          </div>
+
+          <h2>
+            Remember These Concepts
+          </h2>
+
+        </div>
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+
+              <tr>
+                <th>Concept</th>
+                <th>Remember</th>
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              <tr>
+                <td>Authentication</td>
+                <td>
+                  Verifies who the user is.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Authorization</td>
+                <td>
+                  Determines what the user can access or do.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Password Hash</td>
+                <td>
+                  One-way representation used for password verification.
+                </td>
+              </tr>
+
+              <tr>
+                <td>bcrypt</td>
+                <td>
+                  Common password-hashing library.
+                </td>
+              </tr>
+
+              <tr>
+                <td>JWT</td>
+                <td>
+                  Compact signed token format.
+                </td>
+              </tr>
+
+              <tr>
+                <td>JWT Header</td>
+                <td>
+                  Token metadata such as algorithm and type.
+                </td>
+              </tr>
+
+              <tr>
+                <td>JWT Payload</td>
+                <td>
+                  Claims about the token subject and context.
+                </td>
+              </tr>
+
+              <tr>
+                <td>JWT Signature</td>
+                <td>
+                  Helps verify token integrity and authenticity.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Middleware</td>
+                <td>
+                  Reusable request-processing logic.
+                </td>
+              </tr>
+
+              <tr>
+                <td>401</td>
+                <td>
+                  Authentication credentials are missing or invalid.
+                </td>
+              </tr>
+
+              <tr>
+                <td>403</td>
+                <td>
+                  Request is understood but not authorized.
+                </td>
+              </tr>
+
+              <tr>
+                <td>HttpOnly</td>
+                <td>
+                  Prevents JavaScript from directly reading a cookie.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Helmet</td>
+                <td>
+                  Helps configure security-related HTTP headers.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Rate Limiting</td>
+                <td>
+                  Restricts excessive requests.
+                </td>
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           COMPLETE
+      ========================== -->
+
+      <section
+        class="section completion"
+        id="complete"
+        data-section
+      >
+
+        <div class="completion-icon">
+          ✓
+        </div>
+
+        <h2>
+          Authentication & Security Mastered
+        </h2>
+
+        <p>
+          You have covered authentication, authorization, password hashing,
+          bcrypt, JWT structure, JWT verification, middleware, protected routes,
+          cookies, sessions, security headers, rate limiting, common attacks,
+          and a complete Express authentication API.
+        </p>
+
+        <br />
+
+        <button
+          class="btn"
+          id="completeBtn"
+          onclick="completeLesson()"
+        >
+          Mark Lesson 13 Complete
+        </button>
+
+        <div class="nav-buttons">
+
+          <a
+            class="btn secondary"
+            href="lesson12.html"
+          >
+            ← Lesson 12
+          </a>
+
+          <a
+            class="btn"
+            href="lesson14.html"
+          >
+            Lesson 14 →
+          </a>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+  <script>
+
+    /* =========================
+       PROGRESS
+    ========================== */
+
+    const sections =
+      [...document.querySelectorAll("[data-section]")];
+
+    const progressFill =
+      document.getElementById("progressFill");
+
+    const progressLabel =
+      document.getElementById("progressLabel");
+
+    function updateProgress() {
+
+      const scrollTop =
+        window.scrollY;
+
+      const documentHeight =
+        document.documentElement.scrollHeight -
+        window.innerHeight;
+
+      const percentage =
+        documentHeight <= 0
+          ? 0
+          : Math.min(
+              100,
+              Math.round(
+                (scrollTop / documentHeight) * 100
+              )
+            );
+
+      progressFill.style.width =
+        percentage + "%";
+
+      progressLabel.textContent =
+        percentage + "% Complete";
+    }
+
+    window.addEventListener(
+      "scroll",
+      updateProgress
+    );
+
+    updateProgress();
+
+
+    /* =========================
+       ACTIVE TOC
+    ========================== */
+
+    const tocLinks =
+      [...document.querySelectorAll("#toc a")];
+
+    const observer =
+      new IntersectionObserver(
+        entries => {
+
+          entries.forEach(entry => {
+
+            if (entry.isIntersecting) {
+
+              const id =
+                entry.target.id;
+
+              tocLinks.forEach(link => {
+
+                link.classList.toggle(
+                  "active",
+                  link.getAttribute("href") ===
+                    "#" + id
+                );
+
+              });
+
+            }
+
+          });
+
+        },
+        {
+          rootMargin:
+            "-20% 0px -65% 0px"
+        }
+      );
+
+    sections.forEach(
+      section =>
+        observer.observe(section)
+    );
+
+
+    /* =========================
+       COPY CODE
+    ========================== */
+
+    function copyCode(button) {
+
+      const code =
+        button
+          .closest(".code-wrap")
+          .querySelector("code")
+          .innerText;
+
+      navigator.clipboard.writeText(code);
+
+      const original =
+        button.innerText;
+
+      button.innerText =
+        "Copied!";
+
+      setTimeout(
+        () => {
+          button.innerText =
+            original;
+        },
+        1200
+      );
+    }
+
+
+    /* =========================
+       JWT EXPLORER
+    ========================== */
+
+    function showJWTPart(part) {
+
+      const info =
+        document.getElementById("jwtInfo");
+
+      const descriptions = {
+
+        header:
+          "<strong>Header:</strong> Contains metadata such as the token type and signing algorithm.",
+
+        payload:
+          "<strong>Payload:</strong> Contains claims. It can generally be decoded, so do not place passwords or other secrets here.",
+
+        signature:
+          "<strong>Signature:</strong> Allows the recipient to verify that the signed token has not been altered and was signed using the expected key."
+      };
+
+      info.innerHTML =
+        descriptions[part];
+    }
+
+
+    /* =========================
+       AUTH SIMULATOR
+    ========================== */
+
+    let demoAuthenticated =
+      false;
+
+    function runAuthDemo() {
+
+      const email =
+        document.getElementById(
+          "demoEmail"
+        ).value.trim();
+
+      const action =
+        document.getElementById(
+          "demoAction"
+        ).value;
+
+      const result =
+        document.getElementById(
+          "authResult"
+        );
+
+      if (!email) {
+
+        result.textContent =
+`STATUS: 400 Bad Request
+
+Email is required.`;
+
+        return;
+      }
+
+
+      if (action === "login") {
+
+        demoAuthenticated =
+          true;
+
+        result.textContent =
+`STATUS: 200 OK
+
+LOGIN SUCCESS
+
+User:
+${email}
+
+Authentication steps:
+1. Receive credentials
+2. Find user
+3. Verify password hash
+4. Create signed JWT
+5. Return authentication result
+
+Simulation token:
+eyJhbGciOiJIUzI1NiJ9.demo.payload.signature`;
+
+      }
+
+
+      else if (action === "protected") {
+
+        if (!demoAuthenticated) {
+
+          result.textContent =
+`STATUS: 401 Unauthorized
+
+Protected resource requires authentication.
+
+Action:
+Login first.`;
+
+          return;
+        }
+
+        result.textContent =
+`STATUS: 200 OK
+
+PROTECTED API ACCESS GRANTED
+
+User:
+${email}
+
+Middleware:
+✓ Token found
+✓ Token verified
+✓ Authentication accepted
+
+Response:
+{
+  "message": "Protected resource accessed successfully"
+}`;
+
+      }
+
+
+      else if (action === "admin") {
+
+        if (!demoAuthenticated) {
+
+          result.textContent =
+`STATUS: 401 Unauthorized
+
+You must authenticate first.`;
+
+          return;
+        }
+
+        result.textContent =
+`STATUS: 403 Forbidden
+
+Authentication succeeded.
+
+Authorization failed.
+
+The simulation user does not have
+administrator permission.`;
+
+      }
+
+
+      else if (action === "logout") {
+
+        demoAuthenticated =
+          false;
+
+        result.textContent =
+`STATUS: 200 OK
+
+LOGOUT
+
+Authentication state cleared
+for this simulator session.`;
+
+      }
+
+    }
+
+
+    /* =========================
+       ACCORDION
+    ========================== */
+
+    document
+      .querySelectorAll(".accordion-btn")
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const accordion =
+              button.parentElement;
+
+            accordion.classList.toggle(
+              "open"
+            );
+
+            const symbol =
+              button.querySelector("span");
+
+            symbol.textContent =
+              accordion.classList.contains(
+                "open"
+              )
+                ? "−"
+                : "+";
+
+          }
+        );
+
+      });
+
+
+    /* =========================
+       QUIZ
+    ========================== */
+
+    let quizScore = 0;
+    let answeredQuestions = 0;
+
+    document
+      .querySelectorAll(
+        ".quiz-question"
+      )
+      .forEach(question => {
+
+        const options =
+          question.querySelectorAll(
+            ".option"
+          );
+
+        options.forEach(option => {
+
+          option.addEventListener(
+            "click",
+            () => {
+
+              if (
+                question.dataset.answered ===
+                "true"
+              ) {
+                return;
+              }
+
+              question.dataset.answered =
+                "true";
+
+              answeredQuestions++;
+
+              if (
+                option.dataset.answer ===
+                "correct"
+              ) {
+
+                option.classList.add(
+                  "correct"
+                );
+
+                quizScore++;
+
+              } else {
+
+                option.classList.add(
+                  "wrong"
+                );
+
+                const correct =
+                  question.querySelector(
+                    '[data-answer="correct"]'
+                  );
+
+                correct.classList.add(
+                  "correct"
+                );
+
+              }
+
+            }
+          );
+
+        });
+
+      });
+
+
+    function finishQuiz() {
+
+      const result =
+        document.getElementById(
+          "quizResult"
+        );
+
+      const total =
+        document.querySelectorAll(
+          ".quiz-question"
+        ).length;
+
+      if (
+        answeredQuestions < total
+      ) {
+
+        result.style.display =
+          "block";
+
+        result.textContent =
+          `Answer all ${total} questions first. You have answered ${answeredQuestions}/${total}.`;
+
+        return;
+      }
+
+      result.style.display =
+        "block";
+
+      const percentage =
+        Math.round(
+          (quizScore / total) * 100
+        );
+
+      result.textContent =
+        `Your score: ${quizScore}/${total} (${percentage}%). ${
+          percentage === 100
+            ? "Excellent! You have a strong understanding of authentication and security."
+            : "Review the lesson sections and strengthen the concepts you missed."
+        }`;
+
+      localStorage.setItem(
+        "zensus-node-lesson13-quiz",
+        quizScore
+      );
+    }
+
+
+    /* =========================
+       COMPLETE LESSON
+    ========================== */
+
+    function completeLesson() {
+
+      localStorage.setItem(
+        "zensus-node-lesson13-complete",
+        "true"
+      );
+
+      const button =
+        document.getElementById(
+          "completeBtn"
+        );
+
+      button.textContent =
+        "✓ Lesson 13 Completed";
+
+      button.style.background =
+        "#16a34a";
+
+      progressFill.style.width =
+        "100%";
+
+      progressLabel.textContent =
+        "100% Complete";
+    }
+
+
+    /* =========================
+       LOAD COMPLETION
+    ========================== */
+
+    if (
+      localStorage.getItem(
+        "zensus-node-lesson13-complete"
+      ) === "true"
+    ) {
+
+      const button =
+        document.getElementById(
+          "completeBtn"
+        );
+
+      button.textContent =
+        "✓ Lesson 13 Completed";
+
+      button.style.background =
+        "#16a34a";
+    }
+
+  </script>
+
+</body>
+</html>

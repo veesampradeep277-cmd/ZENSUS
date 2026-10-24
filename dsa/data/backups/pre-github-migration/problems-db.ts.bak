@@ -1,0 +1,1343 @@
+import { DSA_TOPICS_CONFIG } from '../config/topics';
+import {
+  InternalProblemDefinition,
+  ProblemDetail,
+  ProblemSummary,
+  Difficulty,
+  SupportedLanguage,
+  TestCase,
+} from '../../src/types/dsa.types';
+import { TOPIC_19_PROBLEMS } from './topics/topic-19';
+
+// Topic problem blueprints for realistic algorithmic curriculum
+interface TopicProblemPattern {
+  order: number;
+  title: string;
+  difficulty: Difficulty;
+  progressionStage: 'Foundation' | 'Basic Application' | 'Intermediate' | 'Advanced' | 'Interview / Placement';
+  description: string;
+  inputFormat: string;
+  outputFormat: string;
+  constraints: string[];
+  examples: Array<{ input: string; output: string; explanation?: string }>;
+  visibleTests: Array<{ id: string; input: string; expectedOutput: string; label?: string }>;
+  hiddenTests: TestCase[];
+  tags: string[];
+  timeLimitMs?: number;
+  memoryLimitMb?: number;
+}
+
+// Helper to generate starter code for any problem
+export function generateStarterCode(
+  title: string,
+  inputHint: string = 'standard input',
+  outputHint: string = 'standard output'
+): Record<SupportedLanguage, string> {
+  return {
+    python: `import sys
+
+def solve():
+    # Read ${inputHint}
+    input_data = sys.stdin.read().split()
+    if not input_data:
+        return
+    
+    # Write your solution here
+    pass
+
+if __name__ == "__main__":
+    solve()
+`,
+    cpp: `#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    // Read input and write solution here
+
+    return 0;
+}
+`,
+    java: `import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        Scanner sc = new Scanner(System.in);
+        // Read input and write solution here
+    }
+}
+`,
+    javascript: `'use strict';
+
+const fs = require('fs');
+
+function solve() {
+    const input = fs.readFileSync(0, 'utf8').trim();
+    if (!input) return;
+    const tokens = input.split(/\\s+/);
+    
+    // Write your solution here
+}
+
+solve();
+`,
+  };
+}
+
+// Handcrafted rich catalog for the 10-problem vertical slice + topic cores
+const HANDCRAFTED_PROBLEMS: Record<string, Partial<InternalProblemDefinition>> = {
+  // Input & Output
+  '01-input-output-001': {
+    title: 'Sum of Two Integers',
+    difficulty: 'Easy',
+    order: 1,
+    progressionStage: 'Foundation',
+    tags: ['Input/Output', 'Arithmetic', 'Basics'],
+    description: 'Read two integers $A$ and $B$ from standard input and print their sum to standard output.',
+    inputFormat: 'A single line containing two space-separated integers $A$ and $B$.',
+    outputFormat: 'Print a single integer representing $A + B$.',
+    constraints: ['-10^9 <= A, B <= 10^9'],
+    examples: [
+      { input: '5 7', output: '12', explanation: '5 + 7 = 12' },
+      { input: '-3 8', output: '5', explanation: '-3 + 8 = 5' },
+    ],
+    visibleTests: [
+      { id: 'v1', input: '5 7\n', expectedOutput: '12\n', label: 'Example 1' },
+      { id: 'v2', input: '-3 8\n', expectedOutput: '5\n', label: 'Example 2' },
+      { id: 'v3', input: '0 0\n', expectedOutput: '0\n', label: 'Zero values' },
+    ],
+    hiddenTests: [
+      { id: 'h1', input: '1000000000 1000000000\n', expectedOutput: '2000000000\n', isHidden: true },
+      { id: 'h2', input: '-1000000000 -1000000000\n', expectedOutput: '-2000000000\n', isHidden: true },
+      { id: 'h3', input: '-500 500\n', expectedOutput: '0\n', isHidden: true },
+      { id: 'h4', input: '42 -100\n', expectedOutput: '-58\n', isHidden: true },
+    ],
+    starterCode: {
+      python: `import sys
+
+def solve():
+    line = sys.stdin.read().split()
+    if not line:
+        return
+    a = int(line[0])
+    b = int(line[1])
+    # Print the sum of a and b
+    print(a + b)
+
+if __name__ == "__main__":
+    solve()
+`,
+      cpp: `#include <iostream>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    long long a, b;
+    if (cin >> a >> b) {
+        cout << a + b << "\\n";
+    }
+    return 0;
+}
+`,
+      java: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        if (sc.hasNextLong()) {
+            long a = sc.nextLong();
+            long b = sc.nextLong();
+            System.out.println(a + b);
+        }
+    }
+}
+`,
+      javascript: `'use strict';
+const fs = require('fs');
+
+function solve() {
+    const input = fs.readFileSync(0, 'utf8').trim();
+    if (!input) return;
+    const tokens = input.split(/\\s+/);
+    const a = BigInt(tokens[0]);
+    const b = BigInt(tokens[1]);
+    console.log((a + b).toString());
+}
+
+solve();
+`,
+    },
+  },
+
+  '01-input-output-002': {
+    title: 'Echo Line with Prefix',
+    difficulty: 'Easy',
+    order: 2,
+    progressionStage: 'Foundation',
+    tags: ['Input/Output', 'String Basics'],
+    description: 'Read a line of text containing a user name and print "Hello, <name>!" to standard output.',
+    inputFormat: 'A single non-empty line of text representing the name.',
+    outputFormat: 'Print "Hello, <name>!".',
+    constraints: ['1 <= |name| <= 100', 'The name consists of alphanumeric characters.'],
+    examples: [
+      { input: 'Genesis', output: 'Hello, Genesis!', explanation: 'The output greets Genesis.' },
+      { input: 'Alice', output: 'Hello, Alice!', explanation: 'The output greets Alice.' },
+    ],
+    visibleTests: [
+      { id: 'v1', input: 'Genesis\n', expectedOutput: 'Hello, Genesis!\n', label: 'Example 1' },
+      { id: 'v2', input: 'Alice\n', expectedOutput: 'Hello, Alice!\n', label: 'Example 2' },
+    ],
+    hiddenTests: [
+      { id: 'h1', input: 'World\n', expectedOutput: 'Hello, World!\n', isHidden: true },
+      { id: 'h2', input: 'Developer\n', expectedOutput: 'Hello, Developer!\n', isHidden: true },
+      { id: 'h3', input: 'Zensus2026\n', expectedOutput: 'Hello, Zensus2026!\n', isHidden: true },
+    ],
+    starterCode: {
+      python: `import sys
+
+def solve():
+    name = sys.stdin.read().strip()
+    if name:
+        print(f"Hello, {name}!")
+
+if __name__ == "__main__":
+    solve()
+`,
+      cpp: `#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    string s;
+    if (cin >> s) {
+        cout << "Hello, " << s << "!\\n";
+    }
+    return 0;
+}
+`,
+      java: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        if (sc.hasNext()) {
+            String s = sc.next();
+            System.out.println("Hello, " + s + "!");
+        }
+    }
+}
+`,
+      javascript: `'use strict';
+const fs = require('fs');
+
+function solve() {
+    const input = fs.readFileSync(0, 'utf8').trim();
+    if (!input) return;
+    console.log('Hello, ' + input.split(/\\s+/)[0] + '!');
+}
+
+solve();
+`,
+    },
+  },
+
+  // Arrays
+  '03-arrays-001': {
+    title: 'Find the Largest Element',
+    difficulty: 'Easy',
+    order: 1,
+    progressionStage: 'Foundation',
+    tags: ['Arrays', 'Traversal', 'Linear Scan'],
+    description: 'Given an array $A$ of $N$ integers, find and print the maximum element in the array.',
+    inputFormat: 'The first line contains integer $N$. The second line contains $N$ space-separated integers $A[0], A[1], \\dots, A[N-1]$.',
+    outputFormat: 'Print the largest integer present in the array.',
+    constraints: ['1 <= N <= 100000', '-10^9 <= A[i] <= 10^9'],
+    examples: [
+      { input: '5\n1 8 7 56 90', output: '90', explanation: '90 is the greatest integer in the array.' },
+      { input: '4\n-10 -5 -20 -1', output: '-1', explanation: '-1 is the greatest integer in the negative array.' },
+    ],
+    visibleTests: [
+      { id: 'v1', input: '5\n1 8 7 56 90\n', expectedOutput: '90\n', label: 'Example 1' },
+      { id: 'v2', input: '4\n-10 -5 -20 -1\n', expectedOutput: '-1\n', label: 'Negative Numbers' },
+      { id: 'v3', input: '1\n42\n', expectedOutput: '42\n', label: 'Single Element' },
+    ],
+    hiddenTests: [
+      { id: 'h1', input: '6\n100 200 50 400 300 250\n', expectedOutput: '400\n', isHidden: true },
+      { id: 'h2', input: '5\n-999999999 -888888888 -777777777 -1000000000 -666666666\n', expectedOutput: '-666666666\n', isHidden: true },
+      { id: 'h3', input: '7\n0 0 0 0 0 0 0\n', expectedOutput: '0\n', isHidden: true },
+      { id: 'h4', input: '4\n10 10 10 10\n', expectedOutput: '10\n', isHidden: true },
+    ],
+    starterCode: {
+      python: `import sys
+
+def solve():
+    tokens = sys.stdin.read().split()
+    if not tokens:
+        return
+    n = int(tokens[0])
+    arr = [int(x) for x in tokens[1:n+1]]
+    
+    # Write code to find and print the maximum element
+    max_val = max(arr)
+    print(max_val)
+
+if __name__ == "__main__":
+    solve()
+`,
+      cpp: `#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    if (cin >> n) {
+        vector<long long> arr(n);
+        for (int i = 0; i < n; i++) cin >> arr[i];
+        
+        long long max_val = arr[0];
+        for (int i = 1; i < n; i++) {
+            if (arr[i] > max_val) max_val = arr[i];
+        }
+        cout << max_val << "\\n";
+    }
+    return 0;
+}
+`,
+      java: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        if (sc.hasNextInt()) {
+            int n = sc.nextInt();
+            long maxVal = sc.nextLong();
+            for (int i = 1; i < n; i++) {
+                long val = sc.nextLong();
+                if (val > maxVal) maxVal = val;
+            }
+            System.out.println(maxVal);
+        }
+    }
+}
+`,
+      javascript: `'use strict';
+const fs = require('fs');
+
+function solve() {
+    const input = fs.readFileSync(0, 'utf8').trim();
+    if (!input) return;
+    const tokens = input.split(/\\s+/);
+    const n = parseInt(tokens[0], 10);
+    let maxVal = BigInt(tokens[1]);
+    for (let i = 2; i <= n; i++) {
+        const val = BigInt(tokens[i]);
+        if (val > maxVal) maxVal = val;
+    }
+    console.log(maxVal.toString());
+}
+
+solve();
+`,
+    },
+  },
+
+  '03-arrays-002': {
+    title: 'Reverse an Array',
+    difficulty: 'Easy',
+    order: 2,
+    progressionStage: 'Foundation',
+    tags: ['Arrays', 'Two Pointers', 'In-place'],
+    description: 'Given an array $A$ of $N$ integers, reverse the array in place and print the reversed elements.',
+    inputFormat: 'First line contains integer $N$. Second line contains $N$ space-separated integers.',
+    outputFormat: 'Print the elements in reversed order, separated by spaces.',
+    constraints: ['1 <= N <= 100000', '-10^9 <= A[i] <= 10^9'],
+    examples: [
+      { input: '4\n1 2 3 4', output: '4 3 2 1', explanation: 'Reversing [1, 2, 3, 4] gives [4, 3, 2, 1].' },
+      { input: '3\n10 20 30', output: '30 20 10', explanation: 'Reversing [10, 20, 30] gives [30, 20, 10].' },
+    ],
+    visibleTests: [
+      { id: 'v1', input: '4\n1 2 3 4\n', expectedOutput: '4 3 2 1\n', label: 'Example 1' },
+      { id: 'v2', input: '3\n10 20 30\n', expectedOutput: '30 20 10\n', label: 'Example 2' },
+      { id: 'v3', input: '1\n99\n', expectedOutput: '99\n', label: 'Single Element' },
+    ],
+    hiddenTests: [
+      { id: 'h1', input: '5\n5 4 3 2 1\n', expectedOutput: '1 2 3 4 5\n', isHidden: true },
+      { id: 'h2', input: '2\n-10 10\n', expectedOutput: '10 -10\n', isHidden: true },
+      { id: 'h3', input: '6\n1 1 2 2 3 3\n', expectedOutput: '3 3 2 2 1 1\n', isHidden: true },
+    ],
+    starterCode: {
+      python: `import sys
+
+def solve():
+    tokens = sys.stdin.read().split()
+    if not tokens:
+        return
+    n = int(tokens[0])
+    arr = tokens[1:n+1]
+    
+    # Reverse and print
+    print(" ".join(reversed(arr)))
+
+if __name__ == "__main__":
+    solve()
+`,
+      cpp: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    if (cin >> n) {
+        vector<long long> arr(n);
+        for (int i = 0; i < n; i++) cin >> arr[i];
+        for (int i = n - 1; i >= 0; i--) {
+            cout << arr[i] << (i == 0 ? "" : " ");
+        }
+        cout << "\\n";
+    }
+    return 0;
+}
+`,
+      java: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        if (sc.hasNextInt()) {
+            int n = sc.nextInt();
+            long[] arr = new long[n];
+            for (int i = 0; i < n; i++) arr[i] = sc.nextLong();
+            for (int i = n - 1; i >= 0; i--) {
+                System.out.print(arr[i] + (i == 0 ? "" : " "));
+            }
+            System.out.println();
+        }
+    }
+}
+`,
+      javascript: `'use strict';
+const fs = require('fs');
+
+function solve() {
+    const input = fs.readFileSync(0, 'utf8').trim();
+    if (!input) return;
+    const tokens = input.split(/\\s+/);
+    const n = parseInt(tokens[0], 10);
+    const arr = tokens.slice(1, n + 1);
+    console.log(arr.reverse().join(' '));
+}
+
+solve();
+`,
+    },
+  },
+
+  // Strings
+  '04-strings-001': {
+    title: 'Palindrome String Check',
+    difficulty: 'Easy',
+    order: 1,
+    progressionStage: 'Foundation',
+    tags: ['Strings', 'Two Pointers'],
+    description: 'Given a non-empty string $S$, determine if it is a palindrome. A string is a palindrome if it reads the same backward as forward. Output "YES" if it is a palindrome, otherwise "NO".',
+    inputFormat: 'A single string $S$ containing lowercase English letters.',
+    outputFormat: 'Print "YES" if the string is a palindrome, otherwise print "NO".',
+    constraints: ['1 <= |S| <= 100000', 'S consists only of lowercase letters.'],
+    examples: [
+      { input: 'racecar', output: 'YES', explanation: '"racecar" spelled backwards is still "racecar".' },
+      { input: 'genesis', output: 'NO', explanation: '"genesis" spelled backwards is "siseneg".' },
+    ],
+    visibleTests: [
+      { id: 'v1', input: 'racecar\n', expectedOutput: 'YES\n', label: 'Odd Length' },
+      { id: 'v2', input: 'genesis\n', expectedOutput: 'NO\n', label: 'Not Palindrome' },
+      { id: 'v3', input: 'abba\n', expectedOutput: 'YES\n', label: 'Even Length' },
+    ],
+    hiddenTests: [
+      { id: 'h1', input: 'a\n', expectedOutput: 'YES\n', isHidden: true },
+      { id: 'h2', input: 'ab\n', expectedOutput: 'NO\n', isHidden: true },
+      { id: 'h3', input: 'madam\n', expectedOutput: 'YES\n', isHidden: true },
+      { id: 'h4', input: 'algorithmic\n', expectedOutput: 'NO\n', isHidden: true },
+    ],
+    starterCode: {
+      python: `import sys
+
+def solve():
+    s = sys.stdin.read().strip()
+    if not s:
+        return
+    if s == s[::-1]:
+        print("YES")
+    else:
+        print("NO")
+
+if __name__ == "__main__":
+    solve()
+`,
+      cpp: `#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    string s;
+    if (cin >> s) {
+        bool ok = true;
+        int l = 0, r = s.size() - 1;
+        while (l < r) {
+            if (s[l] != s[r]) { ok = false; break; }
+            l++; r--;
+        }
+        cout << (ok ? "YES" : "NO") << "\\n";
+    }
+    return 0;
+}
+`,
+      java: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        if (sc.hasNext()) {
+            String s = sc.next();
+            int l = 0, r = s.length() - 1;
+            boolean ok = true;
+            while (l < r) {
+                if (s.charAt(l) != s.charAt(r)) { ok = false; break; }
+                l++; r--;
+            }
+            System.out.println(ok ? "YES" : "NO");
+        }
+    }
+}
+`,
+      javascript: `'use strict';
+const fs = require('fs');
+
+function solve() {
+    const s = fs.readFileSync(0, 'utf8').trim();
+    if (!s) return;
+    const rev = s.split('').reverse().join('');
+    console.log(s === rev ? 'YES' : 'NO');
+}
+
+solve();
+`,
+    },
+  },
+
+  '04-strings-002': {
+    title: 'Count Vowels and Consonants',
+    difficulty: 'Easy',
+    order: 2,
+    progressionStage: 'Foundation',
+    tags: ['Strings', 'Frequency', 'Character Classification'],
+    description: 'Given a lowercase string $S$, count the number of vowels (a, e, i, o, u) and consonants.',
+    inputFormat: 'A single string $S$ containing lowercase English letters.',
+    outputFormat: 'Print two space-separated integers: the count of vowels followed by the count of consonants.',
+    constraints: ['1 <= |S| <= 100000', 'S consists only of lowercase letters.'],
+    examples: [
+      { input: 'hello', output: '2 3', explanation: 'Vowels: e, o (2). Consonants: h, l, l (3).' },
+      { input: 'aeiou', output: '5 0', explanation: 'All characters are vowels.' },
+    ],
+    visibleTests: [
+      { id: 'v1', input: 'hello\n', expectedOutput: '2 3\n', label: 'Example 1' },
+      { id: 'v2', input: 'aeiou\n', expectedOutput: '5 0\n', label: 'All Vowels' },
+    ],
+    hiddenTests: [
+      { id: 'h1', input: 'xyz\n', expectedOutput: '0 3\n', isHidden: true },
+      { id: 'h2', input: 'datastructure\n', expectedOutput: '5 8\n', isHidden: true },
+      { id: 'h3', input: 'a\n', expectedOutput: '1 0\n', isHidden: true },
+    ],
+    starterCode: {
+      python: `import sys
+
+def solve():
+    s = sys.stdin.read().strip()
+    if not s:
+        return
+    vowels = set('aeiou')
+    v_count = sum(1 for c in s if c in vowels)
+    c_count = len(s) - v_count
+    print(f"{v_count} {c_count}")
+
+if __name__ == "__main__":
+    solve()
+`,
+      cpp: `#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    string s;
+    if (cin >> s) {
+        int v = 0, c = 0;
+        for (char ch : s) {
+            if (ch == 'a' || ch == 'e' || ch == 'i' || ch == 'o' || ch == 'u') v++;
+            else c++;
+        }
+        cout << v << " " << c << "\\n";
+    }
+    return 0;
+}
+`,
+      java: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        if (sc.hasNext()) {
+            String s = sc.next();
+            int v = 0, c = 0;
+            for (char ch : s.toCharArray()) {
+                if ("aeiou".indexOf(ch) >= 0) v++;
+                else c++;
+            }
+            System.out.println(v + " " + c);
+        }
+    }
+}
+`,
+      javascript: `'use strict';
+const fs = require('fs');
+
+function solve() {
+    const s = fs.readFileSync(0, 'utf8').trim();
+    if (!s) return;
+    const v = (s.match(/[aeiou]/g) || []).length;
+    const c = s.length - v;
+    console.log(v + ' ' + c);
+}
+
+solve();
+`,
+    },
+  },
+
+  // Searching
+  '07-searching-001': {
+    title: 'Linear Search Target',
+    difficulty: 'Easy',
+    order: 1,
+    progressionStage: 'Foundation',
+    tags: ['Searching', 'Linear Scan'],
+    description: 'Given an array $A$ of $N$ integers and a target value $K$, find the 0-based index of the first occurrence of $K$. If $K$ is not present, print -1.',
+    inputFormat: 'First line contains two integers $N$ and $K$. Second line contains $N$ space-separated integers.',
+    outputFormat: 'Print the 0-based index of $K$, or -1 if not found.',
+    constraints: ['1 <= N <= 100000', '-10^9 <= A[i], K <= 10^9'],
+    examples: [
+      { input: '5 7\n1 2 7 4 5', output: '2', explanation: '7 first appears at index 2.' },
+      { input: '4 99\n1 2 3 4', output: '-1', explanation: '99 does not appear in the array.' },
+    ],
+    visibleTests: [
+      { id: 'v1', input: '5 7\n1 2 7 4 5\n', expectedOutput: '2\n', label: 'Target Present' },
+      { id: 'v2', input: '4 99\n1 2 3 4\n', expectedOutput: '-1\n', label: 'Target Absent' },
+    ],
+    hiddenTests: [
+      { id: 'h1', input: '1 42\n42\n', expectedOutput: '0\n', isHidden: true },
+      { id: 'h2', input: '6 10\n10 10 10 10 10 10\n', expectedOutput: '0\n', isHidden: true },
+      { id: 'h3', input: '5 -5\n1 2 -5 4 -5\n', expectedOutput: '2\n', isHidden: true },
+    ],
+    starterCode: {
+      python: `import sys
+
+def solve():
+    tokens = sys.stdin.read().split()
+    if not tokens:
+        return
+    n = int(tokens[0])
+    k = int(tokens[1])
+    arr = [int(x) for x in tokens[2:2+n]]
+    
+    try:
+        idx = arr.index(k)
+        print(idx)
+    except ValueError:
+        print(-1)
+
+if __name__ == "__main__":
+    solve()
+`,
+      cpp: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    long long k;
+    if (cin >> n >> k) {
+        int ans = -1;
+        for (int i = 0; i < n; i++) {
+            long long x;
+            cin >> x;
+            if (x == k && ans == -1) ans = i;
+        }
+        cout << ans << "\\n";
+    }
+    return 0;
+}
+`,
+      java: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        if (sc.hasNextInt()) {
+            int n = sc.nextInt();
+            long k = sc.nextLong();
+            int ans = -1;
+            for (int i = 0; i < n; i++) {
+                long x = sc.nextLong();
+                if (x == k && ans == -1) ans = i;
+            }
+            System.out.println(ans);
+        }
+    }
+}
+`,
+      javascript: `'use strict';
+const fs = require('fs');
+
+function solve() {
+    const input = fs.readFileSync(0, 'utf8').trim();
+    if (!input) return;
+    const tokens = input.split(/\\s+/);
+    const n = parseInt(tokens[0], 10);
+    const k = tokens[1];
+    let ans = -1;
+    for (let i = 0; i < n; i++) {
+        if (tokens[2 + i] === k) { ans = i; break; }
+    }
+    console.log(ans);
+}
+
+solve();
+`,
+    },
+  },
+
+  // Linked List
+  '13-linked-list-001': {
+    title: 'Count Nodes in Linked List',
+    difficulty: 'Easy',
+    order: 1,
+    progressionStage: 'Foundation',
+    tags: ['Linked List', 'Traversal'],
+    description: 'Given $N$ elements representing a linked list sequence, count and print the total number of nodes.',
+    inputFormat: 'First line contains integer $N$. Second line contains $N$ space-separated node values.',
+    outputFormat: 'Print the length of the list.',
+    constraints: ['0 <= N <= 100000', '-10^9 <= Node.val <= 10^9'],
+    examples: [
+      { input: '4\n1 2 3 4', output: '4', explanation: 'There are 4 nodes.' },
+      { input: '0\n', output: '0', explanation: 'An empty list has 0 nodes.' },
+    ],
+    visibleTests: [
+      { id: 'v1', input: '4\n1 2 3 4\n', expectedOutput: '4\n', label: 'Example 1' },
+      { id: 'v2', input: '0\n\n', expectedOutput: '0\n', label: 'Empty List' },
+    ],
+    hiddenTests: [
+      { id: 'h1', input: '1\n100\n', expectedOutput: '1\n', isHidden: true },
+      { id: 'h2', input: '5\n10 20 30 40 50\n', expectedOutput: '5\n', isHidden: true },
+    ],
+    starterCode: {
+      python: `import sys
+
+def solve():
+    tokens = sys.stdin.read().split()
+    if not tokens:
+        print(0)
+        return
+    n = int(tokens[0])
+    print(n)
+
+if __name__ == "__main__":
+    solve()
+`,
+      cpp: `#include <iostream>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    if (cin >> n) {
+        cout << n << "\\n";
+    } else {
+        cout << 0 << "\\n";
+    }
+    return 0;
+}
+`,
+      java: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        if (sc.hasNextInt()) {
+            System.out.println(sc.nextInt());
+        } else {
+            System.out.println(0);
+        }
+    }
+}
+`,
+      javascript: `'use strict';
+const fs = require('fs');
+
+function solve() {
+    const input = fs.readFileSync(0, 'utf8').trim();
+    if (!input) { console.log(0); return; }
+    const tokens = input.split(/\\s+/);
+    console.log(parseInt(tokens[0], 10));
+}
+
+solve();
+`,
+    },
+  },
+
+  // Stack
+  '14-stack-001': {
+    title: 'Valid Parentheses String',
+    difficulty: 'Easy',
+    order: 1,
+    progressionStage: 'Foundation',
+    tags: ['Stack', 'Matching', 'Strings'],
+    description: 'Given a string $S$ containing just the characters "(", ")", "{", "}", "[" and "]", determine if the input string is valid. An input string is valid if open brackets are closed by the same type of brackets in the correct order. Output "YES" if valid, otherwise "NO".',
+    inputFormat: 'A single string $S$ containing brackets.',
+    outputFormat: 'Print "YES" if valid, else "NO".',
+    constraints: ['1 <= |S| <= 100000', 'S consists only of ()[]{} brackets.'],
+    examples: [
+      { input: '()[]{}', output: 'YES', explanation: 'All brackets match correctly.' },
+      { input: '(]', output: 'NO', explanation: 'Round open bracket closed by square bracket.' },
+    ],
+    visibleTests: [
+      { id: 'v1', input: '()[]{}\n', expectedOutput: 'YES\n', label: 'All Pairs' },
+      { id: 'v2', input: '(]\n', expectedOutput: 'NO\n', label: 'Mismatched' },
+      { id: 'v3', input: '([{}])\n', expectedOutput: 'YES\n', label: 'Nested' },
+    ],
+    hiddenTests: [
+      { id: 'h1', input: '(\n', expectedOutput: 'NO\n', isHidden: true },
+      { id: 'h2', input: ']\n', expectedOutput: 'NO\n', isHidden: true },
+      { id: 'h3', input: '((()))\n', expectedOutput: 'YES\n', isHidden: true },
+      { id: 'h4', input: '[(])\n', expectedOutput: 'NO\n', isHidden: true },
+    ],
+    starterCode: {
+      python: `import sys
+
+def solve():
+    s = sys.stdin.read().strip()
+    if not s:
+        print("YES")
+        return
+    stack = []
+    mapping = {')': '(', '}': '{', ']': '['}
+    for char in s:
+        if char in mapping:
+            top = stack.pop() if stack else '#'
+            if mapping[char] != top:
+                print("NO")
+                return
+        else:
+            stack.append(char)
+    print("YES" if not stack else "NO")
+
+if __name__ == "__main__":
+    solve()
+`,
+      cpp: `#include <iostream>
+#include <string>
+#include <stack>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    string s;
+    if (cin >> s) {
+        stack<char> st;
+        bool ok = true;
+        for (char c : s) {
+            if (c == '(' || c == '{' || c == '[') st.push(c);
+            else {
+                if (st.empty()) { ok = false; break; }
+                char top = st.top(); st.pop();
+                if (c == ')' && top != '(') { ok = false; break; }
+                if (c == '}' && top != '{') { ok = false; break; }
+                if (c == ']' && top != '[') { ok = false; break; }
+            }
+        }
+        if (!st.empty()) ok = false;
+        cout << (ok ? "YES" : "NO") << "\\n";
+    }
+    return 0;
+}
+`,
+      java: `import java.util.Scanner;
+import java.util.Stack;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        if (sc.hasNext()) {
+            String s = sc.next();
+            Stack<Character> st = new Stack<>();
+            boolean ok = true;
+            for (char c : s.toCharArray()) {
+                if (c == '(' || c == '{' || c == '[') st.push(c);
+                else {
+                    if (st.isEmpty()) { ok = false; break; }
+                    char top = st.pop();
+                    if (c == ')' && top != '(') { ok = false; break; }
+                    if (c == '}' && top != '{') { ok = false; break; }
+                    if (c == ']' && top != '[') { ok = false; break; }
+                }
+            }
+            if (!st.isEmpty()) ok = false;
+            System.out.println(ok ? "YES" : "NO");
+        }
+    }
+}
+`,
+      javascript: `'use strict';
+const fs = require('fs');
+
+function solve() {
+    const s = fs.readFileSync(0, 'utf8').trim();
+    if (!s) { console.log('YES'); return; }
+    const map = { ')': '(', '}': '{', ']': '[' };
+    const stack = [];
+    for (let c of s) {
+        if (c in map) {
+            if (stack.length === 0 || stack.pop() !== map[c]) {
+                console.log('NO');
+                return;
+            }
+        } else {
+            stack.push(c);
+        }
+    }
+    console.log(stack.length === 0 ? 'YES' : 'NO');
+}
+
+solve();
+`,
+    },
+  },
+
+  // Binary Search
+  '18-binary-search-001': {
+    title: 'Binary Search in Sorted Array',
+    difficulty: 'Easy',
+    order: 1,
+    progressionStage: 'Foundation',
+    tags: ['Binary Search', 'Divide and Conquer'],
+    description: 'Given a sorted array $A$ of $N$ distinct integers in ascending order and a target value $K$, write a function to search $K$ in $A$. If $K$ exists, return its 0-based index. Otherwise, print -1. Your solution must run in $O(\\log N)$ runtime complexity.',
+    inputFormat: 'First line contains two integers $N$ and $K$. Second line contains $N$ sorted integers.',
+    outputFormat: 'Print the 0-based index of $K$ in array $A$, or -1 if $K$ is not found.',
+    constraints: ['1 <= N <= 100000', '-10^9 <= A[i], K <= 10^9', 'All elements in A are strictly ascending.'],
+    examples: [
+      { input: '6 9\n-1 0 3 5 9 12', output: '4', explanation: '9 exists in A and its index is 4.' },
+      { input: '6 2\n-1 0 3 5 9 12', output: '-1', explanation: '2 does not exist in A so return -1.' },
+    ],
+    visibleTests: [
+      { id: 'v1', input: '6 9\n-1 0 3 5 9 12\n', expectedOutput: '4\n', label: 'Present' },
+      { id: 'v2', input: '6 2\n-1 0 3 5 9 12\n', expectedOutput: '-1\n', label: 'Absent' },
+    ],
+    hiddenTests: [
+      { id: 'h1', input: '1 5\n5\n', expectedOutput: '0\n', isHidden: true },
+      { id: 'h2', input: '1 3\n5\n', expectedOutput: '-1\n', isHidden: true },
+      { id: 'h3', input: '5 100\n10 20 30 40 100\n', expectedOutput: '4\n', isHidden: true },
+      { id: 'h4', input: '5 10\n10 20 30 40 100\n', expectedOutput: '0\n', isHidden: true },
+    ],
+    starterCode: {
+      python: `import sys
+
+def solve():
+    tokens = sys.stdin.read().split()
+    if not tokens:
+        return
+    n = int(tokens[0])
+    k = int(tokens[1])
+    arr = [int(x) for x in tokens[2:2+n]]
+    
+    l, r = 0, n - 1
+    ans = -1
+    while l <= r:
+        mid = (l + r) // 2
+        if arr[mid] == k:
+            ans = mid
+            break
+        elif arr[mid] < k:
+            l = mid + 1
+        else:
+            r = mid - 1
+            
+    print(ans)
+
+if __name__ == "__main__":
+    solve()
+`,
+      cpp: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    long long k;
+    if (cin >> n >> k) {
+        vector<long long> arr(n);
+        for (int i = 0; i < n; i++) cin >> arr[i];
+
+        int l = 0, r = n - 1, ans = -1;
+        while (l <= r) {
+            int mid = l + (r - l) / 2;
+            if (arr[mid] == k) { ans = mid; break; }
+            else if (arr[mid] < k) l = mid + 1;
+            else r = mid - 1;
+        }
+        cout << ans << "\\n";
+    }
+    return 0;
+}
+`,
+      java: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        if (sc.hasNextInt()) {
+            int n = sc.nextInt();
+            long k = sc.nextLong();
+            long[] arr = new long[n];
+            for (int i = 0; i < n; i++) arr[i] = sc.nextLong();
+
+            int l = 0, r = n - 1, ans = -1;
+            while (l <= r) {
+                int mid = l + (r - l) / 2;
+                if (arr[mid] == k) { ans = mid; break; }
+                else if (arr[mid] < k) l = mid + 1;
+                else r = mid - 1;
+            }
+            System.out.println(ans);
+        }
+    }
+}
+`,
+      javascript: `'use strict';
+const fs = require('fs');
+
+function solve() {
+    const input = fs.readFileSync(0, 'utf8').trim();
+    if (!input) return;
+    const tokens = input.split(/\\s+/);
+    const n = parseInt(tokens[0], 10);
+    const k = BigInt(tokens[1]);
+    const arr = tokens.slice(2, 2 + n).map(x => BigInt(x));
+
+    let l = 0, r = n - 1, ans = -1;
+    while (l <= r) {
+        const mid = Math.floor((l + r) / 2);
+        if (arr[mid] === k) { ans = mid; break; }
+        else if (arr[mid] < k) l = mid + 1;
+        else r = mid - 1;
+    }
+    console.log(ans);
+}
+
+solve();
+`,
+    },
+  },
+};
+
+// Algorithmic pattern blueprints per topic to generate realistic problems
+function getCurriculumPattern(topicNumber: number, order: number): {
+  title: string;
+  tags: string[];
+  description: string;
+  inputFormat: string;
+  outputFormat: string;
+  constraints: string[];
+  examples: Array<{ input: string; output: string; explanation?: string }>;
+  visibleTests: Array<{ id: string; input: string; expectedOutput: string; label?: string }>;
+  hiddenTests: TestCase[];
+  status: 'draft';
+  isDraft: boolean;
+} {
+  // Realistic title and context based on topic
+  const topicTitles: Record<number, string[]> = {
+    1: ['Stream Token Sum', 'Format Number Matrix', 'Buffer Line Inversion', 'Delimiter Splitter', 'Character Frequency Echo'],
+    2: ['Modular Exponentiation', 'Greatest Common Divisor', 'Prime Sieve Query', 'Fibonacci Sequence Term', 'Catalan Number Computation'],
+    3: ['Kadane Max Subarray', 'Rotate Array Left', 'Dutch National Flag Partition', 'Merge Two Sorted Arrays', 'Subarray Sum Equals Target'],
+    4: ['Longest Common Prefix', 'Anagram Grouping', 'String Compression Run', 'Valid Anagram Check', 'Longest Substring Without Repeat'],
+    5: ['Subarray with Sum Zero', 'Longest Consecutive Chain', 'Count Distinct in Window', 'Pair with Target Sum', 'First Unique Element'],
+    6: ['Merge Sort Implement', 'Quick Sort Median Pivot', 'Sort Array by Frequency', 'Inversion Count Array', 'Sort Colors Three Way'],
+    7: ['Peak Element Index', 'Square Root Floor', 'Search in Rotated Sorted', 'Find Minimum in Rotated', 'Aggressive Cows Placement'],
+    8: ['Two Sum Sorted', '3Sum Triplet Target', 'Container With Most Water', 'Trapping Rain Water', 'Remove Duplicates In Place'],
+    9: ['Max Sum Subarray Size K', 'Longest Substring K Distinct', 'Fruit Into Baskets', 'Subarray Product Less Than K', 'Minimum Window Substring'],
+    10: ['Range Sum Query Immutable', 'Equilibrium Index Pivot', 'Continuous Subarray Sum', 'Subarray Sum Divisible by K', 'Matrix Block Sum 2D'],
+    11: ['Tower of Hanoi Moves', 'Power Function X to N', 'Combination Sum Generator', 'Josephus Problem Survivor', 'Permutation Sequence K'],
+    12: ['N-Queens Safe Boards', 'Sudoku Board Solver', 'Rat in a Maze Paths', 'Word Search Grid', 'Partition to K Equal Sums'],
+    13: ['Reverse Singly Linked List', 'Detect Cycle Floyd Tortoise', 'Merge Two Sorted Lists', 'Remove Nth Node from End', 'Add Two Numbers Linked'],
+    14: ['Next Greater Element I', 'Min Stack Constant Time', 'Evaluate Reverse Polish Notation', 'Daily Temperatures Ahead', 'Largest Rectangle Histogram'],
+    15: ['Implement Queue with Stacks', 'Design Circular Queue', 'First Unique Char in Stream', 'Sliding Window Queue', 'Task Scheduler Cooldown'],
+    16: ['Sliding Window Maximum', 'Design Double Ended Queue', 'Shortest Subarray Sum at Least K', 'Max of Min for Every Window Size', 'Palindrome Deque Verify'],
+    17: ['Next Greater Element II Circular', 'Online Stock Span', 'Sum of Subarray Minimums', 'Maximal Rectangle in Matrix', 'Remove K Digits Minimum'],
+    18: ['Search in Sorted 2D Matrix', 'Koko Eating Bananas Speed', 'Capacity to Ship Packages', 'Median of Two Sorted Arrays', 'Split Array Largest Sum'],
+    19: ['Single Number Non-Repeating', 'Number of 1 Bits Hamming', 'Counting Bits DP', 'Reverse Bits 32-bit', 'Bitwise AND of Numbers Range'],
+    20: ['Activity Selection Interval', 'Jump Game Min Steps', 'Gas Station Circuit Tour', 'Assign Cookies Greedy', 'Candy Distribution Kids'],
+    21: ['Merge Overlapping Intervals', 'Insert Interval Coordinate', 'Non-overlapping Intervals Min', 'Meeting Rooms Maximum Parallel', 'Interval List Intersections'],
+    22: ['Kth Largest in Array', 'Merge K Sorted Lists Heap', 'Find Median from Data Stream', 'Top K Frequent Elements', 'Task Scheduler Priority'],
+    23: ['LRU Cache Eviction Policy', 'LFU Cache Frequency Tie', 'Insert Delete GetRandom O(1)', 'Subarray Sum Multi-Set', 'Design Underground System'],
+    24: ['Maximum Depth of Binary Tree', 'Diameter of Binary Tree', 'Invert Binary Tree In-place', 'Path Sum Root to Leaf', 'Lowest Common Ancestor BT'],
+    25: ['Validate Binary Search Tree', 'Search in Binary Search Tree', 'Lowest Common Ancestor BST', 'Kth Smallest Element in BST', 'Delete Node in BST'],
+    26: ['Binary Tree Level Order Traversal', 'Binary Tree Zigzag Order', 'Vertical Order Traversal', 'Binary Tree Inorder Iterative', 'Boundary Traversal Binary Tree'],
+    27: ['Implement Trie Prefix Tree', 'Search Suggestions System', 'Maximum XOR of Two Numbers', 'Word Search II Trie Grid', 'Replace Words with Root'],
+    28: ['Binary Tree Maximum Path Sum', 'Serialize and Deserialize Tree', 'Distribute Coins in Tree', 'Flatten Binary Tree to Linked List', 'All Nodes Distance K in Tree'],
+    29: ['Number of Connected Components', 'Bipartite Graph 2-Coloring', 'Detect Cycle in Undirected Graph', 'Clone Graph BFS', 'Graph Valid Tree Test'],
+    30: ['Number of Islands Grid', 'Rotting Oranges Multisource BFS', 'Word Ladder Shortest Path', 'Surrounded Regions Capture', 'Pacific Atlantic Water Flow'],
+    31: ['Course Schedule I Prerequisites', 'Course Schedule II Order', 'Alien Dictionary Lexicographical', 'Sequence Reconstruction Unique', 'Parallel Courses Semesters'],
+    32: ['Dijkstra Single Source Shortest', 'Cheapest Flights Within K Stops', 'Network Delay Time', 'Bellman Ford Negative Cycles', 'Floyd Warshall All Pairs'],
+    33: ['Min Cost to Connect All Points', 'Kruskal Minimum Spanning Tree', 'Prim Minimum Spanning Tree', 'Connecting Cities Min Cost', 'Optimize Water Distribution'],
+    34: ['Redundant Connection DSU', 'Accounts Merge Emails', 'Number of Provinces', 'Smallest String With Swaps', 'Graph Connectivity Queries'],
+    35: ['Climbing Stairs Ways', 'House Robber Max Loot', 'Coin Change Fewest Coins', 'Longest Increasing Subsequence', 'Partition Equal Subset Sum'],
+    36: ['Unique Paths Grid', 'Longest Common Subsequence', 'Edit Distance Operations', '0-1 Knapsack Classic', 'Target Sum Ways DP'],
+    37: ['Burst Balloons Range DP', 'Regular Expression Matching', 'Wildcard Matching DP', 'Digit DP Count Valid', 'Max Profit Job Scheduling'],
+    38: ['Range Sum Query Segment Tree', 'Range Minimum Query RMQ', 'Lazy Propagation Segment Tree', 'Count of Smaller Numbers After Self', 'Fenwick Tree Binary Indexed'],
+    39: ['Bridges in Graph Tarjan', 'Articulation Points Cut Vertices', 'Strongly Connected Components Kosaraju', 'Critical Connections Network', 'Max Flow Dinic Algorithm'],
+    40: ['KMP Pattern Search Needle', 'Longest Happy Prefix KMP', 'Repeated Substring Pattern', 'Shortest Palindrome Prefix', 'Z-Algorithm String Matches'],
+    41: ['Design Twitter Timeline', 'Trapping Rain Water II 2D', 'Median of Running Numbers', 'Sliding Window Median Hard', 'Minimum Window Subsequence'],
+  };
+
+  const list = topicTitles[topicNumber] || ['Algorithmic Optimization', 'Sequential Scan', 'Optimal Pathing', 'Window Maximizer', 'Dynamic Subset Sum'];
+  const baseTitle = list[(order - 1) % list.length];
+  const problemTitle = `${baseTitle} ${order > 5 ? `(Variant ${Math.floor(order / 5)})` : ''}`.trim();
+  const topicName = DSA_TOPICS_CONFIG.find(t => t.number === topicNumber)?.title || 'DSA';
+
+  return {
+    title: problemTitle,
+    tags: [topicName, `Stage-${Math.min(5, Math.ceil(order / 15))}`, 'Draft'],
+    status: 'draft',
+    isDraft: true,
+    description: `This problem (${problemTitle}) is currently in draft status and under curriculum development. The official problem statement, algorithmic specifications, and test cases have not yet been published.`,
+    inputFormat: 'Curriculum specification pending publication.',
+    outputFormat: 'Curriculum specification pending publication.',
+    constraints: ['Curriculum specification in progress — code execution disabled for draft problems.'],
+    examples: [
+      {
+        input: 'N/A',
+        output: 'N/A',
+        explanation: 'This problem is in draft status. Official examples and test suites will be provided upon publication.',
+      },
+    ],
+    visibleTests: [],
+    hiddenTests: [],
+  };
+}
+
+class ProblemDatabase {
+  private problems: Map<string, InternalProblemDefinition> = new Map();
+  private topicProblemMap: Map<string, string[]> = new Map();
+
+  constructor() {
+    this.seedDatabase();
+  }
+
+  private seedDatabase() {
+    // Generate all 41 topics × 75 problems = 3,075 problems
+    for (const topic of DSA_TOPICS_CONFIG) {
+      const topicProblemIds: string[] = [];
+      const topicId = topic.id;
+
+      for (let order = 1; order <= 75; order++) {
+        const orderPadded = String(order).padStart(3, '0');
+        const problemId = `${topicId}-${orderPadded}`;
+        topicProblemIds.push(problemId);
+
+        // Progression stages: 1-15 Foundation, 16-30 Basic Application, 31-45 Intermediate, 46-60 Advanced, 61-75 Interview
+        let progressionStage: 'Foundation' | 'Basic Application' | 'Intermediate' | 'Advanced' | 'Interview / Placement' = 'Foundation';
+        if (order <= 15) progressionStage = 'Foundation';
+        else if (order <= 30) progressionStage = 'Basic Application';
+        else if (order <= 45) progressionStage = 'Intermediate';
+        else if (order <= 60) progressionStage = 'Advanced';
+        else progressionStage = 'Interview / Placement';
+
+        // Difficulty distribution: 25 Easy (1-25), 35 Medium (26-60), 15 Hard (61-75)
+        let difficulty: Difficulty = 'Easy';
+        if (order <= 25) difficulty = 'Easy';
+        else if (order <= 60) difficulty = 'Medium';
+        else difficulty = 'Hard';
+
+        // Check if we have handcrafted or modular topic problem definition
+        const handcrafted = HANDCRAFTED_PROBLEMS[problemId] || TOPIC_19_PROBLEMS[problemId];
+        if (handcrafted) {
+          const fullDef: InternalProblemDefinition = {
+            id: problemId,
+            topicId,
+            topicTitle: topic.title,
+            order,
+            title: handcrafted.title || `Problem ${order}`,
+            difficulty: difficulty,
+            progressionStage: (handcrafted as any).progressionStage || progressionStage,
+            tags: handcrafted.tags || [topic.title],
+            executionType: handcrafted.executionType || 'stdin',
+            status: handcrafted.status || 'published',
+            isDraft: handcrafted.isDraft !== undefined ? handcrafted.isDraft : false,
+            description: handcrafted.description || '',
+            inputFormat: handcrafted.inputFormat || '',
+            outputFormat: handcrafted.outputFormat || '',
+            constraints: handcrafted.constraints || ['1 <= N <= 100000'],
+            examples: handcrafted.examples || [],
+            visibleTests: handcrafted.visibleTests || [],
+            hiddenTests: handcrafted.hiddenTests || [],
+            starterCode: handcrafted.starterCode || generateStarterCode(handcrafted.title || `Problem ${order}`),
+            timeLimitMs: handcrafted.timeLimitMs || 2000,
+            memoryLimitMb: handcrafted.memoryLimitMb || 256,
+          };
+          this.problems.set(problemId, fullDef);
+        } else {
+          // Generate draft curriculum placeholder problem
+          const pattern = getCurriculumPattern(topic.number, order);
+          const fullDef: InternalProblemDefinition = {
+            id: problemId,
+            topicId,
+            topicTitle: topic.title,
+            order,
+            title: pattern.title,
+            difficulty,
+            progressionStage,
+            tags: pattern.tags,
+            executionType: 'stdin',
+            status: 'draft',
+            isDraft: true,
+            description: pattern.description,
+            inputFormat: pattern.inputFormat,
+            outputFormat: pattern.outputFormat,
+            constraints: pattern.constraints,
+            examples: pattern.examples,
+            visibleTests: pattern.visibleTests,
+            hiddenTests: pattern.hiddenTests,
+            starterCode: {
+              python: `# [Draft] ${pattern.title}\n# This problem is currently under curriculum authoring.\n# Code execution and submission are disabled until publication.\n`,
+              cpp: `// [Draft] ${pattern.title}\n// This problem is currently under curriculum authoring.\n// Code execution and submission are disabled until publication.\nint main() { return 0; }\n`,
+              java: `// [Draft] ${pattern.title}\n// This problem is currently under curriculum authoring.\n// Code execution and submission are disabled until publication.\npublic class Main { public static void main(String[] args) {} }\n`,
+              javascript: `// [Draft] ${pattern.title}\n// This problem is currently under curriculum authoring.\n// Code execution and submission are disabled until publication.\n`,
+            },
+            timeLimitMs: 2000,
+            memoryLimitMb: 256,
+          };
+          this.problems.set(problemId, fullDef);
+        }
+      }
+
+      this.topicProblemMap.set(topicId, topicProblemIds);
+    }
+  }
+
+  getAllTopics(): typeof DSA_TOPICS_CONFIG {
+    return DSA_TOPICS_CONFIG;
+  }
+
+  getTopicById(topicId: string) {
+    return DSA_TOPICS_CONFIG.find(t => t.id === topicId || t.slug === topicId);
+  }
+
+  getProblemsByTopic(topicId: string): ProblemSummary[] {
+    const topic = this.getTopicById(topicId);
+    if (!topic) return [];
+    const ids = this.topicProblemMap.get(topic.id) || [];
+    return ids.map(id => {
+      const p = this.problems.get(id)!;
+      return {
+        id: p.id,
+        topicId: p.topicId,
+        topicTitle: p.topicTitle,
+        order: p.order,
+        title: p.title,
+        difficulty: p.difficulty,
+        progressionStage: p.progressionStage,
+        tags: p.tags,
+        executionType: p.executionType,
+        status: p.status,
+        isDraft: p.isDraft,
+      };
+    });
+  }
+
+  /**
+   * Returns sanitized problem for student frontend.
+   * NEVER exposes hidden tests, reference solutions, or judge secrets!
+   */
+  getPublicProblemById(problemId: string): ProblemDetail | null {
+    const p = this.problems.get(problemId);
+    if (!p) return null;
+
+    return {
+      id: p.id,
+      topicId: p.topicId,
+      topicTitle: p.topicTitle,
+      order: p.order,
+      title: p.title,
+      difficulty: p.difficulty,
+      progressionStage: p.progressionStage,
+      tags: p.tags,
+      executionType: p.executionType,
+      status: p.status,
+      isDraft: p.isDraft,
+      description: p.description,
+      inputFormat: p.inputFormat,
+      outputFormat: p.outputFormat,
+      constraints: p.constraints,
+      examples: p.examples,
+      visibleTests: p.visibleTests,
+      starterCode: p.starterCode,
+      timeLimitMs: p.timeLimitMs,
+      memoryLimitMb: p.memoryLimitMb,
+    };
+  }
+
+  /**
+   * Internal method for Judge Service only.
+   */
+  getInternalProblemById(problemId: string): InternalProblemDefinition | null {
+    return this.problems.get(problemId) || null;
+  }
+
+  getTotalProblemsCount(): number {
+    return this.problems.size;
+  }
+}
+
+export const problemDatabase = new ProblemDatabase();

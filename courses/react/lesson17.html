@@ -1,0 +1,2129 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENSUS React — Lesson 17: useCallback()</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+    --bg:#f5f7fb;
+    --surface:#ffffff;
+    --surface-2:#f8fafc;
+    --text:#172033;
+    --muted:#667085;
+    --border:#e5e7eb;
+    --primary:#4f46e5;
+    --primary-dark:#3730a3;
+    --cyan:#0891b2;
+    --green:#059669;
+    --orange:#ea580c;
+    --red:#dc2626;
+    --dark:#101828;
+    --dark-2:#172033;
+    --shadow:0 10px 30px rgba(15,23,42,.07);
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+button{
+    font-family:inherit;
+}
+
+.topbar{
+    height:68px;
+    background:#fff;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 28px;
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:1000;
+}
+
+.logo{
+    font-size:24px;
+    font-weight:900;
+    letter-spacing:-1px;
+    color:var(--primary);
+}
+
+.logo span{
+    color:#111827;
+}
+
+.lesson-badge{
+    background:#eef2ff;
+    color:var(--primary-dark);
+    padding:8px 15px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:700;
+}
+
+.layout{
+    display:flex;
+    padding-top:68px;
+}
+
+.sidebar{
+    width:270px;
+    height:calc(100vh - 68px);
+    background:#fff;
+    border-right:1px solid var(--border);
+    position:fixed;
+    left:0;
+    top:68px;
+    overflow-y:auto;
+    padding:24px 16px;
+}
+
+.sidebar-title{
+    font-size:11px;
+    text-transform:uppercase;
+    color:#98a2b3;
+    font-weight:800;
+    letter-spacing:1px;
+    margin:8px 12px 14px;
+}
+
+.side-item{
+    padding:10px 13px;
+    border-radius:9px;
+    margin-bottom:4px;
+    color:#475467;
+    font-size:14px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.side-item:hover{
+    background:#f2f4f7;
+    color:var(--primary);
+}
+
+.side-item.active{
+    background:#eef2ff;
+    color:var(--primary-dark);
+    font-weight:700;
+    border-left:3px solid var(--primary);
+}
+
+.main{
+    margin-left:270px;
+    width:calc(100% - 270px);
+}
+
+.hero{
+    background:
+        radial-gradient(circle at 80% 20%,rgba(79,70,229,.25),transparent 30%),
+        linear-gradient(135deg,#0b1020,#172033);
+    color:#fff;
+    padding:80px 8%;
+    min-height:470px;
+    display:flex;
+    align-items:center;
+}
+
+.hero-content{
+    max-width:1000px;
+}
+
+.eyebrow{
+    color:#a5b4fc;
+    text-transform:uppercase;
+    letter-spacing:2px;
+    font-size:12px;
+    font-weight:800;
+    margin-bottom:16px;
+}
+
+.hero h1{
+    font-size:clamp(42px,5vw,70px);
+    line-height:1.05;
+    letter-spacing:-3px;
+    margin-bottom:22px;
+}
+
+.hero h1 span{
+    color:#a5b4fc;
+}
+
+.hero p{
+    max-width:820px;
+    color:#cbd5e1;
+    font-size:18px;
+}
+
+.hero-flow{
+    margin-top:40px;
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.flow-box{
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.15);
+    padding:13px 17px;
+    border-radius:12px;
+    font-size:13px;
+    backdrop-filter:blur(10px);
+}
+
+.flow-arrow{
+    color:#818cf8;
+    font-size:22px;
+}
+
+.content{
+    max-width:1150px;
+    margin:auto;
+    padding:65px 35px 100px;
+}
+
+.section{
+    margin-bottom:80px;
+    scroll-margin-top:90px;
+}
+
+.section h2{
+    font-size:34px;
+    letter-spacing:-1px;
+    margin-bottom:14px;
+}
+
+.section h3{
+    font-size:23px;
+    margin:30px 0 12px;
+}
+
+.section-intro{
+    color:var(--muted);
+    max-width:850px;
+    margin-bottom:28px;
+}
+
+.card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:27px;
+    margin:22px 0;
+    box-shadow:var(--shadow);
+}
+
+.info-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.info-card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:23px;
+    box-shadow:var(--shadow);
+}
+
+.info-card h4{
+    margin-bottom:8px;
+}
+
+.info-card p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+.highlight{
+    border-left:4px solid var(--primary);
+    background:#eef2ff;
+    padding:18px 20px;
+    border-radius:0 12px 12px 0;
+    margin:20px 0;
+}
+
+.warning{
+    border-left:4px solid var(--orange);
+    background:#fff7ed;
+    padding:18px 20px;
+    border-radius:0 12px 12px 0;
+    margin:20px 0;
+}
+
+.success{
+    border-left:4px solid var(--green);
+    background:#ecfdf5;
+    padding:18px 20px;
+    border-radius:0 12px 12px 0;
+    margin:20px 0;
+}
+
+.danger{
+    border-left:4px solid var(--red);
+    background:#fef2f2;
+    padding:18px 20px;
+    border-radius:0 12px 12px 0;
+    margin:20px 0;
+}
+
+.code{
+    background:#0b1020;
+    color:#dbeafe;
+    border-radius:15px;
+    padding:23px;
+    overflow:auto;
+    font-family:Consolas,Monaco,monospace;
+    font-size:14px;
+    line-height:1.7;
+    margin:18px 0;
+    border:1px solid #1e293b;
+}
+
+.code .comment{
+    color:#94a3b8;
+}
+
+.code .keyword{
+    color:#c4b5fd;
+}
+
+.code .string{
+    color:#86efac;
+}
+
+.code .function{
+    color:#67e8f9;
+}
+
+.code .number{
+    color:#fbbf24;
+}
+
+.visual-flow{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+    margin:30px 0;
+}
+
+.visual-node{
+    min-width:150px;
+    text-align:center;
+    padding:17px;
+    background:#fff;
+    border:2px solid #c7d2fe;
+    border-radius:14px;
+    font-weight:700;
+    box-shadow:0 8px 20px rgba(15,23,42,.06);
+    animation:floatNode 3s ease-in-out infinite;
+}
+
+.visual-node:nth-child(2){animation-delay:.25s}
+.visual-node:nth-child(3){animation-delay:.5s}
+.visual-node:nth-child(4){animation-delay:.75s}
+.visual-node:nth-child(5){animation-delay:1s}
+
+@keyframes floatNode{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-7px)}
+}
+
+.visual-arrow{
+    font-size:25px;
+    color:var(--primary);
+}
+
+.compare{
+    width:100%;
+    border-collapse:collapse;
+    margin:25px 0;
+    background:#fff;
+    border-radius:14px;
+    overflow:hidden;
+    border:1px solid var(--border);
+}
+
+.compare th,
+.compare td{
+    padding:15px;
+    border-bottom:1px solid var(--border);
+    text-align:left;
+    font-size:14px;
+}
+
+.compare th{
+    background:#f8fafc;
+    font-weight:800;
+}
+
+.demo{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:26px;
+    box-shadow:var(--shadow);
+    margin:25px 0;
+}
+
+.demo-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+}
+
+.demo-title{
+    font-size:19px;
+    font-weight:800;
+}
+
+.btn{
+    border:none;
+    border-radius:10px;
+    padding:10px 16px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.2s;
+    background:var(--primary);
+    color:#fff;
+}
+
+.btn:hover{
+    transform:translateY(-2px);
+    background:var(--primary-dark);
+}
+
+.btn.secondary{
+    background:#eef2ff;
+    color:var(--primary-dark);
+}
+
+.counter{
+    font-size:38px;
+    font-weight:900;
+    margin:15px 0;
+}
+
+.render-box{
+    padding:20px;
+    border:2px dashed #cbd5e1;
+    border-radius:14px;
+    margin-top:18px;
+    transition:.3s;
+}
+
+.render-box.rendered{
+    animation:renderFlash .55s ease;
+}
+
+@keyframes renderFlash{
+    0%{transform:scale(.98);opacity:.55}
+    100%{transform:scale(1);opacity:1}
+}
+
+.parent-child{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+    margin-top:20px;
+}
+
+.component-box{
+    border:2px solid #dbeafe;
+    border-radius:16px;
+    padding:22px;
+    background:#f8fafc;
+    position:relative;
+}
+
+.component-box h4{
+    margin-bottom:10px;
+}
+
+.render-count{
+    display:inline-block;
+    background:#eef2ff;
+    color:var(--primary-dark);
+    border-radius:999px;
+    padding:6px 11px;
+    font-size:12px;
+    font-weight:800;
+}
+
+.identity-demo{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.identity-card{
+    padding:25px;
+    border:1px solid var(--border);
+    border-radius:16px;
+    background:#fff;
+}
+
+.identity-value{
+    margin:18px 0;
+    padding:17px;
+    background:#0b1020;
+    color:#dbeafe;
+    border-radius:12px;
+    font-family:monospace;
+    word-break:break-all;
+}
+
+.same{
+    color:var(--green);
+    font-weight:800;
+}
+
+.different{
+    color:var(--red);
+    font-weight:800;
+}
+
+.memo-demo{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.memo-column{
+    padding:25px;
+    border-radius:16px;
+    border:1px solid var(--border);
+    background:#fff;
+}
+
+.render-log{
+    min-height:100px;
+    background:#0b1020;
+    color:#dbeafe;
+    border-radius:12px;
+    padding:15px;
+    font-family:monospace;
+    font-size:13px;
+    overflow:auto;
+}
+
+.badge{
+    display:inline-block;
+    padding:5px 10px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:800;
+    margin:3px;
+}
+
+.badge.red{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.badge.green{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.dependency-track{
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+    margin:25px 0;
+}
+
+.dep{
+    min-width:150px;
+    padding:18px;
+    text-align:center;
+    background:#f8fafc;
+    border:2px solid #e2e8f0;
+    border-radius:14px;
+    transition:.3s;
+}
+
+.dep.changed{
+    border-color:#818cf8;
+    background:#eef2ff;
+    transform:translateY(-4px);
+}
+
+.dep span{
+    display:block;
+    font-size:12px;
+    color:var(--muted);
+}
+
+.code-editor{
+    width:100%;
+    min-height:160px;
+    resize:vertical;
+    background:#0b1020;
+    color:#dbeafe;
+    border:1px solid #334155;
+    border-radius:12px;
+    padding:16px;
+    font-family:Consolas,monospace;
+    font-size:13px;
+}
+
+.quiz-question{
+    padding:23px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    margin:15px 0;
+    background:#fff;
+}
+
+.quiz-question button{
+    display:block;
+    width:100%;
+    text-align:left;
+    border:1px solid var(--border);
+    background:#f8fafc;
+    padding:12px 15px;
+    border-radius:9px;
+    margin-top:8px;
+    cursor:pointer;
+}
+
+.quiz-question button:hover{
+    border-color:#a5b4fc;
+    background:#eef2ff;
+}
+
+.answer{
+    display:none;
+    margin-top:12px;
+    padding:13px;
+    background:#ecfdf5;
+    border-radius:10px;
+    color:#065f46;
+    font-size:14px;
+}
+
+.cheat{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
+}
+
+.cheat div{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:13px;
+    padding:18px;
+}
+
+.small{
+    font-size:13px;
+    color:var(--muted);
+}
+
+.footer{
+    text-align:center;
+    color:#98a2b3;
+    padding:30px;
+    border-top:1px solid var(--border);
+}
+
+@media(max-width:900px){
+    .sidebar{
+        display:none;
+    }
+
+    .main{
+        margin-left:0;
+        width:100%;
+    }
+
+    .info-grid,
+    .parent-child,
+    .identity-demo,
+    .memo-demo,
+    .cheat{
+        grid-template-columns:1fr;
+    }
+
+    .hero{
+        padding:60px 25px;
+    }
+
+    .content{
+        padding:45px 18px;
+    }
+
+    .hero h1{
+        font-size:44px;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="logo">ZENSUS<span>.</span></div>
+    <div class="lesson-badge">React • Lesson 17 / 17</div>
+</header>
+
+<div class="layout">
+
+<aside class="sidebar">
+
+```
+<div class="sidebar-title">Lesson Navigation</div>
+
+<div class="side-item active" data-target="intro">Introduction</div>
+<div class="side-item" data-target="what">What is useCallback?</div>
+<div class="side-item" data-target="identity">Function References</div>
+<div class="side-item" data-target="rerender">Re-rendering</div>
+<div class="side-item" data-target="parentchild">Parent → Child</div>
+<div class="side-item" data-target="memo">React.memo</div>
+<div class="side-item" data-target="combination">useCallback + memo</div>
+<div class="side-item" data-target="dependencies">Dependency Array</div>
+<div class="side-item" data-target="performance">Performance</div>
+<div class="side-item" data-target="when">When to Use</div>
+<div class="side-item" data-target="mistakes">Common Mistakes</div>
+<div class="side-item" data-target="quiz">Quick Quiz</div>
+```
+
+</aside>
+
+<main class="main">
+
+<section class="hero" id="intro">
+
+<div class="hero-content">
+
+<div class="eyebrow">ZENSUS • React Performance</div>
+
+<h1><span>useCallback()</span><br>Function Optimization</h1>
+
+<p>
+Learn how React treats functions as values, why function references change
+during rendering, how parent-child rendering works, and how
+<strong>useCallback()</strong> works together with <strong>React.memo</strong>
+to avoid unnecessary child renders.
+</p>
+
+<div class="hero-flow">
+
+<div class="flow-box">Component Render</div>
+<div class="flow-arrow">→</div>
+<div class="flow-box">New Function?</div>
+<div class="flow-arrow">→</div>
+<div class="flow-box">Reference Changes</div>
+<div class="flow-arrow">→</div>
+<div class="flow-box">memo Child May Render</div>
+<div class="flow-arrow">→</div>
+<div class="flow-box">useCallback</div>
+
+</div>
+
+</div>
+
+</section>
+
+<div class="content">
+
+<!-- WHAT -->
+
+<section class="section" id="what">
+
+<h2>1. What is useCallback()?</h2>
+
+<p class="section-intro">
+<strong>useCallback()</strong> is a React Hook that caches a function definition
+between renders until its dependencies change.
+</p>
+
+<div class="highlight">
+<strong>Core idea:</strong>
+useCallback does not make the function itself magically faster.
+It can preserve the function's <strong>reference identity</strong>.
+</div>
+
+<div class="code">
+<span class="keyword">const</span> handleClick = <span class="function">useCallback</span>(() =&gt; {
+    console.log(<span class="string">"Button clicked"</span>);
+}, []);
+</div>
+
+<p>
+The function is created normally on the first render. On later renders,
+React can return the same cached function when the dependency array has
+not changed.
+</p>
+
+<div class="visual-flow">
+
+<div class="visual-node">Render</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Create Function</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Cache Reference</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Next Render</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Reuse if Dependencies Same</div>
+
+</div>
+
+<h3>What does it NOT do?</h3>
+
+<div class="info-grid">
+
+<div class="info-card">
+<h4>❌ Does not stop parent rendering</h4>
+<p>
+The component containing useCallback can still render normally.
+</p>
+</div>
+
+<div class="info-card">
+<h4>❌ Does not automatically improve everything</h4>
+<p>
+Adding useCallback everywhere can make code more complex without producing
+a meaningful performance benefit.
+</p>
+</div>
+
+<div class="info-card">
+<h4>✅ Preserves function identity</h4>
+<p>
+Its major purpose is maintaining a stable function reference when appropriate.
+</p>
+</div>
+
+</div>
+
+</section>
+
+<!-- IDENTITY -->
+
+<section class="section" id="identity">
+
+<h2>2. Function References & Function Identity</h2>
+
+<p class="section-intro">
+To understand useCallback, you must understand that JavaScript functions are
+objects/values with identity. Two separately created functions are different
+references even when their code looks identical.
+</p>
+
+<div class="code">
+<span class="keyword">const</span> first = () =&gt; console.log(<span class="string">"Hello"</span>);
+
+<span class="keyword">const</span> second = () => console.log(<span class="string">"Hello"</span>);
+
+console.log(first === second); <span class="comment">// false</span>
+
+</div>
+
+<p>
+Why? Because JavaScript created two different function objects.
+</p>
+
+<div class="visual-flow">
+
+<div class="visual-node">
+Function A<br>
+<small>Reference #101</small>
+</div>
+
+<div class="visual-arrow">≠</div>
+
+<div class="visual-node">
+Function B<br>
+<small>Reference #202</small>
+</div>
+
+</div>
+
+<div class="identity-demo">
+
+<div class="identity-card">
+
+<h3>Without useCallback</h3>
+
+<div class="identity-value">
+render #1 → function reference A<br>
+render #2 → function reference B<br>
+render #3 → function reference C
+</div>
+
+<p class="different">
+Reference changes on every render.
+</p>
+
+</div>
+
+<div class="identity-card">
+
+<h3>With useCallback</h3>
+
+<div class="identity-value">
+render #1 → function reference A<br>
+render #2 → function reference A<br>
+render #3 → function reference A
+</div>
+
+<p class="same">
+Reference remains stable while dependencies remain unchanged.
+</p>
+
+</div>
+
+</div>
+
+<div class="demo">
+
+<div class="demo-header">
+
+<div class="demo-title">Interactive Function Identity Demo</div>
+
+<button class="btn" onclick="runIdentityDemo()">
+Re-render Component
+</button>
+
+</div>
+
+<p>
+Click the button several times and observe the reference behavior.
+</p>
+
+<div id="identityOutput" class="render-box">
+Render the component to begin.
+</div>
+
+</div>
+
+</section>
+
+<!-- RERENDER -->
+
+<section class="section" id="rerender">
+
+<h2>3. Re-rendering in React</h2>
+
+<p class="section-intro">
+A React component can re-render when its state changes, its parent renders,
+or other reactive inputs change. A re-render means React executes the
+component function again.
+</p>
+
+<div class="visual-flow">
+
+<div class="visual-node">State Changes</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Component Executes</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Functions Re-created</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">JSX Returned</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">React Reconciles</div>
+
+</div>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+```
+<span class="keyword">const</span> [count, setCount] = <span class="function">useState</span>(<span class="number">0</span>);
+
+<span class="keyword">const</span> handleClick = () =&gt; {
+    console.log(<span class="string">"clicked"</span>);
+};
+
+<span class="keyword">return</span> (
+    &lt;button onClick={handleClick}&gt;
+        {count}
+    &lt;/button&gt;
+);
+```
+
+}
+
+</div>
+
+<p>
+Every time App renders, the function expression assigned to
+<strong>handleClick</strong> is evaluated again.
+</p>
+
+<div class="warning">
+<strong>Important:</strong> A new function reference does not automatically mean
+the browser will perform an expensive DOM update. React still compares the
+resulting UI. The performance concern becomes especially relevant when a
+function is passed as a prop to a memoized child.
+</div>
+
+</section>
+
+<!-- PARENT CHILD -->
+
+<section class="section" id="parentchild">
+
+<h2>4. Parent → Child Rendering</h2>
+
+<p class="section-intro">
+This is where useCallback becomes particularly useful. Suppose a parent
+creates a callback and passes it to a child.
+</p>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">Parent</span>() {
+
+```
+<span class="keyword">const</span> handleClick = () =&gt; {
+    console.log(<span class="string">"Clicked"</span>);
+};
+
+<span class="keyword">return</span> (
+    &lt;Child onClick={handleClick} /&gt;
+);
+```
+
+}
+
+</div>
+
+<div class="visual-flow">
+
+<div class="visual-node">Parent Render</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">New handleClick</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Prop Changes</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Child May Render</div>
+
+</div>
+
+<div class="parent-child">
+
+<div class="component-box">
+
+<h4>Parent Component</h4>
+
+<p>
+State changes here can cause the parent to render again.
+</p>
+
+<div class="render-count">
+Parent renders: <span id="parentCount">0</span>
+</div>
+
+<br><br>
+
+<button class="btn" onclick="parentRender()">
+Update Parent
+</button>
+
+</div>
+
+<div class="component-box">
+
+<h4>Child Component</h4>
+
+<p>
+The child receives a callback prop.
+</p>
+
+<div class="render-count">
+Child renders: <span id="childCount">0</span>
+</div>
+
+<div id="childStatus" class="small">
+Waiting...
+</div>
+
+</div>
+
+</div>
+
+<p class="small">
+This visualization is a simplified model of the relationship. In real React,
+whether a child re-renders also depends on its own state, context, parent
+rendering, memoization, and other factors.
+</p>
+
+</section>
+
+<!-- REACT MEMO -->
+
+<section class="section" id="memo">
+
+<h2>5. React.memo</h2>
+
+<p class="section-intro">
+Before understanding useCallback + React.memo, understand what
+<strong>React.memo</strong> does.
+</p>
+
+<div class="code">
+<span class="keyword">const</span> Child = React.<span class="function">memo</span>(<span class="keyword">function</span> Child({ onClick }) {
+
+```
+<span class="keyword">return</span> (
+    &lt;button onClick={onClick}&gt;
+        Click
+    &lt;/button&gt;
+);
+```
+
+});
+
+</div>
+
+<p>
+React.memo lets React skip rendering a child when its props are considered
+equal to their previous values.
+</p>
+
+<div class="highlight">
+<strong>Important:</strong> React.memo is about skipping unnecessary component
+renders based on props. It does not prevent the parent from rendering.
+</div>
+
+<h3>Primitive props vs function props</h3>
+
+<table class="compare">
+
+<tr>
+<th>Prop</th>
+<th>Example</th>
+<th>Reference behavior</th>
+</tr>
+
+<tr>
+<td>Number</td>
+<td>count={5}</td>
+<td>Primitive value comparison</td>
+</tr>
+
+<tr>
+<td>String</td>
+<td>name="Pradeep"</td>
+<td>Primitive value comparison</td>
+</tr>
+
+<tr>
+<td>Boolean</td>
+<td>active={true}</td>
+<td>Primitive value comparison</td>
+</tr>
+
+<tr>
+<td>Function</td>
+<td>onClick={handleClick}</td>
+<td>Reference identity matters</td>
+</tr>
+
+<tr>
+<td>Object</td>
+<td>user={user}</td>
+<td>Reference identity matters</td>
+</tr>
+
+</table>
+
+</section>
+
+<!-- COMBINATION -->
+
+<section class="section" id="combination">
+
+<h2>6. useCallback + React.memo</h2>
+
+<p class="section-intro">
+These two tools solve related parts of the same optimization scenario.
+</p>
+
+<div class="visual-flow">
+
+<div class="visual-node">Parent Re-renders</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">useCallback</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Stable Function</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">React.memo</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Child Can Skip Render</div>
+
+</div>
+
+<h3>Without useCallback</h3>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">Parent</span>() {
+
+```
+<span class="keyword">const</span> [count, setCount] = <span class="function">useState</span>(<span class="number">0</span>);
+
+<span class="keyword">const</span> handleClick = () =&gt; {
+    console.log(<span class="string">"clicked"</span>);
+};
+
+<span class="keyword">return</span> (
+    &lt;&gt;
+        &lt;button onClick={() =&gt; setCount(count + <span class="number">1</span>)}&gt;
+            Count: {count}
+        &lt;/button&gt;
+
+        &lt;Child onClick={handleClick} /&gt;
+    &lt;/&gt;
+);
+```
+
+}
+
+<span class="keyword">const</span> Child = React.<span class="function">memo</span>(({ onClick }) => {
+
+```
+console.log(<span class="string">"Child rendered"</span>);
+
+<span class="keyword">return</span> &lt;button onClick={onClick}&gt;Child&lt;/button&gt;;
+```
+
+});
+
+</div>
+
+<p>
+The parent renders again. A new handleClick function is created.
+React.memo sees a different function reference, so the child may render again.
+</p>
+
+<h3>With useCallback</h3>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">Parent</span>() {
+
+```
+<span class="keyword">const</span> [count, setCount] = <span class="function">useState</span>(<span class="number">0</span>);
+
+<span class="keyword">const</span> handleClick = <span class="function">useCallback</span>(() =&gt; {
+    console.log(<span class="string">"clicked"</span>);
+}, []);
+
+<span class="keyword">return</span> (
+    &lt;&gt;
+        &lt;button onClick={() =&gt; setCount(count + <span class="number">1</span>)}&gt;
+            Count: {count}
+        &lt;/button&gt;
+
+        &lt;Child onClick={handleClick} /&gt;
+    &lt;/&gt;
+);
+```
+
+}
+
+</div>
+
+<div class="success">
+Because handleClick keeps the same reference while its dependencies are
+unchanged, a memoized Child can skip rendering when its other props also
+remain unchanged.
+</div>
+
+<div class="demo">
+
+<div class="demo-header">
+
+<div class="demo-title">React.memo + useCallback Simulation</div>
+
+<button class="btn" onclick="memoSimulation()">
+Re-render Parent
+</button>
+
+</div>
+
+<div class="memo-demo">
+
+<div class="memo-column">
+
+<h3>Without useCallback</h3>
+
+<p>
+Parent renders → new function reference → memo sees changed prop.
+</p>
+
+<div id="withoutLog" class="render-log">
+No renders yet.
+</div>
+
+</div>
+
+<div class="memo-column">
+
+<h3>With useCallback</h3>
+
+<p>
+Parent renders → same function reference → memo can skip child.
+</p>
+
+<div id="withLog" class="render-log">
+No renders yet.
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- DEPENDENCIES -->
+
+<section class="section" id="dependencies">
+
+<h2>7. Dependency Array</h2>
+
+<p class="section-intro">
+The dependency array tells React when the cached callback should be considered
+out of date.
+</p>
+
+<div class="code">
+<span class="keyword">const</span> handleClick = <span class="function">useCallback</span>(() =&gt; {
+
+```
+console.log(userId);
+```
+
+}, [userId]);
+
+</div>
+
+<p>
+If userId remains the same, React can reuse the callback reference.
+If userId changes, React creates a new callback that captures the new value.
+</p>
+
+<div class="dependency-track">
+
+<div class="dep" id="depUser">
+<strong>userId</strong>
+<span>Dependency</span>
+</div>
+
+<div class="dep" id="depTheme">
+<strong>theme</strong>
+<span>Dependency</span>
+</div>
+
+<div class="dep" id="depCount">
+<strong>count</strong>
+<span>Dependency</span>
+</div>
+
+</div>
+
+<button class="btn" onclick="changeDependency()">
+Change userId
+</button>
+
+<div id="dependencyResult" class="render-box">
+userId = 101 — callback can be reused.
+</div>
+
+<h3>How to think about dependencies</h3>
+
+<div class="visual-flow">
+
+<div class="visual-node">Callback</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Reads Reactive Values</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Dependencies</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Compare</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Reuse / Replace</div>
+
+</div>
+
+<div class="warning">
+Do not choose dependencies simply because you want fewer re-creations.
+Dependencies should represent the reactive values used by the callback.
+Incorrect dependencies can create stale values or incorrect behavior.
+</div>
+
+</section>
+
+<!-- FUNCTION CLOSURE -->
+
+<section class="section">
+
+<h2>8. Closures & useCallback</h2>
+
+<p class="section-intro">
+A callback can capture values from the render in which it was created.
+This is why dependencies matter.
+</p>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">Profile</span>({ name }) {
+
+```
+<span class="keyword">const</span> greet = <span class="function">useCallback</span>(() =&gt; {
+    console.log(<span class="string">`Hello ${name}`</span>);
+}, [name]);
+
+<span class="keyword">return</span> &lt;button onClick={greet}&gt;Greet&lt;/button&gt;;
+```
+
+}
+
+</div>
+
+<div class="visual-flow">
+
+<div class="visual-node">Render</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">name = "Pradeep"</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Callback Captures name</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">name Changes</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">New Callback</div>
+
+</div>
+
+<p>
+If the callback uses name, name belongs in the dependency array.
+</p>
+
+</section>
+
+<!-- PERFORMANCE -->
+
+<section class="section" id="performance">
+
+<h2>9. Performance Optimization</h2>
+
+<p class="section-intro">
+useCallback is an optimization tool, not a default requirement for every
+event handler.
+</p>
+
+<div class="info-grid">
+
+<div class="info-card">
+
+<h4>Potential Benefit</h4>
+
+<p>
+Stable callback references can help memoized children avoid unnecessary
+renders when the callback is passed as a prop.
+</p>
+
+</div>
+
+<div class="info-card">
+
+<h4>Potential Cost</h4>
+
+<p>
+React must track the callback and dependencies. Additional memoization also
+adds conceptual complexity.
+</p>
+
+</div>
+
+<div class="info-card">
+
+<h4>Measure First</h4>
+
+<p>
+Optimization should be based on actual rendering behavior and performance
+evidence rather than automatically adding hooks everywhere.
+</p>
+
+</div>
+
+</div>
+
+<h3>Optimization chain</h3>
+
+<div class="visual-flow">
+
+<div class="visual-node">Expensive UI</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Frequent Parent Renders</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Callback Prop Changes</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Memoized Child Re-renders</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Investigate</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Optimize</div>
+
+</div>
+
+<div class="highlight">
+<strong>Professional rule:</strong>
+Do not think “useCallback = faster React.” Think:
+<strong>“Can a stable function reference prevent unnecessary work in this specific component tree?”</strong>
+</div>
+
+</section>
+
+<!-- WHEN -->
+
+<section class="section" id="when">
+
+<h2>10. When to Use useCallback()</h2>
+
+<div class="card">
+
+<h3>Good situations</h3>
+
+<ul>
+<li>A callback is passed to a child wrapped with React.memo.</li>
+<li>The child is expensive to render.</li>
+<li>The parent renders frequently.</li>
+<li>The callback is used as a dependency where stable identity matters.</li>
+<li>Profiling or analysis shows that callback identity is contributing to unnecessary work.</li>
+</ul>
+
+</div>
+
+<h2>11. When NOT to Use useCallback()</h2>
+
+<div class="card">
+
+<h3>Usually unnecessary</h3>
+
+<ul>
+<li>A tiny component has a simple button handler.</li>
+<li>The callback is not passed to a memoized child.</li>
+<li>The child is inexpensive to render.</li>
+<li>There is no measurable performance issue.</li>
+<li>You are adding it everywhere just because it is a React performance Hook.</li>
+</ul>
+
+</div>
+
+<table class="compare">
+
+<tr>
+<th>Situation</th>
+<th>useCallback?</th>
+<th>Reason</th>
+</tr>
+
+<tr>
+<td>Simple local button</td>
+<td>Usually no</td>
+<td>Little benefit</td>
+</tr>
+
+<tr>
+<td>Callback passed to memoized expensive child</td>
+<td>Potentially yes</td>
+<td>Stable reference may allow child to skip</td>
+</tr>
+
+<tr>
+<td>Large frequently-rendering component tree</td>
+<td>Investigate</td>
+<td>Measure actual rendering behavior</td>
+</tr>
+
+<tr>
+<td>Every function automatically</td>
+<td>No</td>
+<td>Unnecessary complexity</td>
+</tr>
+
+</table>
+
+</section>
+
+<!-- MISTAKES -->
+
+<section class="section" id="mistakes">
+
+<h2>12. Common useCallback() Mistakes</h2>
+
+<h3>Mistake 1 — Using it everywhere</h3>
+
+<div class="code">
+<span class="keyword">const</span> handleA = <span class="function">useCallback</span>(() =&gt; {}, []);
+<span class="keyword">const</span> handleB = <span class="function">useCallback</span>(() =&gt; {}, []);
+<span class="keyword">const</span> handleC = <span class="function">useCallback</span>(() =&gt; {}, []);
+<span class="keyword">const</span> handleD = <span class="function">useCallback</span>(() =&gt; {}, []);
+</div>
+
+<div class="danger">
+Memoizing every function is not automatically a performance improvement.
+It can make the code harder to understand without meaningful benefit.
+</div>
+
+<h3>Mistake 2 — Forgetting dependencies</h3>
+
+<div class="code">
+<span class="keyword">const</span> handleClick = <span class="function">useCallback</span>(() =&gt; {
+
+```
+console.log(count);
+```
+
+}, []);
+
+</div>
+
+<p>
+If the callback needs the current count, an empty dependency list can cause
+the callback to retain an outdated captured value.
+</p>
+
+<div class="success">
+A dependency array is not a “performance setting.” It describes the values
+that determine when the callback needs to change.
+</div>
+
+<h3>Mistake 3 — Expecting useCallback to stop the parent render</h3>
+
+<div class="danger">
+useCallback stabilizes a callback reference. It does not stop the component
+that owns the callback from rendering.
+</div>
+
+<h3>Mistake 4 — Forgetting React.memo</h3>
+
+<p>
+If a child is not memoized and is rendered normally by a parent, stabilizing
+a callback prop may not produce the expected child-render optimization.
+</p>
+
+<h3>Mistake 5 — Confusing useCallback and useMemo</h3>
+
+<table class="compare">
+
+<tr>
+<th>Hook</th>
+<th>What is cached?</th>
+<th>Typical purpose</th>
+</tr>
+
+<tr>
+<td>useMemo</td>
+<td>A calculated value</td>
+<td>Avoid repeating an expensive calculation</td>
+</tr>
+
+<tr>
+<td>useCallback</td>
+<td>A function reference</td>
+<td>Keep callback identity stable</td>
+</tr>
+
+</table>
+
+<div class="code">
+<span class="comment">// useMemo → caches a value</span>
+<span class="keyword">const</span> result = <span class="function">useMemo</span>(() =&gt; calculate(data), [data]);
+
+<span class="comment">// useCallback → caches a function</span> <span class="keyword">const</span> handle = <span class="function">useCallback</span>(() => doSomething(data), [data]);
+
+</div>
+
+</section>
+
+<!-- REAL WORLD -->
+
+<section class="section">
+
+<h2>13. Real-World Example — Student Dashboard</h2>
+
+<p class="section-intro">
+Imagine a ZENSUS dashboard where a parent component contains many controls
+and a large student list.
+</p>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">Dashboard</span>() {
+
+```
+<span class="keyword">const</span> [search, setSearch] = <span class="function">useState</span>(<span class="string">""</span>);
+
+<span class="keyword">const</span> handleSelectStudent = <span class="function">useCallback</span>((id) =&gt; {
+
+    console.log(<span class="string">"Selected:"</span>, id);
+
+}, []);
+
+<span class="keyword">return</span> (
+    &lt;&gt;
+
+        &lt;SearchBox
+            value={search}
+            onChange={setSearch}
+        /&gt;
+
+        &lt;StudentList
+            onSelect={handleSelectStudent}
+        /&gt;
+
+    &lt;/&gt;
+);
+```
+
+}
+
+<span class="keyword">const</span> StudentList = React.<span class="function">memo</span>(({ onSelect }) => {
+
+```
+<span class="keyword">return</span> (
+    &lt;div&gt;
+        {students.map(student =&gt; (
+            &lt;StudentCard
+                key={student.id}
+                student={student}
+                onSelect={onSelect}
+            /&gt;
+        ))}
+    &lt;/div&gt;
+);
+```
+
+});
+
+</div>
+
+<div class="highlight">
+The important optimization is not simply “useCallback exists.”
+The optimization comes from the combination of a stable callback reference,
+memoized components, appropriate props, and an actual rendering scenario
+where avoiding work matters.
+</div>
+
+</section>
+
+<!-- DECISION GUIDE -->
+
+<section class="section">
+
+<h2>14. useCallback Decision Guide</h2>
+
+<div class="visual-flow">
+
+<div class="visual-node">Do I have a callback?</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Is it passed to a child?</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Is child memoized?</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Is rendering expensive?</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Measure</div>
+<div class="visual-arrow">→</div>
+<div class="visual-node">Optimize if useful</div>
+
+</div>
+
+<div class="card">
+
+<h3>Professional mental model</h3>
+
+<p style="font-size:20px;font-weight:800;">
+Render → Function Creation → Reference Identity → Props → React.memo →
+Possible Child Render → Measure → Optimize
+</p>
+
+</div>
+
+</section>
+
+<!-- CHEATSHEET -->
+
+<section class="section">
+
+<h2>15. useCallback Cheat Sheet</h2>
+
+<div class="cheat">
+
+<div>
+<strong>Syntax</strong>
+<p class="small">
+useCallback(function, dependencies)
+</p>
+</div>
+
+<div>
+<strong>Purpose</strong>
+<p class="small">
+Cache a function reference between renders.
+</p>
+</div>
+
+<div>
+<strong>Important Partner</strong>
+<p class="small">
+React.memo
+</p>
+</div>
+
+<div>
+<strong>Dependency Rule</strong>
+<p class="small">
+Include reactive values used by the callback.
+</p>
+</div>
+
+<div>
+<strong>Not a Magic Speed Button</strong>
+<p class="small">
+It does not automatically make all React applications faster.
+</p>
+</div>
+
+<div>
+<strong>Use Carefully</strong>
+<p class="small">
+Prefer evidence-based optimization.
+</p>
+</div>
+
+</div>
+
+</section>
+
+<!-- MASTER -->
+
+<section class="section">
+
+<h2>16. Master Concept</h2>
+
+<div class="card">
+
+<div class="visual-flow">
+
+<div class="visual-node">Parent State Changes</div>
+<div class="visual-arrow">→</div>
+
+<div class="visual-node">Parent Re-renders</div>
+<div class="visual-arrow">→</div>
+
+<div class="visual-node">Callback May Get New Identity</div>
+<div class="visual-arrow">→</div>
+
+<div class="visual-node">Function Prop Changes</div>
+<div class="visual-arrow">→</div>
+
+<div class="visual-node">Memo Child May Render</div>
+
+</div>
+
+<hr style="border:none;border-top:1px solid #e5e7eb;margin:30px 0;">
+
+<div class="visual-flow">
+
+<div class="visual-node">useCallback</div>
+<div class="visual-arrow">→</div>
+
+<div class="visual-node">Stable Callback Reference</div>
+<div class="visual-arrow">→</div>
+
+<div class="visual-node">React.memo</div>
+<div class="visual-arrow">→</div>
+
+<div class="visual-node">Child Can Skip When Props Are Equal</div>
+
+</div>
+
+</div>
+
+<div class="success">
+
+<strong>Remember:</strong><br><br>
+
+useCallback is primarily about <strong>function identity</strong>.
+React.memo is about <strong>memoizing component rendering based on props</strong>.
+Together, they can reduce unnecessary child renders in the right scenario.
+
+</div>
+
+</section>
+
+<!-- QUIZ -->
+
+<section class="section" id="quiz">
+
+<h2>17. Quick Quiz</h2>
+
+<p class="section-intro">
+Test whether you understand the underlying mechanism instead of memorizing
+the syntax.
+</p>
+
+<div class="quiz-question">
+
+<strong>1. What does useCallback primarily preserve?</strong>
+
+<button onclick="showAnswer(1)">A. DOM state</button> <button onclick="showAnswer(1)">B. Function reference identity</button> <button onclick="showAnswer(1)">C. Component HTML</button> <button onclick="showAnswer(1)">D. API response</button>
+
+<div class="answer" id="answer1">
+Answer: B — useCallback can preserve a function reference while its dependencies remain unchanged.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<strong>2. Why can a new callback cause a memoized child to render?</strong>
+
+<button onclick="showAnswer(2)">A. Functions cannot be props</button> <button onclick="showAnswer(2)">B. The callback has a new reference</button> <button onclick="showAnswer(2)">C. React removes the child</button> <button onclick="showAnswer(2)">D. useState automatically runs</button>
+
+<div class="answer" id="answer2">
+Answer: B — a newly created function is a different reference, so the callback prop can be considered changed.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<strong>3. What does React.memo primarily optimize?</strong>
+
+<button onclick="showAnswer(3)">A. Network requests</button> <button onclick="showAnswer(3)">B. CSS parsing</button> <button onclick="showAnswer(3)">C. Component rendering based on props</button> <button onclick="showAnswer(3)">D. JavaScript compilation</button>
+
+<div class="answer" id="answer3">
+Answer: C — React.memo allows a component to skip rendering when its props are unchanged according to its comparison.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<strong>4. Which statement is correct?</strong>
+
+<button onclick="showAnswer(4)">A. useCallback always makes React faster</button> <button onclick="showAnswer(4)">B. useCallback prevents the parent from rendering</button> <button onclick="showAnswer(4)">C. useCallback is mainly useful when stable function identity matters</button> <button onclick="showAnswer(4)">D. useCallback replaces useState</button>
+
+<div class="answer" id="answer4">
+Answer: C — stable callback identity can matter when functions are passed to memoized children or used in other identity-sensitive situations.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<strong>5. What should dependencies represent?</strong>
+
+<button onclick="showAnswer(5)">A. Values randomly chosen to reduce renders</button> <button onclick="showAnswer(5)">B. Reactive values used by the callback</button> <button onclick="showAnswer(5)">C. Only numbers</button> <button onclick="showAnswer(5)">D. CSS classes</button>
+
+<div class="answer" id="answer5">
+Answer: B — dependencies describe the reactive values that the callback uses and that determine when its captured values may need updating.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<strong>6. Which situation usually does NOT justify useCallback by itself?</strong>
+
+<button onclick="showAnswer(6)">A. A callback passed to an expensive memoized child</button> <button onclick="showAnswer(6)">B. A frequently rendering parent with a memoized child</button> <button onclick="showAnswer(6)">C. A tiny component with a simple local event handler</button> <button onclick="showAnswer(6)">D. A measured callback identity performance issue</button>
+
+<div class="answer" id="answer6">
+Answer: C — simple local handlers often gain little from memoization and may become unnecessarily complex.
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+<footer class="footer">
+ZENSUS React Course • Lesson 17 • useCallback() & Function Optimization
+</footer>
+
+</main>
+</div>
+
+<script>
+
+/* SIDEBAR NAVIGATION */
+
+document.querySelectorAll(".side-item").forEach(item => {
+
+    item.addEventListener("click", () => {
+
+        const target = document.getElementById(item.dataset.target);
+
+        if(target){
+            target.scrollIntoView({
+                behavior:"smooth",
+                block:"start"
+            });
+        }
+
+        document.querySelectorAll(".side-item")
+            .forEach(x => x.classList.remove("active"));
+
+        item.classList.add("active");
+
+    });
+
+});
+
+
+/* FUNCTION IDENTITY DEMO */
+
+let identityRender = 0;
+
+function runIdentityDemo(){
+
+    identityRender++;
+
+    const normalReference =
+        "fn_" + Math.floor(Math.random() * 9000 + 1000);
+
+    const callbackReference = "stable_callback_101";
+
+    const output = document.getElementById("identityOutput");
+
+    output.innerHTML = `
+        <strong>Render #${identityRender}</strong><br><br>
+
+        Without useCallback:
+        <strong style="color:#dc2626;">
+        ${normalReference}
+        </strong>
+        → new reference
+
+        <br><br>
+
+        With useCallback:
+        <strong style="color:#059669;">
+        ${callbackReference}
+        </strong>
+        → reused while dependencies stay unchanged
+    `;
+
+    output.classList.remove("rendered");
+
+    void output.offsetWidth;
+
+    output.classList.add("rendered");
+
+}
+
+
+/* PARENT CHILD DEMO */
+
+let parentRenders = 0;
+let childRenders = 0;
+
+function parentRender(){
+
+    parentRenders++;
+    childRenders++;
+
+    document.getElementById("parentCount").textContent = parentRenders;
+    document.getElementById("childCount").textContent = childRenders;
+
+    document.getElementById("childStatus").innerHTML =
+        "Parent created a new callback reference → memoized child receives a changed function prop.";
+
+}
+
+
+/* MEMO SIMULATION */
+
+let memoCount = 0;
+
+function memoSimulation(){
+
+    memoCount++;
+
+    document.getElementById("withoutLog").innerHTML +=
+        `Parent render #${memoCount}<br>
+         → new callback reference<br>
+         → Child renders<br><br>`;
+
+    document.getElementById("withLog").innerHTML +=
+        `Parent render #${memoCount}<br>
+         → same callback reference<br>
+         → Child can skip<br><br>`;
+
+}
+
+
+/* DEPENDENCY DEMO */
+
+let userId = 101;
+
+function changeDependency(){
+
+    userId += 1;
+
+    document.getElementById("depUser")
+        .classList.add("changed");
+
+    document.getElementById("dependencyResult").innerHTML =
+        `userId changed to <strong>${userId}</strong> → dependency changed → a new callback reference is required.`;
+
+    setTimeout(() => {
+
+        document.getElementById("depUser")
+            .classList.remove("changed");
+
+    },700);
+
+}
+
+
+/* QUIZ */
+
+function showAnswer(number){
+
+    const answer = document.getElementById("answer" + number);
+
+    if(answer){
+        answer.style.display =
+            answer.style.display === "block"
+            ? "none"
+            : "block";
+    }
+
+}
+
+</script>
+
+</body>
+</html>

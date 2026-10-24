@@ -1,0 +1,5166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENSUS | C++ Lesson 11 - Classes & Objects</title>
+
+<style>
+/* =========================================================
+   ZENSUS — C++ LESSON 11
+   CLASSES & OBJECTS
+   ========================================================= */
+
+:root{
+    --primary:#2563eb;
+    --primary-dark:#1d4ed8;
+    --secondary:#7c3aed;
+    --success:#16a34a;
+    --warning:#d97706;
+    --danger:#dc2626;
+
+    --bg:#f7f9fc;
+    --surface:#ffffff;
+    --surface-2:#f1f5f9;
+
+    --text:#0f172a;
+    --muted:#64748b;
+    --border:#e2e8f0;
+
+    --code-bg:#0f172a;
+    --code-text:#e2e8f0;
+
+    --sidebar:280px;
+    --header:72px;
+
+    --shadow:0 10px 30px rgba(15,23,42,.07);
+    --shadow-lg:0 20px 50px rgba(15,23,42,.12);
+
+    --radius:18px;
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+/* =========================================================
+   SCROLL PROGRESS
+   ========================================================= */
+
+.progress-bar{
+    position:fixed;
+    top:0;
+    left:0;
+    height:4px;
+    width:0%;
+    background:var(--primary);
+    z-index:9999;
+}
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    width:var(--sidebar);
+
+    background:#fff;
+    border-right:1px solid var(--border);
+
+    z-index:1000;
+
+    overflow-y:auto;
+
+    transition:.3s ease;
+}
+
+.brand{
+    height:var(--header);
+
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    padding:0 22px;
+
+    border-bottom:1px solid var(--border);
+}
+
+.brand-logo{
+    width:38px;
+    height:38px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:11px;
+
+    background:#eff6ff;
+    color:var(--primary);
+
+    font-weight:900;
+    font-size:18px;
+}
+
+.brand-text{
+    font-weight:900;
+    font-size:19px;
+    letter-spacing:.4px;
+}
+
+.brand-text span{
+    color:var(--primary);
+}
+
+.course-label{
+    padding:22px 22px 10px;
+
+    font-size:11px;
+    font-weight:800;
+    color:#94a3b8;
+
+    text-transform:uppercase;
+    letter-spacing:1.3px;
+}
+
+.side-nav{
+    padding:0 12px 30px;
+}
+
+.side-nav a{
+    display:flex;
+    align-items:center;
+    gap:11px;
+
+    text-decoration:none;
+
+    color:#64748b;
+
+    padding:11px 13px;
+    margin:3px 0;
+
+    border-radius:10px;
+
+    font-size:14px;
+    font-weight:600;
+
+    transition:.2s ease;
+}
+
+.side-nav a:hover{
+    background:#f8fafc;
+    color:var(--primary);
+    transform:translateX(2px);
+}
+
+.side-nav a.active{
+    background:#eff6ff;
+    color:var(--primary);
+    font-weight:800;
+}
+
+.side-nav .num{
+    width:25px;
+    height:25px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:7px;
+
+    background:#f1f5f9;
+
+    font-size:11px;
+    font-weight:800;
+}
+
+.side-nav a.active .num{
+    background:var(--primary);
+    color:white;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.header{
+    position:fixed;
+    top:0;
+    right:0;
+    left:var(--sidebar);
+
+    height:var(--header);
+
+    background:rgba(255,255,255,.94);
+    backdrop-filter:blur(12px);
+
+    border-bottom:1px solid var(--border);
+
+    z-index:900;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 28px;
+}
+
+.header-left{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.menu-btn{
+    display:none;
+
+    border:0;
+    background:#f1f5f9;
+
+    width:40px;
+    height:40px;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    font-size:19px;
+}
+
+.lesson-label{
+    font-weight:800;
+    font-size:14px;
+}
+
+.header-right{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.progress-pill{
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    background:#eff6ff;
+    color:var(--primary);
+
+    padding:7px 12px;
+
+    border-radius:999px;
+
+    font-size:12px;
+    font-weight:800;
+}
+
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+.main{
+    margin-left:var(--sidebar);
+    padding-top:var(--header);
+}
+
+.container{
+    width:min(1180px, calc(100% - 40px));
+    margin:auto;
+}
+
+section{
+    padding:70px 0;
+}
+
+.section-head{
+    margin-bottom:30px;
+}
+
+.eyebrow{
+    color:var(--primary);
+
+    font-size:12px;
+    font-weight:900;
+
+    text-transform:uppercase;
+    letter-spacing:1.4px;
+
+    margin-bottom:8px;
+}
+
+.section-head h2{
+    font-size:34px;
+    line-height:1.2;
+    margin-bottom:10px;
+}
+
+.section-head p{
+    color:var(--muted);
+    max-width:760px;
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero{
+    min-height:calc(100vh - var(--header));
+
+    display:flex;
+    align-items:center;
+
+    padding:65px 0;
+}
+
+.hero-grid{
+    display:grid;
+    grid-template-columns:1.05fr .95fr;
+    gap:55px;
+
+    align-items:center;
+}
+
+.badges{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+
+    margin-bottom:20px;
+}
+
+.badge{
+    padding:6px 10px;
+
+    border-radius:999px;
+
+    background:#eff6ff;
+    color:var(--primary);
+
+    font-size:11px;
+    font-weight:800;
+}
+
+.hero h1{
+    font-size:clamp(42px,5vw,70px);
+
+    line-height:1.02;
+
+    letter-spacing:-2.5px;
+
+    margin-bottom:22px;
+}
+
+.hero h1 span{
+    color:var(--primary);
+}
+
+.hero p{
+    color:var(--muted);
+
+    font-size:17px;
+
+    max-width:650px;
+
+    margin-bottom:25px;
+}
+
+.hero-stats{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.stat{
+    background:#fff;
+    border:1px solid var(--border);
+
+    padding:10px 14px;
+
+    border-radius:12px;
+
+    font-size:12px;
+    font-weight:800;
+
+    box-shadow:0 5px 18px rgba(15,23,42,.04);
+}
+
+/* =========================================================
+   CODE
+   ========================================================= */
+
+.code-card{
+    background:var(--code-bg);
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+    box-shadow:var(--shadow-lg);
+
+    animation:floatCode 5s ease-in-out infinite;
+}
+
+@keyframes floatCode{
+    0%,100%{
+        transform:translateY(0);
+    }
+    50%{
+        transform:translateY(-8px);
+    }
+}
+
+.code-top{
+    height:44px;
+
+    display:flex;
+    align-items:center;
+
+    gap:7px;
+
+    padding:0 15px;
+
+    background:#111827;
+
+    border-bottom:1px solid #1e293b;
+}
+
+.dot{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:#64748b;
+}
+
+.file-name{
+    margin-left:auto;
+
+    color:#94a3b8;
+
+    font-size:11px;
+}
+
+pre{
+    margin:0;
+    padding:24px;
+
+    overflow:auto;
+
+    color:var(--code-text);
+
+    font-family:
+        "Cascadia Code",
+        "Consolas",
+        monospace;
+
+    font-size:14px;
+
+    line-height:1.8;
+}
+
+.code-box{
+    background:var(--code-bg);
+    border-radius:15px;
+    overflow:hidden;
+    margin:20px 0;
+}
+
+.code-box pre,
+.code-box code,
+pre,
+code{
+    color:var(--code-text);
+}
+
+.kw{color:#93c5fd;}
+.type{color:#86efac;}
+.str{color:#fde68a;}
+.comment{color:#94a3b8;}
+.num{color:#c4b5fd;}
+.func{color:#fca5a5;}
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+.card-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.card{
+    background:var(--surface);
+
+    border:1px solid var(--border);
+
+    border-radius:var(--radius);
+
+    padding:24px;
+
+    box-shadow:var(--shadow);
+
+    transition:.3s ease;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+    box-shadow:var(--shadow-lg);
+}
+
+.icon-box{
+    width:45px;
+    height:45px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:12px;
+
+    background:#eff6ff;
+
+    color:var(--primary);
+
+    font-size:21px;
+
+    margin-bottom:15px;
+}
+
+.card h3{
+    margin-bottom:8px;
+    font-size:19px;
+}
+
+.card p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+/* =========================================================
+   INFO BOX
+   ========================================================= */
+
+.info{
+    padding:18px 20px;
+
+    border-radius:14px;
+
+    background:#eff6ff;
+
+    border:1px solid #dbeafe;
+
+    margin:20px 0;
+}
+
+.info strong{
+    color:var(--primary);
+}
+
+.warning{
+    background:#fff7ed;
+    border-color:#fed7aa;
+}
+
+.warning strong{
+    color:var(--warning);
+}
+
+.success{
+    background:#f0fdf4;
+    border-color:#bbf7d0;
+}
+
+.success strong{
+    color:var(--success);
+}
+
+/* =========================================================
+   CLASS VS OBJECT
+   ========================================================= */
+
+.compare{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.compare-card{
+    padding:28px;
+
+    background:#fff;
+
+    border:1px solid var(--border);
+
+    border-radius:20px;
+
+    box-shadow:var(--shadow);
+
+    position:relative;
+    overflow:hidden;
+}
+
+.compare-card::after{
+    content:"";
+
+    position:absolute;
+
+    width:130px;
+    height:130px;
+
+    border-radius:50%;
+
+    right:-50px;
+    top:-50px;
+
+    background:#eff6ff;
+}
+
+.compare-card.object::after{
+    background:#f5f3ff;
+}
+
+.compare-card h3{
+    font-size:24px;
+    margin-bottom:12px;
+}
+
+.compare-card p{
+    color:var(--muted);
+}
+
+.definition{
+    margin-top:20px;
+
+    padding:15px;
+
+    background:#f8fafc;
+
+    border-radius:12px;
+
+    font-size:14px;
+}
+
+/* =========================================================
+   ANIMATED BLUEPRINT
+   ========================================================= */
+
+.blueprint{
+    background:#fff;
+
+    border:1px solid var(--border);
+
+    border-radius:24px;
+
+    padding:35px;
+
+    box-shadow:var(--shadow);
+
+    overflow:hidden;
+}
+
+.blueprint-stage{
+    display:grid;
+
+    grid-template-columns:1fr 120px 1fr;
+
+    align-items:center;
+
+    gap:20px;
+}
+
+.blueprint-box{
+    min-height:220px;
+
+    padding:22px;
+
+    border:2px dashed #93c5fd;
+
+    background:#eff6ff;
+
+    border-radius:18px;
+
+    position:relative;
+}
+
+.blueprint-box.object-box{
+    border-color:#c4b5fd;
+    background:#f5f3ff;
+}
+
+.blueprint-title{
+    font-weight:900;
+    margin-bottom:15px;
+}
+
+.member{
+    padding:9px 12px;
+
+    background:#fff;
+
+    border:1px solid var(--border);
+
+    border-radius:9px;
+
+    margin:8px 0;
+
+    font-size:12px;
+
+    font-family:monospace;
+
+    animation:pulseMember 2.5s infinite;
+}
+
+@keyframes pulseMember{
+    0%,100%{transform:scale(1);}
+    50%{transform:scale(1.025);}
+}
+
+.arrow-flow{
+    text-align:center;
+
+    color:var(--primary);
+
+    font-size:30px;
+}
+
+.arrow-line{
+    height:3px;
+
+    background:var(--primary);
+
+    position:relative;
+}
+
+.arrow-line::after{
+    content:"";
+
+    position:absolute;
+
+    right:0;
+    top:50%;
+
+    width:10px;
+    height:10px;
+
+    border-top:3px solid var(--primary);
+    border-right:3px solid var(--primary);
+
+    transform:translateY(-50%) rotate(45deg);
+}
+
+/* =========================================================
+   SYNTAX
+   ========================================================= */
+
+.syntax-anatomy{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+
+    gap:22px;
+}
+
+.syntax-item{
+    background:#fff;
+
+    border:1px solid var(--border);
+
+    border-radius:16px;
+
+    padding:20px;
+}
+
+.syntax-item span{
+    display:inline-block;
+
+    padding:4px 8px;
+
+    border-radius:6px;
+
+    background:#eff6ff;
+
+    color:var(--primary);
+
+    font-family:monospace;
+
+    font-size:12px;
+
+    margin-bottom:9px;
+}
+
+/* =========================================================
+   ACCESS SPECIFIERS
+   ========================================================= */
+
+.access-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.access-card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:23px;
+}
+
+.access-card .access-tag{
+    display:inline-block;
+
+    padding:5px 9px;
+
+    border-radius:8px;
+
+    background:#f1f5f9;
+
+    font-family:monospace;
+
+    font-size:12px;
+
+    font-weight:800;
+
+    margin-bottom:12px;
+}
+
+.access-card h3{
+    margin-bottom:8px;
+}
+
+.access-card p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+/* =========================================================
+   MEMORY VISUAL
+   ========================================================= */
+
+.memory{
+    background:#0f172a;
+
+    border-radius:22px;
+
+    padding:30px;
+
+    color:white;
+
+    overflow:hidden;
+
+    position:relative;
+}
+
+.memory h3{
+    margin-bottom:25px;
+}
+
+.memory-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+}
+
+.memory-object{
+    padding:18px;
+
+    border:1px solid #334155;
+
+    background:#111827;
+
+    border-radius:15px;
+
+    animation:memoryPulse 3s infinite;
+}
+
+.memory-object:nth-child(2){
+    animation-delay:.5s;
+}
+
+.memory-object:nth-child(3){
+    animation-delay:1s;
+}
+
+@keyframes memoryPulse{
+    0%,100%{
+        transform:translateY(0);
+        border-color:#334155;
+    }
+    50%{
+        transform:translateY(-5px);
+        border-color:#60a5fa;
+    }
+}
+
+.address{
+    font-family:monospace;
+    color:#93c5fd;
+    font-size:11px;
+    margin-bottom:12px;
+}
+
+.memory-row{
+    display:flex;
+    justify-content:space-between;
+
+    padding:7px 9px;
+
+    border-radius:7px;
+
+    background:#1e293b;
+
+    margin:5px 0;
+
+    font-family:monospace;
+    font-size:11px;
+}
+
+/* =========================================================
+   CONSTRUCTOR ANIMATION
+   ========================================================= */
+
+.constructor-demo{
+    background:#fff;
+
+    border:1px solid var(--border);
+
+    border-radius:22px;
+
+    padding:28px;
+
+    box-shadow:var(--shadow);
+}
+
+.constructor-flow{
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    gap:15px;
+
+    flex-wrap:wrap;
+
+    margin:25px 0;
+}
+
+.flow-node{
+    min-width:150px;
+
+    padding:18px;
+
+    border-radius:15px;
+
+    background:#f8fafc;
+
+    border:1px solid var(--border);
+
+    text-align:center;
+
+    font-weight:800;
+
+    position:relative;
+}
+
+.flow-node.active{
+    border-color:var(--primary);
+    background:#eff6ff;
+    color:var(--primary);
+
+    animation:nodePop .7s ease;
+}
+
+@keyframes nodePop{
+    0%{
+        transform:scale(.8);
+        opacity:0;
+    }
+    100%{
+        transform:scale(1);
+        opacity:1;
+    }
+}
+
+.flow-arrow{
+    color:#94a3b8;
+    font-size:25px;
+}
+
+.run-btn{
+    border:0;
+
+    background:var(--primary);
+    color:white;
+
+    padding:11px 18px;
+
+    border-radius:10px;
+
+    font-weight:800;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.run-btn:hover{
+    background:var(--primary-dark);
+    transform:translateY(-2px);
+}
+
+/* =========================================================
+   OBJECT FACTORY
+   ========================================================= */
+
+.factory{
+    background:#fff;
+
+    border:1px solid var(--border);
+
+    border-radius:24px;
+
+    padding:30px;
+
+    box-shadow:var(--shadow);
+}
+
+.factory-controls{
+    display:grid;
+    grid-template-columns:1fr 1fr auto;
+    gap:12px;
+
+    margin-bottom:25px;
+}
+
+.input{
+    width:100%;
+
+    border:1px solid var(--border);
+
+    background:#f8fafc;
+
+    padding:12px 14px;
+
+    border-radius:10px;
+
+    outline:none;
+
+    font:inherit;
+
+    font-size:14px;
+}
+
+.input:focus{
+    border-color:var(--primary);
+
+    box-shadow:0 0 0 3px rgba(37,99,235,.1);
+}
+
+.objects-stage{
+    min-height:180px;
+
+    background:#f8fafc;
+
+    border:1px dashed #cbd5e1;
+
+    border-radius:17px;
+
+    padding:20px;
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:15px;
+
+    flex-wrap:wrap;
+}
+
+.created-object{
+    width:190px;
+
+    padding:17px;
+
+    background:#fff;
+
+    border:1px solid #dbeafe;
+
+    border-radius:14px;
+
+    box-shadow:0 7px 20px rgba(15,23,42,.06);
+
+    animation:objectSpawn .55s cubic-bezier(.2,.8,.2,1);
+}
+
+@keyframes objectSpawn{
+    0%{
+        transform:translateY(25px) scale(.85);
+        opacity:0;
+    }
+    100%{
+        transform:translateY(0) scale(1);
+        opacity:1;
+    }
+}
+
+.object-head{
+    display:flex;
+    align-items:center;
+    gap:9px;
+
+    margin-bottom:10px;
+}
+
+.object-icon{
+    width:32px;
+    height:32px;
+
+    display:grid;
+    place-items:center;
+
+    background:#eff6ff;
+
+    color:var(--primary);
+
+    border-radius:8px;
+}
+
+.created-object small{
+    color:var(--muted);
+}
+
+.created-object strong{
+    display:block;
+}
+
+/* =========================================================
+   INTERACTIVE CODE RUNNER
+   ========================================================= */
+
+.playground{
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:20px;
+}
+
+.editor,
+.output{
+    background:#0f172a;
+
+    border-radius:18px;
+
+    overflow:hidden;
+}
+
+.editor-header,
+.output-header{
+    padding:12px 16px;
+
+    border-bottom:1px solid #1e293b;
+
+    color:#94a3b8;
+
+    font-size:12px;
+
+    font-weight:800;
+}
+
+.editor textarea{
+    width:100%;
+
+    min-height:300px;
+
+    resize:vertical;
+
+    border:0;
+    outline:0;
+
+    background:#0f172a;
+
+    color:#e2e8f0;
+
+    padding:20px;
+
+    font-family:monospace;
+
+    font-size:13px;
+
+    line-height:1.7;
+}
+
+.output-body{
+    padding:20px;
+
+    color:#cbd5e1;
+
+    min-height:300px;
+
+    font-family:monospace;
+
+    white-space:pre-wrap;
+}
+
+/* =========================================================
+   QUIZ
+   ========================================================= */
+
+.quiz{
+    background:#fff;
+
+    border:1px solid var(--border);
+
+    border-radius:22px;
+
+    padding:30px;
+
+    box-shadow:var(--shadow);
+}
+
+.question{
+    margin-bottom:28px;
+
+    padding-bottom:24px;
+
+    border-bottom:1px solid var(--border);
+}
+
+.question:last-child{
+    border-bottom:0;
+}
+
+.question h3{
+    font-size:16px;
+
+    margin-bottom:14px;
+}
+
+.options{
+    display:grid;
+
+    gap:8px;
+}
+
+.option{
+    border:1px solid var(--border);
+
+    background:#fff;
+
+    padding:11px 14px;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    text-align:left;
+
+    font:inherit;
+
+    transition:.2s;
+}
+
+.option:hover{
+    border-color:#93c5fd;
+    background:#eff6ff;
+}
+
+.option.correct{
+    background:#f0fdf4;
+    border-color:#86efac;
+}
+
+.option.wrong{
+    background:#fef2f2;
+    border-color:#fca5a5;
+}
+
+.quiz-result{
+    margin-top:20px;
+
+    padding:15px;
+
+    border-radius:12px;
+
+    background:#f8fafc;
+
+    font-weight:800;
+}
+
+/* =========================================================
+   ACCORDION
+   ========================================================= */
+
+.accordion{
+    background:#fff;
+
+    border:1px solid var(--border);
+
+    border-radius:15px;
+
+    margin:10px 0;
+
+    overflow:hidden;
+}
+
+.accordion-btn{
+    width:100%;
+
+    border:0;
+
+    background:#fff;
+
+    padding:17px 20px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    cursor:pointer;
+
+    font:inherit;
+
+    font-weight:800;
+
+    text-align:left;
+}
+
+.accordion-content{
+    max-height:0;
+
+    overflow:hidden;
+
+    transition:max-height .35s ease;
+
+    color:var(--muted);
+}
+
+.accordion-content-inner{
+    padding:0 20px 18px;
+}
+
+/* =========================================================
+   CHECKLIST
+   ========================================================= */
+
+.checklist{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+}
+
+.check{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    padding:13px 15px;
+
+    border:1px solid var(--border);
+
+    background:#fff;
+
+    border-radius:11px;
+
+    font-size:14px;
+}
+
+.check input{
+    width:17px;
+    height:17px;
+
+    accent-color:var(--primary);
+}
+
+/* =========================================================
+   TIMELINE
+   ========================================================= */
+
+.timeline{
+    position:relative;
+
+    margin-top:30px;
+}
+
+.timeline::before{
+    content:"";
+
+    position:absolute;
+
+    left:18px;
+    top:0;
+    bottom:0;
+
+    width:2px;
+
+    background:#dbeafe;
+}
+
+.timeline-item{
+    position:relative;
+
+    padding-left:55px;
+
+    margin-bottom:25px;
+}
+
+.timeline-dot{
+    position:absolute;
+
+    left:9px;
+    top:3px;
+
+    width:20px;
+    height:20px;
+
+    border-radius:50%;
+
+    background:var(--primary);
+
+    border:5px solid #dbeafe;
+}
+
+/* =========================================================
+   REVEAL
+   ========================================================= */
+
+.reveal{
+    opacity:0;
+
+    transform:translateY(25px);
+
+    transition:
+        opacity .7s ease,
+        transform .7s ease;
+}
+
+.reveal.visible{
+    opacity:1;
+    transform:translateY(0);
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.footer{
+    padding:50px 0;
+
+    border-top:1px solid var(--border);
+
+    text-align:center;
+
+    color:var(--muted);
+
+    font-size:13px;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(max-width:1000px){
+
+    .hero-grid{
+        grid-template-columns:1fr;
+    }
+
+    .card-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .access-grid{
+        grid-template-columns:1fr;
+    }
+
+    .memory-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:800px){
+
+    :root{
+        --sidebar:0px;
+    }
+
+    .sidebar{
+        transform:translateX(-100%);
+        width:280px;
+    }
+
+    .sidebar.open{
+        transform:translateX(0);
+    }
+
+    .header{
+        left:0;
+    }
+
+    .menu-btn{
+        display:grid;
+        place-items:center;
+    }
+
+    .main{
+        margin-left:0;
+    }
+
+    .compare,
+    .syntax-anatomy,
+    .playground{
+        grid-template-columns:1fr;
+    }
+
+    .blueprint-stage{
+        grid-template-columns:1fr;
+    }
+
+    .arrow-line{
+        transform:rotate(90deg);
+        margin:25px auto;
+        width:70px;
+    }
+
+    .factory-controls{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:600px){
+
+    .container{
+        width:min(100% - 25px,1180px);
+    }
+
+    section{
+        padding:50px 0;
+    }
+
+    .hero{
+        padding:45px 0;
+    }
+
+    .hero h1{
+        font-size:43px;
+    }
+
+    .hero p{
+        font-size:15px;
+    }
+
+    .section-head h2{
+        font-size:28px;
+    }
+
+    .card-grid,
+    .checklist{
+        grid-template-columns:1fr;
+    }
+
+    .header{
+        padding:0 14px;
+    }
+
+    .header-right{
+        display:none;
+    }
+
+    pre{
+        font-size:12px;
+        padding:18px;
+    }
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media(prefers-reduced-motion:reduce){
+
+    *,
+    *::before,
+    *::after{
+        animation:none !important;
+        transition:none !important;
+        scroll-behavior:auto !important;
+    }
+
+    .reveal{
+        opacity:1;
+        transform:none;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- =====================================================
+     SIDEBAR
+     ===================================================== -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+        <div class="brand-logo">Z</div>
+
+        <div class="brand-text">
+            ZEN<span>SUS</span>
+        </div>
+    </div>
+
+    <div class="course-label">
+        C++ Mastery
+    </div>
+
+    <nav class="side-nav">
+
+        <a href="#top" class="active">
+            <span class="num">11</span>
+            Classes & Objects
+        </a>
+
+        <a href="#oop">
+            <span class="num">01</span>
+            OOP Fundamentals
+        </a>
+
+        <a href="#class-object">
+            <span class="num">02</span>
+            Class vs Object
+        </a>
+
+        <a href="#syntax">
+            <span class="num">03</span>
+            Class Syntax
+        </a>
+
+        <a href="#members">
+            <span class="num">04</span>
+            Members
+        </a>
+
+        <a href="#access">
+            <span class="num">05</span>
+            Access Specifiers
+        </a>
+
+        <a href="#memory">
+            <span class="num">06</span>
+            Object Memory
+        </a>
+
+        <a href="#constructors">
+            <span class="num">07</span>
+            Constructors
+        </a>
+
+        <a href="#this">
+            <span class="num">08</span>
+            this Pointer
+        </a>
+
+        <a href="#encapsulation">
+            <span class="num">09</span>
+            Encapsulation
+        </a>
+
+        <a href="#static">
+            <span class="num">10</span>
+            Static Members
+        </a>
+
+        <a href="#advanced">
+            <span class="num">11</span>
+            Object Techniques
+        </a>
+
+        <a href="#factory">
+            <span class="num">12</span>
+            Object Factory
+        </a>
+
+        <a href="#quiz">
+            <span class="num">13</span>
+            Quiz
+        </a>
+
+        <a href="#interview">
+            <span class="num">14</span>
+            Interview
+        </a>
+
+        <a href="#practice">
+            <span class="num">15</span>
+            Practice
+        </a>
+
+        <a href="#checklist">
+            <span class="num">16</span>
+            Checklist
+        </a>
+
+    </nav>
+
+</aside>
+
+<!-- =====================================================
+     HEADER
+     ===================================================== -->
+
+<header class="header">
+
+    <div class="header-left">
+
+        <button class="menu-btn" id="menuBtn">
+            ☰
+        </button>
+
+        <div class="lesson-label">
+            C++ • Lesson 11
+        </div>
+
+    </div>
+
+    <div class="header-right">
+
+        <div class="progress-pill">
+            ● OOP Fundamentals
+        </div>
+
+        <div class="progress-pill">
+            16 Sections
+        </div>
+
+    </div>
+
+</header>
+
+<!-- =====================================================
+     MAIN
+     ===================================================== -->
+
+<main class="main" id="top">
+
+<div class="container">
+
+<!-- =====================================================
+     HERO
+     ===================================================== -->
+
+<section class="hero">
+
+<div class="hero-grid">
+
+<div class="reveal">
+
+    <div class="badges">
+
+        <span class="badge">C++ OOP</span>
+        <span class="badge">Classes</span>
+        <span class="badge">Objects</span>
+        <span class="badge">Interview Ready</span>
+
+    </div>
+
+    <h1>
+        Classes <span>&</span><br>
+        Objects
+    </h1>
+
+    <p>
+        Learn how C++ models real-world entities using
+        classes and objects — from your first class to
+        constructors, encapsulation, static members,
+        object arrays and interview-level concepts.
+    </p>
+
+    <div class="hero-stats">
+
+        <div class="stat">40+ Concepts</div>
+        <div class="stat">Animated Visuals</div>
+        <div class="stat">Interactive Lab</div>
+        <div class="stat">Interview Prep</div>
+
+    </div>
+
+</div>
+
+<div class="code-card reveal">
+
+<div class="code-top">
+
+    <span class="dot"></span>
+    <span class="dot"></span>
+    <span class="dot"></span>
+
+    <span class="file-name">
+        Student.cpp
+    </span>
+
+</div>
+
+<pre><code><span class="kw">#include</span> <span class="str">&lt;iostream&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;string&gt;</span>
+
+<span class="kw">class</span> <span class="type">Student</span> {
+
+<span class="kw">private</span>:
+    <span class="type">std::string</span> name;
+    <span class="type">int</span> age;
+
+<span class="kw">public</span>:
+
+    <span class="type">Student</span>(
+        <span class="type">std::string</span> n,
+        <span class="type">int</span> a
+    ){
+        name = n;
+        age = a;
+    }
+
+    <span class="type">void</span> <span class="func">display</span>() {
+        std::cout &lt;&lt; name
+                  &lt;&lt; <span class="str">" "</span>
+                  &lt;&lt; age;
+    }
+};
+
+<span class="type">int</span> <span class="func">main</span>() {
+
+    <span class="type">Student</span> s1(
+        <span class="str">"Pradeep"</span>, <span class="num">19</span>
+    );
+
+    s1.<span class="func">display</span>();
+}</code></pre>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     OBJECTIVES
+     ===================================================== -->
+
+<section id="oop" class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+Learning Objectives
+</div>
+
+<h2>What you will master</h2>
+
+<p>
+By the end of this lesson, you should be able to design
+simple C++ classes, create objects and explain how
+object-oriented programming works.
+</p>
+
+</div>
+
+<div class="card-grid">
+
+<div class="card">
+
+<div class="icon-box">🧱</div>
+
+<h3>Build Classes</h3>
+
+<p>
+Create user-defined types containing data and behavior.
+</p>
+
+</div>
+
+<div class="card">
+
+<div class="icon-box">⚙️</div>
+
+<h3>Create Objects</h3>
+
+<p>
+Instantiate multiple independent objects from one class.
+</p>
+
+</div>
+
+<div class="card">
+
+<div class="icon-box">🔐</div>
+
+<h3>Encapsulation</h3>
+
+<p>
+Protect data using private members and public methods.
+</p>
+
+</div>
+
+<div class="card">
+
+<div class="icon-box">🚀</div>
+
+<h3>Constructors</h3>
+
+<p>
+Initialize objects using default and parameterized constructors.
+</p>
+
+</div>
+
+<div class="card">
+
+<div class="icon-box">🧠</div>
+
+<h3>Object Memory</h3>
+
+<p>
+Understand what an object actually stores in memory.
+</p>
+
+</div>
+
+<div class="card">
+
+<div class="icon-box">💼</div>
+
+<h3>Interview Ready</h3>
+
+<p>
+Prepare common class and object questions asked in interviews.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     WHAT IS OOP
+     ===================================================== -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+01 • OOP Fundamentals
+</div>
+
+<h2>What is Object-Oriented Programming?</h2>
+
+<p>
+Object-Oriented Programming, or OOP, organizes software
+around objects that combine data and behavior.
+</p>
+
+</div>
+
+<div class="card-grid">
+
+<div class="card">
+
+<div class="icon-box">📦</div>
+
+<h3>Data</h3>
+
+<p>
+Represents the state of an entity.
+For a Student: name, age, roll number and CGPA.
+</p>
+
+</div>
+
+<div class="card">
+
+<div class="icon-box">🔧</div>
+
+<h3>Behavior</h3>
+
+<p>
+Represents actions performed by an entity.
+For example: display(), calculateGrade(), login().
+</p>
+
+</div>
+
+<div class="card">
+
+<div class="icon-box">🎯</div>
+
+<h3>Object</h3>
+
+<p>
+A concrete instance that owns its own non-static data.
+</p>
+
+</div>
+
+</div>
+
+<div class="info">
+
+<strong>Simple idea:</strong>
+
+Instead of thinking only in terms of functions,
+OOP lets us model a program using entities
+that contain both <b>state</b> and <b>behavior</b>.
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     CLASS VS OBJECT
+     ===================================================== -->
+
+<section id="class-object" class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+02 • Core Concept
+</div>
+
+<h2>Class vs Object</h2>
+
+<p>
+This is the most important distinction in this lesson.
+</p>
+
+</div>
+
+<div class="compare">
+
+<div class="compare-card">
+
+<h3>🧱 Class</h3>
+
+<p>
+A class is a user-defined type that describes
+the data and functions that its objects can have.
+</p>
+
+<div class="definition">
+
+<b>Think:</b> Blueprint / Design / Template
+
+</div>
+
+<div class="definition">
+
+Example:
+
+<code>class Student { ... };</code>
+
+</div>
+
+</div>
+
+<div class="compare-card object">
+
+<h3>🎯 Object</h3>
+
+<p>
+An object is an instance of a class.
+It represents an actual entity created from the class.
+</p>
+
+<div class="definition">
+
+<b>Think:</b> Actual house built from a blueprint
+
+</div>
+
+<div class="definition">
+
+Example:
+
+<code>Student s1;</code>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     ANIMATED CLASS → OBJECT
+     ===================================================== -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+Picture Perfect Visualization
+</div>
+
+<h2>From Blueprint → Real Objects</h2>
+
+<p>
+One class can be used to create many objects.
+Each object gets its own non-static data.
+</p>
+
+</div>
+
+<div class="blueprint">
+
+<div class="blueprint-stage">
+
+<div class="blueprint-box">
+
+<div class="blueprint-title">
+🧱 CLASS — Student
+</div>
+
+<div class="member">
+name
+</div>
+
+<div class="member">
+age
+</div>
+
+<div class="member">
+rollNo
+</div>
+
+<div class="member">
+display()
+</div>
+
+</div>
+
+<div>
+
+<div class="arrow-flow">
+CLASS
+</div>
+
+<div class="arrow-line"></div>
+
+<div style="text-align:center;margin-top:10px;color:#64748b;font-size:12px;">
+Instantiate
+</div>
+
+</div>
+
+<div class="blueprint-box object-box">
+
+<div class="blueprint-title">
+🎯 OBJECTS
+</div>
+
+<div class="member">
+s1 → "Pradeep"
+</div>
+
+<div class="member">
+s2 → "Rahul"
+</div>
+
+<div class="member">
+s3 → "Anjali"
+</div>
+
+<div class="member">
+Same class, different state
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     SYNTAX
+     ===================================================== -->
+
+<section id="syntax" class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+03 • Class Syntax
+</div>
+
+<h2>Class Syntax & Anatomy</h2>
+
+<p>
+A class can contain data members, member functions,
+constructors and access-control sections.
+</p>
+
+</div>
+
+<div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">Student</span> {
+
+<span class="kw">private</span>:
+
+    <span class="type">std::string</span> name;
+    <span class="type">int</span> age;
+
+<span class="kw">public</span>:
+
+    <span class="type">void</span> <span class="func">display</span>() {
+        std::cout &lt;&lt; name;
+    }
+};</code></pre>
+
+</div>
+
+<div class="syntax-anatomy">
+
+<div class="syntax-item">
+
+<span>class Student</span>
+
+<p>
+Declares a new user-defined type named Student.
+</p>
+
+</div>
+
+<div class="syntax-item">
+
+<span>private:</span>
+
+<p>
+Begins a section whose members are inaccessible
+directly from unrelated outside code.
+</p>
+
+</div>
+
+<div class="syntax-item">
+
+<span>std::string name;</span>
+
+<p>
+A non-static data member representing object state.
+</p>
+
+</div>
+
+<div class="syntax-item">
+
+<span>public:</span>
+
+<p>
+Begins a section accessible through an object's
+public interface.
+</p>
+
+</div>
+
+<div class="syntax-item">
+
+<span>void display()</span>
+
+<p>
+A member function describing behavior.
+</p>
+
+</div>
+
+<div class="syntax-item">
+
+<span>};</span>
+
+<p>
+The semicolon after a class definition is required.
+</p>
+
+</div>
+
+</div>
+
+<div class="warning info">
+
+<strong>Important:</strong>
+
+The default access level of a <code>class</code> is
+<b>private</b>. The default access level of a
+<code>struct</code> is <b>public</b>.
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     MEMBERS
+     ===================================================== -->
+
+<section id="members" class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+04 • Class Members
+</div>
+
+<h2>Data Members & Member Functions</h2>
+
+<p>
+A class usually combines state and behavior.
+</p>
+
+</div>
+
+<div class="card-grid">
+
+<div class="card">
+
+<div class="icon-box">📊</div>
+
+<h3>Data Members</h3>
+
+<p>
+Variables declared inside a class.
+They represent the state of each object.
+</p>
+
+<div class="code-box">
+
+<pre><code><span class="type">int</span> age;
+<span class="type">double</span> cgpa;
+<span class="type">std::string</span> name;</code></pre>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="icon-box">⚙️</div>
+
+<h3>Member Functions</h3>
+
+<p>
+Functions declared inside a class.
+They represent behavior.
+</p>
+
+<div class="code-box">
+
+<pre><code><span class="type">void</span> <span class="func">display</span>() {
+    std::cout &lt;&lt; name;
+}</code></pre>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="icon-box">🔗</div>
+
+<h3>Combined Model</h3>
+
+<p>
+The object combines its own non-static data
+with the class's member-function behavior.
+</p>
+
+</div>
+
+</div>
+
+<div class="info">
+
+<strong>Real-world example:</strong>
+
+A BankAccount object may contain
+<code>accountNumber</code> and <code>balance</code>
+as state, while <code>deposit()</code> and
+<code>withdraw()</code> represent behavior.
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     ACCESS SPECIFIERS
+     ===================================================== -->
+
+<section id="access" class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+05 • Access Control
+</div>
+
+<h2>public, private & protected</h2>
+
+<p>
+Access specifiers control where class members can be accessed.
+</p>
+
+</div>
+
+<div class="access-grid">
+
+<div class="access-card">
+
+<div class="access-tag">public</div>
+
+<h3>Open Interface</h3>
+
+<p>
+Accessible from outside the class through an object,
+subject to the usual access rules.
+</p>
+
+<div class="code-box">
+
+<pre><code><span class="kw">public</span>:
+    <span class="type">void</span> <span class="func">display</span>();</code></pre>
+
+</div>
+
+</div>
+
+<div class="access-card">
+
+<div class="access-tag">private</div>
+
+<h3>Protected State</h3>
+
+<p>
+Direct access is restricted to the class's permitted
+member/friend context.
+</p>
+
+<div class="code-box">
+
+<pre><code><span class="kw">private</span>:
+    <span class="type">double</span> balance;</code></pre>
+
+</div>
+
+</div>
+
+<div class="access-card">
+
+<div class="access-tag">protected</div>
+
+<h3>Inheritance Interface</h3>
+
+<p>
+Accessible within the class and appropriate derived-class
+contexts, with friend access also possible.
+</p>
+
+<div class="code-box">
+
+<pre><code><span class="kw">protected</span>:
+    <span class="type">int</span> score;</code></pre>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="info">
+
+<strong>Interview shortcut:</strong>
+
+For a <code>class</code>, members are
+<b>private by default</b>.
+For a <code>struct</code>, members are
+<b>public by default</b>.
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     OBJECT CREATION
+     ===================================================== -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+Creating Objects
+</div>
+
+<h2>How do we create an object?</h2>
+
+</div>
+
+<div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">Student</span> {
+
+<span class="kw">public</span>:
+
+    <span class="type">std::string</span> name;
+
+    <span class="type">void</span> <span class="func">display</span>() {
+        std::cout &lt;&lt; name;
+    }
+};
+
+<span class="type">int</span> <span class="func">main</span>() {
+
+    <span class="type">Student</span> s1;
+    <span class="type">Student</span> s2;
+
+    s1.name = <span class="str">"Pradeep"</span>;
+    s2.name = <span class="str">"Rahul"</span>;
+
+    s1.<span class="func">display</span>();
+    s2.<span class="func">display</span>();
+}</code></pre>
+
+</div>
+
+<div class="success info">
+
+<strong>Key idea:</strong>
+
+<code>Student s1;</code> creates an object named
+<code>s1</code> whose type is <code>Student</code>.
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     MEMORY
+     ===================================================== -->
+
+<section id="memory" class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+06 • Memory Visualization
+</div>
+
+<h2>What does an object store?</h2>
+
+<p>
+Understanding object memory makes classes much easier.
+</p>
+
+</div>
+
+<div class="memory">
+
+<h3>🧠 Three Student Objects</h3>
+
+<div class="memory-grid">
+
+<div class="memory-object">
+
+<div class="address">
+Object @ 0x1000
+</div>
+
+<strong>s1</strong>
+
+<div class="memory-row">
+<span>age</span>
+<span>19</span>
+</div>
+
+<div class="memory-row">
+<span>rollNo</span>
+<span>101</span>
+</div>
+
+</div>
+
+<div class="memory-object">
+
+<div class="address">
+Object @ 0x2000
+</div>
+
+<strong>s2</strong>
+
+<div class="memory-row">
+<span>age</span>
+<span>20</span>
+</div>
+
+<div class="memory-row">
+<span>rollNo</span>
+<span>102</span>
+</div>
+
+</div>
+
+<div class="memory-object">
+
+<div class="address">
+Object @ 0x3000
+</div>
+
+<strong>s3</strong>
+
+<div class="memory-row">
+<span>age</span>
+<span>18</span>
+</div>
+
+<div class="memory-row">
+<span>rollNo</span>
+<span>103</span>
+</div>
+
+</div>
+
+</div>
+
+<div class="info" style="margin-top:25px;background:#111827;border-color:#334155;color:#cbd5e1;">
+
+<strong style="color:#93c5fd;">
+Remember:
+</strong>
+
+Non-static data members belong to individual objects.
+Static data members are shared.
+Member functions are not copied as separate function bodies
+into every object.
+
+</div>
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     CONSTRUCTORS
+     ===================================================== -->
+
+<section id="constructors" class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+07 • Constructors
+</div>
+
+<h2>Constructors — Automatic Object Initialization</h2>
+
+<p>
+A constructor is a special member function that runs
+when an object is initialized.
+</p>
+
+</div>
+
+<div class="card-grid">
+
+<div class="card">
+
+<div class="icon-box">1️⃣</div>
+
+<h3>Default Constructor</h3>
+
+<p>
+A constructor that can be called without arguments.
+</p>
+
+<div class="code-box">
+
+<pre><code><span class="type">Student</span>() {
+    age = <span class="num">0</span>;
+}</code></pre>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="icon-box">2️⃣</div>
+
+<h3>Parameterized Constructor</h3>
+
+<p>
+Accepts values used to initialize an object.
+</p>
+
+<div class="code-box">
+
+<pre><code><span class="type">Student</span>(
+    <span class="type">int</span> a
+) {
+    age = a;
+}</code></pre>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="icon-box">3️⃣</div>
+
+<h3>Constructor Overloading</h3>
+
+<p>
+Multiple constructors can exist with different parameter lists.
+</p>
+
+</div>
+
+</div>
+
+<div class="constructor-demo">
+
+<h3>🚀 Constructor Execution</h3>
+
+<p style="color:#64748b;">
+Click the button to visualize object initialization.
+</p>
+
+<div class="constructor-flow">
+
+<div class="flow-node" id="node1">
+Student s1
+</div>
+
+<div class="flow-arrow">
+→
+</div>
+
+<div class="flow-node" id="node2">
+Constructor
+</div>
+
+<div class="flow-arrow">
+→
+</div>
+
+<div class="flow-node" id="node3">
+Initialize Data
+</div>
+
+<div class="flow-arrow">
+→
+</div>
+
+<div class="flow-node" id="node4">
+Ready Object
+</div>
+
+</div>
+
+<button class="run-btn" id="constructorBtn">
+▶ Run Animation
+</button>
+
+</div>
+
+<div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">Student</span> {
+
+<span class="kw">private</span>:
+
+    <span class="type">std::string</span> name;
+    <span class="type">int</span> age;
+
+<span class="kw">public</span>:
+
+    <span class="type">Student</span>(
+        <span class="type">std::string</span> n,
+        <span class="type">int</span> a
+    )
+        : name(n), age(a) {}
+
+};
+
+<span class="type">Student</span> s1(
+    <span class="str">"Pradeep"</span>,
+    <span class="num">19</span>
+);</code></pre>
+
+</div>
+
+<div class="info">
+
+<strong>Best practice:</strong>
+
+Use constructor member-initializer lists when initializing
+data members. They are especially important for
+const members, reference members and members without
+default constructors.
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     THIS POINTER
+     ===================================================== -->
+
+<section id="this" class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+08 • this Pointer
+</div>
+
+<h2>What is the <code>this</code> pointer?</h2>
+
+<p>
+Inside a non-static member function, <code>this</code>
+points to the current object.
+</p>
+
+</div>
+
+<div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">Student</span> {
+
+<span class="kw">private</span>:
+
+    <span class="type">int</span> age;
+
+<span class="kw">public</span>:
+
+    <span class="type">void</span> <span class="func">setAge</span>(<span class="type">int</span> age) {
+
+        <span class="kw">this</span>-&gt;age = age;
+
+    }
+};</code></pre>
+
+</div>
+
+<div class="blueprint">
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:25px;align-items:center;">
+
+<div>
+
+<h3>Parameter</h3>
+
+<div class="definition">
+<code>age</code>
+<br>
+The function parameter.
+</div>
+
+</div>
+
+<div>
+
+<h3>Object Member</h3>
+
+<div class="definition">
+<code>this-&gt;age</code>
+<br>
+The age member belonging to the current object.
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="info">
+
+<strong>Interview point:</strong>
+
+<code>this</code> is a pointer available in non-static
+member functions. A static member function does not
+have a <code>this</code> pointer.
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     ENCAPSULATION
+     ===================================================== -->
+
+<section id="encapsulation" class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+09 • Encapsulation
+</div>
+
+<h2>Encapsulation — Protecting Object State</h2>
+
+<p>
+Encapsulation combines data and the operations that work
+on that data while controlling direct access.
+</p>
+
+</div>
+
+<div class="compare">
+
+<div class="compare-card">
+
+<h3>❌ Poor Design</h3>
+
+<p>
+Expose important internal state directly.
+</p>
+
+<div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">BankAccount</span> {
+
+<span class="kw">public</span>:
+    <span class="type">double</span> balance;
+
+};</code></pre>
+
+</div>
+
+</div>
+
+<div class="compare-card object">
+
+<h3>✅ Encapsulated Design</h3>
+
+<p>
+Keep the state private and expose controlled operations.
+</p>
+
+<div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">BankAccount</span> {
+
+<span class="kw">private</span>:
+    <span class="type">double</span> balance;
+
+<span class="kw">public</span>:
+
+    <span class="type">void</span> <span class="func">deposit</span>(
+        <span class="type">double</span> amount
+    ) {
+        <span class="kw">if</span> (amount &gt; <span class="num">0</span>)
+            balance += amount;
+    }
+
+};</code></pre>
+
+</div>
+
+</div>
+
+</div>
+
+<h3 style="margin-top:30px;">
+Getters & Setters
+</h3>
+
+<div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">Student</span> {
+
+<span class="kw">private</span>:
+
+    <span class="type">int</span> age;
+
+<span class="kw">public</span>:
+
+    <span class="type">void</span> <span class="func">setAge</span>(<span class="type">int</span> value) {
+
+        <span class="kw">if</span> (value &gt;= <span class="num">0</span>)
+            age = value;
+    }
+
+    <span class="type">int</span> <span class="func">getAge</span>() <span class="kw">const</span> {
+        <span class="kw">return</span> age;
+    }
+
+};</code></pre>
+
+</div>
+
+<div class="success info">
+
+<strong>Important:</strong>
+
+Encapsulation is not simply “making variables private”.
+It is about designing a controlled public interface
+around an object's internal state.
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     CONST MEMBER FUNCTION
+     ===================================================== -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+Const Correctness
+</div>
+
+<h2>Const Member Functions</h2>
+
+<p>
+A const member function promises not to modify the
+ordinary state of the object.
+</p>
+
+</div>
+
+<div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">Student</span> {
+
+<span class="kw">private</span>:
+
+    <span class="type">int</span> age;
+
+<span class="kw">public</span>:
+
+    <span class="type">int</span> <span class="func">getAge</span>() <span class="kw">const</span> {
+
+        <span class="kw">return</span> age;
+
+    }
+
+};</code></pre>
+
+</div>
+
+<div class="info">
+
+<strong>Remember:</strong>
+
+The <code>const</code> after the parameter list is part of
+the member-function declaration. It allows the function
+to be called on const objects and prevents modification
+of ordinary non-mutable members through that function.
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     STATIC
+     ===================================================== -->
+
+<section id="static" class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+10 • Static Members
+</div>
+
+<h2>Static Data Members & Functions</h2>
+
+<p>
+Static members belong to the class rather than each
+individual object.
+</p>
+
+</div>
+
+<div class="card-grid">
+
+<div class="card">
+
+<div class="icon-box">🔢</div>
+
+<h3>Static Data Member</h3>
+
+<p>
+Only one shared member exists for the class,
+rather than one separate copy per object.
+</p>
+
+</div>
+
+<div class="card">
+
+<div class="icon-box">⚡</div>
+
+<h3>Static Function</h3>
+
+<p>
+Can be called without an object and does not have
+a <code>this</code> pointer.
+</p>
+
+</div>
+
+<div class="card">
+
+<div class="icon-box">👥</div>
+
+<h3>Shared State</h3>
+
+<p>
+Useful when information logically belongs to the class,
+such as an object counter.
+</p>
+
+</div>
+
+</div>
+
+<div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">Student</span> {
+
+<span class="kw">private</span>:
+
+    <span class="kw">inline</span> <span class="kw">static</span>
+    <span class="type">int</span> count = <span class="num">0</span>;
+
+<span class="kw">public</span>:
+
+    <span class="type">Student</span>() {
+        ++count;
+    }
+
+    <span class="kw">static</span>
+    <span class="type">int</span> <span class="func">getCount</span>() {
+        <span class="kw">return</span> count;
+    }
+};
+
+<span class="type">Student</span> a;
+<span class="type">Student</span> b;
+
+std::cout &lt;&lt;
+    <span class="type">Student</span>::<span class="func">getCount</span>();</code></pre>
+
+</div>
+
+<div class="warning info">
+
+<strong>Version note:</strong>
+
+<code>inline static</code> data members can be defined
+inside the class in C++17 and later. Older C++ standards
+usually require an out-of-class definition for a static
+data member.
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     OBJECT ARRAYS
+     ===================================================== -->
+
+<section id="advanced" class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+11 • Object Techniques
+</div>
+
+<h2>Working with Objects</h2>
+
+</div>
+
+<div class="card-grid">
+
+<div class="card">
+
+<h3>Object Arrays</h3>
+
+<p>
+An array can contain multiple objects of the same type.
+</p>
+
+<div class="code-box">
+
+<pre><code><span class="type">Student</span> students[<span class="num">3</span>];</code></pre>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>Pass Objects</h3>
+
+<p>
+Objects can be passed to functions, often by const reference.
+</p>
+
+<div class="code-box">
+
+<pre><code><span class="type">void</span> <span class="func">show</span>(
+    <span class="kw">const</span> <span class="type">Student</span>&amp; s
+){
+    s.<span class="func">display</span>();
+}</code></pre>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>Return Objects</h3>
+
+<p>
+Functions can return objects by value.
+Modern C++ handles this efficiently in many cases.
+</p>
+
+<div class="code-box">
+
+<pre><code><span class="type">Student</span> <span class="func">createStudent</span>() {
+
+    <span class="kw">return</span> <span class="type">Student</span>(
+        <span class="str">"Alex"</span>,
+        <span class="num">20</span>
+    );
+}</code></pre>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     FRIEND
+     ===================================================== -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+Advanced Preview
+</div>
+
+<h2>Friend Function</h2>
+
+<p>
+A friend function is not a member function, but a class
+can grant it access to private and protected members.
+</p>
+
+</div>
+
+<div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">Box</span> {
+
+<span class="kw">private</span>:
+
+    <span class="type">int</span> value;
+
+<span class="kw">public</span>:
+
+    <span class="type">Box</span>(<span class="type">int</span> v)
+        : value(v) {}
+
+    <span class="kw">friend</span>
+    <span class="type">void</span> <span class="func">show</span>(
+        <span class="kw">const</span> <span class="type">Box</span>&amp; b
+    );
+};
+
+<span class="type">void</span> <span class="func">show</span>(
+    <span class="kw">const</span> <span class="type">Box</span>&amp; b
+) {
+    std::cout &lt;&lt; b.value;
+}</code></pre>
+
+</div>
+
+<div class="warning info">
+
+<strong>Use carefully:</strong>
+
+Friendship is powerful but weakens strict encapsulation.
+Use it when it genuinely improves the design.
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     NESTED CLASS
+     ===================================================== -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+Advanced Preview
+</div>
+
+<h2>Nested Classes</h2>
+
+<p>
+A class can be declared inside another class.
+This is useful when the helper type is tightly related
+to the outer type.
+</p>
+
+</div>
+
+<div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">University</span> {
+
+<span class="kw">public</span>:
+
+    <span class="kw">class</span> <span class="type">Department</span> {
+
+    <span class="kw">public</span>:
+
+        <span class="type">void</span> <span class="func">show</span>() {
+            std::cout &lt;&lt;
+                <span class="str">"CSE"</span>;
+        }
+    };
+};</code></pre>
+
+</div>
+
+<div class="info">
+
+<strong>Preview only:</strong>
+
+Nested-class access rules have details that depend on
+which entity is accessing what. Learn the basic concept
+now and study the complete rules with nested classes
+and access control later.
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     OBJECT FACTORY
+     ===================================================== -->
+
+<section id="factory" class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+12 • Interactive Lab
+</div>
+
+<h2>🎯 Object Factory</h2>
+
+<p>
+Create multiple Student objects from one class blueprint.
+This is a browser simulation — it does not compile C++.
+</p>
+
+</div>
+
+<div class="factory">
+
+<div class="factory-controls">
+
+<input
+    class="input"
+    id="studentName"
+    placeholder="Student name"
+>
+
+<input
+    class="input"
+    id="studentAge"
+    type="number"
+    placeholder="Age"
+>
+
+<button
+    class="run-btn"
+    id="createObjectBtn"
+>
++ Create Object
+</button>
+
+</div>
+
+<div class="objects-stage" id="objectsStage">
+
+<div style="color:#64748b;font-size:14px;">
+Your objects will appear here...
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     FLOWCHART
+     ===================================================== -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+13 • Program Flow
+</div>
+
+<h2>Class → Object → Method Flow</h2>
+
+</div>
+
+<div class="timeline">
+
+<div class="timeline-item">
+
+<div class="timeline-dot"></div>
+
+<h3>Define Class</h3>
+
+<p style="color:#64748b;">
+Describe data and behavior.
+</p>
+
+</div>
+
+<div class="timeline-item">
+
+<div class="timeline-dot"></div>
+
+<h3>Create Object</h3>
+
+<p style="color:#64748b;">
+Instantiate the class.
+</p>
+
+</div>
+
+<div class="timeline-item">
+
+<div class="timeline-dot"></div>
+
+<h3>Initialize</h3>
+
+<p style="color:#64748b;">
+Constructor initializes the object's state.
+</p>
+
+</div>
+
+<div class="timeline-item">
+
+<div class="timeline-dot"></div>
+
+<h3>Call Member Function</h3>
+
+<p style="color:#64748b;">
+Object interacts with its behavior.
+</p>
+
+</div>
+
+<div class="timeline-item">
+
+<div class="timeline-dot"></div>
+
+<h3>Object Lifetime Ends</h3>
+
+<p style="color:#64748b;">
+The object's destructor eventually runs when its lifetime ends.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     REAL WORLD
+     ===================================================== -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+Real-World Modeling
+</div>
+
+<h2>Where are Classes & Objects Used?</h2>
+
+</div>
+
+<div class="card-grid">
+
+<div class="card">
+
+<h3>🏦 Banking</h3>
+
+<p>
+BankAccount → account number, balance,
+deposit(), withdraw().
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>🚗 Vehicles</h3>
+
+<p>
+Car → model, speed, fuel,
+accelerate(), brake().
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>🎓 Education</h3>
+
+<p>
+Student → name, roll number, marks,
+calculateGrade().
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>🛒 E-Commerce</h3>
+
+<p>
+Product → name, price, stock,
+updateStock().
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>🏥 Healthcare</h3>
+
+<p>
+Patient → ID, name, age,
+appointment information.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>🎮 Games</h3>
+
+<p>
+Player → health, score, level,
+move(), attack().
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     MINI CODE PLAYGROUND
+     ===================================================== -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+Practice Simulator
+</div>
+
+<h2>Class Code Playground</h2>
+
+<p>
+Experiment with class syntax. The output is simulated
+for learning purposes.
+</p>
+
+</div>
+
+<div class="playground">
+
+<div class="editor">
+
+<div class="editor-header">
+C++ Editor
+</div>
+
+<textarea id="codeEditor">class Student {
+public:
+    string name;
+    int age;
+
+    void display() {
+        cout << name;
+    }
+};
+
+Student s1;
+s1.name = "Pradeep";
+s1.age = 19;
+s1.display();</textarea>
+
+</div>
+
+<div class="output">
+
+<div class="output-header">
+Terminal Output
+</div>
+
+<div class="output-body" id="playOutput">
+Click "Simulate" to analyze your code.
+</div>
+
+</div>
+
+</div>
+
+<button
+    class="run-btn"
+    id="simulateBtn"
+    style="margin-top:15px;"
+>
+▶ Simulate
+</button>
+
+</section>
+
+<!-- =====================================================
+     COMMON MISTAKES
+     ===================================================== -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+Common Mistakes
+</div>
+
+<h2>⚠️ Mistakes Beginners Make</h2>
+
+</div>
+
+<div class="card-grid">
+
+<div class="card">
+
+<h3>1. Forgetting semicolon</h3>
+
+<div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">Student</span> {
+};
+
+<span class="comment">// Correct</span></code></pre>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>2. Accessing private data</h3>
+
+<p>
+Private members cannot normally be accessed directly
+from outside the class.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>3. Constructor has return type</h3>
+
+<p>
+Constructors do not have a return type — not even void.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>4. Confusing class and object</h3>
+
+<p>
+Class = type/blueprint.
+Object = instance of that type.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>5. Forgetting const</h3>
+
+<p>
+Use const member functions when a function should not
+modify ordinary object state.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>6. Misunderstanding static</h3>
+
+<p>
+A static member belongs to the class and is shared,
+rather than being duplicated for every object.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     EXAM QUESTIONS
+     ===================================================== -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+Exam Preparation
+</div>
+
+<h2>5-Mark & 10-Mark Questions</h2>
+
+</div>
+
+<div class="accordion">
+
+<button class="accordion-btn">
+Define class and object with an example
+<span>+</span>
+</button>
+
+<div class="accordion-content">
+
+<div class="accordion-content-inner">
+
+A class is a user-defined type that specifies data
+members and member functions. An object is an instance
+of that class.
+
+Example:
+
+<code>Student s1;</code>
+
+Here Student is the class and s1 is an object.
+
+</div>
+
+</div>
+
+</div>
+
+<div class="accordion">
+
+<button class="accordion-btn">
+Explain access specifiers in C++
+<span>+</span>
+</button>
+
+<div class="accordion-content">
+
+<div class="accordion-content-inner">
+
+C++ provides public, private and protected access
+specifiers. Public members form the accessible interface.
+Private members are restricted to permitted class/friend
+contexts. Protected members can also be accessed in
+appropriate derived-class contexts.
+
+</div>
+
+</div>
+
+</div>
+
+<div class="accordion">
+
+<button class="accordion-btn">
+Explain constructors and their types
+<span>+</span>
+</button>
+
+<div class="accordion-content">
+
+<div class="accordion-content-inner">
+
+A constructor is a special member function used during
+object initialization. Common forms include default
+constructors, parameterized constructors and overloaded
+constructors.
+
+</div>
+
+</div>
+
+</div>
+
+<div class="accordion">
+
+<button class="accordion-btn">
+Explain encapsulation with example
+<span>+</span>
+</button>
+
+<div class="accordion-content">
+
+<div class="accordion-content-inner">
+
+Encapsulation combines state and behavior and controls
+access to internal state. Private data with public
+getter/setter or domain-specific methods is a common
+implementation technique.
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     INTERVIEW
+     ===================================================== -->
+
+<section id="interview" class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+Interview Preparation
+</div>
+
+<h2>🔥 Interview Questions</h2>
+
+</div>
+
+<div class="accordion">
+
+<button class="accordion-btn">
+What is the difference between class and object?
+<span>+</span>
+</button>
+
+<div class="accordion-content">
+<div class="accordion-content-inner">
+
+A class defines a user-defined type and its possible
+state/behavior. An object is an instance of that type.
+
+</div>
+</div>
+
+</div>
+
+<div class="accordion">
+
+<button class="accordion-btn">
+What is the default access modifier of a class?
+<span>+</span>
+</button>
+
+<div class="accordion-content">
+<div class="accordion-content-inner">
+
+Private.
+
+</div>
+</div>
+
+</div>
+
+<div class="accordion">
+
+<button class="accordion-btn">
+What is the default access modifier of a struct?
+<span>+</span>
+</button>
+
+<div class="accordion-content">
+<div class="accordion-content-inner">
+
+Public.
+
+</div>
+</div>
+
+</div>
+
+<div class="accordion">
+
+<button class="accordion-btn">
+Does a constructor have a return type?
+<span>+</span>
+</button>
+
+<div class="accordion-content">
+<div class="accordion-content-inner">
+
+No. A constructor has the same name as its class
+and has no return type.
+
+</div>
+</div>
+
+</div>
+
+<div class="accordion">
+
+<button class="accordion-btn">
+What is the this pointer?
+<span>+</span>
+</button>
+
+<div class="accordion-content">
+<div class="accordion-content-inner">
+
+It points to the current object inside a non-static
+member function.
+
+</div>
+</div>
+
+</div>
+
+<div class="accordion">
+
+<button class="accordion-btn">
+Can static functions use this?
+<span>+</span>
+</button>
+
+<div class="accordion-content">
+<div class="accordion-content-inner">
+
+No. Static member functions do not have a this pointer.
+
+</div>
+</div>
+
+</div>
+
+<div class="accordion">
+
+<button class="accordion-btn">
+What is encapsulation?
+<span>+</span>
+</button>
+
+<div class="accordion-content">
+<div class="accordion-content-inner">
+
+Encapsulation is the bundling of state and operations
+together with controlled access to internal state.
+
+</div>
+</div>
+
+</div>
+
+<div class="accordion">
+
+<button class="accordion-btn">
+Are member functions stored separately inside every object?
+<span>+</span>
+</button>
+
+<div class="accordion-content">
+<div class="accordion-content-inner">
+
+Typically, no. Non-static data members form the object's
+state, while member-function code is generally shared rather
+than copied into each object.
+
+</div>
+</div>
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     QUIZ
+     ===================================================== -->
+
+<section id="quiz" class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+Knowledge Check
+</div>
+
+<h2>🧠 C++ Classes & Objects Quiz</h2>
+
+</div>
+
+<div class="quiz">
+
+<div class="question">
+
+<h3>
+1. What is a class?
+</h3>
+
+<div class="options">
+
+<button class="option" data-correct="true">
+A user-defined type / blueprint
+</button>
+
+<button class="option">
+A compiler
+</button>
+
+<button class="option">
+A loop
+</button>
+
+<button class="option">
+Only a function
+</button>
+
+</div>
+
+</div>
+
+<div class="question">
+
+<h3>
+2. What is an object?
+</h3>
+
+<div class="options">
+
+<button class="option">
+A keyword
+</button>
+
+<button class="option" data-correct="true">
+An instance of a class
+</button>
+
+<button class="option">
+A header file
+</button>
+
+<button class="option">
+A namespace
+</button>
+
+</div>
+
+</div>
+
+<div class="question">
+
+<h3>
+3. Default access in a class is?
+</h3>
+
+<div class="options">
+
+<button class="option">
+public
+</button>
+
+<button class="option" data-correct="true">
+private
+</button>
+
+<button class="option">
+protected
+</button>
+
+<button class="option">
+global
+</button>
+
+</div>
+
+</div>
+
+<div class="question">
+
+<h3>
+4. Which function initializes an object?
+</h3>
+
+<div class="options">
+
+<button class="option">
+Destructor
+</button>
+
+<button class="option">
+main()
+</button>
+
+<button class="option" data-correct="true">
+Constructor
+</button>
+
+<button class="option">
+Namespace
+</button>
+
+</div>
+
+</div>
+
+<div class="question">
+
+<h3>
+5. Does a static member function have this?
+</h3>
+
+<div class="options">
+
+<button class="option" data-correct="true">
+No
+</button>
+
+<button class="option">
+Yes
+</button>
+
+<button class="option">
+Only sometimes
+</button>
+
+<button class="option">
+Only for public functions
+</button>
+
+</div>
+
+</div>
+
+<button
+    class="run-btn"
+    id="quizBtn"
+>
+Check Score
+</button>
+
+<div
+    class="quiz-result"
+    id="quizResult"
+>
+Choose your answers and check your score.
+</div>
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     PRACTICE
+     ===================================================== -->
+
+<section id="practice" class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+Coding Practice
+</div>
+
+<h2>💻 Practice Problems</h2>
+
+</div>
+
+<div class="card-grid">
+
+<div class="card">
+
+<h3>Easy</h3>
+
+<p>
+Create a Student class with name and age.
+Create two objects and display their information.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>Easy+</h3>
+
+<p>
+Create a Rectangle class with length and width.
+Add a member function to calculate area.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>Medium</h3>
+
+<p>
+Create a BankAccount class using private balance
+and public deposit/withdraw methods.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>Medium+</h3>
+
+<p>
+Create a Student class with a parameterized constructor
+and a const display() function.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>Hard</h3>
+
+<p>
+Create an Employee class with a static counter that
+tracks how many objects have been constructed.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>Interview</h3>
+
+<p>
+Explain why private data + public methods is generally
+safer than exposing all data members publicly.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     MINI PROJECT
+     ===================================================== -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+Mini Project
+</div>
+
+<h2>🎓 Student Management System</h2>
+
+<p>
+Use everything learned in this lesson.
+</p>
+
+</div>
+
+<div class="code-box">
+
+<pre><code><span class="kw">#include</span> <span class="str">&lt;iostream&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;string&gt;</span>
+
+<span class="kw">class</span> <span class="type">Student</span> {
+
+<span class="kw">private</span>:
+
+    <span class="type">std::string</span> name;
+    <span class="type">int</span> age;
+    <span class="type">double</span> cgpa;
+
+<span class="kw">public</span>:
+
+    <span class="type">Student</span>(
+        <span class="type">std::string</span> n,
+        <span class="type">int</span> a,
+        <span class="type">double</span> c
+    )
+        : name(n), age(a), cgpa(c) {}
+
+    <span class="type">void</span> <span class="func">display</span>() <span class="kw">const</span> {
+
+        std::cout
+            &lt;&lt; <span class="str">"Name: "</span>
+            &lt;&lt; name
+            &lt;&lt; <span class="str">"\nAge: "</span>
+            &lt;&lt; age
+            &lt;&lt; <span class="str">"\nCGPA: "</span>
+            &lt;&lt; cgpa
+            &lt;&lt; <span class="str">'\n'</span>;
+    }
+};
+
+<span class="type">int</span> <span class="func">main</span>() {
+
+    <span class="type">Student</span> s1(
+        <span class="str">"Pradeep"</span>,
+        <span class="num">19</span>,
+        <span class="num">8.63</span>
+    );
+
+    s1.<span class="func">display</span>();
+
+}</code></pre>
+
+</div>
+
+<div class="success info">
+
+<strong>Project challenge:</strong>
+
+Extend this into a mini Student Management System
+with multiple students, an object array or suitable
+container, search by roll number, CGPA calculation,
+and a menu-driven interface.
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     RAPID REVISION
+     ===================================================== -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+Rapid Revision
+</div>
+
+<h2>⚡ One-Minute Revision</h2>
+
+</div>
+
+<div class="timeline">
+
+<div class="timeline-item">
+<div class="timeline-dot"></div>
+<h3>Class</h3>
+<p style="color:#64748b;">
+User-defined type containing data and behavior.
+</p>
+</div>
+
+<div class="timeline-item">
+<div class="timeline-dot"></div>
+<h3>Object</h3>
+<p style="color:#64748b;">
+Instance of a class.
+</p>
+</div>
+
+<div class="timeline-item">
+<div class="timeline-dot"></div>
+<h3>Data Member</h3>
+<p style="color:#64748b;">
+Represents object state.
+</p>
+</div>
+
+<div class="timeline-item">
+<div class="timeline-dot"></div>
+<h3>Member Function</h3>
+<p style="color:#64748b;">
+Represents object behavior.
+</p>
+</div>
+
+<div class="timeline-item">
+<div class="timeline-dot"></div>
+<h3>Constructor</h3>
+<p style="color:#64748b;">
+Runs during object initialization.
+</p>
+</div>
+
+<div class="timeline-item">
+<div class="timeline-dot"></div>
+<h3>Encapsulation</h3>
+<p style="color:#64748b;">
+Controlled access to internal state.
+</p>
+</div>
+
+<div class="timeline-item">
+<div class="timeline-dot"></div>
+<h3>this</h3>
+<p style="color:#64748b;">
+Points to the current object in non-static member functions.
+</p>
+</div>
+
+<div class="timeline-item">
+<div class="timeline-dot"></div>
+<h3>static</h3>
+<p style="color:#64748b;">
+Belongs to the class rather than each individual object.
+</p>
+</div>
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     CHECKLIST
+     ===================================================== -->
+
+<section id="checklist" class="reveal">
+
+<div class="section-head">
+
+<div class="eyebrow">
+Completion
+</div>
+
+<h2>✅ Lesson 11 Checklist</h2>
+
+<p>
+Track your understanding. Your progress is saved
+in this browser.
+</p>
+
+</div>
+
+<div class="checklist">
+
+<label class="check">
+<input type="checkbox" data-check="class">
+I understand what a class is
+</label>
+
+<label class="check">
+<input type="checkbox" data-check="object">
+I understand what an object is
+</label>
+
+<label class="check">
+<input type="checkbox" data-check="members">
+I understand data and member functions
+</label>
+
+<label class="check">
+<input type="checkbox" data-check="access">
+I understand public/private/protected
+</label>
+
+<label class="check">
+<input type="checkbox" data-check="constructor">
+I understand constructors
+</label>
+
+<label class="check">
+<input type="checkbox" data-check="this">
+I understand this pointer
+</label>
+
+<label class="check">
+<input type="checkbox" data-check="encapsulation">
+I understand encapsulation
+</label>
+
+<label class="check">
+<input type="checkbox" data-check="static">
+I understand static members
+</label>
+
+<label class="check">
+<input type="checkbox" data-check="objects">
+I can create multiple objects
+</label>
+
+<label class="check">
+<input type="checkbox" data-check="practice">
+I completed the practice problems
+</label>
+
+</div>
+
+</section>
+
+<!-- =====================================================
+     NEXT LESSON
+     ===================================================== -->
+
+<section class="reveal">
+
+<div class="card" style="text-align:center;padding:45px;">
+
+<div class="eyebrow">
+Next Lesson
+</div>
+
+<h2 style="font-size:35px;margin-bottom:12px;">
+Inheritance
+</h2>
+
+<p style="color:#64748b;max-width:650px;margin:0 auto 22px;">
+
+You now know how to create your own types and objects.
+Next, learn how one class can inherit properties and
+behavior from another class.
+
+</p>
+
+<div class="hero-stats" style="justify-content:center;">
+
+<div class="stat">
+Classes ✓
+</div>
+
+<div class="stat">
+Objects ✓
+</div>
+
+<div class="stat">
+Constructors ✓
+</div>
+
+<div class="stat">
+Encapsulation ✓
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+<!-- =====================================================
+     FOOTER
+     ===================================================== -->
+
+<footer class="footer">
+
+<div class="container">
+
+<strong>ZENSUS</strong>
+
+<br>
+
+Learn • Build • Practice • Get Placement Ready
+
+<br><br>
+
+C++ Mastery • Lesson 11
+
+</div>
+
+</footer>
+
+</main>
+
+<!-- =====================================================
+     JAVASCRIPT
+     ===================================================== -->
+
+<script>
+
+/* =========================================================
+   MOBILE SIDEBAR
+   ========================================================= */
+
+const sidebar = document.getElementById("sidebar");
+const menuBtn = document.getElementById("menuBtn");
+
+menuBtn.addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+});
+
+document.querySelectorAll(".side-nav a").forEach(link => {
+
+    link.addEventListener("click", () => {
+
+        if(window.innerWidth <= 800){
+            sidebar.classList.remove("open");
+        }
+
+    });
+
+});
+
+/* =========================================================
+   SCROLL PROGRESS
+   ========================================================= */
+
+const progressBar =
+    document.getElementById("progressBar");
+
+window.addEventListener("scroll", () => {
+
+    const scrollTop =
+        window.scrollY;
+
+    const height =
+        document.documentElement.scrollHeight -
+        window.innerHeight;
+
+    const progress =
+        height > 0
+        ? (scrollTop / height) * 100
+        : 0;
+
+    progressBar.style.width =
+        progress + "%";
+
+});
+
+/* =========================================================
+   REVEAL ANIMATION
+   ========================================================= */
+
+const revealObserver =
+    new IntersectionObserver(
+        entries => {
+
+            entries.forEach(entry => {
+
+                if(entry.isIntersecting){
+
+                    entry.target.classList.add("visible");
+
+                    revealObserver.unobserve(entry.target);
+
+                }
+
+            });
+
+        },
+        {
+            threshold:.12
+        }
+    );
+
+document.querySelectorAll(".reveal")
+.forEach(el => {
+
+    revealObserver.observe(el);
+
+});
+
+/* =========================================================
+   ACTIVE SIDEBAR
+   ========================================================= */
+
+const navLinks =
+    document.querySelectorAll(".side-nav a");
+
+const sections =
+    document.querySelectorAll("section[id]");
+
+const activeObserver =
+    new IntersectionObserver(
+        entries => {
+
+            entries.forEach(entry => {
+
+                if(entry.isIntersecting){
+
+                    navLinks.forEach(link => {
+
+                        link.classList.remove("active");
+
+                    });
+
+                    const active =
+                        document.querySelector(
+                            `.side-nav a[href="#${entry.target.id}"]`
+                        );
+
+                    if(active){
+                        active.classList.add("active");
+                    }
+
+                }
+
+            });
+
+        },
+        {
+            rootMargin:"-30% 0px -60% 0px"
+        }
+    );
+
+sections.forEach(section => {
+
+    activeObserver.observe(section);
+
+});
+
+/* =========================================================
+   CONSTRUCTOR ANIMATION
+   ========================================================= */
+
+const constructorBtn =
+    document.getElementById("constructorBtn");
+
+const constructorNodes = [
+    document.getElementById("node1"),
+    document.getElementById("node2"),
+    document.getElementById("node3"),
+    document.getElementById("node4")
+];
+
+constructorBtn.addEventListener("click", async () => {
+
+    constructorNodes.forEach(node => {
+        node.classList.remove("active");
+    });
+
+    for(const node of constructorNodes){
+
+        await new Promise(resolve =>
+            setTimeout(resolve, 500)
+        );
+
+        node.classList.add("active");
+
+    }
+
+});
+
+/* =========================================================
+   OBJECT FACTORY
+   ========================================================= */
+
+const createObjectBtn =
+    document.getElementById("createObjectBtn");
+
+const studentName =
+    document.getElementById("studentName");
+
+const studentAge =
+    document.getElementById("studentAge");
+
+const objectsStage =
+    document.getElementById("objectsStage");
+
+let objectCount = 0;
+
+createObjectBtn.addEventListener("click", () => {
+
+    const name =
+        studentName.value.trim() || "Student";
+
+    const age =
+        studentAge.value || "—";
+
+    if(objectCount === 0){
+        objectsStage.innerHTML = "";
+    }
+
+    objectCount++;
+
+    const object =
+        document.createElement("div");
+
+    object.className =
+        "created-object";
+
+    object.innerHTML = `
+
+        <div class="object-head">
+
+            <div class="object-icon">
+                🎓
+            </div>
+
+            <div>
+                <small>Object #${objectCount}</small>
+                <strong>Student</strong>
+            </div>
+
+        </div>
+
+        <div class="memory-row">
+            <span>name</span>
+            <span>${escapeHTML(name)}</span>
+        </div>
+
+        <div class="memory-row">
+            <span>age</span>
+            <span>${escapeHTML(String(age))}</span>
+        </div>
+
+    `;
+
+    objectsStage.appendChild(object);
+
+    studentName.value = "";
+    studentAge.value = "";
+
+});
+
+function escapeHTML(value){
+
+    return value
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+
+}
+
+/* =========================================================
+   PLAYGROUND SIMULATOR
+   ========================================================= */
+
+const simulateBtn =
+    document.getElementById("simulateBtn");
+
+const codeEditor =
+    document.getElementById("codeEditor");
+
+const playOutput =
+    document.getElementById("playOutput");
+
+simulateBtn.addEventListener("click", () => {
+
+    const code =
+        codeEditor.value;
+
+    const lines =
+        code.split("\n").length;
+
+    const hasClass =
+        /\bclass\b/.test(code);
+
+    const hasObject =
+        /\bStudent\s+\w+/.test(code);
+
+    const hasDisplay =
+        /\bdisplay\s*\(/.test(code);
+
+    let output =
+`ZENSUS C++ Simulator
+---------------------
+`;
+
+    if(hasClass){
+
+        output +=
+`✓ Class definition detected
+`;
+
+    }else{
+
+        output +=
+`⚠ No class definition detected
+`;
+
+    }
+
+    if(hasObject){
+
+        output +=
+`✓ Student object detected
+`;
+
+    }else{
+
+        output +=
+`⚠ No Student object detected
+`;
+
+    }
+
+    if(hasDisplay){
+
+        output +=
+`✓ Member function call detected
+`;
+
+    }
+
+    output +=
+`
+Lines analyzed: ${lines}
+
+Simulation complete.
+Note: This is an educational browser simulator,
+not a real C++ compiler.`;
+
+    playOutput.textContent =
+        output;
+
+});
+
+/* =========================================================
+   ACCORDIONS
+   ========================================================= */
+
+document.querySelectorAll(".accordion-btn")
+.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        const content =
+            button.nextElementSibling;
+
+        const isOpen =
+            content.style.maxHeight;
+
+        document.querySelectorAll(".accordion-content")
+        .forEach(item => {
+
+            item.style.maxHeight = null;
+
+        });
+
+        document.querySelectorAll(".accordion-btn span")
+        .forEach(icon => {
+
+            icon.textContent = "+";
+
+        });
+
+        if(!isOpen){
+
+            content.style.maxHeight =
+                content.scrollHeight + "px";
+
+            button.querySelector("span")
+                .textContent = "−";
+
+        }
+
+    });
+
+});
+
+/* =========================================================
+   QUIZ
+   ========================================================= */
+
+document.querySelectorAll(".option")
+.forEach(option => {
+
+    option.addEventListener("click", () => {
+
+        const parent =
+            option.closest(".question");
+
+        parent
+            .querySelectorAll(".option")
+            .forEach(btn => {
+
+                btn.classList.remove(
+                    "correct",
+                    "wrong"
+                );
+
+            });
+
+        if(option.dataset.correct === "true"){
+
+            option.classList.add("correct");
+
+        }else{
+
+            option.classList.add("wrong");
+
+        }
+
+        parent.dataset.answered = "true";
+
+    });
+
+});
+
+document.getElementById("quizBtn")
+.addEventListener("click", () => {
+
+    const questions =
+        document.querySelectorAll(".question");
+
+    let score = 0;
+
+    let answered = 0;
+
+    questions.forEach(question => {
+
+        if(question.dataset.answered){
+
+            answered++;
+
+            const selected =
+                question.querySelector(
+                    ".option.correct"
+                );
+
+            if(selected){
+                score++;
+            }
+
+        }
+
+    });
+
+    const result =
+        document.getElementById("quizResult");
+
+    result.textContent =
+        `Score: ${score}/${questions.length} • ` +
+        `Answered: ${answered}/${questions.length}`;
+
+});
+
+/* =========================================================
+   CHECKLIST LOCAL STORAGE
+   ========================================================= */
+
+const checks =
+    document.querySelectorAll("[data-check]");
+
+checks.forEach(check => {
+
+    const key =
+        "zensus_lesson11_" +
+        check.dataset.check;
+
+    check.checked =
+        localStorage.getItem(key) === "true";
+
+    check.addEventListener("change", () => {
+
+        localStorage.setItem(
+            key,
+            check.checked
+        );
+
+    });
+
+});
+
+/* =========================================================
+   KEYBOARD SHORTCUT
+   ========================================================= */
+
+document.addEventListener("keydown", event => {
+
+    if(event.key === "Escape"){
+
+        sidebar.classList.remove("open");
+
+    }
+
+});
+
+/* =========================================================
+   INITIAL STATE
+   ========================================================= */
+
+window.addEventListener("load", () => {
+
+    document.querySelectorAll(".reveal")
+    .forEach((el,index) => {
+
+        if(index < 2){
+
+            setTimeout(() => {
+
+                el.classList.add("visible");
+
+            }, index * 150);
+
+        }
+
+    });
+
+});
+
+</script>
+
+</body>
+</html>

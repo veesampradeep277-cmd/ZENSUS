@@ -1,0 +1,2129 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS React — Lesson 34: Suspense & Lazy Loading</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+    --bg:#f7f8fc;
+    --panel:#ffffff;
+    --panel-soft:#f9fafb;
+    --border:#e5e7eb;
+    --text:#111827;
+    --muted:#6b7280;
+    --primary:#6366f1;
+    --primary-dark:#4f46e5;
+    --purple:#8b5cf6;
+    --green:#16a34a;
+    --orange:#f59e0b;
+    --red:#ef4444;
+    --blue:#2563eb;
+    --shadow:0 12px 35px rgba(15,23,42,.07);
+    --radius:18px;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+a{
+    color:inherit;
+    text-decoration:none;
+}
+
+button{
+    font:inherit;
+}
+
+/* ================= HEADER ================= */
+
+.topbar{
+    height:68px;
+    background:#ffffff;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 28px;
+    position:sticky;
+    top:0;
+    z-index:1000;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-weight:800;
+    letter-spacing:.5px;
+}
+
+.logo{
+    width:38px;
+    height:38px;
+    border-radius:11px;
+    background:#111827;
+    color:white;
+    display:grid;
+    place-items:center;
+    font-weight:900;
+}
+
+.lesson-badge{
+    color:var(--primary);
+    font-size:13px;
+    font-weight:800;
+}
+
+.top-status{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    color:var(--muted);
+    font-size:13px;
+}
+
+.status-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#22c55e;
+    box-shadow:0 0 0 5px #dcfce7;
+}
+
+/* ================= LAYOUT ================= */
+
+.layout{
+    display:grid;
+    grid-template-columns:270px 1fr;
+    min-height:calc(100vh - 68px);
+}
+
+.sidebar{
+    position:sticky;
+    top:68px;
+    height:calc(100vh - 68px);
+    overflow-y:auto;
+    background:#ffffff;
+    border-right:1px solid var(--border);
+    padding:24px 16px;
+}
+
+.sidebar-title{
+    font-size:11px;
+    font-weight:800;
+    color:#9ca3af;
+    letter-spacing:1.3px;
+    text-transform:uppercase;
+    padding:0 12px 12px;
+}
+
+.sidebar a{
+    display:block;
+    padding:9px 12px;
+    border-radius:9px;
+    color:#6b7280;
+    font-size:13px;
+    margin-bottom:3px;
+    transition:.2s;
+}
+
+.sidebar a:hover{
+    background:#f3f4f6;
+    color:var(--primary);
+}
+
+.sidebar a.active{
+    background:#eef2ff;
+    color:var(--primary-dark);
+    font-weight:700;
+}
+
+.main{
+    min-width:0;
+}
+
+/* ================= HERO ================= */
+
+.hero{
+    padding:78px 7vw 65px;
+    background:
+        radial-gradient(circle at 15% 20%,rgba(99,102,241,.10),transparent 28%),
+        radial-gradient(circle at 85% 30%,rgba(139,92,246,.08),transparent 30%),
+        #ffffff;
+    border-bottom:1px solid var(--border);
+}
+
+.hero-inner{
+    max-width:1100px;
+    margin:auto;
+}
+
+.eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:#eef2ff;
+    color:var(--primary-dark);
+    border:1px solid #dfe3ff;
+    padding:7px 12px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:800;
+    margin-bottom:20px;
+}
+
+.hero h1{
+    font-size:clamp(42px,6vw,78px);
+    line-height:1.02;
+    letter-spacing:-3px;
+    margin-bottom:20px;
+}
+
+.hero h1 span{
+    background-image:linear-gradient(90deg,#6366f1,#8b5cf6);
+    background-clip:text;
+    -webkit-background-clip:text;
+    color:transparent;
+    -webkit-text-fill-color:transparent;
+}
+
+.hero p{
+    max-width:780px;
+    color:var(--muted);
+    font-size:18px;
+}
+
+.hero-tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    margin-top:26px;
+}
+
+.tag{
+    background:#f8fafc;
+    border:1px solid var(--border);
+    padding:7px 11px;
+    border-radius:9px;
+    font-size:12px;
+    color:#475569;
+}
+
+/* ================= CONTENT ================= */
+
+.content{
+    max-width:1100px;
+    margin:auto;
+    padding:65px 28px 100px;
+}
+
+.section{
+    margin-bottom:75px;
+    scroll-margin-top:95px;
+}
+
+.section-label{
+    color:var(--primary);
+    font-size:12px;
+    font-weight:900;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    margin-bottom:7px;
+}
+
+.section h2{
+    font-size:34px;
+    line-height:1.2;
+    letter-spacing:-1px;
+    margin-bottom:15px;
+}
+
+.section-intro{
+    color:var(--muted);
+    max-width:850px;
+    margin-bottom:28px;
+}
+
+.card-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+}
+
+.card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:24px;
+    box-shadow:var(--shadow);
+}
+
+.card h3{
+    font-size:18px;
+    margin-bottom:9px;
+}
+
+.card p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+.card ul{
+    padding-left:19px;
+    color:var(--muted);
+    font-size:14px;
+}
+
+.card li{
+    margin:6px 0;
+}
+
+/* ================= CODE ================= */
+
+.code{
+    background:#111827;
+    color:#e5e7eb;
+    border-radius:15px;
+    padding:20px;
+    overflow:auto;
+    margin:18px 0;
+    border:1px solid #1f2937;
+}
+
+.code pre{
+    font-family:"Cascadia Code","Fira Code",Consolas,monospace;
+    font-size:13px;
+    line-height:1.75;
+    white-space:pre;
+}
+
+.code-title{
+    color:#9ca3af;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin-bottom:10px;
+}
+
+/* ================= FLOW ================= */
+
+.flow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin:30px 0;
+}
+
+.flow-node{
+    min-width:135px;
+    padding:17px 15px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:white;
+    text-align:center;
+    box-shadow:0 8px 20px rgba(15,23,42,.05);
+    font-size:13px;
+    font-weight:800;
+}
+
+.flow-node small{
+    display:block;
+    color:var(--muted);
+    font-weight:500;
+    margin-top:4px;
+}
+
+.flow-arrow{
+    color:var(--primary);
+    font-size:23px;
+    animation:pulseArrow 1.5s infinite;
+}
+
+@keyframes pulseArrow{
+    0%,100%{transform:translateX(0);opacity:.5}
+    50%{transform:translateX(5px);opacity:1}
+}
+
+/* ================= ARCHITECTURE ================= */
+
+.architecture{
+    background:#ffffff;
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:30px;
+    box-shadow:var(--shadow);
+}
+
+.arch-title{
+    text-align:center;
+    font-weight:800;
+    margin-bottom:25px;
+}
+
+.arch-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.arch-box{
+    width:165px;
+    min-height:92px;
+    border-radius:15px;
+    border:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    background:#fafafa;
+    text-align:center;
+    font-size:13px;
+    font-weight:800;
+}
+
+.arch-box small{
+    color:var(--muted);
+    font-weight:500;
+    margin-top:5px;
+}
+
+.arch-box.highlight{
+    background:#eef2ff;
+    border-color:#c7d2fe;
+    color:var(--primary-dark);
+}
+
+.arch-arrow{
+    font-size:22px;
+    color:var(--primary);
+}
+
+/* ================= LOADER ================= */
+
+.loader-demo{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:170px;
+    background:#f8fafc;
+    border:1px dashed #cbd5e1;
+    border-radius:15px;
+    margin-top:20px;
+}
+
+.spinner{
+    width:42px;
+    height:42px;
+    border:4px solid #e5e7eb;
+    border-top-color:var(--primary);
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+    to{transform:rotate(360deg)}
+}
+
+.loading-dots{
+    display:flex;
+    gap:6px;
+}
+
+.loading-dots span{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:var(--primary);
+    animation:bounce 1s infinite;
+}
+
+.loading-dots span:nth-child(2){
+    animation-delay:.15s;
+}
+
+.loading-dots span:nth-child(3){
+    animation-delay:.3s;
+}
+
+@keyframes bounce{
+    0%,80%,100%{
+        transform:translateY(0);
+        opacity:.4;
+    }
+    40%{
+        transform:translateY(-8px);
+        opacity:1;
+    }
+}
+
+/* ================= COMPARISON ================= */
+
+.compare{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+}
+
+.compare-box{
+    padding:25px;
+    border-radius:17px;
+    border:1px solid var(--border);
+    background:#ffffff;
+}
+
+.compare-box h3{
+    margin-bottom:12px;
+}
+
+.compare-box.before{
+    border-left:4px solid var(--red);
+}
+
+.compare-box.after{
+    border-left:4px solid var(--green);
+}
+
+.metric{
+    margin-top:16px;
+    display:flex;
+    justify-content:space-between;
+    font-size:13px;
+    color:var(--muted);
+}
+
+.bar{
+    height:9px;
+    border-radius:99px;
+    background:#e5e7eb;
+    overflow:hidden;
+    margin-top:7px;
+}
+
+.bar span{
+    display:block;
+    height:100%;
+    width:82%;
+    background:var(--primary);
+    animation:loadBar 2s ease;
+}
+
+@keyframes loadBar{
+    from{width:0}
+}
+
+/* ================= INFO ================= */
+
+.info{
+    padding:19px 20px;
+    border-radius:14px;
+    border:1px solid #dbeafe;
+    background:#eff6ff;
+    color:#1e40af;
+    font-size:14px;
+    margin:20px 0;
+}
+
+.warning{
+    padding:19px 20px;
+    border-radius:14px;
+    border:1px solid #fde68a;
+    background:#fffbeb;
+    color:#92400e;
+    font-size:14px;
+    margin:20px 0;
+}
+
+.success{
+    padding:19px 20px;
+    border-radius:14px;
+    border:1px solid #bbf7d0;
+    background:#f0fdf4;
+    color:#166534;
+    font-size:14px;
+    margin:20px 0;
+}
+
+/* ================= QUIZ ================= */
+
+.quiz{
+    display:grid;
+    gap:15px;
+}
+
+.question{
+    border:1px solid var(--border);
+    background:white;
+    border-radius:15px;
+    overflow:hidden;
+}
+
+.question-head{
+    padding:19px;
+    font-weight:800;
+}
+
+.answer{
+    padding:16px 19px;
+    border-top:1px solid var(--border);
+    color:var(--muted);
+    display:none;
+    background:#fafafa;
+}
+
+.question button{
+    width:100%;
+    border:0;
+    background:none;
+    cursor:pointer;
+    text-align:left;
+}
+
+.question.open .answer{
+    display:block;
+}
+
+/* ================= FOOTER ================= */
+
+.final{
+    padding:35px;
+    border-radius:22px;
+    background:#111827;
+    color:white;
+    text-align:center;
+}
+
+.final h2{
+    margin-bottom:10px;
+}
+
+.final p{
+    color:#cbd5e1;
+    max-width:700px;
+    margin:auto;
+}
+
+/* ================= ANIMATION ================= */
+
+.reveal{
+    opacity:0;
+    transform:translateY(25px);
+    transition:.7s ease;
+}
+
+.reveal.show{
+    opacity:1;
+    transform:translateY(0);
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:900px){
+    .layout{
+        grid-template-columns:1fr;
+    }
+
+    .sidebar{
+        position:relative;
+        top:0;
+        height:auto;
+        border-right:0;
+        border-bottom:1px solid var(--border);
+    }
+
+    .card-grid,
+    .compare{
+        grid-template-columns:1fr;
+    }
+
+    .hero{
+        padding:55px 25px;
+    }
+}
+
+@media(max-width:600px){
+    .topbar{
+        padding:0 15px;
+    }
+
+    .top-status{
+        display:none;
+    }
+
+    .content{
+        padding:45px 18px;
+    }
+
+    .hero h1{
+        font-size:43px;
+        letter-spacing:-2px;
+    }
+
+    .section h2{
+        font-size:28px;
+    }
+
+    .architecture{
+        padding:18px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <div class="brand">
+        <div class="logo">Z</div>
+        <div>
+            ZENSUS
+            <div class="lesson-badge">REACT • LESSON 34</div>
+        </div>
+    </div>
+
+    <div class="top-status">
+        <span class="status-dot"></span>
+        Advanced React
+    </div>
+
+</header>
+
+
+<div class="layout">
+
+<aside class="sidebar">
+
+    <div class="sidebar-title">Lesson 34</div>
+
+    <a href="#intro" class="active">Suspense & Lazy Loading</a>
+    <a href="#splitting">Code Splitting</a>
+    <a href="#dynamic">Dynamic Imports</a>
+    <a href="#lazy">React.lazy()</a>
+    <a href="#suspense">Suspense</a>
+    <a href="#fallback">Fallback UI</a>
+    <a href="#route">Route-Level Loading</a>
+    <a href="#component">Component-Level Loading</a>
+    <a href="#boundaries">Loading Boundaries</a>
+    <a href="#performance">Performance Benefits</a>
+    <a href="#practical">Practical Example</a>
+    <a href="#mistakes">Common Mistakes</a>
+    <a href="#quiz">Quick Quiz</a>
+
+</aside>
+
+
+<main class="main">
+
+<section class="hero" id="intro">
+
+<div class="hero-inner">
+
+    <div class="eyebrow">
+        PHASE 5 • ADVANCED REACT • LESSON 34
+    </div>
+
+    <h1>
+        Suspense & <span>Lazy Loading</span>
+    </h1>
+
+    <p>
+        Learn how React loads application code only when it is needed.
+        Master code splitting, dynamic imports, React.lazy(), Suspense,
+        fallback interfaces, route-level loading and component-level loading.
+    </p>
+
+    <div class="hero-tags">
+        <span class="tag">Code Splitting</span>
+        <span class="tag">Dynamic Imports</span>
+        <span class="tag">React.lazy()</span>
+        <span class="tag">Suspense</span>
+        <span class="tag">Loading UI</span>
+        <span class="tag">Performance</span>
+    </div>
+
+</div>
+
+</section>
+
+
+<div class="content">
+
+
+<!-- ================= CODE SPLITTING ================= -->
+
+<section class="section reveal" id="splitting">
+
+<div class="section-label">01 • CODE SPLITTING</div>
+
+<h2>What is Code Splitting?</h2>
+
+<p class="section-intro">
+Code splitting means dividing your application's JavaScript into
+smaller chunks instead of sending the entire application to the browser
+during the initial page load.
+</p>
+
+<div class="compare">
+
+<div class="compare-box before">
+
+<h3>Traditional Bundle</h3>
+
+<p>
+The browser downloads a large JavaScript bundle containing code for
+every page and feature.
+</p>
+
+<div class="metric">
+<span>Initial JavaScript</span>
+<span>Large</span>
+</div>
+
+<div class="bar">
+<span style="width:90%;"></span>
+</div>
+
+</div>
+
+
+<div class="compare-box after">
+
+<h3>Code-Split Application</h3>
+
+<p>
+Only the code required for the current screen is loaded initially.
+Other chunks can be downloaded later.
+</p>
+
+<div class="metric">
+<span>Initial JavaScript</span>
+<span>Smaller</span>
+</div>
+
+<div class="bar">
+<span style="width:38%;"></span>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="flow">
+
+<div class="flow-node">
+Application
+<small>React source</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Build Tool
+<small>Vite / Webpack</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+JavaScript Chunks
+<small>Multiple files</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Browser
+<small>Loads when needed</small>
+</div>
+
+</div>
+
+
+<div class="info">
+<strong>Important:</strong>
+Code splitting does not magically make your application code faster.
+It changes when code is downloaded and evaluated, which can reduce the
+amount of JavaScript needed during the initial load.
+</div>
+
+</section>
+
+
+<!-- ================= DYNAMIC IMPORT ================= -->
+
+<section class="section reveal" id="dynamic">
+
+<div class="section-label">02 • DYNAMIC IMPORTS</div>
+
+<h2>Dynamic Imports</h2>
+
+<p class="section-intro">
+JavaScript normally uses static imports that are loaded as part of the
+module graph. A dynamic import allows a module to be requested
+asynchronously when execution reaches that point.
+</p>
+
+
+<div class="card-grid">
+
+<div class="card">
+
+<h3>Static Import</h3>
+
+<div class="code">
+
+<div class="code-title">JavaScript</div>
+
+<pre>
+import Dashboard from "./Dashboard";
+</pre>
+
+</div>
+
+<p>
+The module becomes part of the application's normal module dependency
+graph.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h3>Dynamic Import</h3>
+
+<div class="code">
+
+<div class="code-title">JavaScript</div>
+
+<pre>
+const module = await import("./Dashboard");
+</pre>
+
+<p style="color:#9ca3af;margin-top:12px;">
+The module can be loaded asynchronously when required.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+<h3 style="margin-top:30px;">Dynamic Import Flow</h3>
+
+<div class="architecture">
+
+<div class="arch-row">
+
+<div class="arch-box">
+User Action
+<small>Click / Route</small>
+</div>
+
+<div class="arch-arrow">→</div>
+
+<div class="arch-box highlight">
+import()
+<small>Request chunk</small>
+</div>
+
+<div class="arch-arrow">→</div>
+
+<div class="arch-box">
+Network
+<small>Download module</small>
+</div>
+
+<div class="arch-arrow">→</div>
+
+<div class="arch-box">
+Module
+<small>Execute code</small>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="success">
+Dynamic imports are one of the mechanisms that make practical code
+splitting possible.
+</div>
+
+</section>
+
+
+<!-- ================= REACT LAZY ================= -->
+
+<section class="section reveal" id="lazy">
+
+<div class="section-label">03 • REACT.LAZY()</div>
+
+<h2>React.lazy()</h2>
+
+<p class="section-intro">
+React.lazy() lets you render a component that is loaded dynamically.
+The component is represented by a lazy component until its module
+has been loaded.
+</p>
+
+
+<div class="code">
+
+<div class="code-title">React</div>
+
+<pre>
+import { lazy } from "react";
+
+const Dashboard = lazy(
+    () => import("./Dashboard")
+);
+</pre>
+
+</div>
+
+
+<div class="card-grid">
+
+<div class="card">
+
+<h3>What happens?</h3>
+
+<ul>
+<li>React encounters the lazy component.</li>
+<li>The import function starts loading the module.</li>
+<li>The module is downloaded asynchronously.</li>
+<li>React waits for the lazy component.</li>
+<li>The component renders after loading completes.</li>
+</ul>
+
+</div>
+
+
+<div class="card">
+
+<h3>Why use it?</h3>
+
+<ul>
+<li>Reduce initial JavaScript.</li>
+<li>Delay rarely needed features.</li>
+<li>Split large applications.</li>
+<li>Load route components on demand.</li>
+<li>Improve initial loading experience.</li>
+</ul>
+
+</div>
+
+</div>
+
+
+<div class="warning">
+A lazy component needs an appropriate Suspense boundary above it.
+Without a boundary that can handle the suspended rendering, the UI
+cannot provide the intended loading experience.
+</div>
+
+</section>
+
+
+<!-- ================= SUSPENSE ================= -->
+
+<section class="section reveal" id="suspense">
+
+<div class="section-label">04 • SUSPENSE</div>
+
+<h2>What is Suspense?</h2>
+
+<p class="section-intro">
+Suspense provides a declarative way to specify what React should display
+while part of the UI is not yet ready to render.
+</p>
+
+
+<div class="code">
+
+<div class="code-title">React</div>
+
+<pre>
+import { Suspense } from "react";
+
+&lt;Suspense fallback={&lt;Loading /&gt;}&gt;
+
+    &lt;Dashboard /&gt;
+
+&lt;/Suspense&gt;
+</pre>
+
+</div>
+
+
+<div class="architecture">
+
+<div class="arch-title">
+Suspense Rendering Model
+</div>
+
+<div class="arch-row">
+
+<div class="arch-box highlight">
+Suspense
+<small>Boundary</small>
+</div>
+
+<div class="arch-arrow">→</div>
+
+<div class="arch-box">
+Content Ready
+<small>Render children</small>
+</div>
+
+<div class="arch-arrow">or</div>
+
+<div class="arch-box">
+Content Waiting
+<small>Render fallback</small>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="info">
+Suspense itself is not a network library and it does not perform arbitrary
+data fetching by itself. In this lesson, the common use case is handling
+lazy-loaded React components.
+</div>
+
+</section>
+
+
+<!-- ================= FALLBACK ================= -->
+
+<section class="section reveal" id="fallback">
+
+<div class="section-label">05 • FALLBACK UI</div>
+
+<h2>Fallback UI</h2>
+
+<p class="section-intro">
+A fallback is the temporary interface displayed while the suspended
+content is waiting to become available.
+</p>
+
+
+<div class="card-grid">
+
+<div class="card">
+
+<h3>Simple Spinner</h3>
+
+<div class="loader-demo">
+<div class="spinner"></div>
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3>Loading Dots</h3>
+
+<div class="loader-demo">
+
+<div class="loading-dots">
+<span></span>
+<span></span>
+<span></span>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="code">
+
+<div class="code-title">React</div>
+
+<pre>
+function Loading() {
+    return (
+        &lt;div className="loading"&gt;
+            Loading dashboard...
+        &lt;/div&gt;
+    );
+}
+
+&lt;Suspense fallback={&lt;Loading /&gt;}&gt;
+    &lt;Dashboard /&gt;
+&lt;/Suspense&gt;
+</pre>
+
+</div>
+
+
+<h3>Good Fallback UI</h3>
+
+<div class="card-grid">
+
+<div class="card">
+<h3>Fast</h3>
+<p>
+The fallback should appear immediately instead of making the user stare
+at an empty screen.
+</p>
+</div>
+
+<div class="card">
+<h3>Contextual</h3>
+<p>
+A dashboard skeleton can be more useful than a generic full-screen
+spinner when only part of the page is loading.
+</p>
+</div>
+
+<div class="card">
+<h3>Stable</h3>
+<p>
+Avoid layouts that dramatically jump when the real component appears.
+</p>
+</div>
+
+<div class="card">
+<h3>Accessible</h3>
+<p>
+Loading indicators should communicate that content is currently being
+prepared.
+</p>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================= ROUTE LEVEL ================= -->
+
+<section class="section reveal" id="route">
+
+<div class="section-label">06 • ROUTE-LEVEL LOADING</div>
+
+<h2>Route-Level Lazy Loading</h2>
+
+<p class="section-intro">
+Large applications commonly split code by page or route. Users do not
+necessarily need the JavaScript for every page during the first visit.
+</p>
+
+
+<div class="architecture">
+
+<div class="arch-title">
+Route-Based Code Splitting
+</div>
+
+<div class="arch-row">
+
+<div class="arch-box highlight">
+App
+<small>Initial bundle</small>
+</div>
+
+<div class="arch-arrow">→</div>
+
+<div class="arch-box">
+Home Chunk
+<small>Loaded first</small>
+</div>
+
+<div class="arch-arrow">+</div>
+
+<div class="arch-box">
+Dashboard Chunk
+<small>Loaded later</small>
+</div>
+
+<div class="arch-arrow">+</div>
+
+<div class="arch-box">
+Settings Chunk
+<small>Loaded later</small>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="code">
+
+<div class="code-title">React Router Pattern</div>
+
+<pre>
+import { lazy, Suspense } from "react";
+
+const Home = lazy(() => import("./pages/Home"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Settings = lazy(() => import("./pages/Settings"));
+
+function App() {
+
+    return (
+        &lt;Suspense fallback={&lt;PageLoader /&gt;}&gt;
+
+            &lt;Routes&gt;
+
+                &lt;Route
+                    path="/"
+                    element={&lt;Home /&gt;}
+                /&gt;
+
+                &lt;Route
+                    path="/dashboard"
+                    element={&lt;Dashboard /&gt;}
+                /&gt;
+
+                &lt;Route
+                    path="/settings"
+                    element={&lt;Settings /&gt;}
+                /&gt;
+
+            &lt;/Routes&gt;
+
+        &lt;/Suspense&gt;
+    );
+}
+</pre>
+
+</div>
+
+
+<div class="success">
+This approach can prevent every page's JavaScript from being required
+before the user even visits that page.
+</div>
+
+</section>
+
+
+<!-- ================= COMPONENT LEVEL ================= -->
+
+<section class="section reveal" id="component">
+
+<div class="section-label">07 • COMPONENT-LEVEL LOADING</div>
+
+<h2>Component-Level Lazy Loading</h2>
+
+<p class="section-intro">
+Code splitting does not have to happen only at the route level. A large
+feature inside a page can also be loaded only when needed.
+</p>
+
+
+<div class="card-grid">
+
+<div class="card">
+
+<h3>Example Features</h3>
+
+<ul>
+<li>Analytics dashboard</li>
+<li>Chart library</li>
+<li>Rich text editor</li>
+<li>Advanced code editor</li>
+<li>Admin tools</li>
+<li>Large visualization</li>
+</ul>
+
+</div>
+
+
+<div class="card">
+
+<h3>Lazy Component</h3>
+
+<div class="code">
+
+<pre>
+const Analytics =
+    lazy(() => import("./Analytics"));
+
+function Dashboard() {
+
+    return (
+        &lt;Suspense
+            fallback={&lt;ChartLoader /&gt;}
+        &gt;
+
+            &lt;Analytics /&gt;
+
+        &lt;/Suspense&gt;
+    );
+}
+</pre>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="info">
+Use component-level splitting when a feature is relatively expensive or
+unlikely to be needed immediately. Splitting every tiny component can
+create unnecessary complexity and additional network requests.
+</div>
+
+</section>
+
+
+<!-- ================= BOUNDARIES ================= -->
+
+<section class="section reveal" id="boundaries">
+
+<div class="section-label">08 • LOADING BOUNDARIES</div>
+
+<h2>Loading Boundaries</h2>
+
+<p class="section-intro">
+A Suspense boundary controls which portion of the interface can show a
+fallback while its suspended children are waiting.
+</p>
+
+
+<h3>One Large Boundary</h3>
+
+<div class="code">
+
+<pre>
+&lt;Suspense fallback={&lt;FullPageLoader /&gt;}&gt;
+
+    &lt;Header /&gt;
+    &lt;Sidebar /&gt;
+    &lt;Dashboard /&gt;
+    &lt;Recommendations /&gt;
+
+&lt;/Suspense&gt;
+</pre>
+
+</div>
+
+
+<h3>Multiple Smaller Boundaries</h3>
+
+<div class="code">
+
+<pre>
+&lt;Header /&gt;
+
+&lt;Suspense fallback={&lt;DashboardSkeleton /&gt;}&gt;
+    &lt;Dashboard /&gt;
+&lt;/Suspense&gt;
+
+&lt;Suspense fallback={&lt;RecommendationSkeleton /&gt;}&gt;
+    &lt;Recommendations /&gt;
+&lt;/Suspense&gt;
+</pre>
+
+</div>
+
+
+<div class="card-grid">
+
+<div class="card">
+
+<h3>Coarse Boundary</h3>
+
+<p>
+Simple architecture. Useful when a whole section naturally belongs
+together during loading.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>Fine-Grained Boundaries</h3>
+
+<p>
+Different parts of the interface can reveal themselves independently,
+creating a more progressive experience.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="warning">
+More boundaries are not automatically better. Choose boundaries around
+meaningful UI sections rather than creating one around every component.
+</div>
+
+</section>
+
+
+<!-- ================= PERFORMANCE ================= -->
+
+<section class="section reveal" id="performance">
+
+<div class="section-label">09 • PERFORMANCE BENEFITS</div>
+
+<h2>Why Lazy Loading Can Help Performance</h2>
+
+<div class="card-grid">
+
+<div class="card">
+
+<h3>1. Smaller Initial Download</h3>
+
+<p>
+Users may download less JavaScript during the initial page load.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>2. Less Initial Parsing</h3>
+
+<p>
+The browser does not need to parse and evaluate every deferred chunk
+immediately.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>3. Faster Feature Discovery</h3>
+
+<p>
+Important application features can become available without requiring
+every optional feature first.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>4. Better Scalability</h3>
+
+<p>
+Large applications can divide their JavaScript into meaningful chunks.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="flow">
+
+<div class="flow-node">
+Initial Request
+<small>Small core</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Render
+<small>Important UI</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+User navigates
+<small>New feature</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Load Chunk
+<small>On demand</small>
+</div>
+
+</div>
+
+
+<div class="info">
+Performance improvement depends on the application, network, device,
+chunk sizes and loading strategy. Always measure real applications
+rather than assuming that more chunks automatically means better
+performance.
+</div>
+
+</section>
+
+
+<!-- ================= PRACTICAL ================= -->
+
+<section class="section reveal" id="practical">
+
+<div class="section-label">10 • PRACTICAL EXAMPLE</div>
+
+<h2>Complete Lazy Dashboard Example</h2>
+
+<p class="section-intro">
+Imagine a student platform such as ZENSUS. The home page is frequently
+visited, while Analytics and Admin tools may be used by only a smaller
+portion of users.
+</p>
+
+
+<h3>Step 1 — Create Components</h3>
+
+<div class="code">
+
+<pre>
+// Home.jsx
+
+export default function Home() {
+    return (
+        &lt;section&gt;
+            &lt;h2&gt;Welcome to ZENSUS&lt;/h2&gt;
+            &lt;p&gt;Start learning today.&lt;/p&gt;
+        &lt;/section&gt;
+    );
+}
+
+
+// Analytics.jsx
+
+export default function Analytics() {
+    return (
+        &lt;section&gt;
+            &lt;h2&gt;Analytics&lt;/h2&gt;
+            &lt;p&gt;Your learning analytics appear here.&lt;/p&gt;
+        &lt;/section&gt;
+    );
+}
+
+
+// Admin.jsx
+
+export default function Admin() {
+    return (
+        &lt;section&gt;
+            &lt;h2&gt;Admin Panel&lt;/h2&gt;
+            &lt;p&gt;Manage the platform here.&lt;/p&gt;
+        &lt;/section&gt;
+    );
+}
+</pre>
+
+</div>
+
+
+<h3>Step 2 — Lazy Load Features</h3>
+
+<div class="code">
+
+<pre>
+import { lazy, Suspense } from "react";
+
+const Home =
+    lazy(() => import("./Home"));
+
+const Analytics =
+    lazy(() => import("./Analytics"));
+
+const Admin =
+    lazy(() => import("./Admin"));
+</pre>
+
+</div>
+
+
+<h3>Step 3 — Create a Loading Component</h3>
+
+<div class="code">
+
+<pre>
+function PageLoader() {
+
+    return (
+        &lt;div className="page-loader"&gt;
+            Loading page...
+        &lt;/div&gt;
+    );
+}
+</pre>
+
+</div>
+
+
+<h3>Step 4 — Wrap Lazy Components</h3>
+
+<div class="code">
+
+<pre>
+function App() {
+
+    return (
+        &lt;Suspense fallback={&lt;PageLoader /&gt;}&gt;
+
+            &lt;Home /&gt;
+            &lt;Analytics /&gt;
+            &lt;Admin /&gt;
+
+        &lt;/Suspense&gt;
+    );
+}
+</pre>
+
+</div>
+
+
+<h3>Complete Mental Model</h3>
+
+<div class="architecture">
+
+<div class="arch-row">
+
+<div class="arch-box highlight">
+React App
+<small>Core bundle</small>
+</div>
+
+<div class="arch-arrow">→</div>
+
+<div class="arch-box">
+Home
+<small>Loaded when needed</small>
+</div>
+
+<div class="arch-arrow">→</div>
+
+<div class="arch-box">
+Analytics
+<small>Separate chunk</small>
+</div>
+
+<div class="arch-arrow">→</div>
+
+<div class="arch-box">
+Admin
+<small>Separate chunk</small>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="success">
+
+<strong>Professional pattern:</strong>
+Split code around meaningful application boundaries, provide useful
+loading states, and measure the result in the production-like
+environment.
+
+</div>
+
+</section>
+
+
+<!-- ================= MISTAKES ================= -->
+
+<section class="section reveal" id="mistakes">
+
+<div class="section-label">11 • COMMON MISTAKES</div>
+
+<h2>Common Suspense & Lazy Loading Mistakes</h2>
+
+<div class="card-grid">
+
+<div class="card">
+<h3>❌ Lazy Loading Everything</h3>
+<p>
+Creating a separate chunk for every tiny component can add complexity
+without meaningful performance benefits.
+</p>
+</div>
+
+<div class="card">
+<h3>❌ Poor Fallback UI</h3>
+<p>
+A giant spinner replacing the entire page can create a poor experience
+when only one small section is loading.
+</p>
+</div>
+
+<div class="card">
+<h3>❌ Forgetting Suspense</h3>
+<p>
+A lazy component needs an appropriate Suspense boundary to handle its
+suspended rendering.
+</p>
+</div>
+
+<div class="card">
+<h3>❌ Huge Lazy Chunks</h3>
+<p>
+A lazy-loaded chunk can still be too large. Splitting code does not
+automatically make each chunk small.
+</p>
+</div>
+
+<div class="card">
+<h3>❌ Assuming More Chunks = Faster</h3>
+<p>
+Excessive splitting can introduce additional loading overhead and
+complexity.
+</p>
+</div>
+
+<div class="card">
+<h3>❌ Ignoring Measurement</h3>
+<p>
+Use performance tools and production-like testing to determine whether
+the loading strategy actually helps.
+</p>
+</div>
+
+</div>
+
+
+<div class="warning">
+
+<strong>Remember:</strong>
+The goal is not “maximum lazy loading.” The goal is delivering the right
+amount of code at the right time while maintaining a good user experience.
+
+</div>
+
+</section>
+
+
+<!-- ================= SUMMARY ================= -->
+
+<section class="section reveal">
+
+<div class="section-label">12 • QUICK REFERENCE</div>
+
+<h2>Suspense & Lazy Loading Cheat Sheet</h2>
+
+<div class="card">
+
+<ul>
+
+<li>
+<strong>Code Splitting:</strong>
+Break application JavaScript into independently loadable chunks.
+</li>
+
+<li>
+<strong>Dynamic Import:</strong>
+Use import() to load a module asynchronously.
+</li>
+
+<li>
+<strong>React.lazy():</strong>
+Create a component whose module is loaded dynamically.
+</li>
+
+<li>
+<strong>Suspense:</strong>
+Define fallback UI for suspended rendering.
+</li>
+
+<li>
+<strong>Fallback:</strong>
+Temporary UI displayed while content is waiting.
+</li>
+
+<li>
+<strong>Route-Level Loading:</strong>
+Split application code by page or route.
+</li>
+
+<li>
+<strong>Component-Level Loading:</strong>
+Split expensive or optional features within a page.
+</li>
+
+<li>
+<strong>Loading Boundary:</strong>
+Controls which UI region is replaced by a fallback.
+</li>
+
+<li>
+<strong>Performance:</strong>
+Reduce initial JavaScript and defer non-critical code.
+</li>
+
+</ul>
+
+</div>
+
+</section>
+
+
+<!-- ================= QUIZ ================= -->
+
+<section class="section reveal" id="quiz">
+
+<div class="section-label">13 • KNOWLEDGE CHECK</div>
+
+<h2>Quick Quiz</h2>
+
+<p class="section-intro">
+Test whether you understand the core concepts of Suspense and Lazy
+Loading.
+</p>
+
+
+<div class="quiz">
+
+<div class="question">
+
+<button onclick="toggleQuestion(this)">
+<div class="question-head">
+1. What is the primary purpose of code splitting?
+</div>
+<div class="answer">
+To divide JavaScript into smaller chunks that can be loaded when needed.
+</div>
+</button>
+
+</div>
+
+
+<div class="question">
+
+<button onclick="toggleQuestion(this)">
+<div class="question-head">
+2. Which JavaScript feature can dynamically load a module?
+</div>
+<div class="answer">
+The dynamic import() expression.
+</div>
+</button>
+
+</div>
+
+
+<div class="question">
+
+<button onclick="toggleQuestion(this)">
+<div class="question-head">
+3. What does React.lazy() create?
+</div>
+<div class="answer">
+A lazy component whose module is loaded dynamically.
+</div>
+</button>
+
+</div>
+
+
+<div class="question">
+
+<button onclick="toggleQuestion(this)">
+<div class="question-head">
+4. What does the fallback prop of Suspense provide?
+</div>
+<div class="answer">
+The UI React can display while suspended content is waiting.
+</div>
+</button>
+
+</div>
+
+
+<div class="question">
+
+<button onclick="toggleQuestion(this)">
+<div class="question-head">
+5. Why is route-level lazy loading useful?
+</div>
+<div class="answer">
+It can prevent code for routes the user has not visited from being part
+of the initial JavaScript work.
+</div>
+</button>
+
+</div>
+
+
+<div class="question">
+
+<button onclick="toggleQuestion(this)">
+<div class="question-head">
+6. Does lazy loading automatically make every application faster?
+</div>
+<div class="answer">
+No. The result depends on chunk sizes, network conditions, device
+performance, application architecture and how the code is split.
+</div>
+</button>
+
+</div>
+
+
+<div class="question">
+
+<button onclick="toggleQuestion(this)">
+<div class="question-head">
+7. Should every small React component be lazy loaded?
+</div>
+<div class="answer">
+No. Splitting should target meaningful or expensive boundaries where the
+loading trade-off makes sense.
+</div>
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================= FINAL ================= -->
+
+<section class="section reveal">
+
+<div class="final">
+
+<h2>Professional React Loading Mindset</h2>
+
+<p>
+Don't ask “What can I lazy load?”
+Ask “What code does the user actually need right now?”
+Split meaningful boundaries, provide useful fallback UI, and measure
+the real performance impact.
+</p>
+
+</div>
+
+</section>
+
+
+</div>
+
+</main>
+
+</div>
+
+
+<script>
+
+/* ================= QUIZ ================= */
+
+function toggleQuestion(button){
+
+    const question = button.closest(".question");
+
+    question.classList.toggle("open");
+
+}
+
+
+/* ================= SCROLL REVEAL ================= */
+
+const observer =
+new IntersectionObserver(
+(entries) => {
+
+    entries.forEach(entry => {
+
+        if(entry.isIntersecting){
+            entry.target.classList.add("show");
+        }
+
+    });
+
+},
+{
+    threshold:.12
+}
+);
+
+document
+.querySelectorAll(".reveal")
+.forEach(element => observer.observe(element));
+
+
+/* ================= ACTIVE SIDEBAR ================= */
+
+const sections =
+document.querySelectorAll(".section, .hero");
+
+const links =
+document.querySelectorAll(".sidebar a");
+
+const sectionObserver =
+new IntersectionObserver(
+(entries) => {
+
+    entries.forEach(entry => {
+
+        if(entry.isIntersecting){
+
+            links.forEach(link => {
+
+                link.classList.remove("active");
+
+                if(
+                    link.getAttribute("href") ===
+                    "#" + entry.target.id
+                ){
+                    link.classList.add("active");
+                }
+
+            });
+
+        }
+
+    });
+
+},
+{
+    rootMargin:"-20% 0px -65% 0px"
+}
+);
+
+sections.forEach(section =>
+    sectionObserver.observe(section)
+);
+
+</script>
+
+</body>
+</html>
+

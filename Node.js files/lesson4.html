@@ -1,0 +1,3242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENSUS Node.js — Lesson 04 | NPM & Package Management</title>
+
+<style>
+    :root {
+        --bg: #101214;
+        --bg-soft: #16191d;
+        --panel: #1c2025;
+        --panel-light: #23282e;
+        --panel-hover: #292f35;
+
+        --gold: #d4af37;
+        --gold-soft: #c9a45c;
+        --gold-dark: #8f6b2e;
+
+        --ivory: #f5f0e5;
+        --cream: #e9dfcc;
+        --text: #ddd7ca;
+        --muted: #a7a195;
+
+        --green: #6fa77d;
+        --green-dark: #31583b;
+
+        --red: #b56b6b;
+        --red-dark: #633838;
+
+        --blue: #718ba8;
+
+        --line: rgba(212, 175, 55, 0.22);
+
+        --shadow:
+            0 18px 45px rgba(0,0,0,.35),
+            inset 0 1px 0 rgba(255,255,255,.025);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        background:
+            radial-gradient(circle at 10% 0%, rgba(212,175,55,.07), transparent 28%),
+            radial-gradient(circle at 90% 20%, rgba(113,139,168,.06), transparent 25%),
+            var(--bg);
+        color: var(--text);
+        line-height: 1.7;
+    }
+
+    /* ================= NAVBAR ================= */
+
+    nav {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        height: 72px;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        padding: 0 6%;
+
+        background: rgba(16,18,20,.94);
+        backdrop-filter: blur(16px);
+
+        border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        color: var(--ivory);
+        font-family: Georgia, serif;
+        font-size: 22px;
+        font-weight: bold;
+        letter-spacing: 2px;
+    }
+
+    .brand-mark {
+        width: 36px;
+        height: 36px;
+
+        display: grid;
+        place-items: center;
+
+        border: 1px solid var(--gold);
+        border-radius: 8px;
+
+        color: var(--gold);
+        font-size: 17px;
+
+        box-shadow:
+            0 0 20px rgba(212,175,55,.08),
+            inset 0 0 15px rgba(212,175,55,.05);
+    }
+
+    .lesson-number {
+        color: var(--gold);
+        font-family: Georgia, serif;
+        letter-spacing: 1px;
+    }
+
+    /* ================= HERO ================= */
+
+    .hero {
+        min-height: 620px;
+
+        display: flex;
+        align-items: center;
+
+        padding: 90px 8%;
+
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero::before {
+        content: "";
+        position: absolute;
+
+        width: 420px;
+        height: 420px;
+
+        border: 1px solid rgba(212,175,55,.08);
+        border-radius: 50%;
+
+        right: -100px;
+        top: 70px;
+    }
+
+    .hero::after {
+        content: "";
+        position: absolute;
+
+        width: 260px;
+        height: 260px;
+
+        border: 1px solid rgba(212,175,55,.06);
+        border-radius: 50%;
+
+        right: 0;
+        top: 150px;
+    }
+
+    .hero-content {
+        max-width: 850px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .eyebrow {
+        color: var(--gold);
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 18px;
+    }
+
+    .hero h1 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(48px, 7vw, 86px);
+        line-height: 1.05;
+        color: var(--ivory);
+        margin-bottom: 22px;
+        font-weight: 500;
+    }
+
+    .hero h1 span {
+        color: var(--gold);
+    }
+
+    .hero p {
+        max-width: 700px;
+        font-size: 19px;
+        color: var(--muted);
+    }
+
+    .ornament {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin: 30px 0;
+        color: var(--gold);
+    }
+
+    .ornament::before,
+    .ornament::after {
+        content: "";
+        height: 1px;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            var(--gold-dark)
+        );
+        width: 80px;
+    }
+
+    .ornament::after {
+        background: linear-gradient(
+            90deg,
+            var(--gold-dark),
+            transparent
+        );
+    }
+
+    .hero-buttons {
+        display: flex;
+        gap: 14px;
+        margin-top: 32px;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        border: none;
+        padding: 13px 22px;
+        border-radius: 7px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        transition: .3s ease;
+    }
+
+    .btn-gold {
+        background: linear-gradient(
+            135deg,
+            #d8b84c,
+            #b98d24
+        );
+        color: #17130b;
+        box-shadow: 0 8px 25px rgba(212,175,55,.12);
+    }
+
+    .btn-gold:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(212,175,55,.2);
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: var(--gold);
+        border: 1px solid var(--gold-dark);
+    }
+
+    .btn-outline:hover {
+        background: rgba(212,175,55,.07);
+    }
+
+    /* ================= COMMON ================= */
+
+    section {
+        padding: 90px 8%;
+    }
+
+    .section-header {
+        max-width: 800px;
+        margin-bottom: 48px;
+    }
+
+    .section-label {
+        color: var(--gold);
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        font-size: 12px;
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
+
+    .section-header h2 {
+        font-family: Georgia, serif;
+        color: var(--ivory);
+        font-size: clamp(30px, 4vw, 48px);
+        font-weight: 500;
+        margin-bottom: 12px;
+    }
+
+    .section-header p {
+        color: var(--muted);
+    }
+
+    /* ================= OBJECTIVES ================= */
+
+    .objectives {
+        background: #131619;
+        border-top: 1px solid rgba(212,175,55,.08);
+        border-bottom: 1px solid rgba(212,175,55,.08);
+    }
+
+    .objective-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+    }
+
+    .objective {
+        background: linear-gradient(
+            145deg,
+            var(--panel),
+            #171a1e
+        );
+
+        border: 1px solid var(--line);
+        padding: 26px;
+        border-radius: 14px;
+
+        transition: .3s ease;
+        box-shadow: var(--shadow);
+    }
+
+    .objective:hover {
+        transform: translateY(-5px);
+        border-color: rgba(212,175,55,.5);
+    }
+
+    .objective-number {
+        font-family: Georgia, serif;
+        color: var(--gold);
+        font-size: 28px;
+        margin-bottom: 10px;
+    }
+
+    .objective h3 {
+        color: var(--ivory);
+        margin-bottom: 7px;
+    }
+
+    .objective p {
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    /* ================= NPM INTRO ================= */
+
+    .concept-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+    }
+
+    .concept-card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .concept-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 25px;
+        right: 25px;
+        height: 1px;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            var(--gold),
+            transparent
+        );
+    }
+
+    .concept-icon {
+        width: 52px;
+        height: 52px;
+
+        display: grid;
+        place-items: center;
+
+        border-radius: 10px;
+        border: 1px solid var(--gold-dark);
+
+        color: var(--gold);
+        font-size: 22px;
+
+        margin-bottom: 20px;
+    }
+
+    .concept-card h3 {
+        font-family: Georgia, serif;
+        color: var(--ivory);
+        font-size: 22px;
+        margin-bottom: 10px;
+    }
+
+    .concept-card p {
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    .definition-box {
+        margin-top: 30px;
+        padding: 25px 30px;
+
+        border-left: 3px solid var(--gold);
+        background: rgba(212,175,55,.045);
+
+        border-radius: 0 10px 10px 0;
+    }
+
+    .definition-box strong {
+        color: var(--gold);
+    }
+
+    /* ================= COMPARISON ================= */
+
+    .comparison {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+    }
+
+    .compare-card {
+        padding: 30px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+    }
+
+    .compare-card h3 {
+        color: var(--gold);
+        font-family: Georgia, serif;
+        font-size: 25px;
+        margin-bottom: 12px;
+    }
+
+    .compare-card p {
+        color: var(--muted);
+    }
+
+    /* ================= TERMINAL ================= */
+
+    .terminal-section {
+        background:
+            linear-gradient(
+                180deg,
+                #111315,
+                #0e1012
+            );
+    }
+
+    .terminal {
+        max-width: 950px;
+        margin: auto;
+
+        background: #0b0d0f;
+
+        border: 1px solid #4b4026;
+        border-radius: 12px;
+
+        overflow: hidden;
+
+        box-shadow:
+            0 30px 70px rgba(0,0,0,.5),
+            0 0 0 1px rgba(212,175,55,.03);
+    }
+
+    .terminal-bar {
+        height: 42px;
+
+        display: flex;
+        align-items: center;
+        gap: 7px;
+
+        padding: 0 15px;
+
+        background: #181a1c;
+        border-bottom: 1px solid #302a1d;
+    }
+
+    .terminal-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #6d6250;
+    }
+
+    .terminal-title {
+        margin-left: 8px;
+        color: #9c9589;
+        font-size: 12px;
+    }
+
+    .terminal-body {
+        padding: 28px;
+        min-height: 370px;
+
+        font-family: Consolas, monospace;
+        font-size: 14px;
+    }
+
+    .command-line {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .prompt {
+        color: var(--gold);
+    }
+
+    .command {
+        color: #e9dfcc;
+    }
+
+    .output {
+        color: #8c978d;
+        margin-bottom: 18px;
+        white-space: pre-wrap;
+    }
+
+    .terminal-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        margin-top: 20px;
+    }
+
+    .cmd-btn {
+        background: #1b1e21;
+        color: var(--cream);
+
+        border: 1px solid #4b4026;
+        padding: 9px 13px;
+
+        border-radius: 6px;
+        cursor: pointer;
+
+        font-family: Consolas, monospace;
+        font-size: 12px;
+
+        transition: .2s;
+    }
+
+    .cmd-btn:hover {
+        color: var(--gold);
+        border-color: var(--gold-dark);
+    }
+
+    /* ================= PACKAGE.JSON ================= */
+
+    .package-area {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+        align-items: stretch;
+    }
+
+    .code-window {
+        background: #0d0f11;
+        border: 1px solid #4a4028;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .code-header {
+        padding: 12px 18px;
+        background: #1a1d20;
+        color: var(--gold);
+        border-bottom: 1px solid #3d3423;
+        font-size: 13px;
+        font-weight: bold;
+    }
+
+    pre {
+        padding: 25px;
+        overflow-x: auto;
+        color: #ddd7ca;
+        font-family: Consolas, monospace;
+        font-size: 13px;
+        line-height: 1.8;
+    }
+
+    .key {
+        color: #d4af37;
+    }
+
+    .string {
+        color: #b8c8a9;
+    }
+
+    .number {
+        color: #c9a45c;
+    }
+
+    .comment {
+        color: #706b62;
+    }
+
+    .package-fields {
+        display: grid;
+        gap: 10px;
+    }
+
+    .field {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 9px;
+
+        padding: 14px 17px;
+        cursor: pointer;
+
+        transition: .25s;
+    }
+
+    .field:hover,
+    .field.active {
+        background: var(--panel-hover);
+        border-color: var(--gold);
+    }
+
+    .field strong {
+        color: var(--gold);
+        font-family: Consolas, monospace;
+    }
+
+    .field-info {
+        margin-top: 15px;
+        min-height: 85px;
+
+        padding: 17px;
+
+        background: rgba(212,175,55,.045);
+        border-left: 2px solid var(--gold);
+
+        color: var(--muted);
+        border-radius: 0 8px 8px 0;
+        font-size: 14px;
+    }
+
+    /* ================= FLOW ================= */
+
+    .flow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+
+        margin-top: 35px;
+    }
+
+    .flow-box {
+        width: 165px;
+        min-height: 105px;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        text-align: center;
+
+        background: var(--panel);
+        border: 1px solid var(--line);
+
+        border-radius: 12px;
+        padding: 15px;
+
+        transition: .4s;
+    }
+
+    .flow-box.active {
+        transform: translateY(-7px);
+        border-color: var(--gold);
+        box-shadow: 0 12px 35px rgba(212,175,55,.12);
+    }
+
+    .flow-box span {
+        color: var(--gold);
+        font-size: 22px;
+        margin-bottom: 5px;
+    }
+
+    .flow-box strong {
+        color: var(--ivory);
+        font-size: 14px;
+    }
+
+    .flow-box small {
+        color: var(--muted);
+        font-size: 11px;
+    }
+
+    .arrow {
+        color: var(--gold-dark);
+        font-size: 22px;
+    }
+
+    /* ================= INSTALL CARDS ================= */
+
+    .install-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+
+    .install-card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 27px;
+    }
+
+    .install-card h3 {
+        color: var(--ivory);
+        font-family: Georgia, serif;
+        margin-bottom: 10px;
+    }
+
+    .install-card p {
+        color: var(--muted);
+        font-size: 14px;
+        margin-bottom: 17px;
+    }
+
+    .mini-code {
+        background: #0d0f11;
+        border: 1px solid #3d3423;
+        border-radius: 7px;
+        padding: 13px;
+
+        color: var(--cream);
+        font-family: Consolas, monospace;
+        font-size: 12px;
+        overflow-x: auto;
+    }
+
+    .mini-code::first-letter {
+        color: var(--gold);
+    }
+
+    /* ================= DEPENDENCIES ================= */
+
+    .dependency-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 25px;
+
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .dependency-table th,
+    .dependency-table td {
+        padding: 17px;
+        text-align: left;
+        border-bottom: 1px solid rgba(212,175,55,.1);
+    }
+
+    .dependency-table th {
+        color: var(--gold);
+        font-family: Georgia, serif;
+        background: #191d21;
+    }
+
+    .dependency-table td {
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    .dependency-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* ================= SEMVER ================= */
+
+    .semver-box {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 15px;
+        padding: 35px;
+        max-width: 950px;
+        margin: auto;
+    }
+
+    .version-display {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .version-display .version {
+        font-family: Georgia, serif;
+        font-size: 48px;
+        color: var(--gold);
+    }
+
+    .version-parts {
+        display: grid;
+        grid-template-columns: repeat(3,1fr);
+        gap: 12px;
+        margin-top: 25px;
+    }
+
+    .version-part {
+        background: #15181b;
+        border: 1px solid var(--line);
+        padding: 18px;
+        border-radius: 9px;
+        text-align: center;
+    }
+
+    .version-part strong {
+        display: block;
+        color: var(--ivory);
+        font-size: 20px;
+    }
+
+    .version-part span {
+        color: var(--muted);
+        font-size: 12px;
+    }
+
+    .semver-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 25px;
+    }
+
+    /* ================= NPM FILES ================= */
+
+    .file-grid {
+        display: grid;
+        grid-template-columns: repeat(3,1fr);
+        gap: 20px;
+    }
+
+    .file-card {
+        padding: 27px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 13px;
+    }
+
+    .file-icon {
+        font-size: 28px;
+        color: var(--gold);
+        margin-bottom: 13px;
+    }
+
+    .file-card h3 {
+        color: var(--ivory);
+        font-family: Georgia, serif;
+        margin-bottom: 8px;
+    }
+
+    .file-card p {
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    /* ================= AUDIT ================= */
+
+    .notice {
+        padding: 24px 28px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        margin-bottom: 18px;
+    }
+
+    .notice strong {
+        display: block;
+        color: var(--gold);
+        margin-bottom: 5px;
+    }
+
+    .notice p {
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    /* ================= ACCORDION ================= */
+
+    .accordion {
+        max-width: 900px;
+        margin: auto;
+    }
+
+    .accordion-item {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        border-radius: 10px;
+        margin-bottom: 10px;
+        overflow: hidden;
+    }
+
+    .accordion-question {
+        padding: 19px 22px;
+        cursor: pointer;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        color: var(--ivory);
+        font-weight: 600;
+    }
+
+    .accordion-question:hover {
+        color: var(--gold);
+    }
+
+    .accordion-answer {
+        max-height: 0;
+        overflow: hidden;
+
+        transition: max-height .35s ease;
+
+        color: var(--muted);
+        padding: 0 22px;
+    }
+
+    .accordion-item.open .accordion-answer {
+        max-height: 300px;
+        padding: 0 22px 20px;
+    }
+
+    .plus {
+        color: var(--gold);
+        font-size: 22px;
+    }
+
+    /* ================= QUIZ ================= */
+
+    .quiz {
+        max-width: 850px;
+        margin: auto;
+    }
+
+    .question-card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 13px;
+        padding: 28px;
+        margin-bottom: 18px;
+    }
+
+    .question-card h3 {
+        color: var(--ivory);
+        font-size: 17px;
+        margin-bottom: 17px;
+    }
+
+    .option {
+        display: block;
+
+        padding: 12px 15px;
+        margin: 8px 0;
+
+        border: 1px solid rgba(212,175,55,.15);
+        border-radius: 7px;
+
+        color: var(--muted);
+        cursor: pointer;
+
+        transition: .2s;
+    }
+
+    .option:hover {
+        background: rgba(212,175,55,.05);
+        border-color: var(--gold-dark);
+    }
+
+    .option input {
+        margin-right: 9px;
+        accent-color: var(--gold);
+    }
+
+    #quizResult {
+        margin-top: 20px;
+        padding: 18px;
+
+        text-align: center;
+
+        background: rgba(212,175,55,.05);
+        border: 1px solid var(--line);
+        border-radius: 9px;
+
+        color: var(--gold);
+        display: none;
+    }
+
+    /* ================= CHALLENGE ================= */
+
+    .challenge {
+        max-width: 900px;
+        margin: auto;
+
+        padding: 40px;
+
+        background:
+            linear-gradient(
+                145deg,
+                #20231f,
+                #191c1e
+            );
+
+        border: 1px solid rgba(111,167,125,.25);
+        border-radius: 16px;
+
+        box-shadow: var(--shadow);
+    }
+
+    .challenge h3 {
+        color: var(--green);
+        font-family: Georgia, serif;
+        font-size: 28px;
+        margin-bottom: 10px;
+    }
+
+    .challenge p {
+        color: var(--muted);
+        margin-bottom: 20px;
+    }
+
+    .solution {
+        display: none;
+        margin-top: 20px;
+        padding: 20px;
+
+        background: #101512;
+        border: 1px solid rgba(111,167,125,.25);
+        border-radius: 9px;
+    }
+
+    .solution.show {
+        display: block;
+    }
+
+    /* ================= PROGRESS ================= */
+
+    .progress-area {
+        max-width: 850px;
+        margin: auto;
+        text-align: center;
+    }
+
+    .progress-track {
+        height: 10px;
+        background: #292d31;
+        border-radius: 20px;
+        overflow: hidden;
+        margin: 20px 0;
+    }
+
+    .progress-fill {
+        width: 0%;
+        height: 100%;
+
+        background: linear-gradient(
+            90deg,
+            var(--gold-dark),
+            var(--gold)
+        );
+
+        transition: width .8s ease;
+    }
+
+    #progressText {
+        color: var(--gold);
+        font-family: Georgia, serif;
+        font-size: 18px;
+    }
+
+    /* ================= FOOTER ================= */
+
+    footer {
+        padding: 45px 8%;
+        border-top: 1px solid var(--line);
+        text-align: center;
+        background: #0d0f11;
+    }
+
+    footer h3 {
+        color: var(--gold);
+        font-family: Georgia, serif;
+        margin-bottom: 5px;
+    }
+
+    footer p {
+        color: var(--muted);
+        font-size: 13px;
+    }
+
+    /* ================= NAVIGATION ================= */
+
+    .lesson-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        max-width: 1000px;
+        margin: auto;
+    }
+
+    /* ================= REVEAL ================= */
+
+    .reveal {
+        opacity: 0;
+        transform: translateY(25px);
+        transition: .7s ease;
+    }
+
+    .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* ================= RESPONSIVE ================= */
+
+    @media(max-width: 900px) {
+        .objective-grid,
+        .install-grid,
+        .file-grid {
+            grid-template-columns: repeat(2,1fr);
+        }
+
+        .concept-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .package-area,
+        .comparison {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media(max-width: 650px) {
+        nav {
+            padding: 0 5%;
+        }
+
+        .hero {
+            padding: 70px 6%;
+        }
+
+        section {
+            padding: 65px 6%;
+        }
+
+        .objective-grid,
+        .install-grid,
+        .file-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+        }
+
+        .version-parts {
+            grid-template-columns: 1fr;
+        }
+
+        .lesson-nav {
+            flex-direction: column;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+
+<nav>
+    <div class="brand">
+        <div class="brand-mark">Z</div>
+        ZENSUS
+    </div>
+
+    <div class="lesson-number">
+        LESSON 04
+    </div>
+</nav>
+
+
+<!-- ================= HERO ================= -->
+
+<header class="hero">
+
+    <div class="hero-content reveal">
+
+        <div class="eyebrow">
+            Node.js Learning Series
+        </div>
+
+        <h1>
+            NPM &<br>
+            <span>Package Management</span>
+        </h1>
+
+        <div class="ornament">✦</div>
+
+        <p>
+            Learn how Node.js projects use NPM to discover, install,
+            update and manage external packages. Build a clean project
+            structure and understand how dependencies work behind the scenes.
+        </p>
+
+        <div class="hero-buttons">
+            <button class="btn btn-gold"
+                    onclick="document.getElementById('npm').scrollIntoView()">
+                Begin Lesson
+            </button>
+
+            <button class="btn btn-outline"
+                    onclick="document.getElementById('quiz').scrollIntoView()">
+                Test Yourself
+            </button>
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- ================= OBJECTIVES ================= -->
+
+<section class="objectives">
+
+    <div class="section-header reveal">
+        <div class="section-label">At a Glance</div>
+
+        <h2>What You Will Learn</h2>
+
+        <p>
+            By the end of this lesson, you will be able to create,
+            configure and manage a Node.js project using NPM.
+        </p>
+    </div>
+
+    <div class="objective-grid">
+
+        <div class="objective reveal">
+            <div class="objective-number">01</div>
+            <h3>Understand NPM</h3>
+            <p>
+                Learn what NPM is and why it is essential
+                in modern Node.js development.
+            </p>
+        </div>
+
+        <div class="objective reveal">
+            <div class="objective-number">02</div>
+            <h3>Manage Packages</h3>
+            <p>
+                Install, remove, update and inspect
+                project dependencies.
+            </p>
+        </div>
+
+        <div class="objective reveal">
+            <div class="objective-number">03</div>
+            <h3>Read package.json</h3>
+            <p>
+                Understand the important fields inside
+                a Node.js project's package.json file.
+            </p>
+        </div>
+
+        <div class="objective reveal">
+            <div class="objective-number">04</div>
+            <h3>Use NPM Scripts</h3>
+            <p>
+                Automate common development commands
+                using the scripts section.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= WHAT IS NPM ================= -->
+
+<section id="npm">
+
+    <div class="section-header reveal">
+
+        <div class="section-label">Foundation</div>
+
+        <h2>What is NPM?</h2>
+
+        <p>
+            NPM stands for Node Package Manager. It is the standard
+            package manager commonly used with Node.js.
+        </p>
+
+    </div>
+
+    <div class="concept-grid">
+
+        <div class="concept-card reveal">
+
+            <div class="concept-icon">N</div>
+
+            <h3>Package Manager</h3>
+
+            <p>
+                NPM helps developers install and manage reusable
+                JavaScript packages in their projects.
+            </p>
+
+        </div>
+
+        <div class="concept-card reveal">
+
+            <div class="concept-icon">⌘</div>
+
+            <h3>Command Line Tool</h3>
+
+            <p>
+                NPM provides commands such as
+                npm install, npm update, npm uninstall
+                and npm run.
+            </p>
+
+        </div>
+
+        <div class="concept-card reveal">
+
+            <div class="concept-icon">◈</div>
+
+            <h3>Package Registry</h3>
+
+            <p>
+                NPM also refers to the public registry
+                where JavaScript packages are published.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="definition-box reveal">
+
+        <strong>Simple Definition:</strong>
+
+        NPM is the tool that helps your Node.js project
+        find, install and manage the packages it needs.
+    </div>
+
+</section>
+
+
+<!-- ================= NODE VS NPM ================= -->
+
+<section>
+
+    <div class="section-header reveal">
+
+        <div class="section-label">Important Difference</div>
+
+        <h2>Node.js vs NPM</h2>
+
+    </div>
+
+    <div class="comparison">
+
+        <div class="compare-card reveal">
+
+            <h3>Node.js</h3>
+
+            <p>
+                Node.js is a JavaScript runtime environment.
+                It allows JavaScript code to execute outside
+                the browser, including on servers.
+            </p>
+
+            <br>
+
+            <div class="mini-code">
+                node app.js
+            </div>
+
+        </div>
+
+        <div class="compare-card reveal">
+
+            <h3>NPM</h3>
+
+            <p>
+                NPM is primarily used to manage packages,
+                dependencies and project scripts in
+                Node.js applications.
+            </p>
+
+            <br>
+
+            <div class="mini-code">
+                npm install express
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= TERMINAL ================= -->
+
+<section class="terminal-section">
+
+    <div class="section-header reveal">
+
+        <div class="section-label">Interactive Terminal</div>
+
+        <h2>Meet the NPM CLI</h2>
+
+        <p>
+            Click a command below and observe what a terminal
+            might show during a Node.js project workflow.
+        </p>
+
+    </div>
+
+    <div class="terminal reveal">
+
+        <div class="terminal-bar">
+
+            <div class="terminal-dot"></div>
+            <div class="terminal-dot"></div>
+            <div class="terminal-dot"></div>
+
+            <div class="terminal-title">
+                zensus-project — terminal
+            </div>
+
+        </div>
+
+        <div class="terminal-body">
+
+            <div id="terminalOutput">
+
+                <div class="command-line">
+                    <span class="prompt">$</span>
+                    <span class="command">
+                        npm --version
+                    </span>
+                </div>
+
+                <div class="output">
+10.9.3
+                </div>
+
+            </div>
+
+            <div class="terminal-buttons">
+
+                <button class="cmd-btn"
+                        onclick="runCommand('node --version')">
+                    node --version
+                </button>
+
+                <button class="cmd-btn"
+                        onclick="runCommand('npm --version')">
+                    npm --version
+                </button>
+
+                <button class="cmd-btn"
+                        onclick="runCommand('npm init -y')">
+                    npm init -y
+                </button>
+
+                <button class="cmd-btn"
+                        onclick="runCommand('npm install express')">
+                    npm install express
+                </button>
+
+                <button class="cmd-btn"
+                        onclick="runCommand('npm list')">
+                    npm list
+                </button>
+
+                <button class="cmd-btn"
+                        onclick="runCommand('npm outdated')">
+                    npm outdated
+                </button>
+
+                <button class="cmd-btn"
+                        onclick="runCommand('npm audit')">
+                    npm audit
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= NPM INIT ================= -->
+
+<section>
+
+    <div class="section-header reveal">
+
+        <div class="section-label">Step One</div>
+
+        <h2>Create a Node.js Project</h2>
+
+        <p>
+            Every project needs a configuration file describing
+            its identity, scripts and dependencies.
+        </p>
+
+    </div>
+
+    <div class="package-area">
+
+        <div class="code-window reveal">
+
+            <div class="code-header">
+                Terminal
+            </div>
+
+<pre>
+<span class="comment"># Create a project directory</span>
+mkdir zensus-app
+
+<span class="comment"># Enter the directory</span>
+cd zensus-app
+
+<span class="comment"># Create package.json interactively</span>
+npm init
+
+<span class="comment"># Or accept the default values</span>
+npm init -y
+</pre>
+
+        </div>
+
+        <div class="concept-card reveal">
+
+            <div class="concept-icon">01</div>
+
+            <h3>What does npm init do?</h3>
+
+            <p>
+                It creates a <strong>package.json</strong>
+                file for your project.
+            </p>
+
+            <br>
+
+            <p>
+                The <strong>-y</strong> option accepts the
+                default answers automatically.
+            </p>
+
+            <br>
+
+            <div class="mini-code">
+                npm init -y
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= PACKAGE JSON ================= -->
+
+<section>
+
+    <div class="section-header reveal">
+
+        <div class="section-label">Core File</div>
+
+        <h2>Understanding package.json</h2>
+
+        <p>
+            package.json is one of the most important files
+            in a Node.js project.
+        </p>
+
+    </div>
+
+    <div class="package-area">
+
+        <div class="code-window reveal">
+
+            <div class="code-header">
+                package.json
+            </div>
+
+<pre>
+{
+  <span class="key">"name"</span>:
+    <span class="string">"zensus-app"</span>,
+
+  <span class="key">"version"</span>:
+    <span class="string">"1.0.0"</span>,
+
+  <span class="key">"description"</span>:
+    <span class="string">"Node.js learning app"</span>,
+
+  <span class="key">"main"</span>:
+    <span class="string">"app.js"</span>,
+
+  <span class="key">"scripts"</span>: {
+    <span class="key">"start"</span>:
+      <span class="string">"node app.js"</span>,
+    <span class="key">"dev"</span>:
+      <span class="string">"nodemon app.js"</span>
+  },
+
+  <span class="key">"dependencies"</span>: {
+    <span class="key">"express"</span>:
+      <span class="string">"^5.1.0"</span>
+  },
+
+  <span class="key">"devDependencies"</span>: {
+    <span class="key">"nodemon"</span>:
+      <span class="string">"^3.1.0"</span>
+  }
+}
+</pre>
+
+        </div>
+
+
+        <div class="reveal">
+
+            <div class="package-fields">
+
+                <div class="field active"
+                     onclick="showField('name', this)">
+                    <strong>name</strong>
+                </div>
+
+                <div class="field"
+                     onclick="showField('version', this)">
+                    <strong>version</strong>
+                </div>
+
+                <div class="field"
+                     onclick="showField('main', this)">
+                    <strong>main</strong>
+                </div>
+
+                <div class="field"
+                     onclick="showField('scripts', this)">
+                    <strong>scripts</strong>
+                </div>
+
+                <div class="field"
+                     onclick="showField('dependencies', this)">
+                    <strong>dependencies</strong>
+                </div>
+
+                <div class="field"
+                     onclick="showField('devDependencies', this)">
+                    <strong>devDependencies</strong>
+                </div>
+
+            </div>
+
+            <div class="field-info" id="fieldInfo">
+                The package name identifies your project.
+                It should normally be lowercase and suitable
+                for use as an NPM package name.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= INSTALL ================= -->
+
+<section>
+
+    <div class="section-header reveal">
+
+        <div class="section-label">Package Installation</div>
+
+        <h2>Installing Packages</h2>
+
+        <p>
+            NPM makes installing third-party libraries
+            extremely simple.
+        </p>
+
+    </div>
+
+    <div class="install-grid">
+
+        <div class="install-card reveal">
+
+            <h3>Install a Dependency</h3>
+
+            <p>
+                Installs a package for use by your application.
+            </p>
+
+            <div class="mini-code">
+                npm install express
+            </div>
+
+        </div>
+
+        <div class="install-card reveal">
+
+            <h3>Install Dev Dependency</h3>
+
+            <p>
+                Installs a package mainly required during
+                development.
+            </p>
+
+            <div class="mini-code">
+                npm install nodemon --save-dev
+            </div>
+
+        </div>
+
+        <div class="install-card reveal">
+
+            <h3>Remove a Package</h3>
+
+            <p>
+                Removes the package from the project
+                and updates package.json.
+            </p>
+
+            <div class="mini-code">
+                npm uninstall express
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= DEPENDENCY FLOW ================= -->
+
+<section>
+
+    <div class="section-header reveal">
+
+        <div class="section-label">Behind the Scenes</div>
+
+        <h2>What Happens During npm install?</h2>
+
+        <p>
+            Watch the basic dependency installation flow.
+        </p>
+
+    </div>
+
+    <div class="flow">
+
+        <div class="flow-box" id="flow1">
+            <span>①</span>
+            <strong>package.json</strong>
+            <small>Project requirements</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box" id="flow2">
+            <span>②</span>
+            <strong>NPM Registry</strong>
+            <small>Find package</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box" id="flow3">
+            <span>③</span>
+            <strong>Resolve</strong>
+            <small>Dependency tree</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box" id="flow4">
+            <span>④</span>
+            <strong>node_modules</strong>
+            <small>Install packages</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box" id="flow5">
+            <span>⑤</span>
+            <strong>package-lock</strong>
+            <small>Record resolution</small>
+        </div>
+
+    </div>
+
+    <div style="text-align:center;margin-top:35px;">
+
+        <button class="btn btn-gold"
+                onclick="startFlow()">
+            Run Installation Flow
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- ================= DEPENDENCIES ================= -->
+
+<section>
+
+    <div class="section-header reveal">
+
+        <div class="section-label">Dependencies</div>
+
+        <h2>dependencies vs devDependencies</h2>
+
+    </div>
+
+    <table class="dependency-table reveal">
+
+        <thead>
+
+            <tr>
+                <th>Type</th>
+                <th>Purpose</th>
+                <th>Example</th>
+                <th>Command</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+                <td>dependencies</td>
+                <td>
+                    Packages required by the application
+                    during normal runtime.
+                </td>
+                <td>Express</td>
+                <td>npm install express</td>
+            </tr>
+
+            <tr>
+                <td>devDependencies</td>
+                <td>
+                    Tools mainly required while developing,
+                    testing or building.
+                </td>
+                <td>Nodemon</td>
+                <td>npm install nodemon --save-dev</td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</section>
+
+
+<!-- ================= NPM COMMANDS ================= -->
+
+<section>
+
+    <div class="section-header reveal">
+
+        <div class="section-label">Essential Commands</div>
+
+        <h2>NPM Command Reference</h2>
+
+    </div>
+
+    <div class="install-grid">
+
+        <div class="install-card reveal">
+
+            <h3>Update</h3>
+
+            <p>
+                Updates packages according to the version
+                ranges defined by the project.
+            </p>
+
+            <div class="mini-code">
+                npm update
+            </div>
+
+        </div>
+
+        <div class="install-card reveal">
+
+            <h3>List</h3>
+
+            <p>
+                Displays installed packages and their
+                dependency tree.
+            </p>
+
+            <div class="mini-code">
+                npm list
+            </div>
+
+        </div>
+
+        <div class="install-card reveal">
+
+            <h3>Outdated</h3>
+
+            <p>
+                Shows packages for which newer versions
+                may be available.
+            </p>
+
+            <div class="mini-code">
+                npm outdated
+            </div>
+
+        </div>
+
+        <div class="install-card reveal">
+
+            <h3>Audit</h3>
+
+            <p>
+                Checks dependencies against known
+                security advisories.
+            </p>
+
+            <div class="mini-code">
+                npm audit
+            </div>
+
+        </div>
+
+        <div class="install-card reveal">
+
+            <h3>Audit Fix</h3>
+
+            <p>
+                Attempts automated dependency updates
+                for fixable security issues.
+            </p>
+
+            <div class="mini-code">
+                npm audit fix
+            </div>
+
+        </div>
+
+        <div class="install-card reveal">
+
+            <h3>Run Scripts</h3>
+
+            <p>
+                Executes commands defined inside the
+                scripts section.
+            </p>
+
+            <div class="mini-code">
+                npm run dev
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= NODE MODULES ================= -->
+
+<section>
+
+    <div class="section-header reveal">
+
+        <div class="section-label">Project Structure</div>
+
+        <h2>Three Important NPM Files</h2>
+
+    </div>
+
+    <div class="file-grid">
+
+        <div class="file-card reveal">
+
+            <div class="file-icon">◆</div>
+
+            <h3>package.json</h3>
+
+            <p>
+                Describes your project, scripts and
+                dependency requirements.
+            </p>
+
+        </div>
+
+        <div class="file-card reveal">
+
+            <div class="file-icon">◇</div>
+
+            <h3>package-lock.json</h3>
+
+            <p>
+                Records resolved dependency versions and
+                other installation information so installs
+                can be reproduced more consistently.
+            </p>
+
+        </div>
+
+        <div class="file-card reveal">
+
+            <div class="file-icon">▣</div>
+
+            <h3>node_modules</h3>
+
+            <p>
+                Contains the packages installed for your
+                project and their dependencies.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="definition-box reveal">
+
+        <strong>Important:</strong>
+
+        <code>node_modules</code> is normally excluded from Git
+        repositories because dependencies can be recreated
+        from the project's package files.
+    </div>
+
+</section>
+
+
+<!-- ================= SEMVER ================= -->
+
+<section>
+
+    <div class="section-header reveal">
+
+        <div class="section-label">Version Management</div>
+
+        <h2>Semantic Versioning</h2>
+
+        <p>
+            NPM packages commonly use the
+            <strong>MAJOR.MINOR.PATCH</strong> format.
+        </p>
+
+    </div>
+
+    <div class="semver-box reveal">
+
+        <div class="version-display">
+
+            <div class="version" id="versionDisplay">
+                1.4.2
+            </div>
+
+            <p style="color:var(--muted);">
+                Select a version part to understand it.
+            </p>
+
+        </div>
+
+        <div class="version-parts">
+
+            <div class="version-part"
+                 onclick="changeVersion('major')">
+                <strong>1</strong>
+                <span>MAJOR</span>
+            </div>
+
+            <div class="version-part"
+                 onclick="changeVersion('minor')">
+                <strong>4</strong>
+                <span>MINOR</span>
+            </div>
+
+            <div class="version-part"
+                 onclick="changeVersion('patch')">
+                <strong>2</strong>
+                <span>PATCH</span>
+            </div>
+
+        </div>
+
+        <div class="definition-box"
+             id="versionInfo"
+             style="margin-top:25px;">
+
+            <strong>Version 1.4.2:</strong>
+
+            Click a version component above to learn
+            what that part normally represents.
+        </div>
+
+        <div class="semver-buttons">
+
+            <button class="btn btn-outline"
+                    onclick="showSemver('^1.4.2')">
+                ^1.4.2
+            </button>
+
+            <button class="btn btn-outline"
+                    onclick="showSemver('~1.4.2')">
+                ~1.4.2
+            </button>
+
+            <button class="btn btn-outline"
+                    onclick="showSemver('1.4.2')">
+                1.4.2
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= NPX ================= -->
+
+<section>
+
+    <div class="section-header reveal">
+
+        <div class="section-label">Useful Tool</div>
+
+        <h2>What is npx?</h2>
+
+        <p>
+            NPM and npx are related but serve different purposes.
+        </p>
+
+    </div>
+
+    <div class="comparison">
+
+        <div class="compare-card reveal">
+
+            <h3>npm</h3>
+
+            <p>
+                Primarily manages packages and project
+                dependencies.
+            </p>
+
+            <br>
+
+            <div class="mini-code">
+                npm install express
+            </div>
+
+        </div>
+
+        <div class="compare-card reveal">
+
+            <h3>npx</h3>
+
+            <p>
+                Can execute package-provided command-line
+                tools without requiring you to install
+                the tool globally first.
+            </p>
+
+            <br>
+
+            <div class="mini-code">
+                npx create-something
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= GLOBAL LOCAL ================= -->
+
+<section>
+
+    <div class="section-header reveal">
+
+        <div class="section-label">Installation Scope</div>
+
+        <h2>Local vs Global Packages</h2>
+
+    </div>
+
+    <div class="comparison">
+
+        <div class="compare-card reveal">
+
+            <h3>Local</h3>
+
+            <p>
+                Installed inside the current project.
+                This is the normal approach for application
+                dependencies and project-specific tools.
+            </p>
+
+            <br>
+
+            <div class="mini-code">
+                npm install express
+            </div>
+
+        </div>
+
+        <div class="compare-card reveal">
+
+            <h3>Global</h3>
+
+            <p>
+                Installed for broader system-wide use.
+                Global installation should be used selectively;
+                project-local dependencies and npx are often preferable.
+            </p>
+
+            <br>
+
+            <div class="mini-code">
+                npm install -g package-name
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= NPM SCRIPTS ================= -->
+
+<section>
+
+    <div class="section-header reveal">
+
+        <div class="section-label">Automation</div>
+
+        <h2>NPM Scripts</h2>
+
+        <p>
+            Scripts provide convenient names for commands
+            used frequently in your project.
+        </p>
+
+    </div>
+
+    <div class="package-area">
+
+        <div class="code-window reveal">
+
+            <div class="code-header">
+                package.json
+            </div>
+
+<pre>
+<span class="key">"scripts"</span>: {
+
+  <span class="key">"start"</span>:
+    <span class="string">"node app.js"</span>,
+
+  <span class="key">"dev"</span>:
+    <span class="string">"nodemon app.js"</span>,
+
+  <span class="key">"test"</span>:
+    <span class="string">"node test.js"</span>
+
+}
+</pre>
+
+        </div>
+
+        <div class="concept-card reveal">
+
+            <div class="concept-icon">▶</div>
+
+            <h3>Run Your Scripts</h3>
+
+            <p>
+                Instead of typing long commands repeatedly,
+                define them once inside package.json.
+            </p>
+
+            <br>
+
+            <div class="mini-code">
+                npm start
+            </div>
+
+            <br>
+
+            <div class="mini-code">
+                npm run dev
+            </div>
+
+            <br>
+
+            <div class="mini-code">
+                npm test
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= SECURITY ================= -->
+
+<section>
+
+    <div class="section-header reveal">
+
+        <div class="section-label">Security</div>
+
+        <h2>Dependency Security</h2>
+
+        <p>
+            Third-party packages can introduce security risks,
+            so dependency health should be monitored.
+        </p>
+
+    </div>
+
+    <div class="notice reveal">
+
+        <strong>npm audit</strong>
+
+        <p>
+            Checks installed dependencies for known security
+            advisories recorded by the package ecosystem.
+        </p>
+
+    </div>
+
+    <div class="notice reveal">
+
+        <strong>npm audit fix</strong>
+
+        <p>
+            Attempts to apply available automated fixes.
+            Always review changes, especially when updates
+            may involve major version changes.
+        </p>
+
+    </div>
+
+    <div class="notice reveal">
+
+        <strong>Good Practice</strong>
+
+        <p>
+            Keep dependencies reasonably current, review
+            important updates and avoid installing packages
+            you do not actually need.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- ================= MINI PROJECT ================= -->
+
+<section>
+
+    <div class="section-header reveal">
+
+        <div class="section-label">Hands-On Practice</div>
+
+        <h2>Mini Project: Express Setup</h2>
+
+        <p>
+            Let's imagine creating a small Node.js web server
+            using Express.
+        </p>
+
+    </div>
+
+    <div class="code-window reveal">
+
+        <div class="code-header">
+            Terminal + app.js
+        </div>
+
+<pre>
+<span class="comment"># 1. Create project</span>
+mkdir my-server
+cd my-server
+
+<span class="comment"># 2. Create package.json</span>
+npm init -y
+
+<span class="comment"># 3. Install Express</span>
+npm install express
+
+<span class="comment"># 4. Create app.js</span>
+</pre>
+
+    </div>
+
+    <br>
+
+    <div class="code-window reveal">
+
+        <div class="code-header">
+            app.js
+        </div>
+
+<pre>
+<span class="key">const</span> express = require(<span class="string">"express"</span>);
+
+<span class="key">const</span> app = express();
+
+app.get(<span class="string">"/"</span>, (req, res) => {
+    res.send(<span class="string">"Welcome to ZENSUS!"</span>);
+});
+
+app.listen(<span class="number">3000</span>, () => {
+    console.log(<span class="string">"Server running on port 3000"</span>);
+});
+</pre>
+
+    </div>
+
+    <br>
+
+    <div class="definition-box reveal">
+
+        <strong>Run it:</strong>
+
+        After creating the application, you can start the
+        server using <code>node app.js</code>.
+    </div>
+
+</section>
+
+
+<!-- ================= INTERVIEW ================= -->
+
+<section>
+
+    <div class="section-header reveal">
+
+        <div class="section-label">Interview Preparation</div>
+
+        <h2>NPM Interview Questions</h2>
+
+    </div>
+
+    <div class="accordion">
+
+        <div class="accordion-item">
+
+            <div class="accordion-question"
+                 onclick="toggleAccordion(this)">
+                What is NPM?
+                <span class="plus">+</span>
+            </div>
+
+            <div class="accordion-answer">
+                NPM is the package manager and package ecosystem
+                commonly used with Node.js. It helps developers
+                install, update and manage JavaScript packages.
+            </div>
+
+        </div>
+
+
+        <div class="accordion-item">
+
+            <div class="accordion-question"
+                 onclick="toggleAccordion(this)">
+                What is package.json?
+                <span class="plus">+</span>
+            </div>
+
+            <div class="accordion-answer">
+                package.json is a project configuration file.
+                It can contain project metadata, scripts,
+                dependency declarations and other configuration.
+            </div>
+
+        </div>
+
+
+        <div class="accordion-item">
+
+            <div class="accordion-question"
+                 onclick="toggleAccordion(this)">
+                What is package-lock.json?
+                <span class="plus">+</span>
+            </div>
+
+            <div class="accordion-answer">
+                It records the resolved dependency tree,
+                including specific package versions and
+                integrity information, helping installations
+                remain more reproducible.
+            </div>
+
+        </div>
+
+
+        <div class="accordion-item">
+
+            <div class="accordion-question"
+                 onclick="toggleAccordion(this)">
+                What is node_modules?
+                <span class="plus">+</span>
+            </div>
+
+            <div class="accordion-answer">
+                node_modules is the directory where packages
+                installed for the project are stored.
+            </div>
+
+        </div>
+
+
+        <div class="accordion-item">
+
+            <div class="accordion-question"
+                 onclick="toggleAccordion(this)">
+                Difference between dependencies and devDependencies?
+                <span class="plus">+</span>
+            </div>
+
+            <div class="accordion-answer">
+                dependencies contain packages needed by the
+                application at runtime, while devDependencies
+                are primarily used for development, testing
+                or build tooling.
+            </div>
+
+        </div>
+
+
+        <div class="accordion-item">
+
+            <div class="accordion-question"
+                 onclick="toggleAccordion(this)">
+                What does npm install do?
+                <span class="plus">+</span>
+            </div>
+
+            <div class="accordion-answer">
+                It installs the project's declared dependencies
+                or a specified package and updates relevant
+                package-management files.
+            </div>
+
+        </div>
+
+
+        <div class="accordion-item">
+
+            <div class="accordion-question"
+                 onclick="toggleAccordion(this)">
+                What is npx?
+                <span class="plus">+</span>
+            </div>
+
+            <div class="accordion-answer">
+                npx is a command runner associated with the
+                NPM ecosystem. It is commonly used to execute
+                package binaries without requiring a global
+                installation.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= QUIZ ================= -->
+
+<section id="quiz">
+
+    <div class="section-header reveal">
+
+        <div class="section-label">Knowledge Check</div>
+
+        <h2>Test Your Understanding</h2>
+
+    </div>
+
+    <div class="quiz">
+
+        <div class="question-card">
+
+            <h3>
+                1. Which command creates a package.json
+                using default answers?
+            </h3>
+
+            <label class="option">
+                <input type="radio" name="q1" value="wrong">
+                node init -y
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q1" value="correct">
+                npm init -y
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q1" value="wrong">
+                npm create package
+            </label>
+
+        </div>
+
+
+        <div class="question-card">
+
+            <h3>
+                2. Which directory normally contains
+                installed project packages?
+            </h3>
+
+            <label class="option">
+                <input type="radio" name="q2" value="wrong">
+                packages
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q2" value="correct">
+                node_modules
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q2" value="wrong">
+                node_packages
+            </label>
+
+        </div>
+
+
+        <div class="question-card">
+
+            <h3>
+                3. Which command installs Express?
+            </h3>
+
+            <label class="option">
+                <input type="radio" name="q3" value="correct">
+                npm install express
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q3" value="wrong">
+                node install express
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q3" value="wrong">
+                npm add-node express
+            </label>
+
+        </div>
+
+
+        <div class="question-card">
+
+            <h3>
+                4. Which file records resolved dependency
+                information?
+            </h3>
+
+            <label class="option">
+                <input type="radio" name="q4" value="wrong">
+                node.json
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q4" value="correct">
+                package-lock.json
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q4" value="wrong">
+                npm.config
+            </label>
+
+        </div>
+
+
+        <div class="question-card">
+
+            <h3>
+                5. Which command checks for known dependency
+                security advisories?
+            </h3>
+
+            <label class="option">
+                <input type="radio" name="q5" value="wrong">
+                npm secure
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q5" value="correct">
+                npm audit
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q5" value="wrong">
+                npm check-security
+            </label>
+
+        </div>
+
+
+        <button class="btn btn-gold"
+                onclick="checkQuiz()">
+            Submit Quiz
+        </button>
+
+        <div id="quizResult"></div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= CHALLENGE ================= -->
+
+<section>
+
+    <div class="challenge reveal">
+
+        <h3>◆ NPM Challenge</h3>
+
+        <p>
+            You have a new Node.js project. Your goal is to:
+        </p>
+
+        <ol style="padding-left:20px;color:var(--muted);">
+
+            <li>Create package.json.</li>
+            <li>Install Express.</li>
+            <li>Install Nodemon as a development dependency.</li>
+            <li>Create start and dev scripts.</li>
+            <li>Run the development server.</li>
+
+        </ol>
+
+        <br>
+
+        <button class="btn btn-gold"
+                onclick="document.getElementById('solution').classList.toggle('show')">
+            Reveal Solution
+        </button>
+
+        <div class="solution" id="solution">
+
+<pre>
+npm init -y
+
+npm install express
+
+npm install nodemon --save-dev
+
+npm run dev
+</pre>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= PROGRESS ================= -->
+
+<section>
+
+    <div class="progress-area reveal">
+
+        <div class="section-label">
+            Lesson Progress
+        </div>
+
+        <h2 style="
+            font-family:Georgia,serif;
+            color:var(--ivory);
+            font-weight:500;
+        ">
+            Complete Lesson 04
+        </h2>
+
+        <div class="progress-track">
+
+            <div class="progress-fill"
+                 id="progressFill">
+            </div>
+
+        </div>
+
+        <div id="progressText">
+            0% Complete
+        </div>
+
+        <br>
+
+        <button class="btn btn-gold"
+                onclick="completeLesson()">
+            Mark Lesson Complete
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- ================= NAVIGATION ================= -->
+
+<section>
+
+    <div class="lesson-nav">
+
+        <button class="btn btn-outline"
+                onclick="window.location.href='lesson3.html'">
+            ← Lesson 03
+        </button>
+
+        <button class="btn btn-gold"
+                onclick="window.location.href='lesson5.html'">
+            Lesson 05 →
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- ================= FOOTER ================= -->
+
+<footer>
+
+    <h3>ZENSUS NODE.JS</h3>
+
+    <p>
+        Learn. Build. Understand.
+    </p>
+
+    <div class="ornament"
+         style="justify-content:center;">
+        ✦
+    </div>
+
+    <p>
+        Lesson 04 — NPM & Package Management
+    </p>
+
+</footer>
+
+
+<script>
+
+/* ================= TERMINAL ================= */
+
+function runCommand(command) {
+
+    const output = document.getElementById("terminalOutput");
+
+    let result = "";
+
+    if (command === "node --version") {
+
+        result = "v22.x.x";
+
+    } else if (command === "npm --version") {
+
+        result = "10.x.x";
+
+    } else if (command === "npm init -y") {
+
+        result =
+`Wrote to /zensus-project/package.json
+
+{
+  "name": "zensus-project",
+  "version": "1.0.0"
+}`;
+
+    } else if (command === "npm install express") {
+
+        result =
+`added packages
+
+express installed successfully
+
+package.json updated
+package-lock.json updated`;
+
+    } else if (command === "npm list") {
+
+        result =
+`zensus-project
+└── express`;
+
+    } else if (command === "npm outdated") {
+
+        result =
+`Package     Current     Wanted     Latest
+express     5.x.x       5.x.x      5.x.x`;
+
+    } else if (command === "npm audit") {
+
+        result =
+`audited packages
+
+Security audit completed.
+Review any reported advisories before applying fixes.`;
+
+    }
+
+    output.innerHTML += `
+        <div class="command-line">
+            <span class="prompt">$</span>
+            <span class="command">${command}</span>
+        </div>
+
+        <div class="output">${result}</div>
+    `;
+
+    output.scrollTop = output.scrollHeight;
+}
+
+
+/* ================= PACKAGE.JSON EXPLORER ================= */
+
+function showField(field, element) {
+
+    document.querySelectorAll(".field")
+        .forEach(item => item.classList.remove("active"));
+
+    element.classList.add("active");
+
+    const info = document.getElementById("fieldInfo");
+
+    const descriptions = {
+
+        name:
+        "<strong>name:</strong> Identifies the project or package.",
+
+        version:
+        "<strong>version:</strong> Defines the current version of the project.",
+
+        main:
+        "<strong>main:</strong> Specifies the primary entry point for a package.",
+
+        scripts:
+        "<strong>scripts:</strong> Stores convenient commands that can be executed using npm.",
+
+        dependencies:
+        "<strong>dependencies:</strong> Lists packages required by the application at runtime.",
+
+        devDependencies:
+        "<strong>devDependencies:</strong> Lists packages mainly needed during development, testing or build tasks."
+
+    };
+
+    info.innerHTML = descriptions[field];
+}
+
+
+/* ================= INSTALLATION FLOW ================= */
+
+function startFlow() {
+
+    const boxes = [
+        "flow1",
+        "flow2",
+        "flow3",
+        "flow4",
+        "flow5"
+    ];
+
+    boxes.forEach(id => {
+        document.getElementById(id)
+            .classList.remove("active");
+    });
+
+    boxes.forEach((id, index) => {
+
+        setTimeout(() => {
+
+            document.getElementById(id)
+                .classList.add("active");
+
+        }, index * 650);
+
+    });
+
+}
+
+
+/* ================= SEMVER ================= */
+
+function changeVersion(part) {
+
+    const info = document.getElementById("versionInfo");
+
+    if (part === "major") {
+
+        info.innerHTML =
+        "<strong>MAJOR:</strong> Usually indicates incompatible API changes that may require changes in applications using the package.";
+
+    }
+
+    if (part === "minor") {
+
+        info.innerHTML =
+        "<strong>MINOR:</strong> Usually introduces backward-compatible functionality or features.";
+
+    }
+
+    if (part === "patch") {
+
+        info.innerHTML =
+        "<strong>PATCH:</strong> Usually contains backward-compatible bug fixes.";
+
+    }
+
+}
+
+
+function showSemver(type) {
+
+    const info = document.getElementById("versionInfo");
+
+    if (type === "^1.4.2") {
+
+        info.innerHTML =
+        "<strong>^1.4.2:</strong> In typical npm semver behavior, this allows compatible updates that stay below version 2.0.0.";
+
+    }
+
+    if (type === "~1.4.2") {
+
+        info.innerHTML =
+        "<strong>~1.4.2:</strong> Typically allows patch-level updates within the 1.4.x minor line.";
+
+    }
+
+    if (type === "1.4.2") {
+
+        info.innerHTML =
+        "<strong>1.4.2:</strong> Requests that exact version.";
+
+    }
+
+}
+
+
+/* ================= ACCORDION ================= */
+
+function toggleAccordion(element) {
+
+    const item = element.parentElement;
+
+    document.querySelectorAll(".accordion-item")
+        .forEach(other => {
+
+            if (other !== item) {
+                other.classList.remove("open");
+            }
+
+        });
+
+    item.classList.toggle("open");
+
+}
+
+
+/* ================= QUIZ ================= */
+
+function checkQuiz() {
+
+    const answers = {
+        q1: "correct",
+        q2: "correct",
+        q3: "correct",
+        q4: "correct",
+        q5: "correct"
+    };
+
+    let score = 0;
+
+    for (const question in answers) {
+
+        const selected =
+            document.querySelector(
+                `input[name="${question}"]:checked`
+            );
+
+        if (selected && selected.value === answers[question]) {
+            score++;
+        }
+
+    }
+
+    const result = document.getElementById("quizResult");
+
+    result.style.display = "block";
+
+    if (score === 5) {
+
+        result.innerHTML =
+            "Excellent! 5 / 5 — You understand the NPM fundamentals.";
+
+    } else if (score >= 3) {
+
+        result.innerHTML =
+            `Good work! You scored ${score} / 5. Review the missed concepts once more.`;
+
+    } else {
+
+        result.innerHTML =
+            `You scored ${score} / 5. Revisit the lesson and try again.`;
+
+    }
+
+}
+
+
+/* ================= PROGRESS ================= */
+
+function completeLesson() {
+
+    const fill =
+        document.getElementById("progressFill");
+
+    const text =
+        document.getElementById("progressText");
+
+    fill.style.width = "100%";
+
+    text.innerHTML =
+        "100% Complete — Lesson Mastered ✦";
+
+    localStorage.setItem(
+        "zensusLesson4Complete",
+        "true"
+    );
+
+}
+
+
+/* ================= REVEAL ANIMATION ================= */
+
+const observer =
+    new IntersectionObserver(
+        entries => {
+
+            entries.forEach(entry => {
+
+                if (entry.isIntersecting) {
+
+                    entry.target.classList.add("visible");
+
+                }
+
+            });
+
+        },
+        {
+            threshold: 0.12
+        }
+    );
+
+
+document.querySelectorAll(".reveal")
+    .forEach(element => observer.observe(element));
+
+
+/* ================= LOAD PROGRESS ================= */
+
+window.addEventListener("load", () => {
+
+    if (
+        localStorage.getItem(
+            "zensusLesson4Complete"
+        ) === "true"
+    ) {
+
+        document.getElementById("progressFill")
+            .style.width = "100%";
+
+        document.getElementById("progressText")
+            .innerHTML =
+            "100% Complete — Lesson Mastered ✦";
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>

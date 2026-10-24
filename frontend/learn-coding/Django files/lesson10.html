@@ -1,0 +1,2120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENSUS — Django Lesson 10: Admin Panel</title>
+
+<style>
+:root{
+  --blue:#2563eb;
+  --blue-dark:#1d4ed8;
+  --blue-light:#eff6ff;
+  --blue-soft:#dbeafe;
+  --blue-border:#bfdbfe;
+  --text:#10213f;
+  --text-light:#5f6f86;
+  --muted:#8b9ab0;
+  --bg:#f7faff;
+  --white:#fff;
+  --border:#dce6f2;
+  --green:#16a34a;
+  --green-light:#f0fdf4;
+  --orange:#f59e0b;
+  --orange-light:#fffbeb;
+  --red:#dc2626;
+  --red-light:#fef2f2;
+  --purple:#7c3aed;
+  --shadow:0 12px 35px rgba(37,99,235,.08);
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  font-family:Inter,Segoe UI,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.7;
+}
+
+.progress{
+  position:fixed;
+  top:0;
+  left:0;
+  height:4px;
+  width:0;
+  background:var(--blue);
+  z-index:9999;
+}
+
+.sidebar{
+  position:fixed;
+  left:0;
+  top:0;
+  width:280px;
+  height:100vh;
+  background:#fff;
+  border-right:1px solid var(--border);
+  padding:24px 18px;
+  overflow-y:auto;
+  z-index:1000;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:25px;
+  padding:5px 8px;
+}
+
+.logo{
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  background:linear-gradient(135deg,var(--blue),#60a5fa);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  font-size:17px;
+}
+
+.brand h2{
+  font-size:20px;
+}
+
+.brand small{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+  letter-spacing:1px;
+}
+
+.lesson-label{
+  margin:0 8px 12px;
+  font-size:11px;
+  color:var(--muted);
+  font-weight:800;
+  letter-spacing:1.4px;
+}
+
+.nav{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.nav a{
+  text-decoration:none;
+  color:var(--text-light);
+  padding:9px 12px;
+  border-radius:9px;
+  font-size:13px;
+  transition:.2s;
+}
+
+.nav a:hover,
+.nav a.active{
+  background:var(--blue-light);
+  color:var(--blue);
+  font-weight:700;
+}
+
+.main{
+  margin-left:280px;
+  padding:55px 6%;
+  max-width:1500px;
+}
+
+.hero{
+  background:linear-gradient(135deg,#eff6ff,#ffffff);
+  border:1px solid var(--blue-border);
+  border-radius:25px;
+  padding:42px;
+  box-shadow:var(--shadow);
+  position:relative;
+  overflow:hidden;
+}
+
+.hero:after{
+  content:"";
+  position:absolute;
+  width:240px;
+  height:240px;
+  border-radius:50%;
+  background:rgba(37,99,235,.08);
+  right:-80px;
+  top:-100px;
+}
+
+.badges{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:18px;
+}
+
+.badge{
+  padding:5px 10px;
+  border-radius:20px;
+  background:#fff;
+  border:1px solid var(--blue-border);
+  color:var(--blue);
+  font-size:12px;
+  font-weight:700;
+}
+
+.hero h1{
+  font-size:clamp(30px,5vw,52px);
+  line-height:1.15;
+  margin-bottom:14px;
+}
+
+.hero p{
+  color:var(--text-light);
+  max-width:780px;
+  font-size:17px;
+}
+
+.search-box{
+  margin:25px 0;
+  position:relative;
+}
+
+.search-box input{
+  width:100%;
+  border:1px solid var(--border);
+  background:#fff;
+  padding:15px 18px;
+  border-radius:13px;
+  outline:none;
+  font-size:14px;
+  box-shadow:var(--shadow);
+}
+
+.search-box input:focus{
+  border-color:var(--blue);
+}
+
+section{
+  margin-top:65px;
+  scroll-margin-top:30px;
+}
+
+.section-title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:15px;
+}
+
+.number{
+  width:35px;
+  height:35px;
+  border-radius:10px;
+  background:var(--blue);
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  font-size:14px;
+}
+
+h2{
+  font-size:28px;
+}
+
+h3{
+  margin:18px 0 9px;
+  font-size:19px;
+}
+
+p{
+  color:var(--text-light);
+  margin:9px 0;
+}
+
+.card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:25px;
+  box-shadow:var(--shadow);
+  margin-top:18px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:18px;
+}
+
+.grid3{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+
+.info-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:21px;
+  transition:.25s;
+}
+
+.info-card:hover{
+  transform:translateY(-4px);
+  border-color:var(--blue-border);
+  box-shadow:var(--shadow);
+}
+
+.icon{
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:12px;
+  background:var(--blue-light);
+  color:var(--blue);
+  font-weight:800;
+  margin-bottom:12px;
+}
+
+.code{
+  position:relative;
+  background:#0f172a;
+  color:#dbeafe;
+  border-radius:15px;
+  padding:22px;
+  margin-top:15px;
+  overflow:auto;
+  font-family:Consolas,Monaco,monospace;
+  font-size:13px;
+  line-height:1.7;
+}
+
+.code button{
+  position:absolute;
+  top:10px;
+  right:10px;
+  border:1px solid #334155;
+  background:#1e293b;
+  color:#fff;
+  padding:6px 10px;
+  border-radius:7px;
+  cursor:pointer;
+  font-size:11px;
+}
+
+.code button:hover{
+  background:#334155;
+}
+
+.note{
+  padding:17px 20px;
+  border-radius:13px;
+  margin-top:18px;
+  border-left:4px solid var(--blue);
+  background:var(--blue-light);
+}
+
+.warning{
+  background:var(--orange-light);
+  border-left-color:var(--orange);
+}
+
+.success{
+  background:var(--green-light);
+  border-left-color:var(--green);
+}
+
+.danger{
+  background:var(--red-light);
+  border-left-color:var(--red);
+}
+
+.flow{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:10px;
+  margin:25px 0;
+}
+
+.flow-box{
+  min-width:145px;
+  text-align:center;
+  background:#fff;
+  border:1px solid var(--blue-border);
+  border-radius:15px;
+  padding:18px 12px;
+  box-shadow:var(--shadow);
+  animation:float 3s ease-in-out infinite;
+}
+
+.flow-box:nth-child(2){animation-delay:.3s}
+.flow-box:nth-child(3){animation-delay:.6s}
+.flow-box:nth-child(4){animation-delay:.9s}
+.flow-box:nth-child(5){animation-delay:1.2s}
+
+.arrow{
+  color:var(--blue);
+  font-size:22px;
+  font-weight:bold;
+}
+
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-5px)}
+}
+
+.admin-ui{
+  background:#f8fafc;
+  border:1px solid var(--border);
+  border-radius:18px;
+  overflow:hidden;
+  margin-top:20px;
+}
+
+.admin-top{
+  background:#0f172a;
+  color:white;
+  padding:13px 18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:13px;
+}
+
+.admin-body{
+  display:grid;
+  grid-template-columns:210px 1fr;
+  min-height:260px;
+}
+
+.admin-side{
+  background:#fff;
+  border-right:1px solid var(--border);
+  padding:18px;
+}
+
+.admin-side div{
+  padding:9px;
+  border-radius:7px;
+  margin-bottom:5px;
+  color:var(--text-light);
+  font-size:12px;
+}
+
+.admin-side div:first-child{
+  background:var(--blue-light);
+  color:var(--blue);
+  font-weight:700;
+}
+
+.admin-content{
+  padding:22px;
+}
+
+.admin-table{
+  width:100%;
+  border-collapse:collapse;
+  background:white;
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+}
+
+.admin-table th,
+.admin-table td{
+  padding:11px;
+  text-align:left;
+  border-bottom:1px solid var(--border);
+  font-size:12px;
+}
+
+.admin-table th{
+  background:var(--blue-light);
+  color:var(--blue-dark);
+}
+
+.structure{
+  background:#0f172a;
+  color:#dbeafe;
+  border-radius:15px;
+  padding:22px;
+  font-family:Consolas,monospace;
+  overflow:auto;
+  font-size:13px;
+}
+
+.tabs{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:15px;
+}
+
+.tab{
+  border:1px solid var(--blue-border);
+  background:#fff;
+  color:var(--blue);
+  padding:9px 14px;
+  border-radius:9px;
+  cursor:pointer;
+  font-weight:700;
+}
+
+.tab.active{
+  background:var(--blue);
+  color:#fff;
+}
+
+.tab-content{
+  display:none;
+}
+
+.tab-content.active{
+  display:block;
+}
+
+.table-wrap{
+  overflow-x:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:18px;
+  background:#fff;
+}
+
+th,td{
+  padding:13px;
+  border:1px solid var(--border);
+  text-align:left;
+  font-size:13px;
+}
+
+th{
+  background:var(--blue-light);
+  color:var(--blue-dark);
+}
+
+.quiz{
+  border:1px solid var(--blue-border);
+  background:#fff;
+  padding:25px;
+  border-radius:17px;
+  margin-top:18px;
+}
+
+.option{
+  display:block;
+  border:1px solid var(--border);
+  padding:12px 15px;
+  border-radius:10px;
+  margin:8px 0;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.option:hover{
+  border-color:var(--blue);
+  background:var(--blue-light);
+}
+
+.option.correct{
+  background:var(--green-light);
+  border-color:var(--green);
+}
+
+.option.wrong{
+  background:var(--red-light);
+  border-color:var(--red);
+}
+
+.quiz-result{
+  margin-top:12px;
+  font-weight:700;
+}
+
+.checklist{
+  list-style:none;
+  margin-top:12px;
+}
+
+.checklist li{
+  padding:9px 0;
+  border-bottom:1px dashed var(--border);
+}
+
+.checklist li:before{
+  content:"✓";
+  color:var(--green);
+  font-weight:900;
+  margin-right:10px;
+}
+
+.reveal{
+  opacity:0;
+  transform:translateY(20px);
+  transition:.7s;
+}
+
+.reveal.visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+.footer{
+  margin-top:80px;
+  padding:35px;
+  text-align:center;
+  border-top:1px solid var(--border);
+  color:var(--muted);
+}
+
+.next{
+  margin-top:25px;
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  flex-wrap:wrap;
+}
+
+.next-btn{
+  padding:13px 18px;
+  border-radius:10px;
+  text-decoration:none;
+  border:1px solid var(--blue-border);
+  color:var(--blue);
+  background:white;
+  font-weight:700;
+}
+
+.next-btn.primary{
+  color:#fff;
+  background:var(--blue);
+}
+
+@media(max-width:900px){
+  .sidebar{
+    width:220px;
+  }
+
+  .main{
+    margin-left:220px;
+    padding:35px 4%;
+  }
+
+  .grid,
+  .grid3{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:650px){
+  .sidebar{
+    position:relative;
+    width:100%;
+    height:auto;
+    border-right:0;
+    border-bottom:1px solid var(--border);
+  }
+
+  .nav{
+    max-height:250px;
+    overflow-y:auto;
+  }
+
+  .main{
+    margin-left:0;
+    padding:25px 16px;
+  }
+
+  .hero{
+    padding:28px 22px;
+  }
+
+  .admin-body{
+    grid-template-columns:1fr;
+  }
+
+  .admin-side{
+    border-right:0;
+    border-bottom:1px solid var(--border);
+  }
+
+  .flow{
+    flex-direction:column;
+  }
+
+  .arrow{
+    transform:rotate(90deg);
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="progress" id="progress"></div>
+
+<aside class="sidebar">
+
+  <div class="brand">
+    <div class="logo">Z</div>
+    <div>
+      <h2>ZENSUS</h2>
+      <small>LEARNING PLATFORM</small>
+    </div>
+  </div>
+
+  <div class="lesson-label">LESSON 10 / 15</div>
+
+  <nav class="nav">
+    <a href="#overview">Overview</a>
+    <a href="#what">What is Admin?</a>
+    <a href="#why">Why Admin Panel?</a>
+    <a href="#setup">Admin Setup</a>
+    <a href="#superuser">Superuser</a>
+    <a href="#login">Admin Login</a>
+    <a href="#models">Register Models</a>
+    <a href="#adminpy">admin.py</a>
+    <a href="#display">Display Fields</a>
+    <a href="#search">Search</a>
+    <a href="#filter">Filters</a>
+    <a href="#ordering">Ordering</a>
+    <a href="#readonly">Read Only</a>
+    <a href="#custom">Custom Admin</a>
+    <a href="#flow">Admin Flow</a>
+    <a href="#practice">Mini Project</a>
+    <a href="#mistakes">Common Mistakes</a>
+    <a href="#quiz">Quiz</a>
+    <a href="#takeaway">Takeaway</a>
+  </nav>
+
+</aside>
+
+<main class="main">
+
+<header class="hero reveal" id="overview">
+
+  <div class="badges">
+    <span class="badge">LESSON 10 OF 15</span>
+    <span class="badge">IMPORTANT</span>
+    <span class="badge">DJANGO</span>
+    <span class="badge">ADMIN</span>
+  </div>
+
+  <h1>Django Admin Panel</h1>
+
+  <p>
+    Learn how Django's built-in Admin Panel allows developers and administrators
+    to manage database records through a powerful web interface without building
+    a separate management dashboard from scratch.
+  </p>
+
+</header>
+
+<div class="search-box">
+  <input
+    type="text"
+    id="searchInput"
+    placeholder="Search this lesson... e.g. superuser, admin.py, ModelAdmin"
+  >
+</div>
+
+
+<!-- 01 -->
+<section id="what" class="reveal">
+
+  <div class="section-title">
+    <div class="number">01</div>
+    <h2>What is Django Admin?</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      Django Admin is a built-in web-based interface provided by Django.
+      It allows authorized users to view, create, update and delete database
+      records through a browser.
+    </p>
+
+    <div class="flow">
+
+      <div class="flow-box">
+        <strong>Database</strong>
+        <br>
+        <small>Student Records</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>Django Models</strong>
+        <br>
+        <small>Python Classes</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>Admin Panel</strong>
+        <br>
+        <small>Web Interface</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>Administrator</strong>
+        <br>
+        <small>Manages Data</small>
+      </div>
+
+    </div>
+
+    <div class="note success">
+      <strong>Key idea:</strong>
+      Django Admin gives you a ready-made interface for managing model data.
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 02 -->
+<section id="why" class="reveal">
+
+  <div class="section-title">
+    <div class="number">02</div>
+    <h2>Why Do We Need an Admin Panel?</h2>
+  </div>
+
+  <div class="grid">
+
+    <div class="info-card">
+      <div class="icon">01</div>
+      <h3>Manage Data</h3>
+      <p>
+        Add, edit and delete database records without writing SQL manually.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <div class="icon">02</div>
+      <h3>Save Development Time</h3>
+      <p>
+        Django automatically creates a management interface for registered models.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <div class="icon">03</div>
+      <h3>Secure Access</h3>
+      <p>
+        Only authorized users can access administrative functionality.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <div class="icon">04</div>
+      <h3>Quick Testing</h3>
+      <p>
+        Developers can quickly add sample data while developing an application.
+      </p>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 03 -->
+<section id="setup" class="reveal">
+
+  <div class="section-title">
+    <div class="number">03</div>
+    <h2>Django Admin Setup</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      Django projects created using <strong>startproject</strong> already include
+      the admin configuration.
+    </p>
+
+    <div class="code">
+      <button onclick="copyCode(this)">Copy</button>
+<pre>from django.contrib import admin
+from django.urls import path
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+]</pre>
+    </div>
+
+    <p>
+      The URL:
+    </p>
+
+    <div class="code">
+<pre>http://127.0.0.1:8000/admin/</pre>
+    </div>
+
+    <div class="note">
+      <strong>Remember:</strong>
+      The admin URL is normally available at <code>/admin/</code>, unless you
+      change the URL configuration.
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 04 -->
+<section id="superuser" class="reveal">
+
+  <div class="section-title">
+    <div class="number">04</div>
+    <h2>Create a Superuser</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      A superuser is an administrator account with full permissions in Django.
+    </p>
+
+    <h3>Step 1 — Run the command</h3>
+
+    <div class="code">
+      <button onclick="copyCode(this)">Copy</button>
+<pre>python manage.py createsuperuser</pre>
+    </div>
+
+    <h3>Step 2 — Enter details</h3>
+
+    <div class="code">
+<pre>Username: pradeep
+Email address: pradeep@example.com
+Password: ********
+Password (again): ********</pre>
+    </div>
+
+    <h3>Step 3 — Start the server</h3>
+
+    <div class="code">
+      <button onclick="copyCode(this)">Copy</button>
+<pre>python manage.py runserver</pre>
+    </div>
+
+    <div class="note warning">
+      <strong>Important:</strong>
+      Never share your administrator password. Use a strong password for
+      real applications.
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 05 -->
+<section id="login" class="reveal">
+
+  <div class="section-title">
+    <div class="number">05</div>
+    <h2>Open the Admin Panel</h2>
+  </div>
+
+  <div class="card">
+
+    <p>Open the following address in your browser:</p>
+
+    <div class="code">
+<pre>http://127.0.0.1:8000/admin/</pre>
+    </div>
+
+    <div class="admin-ui">
+
+      <div class="admin-top">
+        <strong>Django administration</strong>
+        <span>Welcome, pradeep</span>
+      </div>
+
+      <div class="admin-body">
+
+        <div class="admin-side">
+          <div>Site administration</div>
+          <div>Users</div>
+          <div>Groups</div>
+          <div>Products</div>
+          <div>Students</div>
+        </div>
+
+        <div class="admin-content">
+
+          <h3 style="margin-top:0;">Recent actions</h3>
+
+          <table class="admin-table">
+
+            <tr>
+              <th>Model</th>
+              <th>Action</th>
+              <th>User</th>
+            </tr>
+
+            <tr>
+              <td>Student</td>
+              <td>Added</td>
+              <td>pradeep</td>
+            </tr>
+
+            <tr>
+              <td>Product</td>
+              <td>Changed</td>
+              <td>pradeep</td>
+            </tr>
+
+            <tr>
+              <td>User</td>
+              <td>Added</td>
+              <td>admin</td>
+            </tr>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 06 -->
+<section id="models" class="reveal">
+
+  <div class="section-title">
+    <div class="number">06</div>
+    <h2>Register Models in Admin</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      Creating a model does not automatically mean that it appears in the
+      Admin Panel.
+    </p>
+
+    <p>
+      We usually register the model inside the app's <strong>admin.py</strong>.
+    </p>
+
+    <h3>Example Model</h3>
+
+    <div class="code">
+      <button onclick="copyCode(this)">Copy</button>
+<pre>from django.db import models
+
+class Student(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    age = models.IntegerField()
+    course = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name</pre>
+    </div>
+
+    <h3>Register the Model</h3>
+
+    <div class="code">
+      <button onclick="copyCode(this)">Copy</button>
+<pre>from django.contrib import admin
+from .models import Student
+
+admin.site.register(Student)</pre>
+    </div>
+
+    <div class="note success">
+      After registration, the Student model becomes available in the Admin Panel.
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 07 -->
+<section id="adminpy" class="reveal">
+
+  <div class="section-title">
+    <div class="number">07</div>
+    <h2>Understanding admin.py</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      The <strong>admin.py</strong> file is where we configure how our models
+      should appear and behave inside Django Admin.
+    </p>
+
+    <div class="structure">
+products/
+│
+├── admin.py
+├── apps.py
+├── models.py
+├── views.py
+├── tests.py
+│
+└── migrations/
+    └── __init__.py
+    </div>
+
+    <h3>Basic admin.py</h3>
+
+    <div class="code">
+      <button onclick="copyCode(this)">Copy</button>
+<pre>from django.contrib import admin
+from .models import Student
+
+admin.site.register(Student)</pre>
+    </div>
+
+    <p>
+      For advanced customization, Django provides the
+      <strong>ModelAdmin</strong> class.
+    </p>
+
+  </div>
+
+</section>
+
+
+<!-- 08 -->
+<section id="display" class="reveal">
+
+  <div class="section-title">
+    <div class="number">08</div>
+    <h2>Customize Display Fields</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      By default, Django shows a basic list of objects. We can control which
+      fields appear in the model list.
+    </p>
+
+    <div class="code">
+      <button onclick="copyCode(this)">Copy</button>
+<pre>from django.contrib import admin
+from .models import Student
+
+@admin.register(Student)
+class StudentAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "name",
+        "email",
+        "age",
+        "course",
+    )</pre>
+    </div>
+
+    <div class="admin-ui">
+
+      <div class="admin-top">
+        <strong>Students</strong>
+        <span>ADD STUDENT +</span>
+      </div>
+
+      <div style="padding:18px;">
+
+        <table class="admin-table">
+
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Age</th>
+            <th>Course</th>
+          </tr>
+
+          <tr>
+            <td>Pradeep</td>
+            <td>pradeep@example.com</td>
+            <td>21</td>
+            <td>Django</td>
+          </tr>
+
+          <tr>
+            <td>Rahul</td>
+            <td>rahul@example.com</td>
+            <td>22</td>
+            <td>Python</td>
+          </tr>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 09 -->
+<section id="search" class="reveal">
+
+  <div class="section-title">
+    <div class="number">09</div>
+    <h2>Add Search</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      The <strong>search_fields</strong> option allows administrators to search
+      records using selected model fields.
+    </p>
+
+    <div class="code">
+      <button onclick="copyCode(this)">Copy</button>
+<pre>@admin.register(Student)
+class StudentAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "name",
+        "email",
+        "age",
+        "course",
+    )
+
+    search_fields = (
+        "name",
+        "email",
+        "course",
+    )</pre>
+    </div>
+
+    <div class="note">
+      Now an administrator can search students by name, email or course.
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 10 -->
+<section id="filter" class="reveal">
+
+  <div class="section-title">
+    <div class="number">10</div>
+    <h2>Add Filters</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      <strong>list_filter</strong> creates filtering options in the Admin Panel.
+    </p>
+
+    <div class="code">
+      <button onclick="copyCode(this)">Copy</button>
+<pre>@admin.register(Student)
+class StudentAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "name",
+        "email",
+        "age",
+        "course",
+    )
+
+    list_filter = (
+        "course",
+    )</pre>
+    </div>
+
+    <div class="grid">
+
+      <div class="info-card">
+        <div class="icon">A</div>
+        <h3>All Students</h3>
+        <p>Show every student record.</p>
+      </div>
+
+      <div class="info-card">
+        <div class="icon">D</div>
+        <h3>Django</h3>
+        <p>Show only Django students.</p>
+      </div>
+
+      <div class="info-card">
+        <div class="icon">P</div>
+        <h3>Python</h3>
+        <p>Show only Python students.</p>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 11 -->
+<section id="ordering" class="reveal">
+
+  <div class="section-title">
+    <div class="number">11</div>
+    <h2>Ordering Records</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      Use <strong>ordering</strong> to control the default order of records.
+    </p>
+
+    <div class="code">
+      <button onclick="copyCode(this)">Copy</button>
+<pre>@admin.register(Student)
+class StudentAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "name",
+        "age",
+        "course",
+    )
+
+    ordering = (
+        "name",
+    )</pre>
+    </div>
+
+    <div class="note">
+      <strong>"name"</strong> sorts in ascending order.
+      Use <strong>"-name"</strong> for descending order.
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 12 -->
+<section id="readonly" class="reveal">
+
+  <div class="section-title">
+    <div class="number">12</div>
+    <h2>Read-Only Fields</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      Sometimes an administrator should be able to see a field but should not
+      be allowed to edit it.
+    </p>
+
+    <div class="code">
+      <button onclick="copyCode(this)">Copy</button>
+<pre>@admin.register(Student)
+class StudentAdmin(admin.ModelAdmin):
+
+    readonly_fields = (
+        "email",
+    )</pre>
+    </div>
+
+    <div class="note warning">
+      <strong>Example:</strong>
+      You may want an automatically generated or verified value to be visible
+      but not manually changed.
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 13 -->
+<section id="custom" class="reveal">
+
+  <div class="section-title">
+    <div class="number">13</div>
+    <h2>Complete ModelAdmin Customization</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      We can combine multiple options to create a more useful Admin Panel.
+    </p>
+
+    <div class="code">
+      <button onclick="copyCode(this)">Copy</button>
+<pre>from django.contrib import admin
+from .models import Student
+
+@admin.register(Student)
+class StudentAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "name",
+        "email",
+        "age",
+        "course",
+    )
+
+    search_fields = (
+        "name",
+        "email",
+        "course",
+    )
+
+    list_filter = (
+        "course",
+    )
+
+    ordering = (
+        "name",
+    )
+
+    readonly_fields = (
+        "email",
+    )</pre>
+    </div>
+
+    <h3>What each option does</h3>
+
+    <div class="table-wrap">
+
+      <table>
+
+        <tr>
+          <th>Option</th>
+          <th>Purpose</th>
+        </tr>
+
+        <tr>
+          <td>list_display</td>
+          <td>Controls columns shown in the list</td>
+        </tr>
+
+        <tr>
+          <td>search_fields</td>
+          <td>Adds search functionality</td>
+        </tr>
+
+        <tr>
+          <td>list_filter</td>
+          <td>Adds sidebar filters</td>
+        </tr>
+
+        <tr>
+          <td>ordering</td>
+          <td>Controls default sorting</td>
+        </tr>
+
+        <tr>
+          <td>readonly_fields</td>
+          <td>Prevents editing selected fields</td>
+        </tr>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 14 -->
+<section id="flow" class="reveal">
+
+  <div class="section-title">
+    <div class="number">14</div>
+    <h2>How Django Admin Works</h2>
+  </div>
+
+  <div class="card">
+
+    <div class="flow">
+
+      <div class="flow-box">
+        <strong>Model</strong>
+        <br>
+        <small>Student</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>admin.py</strong>
+        <br>
+        <small>Register Model</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>Admin Site</strong>
+        <br>
+        <small>/admin/</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>Authentication</strong>
+        <br>
+        <small>Authorized User</small>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-box">
+        <strong>Database</strong>
+        <br>
+        <small>CRUD Operations</small>
+      </div>
+
+    </div>
+
+    <h3>Complete Concept</h3>
+
+    <div class="note success">
+      <strong>Model</strong> defines the data →
+      <strong>admin.py</strong> registers/customizes it →
+      <strong>Django Admin</strong> provides the interface →
+      authorized users manage the data →
+      Django communicates with the database.
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 15 -->
+<section id="practice" class="reveal">
+
+  <div class="section-title">
+    <div class="number">15</div>
+    <h2>Mini Project — ZENSUS Student Admin</h2>
+  </div>
+
+  <div class="card">
+
+    <p>
+      Let's build a simple Student model and make it fully manageable through
+      Django Admin.
+    </p>
+
+    <h3>Step 1 — Create Model</h3>
+
+    <div class="code">
+      <button onclick="copyCode(this)">Copy</button>
+<pre>from django.db import models
+
+class Student(models.Model):
+
+    name = models.CharField(max_length=100)
+
+    email = models.EmailField()
+
+    age = models.IntegerField()
+
+    course = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name</pre>
+    </div>
+
+    <h3>Step 2 — Create Migrations</h3>
+
+    <div class="code">
+      <button onclick="copyCode(this)">Copy</button>
+<pre>python manage.py makemigrations
+python manage.py migrate</pre>
+    </div>
+
+    <h3>Step 3 — Register Model</h3>
+
+    <div class="code">
+      <button onclick="copyCode(this)">Copy</button>
+<pre>from django.contrib import admin
+from .models import Student
+
+@admin.register(Student)
+class StudentAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "name",
+        "email",
+        "age",
+        "course",
+    )
+
+    search_fields = (
+        "name",
+        "email",
+    )
+
+    list_filter = (
+        "course",
+    )
+
+    ordering = (
+        "name",
+    )</pre>
+    </div>
+
+    <h3>Step 4 — Create Superuser</h3>
+
+    <div class="code">
+      <button onclick="copyCode(this)">Copy</button>
+<pre>python manage.py createsuperuser</pre>
+    </div>
+
+    <h3>Step 5 — Run Server</h3>
+
+    <div class="code">
+      <button onclick="copyCode(this)">Copy</button>
+<pre>python manage.py runserver</pre>
+    </div>
+
+    <h3>Step 6 — Open Admin</h3>
+
+    <div class="code">
+<pre>http://127.0.0.1:8000/admin/</pre>
+    </div>
+
+    <div class="note success">
+
+      <strong>Practice Goal:</strong>
+
+      <ul class="checklist">
+        <li>Create at least 5 students.</li>
+        <li>Search for a student by name.</li>
+        <li>Filter students by course.</li>
+        <li>Edit a student's information.</li>
+        <li>Delete one student.</li>
+        <li>Observe how changes appear in the database.</li>
+      </ul>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 16 -->
+<section id="mistakes" class="reveal">
+
+  <div class="section-title">
+    <div class="number">16</div>
+    <h2>Common Admin Mistakes</h2>
+  </div>
+
+  <div class="grid">
+
+    <div class="info-card">
+      <div class="icon">01</div>
+      <h3>Model Not Registered</h3>
+      <p>
+        The model exists but does not appear in Admin because it was not
+        registered in admin.py.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <div class="icon">02</div>
+      <h3>No Superuser</h3>
+      <p>
+        Create an administrator account using createsuperuser.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <div class="icon">03</div>
+      <h3>Forgot Migrations</h3>
+      <p>
+        Run makemigrations and migrate after changing models.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <div class="icon">04</div>
+      <h3>Wrong admin.py Import</h3>
+      <p>
+        Make sure the model is imported from the correct app.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <div class="icon">05</div>
+      <h3>Wrong URL</h3>
+      <p>
+        Check that the project urls.py includes admin.site.urls.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <div class="icon">06</div>
+      <h3>Unsafe Access</h3>
+      <p>
+        Do not treat the Admin Panel as a public-facing user dashboard.
+      </p>
+    </div>
+
+  </div>
+
+  <div class="note danger">
+    <strong>Security reminder:</strong>
+    The Admin Panel is powerful. Use strong passwords, proper permissions,
+    secure deployment settings and appropriate access controls in real projects.
+  </div>
+
+</section>
+
+
+<!-- 17 -->
+<section id="quiz" class="reveal">
+
+  <div class="section-title">
+    <div class="number">17</div>
+    <h2>Quick Knowledge Check</h2>
+  </div>
+
+
+  <div class="quiz">
+
+    <h3>Question 1</h3>
+    <p>Which command creates a Django superuser?</p>
+
+    <div class="option" onclick="answer(this,false)">
+      A. python manage.py admin
+    </div>
+
+    <div class="option" onclick="answer(this,true)">
+      B. python manage.py createsuperuser
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      C. python manage.py createadmin
+    </div>
+
+    <div class="quiz-result"></div>
+
+  </div>
+
+
+  <div class="quiz">
+
+    <h3>Question 2</h3>
+    <p>Where do we normally register models for Django Admin?</p>
+
+    <div class="option" onclick="answer(this,false)">
+      A. models.py
+    </div>
+
+    <div class="option" onclick="answer(this,true)">
+      B. admin.py
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      C. views.py
+    </div>
+
+    <div class="quiz-result"></div>
+
+  </div>
+
+
+  <div class="quiz">
+
+    <h3>Question 3</h3>
+    <p>Which option controls columns displayed in the model list?</p>
+
+    <div class="option" onclick="answer(this,true)">
+      A. list_display
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      B. search_fields
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      C. ordering_fields
+    </div>
+
+    <div class="quiz-result"></div>
+
+  </div>
+
+
+  <div class="quiz">
+
+    <h3>Question 4</h3>
+    <p>Which option adds search functionality?</p>
+
+    <div class="option" onclick="answer(this,false)">
+      A. list_filter
+    </div>
+
+    <div class="option" onclick="answer(this,true)">
+      B. search_fields
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      C. search_admin
+    </div>
+
+    <div class="quiz-result"></div>
+
+  </div>
+
+
+  <div class="quiz">
+
+    <h3>Question 5</h3>
+    <p>What is the main purpose of Django Admin?</p>
+
+    <div class="option" onclick="answer(this,false)">
+      A. Create CSS animations
+    </div>
+
+    <div class="option" onclick="answer(this,true)">
+      B. Manage application data through a web interface
+    </div>
+
+    <div class="option" onclick="answer(this,false)">
+      C. Replace Python
+    </div>
+
+    <div class="quiz-result"></div>
+
+  </div>
+
+</section>
+
+
+<!-- 18 -->
+<section id="takeaway" class="reveal">
+
+  <div class="section-title">
+    <div class="number">18</div>
+    <h2>Lesson Takeaway</h2>
+  </div>
+
+  <div class="card">
+
+    <ul class="checklist">
+
+      <li>Django provides a built-in Admin Panel.</li>
+
+      <li>The Admin Panel is used to manage model data.</li>
+
+      <li><code>createsuperuser</code> creates an administrator account.</li>
+
+      <li>Admin is normally available through <code>/admin/</code>.</li>
+
+      <li>Models can be registered inside <code>admin.py</code>.</li>
+
+      <li><code>ModelAdmin</code> allows advanced customization.</li>
+
+      <li><code>list_display</code> controls displayed columns.</li>
+
+      <li><code>search_fields</code> enables searching.</li>
+
+      <li><code>list_filter</code> enables filtering.</li>
+
+      <li><code>ordering</code> controls default ordering.</li>
+
+      <li><code>readonly_fields</code> prevents editing selected fields.</li>
+
+      <li>The Admin Panel works with Django authentication and permissions.</li>
+
+    </ul>
+
+    <div class="note success">
+
+      <strong>Core idea:</strong>
+
+      Model → Register → Customize → Login → Manage Data
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<div class="next">
+
+  <a class="next-btn" href="#overview">
+    ↑ Back to Top
+  </a>
+
+  <a class="next-btn primary" href="#takeaway">
+    Complete Lesson 10 ✓
+  </a>
+
+</div>
+
+
+<footer class="footer">
+  <strong>ZENSUS</strong> — Django Course · Lesson 10 of 15
+  <br>
+  Admin Panel
+</footer>
+
+</main>
+
+
+<script>
+
+/* Progress */
+window.addEventListener("scroll",function(){
+
+  const scrollTop =
+    document.documentElement.scrollTop || document.body.scrollTop;
+
+  const height =
+    document.documentElement.scrollHeight -
+    document.documentElement.clientHeight;
+
+  const progress =
+    height > 0 ? (scrollTop / height) * 100 : 0;
+
+  document.getElementById("progress").style.width =
+    progress + "%";
+
+});
+
+
+/* Copy code */
+function copyCode(button){
+
+  const code =
+    button.parentElement.querySelector("pre").innerText;
+
+  navigator.clipboard.writeText(code)
+    .then(function(){
+
+      const oldText = button.innerText;
+
+      button.innerText = "Copied!";
+
+      setTimeout(function(){
+        button.innerText = oldText;
+      },1500);
+
+    })
+    .catch(function(){
+
+      const area = document.createElement("textarea");
+
+      area.value = code;
+
+      document.body.appendChild(area);
+
+      area.select();
+
+      document.execCommand("copy");
+
+      area.remove();
+
+      button.innerText = "Copied!";
+
+      setTimeout(function(){
+        button.innerText = "Copy";
+      },1500);
+
+    });
+
+}
+
+
+/* Quiz */
+function answer(option,correct){
+
+  const quiz =
+    option.closest(".quiz");
+
+  const options =
+    quiz.querySelectorAll(".option");
+
+  options.forEach(function(item){
+    item.style.pointerEvents = "none";
+  });
+
+  const result =
+    quiz.querySelector(".quiz-result");
+
+  if(correct){
+
+    option.classList.add("correct");
+
+    result.textContent =
+      "✓ Correct! Well done.";
+
+    result.style.color =
+      "#16a34a";
+
+  }else{
+
+    option.classList.add("wrong");
+
+    result.textContent =
+      "✗ Not quite. Try reviewing this section.";
+
+    result.style.color =
+      "#dc2626";
+
+  }
+
+}
+
+
+/* Search */
+const searchInput =
+  document.getElementById("searchInput");
+
+searchInput.addEventListener("input",function(){
+
+  const query =
+    this.value.toLowerCase().trim();
+
+  const sections =
+    document.querySelectorAll("section");
+
+  sections.forEach(function(section){
+
+    if(!query){
+
+      section.style.display = "";
+
+      return;
+
+    }
+
+    const text =
+      section.innerText.toLowerCase();
+
+    section.style.display =
+      text.includes(query) ? "" : "none";
+
+  });
+
+});
+
+
+/* Scroll reveal */
+const revealObserver =
+  new IntersectionObserver(function(entries){
+
+    entries.forEach(function(entry){
+
+      if(entry.isIntersecting){
+
+        entry.target.classList.add("visible");
+
+      }
+
+    });
+
+  },{
+    threshold:.08
+  });
+
+document.querySelectorAll(".reveal")
+  .forEach(function(element){
+
+    revealObserver.observe(element);
+
+  });
+
+
+/* Active navigation */
+const navLinks =
+  document.querySelectorAll(".nav a");
+
+const sections =
+  document.querySelectorAll("section");
+
+const navObserver =
+  new IntersectionObserver(function(entries){
+
+    entries.forEach(function(entry){
+
+      if(entry.isIntersecting){
+
+        navLinks.forEach(function(link){
+
+          link.classList.remove("active");
+
+          if(
+            link.getAttribute("href") ===
+            "#" + entry.target.id
+          ){
+
+            link.classList.add("active");
+
+          }
+
+        });
+
+      }
+
+    });
+
+  },{
+    rootMargin:"-20% 0px -70% 0px"
+  });
+
+sections.forEach(function(section){
+
+  navObserver.observe(section);
+
+});
+
+</script>
+
+</body>
+</html>

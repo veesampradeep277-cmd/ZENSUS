@@ -1,0 +1,3423 @@
+/* =========================================================
+   ZENSUS — LESSON 15
+   DYNAMIC PROGRAMMING
+   PROFESSIONAL LIGHT THEME
+========================================================= */
+
+
+/* =========================================================
+   1. ROOT VARIABLES
+========================================================= */
+
+:root {
+
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #eff6ff;
+
+    --secondary: #7c3aed;
+    --secondary-light: #f5f3ff;
+
+    --accent: #0891b2;
+    --accent-light: #ecfeff;
+
+    --success: #16a34a;
+    --success-light: #f0fdf4;
+
+    --warning: #d97706;
+    --warning-light: #fffbeb;
+
+    --danger: #dc2626;
+    --danger-light: #fef2f2;
+
+    --text: #172033;
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+
+    --background: #f8fafc;
+    --surface: #ffffff;
+    --surface-soft: #f1f5f9;
+
+    --border: #e2e8f0;
+    --border-dark: #cbd5e1;
+
+    --code-bg: #0f172a;
+    --code-header: #111827;
+    --code-text: #e2e8f0;
+
+    --shadow-sm:
+        0 2px 8px rgba(15, 23, 42, 0.05);
+
+    --shadow-md:
+        0 8px 24px rgba(15, 23, 42, 0.08);
+
+    --shadow-lg:
+        0 18px 45px rgba(15, 23, 42, 0.10);
+
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+
+    --topbar-height: 70px;
+    --sidebar-width: 260px;
+
+}
+
+
+/* =========================================================
+   2. RESET
+========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+html {
+    scroll-behavior: smooth;
+}
+
+
+body {
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    background: var(--background);
+    color: var(--text);
+
+    line-height: 1.7;
+
+    overflow-x: hidden;
+}
+
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+
+button {
+    cursor: pointer;
+}
+
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+
+::selection {
+    background: #dbeafe;
+    color: #1e3a8a;
+}
+
+
+/* =========================================================
+   3. TOP BAR
+========================================================= */
+
+.topbar {
+
+    height: var(--topbar-height);
+
+    position: sticky;
+    top: 0;
+
+    z-index: 1000;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 30px;
+
+    background: rgba(255, 255, 255, 0.96);
+
+    border-bottom: 1px solid var(--border);
+
+    backdrop-filter: blur(12px);
+}
+
+
+.brand {
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+
+.brand-logo {
+
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 11px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--primary),
+            var(--secondary)
+        );
+
+    color: white;
+
+    font-size: 20px;
+    font-weight: 800;
+
+    box-shadow:
+        0 6px 16px rgba(37, 99, 235, 0.22);
+}
+
+
+.brand-name {
+
+    font-size: 18px;
+    font-weight: 800;
+
+    letter-spacing: 0.5px;
+
+    color: var(--text-dark);
+}
+
+
+.lesson-label {
+
+    color: var(--text-muted);
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    letter-spacing: 0.4px;
+}
+
+
+/* =========================================================
+   4. PAGE LAYOUT
+========================================================= */
+
+.page-layout {
+
+    display: grid;
+
+    grid-template-columns:
+        var(--sidebar-width)
+        minmax(0, 1fr);
+
+    min-height: calc(
+        100vh - var(--topbar-height)
+    );
+}
+
+
+/* =========================================================
+   5. SIDEBAR
+========================================================= */
+
+.sidebar {
+
+    position: sticky;
+
+    top: var(--topbar-height);
+
+    height: calc(
+        100vh - var(--topbar-height)
+    );
+
+    overflow-y: auto;
+
+    padding: 25px 16px;
+
+    background: #ffffff;
+
+    border-right: 1px solid var(--border);
+}
+
+
+.sidebar::-webkit-scrollbar {
+    width: 5px;
+}
+
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: var(--border-dark);
+    border-radius: 20px;
+}
+
+
+.sidebar-title {
+
+    padding: 0 12px 14px;
+
+    color: var(--text-dark);
+
+    font-size: 13px;
+
+    font-weight: 800;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.7px;
+}
+
+
+.sidebar a {
+
+    display: block;
+
+    padding: 9px 12px;
+
+    margin-bottom: 3px;
+
+    border-radius: 9px;
+
+    color: var(--text-muted);
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.sidebar a:hover {
+
+    background: var(--primary-light);
+
+    color: var(--primary);
+
+    transform: translateX(3px);
+}
+
+
+/* =========================================================
+   6. MAIN
+========================================================= */
+
+.main {
+
+    min-width: 0;
+
+    max-width: 1250px;
+
+    width: 100%;
+
+    margin: 0 auto;
+
+    padding: 35px 42px 80px;
+}
+
+
+/* =========================================================
+   7. HERO
+========================================================= */
+
+.hero {
+
+    position: relative;
+
+    overflow: hidden;
+
+    padding: 55px 48px;
+
+    margin-bottom: 50px;
+
+    border-radius: 24px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff 0%,
+            #f8fbff 55%,
+            #faf8ff 100%
+        );
+
+    border: 1px solid var(--border);
+
+    box-shadow: var(--shadow-md);
+}
+
+
+.hero::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 300px;
+    height: 300px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(37, 99, 235, 0.06);
+
+    top: -150px;
+    right: -100px;
+
+    animation: heroFloat 7s ease-in-out infinite;
+}
+
+
+.hero::after {
+
+    content: "";
+
+    position: absolute;
+
+    width: 200px;
+    height: 200px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(124, 58, 237, 0.05);
+
+    bottom: -100px;
+    left: -70px;
+
+    animation: heroFloat 9s ease-in-out infinite reverse;
+}
+
+
+.hero > * {
+    position: relative;
+    z-index: 2;
+}
+
+
+.hero-badge {
+
+    display: inline-flex;
+
+    padding: 7px 13px;
+
+    margin-bottom: 18px;
+
+    border-radius: 999px;
+
+    background: var(--primary-light);
+
+    color: var(--primary);
+
+    border: 1px solid #dbeafe;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.7px;
+}
+
+
+.hero h1 {
+
+    max-width: 800px;
+
+    font-size:
+        clamp(40px, 6vw, 68px);
+
+    line-height: 1.04;
+
+    letter-spacing: -2.5px;
+
+    color: var(--text-dark);
+
+    margin-bottom: 20px;
+}
+
+
+.hero h1 span {
+
+    color: var(--primary);
+}
+
+
+.hero p {
+
+    max-width: 800px;
+
+    color: var(--text-muted);
+
+    font-size: 17px;
+
+    line-height: 1.8;
+
+    margin-bottom: 32px;
+}
+
+
+.hero-stats {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 14px;
+}
+
+
+.hero-stat {
+
+    padding: 17px;
+
+    border-radius: 14px;
+
+    background: rgba(255,255,255,0.82);
+
+    border: 1px solid var(--border);
+
+    box-shadow: var(--shadow-sm);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+
+.hero-stat:hover {
+
+    transform: translateY(-4px);
+
+    box-shadow: var(--shadow-md);
+}
+
+
+.hero-stat strong {
+
+    display: block;
+
+    color: var(--primary);
+
+    font-size: 20px;
+
+    margin-bottom: 3px;
+}
+
+
+.hero-stat span {
+
+    color: var(--text-muted);
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   8. SECTION
+========================================================= */
+
+.section {
+
+    margin-bottom: 72px;
+
+    scroll-margin-top: 95px;
+}
+
+
+.section-heading {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 15px;
+
+    margin-bottom: 25px;
+}
+
+
+.section-number {
+
+    min-width: 43px;
+    height: 43px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: var(--primary-light);
+
+    color: var(--primary);
+
+    font-size: 13px;
+
+    font-weight: 800;
+
+    border: 1px solid #dbeafe;
+}
+
+
+.section-heading h2 {
+
+    color: var(--text-dark);
+
+    font-size: 29px;
+
+    line-height: 1.25;
+
+    letter-spacing: -0.7px;
+
+    margin-bottom: 4px;
+}
+
+
+.section-heading p {
+
+    color: var(--text-muted);
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   9. CARDS
+========================================================= */
+
+.card {
+
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius-md);
+
+    padding: 25px;
+
+    margin-bottom: 20px;
+
+    box-shadow: var(--shadow-sm);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
+}
+
+
+.card:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow: var(--shadow-md);
+
+    border-color: #d7e0ec;
+}
+
+
+.card h3 {
+
+    color: var(--text-dark);
+
+    font-size: 20px;
+
+    margin-bottom: 10px;
+}
+
+
+.card p {
+
+    color: var(--text-muted);
+
+    margin-bottom: 13px;
+}
+
+
+.card ul,
+.card ol {
+
+    margin-left: 22px;
+
+    color: var(--text-muted);
+}
+
+
+.card li {
+
+    margin-bottom: 7px;
+}
+
+
+.grid-2 {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 20px;
+}
+
+
+.grid-3 {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 20px;
+}
+
+
+.grid-3 .card {
+
+    margin-bottom: 0;
+}
+
+
+/* =========================================================
+   10. CONCEPT CARDS
+========================================================= */
+
+.concept-card {
+
+    text-align: center;
+}
+
+
+.concept-icon {
+
+    width: 55px;
+    height: 55px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 15px;
+
+    border-radius: 15px;
+
+    background: var(--primary-light);
+
+    font-size: 25px;
+}
+
+
+.concept-card .concept-icon {
+
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+/* =========================================================
+   11. CALLOUTS
+========================================================= */
+
+.callout {
+
+    padding: 17px 20px;
+
+    margin: 20px 0;
+
+    border-left: 4px solid var(--primary);
+
+    border-radius: 10px;
+
+    background: var(--primary-light);
+
+    color: #334155;
+
+    font-size: 14px;
+}
+
+
+.callout.success {
+
+    border-left-color: var(--success);
+
+    background: var(--success-light);
+}
+
+
+.callout.warning {
+
+    border-left-color: var(--warning);
+
+    background: var(--warning-light);
+}
+
+
+.callout.danger {
+
+    border-left-color: var(--danger);
+
+    background: var(--danger-light);
+}
+
+
+.callout strong {
+
+    color: var(--text-dark);
+}
+
+
+/* =========================================================
+   12. FORMULA
+========================================================= */
+
+.formula {
+
+    padding: 18px 22px;
+
+    margin: 18px 0;
+
+    border-radius: 12px;
+
+    background: #f8fafc;
+
+    border: 1px solid var(--border);
+
+    color: var(--primary);
+
+    text-align: center;
+
+    font-family:
+        "Cambria Math",
+        "Times New Roman",
+        serif;
+
+    font-size: 20px;
+
+    font-weight: 700;
+
+    overflow-x: auto;
+}
+
+
+/* =========================================================
+   13. DP RECURSION TREE
+========================================================= */
+
+.dp-tree {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 13px;
+
+    padding: 35px 20px;
+
+    margin: 25px 0;
+
+    background: #ffffff;
+
+    border: 1px solid var(--border);
+
+    border-radius: 18px;
+
+    box-shadow: var(--shadow-sm);
+
+    overflow-x: auto;
+}
+
+
+.dp-level {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 14px;
+
+    flex-wrap: wrap;
+}
+
+
+.dp-node {
+
+    min-width: 72px;
+
+    padding: 11px 16px;
+
+    border-radius: 10px;
+
+    background: var(--primary-light);
+
+    border: 1px solid #bfdbfe;
+
+    color: var(--primary-dark);
+
+    text-align: center;
+
+    font-weight: 800;
+
+    animation:
+        dpNodeAppear 0.7s ease both;
+}
+
+
+.dp-node.root {
+
+    background: var(--primary);
+
+    color: white;
+
+    border-color: var(--primary);
+
+    box-shadow:
+        0 8px 18px rgba(37,99,235,0.2);
+}
+
+
+.dp-node.repeated {
+
+    background: var(--danger-light);
+
+    color: var(--danger);
+
+    border-color: #fecaca;
+
+    animation:
+        repeatedPulse 1.7s ease-in-out infinite;
+}
+
+
+.dp-arrow {
+
+    color: var(--text-muted);
+
+    font-size: 22px;
+
+    animation:
+        arrowBounce 1.5s ease-in-out infinite;
+}
+
+
+/* =========================================================
+   14. CODE BLOCK
+   IMPORTANT — CODE VISIBILITY
+========================================================= */
+
+.code-block {
+
+    margin: 22px 0;
+
+    border-radius: 14px;
+
+    overflow: hidden;
+
+    background: var(--code-bg);
+
+    border: 1px solid #1e293b;
+
+    box-shadow:
+        0 12px 28px rgba(15, 23, 42, 0.13);
+}
+
+
+.code-header {
+
+    min-height: 48px;
+
+    padding: 12px 17px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    background: var(--code-header);
+
+    border-bottom: 1px solid #263449;
+
+    color: #cbd5e1;
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+
+.code-header span:last-child {
+
+    color: #93c5fd;
+
+    font-family: monospace;
+}
+
+
+.code-body {
+
+    display: block;
+
+    margin: 0;
+
+    padding: 23px;
+
+    background:
+        #0f172a;
+
+    color:
+        #e2e8f0;
+
+    font-family:
+        "Cascadia Code",
+        "Fira Code",
+        "Consolas",
+        monospace;
+
+    font-size: 14px;
+
+    line-height: 1.8;
+
+    overflow-x: auto;
+
+    white-space: pre;
+
+    tab-size: 4;
+}
+
+
+.code-body code {
+
+    color: #e2e8f0;
+
+    background: transparent;
+
+    font-family: inherit;
+
+    font-size: inherit;
+
+    white-space: inherit;
+}
+
+
+/* Python syntax-like highlighting */
+
+.code-body::selection,
+.code-body code::selection {
+
+    background: #334155;
+
+    color: white;
+}
+
+
+/* =========================================================
+   15. MEMOIZATION DEMO
+========================================================= */
+
+.memo-demo {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr auto 1fr;
+
+    align-items: center;
+
+    gap: 25px;
+
+    padding: 28px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 18px;
+
+    box-shadow: var(--shadow-sm);
+}
+
+
+.memo-column {
+
+    padding: 20px;
+
+    border-radius: 14px;
+
+    background: #f8fafc;
+
+    border: 1px solid var(--border);
+}
+
+
+.memo-column h3 {
+
+    color: var(--text-dark);
+
+    font-size: 16px;
+
+    margin-bottom: 15px;
+}
+
+
+.memo-box {
+
+    padding: 12px 16px;
+
+    margin-bottom: 10px;
+
+    border-radius: 9px;
+
+    background: var(--primary-light);
+
+    border: 1px solid #bfdbfe;
+
+    color: var(--primary-dark);
+
+    font-weight: 700;
+
+    animation: cacheAppear 0.7s ease both;
+}
+
+
+.repeated-box {
+
+    background: var(--danger-light);
+
+    color: var(--danger);
+
+    border-color: #fecaca;
+}
+
+
+.cache-box {
+
+    padding: 14px;
+
+    margin: 12px 0;
+
+    border-radius: 10px;
+
+    background: var(--success-light);
+
+    color: var(--success);
+
+    border: 1px dashed #86efac;
+
+    font-family: monospace;
+
+    font-weight: 700;
+
+    animation: cachePulse 2s infinite;
+}
+
+
+.cached {
+
+    background: var(--success-light);
+
+    color: var(--success);
+
+    border-color: #86efac;
+}
+
+
+.memo-arrow {
+
+    font-size: 32px;
+
+    color: var(--primary);
+
+    animation:
+        arrowSlide 1.5s infinite;
+}
+
+
+/* =========================================================
+   16. TABULATION TABLE DEMO
+========================================================= */
+
+.table-demo {
+
+    display: flex;
+
+    gap: 8px;
+
+    padding: 28px;
+
+    margin: 22px 0;
+
+    overflow-x: auto;
+
+    justify-content: center;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 16px;
+}
+
+
+.table-cell {
+
+    min-width: 75px;
+
+    height: 75px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 10px;
+
+    border: 1px solid var(--border);
+
+    background: #f8fafc;
+
+    color: var(--text-muted);
+
+    font-size: 20px;
+
+    font-weight: 800;
+}
+
+
+.table-cell small {
+
+    font-size: 10px;
+
+    color: var(--text-muted);
+
+    margin-top: 3px;
+}
+
+
+.table-cell.active {
+
+    background: var(--primary-light);
+
+    color: var(--primary);
+
+    border-color: #bfdbfe;
+}
+
+
+.table-cell.filled {
+
+    background: var(--success-light);
+
+    color: var(--success);
+
+    border-color: #86efac;
+
+    animation:
+        cellFill 0.8s ease both;
+}
+
+
+.table-cell.current {
+
+    background: #ede9fe;
+
+    color: var(--secondary);
+
+    border-color: #c4b5fd;
+
+    animation:
+        currentCellPulse 1.3s infinite;
+}
+
+
+/* =========================================================
+   17. ROLLING DP
+========================================================= */
+
+.rolling-dp {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 18px;
+
+    padding: 28px;
+
+    margin: 20px 0;
+
+    flex-wrap: wrap;
+}
+
+
+.rolling-box {
+
+    min-width: 130px;
+
+    padding: 18px;
+
+    text-align: center;
+
+    border-radius: 13px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    color: var(--text-muted);
+
+    box-shadow: var(--shadow-sm);
+}
+
+
+.rolling-box strong {
+
+    display: block;
+
+    margin-top: 5px;
+
+    font-size: 25px;
+
+    color: var(--primary);
+}
+
+
+.rolling-box.current {
+
+    background: var(--primary-light);
+
+    border-color: #93c5fd;
+
+    animation:
+        rollingPulse 1.4s infinite;
+}
+
+
+.rolling-arrow {
+
+    color: var(--primary);
+
+    font-size: 24px;
+
+    animation:
+        arrowSlide 1.5s infinite;
+}
+
+
+/* =========================================================
+   18. STAIRS
+========================================================= */
+
+.stairs {
+
+    position: relative;
+
+    height: 270px;
+
+    margin: 25px 0;
+
+    padding: 20px;
+
+    border-radius: 18px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    overflow: hidden;
+}
+
+
+.stair {
+
+    position: absolute;
+
+    width: 100px;
+    height: 45px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 8px 8px 0 0;
+
+    background: var(--primary-light);
+
+    border: 1px solid #bfdbfe;
+
+    color: var(--primary);
+
+    font-weight: 800;
+}
+
+
+.stair:nth-child(1) {
+    left: 15%;
+    bottom: 20px;
+}
+
+
+.stair:nth-child(2) {
+    left: 28%;
+    bottom: 65px;
+}
+
+
+.stair:nth-child(3) {
+    left: 41%;
+    bottom: 110px;
+}
+
+
+.stair:nth-child(4) {
+    left: 54%;
+    bottom: 155px;
+}
+
+
+.stair:nth-child(5) {
+    left: 67%;
+    bottom: 200px;
+}
+
+
+.person {
+
+    position: absolute;
+
+    left: 18%;
+
+    bottom: 65px;
+
+    font-size: 27px;
+
+    animation:
+        climbAnimation 4s ease-in-out infinite;
+}
+
+
+/* =========================================================
+   19. KNAPSACK
+========================================================= */
+
+.knapsack-items {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 15px;
+
+    margin: 22px 0;
+}
+
+
+.knapsack-item {
+
+    padding: 20px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 5px;
+
+    border-radius: 14px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    box-shadow: var(--shadow-sm);
+
+    transition:
+        transform 0.25s ease,
+        border-color 0.25s ease;
+}
+
+
+.knapsack-item:hover {
+
+    transform: translateY(-5px);
+
+    border-color: #93c5fd;
+}
+
+
+.knapsack-item strong {
+
+    color: var(--primary);
+
+    font-size: 18px;
+}
+
+
+.knapsack-item span {
+
+    color: var(--text-muted);
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   20. COINS
+========================================================= */
+
+.coin-area {
+
+    display: flex;
+
+    gap: 18px;
+
+    flex-wrap: wrap;
+
+    margin: 20px 0;
+}
+
+
+.coin {
+
+    width: 70px;
+    height: 70px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            145deg,
+            #ffffff,
+            #f1f5f9
+        );
+
+    border: 3px solid #cbd5e1;
+
+    color: var(--primary);
+
+    font-weight: 800;
+
+    box-shadow:
+        0 5px 12px rgba(15,23,42,0.08);
+
+    animation:
+        coinFloat 2.5s ease-in-out infinite;
+}
+
+
+.coin:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+
+.coin:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+
+/* =========================================================
+   21. GRID DP
+========================================================= */
+
+.grid-board {
+
+    width: fit-content;
+
+    max-width: 100%;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 70px);
+
+    gap: 6px;
+
+    margin: 25px auto;
+
+    padding: 18px;
+
+    border-radius: 16px;
+
+    background: #ffffff;
+
+    border: 1px solid var(--border);
+
+    box-shadow: var(--shadow-sm);
+}
+
+
+.grid-cell {
+
+    width: 70px;
+    height: 70px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: #f8fafc;
+
+    border: 1px solid var(--border);
+
+    color: var(--text-muted);
+
+    font-weight: 800;
+
+    animation:
+        gridAppear 0.8s ease both;
+}
+
+
+.grid-cell.start {
+
+    background: var(--primary-light);
+
+    color: var(--primary);
+
+    border-color: #93c5fd;
+}
+
+
+.grid-cell.end {
+
+    background: var(--success-light);
+
+    color: var(--success);
+
+    border-color: #86efac;
+
+    animation:
+        destinationPulse 1.5s infinite;
+}
+
+
+/* =========================================================
+   22. STRING BOX
+========================================================= */
+
+.string-box {
+
+    display: inline-flex;
+
+    padding: 14px 20px;
+
+    margin: 8px 0;
+
+    border-radius: 10px;
+
+    background: var(--primary-light);
+
+    border: 1px solid #bfdbfe;
+
+    color: var(--primary-dark);
+
+    font-family: monospace;
+
+    font-size: 19px;
+
+    font-weight: 800;
+
+    letter-spacing: 4px;
+}
+
+
+/* =========================================================
+   23. SEQUENCE
+========================================================= */
+
+.sequence {
+
+    display: flex;
+
+    gap: 9px;
+
+    flex-wrap: wrap;
+
+    margin: 20px 0;
+}
+
+
+.sequence span {
+
+    min-width: 48px;
+
+    padding: 11px;
+
+    text-align: center;
+
+    border-radius: 9px;
+
+    background: #f8fafc;
+
+    border: 1px solid var(--border);
+
+    color: var(--text-muted);
+
+    font-weight: 800;
+
+    transition:
+        transform 0.25s ease,
+        background 0.25s ease;
+}
+
+
+.sequence span.active {
+
+    background: var(--success-light);
+
+    border-color: #86efac;
+
+    color: var(--success);
+
+    transform: translateY(-5px);
+
+    animation:
+        sequencePulse 1.4s infinite;
+}
+
+
+/* =========================================================
+   24. STOCK STATES
+========================================================= */
+
+.stock-states {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 14px;
+
+    padding: 30px 15px;
+
+    flex-wrap: wrap;
+}
+
+
+.stock-state {
+
+    min-width: 145px;
+
+    padding: 20px;
+
+    text-align: center;
+
+    border-radius: 14px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    box-shadow: var(--shadow-sm);
+
+    animation:
+        stateFloat 3s ease-in-out infinite;
+}
+
+
+.stock-state strong {
+
+    display: block;
+
+    color: var(--primary);
+
+    font-size: 18px;
+
+    margin-bottom: 4px;
+}
+
+
+.stock-state span {
+
+    color: var(--text-muted);
+
+    font-size: 12px;
+}
+
+
+.state-arrow {
+
+    color: var(--primary);
+
+    font-size: 25px;
+}
+
+
+/* =========================================================
+   25. SUBSET
+========================================================= */
+
+.subset-demo {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 12px;
+
+    padding: 25px;
+
+    flex-wrap: wrap;
+}
+
+
+.subset-number {
+
+    width: 55px;
+    height: 55px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: var(--secondary-light);
+
+    color: var(--secondary);
+
+    border: 1px solid #ddd6fe;
+
+    font-weight: 800;
+
+    animation:
+        subsetPop 1s ease both;
+}
+
+
+.subset-number:nth-child(2) {
+    animation-delay: .15s;
+}
+
+
+.subset-number:nth-child(3) {
+    animation-delay: .3s;
+}
+
+
+.subset-number:nth-child(4) {
+    animation-delay: .45s;
+}
+
+
+.subset-number:nth-child(5) {
+    animation-delay: .6s;
+}
+
+
+/* =========================================================
+   26. FLOWCHART
+========================================================= */
+
+.flowchart {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 25px 10px;
+}
+
+
+.flow-box {
+
+    width: min(500px, 90%);
+
+    padding: 15px 20px;
+
+    text-align: center;
+
+    border-radius: 11px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    box-shadow: var(--shadow-sm);
+
+    color: var(--text-dark);
+
+    font-weight: 700;
+
+    animation:
+        flowFloat 2.8s ease-in-out infinite;
+}
+
+
+.flow-box.start {
+
+    background: var(--primary);
+
+    color: white;
+
+    border-color: var(--primary);
+}
+
+
+.flow-arrow {
+
+    color: var(--primary);
+
+    font-size: 22px;
+
+    animation:
+        arrowBounce 1.5s infinite;
+}
+
+
+.flow-box:nth-of-type(2) {
+    animation-delay: .2s;
+}
+
+
+.flow-box:nth-of-type(3) {
+    animation-delay: .4s;
+}
+
+
+.flow-box:nth-of-type(4) {
+    animation-delay: .6s;
+}
+
+
+/* =========================================================
+   27. DP VISUALIZER
+========================================================= */
+
+.dp-visualizer {
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 18px;
+
+    overflow: hidden;
+
+    box-shadow: var(--shadow-md);
+}
+
+
+.visualizer-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding: 22px;
+
+    background: #fbfdff;
+
+    border-bottom: 1px solid var(--border);
+}
+
+
+.visualizer-header h3 {
+
+    color: var(--text-dark);
+
+    font-size: 19px;
+
+    margin-bottom: 3px;
+}
+
+
+.visualizer-header p {
+
+    color: var(--text-muted);
+
+    font-size: 13px;
+}
+
+
+.visualizer-buttons {
+
+    display: flex;
+
+    gap: 8px;
+
+    flex-wrap: wrap;
+}
+
+
+/* =========================================================
+   28. BUTTONS
+========================================================= */
+
+.btn {
+
+    border: none;
+
+    border-radius: 9px;
+
+    padding: 10px 16px;
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+
+.btn:hover {
+
+    transform: translateY(-2px);
+}
+
+
+.btn:active {
+
+    transform: translateY(0);
+}
+
+
+.btn.primary {
+
+    background: var(--primary);
+
+    color: white;
+
+    box-shadow:
+        0 5px 12px rgba(37,99,235,0.18);
+}
+
+
+.btn.primary:hover {
+
+    background: var(--primary-dark);
+}
+
+
+.btn.secondary {
+
+    background: var(--secondary-light);
+
+    color: var(--secondary);
+
+    border: 1px solid #ddd6fe;
+}
+
+
+.btn.danger {
+
+    background: var(--danger-light);
+
+    color: var(--danger);
+
+    border: 1px solid #fecaca;
+}
+
+
+/* =========================================================
+   29. DP TABLE
+========================================================= */
+
+.dp-table {
+
+    display: grid;
+
+    grid-template-columns:
+        90px repeat(7, minmax(65px, 1fr));
+
+    gap: 6px;
+
+    padding: 28px;
+
+    overflow-x: auto;
+}
+
+
+.dp-cell {
+
+    min-height: 65px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 9px;
+
+    border: 1px solid var(--border);
+
+    background: #f8fafc;
+
+    color: var(--text-muted);
+
+    font-weight: 800;
+}
+
+
+.dp-cell.label {
+
+    background: #f1f5f9;
+
+    color: var(--text-dark);
+}
+
+
+.dp-cell.dp-value {
+
+    font-size: 20px;
+
+    background: white;
+}
+
+
+.dp-cell.dp-value.filled {
+
+    background: var(--success-light);
+
+    border-color: #86efac;
+
+    color: var(--success);
+
+    animation:
+        cellFill 0.7s ease;
+}
+
+
+.dp-cell.dp-value.current {
+
+    background: var(--primary-light);
+
+    border-color: #93c5fd;
+
+    color: var(--primary);
+
+    animation:
+        currentCellPulse 1.1s infinite;
+}
+
+
+.visualizer-status {
+
+    padding: 16px 22px;
+
+    background: #f8fafc;
+
+    border-top: 1px solid var(--border);
+
+    color: var(--text-muted);
+
+    font-size: 13px;
+}
+
+
+.visualizer-status strong {
+
+    color: var(--text-dark);
+}
+
+
+/* =========================================================
+   30. PATTERN CARDS
+========================================================= */
+
+.pattern-card {
+
+    min-height: 190px;
+
+    position: relative;
+
+    overflow: hidden;
+}
+
+
+.pattern-card::after {
+
+    content: "";
+
+    position: absolute;
+
+    width: 80px;
+    height: 80px;
+
+    border-radius: 50%;
+
+    background: var(--primary-light);
+
+    right: -35px;
+    bottom: -35px;
+}
+
+
+.pattern-card h3 {
+
+    color: var(--primary);
+
+    font-size: 13px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.5px;
+}
+
+
+.pattern-card strong {
+
+    display: block;
+
+    color: var(--text-dark);
+
+    font-size: 21px;
+
+    margin-bottom: 8px;
+}
+
+
+/* =========================================================
+   31. MISTAKES
+========================================================= */
+
+.mistake-list {
+
+    display: grid;
+
+    gap: 13px;
+}
+
+
+.mistake {
+
+    padding: 19px 21px;
+
+    border-radius: 13px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-left:
+        4px solid var(--danger);
+
+    box-shadow: var(--shadow-sm);
+
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
+}
+
+
+.mistake:hover {
+
+    transform: translateX(4px);
+
+    box-shadow: var(--shadow-md);
+}
+
+
+.mistake strong {
+
+    color: var(--danger);
+
+    display: block;
+
+    margin-bottom: 5px;
+}
+
+
+.mistake p {
+
+    color: var(--text-muted);
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   32. PRACTICE PROBLEMS
+========================================================= */
+
+.problem {
+
+    position: relative;
+
+    overflow: hidden;
+}
+
+
+.problem h3 {
+
+    margin-top: 10px;
+}
+
+
+.difficulty {
+
+    display: inline-flex;
+
+    padding: 5px 9px;
+
+    border-radius: 999px;
+
+    font-size: 10px;
+
+    font-weight: 900;
+
+    letter-spacing: .5px;
+}
+
+
+.difficulty.easy {
+
+    background: var(--success-light);
+
+    color: var(--success);
+}
+
+
+.difficulty.medium {
+
+    background: var(--warning-light);
+
+    color: var(--warning);
+}
+
+
+.difficulty.hard {
+
+    background: var(--danger-light);
+
+    color: var(--danger);
+}
+
+
+.difficulty.expert {
+
+    background: var(--secondary-light);
+
+    color: var(--secondary);
+}
+
+
+/* =========================================================
+   33. QUIZ
+========================================================= */
+
+.quiz-question {
+
+    padding: 23px;
+
+    margin-bottom: 18px;
+
+    border-radius: 15px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    box-shadow: var(--shadow-sm);
+}
+
+
+.quiz-question > strong {
+
+    display: block;
+
+    color: var(--text-dark);
+
+    font-size: 15px;
+
+    margin-bottom: 17px;
+}
+
+
+.quiz-options {
+
+    display: grid;
+
+    gap: 9px;
+}
+
+
+.quiz-option {
+
+    width: 100%;
+
+    padding: 13px 15px;
+
+    text-align: left;
+
+    border-radius: 9px;
+
+    border: 1px solid var(--border);
+
+    background: #f8fafc;
+
+    color: var(--text);
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        transform .2s ease;
+}
+
+
+.quiz-option:hover:not(:disabled) {
+
+    background: var(--primary-light);
+
+    border-color: #93c5fd;
+
+    transform: translateX(3px);
+}
+
+
+.quiz-option:disabled {
+
+    cursor: default;
+}
+
+
+.quiz-option.correct {
+
+    background: var(--success-light);
+
+    color: var(--success);
+
+    border-color: #86efac;
+}
+
+
+.quiz-option.wrong {
+
+    background: var(--danger-light);
+
+    color: var(--danger);
+
+    border-color: #fecaca;
+}
+
+
+.quiz-answer {
+
+    display: none;
+
+    margin-top: 14px;
+
+    padding: 12px 15px;
+
+    border-radius: 9px;
+
+    background: var(--success-light);
+
+    color: var(--success);
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+
+.quiz-answer.show {
+
+    display: block;
+
+    animation:
+        answerReveal .35s ease;
+}
+
+
+.quiz-score-box {
+
+    padding: 20px;
+
+    text-align: center;
+
+    border-radius: 13px;
+
+    background: var(--primary-light);
+
+    border: 1px solid #bfdbfe;
+
+    color: var(--primary);
+
+    font-size: 18px;
+
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   34. ROADMAP
+========================================================= */
+
+.roadmap {
+
+    position: relative;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 16px;
+}
+
+
+.roadmap-step {
+
+    position: relative;
+
+    padding: 22px;
+
+    border-radius: 14px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    box-shadow: var(--shadow-sm);
+
+    transition:
+        transform .25s ease,
+        border-color .25s ease,
+        box-shadow .25s ease;
+}
+
+
+.roadmap-step:hover {
+
+    transform: translateY(-4px);
+
+    box-shadow: var(--shadow-md);
+
+    border-color: #bfdbfe;
+}
+
+
+.roadmap-step.active {
+
+    border-left:
+        4px solid var(--primary);
+}
+
+
+.roadmap-step > strong {
+
+    color: var(--primary);
+
+    font-size: 11px;
+
+    letter-spacing: .6px;
+}
+
+
+.roadmap-step h3 {
+
+    margin: 5px 0;
+
+    color: var(--text-dark);
+
+    font-size: 18px;
+}
+
+
+.roadmap-step p {
+
+    color: var(--text-muted);
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   35. MASTERY CARD
+========================================================= */
+
+.mastery-card {
+
+    margin-top: 25px;
+
+    padding: 30px;
+
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #eff6ff,
+            #f5f3ff
+        );
+
+    border: 1px solid #dbeafe;
+
+    box-shadow: var(--shadow-md);
+}
+
+
+.mastery-card h2 {
+
+    color: var(--text-dark);
+
+    margin-bottom: 10px;
+}
+
+
+.mastery-card p {
+
+    color: var(--text-muted);
+
+    margin-bottom: 15px;
+}
+
+
+.mastery-card ul {
+
+    margin-left: 22px;
+
+    color: var(--text);
+}
+
+
+.mastery-card li {
+
+    margin-bottom: 7px;
+}
+
+
+/* =========================================================
+   36. FOOTER
+========================================================= */
+
+footer {
+
+    padding: 40px 20px;
+
+    text-align: center;
+
+    background: #ffffff;
+
+    border-top: 1px solid var(--border);
+
+    color: var(--text-muted);
+
+    font-size: 13px;
+}
+
+
+footer strong {
+
+    color: var(--text-dark);
+
+    font-size: 18px;
+
+    letter-spacing: .5px;
+}
+
+
+/* =========================================================
+   37. SCROLL REVEAL
+========================================================= */
+
+.reveal {
+
+    opacity: 0;
+
+    transform:
+        translateY(25px);
+
+    transition:
+        opacity .7s ease,
+        transform .7s ease;
+}
+
+
+.reveal.visible {
+
+    opacity: 1;
+
+    transform:
+        translateY(0);
+}
+
+
+/* =========================================================
+   38. ANIMATIONS
+========================================================= */
+
+@keyframes heroFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(15px);
+    }
+}
+
+
+@keyframes dpNodeAppear {
+
+    from {
+        opacity: 0;
+        transform:
+            scale(.7)
+            translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform:
+            scale(1)
+            translateY(0);
+    }
+}
+
+
+@keyframes repeatedPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.06);
+    }
+}
+
+
+@keyframes arrowBounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(5px);
+    }
+}
+
+
+@keyframes arrowSlide {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    50% {
+        transform: translateX(5px);
+    }
+}
+
+
+@keyframes cacheAppear {
+
+    from {
+        opacity: 0;
+        transform: translateX(-15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+
+@keyframes cachePulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 rgba(22,163,74,0);
+    }
+
+    50% {
+        box-shadow:
+            0 0 18px rgba(22,163,74,.16);
+    }
+}
+
+
+@keyframes cellFill {
+
+    0% {
+        transform: scale(.85);
+        opacity: .2;
+    }
+
+    70% {
+        transform: scale(1.06);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+
+@keyframes currentCellPulse {
+
+    0%,
+    100% {
+        box-shadow:
+            0 0 0 rgba(37,99,235,0);
+    }
+
+    50% {
+        box-shadow:
+            0 0 18px rgba(37,99,235,.22);
+    }
+}
+
+
+@keyframes rollingPulse {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+
+@keyframes climbAnimation {
+
+    0% {
+        left: 16%;
+        bottom: 65px;
+    }
+
+    20% {
+        left: 29%;
+        bottom: 110px;
+    }
+
+    40% {
+        left: 42%;
+        bottom: 155px;
+    }
+
+    60% {
+        left: 55%;
+        bottom: 200px;
+    }
+
+    80% {
+        left: 68%;
+        bottom: 245px;
+    }
+
+    100% {
+        left: 16%;
+        bottom: 65px;
+    }
+}
+
+
+@keyframes coinFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-7px);
+    }
+}
+
+
+@keyframes gridAppear {
+
+    from {
+        opacity: 0;
+        transform: scale(.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+
+@keyframes destinationPulse {
+
+    0%,
+    100% {
+        box-shadow:
+            0 0 0 rgba(22,163,74,0);
+    }
+
+    50% {
+        box-shadow:
+            0 0 18px rgba(22,163,74,.25);
+    }
+}
+
+
+@keyframes sequencePulse {
+
+    0%,
+    100% {
+        box-shadow:
+            0 0 0 rgba(22,163,74,0);
+    }
+
+    50% {
+        box-shadow:
+            0 6px 15px rgba(22,163,74,.14);
+    }
+}
+
+
+@keyframes stateFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+
+@keyframes subsetPop {
+
+    from {
+        opacity: 0;
+        transform: scale(.5);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+
+@keyframes flowFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+
+@keyframes answerReveal {
+
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* =========================================================
+   39. FOCUS ACCESSIBILITY
+========================================================= */
+
+button:focus-visible,
+a:focus-visible {
+
+    outline: 3px solid rgba(37,99,235,.25);
+
+    outline-offset: 3px;
+}
+
+
+/* =========================================================
+   40. RESPONSIVE — 1100px
+========================================================= */
+
+@media (max-width: 1100px) {
+
+    :root {
+        --sidebar-width: 225px;
+    }
+
+
+    .main {
+
+        padding:
+            30px 28px 70px;
+    }
+
+
+    .hero {
+
+        padding: 42px 35px;
+    }
+
+
+    .hero-stats {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+
+    .grid-3 {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+
+    .dp-table {
+
+        min-width: 700px;
+    }
+
+}
+
+
+/* =========================================================
+   41. RESPONSIVE — 800px
+========================================================= */
+
+@media (max-width: 800px) {
+
+    .topbar {
+
+        padding: 0 18px;
+    }
+
+
+    .lesson-label {
+
+        display: none;
+    }
+
+
+    .page-layout {
+
+        grid-template-columns: 1fr;
+    }
+
+
+    .sidebar {
+
+        position: relative;
+
+        top: 0;
+
+        height: auto;
+
+        max-height: 260px;
+
+        border-right: none;
+
+        border-bottom:
+            1px solid var(--border);
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+        gap: 3px;
+
+        padding: 14px;
+    }
+
+
+    .sidebar-title {
+
+        grid-column: 1 / -1;
+    }
+
+
+    .main {
+
+        padding:
+            25px 18px 60px;
+    }
+
+
+    .hero {
+
+        padding: 35px 25px;
+
+        border-radius: 19px;
+    }
+
+
+    .hero h1 {
+
+        font-size: 44px;
+
+        letter-spacing: -1.7px;
+    }
+
+
+    .hero p {
+
+        font-size: 15px;
+    }
+
+
+    .grid-2,
+    .grid-3 {
+
+        grid-template-columns: 1fr;
+    }
+
+
+    .memo-demo {
+
+        grid-template-columns: 1fr;
+    }
+
+
+    .memo-arrow {
+
+        transform: rotate(90deg);
+    }
+
+
+    .knapsack-items {
+
+        grid-template-columns: 1fr;
+    }
+
+
+    .roadmap {
+
+        grid-template-columns: 1fr;
+    }
+
+
+    .visualizer-header {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .dp-table {
+
+        justify-content: flex-start;
+
+        padding: 20px;
+
+        min-width: 700px;
+    }
+
+
+    .dp-visualizer {
+
+        overflow-x: auto;
+    }
+
+}
+
+
+/* =========================================================
+   42. RESPONSIVE — 520px
+========================================================= */
+
+@media (max-width: 520px) {
+
+    .topbar {
+
+        height: 62px;
+    }
+
+
+    :root {
+
+        --topbar-height: 62px;
+    }
+
+
+    .brand-logo {
+
+        width: 37px;
+        height: 37px;
+
+        font-size: 17px;
+    }
+
+
+    .brand-name {
+
+        font-size: 16px;
+    }
+
+
+    .sidebar {
+
+        grid-template-columns: 1fr;
+
+        max-height: 300px;
+    }
+
+
+    .main {
+
+        padding:
+            20px 13px 50px;
+    }
+
+
+    .hero {
+
+        padding: 30px 20px;
+    }
+
+
+    .hero h1 {
+
+        font-size: 37px;
+
+        letter-spacing: -1.2px;
+    }
+
+
+    .hero-stats {
+
+        grid-template-columns: 1fr 1fr;
+
+        gap: 8px;
+    }
+
+
+    .hero-stat {
+
+        padding: 13px;
+    }
+
+
+    .section {
+
+        margin-bottom: 55px;
+    }
+
+
+    .section-heading h2 {
+
+        font-size: 23px;
+    }
+
+
+    .section-number {
+
+        min-width: 37px;
+        height: 37px;
+    }
+
+
+    .card {
+
+        padding: 19px;
+    }
+
+
+    .formula {
+
+        font-size: 16px;
+
+        padding: 15px;
+    }
+
+
+    .code-header {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 5px;
+    }
+
+
+    .code-body {
+
+        padding: 17px;
+
+        font-size: 12px;
+
+        line-height: 1.7;
+    }
+
+
+    .grid-board {
+
+        grid-template-columns:
+            repeat(4, 57px);
+
+        padding: 12px;
+
+        gap: 4px;
+    }
+
+
+    .grid-cell {
+
+        width: 57px;
+        height: 57px;
+
+        font-size: 13px;
+    }
+
+
+    .table-demo {
+
+        justify-content: flex-start;
+    }
+
+
+    .table-cell {
+
+        min-width: 63px;
+
+        height: 63px;
+    }
+
+
+    .stairs {
+
+        height: 230px;
+    }
+
+
+    .stair {
+
+        width: 70px;
+    }
+
+
+    .person {
+
+        font-size: 21px;
+    }
+
+
+    .stock-states {
+
+        flex-direction: column;
+    }
+
+
+    .state-arrow {
+
+        transform: rotate(90deg);
+    }
+
+
+    .visualizer-buttons {
+
+        width: 100%;
+    }
+
+
+    .btn {
+
+        flex: 1;
+
+        min-width: 90px;
+    }
+
+
+    .mastery-card {
+
+        padding: 22px;
+    }
+
+}
+
+
+/* =========================================================
+   43. REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+
+        animation-duration: 0.01ms !important;
+
+        animation-iteration-count: 1 !important;
+
+        scroll-behavior: auto !important;
+
+        transition-duration: 0.01ms !important;
+    }
+
+}

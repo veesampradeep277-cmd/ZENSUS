@@ -1,0 +1,4795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS | Lesson 14 — Greedy Algorithms</title>
+
+<style>
+
+/* =========================================================
+   ZENSUS — LESSON 14
+   GREEDY ALGORITHMS
+========================================================= */
+
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --purple: #7c3aed;
+    --cyan: #0891b2;
+
+    --success: #16a34a;
+    --warning: #d97706;
+    --danger: #dc2626;
+
+    --text: #172033;
+    --muted: #64748b;
+
+    --bg: #f5f7fb;
+    --surface: #ffffff;
+    --surface-soft: #f8fafc;
+
+    --border: #e2e8f0;
+
+    --shadow-sm: 0 4px 12px rgba(15, 23, 42, .06);
+    --shadow-md: 0 12px 30px rgba(15, 23, 42, .08);
+    --shadow-lg: 0 20px 50px rgba(15, 23, 42, .10);
+
+    --radius: 16px;
+    --topbar: 68px;
+    --sidebar: 255px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+/* =========================================================
+   TOP BAR
+========================================================= */
+
+.topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--topbar);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 26px;
+
+    background: rgba(255,255,255,.94);
+    backdrop-filter: blur(14px);
+
+    border-bottom: 1px solid var(--border);
+
+    z-index: 1000;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brand-logo {
+    width: 38px;
+    height: 38px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 11px;
+
+    background: linear-gradient(
+        135deg,
+        var(--primary),
+        var(--purple)
+    );
+
+    color: white;
+    font-weight: 900;
+}
+
+.brand-name {
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: -.5px;
+}
+
+.lesson-label {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* =========================================================
+   LAYOUT
+========================================================= */
+
+.page-layout {
+    display: flex;
+    padding-top: var(--topbar);
+}
+
+.sidebar {
+    position: fixed;
+    top: var(--topbar);
+    bottom: 0;
+    left: 0;
+
+    width: var(--sidebar);
+
+    background: white;
+    border-right: 1px solid var(--border);
+
+    padding: 22px 15px;
+
+    overflow-y: auto;
+}
+
+.sidebar-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+
+    padding: 0 12px 10px;
+}
+
+.sidebar a {
+    display: block;
+
+    text-decoration: none;
+    color: #475569;
+
+    padding: 9px 12px;
+    margin-bottom: 3px;
+
+    border-radius: 9px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    transition: .2s;
+}
+
+.sidebar a:hover {
+    color: var(--primary);
+    background: #eff6ff;
+    transform: translateX(3px);
+}
+
+.main {
+    width: calc(100% - var(--sidebar));
+    margin-left: var(--sidebar);
+
+    padding: 38px;
+    max-width: 1500px;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero {
+    position: relative;
+    overflow: hidden;
+
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+
+    padding: 48px;
+
+    box-shadow: var(--shadow-md);
+
+    margin-bottom: 38px;
+}
+
+.hero::after {
+    content: "";
+
+    position: absolute;
+    width: 280px;
+    height: 280px;
+
+    right: -100px;
+    top: -100px;
+
+    border-radius: 50%;
+
+    background: rgba(37,99,235,.07);
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    padding: 6px 12px;
+
+    background: #eff6ff;
+    color: var(--primary);
+
+    border: 1px solid #bfdbfe;
+    border-radius: 999px;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.hero h1 {
+    margin-top: 18px;
+
+    font-size: clamp(36px, 5vw, 62px);
+    line-height: 1.05;
+    letter-spacing: -2px;
+}
+
+.hero h1 span {
+    color: var(--primary);
+}
+
+.hero p {
+    max-width: 800px;
+
+    margin-top: 18px;
+
+    color: var(--muted);
+    font-size: 17px;
+}
+
+.hero-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 14px;
+
+    margin-top: 30px;
+}
+
+.hero-stat {
+    padding: 18px;
+
+    border: 1px solid var(--border);
+    border-radius: 14px;
+
+    background: var(--surface-soft);
+}
+
+.hero-stat strong {
+    display: block;
+
+    font-size: 23px;
+    color: var(--primary);
+}
+
+.hero-stat span {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+/* =========================================================
+   SECTIONS
+========================================================= */
+
+.section {
+    margin-bottom: 55px;
+    scroll-margin-top: 90px;
+}
+
+.section-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+
+    margin-bottom: 22px;
+}
+
+.section-number {
+    flex: 0 0 auto;
+
+    width: 40px;
+    height: 40px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 11px;
+
+    background: #eff6ff;
+    color: var(--primary);
+
+    font-weight: 900;
+}
+
+.section-heading h2 {
+    font-size: 27px;
+    letter-spacing: -.5px;
+}
+
+.section-heading p {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+/* =========================================================
+   CARDS
+========================================================= */
+
+.card {
+    background: white;
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+
+    padding: 25px;
+
+    box-shadow: var(--shadow-sm);
+
+    margin-bottom: 18px;
+}
+
+.card h3 {
+    margin-bottom: 10px;
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+/* =========================================================
+   CALLOUT
+========================================================= */
+
+.callout {
+    padding: 20px;
+
+    border-radius: 14px;
+
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+
+    margin: 18px 0;
+}
+
+.callout.success {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+}
+
+.callout.warning {
+    border-color: #fde68a;
+    background: #fffbeb;
+}
+
+.callout.danger {
+    border-color: #fecaca;
+    background: #fef2f2;
+}
+
+.callout strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* =========================================================
+   CONCEPT CARDS
+========================================================= */
+
+.concept-card {
+    transition: .25s;
+}
+
+.concept-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+}
+
+.concept-icon {
+    width: 48px;
+    height: 48px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 13px;
+
+    background: #eff6ff;
+
+    font-size: 24px;
+
+    margin-bottom: 15px;
+}
+
+.concept-card p {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+/* =========================================================
+   CODE EDITOR
+========================================================= */
+
+.code-block {
+    margin: 20px 0;
+
+    border-radius: 14px;
+    overflow: hidden;
+
+    background: #0f172a;
+
+    box-shadow:
+        0 12px 28px rgba(15,23,42,.13);
+}
+
+.code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 13px 18px;
+
+    background: #111c32;
+
+    border-bottom: 1px solid #26344d;
+
+    color: #e2e8f0;
+
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.code-body {
+    margin: 0;
+
+    padding: 22px;
+
+    background: #0f172a;
+
+    color: #e2e8f0;
+
+    font-family:
+        "Cascadia Code",
+        "SFMono-Regular",
+        Consolas,
+        monospace;
+
+    font-size: 14px;
+    line-height: 1.75;
+
+    white-space: pre;
+    overflow-x: auto;
+
+    tab-size: 4;
+}
+
+.keyword {
+    color: #c084fc;
+}
+
+.string {
+    color: #86efac;
+}
+
+.comment {
+    color: #94a3b8;
+}
+
+.function {
+    color: #67e8f9;
+}
+
+.number {
+    color: #fbbf24;
+}
+
+/* =========================================================
+   FLOWCHART
+========================================================= */
+
+.flowchart {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 25px;
+
+    background: #f8fafc;
+
+    border: 1px solid var(--border);
+    border-radius: 16px;
+
+    margin-top: 18px;
+}
+
+.flow-box {
+    min-width: 230px;
+
+    padding: 13px 20px;
+
+    text-align: center;
+
+    background: white;
+
+    border: 2px solid #cbd5e1;
+    border-radius: 10px;
+
+    font-weight: 700;
+
+    animation: flowFloat 3s ease-in-out infinite;
+}
+
+.flow-box.start {
+    border-radius: 999px;
+    border-color: var(--primary);
+}
+
+.flow-box.decision {
+    border-color: var(--warning);
+}
+
+.flow-arrow {
+    color: var(--primary);
+    font-size: 22px;
+
+    animation: arrowBounce 1.5s infinite;
+}
+
+/* =========================================================
+   COMPARISON
+========================================================= */
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    background: white;
+
+    border: 1px solid var(--border);
+    border-radius: 14px;
+
+    overflow: hidden;
+}
+
+.comparison-table th,
+.comparison-table td {
+    padding: 14px;
+
+    border-bottom: 1px solid var(--border);
+
+    text-align: left;
+}
+
+.comparison-table th {
+    background: #f8fafc;
+
+    font-size: 13px;
+}
+
+.comparison-table td {
+    font-size: 14px;
+}
+
+/* =========================================================
+   DRY RUN
+========================================================= */
+
+.dry-run {
+    display: flex;
+    flex-direction: column;
+
+    gap: 14px;
+
+    margin-top: 20px;
+}
+
+.dry-step {
+    display: grid;
+
+    grid-template-columns: 45px 1fr;
+
+    gap: 15px;
+
+    padding: 16px;
+
+    border: 1px solid var(--border);
+    border-radius: 13px;
+
+    background: white;
+}
+
+.dry-number {
+    width: 36px;
+    height: 36px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 50%;
+
+    background: #eff6ff;
+    color: var(--primary);
+
+    font-weight: 900;
+}
+
+/* =========================================================
+   ACTIVITY SELECTION VISUALIZER
+========================================================= */
+
+.activity-lab {
+    background: #f8fafc;
+
+    border: 1px solid var(--border);
+    border-radius: 18px;
+
+    padding: 25px;
+}
+
+.timeline {
+    position: relative;
+
+    height: 270px;
+
+    margin-top: 25px;
+
+    border-left: 2px solid #cbd5e1;
+}
+
+.activity {
+    position: absolute;
+
+    left: 25px;
+
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+
+    border-radius: 8px;
+
+    color: white;
+
+    padding: 0 12px;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    transition: .5s;
+}
+
+.activity.selected {
+    background: #16a34a !important;
+
+    box-shadow:
+        0 0 0 4px rgba(22,163,74,.12);
+
+    transform: scaleY(1.15);
+}
+
+.activity.rejected {
+    opacity: .25;
+}
+
+.a1 { top: 10px; width: 90px; background: #64748b; }
+.a2 { top: 60px; width: 150px; background: #64748b; }
+.a3 { top: 110px; width: 70px; background: #64748b; }
+.a4 { top: 160px; width: 120px; background: #64748b; }
+.a5 { top: 210px; width: 65px; background: #64748b; }
+
+.activity-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* =========================================================
+   KNAPSACK
+========================================================= */
+
+.knapsack-stage {
+    display: flex;
+
+    gap: 15px;
+
+    flex-wrap: wrap;
+
+    align-items: flex-end;
+
+    min-height: 230px;
+
+    padding: 25px;
+
+    background: #f8fafc;
+
+    border: 1px solid var(--border);
+
+    border-radius: 16px;
+}
+
+.item {
+    width: 110px;
+
+    padding: 16px;
+
+    border-radius: 13px;
+
+    border: 2px solid #cbd5e1;
+
+    background: white;
+
+    text-align: center;
+
+    transition: .5s;
+}
+
+.item.active {
+    border-color: var(--success);
+
+    background: #f0fdf4;
+
+    transform: translateY(-14px);
+
+    box-shadow: var(--shadow-md);
+}
+
+.item.partial {
+    border-color: var(--warning);
+
+    background: #fffbeb;
+
+    transform: translateY(-8px);
+}
+
+.item-name {
+    font-weight: 900;
+}
+
+.item-ratio {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+/* =========================================================
+   JOB SEQUENCING
+========================================================= */
+
+.jobs {
+    display: flex;
+
+    gap: 12px;
+
+    flex-wrap: wrap;
+
+    margin-top: 20px;
+}
+
+.job {
+    width: 110px;
+
+    padding: 18px;
+
+    text-align: center;
+
+    background: white;
+
+    border: 2px solid var(--border);
+
+    border-radius: 13px;
+
+    transition: .4s;
+}
+
+.job.selected {
+    border-color: var(--success);
+    background: #f0fdf4;
+
+    transform: translateY(-8px);
+}
+
+/* =========================================================
+   COINS
+========================================================= */
+
+.coin-area {
+    display: flex;
+
+    gap: 12px;
+
+    flex-wrap: wrap;
+
+    margin: 20px 0;
+}
+
+.coin {
+    width: 58px;
+    height: 58px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 50%;
+
+    background: #fef3c7;
+
+    border: 3px solid #f59e0b;
+
+    font-weight: 900;
+
+    transition: .3s;
+}
+
+.coin.used {
+    transform: scale(1.15);
+
+    background: #dcfce7;
+
+    border-color: var(--success);
+}
+
+/* =========================================================
+   INTERACTIVE GREEDY VISUALIZER
+========================================================= */
+
+.greedy-visualizer {
+    background: #0f172a;
+
+    color: white;
+
+    border-radius: 20px;
+
+    padding: 25px;
+
+    box-shadow: var(--shadow-lg);
+}
+
+.greedy-visualizer h3 {
+    color: white;
+}
+
+.visualizer-grid {
+    display: grid;
+
+    grid-template-columns: 1.2fr .8fr;
+
+    gap: 20px;
+
+    margin-top: 20px;
+}
+
+.choice-area {
+    background: #111c32;
+
+    border-radius: 15px;
+
+    padding: 20px;
+
+    min-height: 260px;
+}
+
+.choice-items {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    margin-top: 15px;
+}
+
+.choice-item {
+    min-width: 80px;
+
+    padding: 12px;
+
+    border-radius: 10px;
+
+    background: #1e293b;
+
+    border: 1px solid #334155;
+
+    text-align: center;
+
+    transition: .5s;
+}
+
+.choice-item.current {
+    border-color: #60a5fa;
+
+    background: #1e3a8a;
+
+    transform: translateY(-6px);
+}
+
+.choice-item.chosen {
+    border-color: #4ade80;
+
+    background: #14532d;
+}
+
+.choice-item.skipped {
+    opacity: .35;
+}
+
+.state-panel {
+    background: #111c32;
+
+    border-radius: 15px;
+
+    padding: 20px;
+}
+
+.state-value {
+    font-size: 28px;
+
+    color: #60a5fa;
+
+    font-weight: 900;
+
+    margin: 5px 0 15px;
+}
+
+.status-message {
+    min-height: 45px;
+
+    color: #cbd5e1;
+}
+
+.visualizer-buttons {
+    display: flex;
+
+    gap: 10px;
+
+    flex-wrap: wrap;
+
+    margin-top: 20px;
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.btn {
+    border: none;
+
+    padding: 10px 16px;
+
+    border-radius: 9px;
+
+    font-weight: 800;
+
+    transition: .2s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn.primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn.secondary {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.btn.success {
+    background: var(--success);
+    color: white;
+}
+
+.btn.danger {
+    background: var(--danger);
+    color: white;
+}
+
+/* =========================================================
+   ALGORITHM CARDS
+========================================================= */
+
+.algorithm-card {
+    border-left: 4px solid var(--primary);
+}
+
+.algorithm-card h3 {
+    color: var(--primary);
+}
+
+.complexity {
+    display: inline-block;
+
+    margin-top: 12px;
+
+    padding: 5px 10px;
+
+    background: #eff6ff;
+
+    border-radius: 7px;
+
+    color: var(--primary);
+
+    font-family: monospace;
+
+    font-weight: 800;
+}
+
+/* =========================================================
+   PROOF BOX
+========================================================= */
+
+.proof-box {
+    padding: 22px;
+
+    background: #faf5ff;
+
+    border: 1px solid #ddd6fe;
+
+    border-radius: 15px;
+}
+
+.proof-step {
+    display: flex;
+
+    gap: 12px;
+
+    margin: 12px 0;
+}
+
+.proof-number {
+    flex: 0 0 30px;
+
+    width: 30px;
+    height: 30px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 50%;
+
+    background: var(--purple);
+
+    color: white;
+
+    font-size: 12px;
+
+    font-weight: 900;
+}
+
+/* =========================================================
+   MISTAKES
+========================================================= */
+
+.mistake {
+    padding: 17px;
+
+    background: #fff;
+
+    border: 1px solid #fecaca;
+
+    border-left: 4px solid var(--danger);
+
+    border-radius: 11px;
+
+    margin-bottom: 10px;
+}
+
+.mistake strong {
+    color: var(--danger);
+}
+
+/* =========================================================
+   QUIZ
+========================================================= */
+
+.quiz-question {
+    margin-bottom: 25px;
+
+    padding: 20px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 14px;
+}
+
+.quiz-options {
+    display: grid;
+
+    gap: 9px;
+
+    margin-top: 14px;
+}
+
+.quiz-option {
+    padding: 11px 14px;
+
+    border: 1px solid var(--border);
+
+    background: #f8fafc;
+
+    border-radius: 9px;
+
+    text-align: left;
+
+    transition: .2s;
+}
+
+.quiz-option:hover {
+    border-color: var(--primary);
+}
+
+.quiz-option.correct {
+    background: #dcfce7;
+
+    border-color: #22c55e;
+}
+
+.quiz-option.wrong {
+    background: #fee2e2;
+
+    border-color: #ef4444;
+}
+
+.quiz-answer {
+    display: none;
+
+    margin-top: 12px;
+
+    color: var(--success);
+
+    font-weight: 700;
+}
+
+.quiz-answer.show {
+    display: block;
+}
+
+/* =========================================================
+   ROADMAP
+========================================================= */
+
+.roadmap {
+    display: grid;
+
+    grid-template-columns: repeat(4,1fr);
+
+    gap: 14px;
+}
+
+.roadmap-step {
+    position: relative;
+
+    padding: 20px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 14px;
+}
+
+.roadmap-step.active {
+    border-color: var(--primary);
+
+    box-shadow:
+        0 0 0 3px rgba(37,99,235,.08);
+}
+
+.roadmap-step strong {
+    display: block;
+
+    color: var(--primary);
+
+    margin-bottom: 6px;
+}
+
+/* =========================================================
+   REVEAL
+========================================================= */
+
+.reveal {
+    opacity: 0;
+
+    transform: translateY(25px);
+
+    transition:
+        opacity .7s ease,
+        transform .7s ease;
+}
+
+.reveal.visible {
+    opacity: 1;
+
+    transform: translateY(0);
+}
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes flowFloat {
+    0%,100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+@keyframes arrowBounce {
+    0%,100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(5px);
+    }
+}
+
+@keyframes pulseChoice {
+    0% {
+        box-shadow: 0 0 0 0 rgba(96,165,250,.6);
+    }
+
+    100% {
+        box-shadow: 0 0 0 14px rgba(96,165,250,0);
+    }
+}
+
+@keyframes coinPop {
+    0% {
+        transform: scale(.7);
+    }
+
+    70% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+footer {
+    margin-top: 60px;
+
+    padding: 35px;
+
+    text-align: center;
+
+    color: var(--muted);
+
+    border-top: 1px solid var(--border);
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:1100px) {
+
+    .sidebar {
+        width: 210px;
+    }
+
+    .main {
+        width: calc(100% - 210px);
+        margin-left: 210px;
+
+        padding: 25px;
+    }
+
+    .hero-stats,
+    .roadmap {
+        grid-template-columns: repeat(2,1fr);
+    }
+
+    .grid-4 {
+        grid-template-columns: repeat(2,1fr);
+    }
+}
+
+@media(max-width:800px) {
+
+    .sidebar {
+        display: none;
+    }
+
+    .main {
+        width: 100%;
+        margin-left: 0;
+
+        padding: 18px;
+    }
+
+    .hero {
+        padding: 30px 22px;
+    }
+
+    .grid-2,
+    .grid-3,
+    .visualizer-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-stats,
+    .roadmap,
+    .grid-4 {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media(max-width:520px) {
+
+    .hero h1 {
+        font-size: 38px;
+    }
+
+    .hero-stats,
+    .roadmap,
+    .grid-4 {
+        grid-template-columns: 1fr;
+    }
+
+    .main {
+        padding: 12px;
+    }
+
+    .card {
+        padding: 18px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ======================================================
+     TOP BAR
+====================================================== -->
+
+<header class="topbar">
+
+    <div class="brand">
+
+        <div class="brand-logo">
+            Z
+        </div>
+
+        <div>
+            <div class="brand-name">ZENSUS</div>
+            <div class="lesson-label">
+                DSA Learning Platform
+            </div>
+        </div>
+
+    </div>
+
+    <div class="lesson-label">
+        Lesson 14 • Greedy Algorithms
+    </div>
+
+</header>
+
+
+<!-- ======================================================
+     PAGE
+====================================================== -->
+
+<div class="page-layout">
+
+
+<!-- ======================================================
+     SIDEBAR
+====================================================== -->
+
+<aside class="sidebar">
+
+    <div class="sidebar-title">
+        Lesson Contents
+    </div>
+
+    <a href="#intro">01. Introduction</a>
+    <a href="#intuition">02. Greedy Intuition</a>
+    <a href="#properties">03. Greedy Properties</a>
+    <a href="#recognition">04. Recognition</a>
+    <a href="#strategy">05. Strategy</a>
+
+    <a href="#activity">06. Activity Selection</a>
+    <a href="#knapsack">07. Fractional Knapsack</a>
+    <a href="#jobs">08. Job Sequencing</a>
+    <a href="#coins">09. Coin Change</a>
+    <a href="#platforms">10. Minimum Platforms</a>
+    <a href="#cookies">11. Assign Cookies</a>
+    <a href="#jump">12. Jump Game</a>
+    <a href="#gas">13. Gas Station</a>
+    <a href="#partition">14. Partition Labels</a>
+
+    <a href="#huffman">15. Huffman Coding</a>
+    <a href="#mst">16. Greedy + MST</a>
+    <a href="#proof">17. Correctness Proof</a>
+    <a href="#comparison">18. Greedy vs DP</a>
+    <a href="#patterns">19. Interview Patterns</a>
+    <a href="#visualizer">20. Interactive Visualizer</a>
+    <a href="#mistakes">21. Common Mistakes</a>
+    <a href="#practice">22. Practice</a>
+    <a href="#quiz">23. Quiz</a>
+    <a href="#roadmap">24. Roadmap</a>
+
+</aside>
+
+
+<!-- ======================================================
+     MAIN
+====================================================== -->
+
+<main class="main">
+
+
+<!-- ======================================================
+     HERO
+====================================================== -->
+
+<section class="hero reveal" id="top">
+
+    <span class="hero-badge">
+        ⚡ LESSON 14 • ALGORITHMIC THINKING
+    </span>
+
+    <h1>
+        Greedy <span>Algorithms</span>
+    </h1>
+
+    <p>
+        Learn how to make the best local decision at every step
+        and understand when that local decision leads to a globally
+        optimal solution.
+    </p>
+
+    <div class="hero-stats">
+
+        <div class="hero-stat">
+            <strong>10+</strong>
+            <span>Core Problems</span>
+        </div>
+
+        <div class="hero-stat">
+            <strong>O(n log n)</strong>
+            <span>Common Complexity</span>
+        </div>
+
+        <div class="hero-stat">
+            <strong>Interview</strong>
+            <span>Focused Patterns</span>
+        </div>
+
+        <div class="hero-stat">
+            <strong>Beginner → Advanced</strong>
+            <span>Learning Path</span>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     01 INTRODUCTION
+====================================================== -->
+
+<section class="section reveal" id="intro">
+
+<div class="section-heading">
+
+    <div class="section-number">01</div>
+
+    <div>
+        <h2>What is a Greedy Algorithm?</h2>
+        <p>Understand the central idea before learning individual problems.</p>
+    </div>
+
+</div>
+
+
+<div class="card">
+
+<h3>Definition</h3>
+
+<p>
+A <strong>Greedy Algorithm</strong> solves a problem by repeatedly
+making the choice that appears to be the best at the current moment,
+without reconsidering previous choices.
+</p>
+
+<div class="callout">
+
+<strong>Simple idea</strong>
+
+At every step:
+
+<br><br>
+
+<strong>
+Choose the best available option → make the decision → continue.
+</strong>
+
+</div>
+
+</div>
+
+
+<div class="grid-3">
+
+<div class="card concept-card">
+
+<div class="concept-icon">🎯</div>
+
+<h3>Local Optimum</h3>
+
+<p>
+The best decision available right now.
+</p>
+
+</div>
+
+
+<div class="card concept-card">
+
+<div class="concept-icon">🌍</div>
+
+<h3>Global Optimum</h3>
+
+<p>
+The best possible answer for the entire problem.
+</p>
+
+</div>
+
+
+<div class="card concept-card">
+
+<div class="concept-icon">⚡</div>
+
+<h3>Greedy Choice</h3>
+
+<p>
+A local choice that can safely lead to the optimal solution.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="callout warning">
+
+<strong>Important!</strong>
+
+Greedy does NOT mean:
+
+<em>"Always choose something that looks good."</em>
+
+A greedy strategy must have a logical or mathematical reason
+why the choice is safe.
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     02 INTUITION
+====================================================== -->
+
+<section class="section reveal" id="intuition">
+
+<div class="section-heading">
+
+<div class="section-number">02</div>
+
+<div>
+
+<h2>Greedy Intuition</h2>
+
+<p>Understand greedy thinking using everyday situations.</p>
+
+</div>
+
+</div>
+
+
+<div class="grid-2">
+
+<div class="card">
+
+<h3>💰 Example — Paying with Coins</h3>
+
+<p>
+Suppose the available coins are:
+</p>
+
+<div class="coin-area">
+
+<div class="coin">25</div>
+<div class="coin">10</div>
+<div class="coin">5</div>
+<div class="coin">1</div>
+
+</div>
+
+<p>
+For amount 41, a natural strategy is:
+</p>
+
+<pre>
+25 → 10 → 5 → 1
+
+25 + 10 + 5 + 1 = 41
+</pre>
+
+<p>
+This uses the largest useful coin first.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h3>📅 Example — Scheduling Meetings</h3>
+
+<p>
+Suppose several meetings compete for the same room.
+You want to attend as many as possible.
+</p>
+
+<div class="callout success">
+
+<strong>Greedy idea:</strong>
+
+Choose the meeting that finishes earliest.
+
+</div>
+
+<p>
+Why?
+
+Because finishing early leaves the maximum amount
+of time available for future meetings.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     03 PROPERTIES
+====================================================== -->
+
+<section class="section reveal" id="properties">
+
+<div class="section-heading">
+
+<div class="section-number">03</div>
+
+<div>
+
+<h2>Greedy Choice Property & Optimal Substructure</h2>
+
+<p>The two ideas behind many greedy solutions.</p>
+
+</div>
+
+</div>
+
+
+<div class="grid-2">
+
+<div class="card">
+
+<h3>1. Greedy Choice Property</h3>
+
+<p>
+A globally optimal solution can be obtained by making
+a locally optimal choice first.
+</p>
+
+<div class="callout success">
+
+<strong>Question to ask:</strong>
+
+Can I safely make the best choice now without needing
+to undo it later?
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3>2. Optimal Substructure</h3>
+
+<p>
+After making a correct choice, the remaining problem
+must itself contain an optimal solution.
+</p>
+
+<div class="callout">
+
+<strong>Think:</strong>
+
+Best choice now + best solution for the remaining problem.
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3>Example</h3>
+
+<p>
+Activity Selection demonstrates both properties.
+</p>
+
+<pre>
+Choose activity with earliest finish
+                ↓
+Remaining activities
+                ↓
+Solve remaining scheduling problem
+                ↓
+Repeat
+</pre>
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     04 RECOGNITION
+====================================================== -->
+
+<section class="section reveal" id="recognition">
+
+<div class="section-heading">
+
+<div class="section-number">04</div>
+
+<div>
+
+<h2>How to Recognize a Greedy Problem</h2>
+
+<p>Interview pattern recognition.</p>
+
+</div>
+
+</div>
+
+
+<div class="grid-3">
+
+<div class="card">
+
+<h3>⏱ Scheduling</h3>
+
+<p>
+Activities, meetings, intervals, deadlines.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>💰 Optimization</h3>
+
+<p>
+Maximize value or minimize cost.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>📊 Sorting</h3>
+
+<p>
+A useful greedy order often appears after sorting.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>🎒 Selection</h3>
+
+<p>
+Choose items under constraints.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>🔗 Connectivity</h3>
+
+<p>
+Kruskal and Prim use greedy edge choices.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>⚡ Repeated Best Choice</h3>
+
+<p>
+The problem naturally asks for the next best decision.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="callout warning">
+
+<strong>Interview clue:</strong>
+
+If you see words such as
+<strong>maximum number</strong>,
+<strong>minimum cost</strong>,
+<strong>earliest finish</strong>,
+<strong>highest value</strong>,
+<strong>deadline</strong>,
+or <strong>minimum operations</strong>,
+consider greedy — but prove it before applying it.
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     05 GENERAL STRATEGY
+====================================================== -->
+
+<section class="section reveal" id="strategy">
+
+<div class="section-heading">
+
+<div class="section-number">05</div>
+
+<div>
+
+<h2>General Greedy Strategy</h2>
+
+<p>A reusable mental model.</p>
+
+</div>
+
+</div>
+
+
+<div class="flowchart">
+
+<div class="flow-box start">
+Start
+</div>
+
+<div class="flow-arrow">↓</div>
+
+<div class="flow-box">
+Identify the objective
+</div>
+
+<div class="flow-arrow">↓</div>
+
+<div class="flow-box">
+Find the best local choice
+</div>
+
+<div class="flow-arrow">↓</div>
+
+<div class="flow-box decision">
+Is the choice feasible?
+</div>
+
+<div class="flow-arrow">↓</div>
+
+<div class="flow-box">
+Take the choice
+</div>
+
+<div class="flow-arrow">↓</div>
+
+<div class="flow-box">
+Update the problem state
+</div>
+
+<div class="flow-arrow">↓</div>
+
+<div class="flow-box">
+Repeat until finished
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3>Generic Pseudocode</h3>
+
+<div class="code-block">
+
+<div class="code-header">
+<span>Generic Greedy Template</span>
+<span>Algorithm</span>
+</div>
+
+<pre class="code-body">sort(items)
+
+answer = 0
+
+for item in items:
+
+    if is_feasible(item):
+
+        choose(item)
+
+        update_state()
+
+return answer</pre>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     06 ACTIVITY SELECTION
+====================================================== -->
+
+<section class="section reveal" id="activity">
+
+<div class="section-heading">
+
+<div class="section-number">06</div>
+
+<div>
+
+<h2>Activity Selection Problem</h2>
+
+<p>One of the most important classical greedy problems.</p>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3>Problem</h3>
+
+<p>
+Given activities with start and finish times,
+select the maximum number of non-overlapping activities.
+</p>
+
+<div class="callout success">
+
+<strong>Greedy choice:</strong>
+
+Always choose the activity that finishes earliest.
+
+</div>
+
+</div>
+
+
+<div class="activity-lab">
+
+<h3>🎬 Animated Activity Selection</h3>
+
+<p>
+Click start and watch the algorithm select compatible activities.
+</p>
+
+<div class="timeline">
+
+<div class="activity a1" data-id="1">A: 1–2</div>
+<div class="activity a2" data-id="2">B: 3–5</div>
+<div class="activity a3" data-id="3">C: 0–6</div>
+<div class="activity a4" data-id="4">D: 5–7</div>
+<div class="activity a5" data-id="5">E: 8–9</div>
+
+</div>
+
+<div class="activity-controls">
+
+<button class="btn primary" onclick="startActivityAnimation()">
+▶ Start
+</button>
+
+<button class="btn secondary" onclick="resetActivity()">
+↻ Reset
+</button>
+
+</div>
+
+<p id="activityStatus" style="margin-top:15px;font-weight:700;">
+Ready.
+</p>
+
+</div>
+
+
+<div class="dry-run">
+
+<div class="dry-step">
+
+<div class="dry-number">1</div>
+
+<div>
+<strong>Sort by finish time</strong>
+
+<p>
+A(1,2), B(3,5), C(0,6), D(5,7), E(8,9)
+</p>
+
+</div>
+
+</div>
+
+
+<div class="dry-step">
+
+<div class="dry-number">2</div>
+
+<div>
+<strong>Select A</strong>
+
+<p>
+A finishes at 2.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="dry-step">
+
+<div class="dry-number">3</div>
+
+<div>
+<strong>Select B</strong>
+
+<p>
+B starts at 3 ≥ previous finish 2.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="dry-step">
+
+<div class="dry-number">4</div>
+
+<div>
+<strong>Select D</strong>
+
+<p>
+D starts at 5 ≥ B's finish 5.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="dry-step">
+
+<div class="dry-number">5</div>
+
+<div>
+<strong>Select E</strong>
+
+<p>
+E starts at 8 ≥ D's finish 7.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="code-block">
+
+<div class="code-header">
+<span>Python — Activity Selection</span>
+<span>O(n log n)</span>
+</div>
+
+<pre class="code-body">def activity_selection(activities):
+
+    activities.sort(key=lambda x: x[1])
+
+    selected = []
+
+    last_finish = -1
+
+    for start, finish in activities:
+
+        if start >= last_finish:
+
+            selected.append((start, finish))
+
+            last_finish = finish
+
+    return selected
+
+
+activities = [
+    (1, 2),
+    (3, 5),
+    (0, 6),
+    (5, 7),
+    (8, 9)
+]
+
+print(activity_selection(activities))</pre>
+
+</div>
+
+
+<div class="callout">
+
+<strong>Complexity:</strong>
+
+Sorting takes O(n log n), traversal takes O(n).
+
+Overall:
+
+<strong>O(n log n)</strong>
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     07 FRACTIONAL KNAPSACK
+====================================================== -->
+
+<section class="section reveal" id="knapsack">
+
+<div class="section-heading">
+
+<div class="section-number">07</div>
+
+<div>
+
+<h2>Fractional Knapsack</h2>
+
+<p>Greedy works because items can be divided.</p>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3>Problem</h3>
+
+<p>
+You have a bag with limited capacity.
+Each item has a value and weight.
+You can take fractions of items.
+Maximize total value.
+</p>
+
+<div class="callout success">
+
+<strong>Greedy choice:</strong>
+
+Choose the item with the highest
+
+<strong>value / weight</strong>
+
+ratio first.
+
+</div>
+
+</div>
+
+
+<div class="grid-3">
+
+<div class="card">
+
+<h3>Item A</h3>
+
+<p>Value = 60</p>
+<p>Weight = 10</p>
+
+<strong>Ratio = 6</strong>
+
+</div>
+
+<div class="card">
+
+<h3>Item B</h3>
+
+<p>Value = 100</p>
+<p>Weight = 20</p>
+
+<strong>Ratio = 5</strong>
+
+</div>
+
+<div class="card">
+
+<h3>Item C</h3>
+
+<p>Value = 120</p>
+<p>Weight = 30</p>
+
+<strong>Ratio = 4</strong>
+
+</div>
+
+</div>
+
+
+<div class="knapsack-stage">
+
+<div class="item" id="itemA">
+
+<div class="item-name">A</div>
+<div>60 / 10</div>
+<div class="item-ratio">Ratio 6</div>
+
+</div>
+
+<div class="item" id="itemB">
+
+<div class="item-name">B</div>
+<div>100 / 20</div>
+<div class="item-ratio">Ratio 5</div>
+
+</div>
+
+<div class="item" id="itemC">
+
+<div class="item-name">C</div>
+<div>120 / 30</div>
+<div class="item-ratio">Ratio 4</div>
+
+</div>
+
+</div>
+
+
+<button class="btn primary"
+onclick="runKnapsack()">
+
+▶ Animate Knapsack
+
+</button>
+
+
+<div id="knapsackResult"
+class="callout success">
+
+Capacity = 50
+
+</div>
+
+
+<div class="code-block">
+
+<div class="code-header">
+<span>Python — Fractional Knapsack</span>
+<span>O(n log n)</span>
+</div>
+
+<pre class="code-body">def fractional_knapsack(items, capacity):
+
+    items.sort(
+        key=lambda x: x[0] / x[1],
+        reverse=True
+    )
+
+    total_value = 0
+
+    for value, weight in items:
+
+        if capacity >= weight:
+
+            capacity -= weight
+            total_value += value
+
+        else:
+
+            total_value += (
+                value / weight
+            ) * capacity
+
+            break
+
+    return total_value</pre>
+
+</div>
+
+
+<div class="callout warning">
+
+<strong>Important interview distinction:</strong>
+
+Greedy works for <strong>Fractional Knapsack</strong>.
+
+It does NOT generally work for <strong>0/1 Knapsack</strong>
+because items cannot be divided.
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     08 JOB SEQUENCING
+====================================================== -->
+
+<section class="section reveal" id="jobs">
+
+<div class="section-heading">
+
+<div class="section-number">08</div>
+
+<div>
+
+<h2>Job Sequencing with Deadlines</h2>
+
+<p>Maximize profit while completing jobs before deadlines.</p>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3>Problem</h3>
+
+<p>
+Each job has:
+</p>
+
+<ul>
+<li>Deadline</li>
+<li>Profit</li>
+<li>One unit of execution time</li>
+</ul>
+
+<p>
+Only one job can be executed at a time.
+</p>
+
+<div class="callout success">
+
+<strong>Greedy idea:</strong>
+
+Process jobs in descending order of profit
+and place each job in the latest available slot
+before its deadline.
+
+</div>
+
+</div>
+
+
+<div class="jobs">
+
+<div class="job" id="jobA">
+<strong>A</strong>
+<br>
+Profit 100
+<br>
+Deadline 2
+</div>
+
+<div class="job" id="jobB">
+<strong>B</strong>
+<br>
+Profit 19
+<br>
+Deadline 1
+</div>
+
+<div class="job" id="jobC">
+<strong>C</strong>
+<br>
+Profit 27
+<br>
+Deadline 2
+</div>
+
+<div class="job" id="jobD">
+<strong>D</strong>
+<br>
+Profit 25
+<br>
+Deadline 1
+</div>
+
+</div>
+
+
+<button
+class="btn primary"
+onclick="runJobs()"
+style="margin-top:20px;">
+
+▶ Schedule Jobs
+
+</button>
+
+
+<p id="jobResult" style="margin-top:15px;font-weight:800;"></p>
+
+
+<div class="code-block">
+
+<div class="code-header">
+<span>Python — Job Sequencing</span>
+<span>Greedy</span>
+</div>
+
+<pre class="code-body">def job_sequencing(jobs):
+
+    jobs.sort(
+        key=lambda x: x[2],
+        reverse=True
+    )
+
+    max_deadline = max(job[1] for job in jobs)
+
+    slots = [False] * (max_deadline + 1)
+
+    profit = 0
+
+    for job_id, deadline, value in jobs:
+
+        for slot in range(deadline, 0, -1):
+
+            if not slots[slot]:
+
+                slots[slot] = True
+                profit += value
+                break
+
+    return profit</pre>
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     09 COIN CHANGE
+====================================================== -->
+
+<section class="section reveal" id="coins">
+
+<div class="section-heading">
+
+<div class="section-number">09</div>
+
+<div>
+
+<h2>Minimum Number of Coins</h2>
+
+<p>Learn both the greedy success and greedy failure cases.</p>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3>Greedy Example</h3>
+
+<p>
+Coins:
+</p>
+
+<pre>
+[25, 10, 5, 1]
+
+Amount = 41
+</pre>
+
+<p>
+Choose the largest possible coin repeatedly.
+</p>
+
+<pre>
+41
+↓
+25
+↓
+16
+↓
+10
+↓
+6
+↓
+5
+↓
+1
+
+Answer = 4 coins
+</pre>
+
+</div>
+
+
+<div class="callout danger">
+
+<strong>But greedy is NOT universally correct.</strong>
+
+Consider:
+
+<pre>
+Coins = [1, 3, 4]
+Amount = 6
+</pre>
+
+Greedy:
+
+<pre>
+4 + 1 + 1 = 6
+
+3 coins
+</pre>
+
+Optimal:
+
+<pre>
+3 + 3 = 6
+
+2 coins
+</pre>
+
+Therefore:
+
+<strong>Greedy fails.</strong>
+
+</div>
+
+
+<div class="code-block">
+
+<div class="code-header">
+<span>Python — Greedy Coin Change</span>
+<span>Works only for suitable coin systems</span>
+</div>
+
+<pre class="code-body">def greedy_coins(coins, amount):
+
+    coins.sort(reverse=True)
+
+    count = 0
+
+    for coin in coins:
+
+        count += amount // coin
+
+        amount %= coin
+
+    return count</pre>
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     10 MINIMUM PLATFORMS
+====================================================== -->
+
+<section class="section reveal" id="platforms">
+
+<div class="section-heading">
+
+<div class="section-number">10</div>
+
+<div>
+
+<h2>Minimum Platforms</h2>
+
+<p>A classic interval and sorting problem.</p>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3>Problem</h3>
+
+<p>
+Given train arrival and departure times,
+find the minimum number of platforms required
+so that no train has to wait.
+</p>
+
+<div class="callout success">
+
+<strong>Greedy idea:</strong>
+
+Sort arrival and departure times separately
+and process the next event chronologically.
+
+</div>
+
+
+<div class="code-block">
+
+<div class="code-header">
+<span>Python — Minimum Platforms</span>
+</div>
+
+<pre class="code-body">def minimum_platforms(arrival, departure):
+
+    arrival.sort()
+    departure.sort()
+
+    i = 0
+    j = 0
+
+    platforms = 0
+    answer = 0
+
+    while i &lt; len(arrival):
+
+        if arrival[i] &lt;= departure[j]:
+
+            platforms += 1
+            i += 1
+
+            answer = max(answer, platforms)
+
+        else:
+
+            platforms -= 1
+            j += 1
+
+    return answer</pre>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     11 ASSIGN COOKIES
+====================================================== -->
+
+<section class="section reveal" id="cookies">
+
+<div class="section-heading">
+
+<div class="section-number">11</div>
+
+<div>
+
+<h2>Assign Cookies</h2>
+
+<p>Greedy matching between two sorted arrays.</p>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3>Problem</h3>
+
+<p>
+Each child has a greed factor.
+Each cookie has a size.
+A cookie satisfies a child if:
+
+</p>
+
+<pre>
+cookie size >= child's greed
+</pre>
+
+<div class="callout success">
+
+<strong>Greedy:</strong>
+
+Give the smallest cookie that can satisfy
+the current least-demanding child.
+
+</div>
+
+
+<div class="code-block">
+
+<div class="code-header">
+<span>Python — Assign Cookies</span>
+</div>
+
+<pre class="code-body">def find_content_children(greed, cookies):
+
+    greed.sort()
+    cookies.sort()
+
+    child = 0
+
+    for cookie in cookies:
+
+        if child &lt; len(greed) and cookie >= greed[child]:
+
+            child += 1
+
+    return child</pre>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     12 JUMP GAME
+====================================================== -->
+
+<section class="section reveal" id="jump">
+
+<div class="section-heading">
+
+<div class="section-number">12</div>
+
+<div>
+
+<h2>Jump Game</h2>
+
+<p>Maintain the farthest reachable position.</p>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3>Example</h3>
+
+<pre>
+nums = [2, 3, 1, 1, 4]
+
+index:
+  0  1  2  3  4
+
+value:
+  2  3  1  1  4
+</pre>
+
+<p>
+At every position, calculate the farthest position
+you can reach.
+</p>
+
+
+<div class="callout success">
+
+<strong>Greedy state:</strong>
+
+<strong>max_reach</strong>
+
+Keep updating the farthest reachable index.
+
+</div>
+
+
+<div class="code-block">
+
+<div class="code-header">
+<span>Python — Jump Game</span>
+</div>
+
+<pre class="code-body">def can_jump(nums):
+
+    max_reach = 0
+
+    for i in range(len(nums)):
+
+        if i > max_reach:
+            return False
+
+        max_reach = max(
+            max_reach,
+            i + nums[i]
+        )
+
+    return True</pre>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     13 GAS STATION
+====================================================== -->
+
+<section class="section reveal" id="gas">
+
+<div class="section-heading">
+
+<div class="section-number">13</div>
+
+<div>
+
+<h2>Gas Station</h2>
+
+<p>Understand a powerful greedy reset technique.</p>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3>Core Idea</h3>
+
+<p>
+If your current fuel becomes negative while traveling
+from station <strong>start</strong> to station <strong>i</strong>,
+then none of the stations between start and i can be
+a valid starting point.
+</p>
+
+
+<div class="callout">
+
+<strong>Greedy reset:</strong>
+
+When current fuel &lt; 0:
+
+<pre>
+start = i + 1
+current = 0
+</pre>
+
+</div>
+
+
+<div class="code-block">
+
+<div class="code-header">
+<span>Python — Gas Station</span>
+</div>
+
+<pre class="code-body">def can_complete_circuit(gas, cost):
+
+    if sum(gas) &lt; sum(cost):
+        return -1
+
+    start = 0
+    fuel = 0
+
+    for i in range(len(gas)):
+
+        fuel += gas[i] - cost[i]
+
+        if fuel &lt; 0:
+
+            start = i + 1
+            fuel = 0
+
+    return start</pre>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     14 PARTITION LABELS
+====================================================== -->
+
+<section class="section reveal" id="partition">
+
+<div class="section-heading">
+
+<div class="section-number">14</div>
+
+<div>
+
+<h2>Partition Labels</h2>
+
+<p>Greedy interval expansion.</p>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3>Example</h3>
+
+<pre>
+s = "ababcbacadefegdehijhklij"
+
+Answer:
+[9, 7, 8]
+</pre>
+
+<p>
+The goal is to partition the string so that each character
+appears in at most one partition.
+</p>
+
+<div class="callout success">
+
+<strong>Greedy idea:</strong>
+
+Find the last occurrence of every character.
+
+Expand the current partition until all characters
+inside it have their last occurrence within the partition.
+
+</div>
+
+
+<div class="code-block">
+
+<div class="code-header">
+<span>Python — Partition Labels</span>
+</div>
+
+<pre class="code-body">def partition_labels(s):
+
+    last = {}
+
+    for i, ch in enumerate(s):
+        last[ch] = i
+
+    result = []
+
+    start = 0
+    end = 0
+
+    for i, ch in enumerate(s):
+
+        end = max(end, last[ch])
+
+        if i == end:
+
+            result.append(
+                end - start + 1
+            )
+
+            start = i + 1
+
+    return result</pre>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     15 HUFFMAN CODING
+====================================================== -->
+
+<section class="section reveal" id="huffman">
+
+<div class="section-heading">
+
+<div class="section-number">15</div>
+
+<div>
+
+<h2>Huffman Coding</h2>
+
+<p>A major greedy algorithm used for lossless compression.</p>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3>Core Idea</h3>
+
+<p>
+Characters that occur frequently should receive shorter
+binary codes, while less frequent characters receive
+longer codes.
+</p>
+
+<div class="callout success">
+
+<strong>Greedy choice:</strong>
+
+Repeatedly combine the two nodes with the smallest
+frequencies.
+
+</div>
+
+
+<pre>
+Frequencies:
+
+A = 5
+B = 9
+C = 12
+D = 13
+E = 16
+F = 45
+
+Pick:
+5 + 9 = 14
+
+Then:
+12 + 13 = 25
+
+Continue...
+
+This produces a Huffman Tree.
+</pre>
+
+
+<div class="code-block">
+
+<div class="code-header">
+<span>Python — Huffman Core Idea</span>
+</div>
+
+<pre class="code-body">import heapq
+
+def huffman(frequencies):
+
+    heap = list(frequencies.values())
+
+    heapq.heapify(heap)
+
+    while len(heap) > 1:
+
+        first = heapq.heappop(heap)
+        second = heapq.heappop(heap)
+
+        combined = first + second
+
+        heapq.heappush(
+            heap,
+            combined
+        )
+
+    return heap[0]</pre>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     16 MST CONNECTION
+====================================================== -->
+
+<section class="section reveal" id="mst">
+
+<div class="section-heading">
+
+<div class="section-number">16</div>
+
+<div>
+
+<h2>Greedy Algorithms in Graphs</h2>
+
+<p>Kruskal and Prim are classic greedy algorithms.</p>
+
+</div>
+
+</div>
+
+
+<div class="grid-2">
+
+<div class="card algorithm-card">
+
+<h3>Kruskal's Algorithm</h3>
+
+<p>
+Sort all edges by weight.
+Take the smallest edge that does not create a cycle.
+</p>
+
+<pre>
+Sort edges
+    ↓
+Smallest edge
+    ↓
+Cycle?
+ /     \
+No      Yes
+↓        ↓
+Take    Skip
+</pre>
+
+<p class="complexity">
+O(E log E)
+</p>
+
+</div>
+
+
+<div class="card algorithm-card">
+
+<h3>Prim's Algorithm</h3>
+
+<p>
+Start from one vertex and repeatedly select
+the minimum-weight edge connecting the tree
+to a new vertex.
+</p>
+
+<pre>
+Start vertex
+    ↓
+Cheapest connecting edge
+    ↓
+Add vertex
+    ↓
+Repeat
+</pre>
+
+<p class="complexity">
+O(E log V)
+</p>
+
+</div>
+
+</div>
+
+
+<div class="callout">
+
+<strong>Important connection:</strong>
+
+You learned these algorithms in Graphs,
+but conceptually they are also examples of
+<strong>greedy decision making</strong>.
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     17 CORRECTNESS PROOF
+====================================================== -->
+
+<section class="section reveal" id="proof">
+
+<div class="section-heading">
+
+<div class="section-number">17</div>
+
+<div>
+
+<h2>How to Prove a Greedy Algorithm</h2>
+
+<p>Move from coding to interview-level reasoning.</p>
+
+</div>
+
+</div>
+
+
+<div class="proof-box">
+
+<h3>Exchange Argument</h3>
+
+<p>
+A common proof technique is to show that an optimal solution
+can be transformed so that it contains the greedy choice
+without making the solution worse.
+</p>
+
+
+<div class="proof-step">
+
+<div class="proof-number">1</div>
+
+<div>
+<strong>Choose the greedy option.</strong>
+</div>
+
+</div>
+
+
+<div class="proof-step">
+
+<div class="proof-number">2</div>
+
+<div>
+<strong>Take an optimal solution.</strong>
+</div>
+
+</div>
+
+
+<div class="proof-step">
+
+<div class="proof-number">3</div>
+
+<div>
+<strong>Replace its first choice with the greedy choice.</strong>
+</div>
+
+</div>
+
+
+<div class="proof-step">
+
+<div class="proof-number">4</div>
+
+<div>
+<strong>Show that the solution remains valid or no worse.</strong>
+</div>
+
+</div>
+
+
+<div class="proof-step">
+
+<div class="proof-number">5</div>
+
+<div>
+<strong>Therefore the greedy choice is safe.</strong>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="callout success">
+
+<strong>Activity Selection Proof Intuition</strong>
+
+Choosing the activity that finishes earliest leaves
+at least as much remaining time as any other first choice.
+
+Therefore an optimal solution can always be modified
+to use the earliest-finishing activity first.
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     18 GREEDY VS DP VS BRUTE FORCE
+====================================================== -->
+
+<section class="section reveal" id="comparison">
+
+<div class="section-heading">
+
+<div class="section-number">18</div>
+
+<div>
+
+<h2>Greedy vs Brute Force vs Dynamic Programming</h2>
+
+<p>Know which technique to choose.</p>
+
+</div>
+
+</div>
+
+
+<table class="comparison-table">
+
+<thead>
+
+<tr>
+<th>Feature</th>
+<th>Greedy</th>
+<th>Dynamic Programming</th>
+<th>Brute Force</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td>Decision</td>
+<td>Best current choice</td>
+<td>Compare subproblems</td>
+<td>Try everything</td>
+</tr>
+
+<tr>
+<td>Reconsider choices?</td>
+<td>Usually no</td>
+<td>Yes through states</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Speed</td>
+<td>Usually fast</td>
+<td>Moderate</td>
+<td>Often slow</td>
+</tr>
+
+<tr>
+<td>Proof required</td>
+<td>Very important</td>
+<td>Recurrence correctness</td>
+<td>Exhaustive search</td>
+</tr>
+
+<tr>
+<td>Example</td>
+<td>Activity Selection</td>
+<td>0/1 Knapsack</td>
+<td>Subset Enumeration</td>
+</tr>
+
+</tbody>
+
+</table>
+
+
+<div class="callout danger">
+
+<strong>Classic trap:</strong>
+
+Do not solve every optimization problem greedily.
+
+<strong>0/1 Knapsack</strong> is the classic example where
+greedy based on value/weight can fail.
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     19 INTERVIEW PATTERNS
+====================================================== -->
+
+<section class="section reveal" id="patterns">
+
+<div class="section-heading">
+
+<div class="section-number">19</div>
+
+<div>
+
+<h2>Greedy Interview Pattern Recognition</h2>
+
+<p>What should come into your mind when you see these patterns?</p>
+
+</div>
+
+</div>
+
+
+<div class="grid-3">
+
+<div class="card">
+
+<h3>Pattern 1</h3>
+
+<h4>Intervals</h4>
+
+<p>
+Try sorting by:
+</p>
+
+<pre>
+finish time
+start time
+end time
+</pre>
+
+</div>
+
+
+<div class="card">
+
+<h3>Pattern 2</h3>
+
+<h4>Ratio</h4>
+
+<p>
+Look for:
+</p>
+
+<pre>
+value / weight
+profit / cost
+</pre>
+
+</div>
+
+
+<div class="card">
+
+<h3>Pattern 3</h3>
+
+<h4>Deadlines</h4>
+
+<p>
+Think:
+</p>
+
+<pre>
+highest profit
+latest available slot
+</pre>
+
+</div>
+
+
+<div class="card">
+
+<h3>Pattern 4</h3>
+
+<h4>Reachability</h4>
+
+<p>
+Maintain:
+</p>
+
+<pre>
+maximum reach
+</pre>
+
+</div>
+
+
+<div class="card">
+
+<h3>Pattern 5</h3>
+
+<h4>Two Arrays</h4>
+
+<p>
+Sort both and use two pointers.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h3>Pattern 6</h3>
+
+<h4>Priority Queue</h4>
+
+<p>
+Repeatedly choose the minimum
+or maximum available item.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     20 INTERACTIVE VISUALIZER
+====================================================== -->
+
+<section class="section reveal" id="visualizer">
+
+<div class="section-heading">
+
+<div class="section-number">20</div>
+
+<div>
+
+<h2>Interactive Greedy Visualizer</h2>
+
+<p>
+Watch local choices being made step by step.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="greedy-visualizer">
+
+<h3>⚡ Greedy Choice Simulator</h3>
+
+<p style="color:#94a3b8;">
+This example chooses the largest useful value at each step.
+</p>
+
+
+<div class="visualizer-grid">
+
+
+<div class="choice-area">
+
+<h4>Available Choices</h4>
+
+<div class="choice-items">
+
+<div class="choice-item" id="choice1">
+25
+</div>
+
+<div class="choice-item" id="choice2">
+20
+</div>
+
+<div class="choice-item" id="choice3">
+10
+</div>
+
+<div class="choice-item" id="choice4">
+5
+</div>
+
+<div class="choice-item" id="choice5">
+1
+</div>
+
+</div>
+
+</div>
+
+
+<div class="state-panel">
+
+<h4>Current State</h4>
+
+<div class="state-value" id="remainingValue">
+41
+</div>
+
+<p class="status-message" id="greedyStatus">
+Press Start to begin.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="visualizer-buttons">
+
+<button
+class="btn primary"
+onclick="startGreedyVisualizer()">
+
+▶ Start
+
+</button>
+
+<button
+class="btn secondary"
+onclick="nextGreedyStep()">
+
+Next Step
+
+</button>
+
+<button
+class="btn secondary"
+onclick="resetGreedyVisualizer()">
+
+↻ Reset
+
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     21 COMMON MISTAKES
+====================================================== -->
+
+<section class="section reveal" id="mistakes">
+
+<div class="section-heading">
+
+<div class="section-number">21</div>
+
+<div>
+
+<h2>Common Greedy Mistakes</h2>
+
+<p>Errors students frequently make in interviews.</p>
+
+</div>
+
+</div>
+
+
+<div class="mistake">
+
+<strong>❌ Mistake 1 — Assuming greedy always works</strong>
+
+<p>
+Greedy is not a universal optimization technique.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<strong>❌ Mistake 2 — Choosing randomly</strong>
+
+<p>
+A greedy choice must have a reason.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<strong>❌ Mistake 3 — Ignoring sorting</strong>
+
+<p>
+Many greedy algorithms become obvious only after sorting.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<strong>❌ Mistake 4 — Confusing local and global optimum</strong>
+
+<p>
+The best immediate choice is not automatically the best overall choice.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<strong>❌ Mistake 5 — Forgetting edge cases</strong>
+
+<p>
+Always test empty input, one item, impossible cases,
+duplicates and boundary conditions.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<strong>❌ Mistake 6 — Using greedy for 0/1 Knapsack</strong>
+
+<p>
+Fractional Knapsack is greedy.
+0/1 Knapsack generally requires DP or another exhaustive optimization technique.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     22 PRACTICE
+====================================================== -->
+
+<section class="section reveal" id="practice">
+
+<div class="section-heading">
+
+<div class="section-number">22</div>
+
+<div>
+
+<h2>Greedy Practice Problems</h2>
+
+<p>Progress from beginner to interview level.</p>
+
+</div>
+
+</div>
+
+
+<div class="grid-3">
+
+
+<div class="card">
+
+<h3>🟢 Beginner</h3>
+
+<ol>
+<li>Assign Cookies</li>
+<li>Minimum Coins</li>
+<li>Best Time to Buy/Sell Stock</li>
+<li>Jump Game</li>
+</ol>
+
+</div>
+
+
+<div class="card">
+
+<h3>🟡 Intermediate</h3>
+
+<ol>
+<li>Activity Selection</li>
+<li>Fractional Knapsack</li>
+<li>Minimum Platforms</li>
+<li>Gas Station</li>
+<li>Partition Labels</li>
+</ol>
+
+</div>
+
+
+<div class="card">
+
+<h3>🔴 Advanced</h3>
+
+<ol>
+<li>Job Sequencing</li>
+<li>Huffman Coding</li>
+<li>Merge Intervals</li>
+<li>Non-overlapping Intervals</li>
+<li>Minimum Number of Arrows</li>
+</ol>
+
+</div>
+
+
+</div>
+
+
+<div class="card">
+
+<h3>🔥 Interview Challenge</h3>
+
+<p>
+For every greedy problem, explain these four things before coding:
+</p>
+
+<pre>
+1. What is the greedy choice?
+
+2. Why is the choice safe?
+
+3. What state do I maintain?
+
+4. What is the complexity?
+</pre>
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     23 QUIZ
+====================================================== -->
+
+<section class="section reveal" id="quiz">
+
+<div class="section-heading">
+
+<div class="section-number">23</div>
+
+<div>
+
+<h2>Greedy Algorithms Quiz</h2>
+
+<p>Test your understanding.</p>
+
+</div>
+
+</div>
+
+
+<div class="quiz-question">
+
+<strong>Q1. What is the main idea of greedy algorithms?</strong>
+
+<div class="quiz-options">
+
+<button class="quiz-option"
+onclick="answerQuiz(this,true)">
+Make the best available local choice
+</button>
+
+<button class="quiz-option"
+onclick="answerQuiz(this,false)">
+Try every possible solution
+</button>
+
+<button class="quiz-option"
+onclick="answerQuiz(this,false)">
+Always use recursion
+</button>
+
+</div>
+
+<div class="quiz-answer">
+✓ Correct — Greedy repeatedly makes a locally optimal choice.
+</div>
+
+</div>
+
+
+<div class="quiz-question">
+
+<strong>
+Q2. Which property says that a local choice can be part
+of a global optimum?
+</strong>
+
+<div class="quiz-options">
+
+<button class="quiz-option"
+onclick="answerQuiz(this,true)">
+Greedy Choice Property
+</button>
+
+<button class="quiz-option"
+onclick="answerQuiz(this,false)">
+Hash Property
+</button>
+
+<button class="quiz-option"
+onclick="answerQuiz(this,false)">
+Binary Property
+</button>
+
+</div>
+
+<div class="quiz-answer">
+✓ Correct.
+</div>
+
+</div>
+
+
+<div class="quiz-question">
+
+<strong>
+Q3. Does greedy always solve Coin Change optimally?
+</strong>
+
+<div class="quiz-options">
+
+<button class="quiz-option"
+onclick="answerQuiz(this,false)">
+Yes, always
+</button>
+
+<button class="quiz-option"
+onclick="answerQuiz(this,true)">
+No
+</button>
+
+<button class="quiz-option"
+onclick="answerQuiz(this,false)">
+Only with recursion
+</button>
+
+</div>
+
+<div class="quiz-answer">
+✓ Correct — coin systems such as [1,3,4] demonstrate greedy failure.
+</div>
+
+</div>
+
+
+<div class="quiz-question">
+
+<strong>
+Q4. What is the greedy strategy for Fractional Knapsack?
+</strong>
+
+<div class="quiz-options">
+
+<button class="quiz-option"
+onclick="answerQuiz(this,true)">
+Highest value/weight ratio
+</button>
+
+<button class="quiz-option"
+onclick="answerQuiz(this,false)">
+Lowest weight only
+</button>
+
+<button class="quiz-option"
+onclick="answerQuiz(this,false)">
+Highest total weight
+</button>
+
+</div>
+
+<div class="quiz-answer">
+✓ Correct.
+</div>
+
+</div>
+
+
+<div class="quiz-question">
+
+<strong>
+Q5. Which classic problem demonstrates that greedy
+does not work for every knapsack variant?
+</strong>
+
+<div class="quiz-options">
+
+<button class="quiz-option"
+onclick="answerQuiz(this,true)">
+0/1 Knapsack
+</button>
+
+<button class="quiz-option"
+onclick="answerQuiz(this,false)">
+Fractional Knapsack
+</button>
+
+<button class="quiz-option"
+onclick="answerQuiz(this,false)">
+Activity Selection
+</button>
+
+</div>
+
+<div class="quiz-answer">
+✓ Correct.
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     24 ROADMAP
+====================================================== -->
+
+<section class="section reveal" id="roadmap">
+
+<div class="section-heading">
+
+<div class="section-number">24</div>
+
+<div>
+
+<h2>Greedy Mastery Roadmap</h2>
+
+<p>What to learn in order.</p>
+
+</div>
+
+</div>
+
+
+<div class="roadmap">
+
+<div class="roadmap-step active">
+
+<strong>01</strong>
+
+<h3>Foundation</h3>
+
+<p>
+Local vs global optimum
+</p>
+
+</div>
+
+
+<div class="roadmap-step">
+
+<strong>02</strong>
+
+<h3>Intervals</h3>
+
+<p>
+Activity Selection
+</p>
+
+</div>
+
+
+<div class="roadmap-step">
+
+<strong>03</strong>
+
+<h3>Optimization</h3>
+
+<p>
+Fractional Knapsack
+</p>
+
+</div>
+
+
+<div class="roadmap-step">
+
+<strong>04</strong>
+
+<h3>Scheduling</h3>
+
+<p>
+Job Sequencing
+</p>
+
+</div>
+
+
+<div class="roadmap-step">
+
+<strong>05</strong>
+
+<h3>Two Pointers</h3>
+
+<p>
+Assign Cookies
+</p>
+
+</div>
+
+
+<div class="roadmap-step">
+
+<strong>06</strong>
+
+<h3>Reachability</h3>
+
+<p>
+Jump Game
+</p>
+
+</div>
+
+
+<div class="roadmap-step">
+
+<strong>07</strong>
+
+<h3>Advanced Greedy</h3>
+
+<p>
+Gas Station & Partition Labels
+</p>
+
+</div>
+
+
+<div class="roadmap-step">
+
+<strong>08</strong>
+
+<h3>Graph Greedy</h3>
+
+<p>
+Kruskal + Prim
+</p>
+
+</div>
+
+
+<div class="roadmap-step">
+
+<strong>09</strong>
+
+<h3>Proof</h3>
+
+<p>
+Exchange Arguments
+</p>
+
+</div>
+
+
+<div class="roadmap-step">
+
+<strong>10</strong>
+
+<h3>Interview Mastery</h3>
+
+<p>
+Recognize patterns quickly
+</p>
+
+</div>
+
+</div>
+
+
+<div class="callout success" style="margin-top:25px;">
+
+<strong>🎯 Final Goal</strong>
+
+By the end of this lesson, you should be able to look at a new
+optimization problem and ask:
+
+<pre>
+"What is the greedy choice?"
+
+"Why is it safe?"
+
+"What state should I maintain?"
+
+"Can I prove it?"
+
+"What is the complexity?"
+</pre>
+
+</div>
+
+</section>
+
+
+<!-- ======================================================
+     FINAL MASTERY
+====================================================== -->
+
+<section class="section reveal">
+
+<div class="card" style="
+background:linear-gradient(
+135deg,
+#eff6ff,
+#faf5ff
+);
+border-color:#c7d2fe;
+">
+
+<h2>🏆 Greedy Algorithm Mastery</h2>
+
+<p style="margin-top:12px;">
+
+Greedy algorithms are not about making careless quick decisions.
+They are about identifying a <strong>safe local decision</strong>
+that preserves the possibility of obtaining the global optimum.
+
+</p>
+
+<div class="grid-3" style="margin-top:20px;">
+
+<div>
+<strong>Think</strong>
+<p>Identify the greedy choice.</p>
+</div>
+
+<div>
+<strong>Prove</strong>
+<p>Show why the choice is safe.</p>
+</div>
+
+<div>
+<strong>Code</strong>
+<p>Implement efficiently.</p>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+</main>
+
+</div>
+
+
+<!-- ======================================================
+     FOOTER
+====================================================== -->
+
+<footer>
+
+<strong>ZENSUS</strong>
+
+<br>
+
+Direction Before Destination
+
+<br><br>
+
+Lesson 14 — Greedy Algorithms
+
+</footer>
+
+
+<!-- ======================================================
+     JAVASCRIPT
+====================================================== -->
+
+<script>
+
+/* =========================================================
+   SCROLL REVEAL
+========================================================= */
+
+const revealElements =
+document.querySelectorAll(".reveal");
+
+const observer =
+new IntersectionObserver(
+(entries) => {
+
+    entries.forEach(entry => {
+
+        if(entry.isIntersecting) {
+
+            entry.target.classList.add("visible");
+
+        }
+
+    });
+
+},
+{
+    threshold: 0.08
+});
+
+revealElements.forEach(
+element => observer.observe(element)
+);
+
+
+/* =========================================================
+   ACTIVITY SELECTION ANIMATION
+========================================================= */
+
+let activityTimer;
+
+function resetActivity() {
+
+    clearInterval(activityTimer);
+
+    document
+    .querySelectorAll(".activity")
+    .forEach(item => {
+
+        item.classList.remove(
+            "selected",
+            "rejected"
+        );
+
+    });
+
+    document.getElementById(
+        "activityStatus"
+    ).textContent = "Ready.";
+
+}
+
+
+function startActivityAnimation() {
+
+    resetActivity();
+
+    const activities =
+    [...document.querySelectorAll(".activity")];
+
+    let index = 0;
+
+    let lastFinish = 0;
+
+    activityTimer =
+    setInterval(() => {
+
+        if(index >= activities.length) {
+
+            clearInterval(activityTimer);
+
+            document.getElementById(
+                "activityStatus"
+            ).textContent =
+            "✓ Maximum compatible activities selected.";
+
+            return;
+        }
+
+        const activity =
+        activities[index];
+
+        /*
+         Example finish values:
+         A = 2
+         B = 5
+         C = 6
+         D = 7
+         E = 9
+        */
+
+        const finishValues =
+        [2,5,6,7,9];
+
+        const startValues =
+        [1,3,0,5,8];
+
+        if(startValues[index] >= lastFinish) {
+
+            activity.classList.add("selected");
+
+            lastFinish =
+            finishValues[index];
+
+            document.getElementById(
+                "activityStatus"
+            ).textContent =
+            `✓ Select ${activity.textContent}`;
+
+        } else {
+
+            activity.classList.add("rejected");
+
+            document.getElementById(
+                "activityStatus"
+            ).textContent =
+            `✗ Skip ${activity.textContent} — overlaps.`;
+
+        }
+
+        index++;
+
+    }, 1100);
+
+}
+
+
+/* =========================================================
+   KNAPSACK ANIMATION
+========================================================= */
+
+function runKnapsack() {
+
+    const items = [
+        document.getElementById("itemA"),
+        document.getElementById("itemB"),
+        document.getElementById("itemC")
+    ];
+
+    items.forEach(item => {
+
+        item.classList.remove(
+            "active",
+            "partial"
+        );
+
+    });
+
+    document.getElementById(
+        "knapsackResult"
+    ).textContent =
+    "Capacity = 50 | Sorting by value/weight ratio...";
+
+    setTimeout(() => {
+
+        items[0].classList.add("active");
+
+        document.getElementById(
+            "knapsackResult"
+        ).textContent =
+        "Take A — weight 10, value 60";
+
+    },700);
+
+
+    setTimeout(() => {
+
+        items[1].classList.add("active");
+
+        document.getElementById(
+            "knapsackResult"
+        ).textContent =
+        "Take B — weight 20, value 100";
+
+    },1500);
+
+
+    setTimeout(() => {
+
+        items[2].classList.add("partial");
+
+        document.getElementById(
+            "knapsackResult"
+        ).textContent =
+        "Take 20/30 of C — total value = 240";
+
+    },2300);
+
+}
+
+
+/* =========================================================
+   JOB SEQUENCING
+========================================================= */
+
+function runJobs() {
+
+    const jobs =
+    document.querySelectorAll(".job");
+
+    jobs.forEach(
+        job => job.classList.remove("selected")
+    );
+
+    const selected =
+    [
+        document.getElementById("jobA"),
+        document.getElementById("jobC")
+    ];
+
+    selected.forEach((job,index) => {
+
+        setTimeout(() => {
+
+            job.classList.add("selected");
+
+        }, index * 700);
+
+    });
+
+
+    setTimeout(() => {
+
+        document.getElementById(
+            "jobResult"
+        ).textContent =
+        "✓ Highest-profit feasible schedule selected.";
+
+    },1500);
+
+}
+
+
+/* =========================================================
+   GREEDY VISUALIZER
+========================================================= */
+
+let greedyRemaining = 41;
+
+let greedyStarted = false;
+
+const greedyChoices =
+[
+    {
+        value:25,
+        id:"choice1"
+    },
+    {
+        value:20,
+        id:"choice2"
+    },
+    {
+        value:10,
+        id:"choice3"
+    },
+    {
+        value:5,
+        id:"choice4"
+    },
+    {
+        value:1,
+        id:"choice5"
+    }
+];
+
+
+function resetGreedyVisualizer() {
+
+    greedyRemaining = 41;
+
+    greedyStarted = false;
+
+    document.getElementById(
+        "remainingValue"
+    ).textContent = 41;
+
+    document.getElementById(
+        "greedyStatus"
+    ).textContent =
+    "Press Start to begin.";
+
+    document
+    .querySelectorAll(".choice-item")
+    .forEach(item => {
+
+        item.classList.remove(
+            "current",
+            "chosen",
+            "skipped"
+        );
+
+    });
+
+}
+
+
+function startGreedyVisualizer() {
+
+    resetGreedyVisualizer();
+
+    greedyStarted = true;
+
+    document.getElementById(
+        "greedyStatus"
+    ).textContent =
+    "Greedy begins by choosing the largest useful value.";
+
+    nextGreedyStep();
+
+}
+
+
+function nextGreedyStep() {
+
+    if(!greedyStarted) {
+
+        greedyStarted = true;
+
+    }
+
+    if(greedyRemaining <= 0) {
+
+        document.getElementById(
+            "greedyStatus"
+        ).textContent =
+        "✓ Target reached.";
+
+        return;
+
+    }
+
+
+    const possible =
+    greedyChoices
+    .filter(
+        choice =>
+        choice.value <= greedyRemaining
+    );
+
+
+    if(possible.length === 0) {
+
+        document.getElementById(
+            "greedyStatus"
+        ).textContent =
+        "No feasible greedy choice.";
+
+        return;
+
+    }
+
+
+    const choice =
+    possible[0];
+
+
+    document
+    .querySelectorAll(".choice-item")
+    .forEach(item => {
+
+        item.classList.remove("current");
+
+    });
+
+
+    const element =
+    document.getElementById(
+        choice.id
+    );
+
+
+    element.classList.add("current");
+
+    element.style.animation =
+    "pulseChoice .8s";
+
+
+    setTimeout(() => {
+
+        element.classList.remove("current");
+
+        element.classList.add("chosen");
+
+        greedyRemaining -=
+        choice.value;
+
+        document.getElementById(
+            "remainingValue"
+        ).textContent =
+        greedyRemaining;
+
+
+        document.getElementById(
+            "greedyStatus"
+        ).textContent =
+        `✓ Choose ${choice.value}. Remaining = ${greedyRemaining}`;
+
+    },500);
+
+}
+
+
+/* =========================================================
+   QUIZ
+========================================================= */
+
+function answerQuiz(button, correct) {
+
+    const parent =
+    button.closest(".quiz-question");
+
+    parent
+    .querySelectorAll(".quiz-option")
+    .forEach(option => {
+
+        option.disabled = true;
+
+    });
+
+
+    if(correct) {
+
+        button.classList.add("correct");
+
+        parent
+        .querySelector(".quiz-answer")
+        .classList.add("show");
+
+    } else {
+
+        button.classList.add("wrong");
+
+    }
+
+}
+
+
+/* =========================================================
+   KEYBOARD ACCESSIBILITY
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if(event.key === "Escape") {
+
+            resetActivity();
+            resetGreedyVisualizer();
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>

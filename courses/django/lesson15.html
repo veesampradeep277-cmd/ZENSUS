@@ -1,0 +1,2535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ZENSUS | Django Lesson 15</title>
+
+    <style>
+        :root {
+            --blue: #2563eb;
+            --blue-dark: #1d4ed8;
+            --blue-light: #eff6ff;
+            --blue-soft: #dbeafe;
+            --blue-border: #bfdbfe;
+
+            --text: #10213f;
+            --text-light: #5f6f86;
+            --muted: #8b9ab0;
+
+            --bg: #f7faff;
+            --white: #ffffff;
+            --border: #dce6f2;
+
+            --green: #16a34a;
+            --green-light: #f0fdf4;
+
+            --orange: #f59e0b;
+            --orange-light: #fffbeb;
+
+            --red: #dc2626;
+            --red-light: #fef2f2;
+
+            --shadow: 0 10px 30px rgba(37, 99, 235, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        /* Progress */
+        #progressBar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 4px;
+            background: var(--blue);
+            z-index: 9999;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 270px;
+            height: 100vh;
+            background: white;
+            border-right: 1px solid var(--border);
+            padding: 24px 18px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .logo {
+            width: 44px;
+            height: 44px;
+            background: var(--blue);
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .brand h2 {
+            font-size: 21px;
+        }
+
+        .brand span {
+            display: block;
+            color: var(--muted);
+            font-size: 10px;
+            letter-spacing: 1px;
+        }
+
+        .lesson-label {
+            font-size: 11px;
+            font-weight: bold;
+            color: var(--muted);
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .nav a {
+            display: block;
+            text-decoration: none;
+            color: var(--text-light);
+            font-size: 13px;
+            padding: 9px 11px;
+            border-radius: 8px;
+            margin-bottom: 3px;
+            transition: 0.2s;
+        }
+
+        .nav a:hover,
+        .nav a.active {
+            color: var(--blue);
+            background: var(--blue-light);
+            font-weight: bold;
+        }
+
+        /* Main */
+        .main {
+            margin-left: 270px;
+            padding: 45px 6%;
+            max-width: 1500px;
+        }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, #eff6ff, #ffffff);
+            border: 1px solid var(--blue-border);
+            border-radius: 24px;
+            padding: 42px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            background: rgba(37, 99, 235, 0.07);
+            border-radius: 50%;
+            right: -100px;
+            top: -100px;
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .badge {
+            background: white;
+            color: var(--blue);
+            border: 1px solid var(--blue-border);
+            padding: 5px 11px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .hero h1 {
+            font-size: clamp(30px, 5vw, 50px);
+            line-height: 1.15;
+            margin-bottom: 15px;
+        }
+
+        .hero p {
+            color: var(--text-light);
+            max-width: 900px;
+            font-size: 16px;
+        }
+
+        /* Search */
+        .search {
+            margin: 25px 0;
+        }
+
+        .search input {
+            width: 100%;
+            padding: 15px 18px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: white;
+            outline: none;
+            font-size: 14px;
+            box-shadow: var(--shadow);
+        }
+
+        .search input:focus {
+            border-color: var(--blue);
+        }
+
+        /* Sections */
+        section {
+            margin-top: 60px;
+            scroll-margin-top: 30px;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .section-number {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        h2 {
+            font-size: 28px;
+        }
+
+        h3 {
+            font-size: 19px;
+            margin: 18px 0 9px;
+        }
+
+        p {
+            color: var(--text-light);
+            margin: 8px 0;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .info-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 20px;
+            transition: 0.25s;
+        }
+
+        .info-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--blue-border);
+            box-shadow: var(--shadow);
+        }
+
+        .icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 11px;
+            background: var(--blue-light);
+            color: var(--blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        /* Flow */
+        .flow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 25px 0;
+        }
+
+        .flow-box {
+            min-width: 135px;
+            padding: 17px 13px;
+            background: white;
+            border: 1px solid var(--blue-border);
+            border-radius: 14px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .flow-box strong {
+            display: block;
+            color: var(--blue);
+        }
+
+        .flow-box small {
+            color: var(--muted);
+        }
+
+        .arrow {
+            color: var(--blue);
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        /* Code */
+        .code-box {
+            position: relative;
+            margin-top: 15px;
+            background: #0f172a;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .code-box pre {
+            color: #dbeafe;
+            padding: 22px;
+            padding-top: 48px;
+            overflow-x: auto;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            white-space: pre;
+        }
+
+        .copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            border: 1px solid #475569;
+            background: #1e293b;
+            color: white;
+            border-radius: 7px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .copy-btn:hover {
+            background: #334155;
+        }
+
+        /* Notes */
+        .note {
+            margin-top: 18px;
+            padding: 16px 18px;
+            border-left: 4px solid var(--blue);
+            border-radius: 10px;
+            background: var(--blue-light);
+        }
+
+        .note p {
+            color: var(--text);
+        }
+
+        .note.success {
+            border-left-color: var(--green);
+            background: var(--green-light);
+        }
+
+        .note.warning {
+            border-left-color: var(--orange);
+            background: var(--orange-light);
+        }
+
+        .note.danger {
+            border-left-color: var(--red);
+            background: var(--red-light);
+        }
+
+        /* Lists */
+        .checklist {
+            list-style: none;
+            margin-top: 12px;
+        }
+
+        .checklist li {
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--border);
+            color: var(--text-light);
+        }
+
+        .checklist li::before {
+            content: "✓";
+            color: var(--green);
+            font-weight: bold;
+            margin-right: 9px;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 18px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border: 1px solid var(--border);
+            text-align: left;
+            font-size: 13px;
+        }
+
+        th {
+            background: var(--blue-light);
+            color: var(--blue-dark);
+        }
+
+        /* Deployment */
+        .deployment-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .deployment-box {
+            text-align: center;
+            padding: 20px 12px;
+            background: white;
+            border: 1px solid var(--blue-border);
+            border-radius: 15px;
+            position: relative;
+        }
+
+        .deployment-box strong {
+            display: block;
+            color: var(--blue);
+            margin-bottom: 5px;
+        }
+
+        .deployment-box span {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        /* Steps */
+        .step {
+            display: flex;
+            gap: 15px;
+            padding: 18px 0;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .step:last-child {
+            border-bottom: none;
+        }
+
+        .step-number {
+            min-width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--blue-light);
+            color: var(--blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Quiz */
+        .quiz {
+            margin-top: 18px;
+            background: white;
+            border: 1px solid var(--blue-border);
+            border-radius: 16px;
+            padding: 23px;
+        }
+
+        .option {
+            padding: 11px 14px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            margin: 8px 0;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .option:hover {
+            background: var(--blue-light);
+            border-color: var(--blue);
+        }
+
+        .option.correct {
+            background: var(--green-light);
+            border-color: var(--green);
+        }
+
+        .option.wrong {
+            background: var(--red-light);
+            border-color: var(--red);
+        }
+
+        .quiz-result {
+            margin-top: 12px;
+            font-weight: bold;
+        }
+
+        /* Final */
+        .final-card {
+            background: linear-gradient(135deg, #eff6ff, white);
+            border: 1px solid var(--blue-border);
+            border-radius: 22px;
+            padding: 35px;
+            text-align: center;
+        }
+
+        /* Reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: 0.6s;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Bottom */
+        .bottom-buttons {
+            margin-top: 70px;
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .bottom-btn {
+            text-decoration: none;
+            padding: 12px 17px;
+            border-radius: 9px;
+            border: 1px solid var(--blue-border);
+            color: var(--blue);
+            background: white;
+            font-weight: bold;
+        }
+
+        .bottom-btn.primary {
+            background: var(--blue);
+            color: white;
+        }
+
+        footer {
+            text-align: center;
+            color: var(--muted);
+            border-top: 1px solid var(--border);
+            margin-top: 70px;
+            padding: 30px;
+        }
+
+        /* Mobile */
+        @media (max-width: 1000px) {
+            .sidebar {
+                width: 230px;
+            }
+
+            .main {
+                margin-left: 230px;
+            }
+
+            .grid-3 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .deployment-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 700px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 25px 15px;
+            }
+
+            .hero {
+                padding: 28px 20px;
+            }
+
+            .grid,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .deployment-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .flow {
+                flex-direction: column;
+            }
+
+            .arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="progressBar"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="logo">Z</div>
+
+            <div>
+                <h2>ZENSUS</h2>
+                <span>LEARNING PLATFORM</span>
+            </div>
+        </div>
+
+        <div class="lesson-label">
+            LESSON 15 / 15
+        </div>
+
+        <nav class="nav">
+
+            <a href="#overview">Overview</a>
+            <a href="#roadmap">Django Roadmap</a>
+            <a href="#project1">Mini Project 1</a>
+            <a href="#model">Student Model</a>
+            <a href="#api">REST API</a>
+            <a href="#project2">Mini Project 2</a>
+            <a href="#production">Production</a>
+            <a href="#settings">Production Settings</a>
+            <a href="#static">Static & Media</a>
+            <a href="#database">Database</a>
+            <a href="#server">WSGI & ASGI</a>
+            <a href="#deployment">Deployment</a>
+            <a href="#environment">Environment Variables</a>
+            <a href="#security">Security</a>
+            <a href="#testing">Testing</a>
+            <a href="#checklist">Checklist</a>
+            <a href="#quiz">Quiz</a>
+            <a href="#takeaway">Takeaway</a>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- HERO -->
+        <header class="hero reveal" id="overview">
+
+            <div class="badges">
+                <span class="badge">LESSON 15 OF 15</span>
+                <span class="badge">MINI PROJECTS</span>
+                <span class="badge">DEPLOYMENT</span>
+                <span class="badge">BEGINNER</span>
+            </div>
+
+            <h1>
+                Django Mini Projects & Deployment
+            </h1>
+
+            <p>
+                Bring everything together and learn how to turn your Django
+                knowledge into complete applications. Build practical mini
+                projects, prepare Django for production and understand the
+                complete deployment process.
+            </p>
+
+        </header>
+
+
+        <!-- SEARCH -->
+        <div class="search">
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search this lesson..."
+            >
+        </div>
+
+
+        <!-- SECTION 1 -->
+        <section id="roadmap" class="reveal">
+
+            <div class="section-heading">
+                <div class="section-number">01</div>
+                <h2>Your Complete Django Roadmap</h2>
+            </div>
+
+            <div class="card">
+
+                <p>
+                    You have now learned the major components required to
+                    create Django applications.
+                </p>
+
+                <div class="flow">
+
+                    <div class="flow-box">
+                        <strong>Python</strong>
+                        <small>Foundation</small>
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        <strong>Django</strong>
+                        <small>Framework</small>
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        <strong>Models</strong>
+                        <small>Database</small>
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        <strong>Views</strong>
+                        <small>Logic</small>
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        <strong>Templates</strong>
+                        <small>UI</small>
+                    </div>
+
+                </div>
+
+                <div class="flow">
+
+                    <div class="flow-box">
+                        <strong>ORM</strong>
+                        <small>Queries</small>
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        <strong>Auth</strong>
+                        <small>Security</small>
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        <strong>Admin</strong>
+                        <small>Management</small>
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        <strong>REST API</strong>
+                        <small>Backend API</small>
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        <strong>Deploy</strong>
+                        <small>Production</small>
+                    </div>
+
+                </div>
+
+                <div class="note success">
+                    <strong>Developer workflow:</strong>
+                    Build → Test → Secure → Deploy → Monitor
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SECTION 2 -->
+        <section id="project1" class="reveal">
+
+            <div class="section-heading">
+                <div class="section-number">02</div>
+                <h2>Mini Project 1 — Student Management System</h2>
+            </div>
+
+            <div class="card">
+
+                <p>
+                    Build a complete student management system using Django.
+                    This project combines models, views, templates, forms,
+                    authentication and ORM.
+                </p>
+
+                <div class="grid">
+
+                    <div class="info-card">
+                        <div class="icon">UI</div>
+                        <h3>Student Interface</h3>
+                        <p>
+                            Add, view, edit and delete student records.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="icon">DB</div>
+                        <h3>Database</h3>
+                        <p>
+                            Store student information using Django models.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="icon">AUTH</div>
+                        <h3>Authentication</h3>
+                        <p>
+                            Protect the dashboard with login.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="icon">API</div>
+                        <h3>REST API</h3>
+                        <p>
+                            Expose student data through REST endpoints.
+                        </p>
+                    </div>
+
+                </div>
+
+                <h3>Features</h3>
+
+                <ul class="checklist">
+                    <li>User login and logout</li>
+                    <li>Student dashboard</li>
+                    <li>Add student</li>
+                    <li>View students</li>
+                    <li>Search students</li>
+                    <li>Update student</li>
+                    <li>Delete student</li>
+                    <li>Profile image upload</li>
+                    <li>Form validation</li>
+                    <li>Admin management</li>
+                </ul>
+
+            </div>
+
+        </section>
+
+
+        <!-- SECTION 3 -->
+        <section id="model" class="reveal">
+
+            <div class="section-heading">
+                <div class="section-number">03</div>
+                <h2>Student Model</h2>
+            </div>
+
+            <div class="card">
+
+                <h3>models.py</h3>
+
+                <div class="code-box">
+
+                    <button
+                        class="copy-btn"
+                        type="button"
+                        onclick="copyCode(this)"
+                    >
+                        Copy
+                    </button>
+
+                    <pre>from django.db import models
+
+
+class Student(models.Model):
+
+    name = models.CharField(max_length=100)
+
+    email = models.EmailField(unique=True)
+
+    age = models.IntegerField()
+
+    course = models.CharField(max_length=100)
+
+    phone = models.CharField(max_length=15)
+
+    profile_image = models.ImageField(
+        upload_to="students/",
+        blank=True,
+        null=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return self.name</pre>
+
+                </div>
+
+                <h3>Create the database table</h3>
+
+                <div class="code-box">
+
+                    <button
+                        class="copy-btn"
+                        type="button"
+                        onclick="copyCode(this)"
+                    >
+                        Copy
+                    </button>
+
+                    <pre>python manage.py makemigrations
+python manage.py migrate</pre>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SECTION 4 -->
+        <section id="api" class="reveal">
+
+            <div class="section-heading">
+                <div class="section-number">04</div>
+                <h2>Student REST API</h2>
+            </div>
+
+            <div class="card">
+
+                <p>
+                    After learning Django REST Framework, the Student
+                    Management System can expose its data through APIs.
+                </p>
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Endpoint</th>
+                                <th>Purpose</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <tr>
+                                <td>GET</td>
+                                <td>/api/students/</td>
+                                <td>Get all students</td>
+                            </tr>
+
+                            <tr>
+                                <td>POST</td>
+                                <td>/api/students/</td>
+                                <td>Create student</td>
+                            </tr>
+
+                            <tr>
+                                <td>GET</td>
+                                <td>/api/students/1/</td>
+                                <td>Get one student</td>
+                            </tr>
+
+                            <tr>
+                                <td>PUT</td>
+                                <td>/api/students/1/</td>
+                                <td>Update student</td>
+                            </tr>
+
+                            <tr>
+                                <td>DELETE</td>
+                                <td>/api/students/1/</td>
+                                <td>Delete student</td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <div class="note">
+                    <strong>Architecture:</strong>
+                    React / Browser → REST API → Serializer → Model → Database
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SECTION 5 -->
+        <section id="project2" class="reveal">
+
+            <div class="section-heading">
+                <div class="section-number">05</div>
+                <h2>Mini Project 2 — Django Blog</h2>
+            </div>
+
+            <div class="card">
+
+                <p>
+                    Build a blog application that combines authentication,
+                    relationships, forms, templates and CRUD.
+                </p>
+
+                <div class="grid-3">
+
+                    <div class="info-card">
+                        <div class="icon">01</div>
+                        <h3>Posts</h3>
+                        <p>Create and manage blog posts.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="icon">02</div>
+                        <h3>Users</h3>
+                        <p>Each post belongs to a user.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="icon">03</div>
+                        <h3>Comments</h3>
+                        <p>Users can comment on posts.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="icon">04</div>
+                        <h3>Categories</h3>
+                        <p>Organize posts by category.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="icon">05</div>
+                        <h3>Search</h3>
+                        <p>Search posts using ORM.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="icon">06</div>
+                        <h3>Admin</h3>
+                        <p>Manage content through admin.</p>
+                    </div>
+
+                </div>
+
+                <h3>Example Models</h3>
+
+                <div class="code-box">
+
+                    <button
+                        class="copy-btn"
+                        type="button"
+                        onclick="copyCode(this)"
+                    >
+                        Copy
+                    </button>
+
+                    <pre>from django.db import models
+from django.contrib.auth.models import User
+
+
+class Category(models.Model):
+
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+
+class Post(models.Model):
+
+    title = models.CharField(max_length=200)
+
+    content = models.TextField()
+
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return self.title
+
+
+class Comment(models.Model):
+
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE
+    )
+
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    content = models.TextField()
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )</pre>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SECTION 6 -->
+        <section id="production" class="reveal">
+
+            <div class="section-heading">
+                <div class="section-number">06</div>
+                <h2>Development vs Production</h2>
+            </div>
+
+            <div class="card">
+
+                <div class="grid">
+
+                    <div class="info-card">
+
+                        <div class="icon">DEV</div>
+
+                        <h3>Development</h3>
+
+                        <ul class="checklist">
+                            <li>DEBUG = True</li>
+                            <li>Local development server</li>
+                            <li>SQLite is convenient</li>
+                            <li>Local configuration</li>
+                            <li>Detailed errors</li>
+                        </ul>
+
+                    </div>
+
+                    <div class="info-card">
+
+                        <div class="icon">PROD</div>
+
+                        <h3>Production</h3>
+
+                        <ul class="checklist">
+                            <li>DEBUG = False</li>
+                            <li>Production application server</li>
+                            <li>Production database</li>
+                            <li>Environment variables</li>
+                            <li>HTTPS</li>
+                        </ul>
+
+                    </div>
+
+                </div>
+
+                <div class="note warning">
+                    <strong>Important:</strong>
+                    Django's development server is designed for development,
+                    not for serving a production application.
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SECTION 7 -->
+        <section id="settings" class="reveal">
+
+            <div class="section-heading">
+                <div class="section-number">07</div>
+                <h2>Production Settings</h2>
+            </div>
+
+            <div class="card">
+
+                <p>
+                    Production configuration should be separated from local
+                    development configuration.
+                </p>
+
+                <div class="code-box">
+
+                    <button
+                        class="copy-btn"
+                        type="button"
+                        onclick="copyCode(this)"
+                    >
+                        Copy
+                    </button>
+
+                    <pre>DEBUG = False
+
+ALLOWED_HOSTS = [
+    "your-domain.com",
+    "www.your-domain.com"
+]
+
+STATIC_URL = "/static/"
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = "/media/"
+
+MEDIA_ROOT = BASE_DIR / "media"</pre>
+
+                </div>
+
+                <div class="note danger">
+                    <strong>Security:</strong>
+                    Never publish your real SECRET_KEY in a public repository.
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SECTION 8 -->
+        <section id="static" class="reveal">
+
+            <div class="section-heading">
+                <div class="section-number">08</div>
+                <h2>Static & Media Files</h2>
+            </div>
+
+            <div class="card">
+
+                <p>
+                    Django applications usually have two important file
+                    categories.
+                </p>
+
+                <div class="grid">
+
+                    <div class="info-card">
+                        <div class="icon">S</div>
+                        <h3>Static Files</h3>
+                        <p>
+                            CSS, JavaScript and application interface assets.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="icon">M</div>
+                        <h3>Media Files</h3>
+                        <p>
+                            Files uploaded by users, such as images and resumes.
+                        </p>
+                    </div>
+
+                </div>
+
+                <h3>Collect Static Files</h3>
+
+                <div class="code-box">
+
+                    <button
+                        class="copy-btn"
+                        type="button"
+                        onclick="copyCode(this)"
+                    >
+                        Copy
+                    </button>
+
+                    <pre>python manage.py collectstatic</pre>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SECTION 9 -->
+        <section id="database" class="reveal">
+
+            <div class="section-heading">
+                <div class="section-number">09</div>
+                <h2>Production Database</h2>
+            </div>
+
+            <div class="card">
+
+                <p>
+                    SQLite is excellent for learning and local development.
+                    Production applications often use a dedicated relational
+                    database such as PostgreSQL.
+                </p>
+
+                <div class="grid-3">
+
+                    <div class="info-card">
+                        <div class="icon">DEV</div>
+                        <h3>SQLite</h3>
+                        <p>
+                            Simple and convenient for local projects.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="icon">DB</div>
+                        <h3>PostgreSQL</h3>
+                        <p>
+                            Common production database choice.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="icon">ENV</div>
+                        <h3>Credentials</h3>
+                        <p>
+                            Keep database credentials outside source code.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SECTION 10 -->
+        <section id="server" class="reveal">
+
+            <div class="section-heading">
+                <div class="section-number">10</div>
+                <h2>WSGI & ASGI</h2>
+            </div>
+
+            <div class="card">
+
+                <div class="grid">
+
+                    <div class="info-card">
+
+                        <div class="icon">W</div>
+
+                        <h3>WSGI</h3>
+
+                        <p>
+                            Web Server Gateway Interface. A standard interface
+                            for deploying traditional Python web applications.
+                        </p>
+
+                    </div>
+
+                    <div class="info-card">
+
+                        <div class="icon">A</div>
+
+                        <h3>ASGI</h3>
+
+                        <p>
+                            Asynchronous Server Gateway Interface. Supports
+                            asynchronous application patterns.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <h3>Django Project Files</h3>
+
+                <div class="code-box">
+
+                    <button
+                        class="copy-btn"
+                        type="button"
+                        onclick="copyCode(this)"
+                    >
+                        Copy
+                    </button>
+
+                    <pre>project/
+│
+├── wsgi.py
+│
+└── asgi.py</pre>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SECTION 11 -->
+        <section id="deployment" class="reveal">
+
+            <div class="section-heading">
+                <div class="section-number">11</div>
+                <h2>Understanding Deployment</h2>
+            </div>
+
+            <div class="card">
+
+                <p>
+                    Deployment means making your application available in a
+                    production environment so users can access it.
+                </p>
+
+                <div class="deployment-grid">
+
+                    <div class="deployment-box">
+                        <strong>1. Code</strong>
+                        <span>Django Project</span>
+                    </div>
+
+                    <div class="deployment-box">
+                        <strong>2. Git</strong>
+                        <span>Source Control</span>
+                    </div>
+
+                    <div class="deployment-box">
+                        <strong>3. Server</strong>
+                        <span>Hosting</span>
+                    </div>
+
+                    <div class="deployment-box">
+                        <strong>4. Live App</strong>
+                        <span>Public Website</span>
+                    </div>
+
+                </div>
+
+                <div class="flow">
+
+                    <div class="flow-box">
+                        <strong>Git</strong>
+                        <small>Source Code</small>
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        <strong>Hosting</strong>
+                        <small>Application</small>
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        <strong>Database</strong>
+                        <small>Data</small>
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        <strong>Domain</strong>
+                        <small>Users</small>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SECTION 12 -->
+        <section id="environment" class="reveal">
+
+            <div class="section-heading">
+                <div class="section-number">12</div>
+                <h2>Environment Variables</h2>
+            </div>
+
+            <div class="card">
+
+                <p>
+                    Sensitive and environment-specific configuration should
+                    not be hard-coded directly into your source code.
+                </p>
+
+                <div class="code-box">
+
+                    <button
+                        class="copy-btn"
+                        type="button"
+                        onclick="copyCode(this)"
+                    >
+                        Copy
+                    </button>
+
+                    <pre>SECRET_KEY=your-secret-key
+DEBUG=False
+
+DATABASE_NAME=production_database
+DATABASE_USER=database_user
+DATABASE_PASSWORD=database_password
+DATABASE_HOST=database_host
+DATABASE_PORT=5432</pre>
+
+                </div>
+
+                <div class="grid-3">
+
+                    <div class="info-card">
+                        <div class="icon">S</div>
+                        <h3>Security</h3>
+                        <p>
+                            Keep secrets outside source code.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="icon">D</div>
+                        <h3>Different Environments</h3>
+                        <p>
+                            Development and production can use different values.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="icon">C</div>
+                        <h3>Configuration</h3>
+                        <p>
+                            Change configuration without changing application logic.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SECTION 13 -->
+        <section id="security" class="reveal">
+
+            <div class="section-heading">
+                <div class="section-number">13</div>
+                <h2>Production Security Checklist</h2>
+            </div>
+
+            <div class="card">
+
+                <ul class="checklist">
+                    <li>Set DEBUG = False.</li>
+                    <li>Configure ALLOWED_HOSTS.</li>
+                    <li>Keep SECRET_KEY private.</li>
+                    <li>Use HTTPS.</li>
+                    <li>Validate user input.</li>
+                    <li>Use CSRF protection for applicable forms.</li>
+                    <li>Keep dependencies updated.</li>
+                    <li>Protect authentication endpoints.</li>
+                    <li>Secure uploaded files.</li>
+                    <li>Back up production data.</li>
+                    <li>Monitor application errors.</li>
+                </ul>
+
+                <div class="note danger">
+                    Production security is a combination of application
+                    configuration, authentication, HTTPS, database security
+                    and infrastructure practices.
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SECTION 14 -->
+        <section id="testing" class="reveal">
+
+            <div class="section-heading">
+                <div class="section-number">14</div>
+                <h2>Pre-Deployment Testing</h2>
+            </div>
+
+            <div class="card">
+
+                <h3>Django deployment check</h3>
+
+                <div class="code-box">
+
+                    <button
+                        class="copy-btn"
+                        type="button"
+                        onclick="copyCode(this)"
+                    >
+                        Copy
+                    </button>
+
+                    <pre>python manage.py check --deploy</pre>
+
+                </div>
+
+                <h3>Test the application</h3>
+
+                <ul class="checklist">
+                    <li>Homepage works.</li>
+                    <li>Login works.</li>
+                    <li>Logout works.</li>
+                    <li>Protected pages work.</li>
+                    <li>Forms validate correctly.</li>
+                    <li>CRUD operations work.</li>
+                    <li>Database migrations work.</li>
+                    <li>File uploads work.</li>
+                    <li>REST APIs work.</li>
+                    <li>Static files load.</li>
+                    <li>Production settings are correct.</li>
+                </ul>
+
+            </div>
+
+        </section>
+
+
+        <!-- SECTION 15 -->
+        <section id="checklist" class="reveal">
+
+            <div class="section-heading">
+                <div class="section-number">15</div>
+                <h2>Complete Deployment Checklist</h2>
+            </div>
+
+            <div class="card">
+
+                <div class="step">
+
+                    <div class="step-number">1</div>
+
+                    <div>
+                        <strong>Prepare the project</strong>
+                        <p>
+                            Remove unnecessary development configuration.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="step">
+
+                    <div class="step-number">2</div>
+
+                    <div>
+                        <strong>Create requirements.txt</strong>
+
+                        <div class="code-box">
+
+                            <button
+                                class="copy-btn"
+                                type="button"
+                                onclick="copyCode(this)"
+                            >
+                                Copy
+                            </button>
+
+                            <pre>pip freeze &gt; requirements.txt</pre>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="step">
+
+                    <div class="step-number">3</div>
+
+                    <div>
+                        <strong>Create .gitignore</strong>
+                        <p>
+                            Prevent virtual environments, secrets and generated
+                            files from being committed.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="step">
+
+                    <div class="step-number">4</div>
+
+                    <div>
+                        <strong>Push the project to Git</strong>
+                        <p>
+                            Store your source code in a Git repository.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="step">
+
+                    <div class="step-number">5</div>
+
+                    <div>
+                        <strong>Configure hosting</strong>
+                        <p>
+                            Configure the application, database and environment
+                            variables.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="step">
+
+                    <div class="step-number">6</div>
+
+                    <div>
+                        <strong>Install dependencies</strong>
+
+                        <div class="code-box">
+
+                            <button
+                                class="copy-btn"
+                                type="button"
+                                onclick="copyCode(this)"
+                            >
+                                Copy
+                            </button>
+
+                            <pre>pip install -r requirements.txt</pre>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="step">
+
+                    <div class="step-number">7</div>
+
+                    <div>
+                        <strong>Run migrations</strong>
+
+                        <div class="code-box">
+
+                            <button
+                                class="copy-btn"
+                                type="button"
+                                onclick="copyCode(this)"
+                            >
+                                Copy
+                            </button>
+
+                            <pre>python manage.py migrate</pre>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="step">
+
+                    <div class="step-number">8</div>
+
+                    <div>
+                        <strong>Collect static files</strong>
+
+                        <div class="code-box">
+
+                            <button
+                                class="copy-btn"
+                                type="button"
+                                onclick="copyCode(this)"
+                            >
+                                Copy
+                            </button>
+
+                            <pre>python manage.py collectstatic</pre>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="step">
+
+                    <div class="step-number">9</div>
+
+                    <div>
+                        <strong>Create admin account</strong>
+
+                        <div class="code-box">
+
+                            <button
+                                class="copy-btn"
+                                type="button"
+                                onclick="copyCode(this)"
+                            >
+                                Copy
+                            </button>
+
+                            <pre>python manage.py createsuperuser</pre>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="step">
+
+                    <div class="step-number">10</div>
+
+                    <div>
+                        <strong>Start the production application server</strong>
+
+                        <p>
+                            Use the production server configuration required
+                            by your hosting environment.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="step">
+
+                    <div class="step-number">11</div>
+
+                    <div>
+                        <strong>Configure domain and HTTPS</strong>
+
+                        <p>
+                            Connect the domain and secure the application.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="step">
+
+                    <div class="step-number">12</div>
+
+                    <div>
+                        <strong>Monitor the application</strong>
+
+                        <p>
+                            Check logs, errors, backups and application health.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- QUIZ -->
+        <section id="quiz" class="reveal">
+
+            <div class="section-heading">
+                <div class="section-number">16</div>
+                <h2>Final Django Quiz</h2>
+            </div>
+
+
+            <div class="quiz">
+
+                <h3>Question 1</h3>
+
+                <p>
+                    Which setting should normally be disabled in production?
+                </p>
+
+                <div
+                    class="option"
+                    data-correct="true"
+                    onclick="checkAnswer(this)"
+                >
+                    A. DEBUG
+                </div>
+
+                <div
+                    class="option"
+                    data-correct="false"
+                    onclick="checkAnswer(this)"
+                >
+                    B. INSTALLED_APPS
+                </div>
+
+                <div
+                    class="option"
+                    data-correct="false"
+                    onclick="checkAnswer(this)"
+                >
+                    C. DATABASES
+                </div>
+
+                <div class="quiz-result"></div>
+
+            </div>
+
+
+            <div class="quiz">
+
+                <h3>Question 2</h3>
+
+                <p>
+                    Which command collects static files?
+                </p>
+
+                <div
+                    class="option"
+                    data-correct="false"
+                    onclick="checkAnswer(this)"
+                >
+                    A. python manage.py startapp
+                </div>
+
+                <div
+                    class="option"
+                    data-correct="true"
+                    onclick="checkAnswer(this)"
+                >
+                    B. python manage.py collectstatic
+                </div>
+
+                <div
+                    class="option"
+                    data-correct="false"
+                    onclick="checkAnswer(this)"
+                >
+                    C. python manage.py static
+                </div>
+
+                <div class="quiz-result"></div>
+
+            </div>
+
+
+            <div class="quiz">
+
+                <h3>Question 3</h3>
+
+                <p>
+                    Which file commonly stores Python package dependencies?
+                </p>
+
+                <div
+                    class="option"
+                    data-correct="false"
+                    onclick="checkAnswer(this)"
+                >
+                    A. urls.txt
+                </div>
+
+                <div
+                    class="option"
+                    data-correct="true"
+                    onclick="checkAnswer(this)"
+                >
+                    B. requirements.txt
+                </div>
+
+                <div
+                    class="option"
+                    data-correct="false"
+                    onclick="checkAnswer(this)"
+                >
+                    C. django.txt
+                </div>
+
+                <div class="quiz-result"></div>
+
+            </div>
+
+
+            <div class="quiz">
+
+                <h3>Question 4</h3>
+
+                <p>
+                    Why are environment variables useful?
+                </p>
+
+                <div
+                    class="option"
+                    data-correct="true"
+                    onclick="checkAnswer(this)"
+                >
+                    A. They keep configuration outside source code.
+                </div>
+
+                <div
+                    class="option"
+                    data-correct="false"
+                    onclick="checkAnswer(this)"
+                >
+                    B. They replace Django models.
+                </div>
+
+                <div
+                    class="option"
+                    data-correct="false"
+                    onclick="checkAnswer(this)"
+                >
+                    C. They create templates.
+                </div>
+
+                <div class="quiz-result"></div>
+
+            </div>
+
+
+            <div class="quiz">
+
+                <h3>Question 5</h3>
+
+                <p>
+                    Which command checks deployment-related Django issues?
+                </p>
+
+                <div
+                    class="option"
+                    data-correct="false"
+                    onclick="checkAnswer(this)"
+                >
+                    A. python manage.py deploy
+                </div>
+
+                <div
+                    class="option"
+                    data-correct="true"
+                    onclick="checkAnswer(this)"
+                >
+                    B. python manage.py check --deploy
+                </div>
+
+                <div
+                    class="option"
+                    data-correct="false"
+                    onclick="checkAnswer(this)"
+                >
+                    C. python manage.py production
+                </div>
+
+                <div class="quiz-result"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- TAKEAWAY -->
+        <section id="takeaway" class="reveal">
+
+            <div class="section-heading">
+                <div class="section-number">17</div>
+                <h2>Final Django Takeaway</h2>
+            </div>
+
+            <div class="final-card">
+
+                <h2>
+                    🎉 You Completed the Django Course!
+                </h2>
+
+                <p>
+                    You started with Django fundamentals and progressed
+                    through routing, views, templates, databases, ORM,
+                    authentication, admin, uploads, REST APIs and deployment.
+                </p>
+
+                <div class="flow">
+
+                    <div class="flow-box">
+                        <strong>01</strong>
+                        <small>Django Basics</small>
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        <strong>02</strong>
+                        <small>Database</small>
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        <strong>03</strong>
+                        <small>Authentication</small>
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        <strong>04</strong>
+                        <small>REST API</small>
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        <strong>05</strong>
+                        <small>Deployment</small>
+                    </div>
+
+                </div>
+
+                <div class="note success">
+
+                    <strong>Final Developer Workflow</strong>
+
+                    <p>
+                        Plan → Build → Database → Authentication →
+                        Test → API → Secure → Deploy → Monitor
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    What you can build now
+                </h3>
+
+                <ul class="checklist">
+
+                    <li>Student Management System</li>
+                    <li>Blog Application</li>
+                    <li>Authentication Dashboard</li>
+                    <li>File Upload Application</li>
+                    <li>CRUD Applications</li>
+                    <li>Django REST APIs</li>
+                    <li>React + Django Applications</li>
+                    <li>Production Django Projects</li>
+
+                </ul>
+
+                <div class="note">
+
+                    <strong>Final challenge:</strong>
+
+                    <p>
+                        Build one complete Django project from an empty
+                        folder, connect a database, add authentication,
+                        create a REST API and deploy it.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- BOTTOM -->
+        <div class="bottom-buttons">
+
+            <a
+                href="#overview"
+                class="bottom-btn"
+            >
+                ↑ Back to Top
+            </a>
+
+            <a
+                href="#takeaway"
+                class="bottom-btn primary"
+            >
+                Complete Django Course ✓
+            </a>
+
+        </div>
+
+
+        <footer>
+            <strong>ZENSUS</strong>
+            — Django Course · Lesson 15 of 15
+            <br>
+            Django Mini Projects & Deployment
+        </footer>
+
+    </main>
+
+
+    <script>
+
+        /* =========================
+           PROGRESS BAR
+        ========================= */
+
+        window.addEventListener("scroll", function () {
+
+            var scrollTop =
+                document.documentElement.scrollTop ||
+                document.body.scrollTop;
+
+            var documentHeight =
+                document.documentElement.scrollHeight -
+                document.documentElement.clientHeight;
+
+            var percentage = 0;
+
+            if (documentHeight > 0) {
+                percentage =
+                    (scrollTop / documentHeight) * 100;
+            }
+
+            document.getElementById("progressBar").style.width =
+                percentage + "%";
+        });
+
+
+        /* =========================
+           COPY CODE
+        ========================= */
+
+        function copyCode(button) {
+
+            var codeBox = button.parentElement;
+            var code = codeBox.querySelector("pre").innerText;
+
+            if (navigator.clipboard) {
+
+                navigator.clipboard.writeText(code)
+                    .then(function () {
+
+                        showCopied(button);
+
+                    })
+                    .catch(function () {
+
+                        fallbackCopy(code, button);
+
+                    });
+
+            } else {
+
+                fallbackCopy(code, button);
+
+            }
+        }
+
+
+        function fallbackCopy(text, button) {
+
+            var textarea =
+                document.createElement("textarea");
+
+            textarea.value = text;
+
+            document.body.appendChild(textarea);
+
+            textarea.select();
+
+            document.execCommand("copy");
+
+            document.body.removeChild(textarea);
+
+            showCopied(button);
+        }
+
+
+        function showCopied(button) {
+
+            var oldText = button.innerText;
+
+            button.innerText = "Copied!";
+
+            setTimeout(function () {
+
+                button.innerText = oldText;
+
+            }, 1200);
+        }
+
+
+        /* =========================
+           SEARCH
+        ========================= */
+
+        var searchInput =
+            document.getElementById("searchInput");
+
+        searchInput.addEventListener("input", function () {
+
+            var query =
+                searchInput.value.toLowerCase().trim();
+
+            var sections =
+                document.querySelectorAll("section");
+
+            sections.forEach(function (section) {
+
+                var text =
+                    section.innerText.toLowerCase();
+
+                if (query === "") {
+
+                    section.style.display = "";
+
+                } else if (text.indexOf(query) !== -1) {
+
+                    section.style.display = "";
+
+                } else {
+
+                    section.style.display = "none";
+
+                }
+
+            });
+        });
+
+
+        /* =========================
+           SCROLL REVEAL
+        ========================= */
+
+        var revealElements =
+            document.querySelectorAll(".reveal");
+
+        if ("IntersectionObserver" in window) {
+
+            var revealObserver =
+                new IntersectionObserver(
+                    function (entries) {
+
+                        entries.forEach(function (entry) {
+
+                            if (entry.isIntersecting) {
+
+                                entry.target.classList.add("visible");
+
+                            }
+
+                        });
+
+                    },
+                    {
+                        threshold: 0.08
+                    }
+                );
+
+            revealElements.forEach(function (element) {
+
+                revealObserver.observe(element);
+
+            });
+
+        } else {
+
+            revealElements.forEach(function (element) {
+
+                element.classList.add("visible");
+
+            });
+
+        }
+
+
+        /* =========================
+           QUIZ
+        ========================= */
+
+        function checkAnswer(option) {
+
+            var quiz =
+                option.parentElement;
+
+            var options =
+                quiz.querySelectorAll(".option");
+
+            var result =
+                quiz.querySelector(".quiz-result");
+
+            options.forEach(function (item) {
+
+                item.style.pointerEvents = "none";
+
+            });
+
+            var correct =
+                option.getAttribute("data-correct") === "true";
+
+            if (correct) {
+
+                option.classList.add("correct");
+
+                result.innerText =
+                    "✓ Correct! Excellent.";
+
+                result.style.color =
+                    "#16a34a";
+
+            } else {
+
+                option.classList.add("wrong");
+
+                result.innerText =
+                    "✗ Incorrect. Review this topic.";
+
+                result.style.color =
+                    "#dc2626";
+            }
+        }
+
+
+        /* =========================
+           ACTIVE NAVIGATION
+        ========================= */
+
+        var navLinks =
+            document.querySelectorAll(".nav a");
+
+        var pageSections =
+            document.querySelectorAll("section");
+
+        if ("IntersectionObserver" in window) {
+
+            var navObserver =
+                new IntersectionObserver(
+                    function (entries) {
+
+                        entries.forEach(function (entry) {
+
+                            if (entry.isIntersecting) {
+
+                                navLinks.forEach(function (link) {
+
+                                    link.classList.remove("active");
+
+                                    var href =
+                                        link.getAttribute("href");
+
+                                    if (
+                                        href === "#" + entry.target.id
+                                    ) {
+
+                                        link.classList.add("active");
+
+                                    }
+
+                                });
+
+                            }
+
+                        });
+
+                    },
+                    {
+                        rootMargin:
+                            "-20% 0px -65% 0px"
+                    }
+                );
+
+            pageSections.forEach(function (section) {
+
+                navObserver.observe(section);
+
+            });
+
+        }
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,154 @@
+export type Difficulty = 'Easy' | 'Medium' | 'Hard';
+
+export type ExecutionType = 'stdin' | 'function';
+
+export type SupportedLanguage = 'python' | 'cpp' | 'java' | 'javascript' | 'c';
+
+export type JudgeVerdict =
+  | 'ACCEPTED'
+  | 'WRONG_ANSWER'
+  | 'COMPILATION_ERROR'
+  | 'RUNTIME_ERROR'
+  | 'TIME_LIMIT_EXCEEDED'
+  | 'MEMORY_LIMIT_EXCEEDED'
+  | 'RUNNER_UNAVAILABLE'
+  | 'SERVER_ERROR'
+  | 'INVALID_REQUEST'
+  | 'JUDGE_ERROR'
+  | 'EXECUTION_SERVICE_UNAVAILABLE'
+  | 'SERVER_OFFLINE';
+
+export interface ExampleCase {
+  input: string;
+  output: string;
+  explanation?: string;
+}
+
+export interface TestCase {
+  id: string;
+  input: string;
+  expectedOutput: string;
+  isHidden?: boolean;
+  label?: string;
+}
+
+export interface ProblemSummary {
+  id: string;
+  topicId: string;
+  topicTitle: string;
+  order: number;
+  title: string;
+  difficulty: Difficulty;
+  progressionStage: 'Foundation' | 'Basic Application' | 'Intermediate' | 'Advanced' | 'Interview / Placement';
+  tags: string[];
+  executionType: ExecutionType;
+  status?: 'published' | 'draft' | 'unavailable';
+  isDraft?: boolean;
+  solved?: boolean;
+  attempted?: boolean;
+  bookmarked?: boolean;
+}
+
+export interface ProblemDetail extends ProblemSummary {
+  description: string;
+  inputFormat: string;
+  outputFormat: string;
+  constraints: string[];
+  examples: ExampleCase[];
+  visibleTests: {
+    id: string;
+    input: string;
+    expectedOutput: string;
+    label?: string;
+  }[];
+  starterCode: Partial<Record<SupportedLanguage, string>>;
+  timeLimitMs: number;
+  memoryLimitMb: number;
+}
+
+// Internal problem definition with hidden tests and reference solutions
+export interface InternalProblemDefinition extends ProblemDetail {
+  hiddenTests: TestCase[];
+  referenceSolution?: Partial<Record<SupportedLanguage, string>>;
+  customChecker?: string;
+}
+
+export interface DsaTopic {
+  id: string;
+  number: number;
+  slug: string;
+  title: string;
+  category: 'Fundamentals' | 'Linear Data Structures' | 'Non-Linear Data Structures' | 'Algorithms' | 'Advanced Topics';
+  description: string;
+  iconName: string;
+  totalProblems: number;
+  easyCount: number;
+  mediumCount: number;
+  hardCount: number;
+  solvedCount?: number;
+  attemptedCount?: number;
+}
+
+export interface ExecutionTestCaseResult {
+  testId: string;
+  label?: string;
+  input: string;
+  expectedOutput?: string;
+  actualOutput?: string;
+  passed: boolean;
+  runtimeMs?: number;
+  status: JudgeVerdict;
+  errorMessage?: string;
+}
+
+export interface RunResult {
+  success: boolean;
+  verdict: JudgeVerdict;
+  runtimeMs: number;
+  memoryMb?: number;
+  compilationError?: string;
+  runtimeError?: string;
+  errorMessage?: string;
+  testResults: ExecutionTestCaseResult[];
+  passedTests: number;
+  totalTests: number;
+}
+
+export interface SubmissionRecord {
+  id: string;
+  problemId: string;
+  problemTitle: string;
+  topicId: string;
+  language: SupportedLanguage;
+  code: string;
+  verdict: JudgeVerdict;
+  runtimeMs: number;
+  memoryMb?: number;
+  passedTests: number;
+  totalTests: number;
+  createdAt: string;
+}
+
+export interface ProgressSummary {
+  totalProblems: number;
+  solvedCount: number;
+  attemptedCount: number;
+  accuracyPercentage: number;
+  streakDays: number;
+  longestStreak: number;
+  easySolved: number;
+  mediumSolved: number;
+  hardSolved: number;
+  topicProgress: Record<string, { solved: number; attempted: number; total: number }>;
+  bookmarks?: string[];
+}
+
+export interface RunnerHealthStatus {
+  language: SupportedLanguage;
+  name: string;
+  available: boolean;
+  version?: string;
+  verified: boolean;
+  command: string;
+  notes?: string;
+}

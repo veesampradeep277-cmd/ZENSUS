@@ -1,0 +1,2417 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENSUS React — Lesson 18: Custom Hooks</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+    --bg:#f5f7fb;
+    --surface:#ffffff;
+    --surface2:#f8fafc;
+    --text:#172033;
+    --muted:#667085;
+    --border:#e4e7ec;
+    --primary:#4f46e5;
+    --primary-dark:#3730a3;
+    --cyan:#0891b2;
+    --green:#059669;
+    --orange:#ea580c;
+    --red:#dc2626;
+    --dark:#0b1020;
+    --dark2:#172033;
+    --shadow:0 10px 30px rgba(15,23,42,.07);
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+button,
+input,
+textarea,
+select{
+    font-family:inherit;
+}
+
+.topbar{
+    height:68px;
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:1000;
+    background:#fff;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 28px;
+}
+
+.logo{
+    font-size:25px;
+    font-weight:900;
+    letter-spacing:-1px;
+    color:var(--primary);
+}
+
+.logo span{
+    color:#111827;
+}
+
+.badge-top{
+    background:#eef2ff;
+    color:var(--primary-dark);
+    padding:8px 15px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:800;
+}
+
+.layout{
+    display:flex;
+    padding-top:68px;
+}
+
+.sidebar{
+    position:fixed;
+    top:68px;
+    left:0;
+    width:270px;
+    height:calc(100vh - 68px);
+    background:#fff;
+    border-right:1px solid var(--border);
+    padding:22px 15px;
+    overflow-y:auto;
+}
+
+.sidebar-title{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1.2px;
+    color:#98a2b3;
+    font-weight:800;
+    margin:8px 12px 14px;
+}
+
+.side-item{
+    padding:10px 13px;
+    border-radius:9px;
+    color:#475467;
+    font-size:14px;
+    margin-bottom:4px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.side-item:hover{
+    background:#f2f4f7;
+    color:var(--primary);
+}
+
+.side-item.active{
+    background:#eef2ff;
+    color:var(--primary-dark);
+    font-weight:800;
+    border-left:3px solid var(--primary);
+}
+
+.main{
+    margin-left:270px;
+    width:calc(100% - 270px);
+}
+
+.hero{
+    min-height:500px;
+    padding:80px 8%;
+    display:flex;
+    align-items:center;
+    color:#fff;
+    background:
+        radial-gradient(circle at 78% 20%,rgba(99,102,241,.3),transparent 30%),
+        radial-gradient(circle at 25% 80%,rgba(8,145,178,.18),transparent 25%),
+        linear-gradient(135deg,#0b1020,#172033);
+}
+
+.hero-content{
+    max-width:1050px;
+}
+
+.eyebrow{
+    color:#a5b4fc;
+    font-size:12px;
+    letter-spacing:2px;
+    font-weight:900;
+    text-transform:uppercase;
+    margin-bottom:17px;
+}
+
+.hero h1{
+    font-size:clamp(44px,5vw,72px);
+    line-height:1.03;
+    letter-spacing:-3px;
+    margin-bottom:22px;
+}
+
+.hero h1 span{
+    color:#a5b4fc;
+}
+
+.hero p{
+    max-width:850px;
+    font-size:18px;
+    color:#cbd5e1;
+}
+
+.hero-flow{
+    margin-top:42px;
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.flow-box{
+    padding:13px 16px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.15);
+    background:rgba(255,255,255,.07);
+    font-size:13px;
+    backdrop-filter:blur(8px);
+}
+
+.flow-arrow{
+    color:#818cf8;
+    font-size:22px;
+}
+
+.content{
+    max-width:1180px;
+    margin:auto;
+    padding:65px 35px 100px;
+}
+
+.section{
+    margin-bottom:82px;
+    scroll-margin-top:90px;
+}
+
+.section h2{
+    font-size:34px;
+    letter-spacing:-1px;
+    margin-bottom:14px;
+}
+
+.section h3{
+    font-size:23px;
+    margin:28px 0 12px;
+}
+
+.intro{
+    color:var(--muted);
+    max-width:880px;
+    margin-bottom:27px;
+}
+
+.card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:27px;
+    margin:22px 0;
+    box-shadow:var(--shadow);
+}
+
+.info-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.info-card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:23px;
+    box-shadow:var(--shadow);
+}
+
+.info-card h4{
+    margin-bottom:8px;
+}
+
+.info-card p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+.highlight{
+    border-left:4px solid var(--primary);
+    background:#eef2ff;
+    padding:18px 20px;
+    border-radius:0 12px 12px 0;
+    margin:21px 0;
+}
+
+.success{
+    border-left:4px solid var(--green);
+    background:#ecfdf5;
+    padding:18px 20px;
+    border-radius:0 12px 12px 0;
+    margin:21px 0;
+}
+
+.warning{
+    border-left:4px solid var(--orange);
+    background:#fff7ed;
+    padding:18px 20px;
+    border-radius:0 12px 12px 0;
+    margin:21px 0;
+}
+
+.danger{
+    border-left:4px solid var(--red);
+    background:#fef2f2;
+    padding:18px 20px;
+    border-radius:0 12px 12px 0;
+    margin:21px 0;
+}
+
+.code{
+    background:#0b1020;
+    color:#dbeafe;
+    border:1px solid #1e293b;
+    border-radius:15px;
+    padding:23px;
+    overflow:auto;
+    font-family:Consolas,Monaco,monospace;
+    font-size:14px;
+    line-height:1.7;
+    margin:18px 0;
+}
+
+.code .comment{
+    color:#94a3b8;
+}
+
+.code .keyword{
+    color:#c4b5fd;
+}
+
+.code .string{
+    color:#86efac;
+}
+
+.code .function{
+    color:#67e8f9;
+}
+
+.code .number{
+    color:#fbbf24;
+}
+
+.visual-flow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:12px;
+    margin:30px 0;
+}
+
+.node{
+    min-width:150px;
+    text-align:center;
+    padding:17px 15px;
+    background:#fff;
+    border:2px solid #c7d2fe;
+    border-radius:14px;
+    font-weight:800;
+    box-shadow:0 8px 22px rgba(15,23,42,.06);
+    animation:float 3s ease-in-out infinite;
+}
+
+.node:nth-child(2){animation-delay:.2s}
+.node:nth-child(3){animation-delay:.4s}
+.node:nth-child(4){animation-delay:.6s}
+.node:nth-child(5){animation-delay:.8s}
+
+@keyframes float{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-7px)}
+}
+
+.table{
+    width:100%;
+    border-collapse:collapse;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:14px;
+    overflow:hidden;
+    margin:25px 0;
+}
+
+.table th,
+.table td{
+    padding:15px;
+    text-align:left;
+    border-bottom:1px solid var(--border);
+    font-size:14px;
+}
+
+.table th{
+    background:#f8fafc;
+    font-weight:800;
+}
+
+.demo{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:26px;
+    margin:25px 0;
+    box-shadow:var(--shadow);
+}
+
+.demo-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.demo-title{
+    font-size:19px;
+    font-weight:900;
+}
+
+.btn{
+    border:0;
+    background:var(--primary);
+    color:#fff;
+    padding:10px 16px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:800;
+    transition:.2s;
+}
+
+.btn:hover{
+    background:var(--primary-dark);
+    transform:translateY(-2px);
+}
+
+.btn.secondary{
+    background:#eef2ff;
+    color:var(--primary-dark);
+}
+
+.output{
+    background:#0b1020;
+    color:#dbeafe;
+    padding:18px;
+    border-radius:12px;
+    font-family:Consolas,monospace;
+    font-size:13px;
+    min-height:80px;
+    margin-top:18px;
+}
+
+.render{
+    border:2px dashed #cbd5e1;
+    padding:20px;
+    border-radius:14px;
+    transition:.3s;
+}
+
+.render.flash{
+    animation:flash .5s ease;
+}
+
+@keyframes flash{
+    0%{transform:scale(.98);opacity:.5}
+    100%{transform:scale(1);opacity:1}
+}
+
+.hook-card{
+    border:1px solid var(--border);
+    background:#fff;
+    border-radius:16px;
+    padding:23px;
+    transition:.25s;
+}
+
+.hook-card:hover{
+    transform:translateY(-4px);
+    box-shadow:var(--shadow);
+}
+
+.hook-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.hook-icon{
+    width:46px;
+    height:46px;
+    border-radius:12px;
+    background:#eef2ff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:var(--primary);
+    font-weight:900;
+    margin-bottom:15px;
+}
+
+.form-demo{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.form-demo input,
+.form-demo textarea,
+.form-demo select{
+    width:100%;
+    padding:11px 13px;
+    border:1px solid var(--border);
+    border-radius:9px;
+    margin:7px 0 14px;
+    outline:none;
+}
+
+.form-demo input:focus,
+.form-demo textarea:focus,
+.form-demo select:focus{
+    border-color:#818cf8;
+    box-shadow:0 0 0 3px #eef2ff;
+}
+
+.storage-display{
+    padding:25px;
+    border-radius:15px;
+    background:#f8fafc;
+    border:1px solid var(--border);
+    text-align:center;
+}
+
+.storage-value{
+    font-size:28px;
+    font-weight:900;
+    color:var(--primary);
+    margin:15px 0;
+}
+
+.architecture{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:18px;
+    align-items:center;
+}
+
+.arch-box{
+    padding:24px;
+    border-radius:16px;
+    border:1px solid var(--border);
+    background:#fff;
+    text-align:center;
+    box-shadow:var(--shadow);
+}
+
+.arch-box strong{
+    display:block;
+    font-size:18px;
+    margin-bottom:7px;
+}
+
+.small{
+    color:var(--muted);
+    font-size:13px;
+}
+
+.quiz-question{
+    padding:23px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    margin:15px 0;
+    background:#fff;
+}
+
+.quiz-question button{
+    display:block;
+    width:100%;
+    text-align:left;
+    border:1px solid var(--border);
+    background:#f8fafc;
+    padding:12px 15px;
+    border-radius:9px;
+    margin-top:8px;
+    cursor:pointer;
+}
+
+.quiz-question button:hover{
+    background:#eef2ff;
+    border-color:#a5b4fc;
+}
+
+.answer{
+    display:none;
+    margin-top:13px;
+    padding:14px;
+    border-radius:10px;
+    background:#ecfdf5;
+    color:#065f46;
+    font-size:14px;
+}
+
+.cheat{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
+}
+
+.cheat-item{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:13px;
+    padding:18px;
+}
+
+.footer{
+    text-align:center;
+    color:#98a2b3;
+    padding:30px;
+    border-top:1px solid var(--border);
+}
+
+@media(max-width:900px){
+
+    .sidebar{
+        display:none;
+    }
+
+    .main{
+        margin-left:0;
+        width:100%;
+    }
+
+    .info-grid,
+    .hook-grid,
+    .form-demo,
+    .architecture,
+    .cheat{
+        grid-template-columns:1fr;
+    }
+
+    .hero{
+        padding:60px 25px;
+    }
+
+    .content{
+        padding:45px 18px;
+    }
+
+    .hero h1{
+        font-size:45px;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="logo">ZENSUS<span>.</span></div>
+    <div class="badge-top">React • Lesson 18 / 18</div>
+</header>
+
+<div class="layout">
+
+<aside class="sidebar">
+
+<div class="sidebar-title">Lesson Navigation</div>
+
+<div class="side-item active" data-target="intro">Introduction</div>
+<div class="side-item" data-target="what">What Are Custom Hooks?</div>
+<div class="side-item" data-target="why">Why Custom Hooks?</div>
+<div class="side-item" data-target="naming">Naming Convention</div>
+<div class="side-item" data-target="create">Creating Hooks</div>
+<div class="side-item" data-target="reuse">Reusing Logic</div>
+<div class="side-item" data-target="state">Custom State Logic</div>
+<div class="side-item" data-target="api">Custom API Hook</div>
+<div class="side-item" data-target="form">Custom Form Hook</div>
+<div class="side-item" data-target="storage">Local Storage Hook</div>
+<div class="side-item" data-target="compose">Hook Composition</div>
+<div class="side-item" data-target="rules">Custom Hook Rules</div>
+<div class="side-item" data-target="architecture">Architecture</div>
+<div class="side-item" data-target="mistakes">Common Mistakes</div>
+<div class="side-item" data-target="quiz">Quick Quiz</div>
+
+</aside>
+
+<main class="main">
+
+<!-- HERO -->
+
+<section class="hero" id="intro">
+
+<div class="hero-content">
+
+<div class="eyebrow">ZENSUS • React Architecture</div>
+
+<h1><span>Custom Hooks</span><br>Reusable Logic for Real Applications</h1>
+
+<p>
+Learn how React developers extract reusable stateful logic into custom Hooks,
+compose existing Hooks together, build API/form/storage utilities, and
+organize application logic into clean reusable architecture.
+</p>
+
+<div class="hero-flow">
+
+<div class="flow-box">Component</div>
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">Repeated Logic</div>
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">Extract</div>
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">useCustomHook()</div>
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">Reuse</div>
+
+</div>
+
+</div>
+
+</section>
+
+<div class="content">
+
+<!-- WHAT -->
+
+<section class="section" id="what">
+
+<h2>1. What Are Custom Hooks?</h2>
+
+<p class="intro">
+A custom Hook is a JavaScript function whose name starts with
+<strong>use</strong> and which can use other React Hooks to encapsulate
+reusable stateful logic.
+</p>
+
+<div class="highlight">
+<strong>Simple definition:</strong><br>
+A custom Hook lets you extract reusable React logic into a function so that
+multiple components can use that logic independently.
+</div>
+
+<h3>Example</h3>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">useCounter</span>(initialValue = <span class="number">0</span>) {
+
+```
+<span class="keyword">const</span> [count, setCount] =
+    <span class="function">useState</span>(initialValue);
+
+<span class="keyword">const</span> increment = () =&gt; {
+    setCount(value =&gt; value + <span class="number">1</span>);
+};
+
+<span class="keyword">const</span> decrement = () =&gt; {
+    setCount(value =&gt; value - <span class="number">1</span>);
+};
+
+<span class="keyword">return</span> {
+    count,
+    increment,
+    decrement
+};
+```
+
+}
+
+</div>
+
+<p>
+Now different components can call useCounter().
+</p>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">CounterA</span>() {
+
+```
+<span class="keyword">const</span> {
+    count,
+    increment
+} = <span class="function">useCounter</span>();
+
+<span class="keyword">return</span> (
+    &lt;button onClick={increment}&gt;
+        {count}
+    &lt;/button&gt;
+);
+```
+
+}
+
+<span class="keyword">function</span> <span class="function">CounterB</span>() {
+
+```
+<span class="keyword">const</span> {
+    count,
+    increment
+} = <span class="function">useCounter</span>();
+
+<span class="keyword">return</span> (
+    &lt;button onClick={increment}&gt;
+        {count}
+    &lt;/button&gt;
+);
+```
+
+}
+
+</div>
+
+<div class="success">
+Each component gets its own state. Custom Hooks share the logic, not the
+same state instance.
+</div>
+
+</section>
+
+<!-- WHY -->
+
+<section class="section" id="why">
+
+<h2>2. Why Custom Hooks?</h2>
+
+<p class="intro">
+Without custom Hooks, the same stateful logic often gets duplicated across
+multiple components.
+</p>
+
+<div class="visual-flow">
+
+<div class="node">Component A</div>
+<div class="flow-arrow">→</div>
+<div class="node">Repeated Logic</div>
+
+<div class="node">Component B</div>
+<div class="flow-arrow">→</div>
+<div class="node">Repeated Logic</div>
+
+</div>
+
+<p>
+Instead, extract the repeated logic.
+</p>
+
+<div class="visual-flow">
+
+<div class="node">Component A</div>
+<div class="flow-arrow">↘</div>
+
+<div class="node">useSomething()</div>
+
+<div class="flow-arrow">↗</div>
+<div class="node">Component B</div>
+
+</div>
+
+<div class="info-grid">
+
+<div class="info-card">
+<h4>Reuse</h4>
+<p>
+The same behavior can be used by multiple components.
+</p>
+</div>
+
+<div class="info-card">
+<h4>Separation</h4>
+<p>
+UI rendering can remain separate from stateful behavior.
+</p>
+</div>
+
+<div class="info-card">
+<h4>Maintainability</h4>
+<p>
+Fixing the shared logic can be done in one place.
+</p>
+</div>
+
+</div>
+
+<h3>Think in terms of responsibilities</h3>
+
+<table class="table">
+
+<tr>
+<th>Component</th>
+<th>Custom Hook</th>
+</tr>
+
+<tr>
+<td>What should the UI look like?</td>
+<td>How should the behavior work?</td>
+</tr>
+
+<tr>
+<td>JSX</td>
+<td>State and effects</td>
+</tr>
+
+<tr>
+<td>Buttons, inputs, layout</td>
+<td>Fetching, validation, storage, timers</td>
+</tr>
+
+<tr>
+<td>Presentation</td>
+<td>Reusable logic</td>
+</tr>
+
+</table>
+
+</section>
+
+<!-- NAMING -->
+
+<section class="section" id="naming">
+
+<h2>3. Hook Naming Convention</h2>
+
+<p class="intro">
+Custom Hooks should start with <strong>use</strong>.
+</p>
+
+<div class="code">
+useCounter()
+useFetch()
+useForm()
+useLocalStorage()
+useOnlineStatus()
+useDebounce()
+useAuth()
+useWindowSize()
+</div>
+
+<div class="highlight">
+The <strong>use</strong> prefix is important because it communicates that the
+function follows Hook rules and may call other Hooks.
+</div>
+
+<h3>Good naming</h3>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">useUserProfile</span>() {}
+
+<span class="keyword">function</span> <span class="function">useWindowSize</span>() {}
+
+<span class="keyword">function</span> <span class="function">useFetch</span>() {}
+
+</div>
+
+<h3>Avoid misleading names</h3>
+
+<div class="code">
+<span class="comment">// These names hide the fact that the function is a Hook.</span>
+
+<span class="keyword">function</span> getUserData() {}
+
+<span class="keyword">function</span> helper() {}
+
+<span class="keyword">function</span> formManager() {}
+
+</div>
+
+</section>
+
+<!-- CREATE -->
+
+<section class="section" id="create">
+
+<h2>4. Creating a Custom Hook</h2>
+
+<p class="intro">
+Creating a custom Hook usually follows four steps.
+</p>
+
+<div class="visual-flow">
+
+<div class="node">Find Repeated Logic</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">Create useName()</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">Move Hooks + Logic</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">Return Useful API</div>
+
+</div>
+
+<h3>Step 1 — Identify repeated behavior</h3>
+
+<p>
+Suppose several components need a counter.
+Instead of duplicating state and handlers, extract them.
+</p>
+
+<h3>Step 2 — Create the Hook</h3>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">useCounter</span>() {
+
+```
+<span class="keyword">const</span> [count, setCount] = <span class="function">useState</span>(<span class="number">0</span>);
+
+<span class="keyword">const</span> increment = () =&gt;
+    setCount(value =&gt; value + <span class="number">1</span>);
+
+<span class="keyword">const</span> decrement = () =&gt;
+    setCount(value =&gt; value - <span class="number">1</span>);
+
+<span class="keyword">const</span> reset = () =&gt;
+    setCount(<span class="number">0</span>);
+
+<span class="keyword">return</span> {
+    count,
+    increment,
+    decrement,
+    reset
+};
+```
+
+}
+
+</div>
+
+<h3>Step 3 — Consume it</h3>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">Counter</span>() {
+
+```
+<span class="keyword">const</span> {
+    count,
+    increment,
+    decrement,
+    reset
+} = <span class="function">useCounter</span>();
+
+<span class="keyword">return</span> (
+    &lt;div&gt;
+        &lt;h2&gt;{count}&lt;/h2&gt;
+
+        &lt;button onClick={increment}&gt;+&lt;/button&gt;
+        &lt;button onClick={decrement}&gt;-&lt;/button&gt;
+        &lt;button onClick={reset}&gt;Reset&lt;/button&gt;
+    &lt;/div&gt;
+);
+```
+
+}
+
+</div>
+
+<div class="demo">
+
+<div class="demo-header">
+
+<div class="demo-title">Custom useCounter() Visualization</div>
+
+<div>
+<button class="btn secondary" onclick="counterMinus()">−</button>
+<button class="btn" onclick="counterPlus()">+</button>
+<button class="btn secondary" onclick="counterReset()">Reset</button>
+</div>
+
+</div>
+
+<div class="render">
+Custom Hook State:
+<strong id="counterValue">0</strong>
+</div>
+
+<div class="output" id="counterOutput">
+useCounter() initialized with count = 0
+</div>
+
+</div>
+
+</section>
+
+<!-- REUSE -->
+
+<section class="section" id="reuse">
+
+<h2>5. Reusing Logic</h2>
+
+<p class="intro">
+The biggest advantage of custom Hooks is that the behavior can be reused
+without duplicating the implementation.
+</p>
+
+<div class="visual-flow">
+
+<div class="node">useCounter()</div>
+<div class="flow-arrow">↙</div>
+
+<div class="node">Counter A</div>
+
+<div class="flow-arrow">↘</div>
+
+<div class="node">Counter B</div>
+
+</div>
+
+<div class="warning">
+Important: Calling the same custom Hook twice does NOT create shared state.
+Each Hook call creates its own state/effect lifecycle.
+</div>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">Dashboard</span>() {
+
+```
+<span class="keyword">const</span> first =
+    <span class="function">useCounter</span>();
+
+<span class="keyword">const</span> second =
+    <span class="function">useCounter</span>();
+```
+
+}
+
+</div>
+
+<p>
+Here first.count and second.count are independent.
+</p>
+
+<table class="table">
+
+<tr>
+<th>Concept</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>Shared logic</td>
+<td>Same implementation can be reused</td>
+</tr>
+
+<tr>
+<td>Shared state</td>
+<td>Not automatically created by custom Hooks</td>
+</tr>
+
+<tr>
+<td>Independent calls</td>
+<td>Each component/Hook call has its own Hook state</td>
+</tr>
+
+</table>
+
+</section>
+
+<!-- STATE -->
+
+<section class="section" id="state">
+
+<h2>6. Custom State Logic</h2>
+
+<p class="intro">
+A custom Hook can package complex state transitions and expose a small,
+easy-to-use API to components.
+</p>
+
+<h3>Example — Toggle Hook</h3>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">useToggle</span>(initial = <span class="keyword">false</span>) {
+
+```
+<span class="keyword">const</span> [value, setValue] =
+    <span class="function">useState</span>(initial);
+
+<span class="keyword">const</span> toggle = () =&gt; {
+    setValue(current =&gt; !current);
+};
+
+<span class="keyword">return</span> [value, toggle];
+```
+
+}
+
+</div>
+
+<p>Usage:</p>
+
+<div class="code">
+<span class="keyword">const</span> [isOpen, toggleOpen] =
+    <span class="function">useToggle</span>();
+
+<button onClick={toggleOpen}>
+{isOpen ? <span class="string">"Close"</span> : <span class="string">"Open"</span>}
+</button>
+
+</div>
+
+<div class="demo">
+
+<div class="demo-header">
+
+<div class="demo-title">useToggle() Visualizer</div>
+
+<button class="btn" onclick="toggleDemo()">
+Toggle
+</button>
+
+</div>
+
+<div id="toggleBox" class="render">
+State: <strong>OFF</strong>
+</div>
+
+</div>
+
+<h3>Custom reducer logic</h3>
+
+<p>
+Custom Hooks can also hide useReducer when state transitions become more
+structured.
+</p>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">useCart</span>() {
+
+```
+<span class="keyword">const</span> [state, dispatch] =
+    <span class="function">useReducer</span>(cartReducer, {
+        items: []
+    });
+
+<span class="keyword">const</span> addItem = item =&gt; {
+    dispatch({
+        type: <span class="string">"ADD_ITEM"</span>,
+        payload: item
+    });
+};
+
+<span class="keyword">return</span> {
+    items: state.items,
+    addItem
+};
+```
+
+}
+
+</div>
+
+</section>
+
+<!-- API -->
+
+<section class="section" id="api">
+
+<h2>7. Custom API Hook</h2>
+
+<p class="intro">
+API fetching is one of the most practical reasons to create custom Hooks.
+Instead of repeating loading, error, request, and data logic inside many
+components, create a reusable data-fetching abstraction.
+</p>
+
+<div class="visual-flow">
+
+<div class="node">Component</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">useFetch(url)</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">useEffect()</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">fetch()</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">data / error / loading</div>
+
+</div>
+
+<h3>Basic API Hook</h3>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">useFetch</span>(url) {
+
+```
+<span class="keyword">const</span> [data, setData] = <span class="function">useState</span>(<span class="keyword">null</span>);
+<span class="keyword">const</span> [loading, setLoading] = <span class="function">useState</span>(<span class="keyword">true</span>);
+<span class="keyword">const</span> [error, setError] = <span class="function">useState</span>(<span class="keyword">null</span>);
+
+<span class="function">useEffect</span>(() =&gt; {
+
+    <span class="keyword">let</span> ignore = <span class="keyword">false</span>;
+
+    <span class="keyword">async function</span> <span class="function">load</span>() {
+
+        <span class="keyword">try</span> {
+
+            setLoading(<span class="keyword">true</span>);
+
+            <span class="keyword">const</span> response =
+                <span class="keyword">await</span> fetch(url);
+
+            <span class="keyword">if</span> (!response.ok) {
+                <span class="keyword">throw new</span> Error(
+                    <span class="string">"Request failed"</span>
+                );
+            }
+
+            <span class="keyword">const</span> result =
+                <span class="keyword">await</span> response.json();
+
+            <span class="keyword">if</span> (!ignore) {
+                setData(result);
+                setError(<span class="keyword">null</span>);
+            }
+
+        } <span class="keyword">catch</span> (err) {
+
+            <span class="keyword">if</span> (!ignore) {
+                setError(err);
+            }
+
+        } <span class="keyword">finally</span> {
+
+            <span class="keyword">if</span> (!ignore) {
+                setLoading(<span class="keyword">false</span>);
+            }
+
+        }
+    }
+
+    load();
+
+    <span class="keyword">return</span> () =&gt; {
+        ignore = <span class="keyword">true</span>;
+    };
+
+}, [url]);
+
+<span class="keyword">return</span> {
+    data,
+    loading,
+    error
+};
+```
+
+}
+
+</div>
+
+<h3>Using the Hook</h3>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">Users</span>() {
+
+```
+<span class="keyword">const</span> {
+    data,
+    loading,
+    error
+} = <span class="function">useFetch</span>(
+    <span class="string">"/api/users"</span>
+);
+
+<span class="keyword">if</span> (loading)
+    <span class="keyword">return</span> &lt;p&gt;Loading...&lt;/p&gt;;
+
+<span class="keyword">if</span> (error)
+    <span class="keyword">return</span> &lt;p&gt;Something went wrong.&lt;/p&gt;;
+
+<span class="keyword">return</span> (
+    &lt;ul&gt;
+        {data.map(user =&gt; (
+            &lt;li key={user.id}&gt;
+                {user.name}
+            &lt;/li&gt;
+        ))}
+    &lt;/ul&gt;
+);
+```
+
+}
+
+</div>
+
+<div class="success">
+The component focuses on UI. The custom Hook owns the reusable fetching
+behavior.
+</div>
+
+</section>
+
+<!-- FORM -->
+
+<section class="section" id="form">
+
+<h2>8. Custom Form Hook</h2>
+
+<p class="intro">
+Forms often contain repeated state, change handlers, validation, reset
+logic, and submission behavior. A custom Hook can centralize that logic.
+</p>
+
+<h3>useForm()</h3>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">useForm</span>(initialValues) {
+
+```
+<span class="keyword">const</span> [values, setValues] =
+    <span class="function">useState</span>(initialValues);
+
+<span class="keyword">const</span> handleChange = event =&gt; {
+
+    <span class="keyword">const</span> {
+        name,
+        value
+    } = event.target;
+
+    setValues(current =&gt; ({
+        ...current,
+        [name]: value
+    }));
+};
+
+<span class="keyword">const</span> reset = () =&gt; {
+    setValues(initialValues);
+};
+
+<span class="keyword">return</span> {
+    values,
+    handleChange,
+    reset
+};
+```
+
+}
+
+</div>
+
+<h3>Using it</h3>
+
+<div class="code">
+<span class="keyword">const</span> {
+    values,
+    handleChange,
+    reset
+} = <span class="function">useForm</span>({
+    name: <span class="string">""</span>,
+    email: <span class="string">""</span>
+});
+</div>
+
+<div class="demo">
+
+<div class="demo-header">
+<div class="demo-title">useForm() Interactive Demo</div>
+<button class="btn secondary" onclick="resetForm()">Reset</button>
+</div>
+
+<div class="form-demo">
+
+<div>
+
+<label>Name</label>
+<input
+id="demoName"
+name="name"
+placeholder="Enter your name"
+oninput="formChanged()"
+
+>
+
+<label>Email</label>
+<input
+id="demoEmail"
+name="email"
+placeholder="Enter your email"
+oninput="formChanged()"
+
+>
+
+</div>
+
+<div class="render">
+
+<strong>Hook State</strong>
+
+<div class="output" id="formOutput">
+{
+  name: "",
+  email: ""
+}
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- STORAGE -->
+
+<section class="section" id="storage">
+
+<h2>9. Custom Local Storage Hook</h2>
+
+<p class="intro">
+The browser's localStorage API can persist small amounts of client-side
+data across page reloads. A custom Hook can combine state with storage
+synchronization.
+</p>
+
+<div class="visual-flow">
+
+<div class="node">Component</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">useLocalStorage()</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">React State</div>
+<div class="flow-arrow">↔</div>
+
+<div class="node">localStorage</div>
+
+</div>
+
+<h3>Basic implementation</h3>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">useLocalStorage</span>(key, initialValue) {
+
+```
+<span class="keyword">const</span> [value, setValue] = <span class="function">useState</span>(() =&gt; {
+
+    <span class="keyword">const</span> saved =
+        localStorage.getItem(key);
+
+    <span class="keyword">return</span> saved !== <span class="keyword">null</span>
+        ? JSON.parse(saved)
+        : initialValue;
+});
+
+<span class="function">useEffect</span>(() =&gt; {
+
+    localStorage.setItem(
+        key,
+        JSON.stringify(value)
+    );
+
+}, [key, value]);
+
+<span class="keyword">return</span> [value, setValue];
+```
+
+}
+
+</div>
+
+<h3>Usage</h3>
+
+<div class="code">
+<span class="keyword">const</span> [theme, setTheme] =
+    <span class="function">useLocalStorage</span>(
+        <span class="string">"theme"</span>,
+        <span class="string">"light"</span>
+    );
+</div>
+
+<div class="demo">
+
+<div class="demo-header">
+
+<div class="demo-title">Local Storage Hook Simulator</div>
+
+<div>
+<button class="btn" onclick="storageSet('ZENSUS')">
+Save ZENSUS
+</button>
+
+<button class="btn secondary" onclick="storageClear()">
+Clear
+</button>
+</div>
+
+</div>
+
+<div class="storage-display">
+
+<div>Stored Value</div>
+
+<div class="storage-value" id="storageValue">
+—
+</div>
+
+<p class="small">
+The custom Hook hides storage synchronization from the component.
+</p>
+
+</div>
+
+</div>
+
+<div class="warning">
+Do not store sensitive secrets such as passwords or private authentication
+tokens in localStorage merely for convenience. Browser storage is accessible
+to JavaScript running on the page.
+</div>
+
+</section>
+
+<!-- COMPOSITION -->
+
+<section class="section" id="compose">
+
+<h2>10. Hook Composition</h2>
+
+<p class="intro">
+One custom Hook can call another custom Hook. This is called
+<strong>Hook composition</strong>.
+</p>
+
+<div class="visual-flow">
+
+<div class="node">useUser()</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">useFetch()</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">useEffect()</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">API</div>
+
+</div>
+
+<h3>Example</h3>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">useUser</span>(userId) {
+
+```
+<span class="keyword">const</span> {
+    data,
+    loading,
+    error
+} = <span class="function">useFetch</span>(
+    <span class="string">`/api/users/${userId}`</span>
+);
+
+<span class="keyword">return</span> {
+    user: data,
+    loading,
+    error
+};
+```
+
+}
+
+</div>
+
+<p>
+Now the component only needs:
+</p>
+
+<div class="code">
+<span class="keyword">const</span> {
+    user,
+    loading,
+    error
+} = <span class="function">useUser</span>(userId);
+</div>
+
+<div class="highlight">
+Composition lets you build larger reusable behaviors from smaller Hooks,
+similar to building software from modular functions.
+</div>
+
+<h3>Composition hierarchy</h3>
+
+<div class="architecture">
+
+<div class="arch-box">
+<strong>Component</strong>
+<span class="small">UI and presentation</span>
+</div>
+
+<div class="arch-box">
+<strong>useUser()</strong>
+<span class="small">Domain-specific behavior</span>
+</div>
+
+<div class="arch-box">
+<strong>useFetch()</strong>
+<span class="small">Reusable data fetching</span>
+</div>
+
+</div>
+
+</section>
+
+<!-- RULES -->
+
+<section class="section" id="rules">
+
+<h2>11. Custom Hook Rules</h2>
+
+<h3>Rule 1 — Start with use</h3>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">useOnlineStatus</span>() {}
+</div>
+
+<h3>Rule 2 — Follow the Rules of Hooks</h3>
+
+<p>
+Custom Hooks can call other Hooks, but they must follow React's Hook rules.
+</p>
+
+<div class="danger">
+
+<strong>Do not call Hooks inside:</strong>
+
+<ul>
+<li>if statements</li>
+<li>for loops</li>
+<li>while loops</li>
+<li>nested functions</li>
+<li>event handlers</li>
+<li>arbitrary conditional branches</li>
+</ul>
+
+</div>
+
+<h3>Correct</h3>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">useProfile</span>() {
+
+```
+<span class="keyword">const</span> [user, setUser] =
+    <span class="function">useState</span>(<span class="keyword">null</span>);
+
+<span class="function">useEffect</span>(() =&gt; {
+    <span class="comment">// effect logic</span>
+}, []);
+
+<span class="keyword">return</span> user;
+```
+
+}
+
+</div>
+
+<h3>Incorrect</h3>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">useProfile</span>(enabled) {
+
+```
+<span class="keyword">if</span> (enabled) {
+
+    <span class="keyword">const</span> [user, setUser] =
+        <span class="function">useState</span>(<span class="keyword">null</span>);
+
+}
+```
+
+}
+
+</div>
+
+<div class="warning">
+The order in which Hooks are called must remain consistent between renders.
+That is why Hooks should be called at the top level of components and custom Hooks.
+</div>
+
+</section>
+
+<!-- ARCHITECTURE -->
+
+<section class="section" id="architecture">
+
+<h2>12. Practical Architecture</h2>
+
+<p class="intro">
+In a professional React application, custom Hooks can create a clean
+separation between UI and reusable behavior.
+</p>
+
+<div class="architecture">
+
+<div class="arch-box">
+
+<strong>components/</strong>
+
+<p class="small">
+Buttons, forms, cards, pages and UI.
+</p>
+
+</div>
+
+<div class="arch-box">
+
+<strong>hooks/</strong>
+
+<p class="small">
+Reusable stateful logic.
+</p>
+
+</div>
+
+<div class="arch-box">
+
+<strong>services/</strong>
+
+<p class="small">
+API and external-service functions.
+</p>
+
+</div>
+
+</div>
+
+<div class="code">
+src/
+│
+├── components/
+│   ├── StudentCard.jsx
+│   ├── SearchBox.jsx
+│   └── Dashboard.jsx
+│
+├── hooks/
+│   ├── useFetch.js
+│   ├── useForm.js
+│   ├── useLocalStorage.js
+│   ├── useDebounce.js
+│   └── useOnlineStatus.js
+│
+├── services/
+│   └── api.js
+│
+└── App.jsx
+</div>
+
+<h3>ZENSUS Example</h3>
+
+<div class="visual-flow">
+
+<div class="node">ZENSUS Dashboard</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">useStudentData()</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">useFetch()</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">API Service</div>
+
+</div>
+
+<p>
+The dashboard does not need to know every implementation detail of fetching,
+loading states, cleanup, and request handling.
+</p>
+
+<div class="success">
+Good architecture hides unnecessary implementation details while exposing
+a small, understandable API to the component.
+</div>
+
+</section>
+
+<!-- COMMON MISTAKES -->
+
+<section class="section" id="mistakes">
+
+<h2>13. Common Mistakes</h2>
+
+<h3>Mistake 1 — Calling a custom Hook like a normal utility</h3>
+
+<div class="code">
+<span class="comment">// ❌ Avoid</span>
+
+<span class="keyword">function</span> calculateSomething() {
+
+```
+<span class="keyword">const</span> value =
+    <span class="function">useState</span>(<span class="number">0</span>);
+```
+
+}
+
+</div>
+
+<p>
+If a function uses Hooks, it should follow Hook conventions and be used in
+a valid React component/custom-Hook context.
+</p>
+
+<h3>Mistake 2 — Conditional Hook calls</h3>
+
+<div class="code">
+<span class="comment">// ❌ Wrong</span>
+
+<span class="keyword">if</span> (loggedIn) { <span class="function">useUser</span>();
+}
+
+</div>
+
+<div class="danger">
+Do not conditionally call a custom Hook if that changes the order of Hook calls.
+</div>
+
+<h3>Mistake 3 — Returning too much</h3>
+
+<p>
+A custom Hook should expose a useful API. Returning many internal
+implementation details can make the Hook harder to use and maintain.
+</p>
+
+<h3>Mistake 4 — Putting UI inside a Hook unnecessarily</h3>
+
+<div class="code">
+<span class="comment">// A Hook should normally provide behavior/data.</span>
+
+<span class="keyword">const</span> {
+data,
+loading,
+error
+} = <span class="function">useFetch</span>(url);
+
+</div>
+
+<p>
+The component decides how that data should be displayed.
+</p>
+
+<h3>Mistake 5 — Assuming custom Hooks share state</h3>
+
+<div class="code">
+<span class="keyword">const</span> first = <span class="function">useCounter</span>();
+<span class="keyword">const</span> second = <span class="function">useCounter</span>();
+</div>
+
+<p>
+first.count and second.count are separate state values.
+</p>
+
+<h3>Mistake 6 — Making a Hook for every tiny function</h3>
+
+<div class="warning">
+Not every reusable JavaScript function needs to become a Hook.
+If a function does not use React state, effects, context, refs, or other
+Hooks, a normal utility function may be simpler.
+</div>
+
+</section>
+
+<!-- NORMAL FUNCTION VS HOOK -->
+
+<section class="section">
+
+<h2>14. Custom Hook vs Normal Function</h2>
+
+<table class="table">
+
+<tr>
+<th>Feature</th>
+<th>Normal Function</th>
+<th>Custom Hook</th>
+</tr>
+
+<tr>
+<td>Starts with use</td>
+<td>Not required</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Can call React Hooks</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Can manage React state</td>
+<td>Not through Hooks</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Reusable JavaScript calculation</td>
+<td>Excellent</td>
+<td>Usually unnecessary</td>
+</tr>
+
+<tr>
+<td>Reusable stateful behavior</td>
+<td>Not the intended abstraction</td>
+<td>Excellent</td>
+</tr>
+
+</table>
+
+<div class="highlight">
+<strong>Decision:</strong>
+If the logic is pure JavaScript, consider a normal function.
+If the logic needs React Hooks and reusable stateful behavior, consider a
+custom Hook.
+</div>
+
+</section>
+
+<!-- MENTAL MODEL -->
+
+<section class="section">
+
+<h2>15. Master Mental Model</h2>
+
+<div class="card">
+
+<div class="visual-flow">
+
+<div class="node">Repeated Behavior</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">Extract</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">useSomething()</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">Compose Hooks</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">Expose Simple API</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">Reuse Across Components</div>
+
+</div>
+
+</div>
+
+<div class="success">
+
+<strong>Remember:</strong><br><br>
+
+Custom Hooks do not create a new type of React state.
+They are a way to package and reuse logic that uses Hooks.
+
+<br><br>
+
+<strong>Shared logic ≠ shared state.</strong>
+
+</div>
+
+</section>
+
+<!-- CHEAT SHEET -->
+
+<section class="section">
+
+<h2>16. Custom Hooks Cheat Sheet</h2>
+
+<div class="cheat">
+
+<div class="cheat-item">
+<strong>What?</strong>
+<p class="small">
+Reusable stateful React logic.
+</p>
+</div>
+
+<div class="cheat-item">
+<strong>Naming</strong>
+<p class="small">
+Start with use.
+</p>
+</div>
+
+<div class="cheat-item">
+<strong>State</strong>
+<p class="small">
+Each Hook call has independent state.
+</p>
+</div>
+
+<div class="cheat-item">
+<strong>Composition</strong>
+<p class="small">
+Custom Hooks can call other Hooks.
+</p>
+</div>
+
+<div class="cheat-item">
+<strong>API Hook</strong>
+<p class="small">
+Encapsulate loading, data and error behavior.
+</p>
+</div>
+
+<div class="cheat-item">
+<strong>Form Hook</strong>
+<p class="small">
+Centralize form state and handlers.
+</p>
+</div>
+
+<div class="cheat-item">
+<strong>Storage Hook</strong>
+<p class="small">
+Synchronize state with browser storage.
+</p>
+</div>
+
+<div class="cheat-item">
+<strong>Architecture</strong>
+<p class="small">
+Keep UI separate from reusable behavior.
+</p>
+</div>
+
+</div>
+
+</section>
+
+<!-- QUIZ -->
+
+<section class="section" id="quiz">
+
+<h2>17. Quick Quiz</h2>
+
+<div class="quiz-question">
+
+<strong>1. What is the primary purpose of a custom Hook?</strong>
+
+<button onclick="showAnswer(1)">A. Create HTML elements</button> <button onclick="showAnswer(1)">B. Reuse stateful React logic</button> <button onclick="showAnswer(1)">C. Replace CSS</button> <button onclick="showAnswer(1)">D. Create database tables</button>
+
+<div class="answer" id="answer1">
+Answer: B — Custom Hooks are primarily used to extract and reuse stateful React logic.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<strong>2. What naming convention identifies a custom Hook?</strong>
+
+<button onclick="showAnswer(2)">A. The function should start with create</button> <button onclick="showAnswer(2)">B. The function should start with use</button> <button onclick="showAnswer(2)">C. The function should start with hook</button> <button onclick="showAnswer(2)">D. The function should end with React</button>
+
+<div class="answer" id="answer2">
+Answer: B — Custom Hooks use the use prefix.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<strong>3. If two components call useCounter(), what normally happens to their state?</strong>
+
+<button onclick="showAnswer(3)">A. They automatically share one counter</button> <button onclick="showAnswer(3)">B. Both become global state</button> <button onclick="showAnswer(3)">C. Each Hook call has independent state</button> <button onclick="showAnswer(3)">D. React prevents the second call</button>
+
+<div class="answer" id="answer3">
+Answer: C — Each custom Hook call has its own Hook state. The implementation is shared, not the state instance.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<strong>4. Which Hook is especially useful for building a reusable API-fetching Hook?</strong>
+
+<button onclick="showAnswer(4)">A. useEffect</button> <button onclick="showAnswer(4)">B. useMemo</button> <button onclick="showAnswer(4)">C. useRef only</button> <button onclick="showAnswer(4)">D. React.memo</button>
+
+<div class="answer" id="answer4">
+Answer: A — API synchronization is commonly implemented with useEffect inside a custom data-fetching Hook.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<strong>5. Can one custom Hook call another custom Hook?</strong>
+
+<button onclick="showAnswer(5)">A. Yes, when Hook rules are followed</button> <button onclick="showAnswer(5)">B. No, never</button> <button onclick="showAnswer(5)">C. Only inside JSX</button> <button onclick="showAnswer(5)">D. Only inside loops</button>
+
+<div class="answer" id="answer5">
+Answer: A — Custom Hooks can compose other Hooks as long as the Rules of Hooks are respected.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<strong>6. What does “shared logic ≠ shared state” mean?</strong>
+
+<button onclick="showAnswer(6)">A. Hooks cannot contain state</button> <button onclick="showAnswer(6)">B. Two Hook calls can reuse implementation while maintaining separate state</button> <button onclick="showAnswer(6)">C. All custom Hooks automatically become global</button> <button onclick="showAnswer(6)">D. State can only exist in one component</button>
+
+<div class="answer" id="answer6">
+Answer: B — The custom Hook implementation is reusable, but each call receives its own state and effect lifecycle.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<strong>7. When is a normal utility function usually more appropriate than a custom Hook?</strong>
+
+<button onclick="showAnswer(7)">A. When the logic is pure JavaScript and does not use React Hooks</button> <button onclick="showAnswer(7)">B. When the logic uses useState</button> <button onclick="showAnswer(7)">C. When the logic uses useEffect</button> <button onclick="showAnswer(7)">D. When the logic needs React state</button>
+
+<div class="answer" id="answer7">
+Answer: A — Pure JavaScript logic that does not need React Hooks can usually remain a normal reusable function.
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+<footer class="footer">
+ZENSUS React Course • Lesson 18 • Custom Hooks
+</footer>
+
+</main>
+</div>
+
+<script>
+
+/* SIDEBAR */
+
+document.querySelectorAll(".side-item").forEach(item => {
+
+    item.addEventListener("click", () => {
+
+        const target =
+            document.getElementById(item.dataset.target);
+
+        if(target){
+            target.scrollIntoView({
+                behavior:"smooth",
+                block:"start"
+            });
+        }
+
+        document.querySelectorAll(".side-item")
+            .forEach(x => x.classList.remove("active"));
+
+        item.classList.add("active");
+
+    });
+
+});
+
+
+/* COUNTER */
+
+let counter = 0;
+
+function updateCounter(){
+
+    document.getElementById("counterValue")
+        .textContent = counter;
+
+    document.getElementById("counterOutput")
+        .textContent =
+        `useCounter() → count = ${counter}`;
+
+}
+
+function counterPlus(){
+
+    counter++;
+    updateCounter();
+
+}
+
+function counterMinus(){
+
+    counter--;
+    updateCounter();
+
+}
+
+function counterReset(){
+
+    counter = 0;
+    updateCounter();
+
+}
+
+
+/* TOGGLE */
+
+let toggleState = false;
+
+function toggleDemo(){
+
+    toggleState = !toggleState;
+
+    const box =
+        document.getElementById("toggleBox");
+
+    box.innerHTML =
+        `State:
+        <strong>
+        ${toggleState ? "ON" : "OFF"}
+        </strong>`;
+
+    box.classList.remove("flash");
+
+    void box.offsetWidth;
+
+    box.classList.add("flash");
+
+}
+
+
+/* FORM */
+
+function formChanged(){
+
+    const name =
+        document.getElementById("demoName").value;
+
+    const email =
+        document.getElementById("demoEmail").value;
+
+    document.getElementById("formOutput")
+        .textContent =
+`{
+  name: "${name}",
+  email: "${email}"
+}`;
+
+}
+
+function resetForm(){
+
+    document.getElementById("demoName").value = "";
+    document.getElementById("demoEmail").value = "";
+
+    formChanged();
+
+}
+
+
+/* LOCAL STORAGE SIMULATION */
+
+function storageSet(value){
+
+    localStorage.setItem(
+        "zensus-demo-value",
+        value
+    );
+
+    document.getElementById("storageValue")
+        .textContent = value;
+
+}
+
+function storageClear(){
+
+    localStorage.removeItem(
+        "zensus-demo-value"
+    );
+
+    document.getElementById("storageValue")
+        .textContent = "—";
+
+}
+
+
+/* LOAD STORAGE */
+
+(function(){
+
+    const saved =
+        localStorage.getItem(
+            "zensus-demo-value"
+        );
+
+    if(saved){
+
+        document.getElementById("storageValue")
+            .textContent = saved;
+
+    }
+
+})();
+
+
+/* QUIZ */
+
+function showAnswer(number){
+
+    const answer =
+        document.getElementById(
+            "answer" + number
+        );
+
+    if(answer){
+
+        answer.style.display =
+            answer.style.display === "block"
+            ? "none"
+            : "block";
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>

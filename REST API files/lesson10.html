@@ -1,0 +1,3699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS | REST API Lesson 10</title>
+
+<style>
+:root{
+    --blue:#2563eb;
+    --blue-dark:#1d4ed8;
+    --blue-light:#eff6ff;
+    --blue-soft:#dbeafe;
+    --blue-border:#bfdbfe;
+
+    --text:#10213f;
+    --text-light:#5f6f86;
+    --muted:#8b9ab0;
+
+    --bg:#f7faff;
+    --white:#ffffff;
+    --border:#dce6f2;
+
+    --green:#16a34a;
+    --green-light:#f0fdf4;
+
+    --orange:#ea580c;
+    --orange-light:#fff7ed;
+
+    --red:#dc2626;
+    --red-light:#fef2f2;
+
+    --purple:#7c3aed;
+    --purple-light:#f5f3ff;
+
+    --shadow:0 12px 35px rgba(37,99,235,.08);
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    width:270px;
+    height:100vh;
+    background:#fff;
+    border-right:1px solid var(--border);
+    padding:25px 18px;
+    overflow-y:auto;
+    z-index:1000;
+}
+
+.logo{
+    font-size:25px;
+    font-weight:900;
+    color:var(--blue);
+    letter-spacing:1px;
+    padding:0 12px;
+}
+
+.lesson-label{
+    font-size:11px;
+    font-weight:800;
+    color:var(--muted);
+    letter-spacing:1.5px;
+    padding:8px 12px 15px;
+}
+
+.nav a{
+    display:block;
+    text-decoration:none;
+    color:var(--text-light);
+    font-size:14px;
+    padding:10px 13px;
+    margin:3px 0;
+    border-radius:9px;
+    transition:.25s;
+}
+
+.nav a:hover,
+.nav a.active{
+    background:var(--blue-light);
+    color:var(--blue);
+    font-weight:700;
+}
+
+/* =========================
+   MAIN
+========================= */
+
+.main{
+    margin-left:270px;
+    padding:35px 45px 90px;
+    max-width:1450px;
+}
+
+.progress-container{
+    position:fixed;
+    top:0;
+    left:270px;
+    right:0;
+    height:4px;
+    background:#eaf0f8;
+    z-index:2000;
+}
+
+.progress-bar{
+    width:0%;
+    height:100%;
+    background:var(--blue);
+}
+
+/* =========================
+   HERO
+========================= */
+
+.hero{
+    background:linear-gradient(135deg,#ffffff,#eff6ff);
+    border:1px solid var(--blue-border);
+    border-radius:24px;
+    padding:45px;
+    box-shadow:var(--shadow);
+    margin-bottom:30px;
+}
+
+.badges{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    margin-bottom:18px;
+}
+
+.badge{
+    padding:6px 11px;
+    border-radius:20px;
+    background:var(--blue-light);
+    color:var(--blue);
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.5px;
+}
+
+.hero h1{
+    font-size:42px;
+    line-height:1.15;
+    margin-bottom:15px;
+}
+
+.hero p{
+    max-width:1000px;
+    color:var(--text-light);
+    font-size:17px;
+}
+
+/* =========================
+   SEARCH
+========================= */
+
+.search-box{
+    margin:25px 0;
+}
+
+.search-box input{
+    width:100%;
+    padding:15px 18px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    font-size:15px;
+    outline:none;
+    background:#fff;
+}
+
+.search-box input:focus{
+    border-color:var(--blue);
+    box-shadow:0 0 0 3px var(--blue-soft);
+}
+
+/* =========================
+   SECTIONS
+========================= */
+
+section{
+    margin:35px 0;
+    scroll-margin-top:25px;
+}
+
+.section-card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:30px;
+    box-shadow:var(--shadow);
+}
+
+.section-title{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:18px;
+}
+
+.section-number{
+    width:40px;
+    height:40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--blue);
+    color:#fff;
+    border-radius:10px;
+    font-weight:800;
+    flex-shrink:0;
+}
+
+h2{
+    font-size:27px;
+}
+
+h3{
+    margin:20px 0 8px;
+}
+
+h4{
+    margin:12px 0 6px;
+}
+
+p{
+    color:var(--text-light);
+}
+
+ul,
+ol{
+    margin:15px 0 15px 22px;
+}
+
+li{
+    margin:7px 0;
+    color:var(--text-light);
+}
+
+strong{
+    color:var(--text);
+}
+
+code{
+    color:var(--blue-dark);
+    font-weight:700;
+}
+
+/* =========================
+   CARDS
+========================= */
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+    gap:18px;
+    margin-top:22px;
+}
+
+.info-card{
+    border:1px solid var(--border);
+    border-radius:15px;
+    padding:20px;
+    background:#fff;
+    transition:.25s;
+}
+
+.info-card:hover{
+    transform:translateY(-4px);
+    border-color:var(--blue-border);
+    box-shadow:0 10px 25px rgba(37,99,235,.08);
+}
+
+.info-icon{
+    font-size:30px;
+    margin-bottom:8px;
+}
+
+.info-card h3{
+    margin-top:0;
+}
+
+.info-card p{
+    font-size:14px;
+}
+
+/* =========================
+   METHOD CARDS
+========================= */
+
+.method-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+    margin-top:25px;
+}
+
+.method-card{
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:25px;
+    background:#fff;
+    position:relative;
+    overflow:hidden;
+}
+
+.method-card::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:4px;
+    background:var(--blue);
+}
+
+.method-card.put::before{
+    background:var(--purple);
+}
+
+.method-card.patch::before{
+    background:var(--orange);
+}
+
+.method-card.delete::before{
+    background:var(--red);
+}
+
+.method-label{
+    display:inline-block;
+    padding:8px 14px;
+    border-radius:9px;
+    background:var(--blue-light);
+    color:var(--blue-dark);
+    font-weight:900;
+    letter-spacing:.5px;
+    margin-bottom:12px;
+}
+
+.put .method-label{
+    background:var(--purple-light);
+    color:var(--purple);
+}
+
+.patch .method-label{
+    background:var(--orange-light);
+    color:var(--orange);
+}
+
+.delete .method-label{
+    background:var(--red-light);
+    color:var(--red);
+}
+
+/* =========================
+   FLOW
+========================= */
+
+.flow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin:28px 0;
+}
+
+.flow-box{
+    min-width:135px;
+    padding:17px;
+    text-align:center;
+    border:1px solid var(--blue-border);
+    background:var(--blue-light);
+    border-radius:14px;
+    font-weight:800;
+    color:var(--blue-dark);
+    animation:floatBox 2.5s ease-in-out infinite;
+}
+
+.flow-box:nth-child(2){
+    animation-delay:.25s;
+}
+
+.flow-box:nth-child(3){
+    animation-delay:.5s;
+}
+
+.flow-box:nth-child(4){
+    animation-delay:.75s;
+}
+
+.flow-box:nth-child(5){
+    animation-delay:1s;
+}
+
+@keyframes floatBox{
+    0%,100%{
+        transform:translateY(0);
+    }
+
+    50%{
+        transform:translateY(-6px);
+    }
+}
+
+.arrow{
+    font-size:24px;
+    color:var(--blue);
+    font-weight:900;
+}
+
+/* =========================
+   CODE
+========================= */
+
+.code-box{
+    background:#0f172a;
+    color:#e2e8f0;
+    border-radius:14px;
+    overflow:hidden;
+    margin:20px 0;
+}
+
+.code-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 15px;
+    background:#1e293b;
+    color:#cbd5e1;
+    font-size:12px;
+    font-weight:700;
+}
+
+.copy-btn{
+    border:0;
+    background:#334155;
+    color:#fff;
+    padding:6px 10px;
+    border-radius:7px;
+    cursor:pointer;
+}
+
+.copy-btn:hover{
+    background:var(--blue);
+}
+
+pre{
+    padding:20px;
+    overflow-x:auto;
+    font-size:14px;
+    line-height:1.7;
+}
+
+/* =========================
+   NOTES
+========================= */
+
+.note{
+    padding:18px;
+    border-radius:13px;
+    background:var(--blue-light);
+    border-left:5px solid var(--blue);
+    margin:20px 0;
+}
+
+.success{
+    padding:18px;
+    border-radius:13px;
+    background:var(--green-light);
+    border-left:5px solid var(--green);
+    margin:20px 0;
+}
+
+.warning{
+    padding:18px;
+    border-radius:13px;
+    background:var(--orange-light);
+    border-left:5px solid var(--orange);
+    margin:20px 0;
+}
+
+.error-note{
+    padding:18px;
+    border-radius:13px;
+    background:var(--red-light);
+    border-left:5px solid var(--red);
+    margin:20px 0;
+}
+
+/* =========================
+   TABLE
+========================= */
+
+.table-wrap{
+    overflow-x:auto;
+    margin-top:20px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:750px;
+}
+
+th,
+td{
+    padding:13px 15px;
+    border-bottom:1px solid var(--border);
+    text-align:left;
+}
+
+th{
+    background:var(--blue-light);
+    color:var(--blue-dark);
+    font-size:14px;
+}
+
+td{
+    color:var(--text-light);
+    font-size:14px;
+}
+
+.method{
+    display:inline-block;
+    padding:5px 9px;
+    border-radius:7px;
+    font-size:11px;
+    font-weight:900;
+    background:var(--blue-light);
+    color:var(--blue);
+}
+
+.method.put{
+    background:var(--purple-light);
+    color:var(--purple);
+}
+
+.method.patch{
+    background:var(--orange-light);
+    color:var(--orange);
+}
+
+.method.delete{
+    background:var(--red-light);
+    color:var(--red);
+}
+
+.endpoint{
+    font-family:monospace;
+    font-weight:700;
+}
+
+/* =========================
+   STEP LIST
+========================= */
+
+.step-list{
+    margin-top:20px;
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:20px;
+}
+
+.step{
+    display:flex;
+    gap:15px;
+    padding:15px 0;
+    border-bottom:1px solid var(--border);
+}
+
+.step:last-child{
+    border-bottom:none;
+}
+
+.step-number{
+    width:36px;
+    height:36px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--blue);
+    color:#fff;
+    border-radius:9px;
+    font-weight:800;
+}
+
+/* =========================
+   REQUEST RESPONSE
+========================= */
+
+.request-response{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+    margin-top:20px;
+}
+
+.terminal{
+    background:#0f172a;
+    border-radius:15px;
+    overflow:hidden;
+}
+
+.terminal-head{
+    background:#1e293b;
+    color:#cbd5e1;
+    padding:10px 15px;
+    font-size:12px;
+    font-weight:700;
+}
+
+.terminal pre{
+    color:#dbeafe;
+}
+
+/* =========================
+   CRUD SIMULATOR
+========================= */
+
+.simulator{
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:25px;
+    background:#fff;
+}
+
+.sim-buttons{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:18px 0;
+}
+
+.sim-btn{
+    border:1px solid var(--blue-border);
+    background:var(--blue-light);
+    color:var(--blue-dark);
+    padding:11px 17px;
+    border-radius:9px;
+    cursor:pointer;
+    font-weight:800;
+}
+
+.sim-btn:hover,
+.sim-btn.active{
+    background:var(--blue);
+    color:#fff;
+}
+
+.sim-output{
+    background:#0f172a;
+    color:#dbeafe;
+    border-radius:13px;
+    padding:20px;
+    min-height:300px;
+    white-space:pre-wrap;
+    font-family:monospace;
+    overflow:auto;
+}
+
+/* =========================
+   QUIZ
+========================= */
+
+.quiz{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:25px;
+    margin-top:20px;
+}
+
+.option{
+    border:1px solid var(--border);
+    padding:13px 16px;
+    border-radius:10px;
+    margin:9px 0;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.option:hover{
+    background:var(--blue-light);
+    border-color:var(--blue-border);
+}
+
+.option.correct{
+    background:var(--green-light);
+    border-color:var(--green);
+}
+
+.option.wrong{
+    background:var(--red-light);
+    border-color:var(--red);
+}
+
+.quiz-result{
+    margin-top:14px;
+    font-weight:800;
+}
+
+/* =========================
+   TAKEAWAY
+========================= */
+
+.takeaway{
+    background:linear-gradient(135deg,#eff6ff,#ffffff);
+    border:1px solid var(--blue-border);
+    border-radius:20px;
+    padding:30px;
+}
+
+.takeaway li{
+    color:var(--text);
+}
+
+/* =========================
+   REVEAL
+========================= */
+
+.reveal{
+    opacity:0;
+    transform:translateY(20px);
+    transition:.7s ease;
+}
+
+.reveal.show{
+    opacity:1;
+    transform:translateY(0);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:1050px){
+
+    .method-grid{
+        grid-template-columns:1fr;
+    }
+
+    .request-response{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:900px){
+
+    .sidebar{
+        position:relative;
+        width:100%;
+        height:auto;
+        border-right:none;
+        border-bottom:1px solid var(--border);
+    }
+
+    .main{
+        margin-left:0;
+        padding:25px 18px 60px;
+    }
+
+    .progress-container{
+        left:0;
+    }
+
+    .hero{
+        padding:28px;
+    }
+
+    .hero h1{
+        font-size:32px;
+    }
+}
+
+@media(max-width:600px){
+
+    .flow-box{
+        min-width:120px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =========================
+     PROGRESS
+========================= -->
+
+<div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+</div>
+
+
+<!-- =========================
+     SIDEBAR
+========================= -->
+
+<aside class="sidebar">
+
+    <div class="logo">ZENSUS</div>
+
+    <div class="lesson-label">
+        REST API • LESSON 10 / 15
+    </div>
+
+    <nav class="nav">
+
+        <a href="#overview">Overview</a>
+        <a href="#methods">PUT, PATCH & DELETE</a>
+        <a href="#put">PUT API</a>
+        <a href="#putflow">PUT Flow</a>
+        <a href="#patch">PATCH API</a>
+        <a href="#putpatch">PUT vs PATCH</a>
+        <a href="#delete">DELETE API</a>
+        <a href="#deleteflow">DELETE Flow</a>
+        <a href="#parameters">Path Parameters</a>
+        <a href="#body">Request Bodies</a>
+        <a href="#status">Status Codes</a>
+        <a href="#idempotency">Idempotency</a>
+        <a href="#complete">Complete CRUD Flow</a>
+        <a href="#example">Student API</a>
+        <a href="#errors">Common Errors</a>
+        <a href="#simulator">API Simulator</a>
+        <a href="#practice">Practice</a>
+        <a href="#quiz">Quiz</a>
+        <a href="#takeaway">Takeaway</a>
+
+    </nav>
+
+</aside>
+
+
+<main class="main">
+
+
+<!-- =========================
+     HERO
+========================= -->
+
+<section id="overview" class="hero reveal">
+
+    <div class="badges">
+
+        <span class="badge">LESSON 10 OF 15</span>
+        <span class="badge">REST API</span>
+        <span class="badge">PUT</span>
+        <span class="badge">PATCH</span>
+        <span class="badge">DELETE</span>
+        <span class="badge">INTERMEDIATE</span>
+
+    </div>
+
+    <h1>Building PUT, PATCH & DELETE APIs</h1>
+
+    <p>
+        Learn how APIs modify and remove resources using PUT,
+        PATCH and DELETE. Understand full updates, partial updates,
+        request bodies, path parameters, validation, status codes,
+        idempotency, complete CRUD workflows and real API design.
+    </p>
+
+</section>
+
+
+<!-- =========================
+     SEARCH
+========================= -->
+
+<div class="search-box">
+
+    <input
+        type="text"
+        id="searchInput"
+        placeholder="Search this lesson..."
+    >
+
+</div>
+
+
+<!-- =========================
+     SECTION 01
+========================= -->
+
+<section id="methods" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">01</div>
+
+    <h2>PUT, PATCH & DELETE</h2>
+
+</div>
+
+<p>
+In the previous lesson, you learned GET and POST. Now we complete
+the remaining major CRUD operations.
+</p>
+
+<div class="method-grid">
+
+    <div class="method-card put">
+
+        <span class="method-label">PUT</span>
+
+        <h3>Replace / Update</h3>
+
+        <p>
+            PUT is commonly used when the client wants to replace
+            the current representation of a resource with a new
+            representation.
+        </p>
+
+        <div class="code-box">
+
+            <div class="code-header">
+                <span>Example</span>
+
+                <button class="copy-btn" onclick="copyCode(this)">
+                    Copy
+                </button>
+            </div>
+
+<pre>PUT /students/101/</pre>
+
+        </div>
+
+    </div>
+
+
+    <div class="method-card patch">
+
+        <span class="method-label">PATCH</span>
+
+        <h3>Partial Update</h3>
+
+        <p>
+            PATCH is commonly used when only part of an existing
+            resource needs to be changed.
+        </p>
+
+        <div class="code-box">
+
+            <div class="code-header">
+                <span>Example</span>
+
+                <button class="copy-btn" onclick="copyCode(this)">
+                    Copy
+                </button>
+            </div>
+
+<pre>PATCH /students/101/</pre>
+
+        </div>
+
+    </div>
+
+
+    <div class="method-card delete">
+
+        <span class="method-label">DELETE</span>
+
+        <h3>Remove</h3>
+
+        <p>
+            DELETE is used to request removal of a resource.
+        </p>
+
+        <div class="code-box">
+
+            <div class="code-header">
+                <span>Example</span>
+
+                <button class="copy-btn" onclick="copyCode(this)">
+                    Copy
+                </button>
+            </div>
+
+<pre>DELETE /students/101/</pre>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="note">
+
+<strong>Simple memory trick:</strong>
+
+<br><br>
+
+PUT → Replace / update the resource
+
+<br>
+
+PATCH → Change part of the resource
+
+<br>
+
+DELETE → Remove the resource
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================
+     PUT
+========================= -->
+
+<section id="put" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">02</div>
+
+    <h2>Building a PUT API</h2>
+
+</div>
+
+<p>
+PUT is commonly used to replace an existing resource with a new
+representation.
+</p>
+
+<h3>Example Resource</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>Current Student</span>
+</div>
+
+<pre>{
+    "id": 101,
+    "name": "Pradeep",
+    "email": "pradeep@example.com",
+    "age": 21,
+    "course": "Python"
+}</pre>
+
+</div>
+
+<p>
+Suppose the client wants to replace this student's information.
+The request can be:
+</p>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>PUT Request</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>PUT /students/101/
+Content-Type: application/json
+
+{
+    "name": "Pradeep Kumar",
+    "email": "pradeep@example.com",
+    "age": 22,
+    "course": "Django"
+}</pre>
+
+</div>
+
+<h3>What Happens?</h3>
+
+<div class="step-list">
+
+<div class="step">
+
+<div class="step-number">1</div>
+
+<div>
+<strong>Client identifies resource</strong>
+<p>
+The URL contains <code>/students/101/</code>.
+</p>
+</div>
+
+</div>
+
+<div class="step">
+
+<div class="step-number">2</div>
+
+<div>
+<strong>Client sends replacement data</strong>
+<p>
+The request body contains the new representation.
+</p>
+</div>
+
+</div>
+
+<div class="step">
+
+<div class="step-number">3</div>
+
+<div>
+<strong>Server validates the request</strong>
+<p>
+The API checks whether the submitted data is acceptable.
+</p>
+</div>
+
+</div>
+
+<div class="step">
+
+<div class="step-number">4</div>
+
+<div>
+<strong>Server updates the resource</strong>
+<p>
+The existing representation is replaced according to the API's
+update rules.
+</p>
+</div>
+
+</div>
+
+<div class="step">
+
+<div class="step-number">5</div>
+
+<div>
+<strong>Server returns a response</strong>
+<p>
+The response communicates whether the operation succeeded.
+</p>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================
+     PUT FLOW
+========================= -->
+
+<section id="putflow" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">03</div>
+
+    <h2>PUT Request Flow</h2>
+
+</div>
+
+<div class="flow">
+
+<div class="flow-box">
+Frontend
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+PUT Request
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+API
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Validate
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Database
+</div>
+
+</div>
+
+<h3>Example Response</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>200 OK</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>{
+    "id": 101,
+    "name": "Pradeep Kumar",
+    "email": "pradeep@example.com",
+    "age": 22,
+    "course": "Django"
+}</pre>
+
+</div>
+
+<div class="note">
+
+A PUT operation may also return <strong>204 No Content</strong>
+when the server successfully processes the update but does not
+return a response body.
+
+</div>
+
+<h3>PUT and Required Fields</h3>
+
+<p>
+When an API defines PUT as a complete replacement operation,
+the client may be expected to provide all fields required for the
+resource representation.
+</p>
+
+<div class="warning">
+
+<strong>Important:</strong>
+
+<br><br>
+
+The exact PUT behavior depends on the API contract. Always follow
+the documentation of the API you are using.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================
+     PATCH
+========================= -->
+
+<section id="patch" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">04</div>
+
+    <h2>Building a PATCH API</h2>
+
+</div>
+
+<p>
+PATCH is used for partial modifications.
+Instead of sending the complete resource, the client can send
+only the fields that need to change.
+</p>
+
+<h3>Current Student</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>Existing Resource</span>
+</div>
+
+<pre>{
+    "id": 101,
+    "name": "Pradeep",
+    "email": "pradeep@example.com",
+    "age": 21,
+    "course": "Python"
+}</pre>
+
+</div>
+
+<p>
+Suppose only the course needs to change.
+</p>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>PATCH Request</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>PATCH /students/101/
+Content-Type: application/json
+
+{
+    "course": "Django"
+}</pre>
+
+</div>
+
+<p>
+The other fields can remain unchanged according to the API's
+defined behavior.
+</p>
+
+<h3>Result</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>Updated Resource</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>{
+    "id": 101,
+    "name": "Pradeep",
+    "email": "pradeep@example.com",
+    "age": 21,
+    "course": "Django"
+}</pre>
+
+</div>
+
+<div class="success">
+
+<strong>Key idea:</strong>
+
+<br><br>
+
+PATCH is useful when you want to modify only selected properties
+without sending the entire resource representation.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================
+     PUT VS PATCH
+========================= -->
+
+<section id="putpatch" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">05</div>
+
+    <h2>PUT vs PATCH — Detailed Difference</h2>
+
+</div>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Feature</th>
+<th>PUT</th>
+<th>PATCH</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>Purpose</td>
+<td>Replace/update a resource representation</td>
+<td>Partially modify a resource</td>
+
+</tr>
+
+<tr>
+
+<td>Typical body</td>
+<td>Often contains the complete representation</td>
+<td>Usually contains only changed fields</td>
+
+</tr>
+
+<tr>
+
+<td>Example</td>
+<td>Change all student details</td>
+<td>Change only course</td>
+
+</tr>
+
+<tr>
+
+<td>URL</td>
+<td>/students/101/</td>
+<td>/students/101/</td>
+
+</tr>
+
+<tr>
+
+<td>Common success</td>
+<td>200 or 204</td>
+<td>200 or 204</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<h3>PUT Example</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>Full Representation</span>
+</div>
+
+<pre>PUT /students/101/
+
+{
+    "name": "Pradeep Kumar",
+    "email": "pradeep@example.com",
+    "age": 22,
+    "course": "Django"
+}</pre>
+
+</div>
+
+<h3>PATCH Example</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>Partial Representation</span>
+</div>
+
+<pre>PATCH /students/101/
+
+{
+    "course": "Django"
+}</pre>
+
+</div>
+
+<div class="note">
+
+<strong>Easy interview answer:</strong>
+
+<br><br>
+
+PUT is generally used for replacing a resource representation,
+while PATCH is designed for partial modification.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================
+     DELETE
+========================= -->
+
+<section id="delete" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">06</div>
+
+    <h2>Building a DELETE API</h2>
+
+</div>
+
+<p>
+DELETE is used to request removal of a resource identified by
+the URL.
+</p>
+
+<h3>Delete Student 101</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>DELETE Request</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>DELETE /students/101/</pre>
+
+</div>
+
+<h3>Server Flow</h3>
+
+<div class="flow">
+
+<div class="flow-box">
+Client
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+DELETE
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Find 101
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Remove
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Response
+</div>
+
+</div>
+
+<h3>Successful Response</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>204 No Content</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>HTTP/1.1 204 No Content</pre>
+
+</div>
+
+<p>
+A 204 response normally has no response body.
+</p>
+
+<h3>If the Resource Does Not Exist</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>404 Not Found</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>HTTP/1.1 404 Not Found
+
+{
+    "error": "Student not found"
+}</pre>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================
+     DELETE FLOW
+========================= -->
+
+<section id="deleteflow" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">07</div>
+
+    <h2>DELETE Request Flow</h2>
+
+</div>
+
+<div class="step-list">
+
+<div class="step">
+
+<div class="step-number">1</div>
+
+<div>
+
+<strong>Client chooses resource</strong>
+
+<p>
+The client identifies the resource using its URL.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="step">
+
+<div class="step-number">2</div>
+
+<div>
+
+<strong>Client sends DELETE</strong>
+
+<p>
+Example: <code>DELETE /students/101/</code>
+</p>
+
+</div>
+
+</div>
+
+
+<div class="step">
+
+<div class="step-number">3</div>
+
+<div>
+
+<strong>Server checks the resource</strong>
+
+<p>
+The API determines whether student 101 exists and whether the
+client is allowed to perform the operation.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="step">
+
+<div class="step-number">4</div>
+
+<div>
+
+<strong>Resource is removed</strong>
+
+<p>
+The backend performs the deletion according to its data model
+and business rules.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="step">
+
+<div class="step-number">5</div>
+
+<div>
+
+<strong>Server returns status</strong>
+
+<p>
+The API reports the result, commonly with 204 on successful
+deletion.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="warning">
+
+<strong>Real-world caution:</strong>
+
+<br><br>
+
+Deleting data can be irreversible. Production applications may
+use soft deletion, backups, confirmation rules, audit logs, or
+permission checks depending on the application's requirements.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================
+     PATH PARAMETERS
+========================= -->
+
+<section id="parameters" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">08</div>
+
+    <h2>Path Parameters</h2>
+
+</div>
+
+<p>
+PUT, PATCH and DELETE commonly operate on one specific resource.
+The resource identifier is therefore placed in the URL path.
+</p>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>Examples</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>PUT    /students/101/
+PATCH  /students/101/
+DELETE /students/101/</pre>
+
+</div>
+
+<p>
+In these examples, <strong>101</strong> is the resource identifier.
+</p>
+
+<h3>Collection vs Individual Resource</h3>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+<th>URL</th>
+<th>Meaning</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td class="endpoint">/students/</td>
+<td>The student collection</td>
+</tr>
+
+<tr>
+<td class="endpoint">/students/101/</td>
+<td>Student resource 101</td>
+</tr>
+
+<tr>
+<td class="endpoint">/students/102/</td>
+<td>Student resource 102</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<div class="note">
+
+A common REST API design is to use the collection endpoint for
+creating resources with POST and the individual resource endpoint
+for modifying or deleting a specific resource.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================
+     REQUEST BODY
+========================= -->
+
+<section id="body" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">09</div>
+
+    <h2>Request Bodies for PUT & PATCH</h2>
+
+</div>
+
+<p>
+PUT and PATCH commonly send JSON in the request body.
+</p>
+
+<h3>PUT Body</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>Complete Representation Example</span>
+</div>
+
+<pre>{
+    "name": "Pradeep Kumar",
+    "email": "pradeep@example.com",
+    "age": 22,
+    "course": "Django"
+}</pre>
+
+</div>
+
+<h3>PATCH Body</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>Partial Update Example</span>
+</div>
+
+<pre>{
+    "age": 22
+}</pre>
+
+</div>
+
+<h3>Content-Type</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>Header</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>Content-Type: application/json</pre>
+
+</div>
+
+<p>
+This tells the server that the request body is JSON.
+</p>
+
+<div class="success">
+
+<strong>Remember:</strong>
+
+<br><br>
+
+The HTTP method tells the server the intended operation.
+The URL identifies the resource.
+The request body contains data when the operation requires it.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================
+     STATUS
+========================= -->
+
+<section id="status" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">10</div>
+
+    <h2>Status Codes for PUT, PATCH & DELETE</h2>
+
+</div>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Status</th>
+<th>Meaning</th>
+<th>Example</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td><strong>200</strong></td>
+<td>OK</td>
+<td>Update succeeds and response contains a representation</td>
+</tr>
+
+<tr>
+<td><strong>204</strong></td>
+<td>No Content</td>
+<td>Successful update or deletion without a response body</td>
+</tr>
+
+<tr>
+<td><strong>400</strong></td>
+<td>Bad Request</td>
+<td>Invalid request data</td>
+</tr>
+
+<tr>
+<td><strong>401</strong></td>
+<td>Unauthorized</td>
+<td>Authentication is required or failed</td>
+</tr>
+
+<tr>
+<td><strong>403</strong></td>
+<td>Forbidden</td>
+<td>Client is authenticated but not permitted</td>
+</tr>
+
+<tr>
+<td><strong>404</strong></td>
+<td>Not Found</td>
+<td>Requested resource does not exist</td>
+</tr>
+
+<tr>
+<td><strong>409</strong></td>
+<td>Conflict</td>
+<td>Request conflicts with current resource state</td>
+</tr>
+
+<tr>
+<td><strong>422</strong></td>
+<td>Unprocessable Content</td>
+<td>Request is understood but validation fails</td>
+</tr>
+
+<tr>
+<td><strong>500</strong></td>
+<td>Internal Server Error</td>
+<td>Unexpected server-side failure</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<h3>Example: Update Success</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>200 OK</span>
+</div>
+
+<pre>{
+    "id": 101,
+    "name": "Pradeep Kumar",
+    "course": "Django"
+}</pre>
+
+</div>
+
+<h3>Example: Delete Success</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>204 No Content</span>
+</div>
+
+<pre>HTTP/1.1 204 No Content</pre>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================
+     IDEMPOTENCY
+========================= -->
+
+<section id="idempotency" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">11</div>
+
+    <h2>Idempotency — Important Concept</h2>
+
+</div>
+
+<p>
+Idempotency is an important HTTP concept when learning PUT and
+DELETE.
+</p>
+
+<p>
+An operation is idempotent when making the same request multiple
+times has the same intended effect on the resource state as making
+it once.
+</p>
+
+<h3>PUT Example</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>Request 1</span>
+</div>
+
+<pre>PUT /students/101/
+
+{
+    "name": "Pradeep",
+    "course": "Django"
+}</pre>
+
+</div>
+
+<p>
+Sending the same intended PUT request again should result in the
+same target representation, assuming the API's state and request
+conditions are unchanged.
+</p>
+
+<h3>DELETE Example</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>DELETE</span>
+</div>
+
+<pre>DELETE /students/101/</pre>
+
+</div>
+
+<p>
+Once student 101 has been deleted, sending the same request again
+does not normally delete another student. The resource remains
+absent.
+</p>
+
+<div class="note">
+
+<strong>Important distinction:</strong>
+
+<br><br>
+
+Idempotent does not necessarily mean that every repeated request
+returns the exact same response. It means the intended effect on
+the resource state is the same.
+
+</div>
+
+<h3>Common HTTP Method Property</h3>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Method</th>
+<th>Typical Idempotency</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td>GET</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>PUT</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>PATCH</td>
+<td>Depends on the operation design</td>
+</tr>
+
+<tr>
+<td>DELETE</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>POST</td>
+<td>No, generally not</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================
+     COMPLETE CRUD
+========================= -->
+
+<section id="complete" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">12</div>
+
+    <h2>Complete CRUD API Flow</h2>
+
+</div>
+
+<p>
+Now combine Lesson 09 and Lesson 10.
+</p>
+
+<div class="flow">
+
+<div class="flow-box">
+Client
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+HTTP Method
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+API Endpoint
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Backend
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Database
+</div>
+
+</div>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+<th>CRUD</th>
+<th>HTTP Method</th>
+<th>Endpoint</th>
+<th>Purpose</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td>Create</td>
+<td><span class="method">POST</span></td>
+<td class="endpoint">/students/</td>
+<td>Create student</td>
+</tr>
+
+<tr>
+<td>Read</td>
+<td><span class="method">GET</span></td>
+<td class="endpoint">/students/</td>
+<td>Get students</td>
+</tr>
+
+<tr>
+<td>Read One</td>
+<td><span class="method">GET</span></td>
+<td class="endpoint">/students/101/</td>
+<td>Get student 101</td>
+</tr>
+
+<tr>
+<td>Update</td>
+<td><span class="method put">PUT</span></td>
+<td class="endpoint">/students/101/</td>
+<td>Replace/update resource</td>
+</tr>
+
+<tr>
+<td>Partial Update</td>
+<td><span class="method patch">PATCH</span></td>
+<td class="endpoint">/students/101/</td>
+<td>Modify selected fields</td>
+</tr>
+
+<tr>
+<td>Delete</td>
+<td><span class="method delete">DELETE</span></td>
+<td class="endpoint">/students/101/</td>
+<td>Remove student</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<div class="success">
+
+You now have the complete HTTP-level CRUD picture:
+<strong>POST → GET → PUT/PATCH → DELETE</strong>.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================
+     STUDENT API
+========================= -->
+
+<section id="example" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">13</div>
+
+    <h2>Complete Student Management API</h2>
+
+</div>
+
+<p>
+Let's design a realistic API for managing students.
+</p>
+
+<h3>Student Resource</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>Student JSON</span>
+</div>
+
+<pre>{
+    "id": 101,
+    "name": "Pradeep",
+    "email": "pradeep@example.com",
+    "age": 21,
+    "course": "REST API"
+}</pre>
+
+</div>
+
+<h3>1. Create Student</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>POST</span>
+</div>
+
+<pre>POST /students/
+
+{
+    "name": "Rahul",
+    "email": "rahul@example.com",
+    "age": 22,
+    "course": "Django"
+}</pre>
+
+</div>
+
+<p>
+Response:
+</p>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>201 Created</span>
+</div>
+
+<pre>{
+    "id": 103,
+    "name": "Rahul",
+    "email": "rahul@example.com",
+    "age": 22,
+    "course": "Django"
+}</pre>
+
+</div>
+
+
+<h3>2. Get Student</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>GET</span>
+</div>
+
+<pre>GET /students/103/</pre>
+
+</div>
+
+
+<h3>3. Replace Student</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>PUT</span>
+</div>
+
+<pre>PUT /students/103/
+
+{
+    "name": "Rahul Kumar",
+    "email": "rahul@example.com",
+    "age": 23,
+    "course": "Django"
+}</pre>
+
+</div>
+
+
+<h3>4. Partially Update Student</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>PATCH</span>
+</div>
+
+<pre>PATCH /students/103/
+
+{
+    "course": "FastAPI"
+}</pre>
+
+</div>
+
+
+<h3>5. Delete Student</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>DELETE</span>
+</div>
+
+<pre>DELETE /students/103/</pre>
+
+</div>
+
+<div class="note">
+
+This gives one resource a complete lifecycle:
+
+<br><br>
+
+<strong>Create → Read → Update → Partial Update → Delete</strong>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================
+     ERRORS
+========================= -->
+
+<section id="errors" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">14</div>
+
+    <h2>Common PUT, PATCH & DELETE Errors</h2>
+
+</div>
+
+<h3>1. Updating a Resource Without an ID</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>Usually Incorrect for an Individual Update</span>
+</div>
+
+<pre>PUT /students/</pre>
+
+</div>
+
+<p>
+For an individual resource update, a common REST design is:
+</p>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>Individual Resource</span>
+</div>
+
+<pre>PUT /students/101/</pre>
+
+</div>
+
+
+<h3>2. Sending Invalid JSON</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>Invalid JSON</span>
+</div>
+
+<pre>{
+    "name": "Rahul",
+    "age": 22,
+}</pre>
+
+</div>
+
+<p>
+The trailing comma makes this invalid JSON.
+</p>
+
+
+<h3>3. Forgetting Content-Type</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>Header</span>
+</div>
+
+<pre>Content-Type: application/json</pre>
+
+</div>
+
+
+<h3>4. Updating a Resource That Does Not Exist</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>Request</span>
+</div>
+
+<pre>PATCH /students/9999/
+
+{
+    "course": "Django"
+}</pre>
+
+</div>
+
+<p>
+If the resource does not exist, the API should follow its documented
+behavior, commonly returning <strong>404 Not Found</strong>.
+</p>
+
+
+<h3>5. Deleting Without Permission</h3>
+
+<p>
+A real application may require authentication and authorization
+before allowing a DELETE request.
+</p>
+
+<div class="error-note">
+
+<strong>Never assume that hiding a Delete button in the frontend
+is enough for security.</strong>
+
+<br><br>
+
+The backend must enforce authorization.
+
+</div>
+
+
+<h3>6. Confusing PUT and PATCH</h3>
+
+<p>
+PUT is generally associated with replacing a resource
+representation, while PATCH is specifically intended for partial
+modification.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- =========================
+     SIMULATOR
+========================= -->
+
+<section id="simulator" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">15</div>
+
+    <h2>Interactive API Simulator</h2>
+
+</div>
+
+<p>
+Choose an operation and observe the complete request,
+server processing and response.
+</p>
+
+<div class="simulator">
+
+<div class="sim-buttons">
+
+<button
+    class="sim-btn"
+    onclick="simulateAPI('put')"
+>
+PUT
+</button>
+
+<button
+    class="sim-btn"
+    onclick="simulateAPI('patch')"
+>
+PATCH
+</button>
+
+<button
+    class="sim-btn"
+    onclick="simulateAPI('delete')"
+>
+DELETE
+</button>
+
+<button
+    class="sim-btn"
+    onclick="simulateAPI('notfound')"
+>
+NOT FOUND
+</button>
+
+</div>
+
+<div
+    class="sim-output"
+    id="simOutput"
+>
+Choose PUT, PATCH, DELETE or NOT FOUND...
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================
+     PRACTICE
+========================= -->
+
+<section id="practice" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">16</div>
+
+    <h2>Practice Challenge</h2>
+
+</div>
+
+<p>
+Design the update and delete APIs for an online course platform.
+</p>
+
+<h3>Course Resource</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>Existing Course</span>
+</div>
+
+<pre>{
+    "id": 10,
+    "title": "Python Fundamentals",
+    "duration": "30 days",
+    "level": "Beginner",
+    "price": 999
+}</pre>
+
+</div>
+
+<h3>Tasks</h3>
+
+<ol>
+
+<li>
+Write a PUT request to completely update course 10.
+</li>
+
+<li>
+Write a PATCH request to change only the price.
+</li>
+
+<li>
+Write a DELETE request to remove course 10.
+</li>
+
+<li>
+Choose suitable success status codes.
+</li>
+
+<li>
+Think about what should happen when course 10 does not exist.
+</li>
+
+<li>
+Think about which operations should require authentication.
+</li>
+
+</ol>
+
+<h3>Possible API Design</h3>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Operation</th>
+<th>Method</th>
+<th>Endpoint</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td>Replace course</td>
+<td>PUT</td>
+<td>/courses/10/</td>
+</tr>
+
+<tr>
+<td>Change price</td>
+<td>PATCH</td>
+<td>/courses/10/</td>
+</tr>
+
+<tr>
+<td>Delete course</td>
+<td>DELETE</td>
+<td>/courses/10/</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<h3>PATCH Example</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>Change Only Price</span>
+</div>
+
+<pre>PATCH /courses/10/
+
+{
+    "price": 799
+}</pre>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================
+     QUIZ
+========================= -->
+
+<section id="quiz" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+    <div class="section-number">17</div>
+
+    <h2>Quick Knowledge Check</h2>
+
+</div>
+
+
+<!-- Q1 -->
+
+<div class="quiz">
+
+<h3>
+Which HTTP method is generally used for replacing a resource
+representation?
+</h3>
+
+<div
+    class="option"
+    data-correct="true"
+    onclick="checkAnswer(this)"
+>
+A. PUT
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+B. GET
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+C. POST
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+D. DELETE
+</div>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<!-- Q2 -->
+
+<div class="quiz">
+
+<h3>
+Which method is specifically designed for partial modification?
+</h3>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+A. GET
+</div>
+
+<div
+    class="option"
+    data-correct="true"
+    onclick="checkAnswer(this)"
+>
+B. PATCH
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+C. POST
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+D. HEAD
+</div>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<!-- Q3 -->
+
+<div class="quiz">
+
+<h3>
+Which HTTP method is used to request deletion of a resource?
+</h3>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+A. PUT
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+B. PATCH
+</div>
+
+<div
+    class="option"
+    data-correct="true"
+    onclick="checkAnswer(this)"
+>
+C. DELETE
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+D. GET
+</div>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<!-- Q4 -->
+
+<div class="quiz">
+
+<h3>
+Which URL is appropriate for updating student 101?
+</h3>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+A. /students/
+</div>
+
+<div
+    class="option"
+    data-correct="true"
+    onclick="checkAnswer(this)"
+>
+B. /students/101/
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+C. /student-update/
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+D. /update-student/
+</div>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<!-- Q5 -->
+
+<div class="quiz">
+
+<h3>
+Which method is commonly used when only the course field needs
+to change?
+</h3>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+A. PUT
+</div>
+
+<div
+    class="option"
+    data-correct="true"
+    onclick="checkAnswer(this)"
+>
+B. PATCH
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+C. DELETE
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+D. GET
+</div>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<!-- Q6 -->
+
+<div class="quiz">
+
+<h3>
+Which status code commonly represents successful deletion with
+no response body?
+</h3>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+A. 200
+</div>
+
+<div
+    class="option"
+    data-correct="true"
+    onclick="checkAnswer(this)"
+>
+B. 204
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+C. 404
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+D. 500
+</div>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<!-- Q7 -->
+
+<div class="quiz">
+
+<h3>
+What is the main idea of idempotency?
+</h3>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+A. Every request must create a new resource
+</div>
+
+<div
+    class="option"
+    data-correct="true"
+    onclick="checkAnswer(this)"
+>
+B. Repeating the same request has the same intended effect on resource state
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+C. The request must always return status 200
+</div>
+
+<div
+    class="option"
+    data-correct="false"
+    onclick="checkAnswer(this)"
+>
+D. The server must never return JSON
+</div>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+</div>
+
+</section>
+
+
+<!-- =========================
+     TAKEAWAY
+========================= -->
+
+<section id="takeaway" class="reveal">
+
+<div class="takeaway">
+
+<div class="section-title">
+
+    <div class="section-number">18</div>
+
+    <h2>Lesson Takeaway</h2>
+
+</div>
+
+<ul>
+
+<li>
+<strong>PUT</strong> is generally used to replace or fully update
+a resource representation.
+</li>
+
+<li>
+<strong>PATCH</strong> is designed for partial modification.
+</li>
+
+<li>
+<strong>DELETE</strong> requests removal of a resource.
+</li>
+
+<li>
+Individual resources are commonly identified using path parameters
+such as <code>/students/101/</code>.
+</li>
+
+<li>
+PUT and PATCH commonly use JSON request bodies when data is being
+submitted.
+</li>
+
+<li>
+A successful update can commonly return <strong>200 OK</strong>
+or <strong>204 No Content</strong>.
+</li>
+
+<li>
+A successful DELETE can commonly return <strong>204 No Content</strong>.
+</li>
+
+<li>
+A missing resource commonly results in <strong>404 Not Found</strong>.
+</li>
+
+<li>
+Authentication and authorization should be enforced by the
+backend for protected operations.
+</li>
+
+<li>
+PUT and DELETE are generally idempotent; PATCH depends on how
+the particular operation is designed.
+</li>
+
+<li>
+Together with GET and POST, these methods complete the main
+HTTP operations used in CRUD-style APIs.
+</li>
+
+</ul>
+
+<div class="success">
+
+<strong>You have completed the CRUD API foundation.</strong>
+
+<br><br>
+
+Next lesson:
+
+<strong>Lesson 11 — API Authentication & Authorization</strong>
+
+</div>
+
+</div>
+
+</section>
+
+
+</main>
+
+
+<script>
+
+/* =========================================================
+   PROGRESS BAR
+========================================================= */
+
+window.addEventListener("scroll",function(){
+
+    var scrollTop =
+        document.documentElement.scrollTop ||
+        document.body.scrollTop;
+
+    var documentHeight =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+
+    var percentage = 0;
+
+    if(documentHeight > 0){
+
+        percentage =
+            (scrollTop / documentHeight) * 100;
+
+    }
+
+    document.getElementById("progressBar").style.width =
+        percentage + "%";
+
+});
+
+
+/* =========================================================
+   COPY CODE
+========================================================= */
+
+function copyCode(button){
+
+    var codeBox =
+        button.parentElement.parentElement;
+
+    var pre =
+        codeBox.querySelector("pre");
+
+    if(!pre){
+        return;
+    }
+
+    var code =
+        pre.innerText;
+
+    if(navigator.clipboard){
+
+        navigator.clipboard.writeText(code)
+        .then(function(){
+
+            showCopied(button);
+
+        })
+        .catch(function(){
+
+            fallbackCopy(code,button);
+
+        });
+
+    }
+    else{
+
+        fallbackCopy(code,button);
+
+    }
+
+}
+
+
+function fallbackCopy(text,button){
+
+    var textarea =
+        document.createElement("textarea");
+
+    textarea.value = text;
+
+    document.body.appendChild(textarea);
+
+    textarea.select();
+
+    document.execCommand("copy");
+
+    document.body.removeChild(textarea);
+
+    showCopied(button);
+
+}
+
+
+function showCopied(button){
+
+    var oldText =
+        button.innerText;
+
+    button.innerText =
+        "Copied!";
+
+    setTimeout(function(){
+
+        button.innerText =
+            oldText;
+
+    },1200);
+
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+var searchInput =
+    document.getElementById("searchInput");
+
+searchInput.addEventListener("input",function(){
+
+    var query =
+        searchInput.value.toLowerCase().trim();
+
+    var sections =
+        document.querySelectorAll("section");
+
+    sections.forEach(function(section){
+
+        var text =
+            section.innerText.toLowerCase();
+
+        if(query === ""){
+
+            section.style.display = "";
+
+        }
+        else if(text.indexOf(query) !== -1){
+
+            section.style.display = "";
+
+        }
+        else{
+
+            section.style.display = "none";
+
+        }
+
+    });
+
+});
+
+
+/* =========================================================
+   API SIMULATOR
+========================================================= */
+
+function simulateAPI(type){
+
+    var output =
+        document.getElementById("simOutput");
+
+    var text = "";
+
+    if(type === "put"){
+
+        text =
+`REQUEST
+
+PUT /students/101/
+
+Content-Type: application/json
+
+{
+    "name": "Pradeep Kumar",
+    "email": "pradeep@example.com",
+    "age": 22,
+    "course": "Django"
+}
+
+
+SERVER PROCESS
+
+1. Receive PUT request
+2. Read resource ID = 101
+3. Parse JSON
+4. Validate fields
+5. Find student 101
+6. Replace/update representation
+7. Return response
+
+
+RESPONSE
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "id": 101,
+    "name": "Pradeep Kumar",
+    "email": "pradeep@example.com",
+    "age": 22,
+    "course": "Django"
+}`;
+
+    }
+
+    else if(type === "patch"){
+
+        text =
+`REQUEST
+
+PATCH /students/101/
+
+Content-Type: application/json
+
+{
+    "course": "FastAPI"
+}
+
+
+SERVER PROCESS
+
+1. Receive PATCH request
+2. Read resource ID = 101
+3. Parse JSON
+4. Validate changed fields
+5. Find student 101
+6. Update only course
+7. Return response
+
+
+RESPONSE
+
+HTTP/1.1 200 OK
+
+{
+    "id": 101,
+    "name": "Pradeep",
+    "email": "pradeep@example.com",
+    "age": 21,
+    "course": "FastAPI"
+}`;
+
+    }
+
+    else if(type === "delete"){
+
+        text =
+`REQUEST
+
+DELETE /students/101/
+
+
+SERVER PROCESS
+
+1. Receive DELETE request
+2. Read resource ID = 101
+3. Check whether student exists
+4. Check authorization
+5. Remove resource
+6. Return result
+
+
+RESPONSE
+
+HTTP/1.1 204 No Content`;
+
+    }
+
+    else if(type === "notfound"){
+
+        text =
+`REQUEST
+
+PATCH /students/9999/
+
+{
+    "course": "Django"
+}
+
+
+SERVER PROCESS
+
+1. Receive request
+2. Read resource ID = 9999
+3. Search for resource
+4. Resource does not exist
+
+
+RESPONSE
+
+HTTP/1.1 404 Not Found
+
+{
+    "error": "Student not found",
+    "code": "STUDENT_NOT_FOUND"
+}`;
+
+    }
+
+    output.innerText =
+        text;
+
+}
+
+
+/* =========================================================
+   QUIZ
+========================================================= */
+
+function checkAnswer(option){
+
+    var quiz =
+        option.parentElement;
+
+    var options =
+        quiz.querySelectorAll(".option");
+
+    var result =
+        quiz.querySelector(".quiz-result");
+
+    options.forEach(function(item){
+
+        item.style.pointerEvents =
+            "none";
+
+    });
+
+    var correct =
+        option.getAttribute("data-correct") === "true";
+
+    if(correct){
+
+        option.classList.add("correct");
+
+        result.innerText =
+            "✓ Correct! Excellent.";
+
+        result.style.color =
+            "#16a34a";
+
+    }
+    else{
+
+        option.classList.add("wrong");
+
+        result.innerText =
+            "✗ Incorrect. Review this concept.";
+
+        result.style.color =
+            "#dc2626";
+
+    }
+
+}
+
+
+/* =========================================================
+   SCROLL REVEAL
+========================================================= */
+
+var revealElements =
+    document.querySelectorAll(".reveal");
+
+var observer =
+    new IntersectionObserver(function(entries){
+
+        entries.forEach(function(entry){
+
+            if(entry.isIntersecting){
+
+                entry.target.classList.add("show");
+
+            }
+
+        });
+
+    },{
+        threshold:.08
+    });
+
+
+revealElements.forEach(function(element){
+
+    observer.observe(element);
+
+});
+
+
+/* =========================================================
+   ACTIVE SIDEBAR
+========================================================= */
+
+var navLinks =
+    document.querySelectorAll(".nav a");
+
+var sections =
+    document.querySelectorAll("section[id]");
+
+var navObserver =
+    new IntersectionObserver(function(entries){
+
+        entries.forEach(function(entry){
+
+            if(entry.isIntersecting){
+
+                navLinks.forEach(function(link){
+
+                    link.classList.remove("active");
+
+                    if(
+                        link.getAttribute("href") ===
+                        "#" + entry.target.id
+                    ){
+
+                        link.classList.add("active");
+
+                    }
+
+                });
+
+            }
+
+        });
+
+    },{
+        rootMargin:"-20% 0px -65% 0px"
+    });
+
+
+sections.forEach(function(section){
+
+    navObserver.observe(section);
+
+});
+
+</script>
+
+</body>
+</html>

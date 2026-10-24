@@ -1,0 +1,6141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ZENSUS | Lesson 13 — Graphs & Graph Algorithms</title>
+
+    <meta
+        name="description"
+        content="ZENSUS Lesson 13 — Learn Graphs and Graph Algorithms from beginner to interview level."
+    >
+
+    <link rel="stylesheet" href="lesson13.css">
+
+    <style>
+        /* =========================================================
+           LESSON 13 — EXTRA COMPONENT STYLES
+           ========================================================= */
+
+        .eyebrow {
+            display: inline-block;
+            font-size: .72rem;
+            font-weight: 800;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: #6366f1;
+            margin-bottom: 7px;
+        }
+
+        .hero-description {
+            max-width: 760px;
+            line-height: 1.8;
+            color: #64748b;
+            font-size: 1rem;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+
+        .btn-link {
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .concept-flow {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            align-items: center;
+            margin-top: 22px;
+        }
+
+        .concept-step {
+            padding: 20px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            transition: .3s ease;
+        }
+
+        .concept-step:hover {
+            transform: translateY(-4px);
+            border-color: #c7d2fe;
+        }
+
+        .concept-step > span {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #eef2ff;
+            color: #4f46e5;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .concept-step strong {
+            display: block;
+            margin-bottom: 7px;
+        }
+
+        .concept-step p {
+            margin: 0;
+            color: #64748b;
+            line-height: 1.6;
+            font-size: .9rem;
+        }
+
+        .flow-arrow {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #94a3b8;
+            font-weight: 800;
+        }
+
+        .definition-box {
+            padding: 22px;
+            border-radius: 18px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            margin-top: 18px;
+        }
+
+        .definition-box p {
+            line-height: 1.85;
+            color: #475569;
+        }
+
+        .definition-box strong {
+            color: #0f172a;
+        }
+
+        .example-strip {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .info-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            font-size: .8rem;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        .info-tag.blue {
+            background: #eff6ff;
+            color: #2563eb;
+            border-color: #bfdbfe;
+        }
+
+        .info-tag.green {
+            background: #f0fdf4;
+            color: #15803d;
+            border-color: #bbf7d0;
+        }
+
+        .info-tag.orange {
+            background: #fff7ed;
+            color: #c2410c;
+            border-color: #fed7aa;
+        }
+
+        .info-tag.red {
+            background: #fef2f2;
+            color: #dc2626;
+            border-color: #fecaca;
+        }
+
+        .info-tag.purple {
+            background: #faf5ff;
+            color: #7e22ce;
+            border-color: #e9d5ff;
+        }
+
+        /* =========================================================
+           GRAPH DIAGRAM
+           ========================================================= */
+
+        .graph-canvas {
+            position: relative;
+            width: 100%;
+            min-height: 390px;
+            background:
+                linear-gradient(rgba(148,163,184,.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(148,163,184,.08) 1px, transparent 1px);
+            background-size: 28px 28px;
+            border: 1px solid #e2e8f0;
+            border-radius: 22px;
+            overflow: hidden;
+        }
+
+        .graph-canvas svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .graph-canvas .graph-line {
+            stroke: #94a3b8;
+            stroke-width: 3;
+            stroke-linecap: round;
+            transition: .3s;
+        }
+
+        .graph-canvas .graph-line.active {
+            stroke: #6366f1;
+            stroke-width: 5;
+            stroke-dasharray: 8 7;
+            animation: dashMove 1s linear infinite;
+        }
+
+        @keyframes dashMove {
+            to {
+                stroke-dashoffset: -30;
+            }
+        }
+
+        .graph-canvas .graph-node {
+            fill: #ffffff;
+            stroke: #6366f1;
+            stroke-width: 4;
+            filter: drop-shadow(0 7px 12px rgba(15,23,42,.12));
+            animation: nodeFloat 3s ease-in-out infinite;
+        }
+
+        .graph-canvas .graph-node:nth-of-type(2) {
+            animation-delay: .2s;
+        }
+
+        .graph-canvas .graph-node:nth-of-type(3) {
+            animation-delay: .4s;
+        }
+
+        .graph-canvas .graph-node:nth-of-type(4) {
+            animation-delay: .6s;
+        }
+
+        .graph-canvas .graph-node:nth-of-type(5) {
+            animation-delay: .8s;
+        }
+
+        .graph-canvas .graph-node:nth-of-type(6) {
+            animation-delay: 1s;
+        }
+
+        @keyframes nodeFloat {
+            0%,100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .graph-canvas text {
+            font-size: 17px;
+            font-weight: 800;
+            fill: #0f172a;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        .graph-caption {
+            text-align: center;
+            margin-top: 13px;
+            color: #64748b;
+            font-size: .88rem;
+        }
+
+        /* =========================================================
+           TERMINOLOGY
+           ========================================================= */
+
+        .term-definition {
+            color: #64748b;
+            line-height: 1.65;
+            font-size: .9rem;
+        }
+
+        .term-example {
+            margin-top: 12px;
+            padding: 9px 12px;
+            background: #f8fafc;
+            border-radius: 10px;
+            font-size: .78rem;
+            color: #475569;
+        }
+
+        /* =========================================================
+           TYPES
+           ========================================================= */
+
+        .type-visual {
+            min-height: 140px;
+            position: relative;
+            margin: 12px 0 18px;
+            border-radius: 14px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+
+        .type-visual svg {
+            width: 100%;
+            height: 140px;
+        }
+
+        .type-visual line {
+            stroke: #64748b;
+            stroke-width: 3;
+        }
+
+        .type-visual circle {
+            fill: #fff;
+            stroke: #6366f1;
+            stroke-width: 3;
+        }
+
+        .type-visual text {
+            text-anchor: middle;
+            dominant-baseline: middle;
+            font-size: 13px;
+            font-weight: 800;
+            fill: #0f172a;
+        }
+
+        /* =========================================================
+           REPRESENTATION
+           ========================================================= */
+
+        .representation-transform {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 18px;
+            align-items: center;
+        }
+
+        .transform-arrow {
+            font-size: 1.8rem;
+            color: #6366f1;
+            animation: arrowMove 1.4s ease-in-out infinite;
+        }
+
+        @keyframes arrowMove {
+            0%,100% { transform: translateX(0); }
+            50% { transform: translateX(7px); }
+        }
+
+        .mini-code {
+            padding: 15px;
+            border-radius: 12px;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-family: "Cascadia Code", Consolas, monospace;
+            font-size: .8rem;
+            overflow-x: auto;
+            line-height: 1.65;
+        }
+
+        .matrix td,
+        .matrix th {
+            text-align: center;
+            min-width: 42px;
+        }
+
+        .matrix .one {
+            background: #eef2ff;
+            color: #4f46e5;
+            font-weight: 800;
+        }
+
+        .matrix .zero {
+            color: #94a3b8;
+        }
+
+        /* =========================================================
+           ALGORITHM BLOCK
+           ========================================================= */
+
+        .algorithm-list {
+            counter-reset: algo;
+            display: grid;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .algorithm-list li {
+            list-style: none;
+            position: relative;
+            padding: 14px 16px 14px 48px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #f8fafc;
+            color: #475569;
+            line-height: 1.6;
+        }
+
+        .algorithm-list li::before {
+            counter-increment: algo;
+            content: counter(algo);
+            position: absolute;
+            left: 14px;
+            top: 12px;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #eef2ff;
+            color: #4f46e5;
+            font-size: .75rem;
+            font-weight: 800;
+        }
+
+        /* =========================================================
+           BFS / DFS LAB
+           ========================================================= */
+
+        .traversal-lab {
+            display: grid;
+            grid-template-columns: 1.25fr .75fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .traversal-graph-panel {
+            min-height: 420px;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            background:
+                linear-gradient(rgba(148,163,184,.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(148,163,184,.07) 1px, transparent 1px);
+            background-size: 25px 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .traversal-graph {
+            width: 100%;
+            height: 420px;
+        }
+
+        .traversal-edge {
+            stroke: #cbd5e1;
+            stroke-width: 4;
+            stroke-linecap: round;
+            transition: .4s ease;
+        }
+
+        .traversal-edge.active {
+            stroke: #6366f1;
+            stroke-width: 6;
+            stroke-dasharray: 10 8;
+            animation: dashMove 1s linear infinite;
+        }
+
+        .traversal-node {
+            fill: #fff;
+            stroke: #64748b;
+            stroke-width: 4;
+            transition: .4s ease;
+            filter: drop-shadow(0 6px 10px rgba(15,23,42,.1));
+        }
+
+        .traversal-node.visited {
+            fill: #eef2ff;
+            stroke: #6366f1;
+        }
+
+        .traversal-node.current {
+            fill: #6366f1;
+            stroke: #4338ca;
+            animation: traversalPulse 1s infinite;
+        }
+
+        .traversal-node.start {
+            stroke: #16a34a;
+            stroke-width: 5;
+        }
+
+        @keyframes traversalPulse {
+            0%,100% {
+                filter: drop-shadow(0 0 0 rgba(99,102,241,0));
+            }
+            50% {
+                filter: drop-shadow(0 0 16px rgba(99,102,241,.65));
+            }
+        }
+
+        .traversal-graph text {
+            text-anchor: middle;
+            dominant-baseline: middle;
+            font-size: 17px;
+            font-weight: 900;
+            fill: #0f172a;
+        }
+
+        .traversal-node.current + text {
+            fill: #fff;
+        }
+
+        .traversal-control-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .traversal-control-card {
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            border-radius: 18px;
+            padding: 17px;
+        }
+
+        .traversal-control-card h4 {
+            margin: 0 0 12px;
+        }
+
+        .traversal-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .traversal-buttons .btn:last-child {
+            grid-column: 1 / -1;
+        }
+
+        .queue-track,
+        .stack-container {
+            display: flex;
+            gap: 8px;
+            min-height: 52px;
+            padding: 9px;
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 12px;
+            align-items: center;
+            margin-top: 10px;
+            overflow-x: auto;
+        }
+
+        .queue-item,
+        .stack-item {
+            min-width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: #eef2ff;
+            color: #4338ca;
+            border: 1px solid #c7d2fe;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            animation: queueEnter .35s ease;
+        }
+
+        .queue-item.front {
+            background: #dcfce7;
+            color: #15803d;
+            border-color: #bbf7d0;
+        }
+
+        .queue-pointer,
+        .stack-top-pointer {
+            margin-top: 7px;
+            font-size: .72rem;
+            font-weight: 800;
+            color: #64748b;
+        }
+
+        @keyframes queueEnter {
+            from {
+                opacity: 0;
+                transform: translateX(-12px) scale(.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        .stack-visual {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stack-container {
+            flex-direction: column-reverse;
+            align-items: stretch;
+            min-height: 180px;
+            justify-content: flex-start;
+        }
+
+        .stack-item {
+            width: 100%;
+        }
+
+        .stack-item.top {
+            background: #fef3c7;
+            color: #b45309;
+            border-color: #fde68a;
+        }
+
+        .call-stack {
+            margin-top: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 14px;
+            background: #f8fafc;
+        }
+
+        .call-stack-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .call-frame {
+            padding: 13px;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            margin-top: 7px;
+            font-family: monospace;
+            font-size: .82rem;
+            transition: .3s;
+        }
+
+        .call-frame.active {
+            border-color: #6366f1;
+            background: #eef2ff;
+            transform: translateX(5px);
+        }
+
+        .dry-step {
+            display: grid;
+            grid-template-columns: 55px 1fr;
+            gap: 15px;
+            padding: 18px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .dry-step:last-child {
+            border-bottom: 0;
+        }
+
+        .dry-step-number {
+            width: 44px;
+            height: 44px;
+            border-radius: 13px;
+            background: #eef2ff;
+            color: #4f46e5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: .75rem;
+        }
+
+        .dry-step p {
+            color: #64748b;
+            line-height: 1.65;
+        }
+
+        .dry-step .queue-track {
+            max-width: 400px;
+        }
+
+        /* =========================================================
+           FLOWCHART
+           ========================================================= */
+
+        .flowchart-pro {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 18px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .flow-box-pro {
+            min-width: 190px;
+            padding: 14px 20px;
+            text-align: center;
+            border-radius: 12px;
+            border: 2px solid #cbd5e1;
+            background: #fff;
+            font-weight: 700;
+            color: #334155;
+            animation: flowAppear 2.8s ease-in-out infinite;
+        }
+
+        .flow-box-pro.start {
+            border-radius: 999px;
+            border-color: #22c55e;
+        }
+
+        .flow-box-pro.end {
+            border-radius: 999px;
+            border-color: #ef4444;
+        }
+
+        .flow-box-pro.decision {
+            border-color: #8b5cf6;
+            transform: rotate(0deg);
+        }
+
+        .flow-arrow-pro {
+            font-size: 1.4rem;
+            color: #94a3b8;
+            line-height: 1.8;
+        }
+
+        @keyframes flowAppear {
+            0%,100% {
+                box-shadow: 0 0 0 rgba(99,102,241,0);
+            }
+            50% {
+                box-shadow: 0 8px 24px rgba(99,102,241,.13);
+            }
+        }
+
+        /* =========================================================
+           SHORTEST PATH
+           ========================================================= */
+
+        .weighted-graph {
+            position: relative;
+            min-height: 330px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .weighted-graph svg {
+            width: 100%;
+            height: 330px;
+        }
+
+        .weighted-graph line {
+            stroke: #94a3b8;
+            stroke-width: 4;
+        }
+
+        .weighted-graph line.selected {
+            stroke: #6366f1;
+            stroke-width: 6;
+            stroke-dasharray: 9 7;
+            animation: dashMove 1s linear infinite;
+        }
+
+        .weighted-graph circle {
+            fill: white;
+            stroke: #6366f1;
+            stroke-width: 4;
+        }
+
+        .weighted-graph text {
+            text-anchor: middle;
+            dominant-baseline: middle;
+            font-weight: 900;
+            fill: #0f172a;
+        }
+
+        .weight {
+            fill: #f8fafc !important;
+            stroke: #cbd5e1 !important;
+            stroke-width: 1 !important;
+        }
+
+        /* =========================================================
+           DISTANCE CARDS
+           ========================================================= */
+
+        .distance-grid-pro {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 9px;
+        }
+
+        .distance-card-pro {
+            text-align: center;
+            padding: 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+        }
+
+        .distance-node-pro {
+            font-weight: 900;
+            color: #475569;
+        }
+
+        .distance-value-pro {
+            margin-top: 7px;
+            font-family: monospace;
+            font-weight: 900;
+            color: #4f46e5;
+        }
+
+        /* =========================================================
+           TOPOLOGICAL SORT
+           ========================================================= */
+
+        .dependency-flow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            padding: 25px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+        }
+
+        .dependency-node {
+            padding: 12px 18px;
+            background: #fff;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            font-weight: 800;
+            transition: .3s;
+        }
+
+        .dependency-node.done {
+            border-color: #22c55e;
+            background: #f0fdf4;
+            color: #15803d;
+        }
+
+        .dependency-arrow {
+            color: #94a3b8;
+            font-size: 1.3rem;
+        }
+
+        /* =========================================================
+           MST
+           ========================================================= */
+
+        .mst-animation {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .mst-edge-chip {
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: white;
+            border: 1px solid #cbd5e1;
+            font-family: monospace;
+            font-weight: 700;
+            transition: .3s;
+        }
+
+        .mst-edge-chip.selected {
+            border-color: #22c55e;
+            background: #f0fdf4;
+            color: #15803d;
+            animation: selectedEdge .8s ease;
+        }
+
+        @keyframes selectedEdge {
+            0% { transform: scale(.92); }
+            50% { transform: scale(1.06); }
+            100% { transform: scale(1); }
+        }
+
+        /* =========================================================
+           DSU
+           ========================================================= */
+
+        .dsu-visual {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .dsu-set {
+            padding: 18px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .dsu-set-title {
+            font-size: .75rem;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: #64748b;
+            font-weight: 800;
+        }
+
+        .dsu-nodes {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .dsu-node-pro {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #eef2ff;
+            border: 2px solid #a5b4fc;
+            color: #4338ca;
+            font-weight: 900;
+        }
+
+        /* =========================================================
+           PATTERN RECOGNITION
+           ========================================================= */
+
+        .pattern-card-pro {
+            padding: 19px;
+            border-radius: 16px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            transition: .3s;
+        }
+
+        .pattern-card-pro:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 30px rgba(15,23,42,.07);
+        }
+
+        .pattern-card-pro .question {
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .pattern-card-pro .answer {
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 10px;
+            background: #f8fafc;
+            color: #475569;
+            line-height: 1.6;
+        }
+
+        /* =========================================================
+           QUIZ
+           ========================================================= */
+
+        .quiz-option.correct {
+            border-color: #22c55e !important;
+            background: #f0fdf4 !important;
+        }
+
+        .quiz-option.wrong {
+            border-color: #ef4444 !important;
+            background: #fef2f2 !important;
+        }
+
+        .quiz-score {
+            display: none;
+            margin-top: 18px;
+            padding: 18px;
+            border-radius: 14px;
+            background: #eef2ff;
+            color: #4338ca;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .quiz-score.show {
+            display: block;
+        }
+
+        /* =========================================================
+           ROADMAP
+           ========================================================= */
+
+        .roadmap-line {
+            position: relative;
+        }
+
+        .roadmap-line::before {
+            content: "";
+            position: absolute;
+            left: 24px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e2e8f0;
+        }
+
+        .roadmap-step {
+            position: relative;
+            padding-left: 65px;
+            margin-bottom: 25px;
+        }
+
+        .roadmap-step::before {
+            content: attr(data-step);
+            position: absolute;
+            left: 8px;
+            top: 0;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .72rem;
+            font-weight: 900;
+            z-index: 2;
+        }
+
+        .roadmap-step.active::before {
+            border-color: #6366f1;
+            color: #4f46e5;
+            background: #eef2ff;
+        }
+
+        .roadmap-content {
+            padding: 17px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 15px;
+        }
+
+        .roadmap-content h4 {
+            margin: 0 0 6px;
+        }
+
+        .roadmap-content p {
+            margin: 0;
+            color: #64748b;
+            line-height: 1.6;
+            font-size: .88rem;
+        }
+
+        /* =========================================================
+           RESPONSIVE
+           ========================================================= */
+
+        @media (max-width: 950px) {
+
+            .concept-flow {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .traversal-lab {
+                grid-template-columns: 1fr;
+            }
+
+            .distance-grid-pro {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .dsu-visual {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+        @media (max-width: 650px) {
+
+            .concept-flow {
+                grid-template-columns: 1fr;
+            }
+
+            .representation-transform {
+                grid-template-columns: 1fr;
+            }
+
+            .transform-arrow {
+                transform: rotate(90deg);
+                text-align: center;
+            }
+
+            .distance-grid-pro {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .hero-actions {
+                flex-direction: column;
+            }
+
+            .hero-actions .btn {
+                width: 100%;
+            }
+
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- =========================================================
+     TOP BAR
+     ========================================================= -->
+
+<header class="topbar">
+
+    <div class="brand">
+
+        <div class="brand-logo">
+            Z
+        </div>
+
+        <div>
+            <strong>ZENSUS</strong>
+            <span>Learn • Build • Master</span>
+        </div>
+
+    </div>
+
+    <div class="lesson-label">
+        DSA / LESSON 13
+    </div>
+
+</header>
+
+
+<!-- =========================================================
+     PAGE LAYOUT
+     ========================================================= -->
+
+<div class="page-layout">
+
+
+<!-- =========================================================
+     SIDEBAR
+     ========================================================= -->
+
+<aside class="sidebar">
+
+    <div class="sidebar-title">
+        LESSON CONTENT
+    </div>
+
+    <a href="#top">Overview</a>
+    <a href="#what-is-graph">01. What is a Graph?</a>
+    <a href="#terminology">02. Terminology</a>
+    <a href="#types">03. Types</a>
+    <a href="#properties">04. Properties</a>
+    <a href="#tree-vs-graph">05. Graph vs Tree</a>
+    <a href="#representation">06. Representation</a>
+    <a href="#bfs">07. BFS</a>
+    <a href="#dfs">08. DFS</a>
+    <a href="#comparison">09. BFS vs DFS</a>
+    <a href="#traversal-problems">10. Traversal Problems</a>
+    <a href="#cycle">11. Cycle Detection</a>
+    <a href="#topological">12. Topological Sort</a>
+    <a href="#shortest-path">13. Shortest Path</a>
+    <a href="#mst">14. Minimum Spanning Tree</a>
+    <a href="#dsu">15. Disjoint Set Union</a>
+    <a href="#advanced">16. Advanced Graphs</a>
+    <a href="#patterns">17. Interview Patterns</a>
+    <a href="#complexity">18. Complexity</a>
+    <a href="#mistakes">19. Common Mistakes</a>
+    <a href="#practice">20. Practice</a>
+    <a href="#visualizer">21. Visualizer</a>
+    <a href="#quiz">22. Quiz</a>
+    <a href="#roadmap">23. Mastery Roadmap</a>
+
+    <div class="sidebar-bottom">
+        <a href="#top">↑ Back to top</a>
+    </div>
+
+</aside>
+
+
+<!-- =========================================================
+     MAIN CONTENT
+     ========================================================= -->
+
+<main class="main" id="top">
+
+
+<!-- =========================================================
+     HERO
+     ========================================================= -->
+
+<section class="hero">
+
+    <div class="hero-badge">
+        🌐 DSA • LESSON 13
+    </div>
+
+    <h1>
+        Graphs &
+        <span>Graph Algorithms</span>
+    </h1>
+
+    <p class="hero-description">
+        Master graphs from absolute fundamentals to advanced interview
+        algorithms. Learn how to represent, traverse, analyze and solve
+        real-world graph problems using BFS, DFS, Dijkstra, Topological
+        Sort, MST, DSU and advanced graph techniques.
+    </p>
+
+    <div class="hero-actions">
+
+        <a href="#what-is-graph"
+           class="btn primary btn-link">
+            Start Learning →
+        </a>
+
+        <a href="#visualizer"
+           class="btn secondary btn-link">
+            Open Visualizer
+        </a>
+
+    </div>
+
+    <div class="hero-stats">
+
+        <div class="hero-stat">
+            <strong>23</strong>
+            <span>Core Sections</span>
+        </div>
+
+        <div class="hero-stat">
+            <strong>BFS</strong>
+            <span>Queue</span>
+        </div>
+
+        <div class="hero-stat">
+            <strong>DFS</strong>
+            <span>Stack</span>
+        </div>
+
+        <div class="hero-stat">
+            <strong>∞</strong>
+            <span>Interview Patterns</span>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     LEARNING OBJECTIVES
+     ========================================================= -->
+
+<section class="section">
+
+    <div class="section-heading">
+
+        <span class="section-number">GOAL</span>
+
+        <div>
+            <span class="eyebrow">WHAT YOU WILL MASTER</span>
+            <h2>Learning Objectives</h2>
+        </div>
+
+    </div>
+
+    <div class="grid-3">
+
+        <div class="card">
+            <div class="term-icon">🌐</div>
+            <h3>Understand Graphs</h3>
+            <p>
+                Learn vertices, edges, paths, cycles, degree,
+                connected components and graph properties.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="term-icon">⚙️</div>
+            <h3>Master Algorithms</h3>
+            <p>
+                Implement BFS, DFS, cycle detection, topological
+                sort, shortest paths and MST.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="term-icon">🎯</div>
+            <h3>Solve Interviews</h3>
+            <p>
+                Recognize graph patterns and choose the correct
+                algorithm based on constraints.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     01 WHAT IS A GRAPH
+     ========================================================= -->
+
+<section class="section" id="what-is-graph">
+
+    <div class="section-heading">
+
+        <span class="section-number">01</span>
+
+        <div>
+            <span class="eyebrow">FOUNDATION</span>
+            <h2>What is a Graph?</h2>
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <h3>Definition</h3>
+
+        <div class="definition-box">
+
+            <p>
+                A <strong>graph</strong> is a non-linear data structure
+                consisting of a collection of
+                <strong>vertices (nodes)</strong> connected by
+                <strong>edges</strong>.
+            </p>
+
+            <p>
+                Mathematically, a graph is represented as:
+            </p>
+
+            <div class="formula">
+                G = (V, E)
+            </div>
+
+            <p>
+                where <strong>V</strong> represents the set of vertices
+                and <strong>E</strong> represents the set of edges.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Real-World Graphs</h3>
+
+        <div class="grid-3">
+
+            <div class="term-card">
+                <div class="term-icon">🗺️</div>
+                <h3>Google Maps</h3>
+                <p class="term-definition">
+                    Cities/intersections are vertices and roads are edges.
+                </p>
+            </div>
+
+            <div class="term-card">
+                <div class="term-icon">👥</div>
+                <h3>Social Network</h3>
+                <p class="term-definition">
+                    Users are vertices and friendships/follows are edges.
+                </p>
+            </div>
+
+            <div class="term-card">
+                <div class="term-icon">✈️</div>
+                <h3>Flight Network</h3>
+                <p class="term-definition">
+                    Airports are vertices and flights are edges.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Visualizing a Graph</h3>
+
+        <div class="graph-canvas">
+
+            <svg viewBox="0 0 700 390">
+
+                <line class="graph-line" x1="110" y1="195" x2="250" y2="90"/>
+                <line class="graph-line active" x1="110" y1="195" x2="250" y2="290"/>
+                <line class="graph-line" x1="250" y1="90" x2="430" y2="90"/>
+                <line class="graph-line" x1="250" y1="290" x2="430" y2="290"/>
+                <line class="graph-line active" x1="430" y1="90" x2="580" y2="190"/>
+                <line class="graph-line" x1="430" y1="290" x2="580" y2="190"/>
+
+                <circle class="graph-node" cx="110" cy="195" r="35"/>
+                <circle class="graph-node" cx="250" cy="90" r="35"/>
+                <circle class="graph-node" cx="250" cy="290" r="35"/>
+                <circle class="graph-node" cx="430" cy="90" r="35"/>
+                <circle class="graph-node" cx="430" cy="290" r="35"/>
+                <circle class="graph-node" cx="580" cy="190" r="35"/>
+
+                <text x="110" y="195">A</text>
+                <text x="250" y="90">B</text>
+                <text x="250" y="290">C</text>
+                <text x="430" y="90">D</text>
+                <text x="430" y="290">E</text>
+                <text x="580" y="190">F</text>
+
+            </svg>
+
+        </div>
+
+        <p class="graph-caption">
+            Vertices represent entities. Edges represent relationships.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     02 TERMINOLOGY
+     ========================================================= -->
+
+<section class="section" id="terminology">
+
+    <div class="section-heading">
+
+        <span class="section-number">02</span>
+
+        <div>
+            <span class="eyebrow">VOCABULARY</span>
+            <h2>Graph Terminology</h2>
+        </div>
+
+    </div>
+
+    <div class="grid-3">
+
+        <div class="term-card">
+            <div class="term-icon">●</div>
+            <h3>Vertex</h3>
+            <p class="term-definition">
+                A node or entity in the graph.
+            </p>
+            <div class="term-example">
+                Example: A, B, C
+            </div>
+        </div>
+
+        <div class="term-card">
+            <div class="term-icon">━</div>
+            <h3>Edge</h3>
+            <p class="term-definition">
+                A connection between two vertices.
+            </p>
+            <div class="term-example">
+                Example: A — B
+            </div>
+        </div>
+
+        <div class="term-card">
+            <div class="term-icon">↔</div>
+            <h3>Degree</h3>
+            <p class="term-definition">
+                Number of edges connected to a vertex in an undirected graph.
+            </p>
+            <div class="term-example">
+                deg(A) = 3
+            </div>
+        </div>
+
+        <div class="term-card">
+            <div class="term-icon">→</div>
+            <h3>Path</h3>
+            <p class="term-definition">
+                A sequence of vertices connected by edges.
+            </p>
+            <div class="term-example">
+                A → B → D → F
+            </div>
+        </div>
+
+        <div class="term-card">
+            <div class="term-icon">⟳</div>
+            <h3>Cycle</h3>
+            <p class="term-definition">
+                A path that starts and ends at the same vertex.
+            </p>
+            <div class="term-example">
+                A → B → C → A
+            </div>
+        </div>
+
+        <div class="term-card">
+            <div class="term-icon">◉</div>
+            <h3>Connected Component</h3>
+            <p class="term-definition">
+                A maximal group of vertices where every pair is reachable.
+            </p>
+            <div class="term-example">
+                Component 1 / Component 2
+            </div>
+        </div>
+
+        <div class="term-card">
+            <div class="term-icon">⚖</div>
+            <h3>Weight</h3>
+            <p class="term-definition">
+                A numerical value associated with an edge.
+            </p>
+            <div class="term-example">
+                A — 5 — B
+            </div>
+        </div>
+
+        <div class="term-card">
+            <div class="term-icon">↗</div>
+            <h3>In-degree</h3>
+            <p class="term-definition">
+                Number of incoming edges to a vertex.
+            </p>
+            <div class="term-example">
+                inDegree(B) = 2
+            </div>
+        </div>
+
+        <div class="term-card">
+            <div class="term-icon">↘</div>
+            <h3>Out-degree</h3>
+            <p class="term-definition">
+                Number of outgoing edges from a vertex.
+            </p>
+            <div class="term-example">
+                outDegree(A) = 3
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     03 TYPES
+     ========================================================= -->
+
+<section class="section" id="types">
+
+    <div class="section-heading">
+
+        <span class="section-number">03</span>
+
+        <div>
+            <span class="eyebrow">CLASSIFICATION</span>
+            <h2>Types of Graphs</h2>
+        </div>
+
+    </div>
+
+
+    <div class="grid-2">
+
+        <!-- Directed -->
+        <div class="card">
+
+            <span class="info-tag blue">DIRECTED</span>
+
+            <h3>Directed Graph</h3>
+
+            <div class="type-visual">
+
+                <svg viewBox="0 0 400 140">
+
+                    <defs>
+                        <marker
+                            id="arrow"
+                            markerWidth="10"
+                            markerHeight="10"
+                            refX="8"
+                            refY="3"
+                            orient="auto">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#64748b"/>
+                        </marker>
+                    </defs>
+
+                    <line x1="80" y1="70" x2="190" y2="40"
+                          marker-end="url(#arrow)"/>
+
+                    <line x1="190" y1="40" x2="310" y2="90"
+                          marker-end="url(#arrow)"/>
+
+                    <circle cx="80" cy="70" r="25"/>
+                    <circle cx="190" cy="40" r="25"/>
+                    <circle cx="310" cy="90" r="25"/>
+
+                    <text x="80" y="70">A</text>
+                    <text x="190" y="40">B</text>
+                    <text x="310" y="90">C</text>
+
+                </svg>
+
+            </div>
+
+            <p>
+                Edges have a direction.
+                <strong>A → B</strong> is different from
+                <strong>B → A</strong>.
+            </p>
+
+        </div>
+
+
+        <!-- Undirected -->
+        <div class="card">
+
+            <span class="info-tag green">UNDIRECTED</span>
+
+            <h3>Undirected Graph</h3>
+
+            <div class="type-visual">
+
+                <svg viewBox="0 0 400 140">
+
+                    <line x1="80" y1="70" x2="190" y2="40"/>
+                    <line x1="190" y1="40" x2="310" y2="90"/>
+
+                    <circle cx="80" cy="70" r="25"/>
+                    <circle cx="190" cy="40" r="25"/>
+                    <circle cx="310" cy="90" r="25"/>
+
+                    <text x="80" y="70">A</text>
+                    <text x="190" y="40">B</text>
+                    <text x="310" y="90">C</text>
+
+                </svg>
+
+            </div>
+
+            <p>
+                Edges have no direction.
+                <strong>A — B</strong> means both vertices are connected.
+            </p>
+
+        </div>
+
+
+        <!-- Weighted -->
+        <div class="card">
+
+            <span class="info-tag orange">WEIGHTED</span>
+
+            <h3>Weighted Graph</h3>
+
+            <div class="type-visual">
+
+                <svg viewBox="0 0 400 140">
+
+                    <line x1="80" y1="70" x2="190" y2="40"/>
+                    <line x1="190" y1="40" x2="310" y2="90"/>
+
+                    <circle cx="80" cy="70" r="25"/>
+                    <circle cx="190" cy="40" r="25"/>
+                    <circle cx="310" cy="90" r="25"/>
+
+                    <text x="80" y="70">A</text>
+                    <text x="190" y="40">B</text>
+                    <text x="310" y="90">C</text>
+
+                    <text x="135" y="47">5</text>
+                    <text x="250" y="67">8</text>
+
+                </svg>
+
+            </div>
+
+            <p>
+                Every edge can contain a cost, distance, time or weight.
+            </p>
+
+        </div>
+
+
+        <!-- Unweighted -->
+        <div class="card">
+
+            <span class="info-tag purple">UNWEIGHTED</span>
+
+            <h3>Unweighted Graph</h3>
+
+            <div class="type-visual">
+
+                <svg viewBox="0 0 400 140">
+
+                    <line x1="80" y1="70" x2="190" y2="40"/>
+                    <line x1="190" y1="40" x2="310" y2="90"/>
+
+                    <circle cx="80" cy="70" r="25"/>
+                    <circle cx="190" cy="40" r="25"/>
+                    <circle cx="310" cy="90" r="25"/>
+
+                    <text x="80" y="70">A</text>
+                    <text x="190" y="40">B</text>
+                    <text x="310" y="90">C</text>
+
+                </svg>
+
+            </div>
+
+            <p>
+                All edges are treated equally unless another cost is specified.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="grid-3">
+
+        <div class="card">
+            <span class="info-tag red">CYCLIC</span>
+            <h3>Cyclic Graph</h3>
+            <p>
+                Contains at least one cycle.
+            </p>
+        </div>
+
+        <div class="card">
+            <span class="info-tag green">ACYCLIC</span>
+            <h3>Acyclic Graph</h3>
+            <p>
+                Contains no cycles. A DAG is a directed acyclic graph.
+            </p>
+        </div>
+
+        <div class="card">
+            <span class="info-tag blue">CONNECTED</span>
+            <h3>Connected Graph</h3>
+            <p>
+                Every vertex is reachable from every other vertex.
+            </p>
+        </div>
+
+        <div class="card">
+            <span class="info-tag orange">DISCONNECTED</span>
+            <h3>Disconnected Graph</h3>
+            <p>
+                At least two vertices belong to separate components.
+            </p>
+        </div>
+
+        <div class="card">
+            <span class="info-tag purple">SIMPLE</span>
+            <h3>Simple Graph</h3>
+            <p>
+                No self-loops and no parallel edges.
+            </p>
+        </div>
+
+        <div class="card">
+            <span class="info-tag red">MULTIGRAPH</span>
+            <h3>Multigraph</h3>
+            <p>
+                Multiple edges may connect the same pair of vertices.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     04 PROPERTIES
+     ========================================================= -->
+
+<section class="section" id="properties">
+
+    <div class="section-heading">
+
+        <span class="section-number">04</span>
+
+        <div>
+            <span class="eyebrow">MATHEMATICAL VIEW</span>
+            <h2>Graph Properties</h2>
+        </div>
+
+    </div>
+
+    <div class="grid-2">
+
+        <div class="card">
+
+            <h3>Degree</h3>
+
+            <div class="formula">
+                degree(v) = number of edges incident to v
+            </div>
+
+            <p>
+                In an undirected graph, every edge contributes
+                one to the degree of each endpoint.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Degree Sum Formula</h3>
+
+            <div class="formula">
+                Σ degree(v) = 2E
+            </div>
+
+            <p>
+                The sum of degrees of all vertices equals twice
+                the number of edges.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Directed Graph</h3>
+
+            <div class="formula">
+                total degree = in-degree + out-degree
+            </div>
+
+            <p>
+                Directed graphs distinguish incoming and outgoing edges.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Maximum Edges</h3>
+
+            <div class="formula">
+                E ≤ V(V − 1) / 2
+            </div>
+
+            <p>
+                Maximum number of edges in a simple undirected graph.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="grid-2">
+
+        <div class="card">
+
+            <h3>🌱 Sparse Graph</h3>
+
+            <p>
+                A graph with relatively few edges compared with
+                the maximum possible number.
+            </p>
+
+            <div class="callout">
+                Adjacency List is usually efficient.
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <h3>🕸️ Dense Graph</h3>
+
+            <p>
+                A graph with a large number of edges.
+            </p>
+
+            <div class="callout">
+                Adjacency Matrix can be useful.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     05 GRAPH VS TREE
+     ========================================================= -->
+
+<section class="section" id="tree-vs-graph">
+
+    <div class="section-heading">
+
+        <span class="section-number">05</span>
+
+        <div>
+            <span class="eyebrow">IMPORTANT COMPARISON</span>
+            <h2>Graph vs Tree</h2>
+        </div>
+
+    </div>
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Graph</th>
+                    <th>Tree</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>Structure</td>
+                    <td>General network</td>
+                    <td>Hierarchical</td>
+                </tr>
+
+                <tr>
+                    <td>Cycles</td>
+                    <td>May contain cycles</td>
+                    <td>Never contains cycles</td>
+                </tr>
+
+                <tr>
+                    <td>Connectivity</td>
+                    <td>May be disconnected</td>
+                    <td>Always connected</td>
+                </tr>
+
+                <tr>
+                    <td>Edges</td>
+                    <td>Variable</td>
+                    <td>Exactly V − 1</td>
+                </tr>
+
+                <tr>
+                    <td>Root</td>
+                    <td>Not required</td>
+                    <td>Usually has a root in rooted trees</td>
+                </tr>
+
+                <tr>
+                    <td>Path</td>
+                    <td>Multiple paths may exist</td>
+                    <td>Exactly one simple path between two vertices</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="callout success">
+        <strong>Key idea:</strong>
+        Every tree is a graph, but not every graph is a tree.
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     06 REPRESENTATION
+     ========================================================= -->
+
+<section class="section" id="representation">
+
+    <div class="section-heading">
+
+        <span class="section-number">06</span>
+
+        <div>
+            <span class="eyebrow">STORAGE</span>
+            <h2>Graph Representation</h2>
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <h3>One Graph — Three Representations</h3>
+
+        <div class="representation-transform">
+
+            <div class="representation-card">
+
+                <span class="rep-tag">GRAPH</span>
+
+                <div class="mini-code">
+                    A — B<br>
+                    |   |<br>
+                    C — D
+                </div>
+
+            </div>
+
+            <div class="transform-arrow">
+                →
+            </div>
+
+            <div class="representation-card">
+
+                <span class="rep-tag">DATA STRUCTURE</span>
+
+                <div class="mini-code">
+                    Edge List<br>
+                    Matrix<br>
+                    Adjacency List
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- EDGE LIST -->
+
+    <div class="card">
+
+        <span class="info-tag blue">01</span>
+
+        <h3>Edge List</h3>
+
+        <p>
+            Store every edge as a pair of vertices.
+        </p>
+
+        <div class="edge-list">
+
+            <span class="edge-chip">(A, B)</span>
+            <span class="edge-chip">(A, C)</span>
+            <span class="edge-chip">(B, D)</span>
+            <span class="edge-chip">(C, D)</span>
+
+        </div>
+
+<pre class="code-body"><code>edges = [
+    ("A", "B"),
+    ("A", "C"),
+    ("B", "D"),
+    ("C", "D")
+]</code></pre>
+
+    </div>
+
+
+    <!-- MATRIX -->
+
+    <div class="card">
+
+        <span class="info-tag green">02</span>
+
+        <h3>Adjacency Matrix</h3>
+
+        <p>
+            Use a V × V matrix where matrix[i][j] indicates
+            whether an edge exists.
+        </p>
+
+        <div class="matrix-wrapper">
+
+            <table class="matrix">
+
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>A</th>
+                        <th>B</th>
+                        <th>C</th>
+                        <th>D</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <th>A</th>
+                        <td class="zero">0</td>
+                        <td class="one">1</td>
+                        <td class="one">1</td>
+                        <td class="zero">0</td>
+                    </tr>
+
+                    <tr>
+                        <th>B</th>
+                        <td class="one">1</td>
+                        <td class="zero">0</td>
+                        <td class="zero">0</td>
+                        <td class="one">1</td>
+                    </tr>
+
+                    <tr>
+                        <th>C</th>
+                        <td class="one">1</td>
+                        <td class="zero">0</td>
+                        <td class="zero">0</td>
+                        <td class="one">1</td>
+                    </tr>
+
+                    <tr>
+                        <th>D</th>
+                        <td class="zero">0</td>
+                        <td class="one">1</td>
+                        <td class="one">1</td>
+                        <td class="zero">0</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+<pre class="code-body"><code>graph = [
+    [0, 1, 1, 0],
+    [1, 0, 0, 1],
+    [1, 0, 0, 1],
+    [0, 1, 1, 0]
+]</code></pre>
+
+    </div>
+
+
+    <!-- ADJ LIST -->
+
+    <div class="card">
+
+        <span class="info-tag purple">03</span>
+
+        <h3>Adjacency List</h3>
+
+        <p>
+            Store every vertex along with its neighbouring vertices.
+            This is one of the most commonly used representations
+            in coding interviews.
+        </p>
+
+        <div class="adj-list">
+
+            <div class="adj-row">
+                <span class="adj-node">A</span>
+                <span>→</span>
+                <span class="adj-neighbor">B</span>
+                <span class="adj-neighbor">C</span>
+            </div>
+
+            <div class="adj-row">
+                <span class="adj-node">B</span>
+                <span>→</span>
+                <span class="adj-neighbor">A</span>
+                <span class="adj-neighbor">D</span>
+            </div>
+
+            <div class="adj-row">
+                <span class="adj-node">C</span>
+                <span>→</span>
+                <span class="adj-neighbor">A</span>
+                <span class="adj-neighbor">D</span>
+            </div>
+
+            <div class="adj-row">
+                <span class="adj-node">D</span>
+                <span>→</span>
+                <span class="adj-neighbor">B</span>
+                <span class="adj-neighbor">C</span>
+            </div>
+
+        </div>
+
+<pre class="code-body"><code>graph = {
+    "A": ["B", "C"],
+    "B": ["A", "D"],
+    "C": ["A", "D"],
+    "D": ["B", "C"]
+}</code></pre>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Representation</th>
+                    <th>Space</th>
+                    <th>Check Edge</th>
+                    <th>Best For</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>Edge List</td>
+                    <td>O(E)</td>
+                    <td>O(E)</td>
+                    <td>Sorting edges / Kruskal</td>
+                </tr>
+
+                <tr>
+                    <td>Adjacency Matrix</td>
+                    <td>O(V²)</td>
+                    <td>O(1)</td>
+                    <td>Dense graphs</td>
+                </tr>
+
+                <tr>
+                    <td>Adjacency List</td>
+                    <td>O(V + E)</td>
+                    <td>O(degree)</td>
+                    <td>BFS / DFS</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     07 BFS
+     ========================================================= -->
+
+<section class="section" id="bfs">
+
+    <div class="section-heading">
+
+        <span class="section-number">07</span>
+
+        <div>
+            <span class="eyebrow">CORE TRAVERSAL</span>
+            <h2>Breadth-First Search <span>(BFS)</span></h2>
+        </div>
+
+    </div>
+
+
+    <div class="callout success">
+
+        <strong>Core idea:</strong>
+
+        BFS explores a graph
+        <strong>level by level</strong>.
+
+        It uses a
+        <strong>Queue</strong>.
+
+        Queue follows
+        <strong>FIFO — First In, First Out.</strong>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>How BFS Thinks</h3>
+
+        <div class="concept-flow">
+
+            <div class="concept-step">
+                <span>1</span>
+                <strong>Start</strong>
+                <p>Choose a starting vertex.</p>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="concept-step">
+                <span>2</span>
+                <strong>Enqueue</strong>
+                <p>Add the starting vertex to the Queue.</p>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="concept-step">
+                <span>3</span>
+                <strong>Dequeue</strong>
+                <p>Remove the front vertex.</p>
+            </div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="concept-step">
+                <span>4</span>
+                <strong>Expand</strong>
+                <p>Add unvisited neighbours.</p>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Why Does BFS Need a Queue?</h3>
+
+        <p>
+            Suppose we start from A.
+            We first want to process all vertices directly connected
+            to A before moving to the next level.
+        </p>
+
+        <div class="queue-visual">
+
+            <div class="queue-title">
+                <strong>QUEUE</strong>
+                <span>FIFO</span>
+            </div>
+
+            <div class="queue-track">
+
+                <span class="queue-item front">A</span>
+                <span class="queue-item">B</span>
+                <span class="queue-item">C</span>
+
+            </div>
+
+            <div class="queue-pointer">
+                FRONT → first element removed
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- BFS DRY RUN -->
+
+    <div class="card">
+
+        <h3>BFS Step-by-Step Dry Run</h3>
+
+        <div class="dry-run">
+
+            <div class="dry-step">
+
+                <div class="dry-step-number">01</div>
+
+                <div>
+
+                    <strong>Start at A</strong>
+
+                    <p>
+                        Mark A visited and put it into the Queue.
+                    </p>
+
+                    <div class="queue-track">
+                        <span class="queue-item">A</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="dry-step">
+
+                <div class="dry-step-number">02</div>
+
+                <div>
+
+                    <strong>Process A</strong>
+
+                    <p>
+                        Remove A and add B and C.
+                    </p>
+
+                    <div class="queue-track">
+                        <span class="queue-item">B</span>
+                        <span class="queue-item">C</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="dry-step">
+
+                <div class="dry-step-number">03</div>
+
+                <div>
+
+                    <strong>Process B</strong>
+
+                    <p>
+                        Remove B and discover D.
+                    </p>
+
+                    <div class="queue-track">
+                        <span class="queue-item">C</span>
+                        <span class="queue-item">D</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="dry-step">
+
+                <div class="dry-step-number">04</div>
+
+                <div>
+
+                    <strong>Process C</strong>
+
+                    <p>
+                        Remove C and discover E.
+                    </p>
+
+                    <div class="queue-track">
+                        <span class="queue-item">D</span>
+                        <span class="queue-item">E</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="dry-step">
+
+                <div class="dry-step-number">05</div>
+
+                <div>
+
+                    <strong>Continue</strong>
+
+                    <p>
+                        Continue until the Queue becomes empty.
+                    </p>
+
+                    <div class="sequence">
+                        <span>A</span>
+                        <span>B</span>
+                        <span>C</span>
+                        <span>D</span>
+                        <span>E</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- BFS FLOWCHART -->
+
+    <div class="card">
+
+        <h3>BFS Flowchart</h3>
+
+        <div class="flowchart-pro">
+
+            <div class="flow-box-pro start">
+                START
+            </div>
+
+            <div class="flow-arrow-pro">↓</div>
+
+            <div class="flow-box-pro">
+                Choose start vertex
+            </div>
+
+            <div class="flow-arrow-pro">↓</div>
+
+            <div class="flow-box-pro">
+                Mark visited
+            </div>
+
+            <div class="flow-arrow-pro">↓</div>
+
+            <div class="flow-box-pro">
+                Enqueue vertex
+            </div>
+
+            <div class="flow-arrow-pro">↓</div>
+
+            <div class="flow-box-pro decision">
+                Is Queue empty?
+            </div>
+
+            <div class="flow-arrow-pro">↓ No</div>
+
+            <div class="flow-box-pro">
+                Dequeue vertex
+            </div>
+
+            <div class="flow-arrow-pro">↓</div>
+
+            <div class="flow-box-pro">
+                Visit unvisited neighbours
+            </div>
+
+            <div class="flow-arrow-pro">↓</div>
+
+            <div class="flow-box-pro">
+                Enqueue neighbours
+            </div>
+
+            <div class="flow-arrow-pro">↺</div>
+
+            <div class="flow-box-pro end">
+                END
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- BFS CODE -->
+
+    <div class="card">
+
+        <h3>Python Implementation</h3>
+
+<pre class="code-body"><code>from collections import deque
+
+def bfs(graph, start):
+
+    visited = set()
+    queue = deque([start])
+
+    visited.add(start)
+
+    while queue:
+
+        node = queue.popleft()
+
+        print(node, end=" ")
+
+        for neighbour in graph[node]:
+
+            if neighbour not in visited:
+
+                visited.add(neighbour)
+                queue.append(neighbour)
+
+
+graph = {
+    "A": ["B", "C"],
+    "B": ["A", "D"],
+    "C": ["A", "E"],
+    "D": ["B"],
+    "E": ["C"]
+}
+
+bfs(graph, "A")</code></pre>
+
+    </div>
+
+
+    <div class="grid-3">
+
+        <div class="card">
+            <h3>Time</h3>
+            <div class="formula">O(V + E)</div>
+        </div>
+
+        <div class="card">
+            <h3>Space</h3>
+            <div class="formula">O(V)</div>
+        </div>
+
+        <div class="card">
+            <h3>Data Structure</h3>
+            <div class="formula">Queue</div>
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Where is BFS Used?</h3>
+
+        <div class="example-strip">
+
+            <span class="info-tag blue">Shortest path in unweighted graph</span>
+            <span class="info-tag green">Level-order exploration</span>
+            <span class="info-tag purple">Social network distance</span>
+            <span class="info-tag orange">Web crawling</span>
+            <span class="info-tag red">Grid problems</span>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     08 DFS
+     ========================================================= -->
+
+<section class="section" id="dfs">
+
+    <div class="section-heading">
+
+        <span class="section-number">08</span>
+
+        <div>
+            <span class="eyebrow">CORE TRAVERSAL</span>
+            <h2>Depth-First Search <span>(DFS)</span></h2>
+        </div>
+
+    </div>
+
+
+    <div class="callout">
+
+        <strong>Core idea:</strong>
+
+        DFS goes as deep as possible before backtracking.
+
+        It can be implemented using an explicit
+        <strong>Stack</strong>
+        or using
+        <strong>recursion</strong>.
+    </div>
+
+
+    <div class="card">
+
+        <h3>Why Does DFS Use a Stack?</h3>
+
+        <p>
+            A Stack follows
+            <strong>LIFO — Last In, First Out</strong>.
+            Therefore, the most recently discovered vertex
+            is processed first.
+        </p>
+
+        <div class="stack-visual">
+
+            <strong>STACK</strong>
+
+            <div class="stack-container">
+
+                <span class="stack-item">C</span>
+                <span class="stack-item">B</span>
+                <span class="stack-item top">D</span>
+
+            </div>
+
+            <div class="stack-top-pointer">
+                ↑ TOP — D is removed first
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ITERATIVE DFS -->
+
+    <div class="card">
+
+        <h3>Iterative DFS Dry Run</h3>
+
+        <div class="dry-run">
+
+            <div class="dry-step">
+
+                <div class="dry-step-number">01</div>
+
+                <div>
+
+                    <strong>Push A</strong>
+
+                    <div class="stack-container">
+                        <span class="stack-item top">A</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="dry-step">
+
+                <div class="dry-step-number">02</div>
+
+                <div>
+
+                    <strong>Pop A</strong>
+
+                    <p>
+                        Visit A and push its neighbours.
+                    </p>
+
+                    <div class="stack-container">
+                        <span class="stack-item">C</span>
+                        <span class="stack-item top">B</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="dry-step">
+
+                <div class="dry-step-number">03</div>
+
+                <div>
+
+                    <strong>Pop B</strong>
+
+                    <p>
+                        Visit B and push D.
+                    </p>
+
+                    <div class="stack-container">
+                        <span class="stack-item">C</span>
+                        <span class="stack-item top">D</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="dry-step">
+
+                <div class="dry-step-number">04</div>
+
+                <div>
+
+                    <strong>Continue deeper</strong>
+
+                    <p>
+                        DFS continues until no unvisited neighbour
+                        remains, then backtracks.
+                    </p>
+
+                    <div class="sequence">
+                        <span>A</span>
+                        <span>B</span>
+                        <span>D</span>
+                        <span>C</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- RECURSIVE DFS -->
+
+    <div class="card">
+
+        <h3>Recursive DFS — Understanding the Call Stack</h3>
+
+        <p>
+            Recursion automatically uses the program's
+            <strong>call stack</strong>.
+            Every recursive call creates a new stack frame.
+        </p>
+
+        <div class="call-stack">
+
+            <div class="call-stack-header">
+                <strong>CALL STACK</strong>
+                <span class="info-tag purple">LIFO</span>
+            </div>
+
+            <div class="call-frame">
+                main()
+            </div>
+
+            <div class="call-frame">
+                dfs(A)
+            </div>
+
+            <div class="call-frame">
+                dfs(B)
+            </div>
+
+            <div class="call-frame active">
+                dfs(D) ← CURRENT
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Recursive DFS Flow</h3>
+
+        <div class="flowchart-pro">
+
+            <div class="flow-box-pro start">
+                START
+            </div>
+
+            <div class="flow-arrow-pro">↓</div>
+
+            <div class="flow-box-pro">
+                Enter vertex
+            </div>
+
+            <div class="flow-arrow-pro">↓</div>
+
+            <div class="flow-box-pro">
+                Mark visited
+            </div>
+
+            <div class="flow-arrow-pro">↓</div>
+
+            <div class="flow-box-pro">
+                For each neighbour
+            </div>
+
+            <div class="flow-arrow-pro">↓</div>
+
+            <div class="flow-box-pro decision">
+                Is neighbour unvisited?
+            </div>
+
+            <div class="flow-arrow-pro">↓ YES</div>
+
+            <div class="flow-box-pro">
+                dfs(neighbour)
+            </div>
+
+            <div class="flow-arrow-pro">↺</div>
+
+        </div>
+
+    </div>
+
+
+    <!-- DFS CODE -->
+
+    <div class="card">
+
+        <h3>Recursive DFS — Python</h3>
+
+<pre class="code-body"><code>def dfs(graph, node, visited):
+
+    visited.add(node)
+
+    print(node, end=" ")
+
+    for neighbour in graph[node]:
+
+        if neighbour not in visited:
+
+            dfs(graph, neighbour, visited)
+
+
+graph = {
+    "A": ["B", "C"],
+    "B": ["A", "D"],
+    "C": ["A", "E"],
+    "D": ["B"],
+    "E": ["C"]
+}
+
+visited = set()
+
+dfs(graph, "A", visited)</code></pre>
+
+    </div>
+
+
+    <!-- ITERATIVE CODE -->
+
+    <div class="card">
+
+        <h3>Iterative DFS — Python</h3>
+
+<pre class="code-body"><code>def dfs_iterative(graph, start):
+
+    visited = set()
+    stack = [start]
+
+    while stack:
+
+        node = stack.pop()
+
+        if node in visited:
+            continue
+
+        visited.add(node)
+
+        print(node, end=" ")
+
+        for neighbour in reversed(graph[node]):
+
+            if neighbour not in visited:
+                stack.append(neighbour)</code></pre>
+
+    </div>
+
+
+    <div class="grid-3">
+
+        <div class="card">
+            <h3>Time</h3>
+            <div class="formula">O(V + E)</div>
+        </div>
+
+        <div class="card">
+            <h3>Space</h3>
+            <div class="formula">O(V)</div>
+        </div>
+
+        <div class="card">
+            <h3>Data Structure</h3>
+            <div class="formula">Stack</div>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     09 BFS VS DFS
+     ========================================================= -->
+
+<section class="section" id="comparison">
+
+    <div class="section-heading">
+
+        <span class="section-number">09</span>
+
+        <div>
+            <span class="eyebrow">INTERVIEW FAVORITE</span>
+            <h2>BFS vs DFS</h2>
+        </div>
+
+    </div>
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Feature</th>
+                    <th>BFS</th>
+                    <th>DFS</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>Strategy</td>
+                    <td>Level by level</td>
+                    <td>Depth first</td>
+                </tr>
+
+                <tr>
+                    <td>Data Structure</td>
+                    <td>Queue</td>
+                    <td>Stack / Recursion</td>
+                </tr>
+
+                <tr>
+                    <td>Order</td>
+                    <td>FIFO</td>
+                    <td>LIFO</td>
+                </tr>
+
+                <tr>
+                    <td>Shortest unweighted path</td>
+                    <td>Yes</td>
+                    <td>Not guaranteed</td>
+                </tr>
+
+                <tr>
+                    <td>Cycle Detection</td>
+                    <td>Yes</td>
+                    <td>Yes</td>
+                </tr>
+
+                <tr>
+                    <td>Connected Components</td>
+                    <td>Yes</td>
+                    <td>Yes</td>
+                </tr>
+
+                <tr>
+                    <td>Time</td>
+                    <td>O(V + E)</td>
+                    <td>O(V + E)</td>
+                </tr>
+
+                <tr>
+                    <td>Space</td>
+                    <td>O(V)</td>
+                    <td>O(V)</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="callout success">
+
+        <strong>Interview shortcut:</strong>
+
+        If the problem says
+        <strong>"minimum number of edges"</strong>
+        in an unweighted graph → think <strong>BFS</strong>.
+
+        If it says
+        <strong>"explore components / detect cycle / dependencies"</strong>
+        → BFS or DFS may be appropriate depending on the problem.
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     10 TRAVERSAL PROBLEMS
+     ========================================================= -->
+
+<section class="section" id="traversal-problems">
+
+    <div class="section-heading">
+
+        <span class="section-number">10</span>
+
+        <div>
+            <span class="eyebrow">PROBLEM PATTERNS</span>
+            <h2>Graph Traversal Problems</h2>
+        </div>
+
+    </div>
+
+
+    <div class="grid-2">
+
+        <div class="problem">
+
+            <span class="difficulty easy">EASY</span>
+
+            <h3>Connected Components</h3>
+
+            <p>
+                Count how many disconnected groups exist in the graph.
+            </p>
+
+            <div class="callout">
+                Pattern → Loop through every vertex and run BFS/DFS
+                whenever an unvisited vertex is found.
+            </div>
+
+        </div>
+
+
+        <div class="problem">
+
+            <span class="difficulty easy">EASY</span>
+
+            <h3>Path Existence</h3>
+
+            <p>
+                Determine whether a path exists from source to destination.
+            </p>
+
+            <div class="callout">
+                Pattern → BFS / DFS + visited.
+            </div>
+
+        </div>
+
+
+        <div class="problem">
+
+            <span class="difficulty medium">MEDIUM</span>
+
+            <h3>Number of Islands</h3>
+
+            <p>
+                Count connected groups of land cells in a grid.
+            </p>
+
+            <div class="callout">
+                Pattern → Grid BFS / DFS.
+            </div>
+
+        </div>
+
+
+        <div class="problem">
+
+            <span class="difficulty medium">MEDIUM</span>
+
+            <h3>Flood Fill</h3>
+
+            <p>
+                Replace all connected cells having the same starting color.
+            </p>
+
+            <div class="callout">
+                Pattern → BFS / DFS on four directions.
+            </div>
+
+        </div>
+
+
+        <div class="problem">
+
+            <span class="difficulty medium">MEDIUM</span>
+
+            <h3>Bipartite Graph</h3>
+
+            <p>
+                Determine whether vertices can be divided into two sets
+                such that no edge connects vertices in the same set.
+            </p>
+
+            <div class="callout">
+                Pattern → BFS/DFS + two-coloring.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     11 CYCLE DETECTION
+     ========================================================= -->
+
+<section class="section" id="cycle">
+
+    <div class="section-heading">
+
+        <span class="section-number">11</span>
+
+        <div>
+            <span class="eyebrow">GRAPH PROPERTY</span>
+            <h2>Cycle Detection</h2>
+        </div>
+
+    </div>
+
+
+    <div class="grid-2">
+
+        <div class="card">
+
+            <span class="info-tag blue">UNDIRECTED</span>
+
+            <h3>Cycle Detection using DFS</h3>
+
+            <p>
+                While traversing an undirected graph, if we encounter
+                an already visited neighbour that is not the current
+                node's parent, a cycle exists.
+            </p>
+
+<pre class="code-body"><code>def has_cycle(node, parent):
+
+    visited[node] = True
+
+    for neighbour in graph[node]:
+
+        if not visited[neighbour]:
+
+            if has_cycle(neighbour, node):
+                return True
+
+        elif neighbour != parent:
+
+            return True
+
+    return False</code></pre>
+
+        </div>
+
+
+        <div class="card">
+
+            <span class="info-tag red">DIRECTED</span>
+
+            <h3>Cycle Detection using Recursion Stack</h3>
+
+            <p>
+                In a directed graph, a cycle exists if DFS reaches
+                a vertex that is already in the current recursion path.
+            </p>
+
+<pre class="code-body"><code>def dfs(node):
+
+    visited[node] = True
+    path[node] = True
+
+    for neighbour in graph[node]:
+
+        if not visited[neighbour]:
+
+            if dfs(neighbour):
+                return True
+
+        elif path[neighbour]:
+
+            return True
+
+    path[node] = False
+    return False</code></pre>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     12 TOPOLOGICAL SORT
+     ========================================================= -->
+
+<section class="section" id="topological">
+
+    <div class="section-heading">
+
+        <span class="section-number">12</span>
+
+        <div>
+            <span class="eyebrow">DEPENDENCY ORDER</span>
+            <h2>Topological Sort</h2>
+        </div>
+
+    </div>
+
+
+    <div class="callout">
+
+        <strong>Definition:</strong>
+
+        Topological sorting produces a linear ordering of vertices
+        in a <strong>DAG</strong> such that for every directed edge
+        <strong>u → v</strong>, u appears before v.
+    </div>
+
+
+    <div class="card">
+
+        <h3>Dependency Example</h3>
+
+        <div class="dependency-flow">
+
+            <div class="dependency-node done">
+                Basics
+            </div>
+
+            <div class="dependency-arrow">→</div>
+
+            <div class="dependency-node">
+                Python
+            </div>
+
+            <div class="dependency-arrow">→</div>
+
+            <div class="dependency-node">
+                DSA
+            </div>
+
+            <div class="dependency-arrow">→</div>
+
+            <div class="dependency-node">
+                Interviews
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="grid-2">
+
+        <div class="card">
+
+            <h3>Method 1 — DFS</h3>
+
+            <ol class="algorithm-list">
+
+                <li>Run DFS from every unvisited vertex.</li>
+                <li>After processing all neighbours, push the vertex into a stack.</li>
+                <li>Reverse the stack to obtain topological order.</li>
+
+            </ol>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Method 2 — Kahn's Algorithm</h3>
+
+            <ol class="algorithm-list">
+
+                <li>Calculate the indegree of every vertex.</li>
+                <li>Add all zero-indegree vertices to a Queue.</li>
+                <li>Remove a vertex and decrease neighbours' indegrees.</li>
+                <li>Add newly zero-indegree vertices.</li>
+
+            </ol>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Python — Kahn's Algorithm</h3>
+
+<pre class="code-body"><code>from collections import deque
+
+def topological_sort(graph):
+
+    indegree = {
+        node: 0
+        for node in graph
+    }
+
+    for node in graph:
+
+        for neighbour in graph[node]:
+            indegree[neighbour] += 1
+
+    queue = deque(
+        node for node in graph
+        if indegree[node] == 0
+    )
+
+    order = []
+
+    while queue:
+
+        node = queue.popleft()
+
+        order.append(node)
+
+        for neighbour in graph[node]:
+
+            indegree[neighbour] -= 1
+
+            if indegree[neighbour] == 0:
+                queue.append(neighbour)
+
+    return order</code></pre>
+
+    </div>
+
+
+    <div class="callout warning">
+
+        <strong>Important:</strong>
+
+        A valid topological ordering exists only when the directed graph
+        is acyclic. If a directed cycle exists, topological sorting is impossible.
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     13 SHORTEST PATH
+     ========================================================= -->
+
+<section class="section" id="shortest-path">
+
+    <div class="section-heading">
+
+        <span class="section-number">13</span>
+
+        <div>
+            <span class="eyebrow">PATH OPTIMIZATION</span>
+            <h2>Shortest Path Algorithms</h2>
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Weighted Graph Example</h3>
+
+        <div class="weighted-graph">
+
+            <svg viewBox="0 0 700 330">
+
+                <line x1="100" y1="165" x2="270" y2="80"/>
+                <line x1="100" y1="165" x2="270" y2="250"/>
+                <line x1="270" y1="80" x2="450" y2="80"/>
+                <line class="selected" x1="270" y1="250" x2="450" y2="80"/>
+                <line x1="450" y1="80" x2="600" y2="165"/>
+
+                <circle cx="100" cy="165" r="32"/>
+                <circle cx="270" cy="80" r="32"/>
+                <circle cx="270" cy="250" r="32"/>
+                <circle cx="450" cy="80" r="32"/>
+                <circle cx="600" cy="165" r="32"/>
+
+                <text x="100" y="165">A</text>
+                <text x="270" y="80">B</text>
+                <text x="270" y="250">C</text>
+                <text x="450" y="80">D</text>
+                <text x="600" y="165">E</text>
+
+                <text class="weight" x="185" y="110">4</text>
+                <text class="weight" x="185" y="220">2</text>
+                <text class="weight" x="360" y="55">3</text>
+                <text class="weight" x="360" y="180">1</text>
+                <text class="weight" x="525" y="110">5</text>
+
+            </svg>
+
+        </div>
+
+    </div>
+
+
+    <div class="grid-2">
+
+        <div class="card">
+
+            <span class="info-tag blue">UNWEIGHTED</span>
+
+            <h3>BFS</h3>
+
+            <p>
+                For an unweighted graph where every edge has equal cost,
+                BFS finds the shortest path in terms of number of edges.
+            </p>
+
+            <div class="formula">
+                O(V + E)
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <span class="info-tag purple">NON-NEGATIVE WEIGHTS</span>
+
+            <h3>Dijkstra</h3>
+
+            <p>
+                Finds shortest paths from a source when edge weights
+                are non-negative.
+            </p>
+
+            <div class="formula">
+                O((V + E) log V)
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <span class="info-tag orange">NEGATIVE EDGES</span>
+
+            <h3>Bellman-Ford</h3>
+
+            <p>
+                Handles negative edge weights and can detect
+                reachable negative-weight cycles.
+            </p>
+
+            <div class="formula">
+                O(VE)
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <span class="info-tag red">ALL PAIRS</span>
+
+            <h3>Floyd-Warshall</h3>
+
+            <p>
+                Computes shortest paths between every pair of vertices
+                using dynamic programming.
+            </p>
+
+            <div class="formula">
+                O(V³)
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Dijkstra — Distance Table</h3>
+
+        <div class="distance-grid-pro">
+
+            <div class="distance-card-pro">
+                <div class="distance-node-pro">A</div>
+                <div class="distance-value-pro">0</div>
+            </div>
+
+            <div class="distance-card-pro">
+                <div class="distance-node-pro">B</div>
+                <div class="distance-value-pro">4</div>
+            </div>
+
+            <div class="distance-card-pro">
+                <div class="distance-node-pro">C</div>
+                <div class="distance-value-pro">2</div>
+            </div>
+
+            <div class="distance-card-pro">
+                <div class="distance-node-pro">D</div>
+                <div class="distance-value-pro">3</div>
+            </div>
+
+            <div class="distance-card-pro">
+                <div class="distance-node-pro">E</div>
+                <div class="distance-value-pro">8</div>
+            </div>
+
+            <div class="distance-card-pro">
+                <div class="distance-node-pro">∞</div>
+                <div class="distance-value-pro">Unreachable</div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Dijkstra — Core Algorithm</h3>
+
+        <ol class="algorithm-list">
+
+            <li>Set source distance to 0 and every other distance to infinity.</li>
+
+            <li>Choose the unvisited vertex with the smallest distance.</li>
+
+            <li>Relax every outgoing edge.</li>
+
+            <li>If a shorter distance is found, update it.</li>
+
+            <li>Mark the current vertex as finalized.</li>
+
+            <li>Repeat until all reachable vertices are processed.</li>
+
+        </ol>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     14 MST
+     ========================================================= -->
+
+<section class="section" id="mst">
+
+    <div class="section-heading">
+
+        <span class="section-number">14</span>
+
+        <div>
+            <span class="eyebrow">CONNECT EVERYTHING CHEAPLY</span>
+            <h2>Minimum Spanning Tree</h2>
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>What is a Spanning Tree?</h3>
+
+        <p>
+            A spanning tree of a connected undirected graph is a
+            subgraph that connects all vertices without creating cycles.
+        </p>
+
+        <div class="formula">
+            Edges in a spanning tree = V − 1
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Minimum Spanning Tree — MST</h3>
+
+        <p>
+            An MST is a spanning tree whose total edge weight is minimum
+            among all possible spanning trees.
+        </p>
+
+        <div class="mst-animation">
+
+            <span class="mst-edge-chip selected">
+                A-B : 2 ✓
+            </span>
+
+            <span class="mst-edge-chip selected">
+                B-C : 3 ✓
+            </span>
+
+            <span class="mst-edge-chip">
+                A-C : 7 ✕
+            </span>
+
+            <span class="mst-edge-chip selected">
+                C-D : 4 ✓
+            </span>
+
+            <span class="mst-edge-chip">
+                B-D : 6 ✕
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="grid-2">
+
+        <div class="card">
+
+            <h3>Kruskal's Algorithm</h3>
+
+            <ol class="algorithm-list">
+
+                <li>Sort all edges by increasing weight.</li>
+                <li>Take the smallest edge.</li>
+                <li>Check whether it creates a cycle.</li>
+                <li>If not, include it in the MST.</li>
+                <li>Continue until V − 1 edges are selected.</li>
+
+            </ol>
+
+            <div class="formula">
+                O(E log E)
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Prim's Algorithm</h3>
+
+            <ol class="algorithm-list">
+
+                <li>Start from any vertex.</li>
+                <li>Select the minimum-weight edge connecting the tree to an unvisited vertex.</li>
+                <li>Add that vertex.</li>
+                <li>Repeat until every vertex is included.</li>
+
+            </ol>
+
+            <div class="formula">
+                O(E log V)
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     15 DSU
+     ========================================================= -->
+
+<section class="section" id="dsu">
+
+    <div class="section-heading">
+
+        <span class="section-number">15</span>
+
+        <div>
+            <span class="eyebrow">UNION-FIND</span>
+            <h2>Disjoint Set Union</h2>
+        </div>
+
+    </div>
+
+
+    <div class="callout">
+
+        DSU, also called
+        <strong>Union-Find</strong>,
+        efficiently maintains multiple disjoint sets and supports
+        two major operations:
+        <strong>Find</strong> and <strong>Union</strong>.
+    </div>
+
+
+    <div class="dsu-visual">
+
+        <div class="dsu-set">
+
+            <div class="dsu-set-title">
+                Set A
+            </div>
+
+            <div class="dsu-nodes">
+
+                <span class="dsu-node-pro">1</span>
+                <span class="dsu-node-pro">2</span>
+                <span class="dsu-node-pro">3</span>
+
+            </div>
+
+        </div>
+
+
+        <div class="dsu-set">
+
+            <div class="dsu-set-title">
+                Set B
+            </div>
+
+            <div class="dsu-nodes">
+
+                <span class="dsu-node-pro">4</span>
+                <span class="dsu-node-pro">5</span>
+
+            </div>
+
+        </div>
+
+
+        <div class="dsu-set">
+
+            <div class="dsu-set-title">
+                After Union
+            </div>
+
+            <div class="dsu-nodes">
+
+                <span class="dsu-node-pro">1</span>
+                <span class="dsu-node-pro">2</span>
+                <span class="dsu-node-pro">3</span>
+                <span class="dsu-node-pro">4</span>
+                <span class="dsu-node-pro">5</span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="grid-2">
+
+        <div class="card">
+
+            <h3>Find</h3>
+
+            <p>
+                Determines the representative/root of the set containing
+                a given element.
+            </p>
+
+            <div class="formula">
+                find(x)
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Union</h3>
+
+            <p>
+                Merges two different sets into one set.
+            </p>
+
+            <div class="formula">
+                union(a, b)
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Path Compression</h3>
+
+            <p>
+                During find(), nodes are directly connected to the root,
+                making future operations faster.
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Union by Rank / Size</h3>
+
+            <p>
+                Attach the smaller tree under the larger tree to keep
+                the DSU structure shallow.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="callout success">
+
+        With path compression and union by rank/size,
+        DSU operations are effectively almost constant time:
+
+        <strong>O(α(V))</strong>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     16 ADVANCED GRAPH ALGORITHMS
+     ========================================================= -->
+
+<section class="section" id="advanced">
+
+    <div class="section-heading">
+
+        <span class="section-number">16</span>
+
+        <div>
+            <span class="eyebrow">ADVANCED</span>
+            <h2>Advanced Graph Algorithms</h2>
+        </div>
+
+    </div>
+
+
+    <div class="grid-3">
+
+        <div class="card">
+
+            <span class="info-tag purple">SCC</span>
+
+            <h3>Strongly Connected Components</h3>
+
+            <p>
+                A strongly connected component of a directed graph is a
+                maximal set of vertices where every vertex can reach every
+                other vertex.
+            </p>
+
+            <div class="term-example">
+                Kosaraju / Tarjan
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <span class="info-tag orange">BRIDGE</span>
+
+            <h3>Bridges</h3>
+
+            <p>
+                An edge whose removal increases the number of connected
+                components is called a bridge.
+            </p>
+
+            <div class="term-example">
+                Critical connection
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <span class="info-tag red">ARTICULATION</span>
+
+            <h3>Articulation Point</h3>
+
+            <p>
+                A vertex whose removal increases the number of connected
+                components.
+            </p>
+
+            <div class="term-example">
+                Critical node
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Advanced Toolkit</h3>
+
+        <div class="example-strip">
+
+            <span class="info-tag purple">
+                Kosaraju
+            </span>
+
+            <span class="info-tag blue">
+                Tarjan
+            </span>
+
+            <span class="info-tag orange">
+                Bridges
+            </span>
+
+            <span class="info-tag red">
+                Articulation Points
+            </span>
+
+            <span class="info-tag green">
+                DSU
+            </span>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     17 INTERVIEW PATTERNS
+     ========================================================= -->
+
+<section class="section" id="patterns">
+
+    <div class="section-heading">
+
+        <span class="section-number">17</span>
+
+        <div>
+            <span class="eyebrow">INTERVIEW INTELLIGENCE</span>
+            <h2>Graph Interview Pattern Recognition</h2>
+        </div>
+
+    </div>
+
+
+    <div class="grid-2">
+
+        <div class="pattern-card-pro">
+
+            <div class="question">
+                "Shortest path in an unweighted graph?"
+            </div>
+
+            <div class="answer">
+                Think <strong>BFS</strong>.
+            </div>
+
+        </div>
+
+
+        <div class="pattern-card-pro">
+
+            <div class="question">
+                "Shortest path with non-negative weights?"
+            </div>
+
+            <div class="answer">
+                Think <strong>Dijkstra</strong>.
+            </div>
+
+        </div>
+
+
+        <div class="pattern-card-pro">
+
+            <div class="question">
+                "Negative edge weights?"
+            </div>
+
+            <div class="answer">
+                Think <strong>Bellman-Ford</strong>.
+            </div>
+
+        </div>
+
+
+        <div class="pattern-card-pro">
+
+            <div class="question">
+                "Prerequisites / dependencies?"
+            </div>
+
+            <div class="answer">
+                Think <strong>Topological Sort</strong>.
+            </div>
+
+        </div>
+
+
+        <div class="pattern-card-pro">
+
+            <div class="question">
+                "Connect all nodes with minimum cost?"
+            </div>
+
+            <div class="answer">
+                Think <strong>MST — Kruskal / Prim</strong>.
+            </div>
+
+        </div>
+
+
+        <div class="pattern-card-pro">
+
+            <div class="question">
+                "Merge groups / connectivity queries?"
+            </div>
+
+            <div class="answer">
+                Think <strong>DSU / Union-Find</strong>.
+            </div>
+
+        </div>
+
+
+        <div class="pattern-card-pro">
+
+            <div class="question">
+                "Count islands / connected regions?"
+            </div>
+
+            <div class="answer">
+                Think <strong>BFS / DFS on a grid</strong>.
+            </div>
+
+        </div>
+
+
+        <div class="pattern-card-pro">
+
+            <div class="question">
+                "Critical edge or critical vertex?"
+            </div>
+
+            <div class="answer">
+                Think <strong>Bridges / Articulation Points</strong>.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     18 COMPLEXITY MASTER TABLE
+     ========================================================= -->
+
+<section class="section" id="complexity">
+
+    <div class="section-heading">
+
+        <span class="section-number">18</span>
+
+        <div>
+            <span class="eyebrow">CHEAT SHEET</span>
+            <h2>Complexity Master Table</h2>
+        </div>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Algorithm</th>
+                    <th>Time</th>
+                    <th>Space</th>
+                    <th>Main Use</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>BFS</td>
+                    <td>O(V + E)</td>
+                    <td>O(V)</td>
+                    <td>Unweighted shortest path</td>
+                </tr>
+
+                <tr>
+                    <td>DFS</td>
+                    <td>O(V + E)</td>
+                    <td>O(V)</td>
+                    <td>Traversal / components</td>
+                </tr>
+
+                <tr>
+                    <td>Topological Sort</td>
+                    <td>O(V + E)</td>
+                    <td>O(V)</td>
+                    <td>DAG dependencies</td>
+                </tr>
+
+                <tr>
+                    <td>Dijkstra</td>
+                    <td>O((V + E) log V)</td>
+                    <td>O(V)</td>
+                    <td>Non-negative weights</td>
+                </tr>
+
+                <tr>
+                    <td>Bellman-Ford</td>
+                    <td>O(VE)</td>
+                    <td>O(V)</td>
+                    <td>Negative edges</td>
+                </tr>
+
+                <tr>
+                    <td>Floyd-Warshall</td>
+                    <td>O(V³)</td>
+                    <td>O(V²)</td>
+                    <td>All-pairs shortest paths</td>
+                </tr>
+
+                <tr>
+                    <td>Kruskal</td>
+                    <td>O(E log E)</td>
+                    <td>O(V)</td>
+                    <td>MST</td>
+                </tr>
+
+                <tr>
+                    <td>Prim</td>
+                    <td>O(E log V)</td>
+                    <td>O(V)</td>
+                    <td>MST</td>
+                </tr>
+
+                <tr>
+                    <td>DSU</td>
+                    <td>≈ O(α(V))</td>
+                    <td>O(V)</td>
+                    <td>Connectivity</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     19 COMMON MISTAKES
+     ========================================================= -->
+
+<section class="section" id="mistakes">
+
+    <div class="section-heading">
+
+        <span class="section-number">19</span>
+
+        <div>
+            <span class="eyebrow">AVOID THESE</span>
+            <h2>Common Mistakes</h2>
+        </div>
+
+    </div>
+
+
+    <div class="mistake-list">
+
+        <div class="mistake">
+
+            <div class="mistake-icon">01</div>
+
+            <div>
+                <strong>Forgetting the visited array/set</strong>
+                <p>
+                    Cyclic graphs can cause infinite traversal without
+                    proper visited tracking.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="mistake">
+
+            <div class="mistake-icon">02</div>
+
+            <div>
+                <strong>Using BFS for every shortest-path problem</strong>
+                <p>
+                    BFS is suitable for unweighted/equal-cost edges.
+                    Weighted graphs may require Dijkstra or another algorithm.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="mistake">
+
+            <div class="mistake-icon">03</div>
+
+            <div>
+                <strong>Using Dijkstra with negative edges</strong>
+                <p>
+                    Standard Dijkstra assumes non-negative edge weights.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="mistake">
+
+            <div class="mistake-icon">04</div>
+
+            <div>
+                <strong>Confusing tree and graph</strong>
+                <p>
+                    Trees have exactly V − 1 edges and contain no cycles.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="mistake">
+
+            <div class="mistake-icon">05</div>
+
+            <div>
+                <strong>Incorrect directed cycle detection</strong>
+                <p>
+                    A visited node alone does not prove a directed cycle.
+                    The recursion-path state matters.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="mistake">
+
+            <div class="mistake-icon">06</div>
+
+            <div>
+                <strong>Ignoring disconnected graphs</strong>
+                <p>
+                    Running BFS/DFS from only one vertex does not necessarily
+                    visit the entire graph.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     20 PRACTICE
+     ========================================================= -->
+
+<section class="section" id="practice">
+
+    <div class="section-heading">
+
+        <span class="section-number">20</span>
+
+        <div>
+            <span class="eyebrow">LEVEL UP</span>
+            <h2>Practice Problems</h2>
+        </div>
+
+    </div>
+
+
+    <div class="grid-3">
+
+        <div class="problem">
+
+            <span class="difficulty easy">BEGINNER</span>
+
+            <h3>1. BFS Traversal</h3>
+
+            <p>
+                Given an adjacency list, print BFS traversal from a source.
+            </p>
+
+        </div>
+
+
+        <div class="problem">
+
+            <span class="difficulty easy">BEGINNER</span>
+
+            <h3>2. DFS Traversal</h3>
+
+            <p>
+                Implement recursive and iterative DFS.
+            </p>
+
+        </div>
+
+
+        <div class="problem">
+
+            <span class="difficulty easy">BEGINNER</span>
+
+            <h3>3. Find Degree</h3>
+
+            <p>
+                Calculate the degree of every vertex.
+            </p>
+
+        </div>
+
+
+        <div class="problem">
+
+            <span class="difficulty medium">INTERMEDIATE</span>
+
+            <h3>4. Number of Islands</h3>
+
+            <p>
+                Count connected land components in a grid.
+            </p>
+
+        </div>
+
+
+        <div class="problem">
+
+            <span class="difficulty medium">INTERMEDIATE</span>
+
+            <h3>5. Detect Cycle</h3>
+
+            <p>
+                Detect cycles in directed and undirected graphs.
+            </p>
+
+        </div>
+
+
+        <div class="problem">
+
+            <span class="difficulty medium">INTERMEDIATE</span>
+
+            <h3>6. Course Schedule</h3>
+
+            <p>
+                Determine whether all courses can be completed.
+            </p>
+
+        </div>
+
+
+        <div class="problem">
+
+            <span class="difficulty hard">ADVANCED</span>
+
+            <h3>7. Dijkstra</h3>
+
+            <p>
+                Find shortest distances from a source.
+            </p>
+
+        </div>
+
+
+        <div class="problem">
+
+            <span class="difficulty hard">ADVANCED</span>
+
+            <h3>8. Minimum Spanning Tree</h3>
+
+            <p>
+                Implement Kruskal and Prim.
+            </p>
+
+        </div>
+
+
+        <div class="problem">
+
+            <span class="difficulty expert">INTERVIEW</span>
+
+            <h3>9. Critical Connections</h3>
+
+            <p>
+                Find bridges in an undirected graph.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     21 INTERACTIVE GRAPH VISUALIZER
+     ========================================================= -->
+
+<section class="section" id="visualizer">
+
+    <div class="section-heading">
+
+        <span class="section-number">21</span>
+
+        <div>
+            <span class="eyebrow">INTERACTIVE LAB</span>
+            <h2>Graph Visualizer</h2>
+        </div>
+
+    </div>
+
+
+    <div class="visualizer">
+
+        <div class="visualizer-header">
+
+            <div>
+                <h3>Explore BFS & DFS</h3>
+                <p>
+                    Watch the graph traversal happen step by step.
+                </p>
+            </div>
+
+            <span class="info-tag blue">
+                INTERACTIVE
+            </span>
+
+        </div>
+
+
+        <div class="traversal-lab">
+
+            <!-- GRAPH -->
+
+            <div class="traversal-graph-panel">
+
+                <svg
+                    class="traversal-graph"
+                    id="traversalGraph"
+                    viewBox="0 0 700 420">
+
+                    <line
+                        id="edgeAB"
+                        class="traversal-edge"
+                        x1="100"
+                        y1="210"
+                        x2="250"
+                        y2="100">
+                    </line>
+
+                    <line
+                        id="edgeAC"
+                        class="traversal-edge"
+                        x1="100"
+                        y1="210"
+                        x2="250"
+                        y2="320">
+                    </line>
+
+                    <line
+                        id="edgeBD"
+                        class="traversal-edge"
+                        x1="250"
+                        y1="100"
+                        x2="450"
+                        y2="100">
+                    </line>
+
+                    <line
+                        id="edgeCE"
+                        class="traversal-edge"
+                        x1="250"
+                        y1="320"
+                        x2="450"
+                        y2="320">
+                    </line>
+
+                    <line
+                        id="edgeDF"
+                        class="traversal-edge"
+                        x1="450"
+                        y1="100"
+                        x2="600"
+                        y2="210">
+                    </line>
+
+                    <line
+                        id="edgeEF"
+                        class="traversal-edge"
+                        x1="450"
+                        y1="320"
+                        x2="600"
+                        y2="210">
+                    </line>
+
+
+                    <circle
+                        id="nodeA"
+                        class="traversal-node start"
+                        cx="100"
+                        cy="210"
+                        r="34">
+                    </circle>
+
+                    <circle
+                        id="nodeB"
+                        class="traversal-node"
+                        cx="250"
+                        cy="100"
+                        r="34">
+                    </circle>
+
+                    <circle
+                        id="nodeC"
+                        class="traversal-node"
+                        cx="250"
+                        cy="320"
+                        r="34">
+                    </circle>
+
+                    <circle
+                        id="nodeD"
+                        class="traversal-node"
+                        cx="450"
+                        cy="100"
+                        r="34">
+                    </circle>
+
+                    <circle
+                        id="nodeE"
+                        class="traversal-node"
+                        cx="450"
+                        cy="320"
+                        r="34">
+                    </circle>
+
+                    <circle
+                        id="nodeF"
+                        class="traversal-node"
+                        cx="600"
+                        cy="210"
+                        r="34">
+                    </circle>
+
+
+                    <text x="100" y="210">A</text>
+                    <text x="250" y="100">B</text>
+                    <text x="250" y="320">C</text>
+                    <text x="450" y="100">D</text>
+                    <text x="450" y="320">E</text>
+                    <text x="600" y="210">F</text>
+
+                </svg>
+
+            </div>
+
+
+            <!-- CONTROL PANEL -->
+
+            <div class="traversal-control-panel">
+
+
+                <div class="traversal-control-card">
+
+                    <h4>Traversal</h4>
+
+                    <div class="traversal-buttons">
+
+                        <button
+                            class="btn primary"
+                            id="bfsBtn">
+                            ▶ BFS
+                        </button>
+
+                        <button
+                            class="btn secondary"
+                            id="dfsBtn">
+                            ▶ DFS
+                        </button>
+
+                        <button
+                            class="btn"
+                            id="resetBtn">
+                            ↻ Reset
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="traversal-control-card">
+
+                    <h4>Current Vertex</h4>
+
+                    <div
+                        id="currentVertex"
+                        class="formula">
+                        —
+                    </div>
+
+                </div>
+
+
+                <div class="traversal-control-card">
+
+                    <h4>Data Structure</h4>
+
+                    <div id="dsTitle">
+                        Waiting...
+                    </div>
+
+                    <div
+                        id="dsVisual"
+                        class="queue-track">
+
+                        <span class="queue-empty">
+                            Empty
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="traversal-control-card">
+
+                    <h4>Traversal Order</h4>
+
+                    <div
+                        id="traversalOrder"
+                        class="sequence">
+                        <span>—</span>
+                    </div>
+
+                </div>
+
+
+                <div class="traversal-control-card">
+
+                    <h4>Status</h4>
+
+                    <div
+                        id="traversalStatus"
+                        class="callout">
+                        Choose BFS or DFS to begin.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     22 QUIZ
+     ========================================================= -->
+
+<section class="section" id="quiz">
+
+    <div class="section-heading">
+
+        <span class="section-number">22</span>
+
+        <div>
+            <span class="eyebrow">CHECK YOURSELF</span>
+            <h2>Graph Mastery Quiz</h2>
+        </div>
+
+    </div>
+
+
+    <div class="quiz-question">
+
+        <h3>1. Which data structure does BFS use?</h3>
+
+        <div class="quiz-options">
+
+            <button class="quiz-option"
+                    data-correct="false">
+                Stack
+            </button>
+
+            <button class="quiz-option"
+                    data-correct="true">
+                Queue
+            </button>
+
+            <button class="quiz-option"
+                    data-correct="false">
+                Heap
+            </button>
+
+            <button class="quiz-option"
+                    data-correct="false">
+                Tree
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="quiz-question">
+
+        <h3>2. What does DFS use?</h3>
+
+        <div class="quiz-options">
+
+            <button class="quiz-option"
+                    data-correct="true">
+                Stack / Recursion
+            </button>
+
+            <button class="quiz-option"
+                    data-correct="false">
+                Queue only
+            </button>
+
+            <button class="quiz-option"
+                    data-correct="false">
+                Hash table
+            </button>
+
+            <button class="quiz-option"
+                    data-correct="false">
+                Priority queue
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="quiz-question">
+
+        <h3>3. Which algorithm handles negative edge weights?</h3>
+
+        <div class="quiz-options">
+
+            <button class="quiz-option"
+                    data-correct="false">
+                BFS
+            </button>
+
+            <button class="quiz-option"
+                    data-correct="false">
+                Dijkstra
+            </button>
+
+            <button class="quiz-option"
+                    data-correct="true">
+                Bellman-Ford
+            </button>
+
+            <button class="quiz-option"
+                    data-correct="false">
+                Prim
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="quiz-question">
+
+        <h3>4. A topological ordering exists for which graph?</h3>
+
+        <div class="quiz-options">
+
+            <button class="quiz-option"
+                    data-correct="false">
+                Any undirected graph
+            </button>
+
+            <button class="quiz-option"
+                    data-correct="true">
+                Directed Acyclic Graph
+            </button>
+
+            <button class="quiz-option"
+                    data-correct="false">
+                Directed cyclic graph
+            </button>
+
+            <button class="quiz-option"
+                    data-correct="false">
+                Complete graph only
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="quiz-question">
+
+        <h3>5. How many edges does a tree with V vertices contain?</h3>
+
+        <div class="quiz-options">
+
+            <button class="quiz-option"
+                    data-correct="false">
+                V
+            </button>
+
+            <button class="quiz-option"
+                    data-correct="true">
+                V − 1
+            </button>
+
+            <button class="quiz-option"
+                    data-correct="false">
+                V + 1
+            </button>
+
+            <button class="quiz-option"
+                    data-correct="false">
+                V²
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <button
+        class="btn primary"
+        id="quizSubmit">
+        Check My Score
+    </button>
+
+    <div
+        id="quizScore"
+        class="quiz-score">
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     23 ROADMAP
+     ========================================================= -->
+
+<section class="section" id="roadmap">
+
+    <div class="section-heading">
+
+        <span class="section-number">23</span>
+
+        <div>
+            <span class="eyebrow">YOUR NEXT JOURNEY</span>
+            <h2>Graph Mastery Roadmap</h2>
+        </div>
+
+    </div>
+
+
+    <div class="roadmap-line">
+
+        <div
+            class="roadmap-step active"
+            data-step="1">
+
+            <div class="roadmap-content">
+
+                <h4>Graph Fundamentals</h4>
+
+                <p>
+                    Vertices, edges, degree, paths, cycles and graph types.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="roadmap-step active"
+            data-step="2">
+
+            <div class="roadmap-content">
+
+                <h4>Graph Representation</h4>
+
+                <p>
+                    Edge List → Matrix → Adjacency List.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="roadmap-step active"
+            data-step="3">
+
+            <div class="roadmap-content">
+
+                <h4>BFS & DFS</h4>
+
+                <p>
+                    Master Queue, Stack, recursion and traversal patterns.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="roadmap-step active"
+            data-step="4">
+
+            <div class="roadmap-content">
+
+                <h4>Cycle Detection</h4>
+
+                <p>
+                    Undirected parent tracking and directed recursion stack.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="roadmap-step"
+            data-step="5">
+
+            <div class="roadmap-content">
+
+                <h4>Topological Sort</h4>
+
+                <p>
+                    DFS ordering and Kahn's algorithm.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="roadmap-step"
+            data-step="6">
+
+            <div class="roadmap-content">
+
+                <h4>Shortest Paths</h4>
+
+                <p>
+                    BFS → Dijkstra → Bellman-Ford → Floyd-Warshall.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="roadmap-step"
+            data-step="7">
+
+            <div class="roadmap-content">
+
+                <h4>MST</h4>
+
+                <p>
+                    Kruskal, Prim and minimum-cost connectivity.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="roadmap-step"
+            data-step="8">
+
+            <div class="roadmap-content">
+
+                <h4>DSU</h4>
+
+                <p>
+                    Find, Union, Path Compression and Union by Rank.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="roadmap-step"
+            data-step="9">
+
+            <div class="roadmap-content">
+
+                <h4>Advanced Graphs</h4>
+
+                <p>
+                    SCC, Bridges and Articulation Points.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="roadmap-step"
+            data-step="10">
+
+            <div class="roadmap-content">
+
+                <h4>Interview Mastery</h4>
+
+                <p>
+                    Recognize patterns and solve graph problems confidently.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="mastery-card">
+
+        <h3>🎯 Lesson 13 Completion Goal</h3>
+
+        <p>
+            You should be able to look at a graph problem and answer:
+        </p>
+
+        <div class="example-strip">
+
+            <span class="info-tag blue">
+                What representation?
+            </span>
+
+            <span class="info-tag green">
+                BFS or DFS?
+            </span>
+
+            <span class="info-tag purple">
+                Weighted or unweighted?
+            </span>
+
+            <span class="info-tag orange">
+                Cycle?
+            </span>
+
+            <span class="info-tag red">
+                Shortest path?
+            </span>
+
+            <span class="info-tag green">
+                MST?
+            </span>
+
+            <span class="info-tag blue">
+                DSU?
+            </span>
+
+        </div>
+
+        <div class="mastery-progress">
+
+            <div style="width: 90%;"></div>
+
+        </div>
+
+        <small>
+            Graph foundation → interview readiness
+        </small>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     FINAL TAKEAWAY
+     ========================================================= -->
+
+<section class="section">
+
+    <div class="card">
+
+        <div class="section-heading">
+
+            <span class="section-number">✓</span>
+
+            <div>
+                <span class="eyebrow">REMEMBER THIS</span>
+                <h2>The Graph Mental Model</h2>
+            </div>
+
+        </div>
+
+
+        <div class="grid-3">
+
+            <div class="callout success">
+
+                <strong>BFS</strong>
+
+                <br><br>
+
+                Queue
+
+                <br>
+
+                FIFO
+
+                <br>
+
+                Level by level
+
+            </div>
+
+
+            <div class="callout">
+
+                <strong>DFS</strong>
+
+                <br><br>
+
+                Stack / Recursion
+
+                <br>
+
+                LIFO
+
+                <br>
+
+                Go deep → backtrack
+
+            </div>
+
+
+            <div class="callout warning">
+
+                <strong>Weighted Paths</strong>
+
+                <br><br>
+
+                BFS → Unweighted
+
+                <br>
+
+                Dijkstra → Non-negative
+
+                <br>
+
+                Bellman-Ford → Negative edges
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+</main>
+
+</div>
+
+
+<!-- =========================================================
+     FOOTER
+     ========================================================= -->
+
+<footer>
+
+    <div class="brand">
+
+        <div class="brand-logo">
+            Z
+        </div>
+
+        <div>
+            <strong>ZENSUS</strong>
+            <span>Learn • Build • Master</span>
+        </div>
+
+    </div>
+
+    <p>
+        Lesson 13 — Graphs & Graph Algorithms
+    </p>
+
+    <p>
+        Build your logic. Master your algorithms. 🚀
+    </p>
+
+</footer>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+     ========================================================= -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    /* =====================================================
+       SIDEBAR ACTIVE LINK
+       ===================================================== */
+
+    const sections = document.querySelectorAll(
+        ".section[id], .hero"
+    );
+
+    const sidebarLinks = document.querySelectorAll(
+        ".sidebar a"
+    );
+
+    const observer = new IntersectionObserver(
+        entries => {
+
+            entries.forEach(entry => {
+
+                if (entry.isIntersecting) {
+
+                    sidebarLinks.forEach(link => {
+                        link.classList.remove("active");
+                    });
+
+                    const link = document.querySelector(
+                        `.sidebar a[href="#${entry.target.id}"]`
+                    );
+
+                    if (link) {
+                        link.classList.add("active");
+                    }
+
+                }
+
+            });
+
+        },
+        {
+            rootMargin: "-25% 0px -65% 0px"
+        }
+    );
+
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+
+
+    /* =====================================================
+       SCROLL REVEAL
+       ===================================================== */
+
+    const revealItems = document.querySelectorAll(
+        ".card, .problem, .term-card, .pattern-card-pro"
+    );
+
+    const revealObserver = new IntersectionObserver(
+        entries => {
+
+            entries.forEach(entry => {
+
+                if (entry.isIntersecting) {
+
+                    entry.target.classList.add(
+                        "reveal-visible"
+                    );
+
+                    revealObserver.unobserve(
+                        entry.target
+                    );
+
+                }
+
+            });
+
+        },
+        {
+            threshold: .08
+        }
+    );
+
+    revealItems.forEach(item => {
+        item.classList.add("reveal");
+        revealObserver.observe(item);
+    });
+
+
+    /* =====================================================
+       GRAPH VISUALIZER
+       ===================================================== */
+
+    const graph = {
+
+        A: ["B", "C"],
+        B: ["A", "D"],
+        C: ["A", "E"],
+        D: ["B", "F"],
+        E: ["C", "F"],
+        F: ["D", "E"]
+
+    };
+
+
+    const nodeMap = {
+        A: "nodeA",
+        B: "nodeB",
+        C: "nodeC",
+        D: "nodeD",
+        E: "nodeE",
+        F: "nodeF"
+    };
+
+
+    const edgeMap = {
+
+        "A-B": "edgeAB",
+        "B-A": "edgeAB",
+
+        "A-C": "edgeAC",
+        "C-A": "edgeAC",
+
+        "B-D": "edgeBD",
+        "D-B": "edgeBD",
+
+        "C-E": "edgeCE",
+        "E-C": "edgeCE",
+
+        "D-F": "edgeDF",
+        "F-D": "edgeDF",
+
+        "E-F": "edgeEF",
+        "F-E": "edgeEF"
+
+    };
+
+
+    const bfsBtn =
+        document.getElementById("bfsBtn");
+
+    const dfsBtn =
+        document.getElementById("dfsBtn");
+
+    const resetBtn =
+        document.getElementById("resetBtn");
+
+    const currentVertex =
+        document.getElementById("currentVertex");
+
+    const dsTitle =
+        document.getElementById("dsTitle");
+
+    const dsVisual =
+        document.getElementById("dsVisual");
+
+    const traversalOrder =
+        document.getElementById("traversalOrder");
+
+    const traversalStatus =
+        document.getElementById("traversalStatus");
+
+
+    let running = false;
+
+
+    function sleep(ms) {
+        return new Promise(
+            resolve => setTimeout(resolve, ms)
+        );
+    }
+
+
+    function resetGraph() {
+
+        running = false;
+
+        document
+            .querySelectorAll(".traversal-node")
+            .forEach(node => {
+
+                node.classList.remove(
+                    "visited",
+                    "current"
+                );
+
+            });
+
+
+        document
+            .querySelectorAll(".traversal-edge")
+            .forEach(edge => {
+
+                edge.classList.remove(
+                    "active"
+                );
+
+            });
+
+
+        currentVertex.textContent = "—";
+
+        dsTitle.textContent =
+            "Waiting...";
+
+        dsVisual.innerHTML =
+            '<span class="queue-empty">Empty</span>';
+
+        traversalOrder.innerHTML =
+            "<span>—</span>";
+
+        traversalStatus.textContent =
+            "Choose BFS or DFS to begin.";
+
+    }
+
+
+    function highlightNode(node, type) {
+
+        const element =
+            document.getElementById(
+                nodeMap[node]
+            );
+
+        if (!element) return;
+
+        element.classList.add(type);
+
+    }
+
+
+    function highlightEdge(a, b) {
+
+        const id =
+            edgeMap[`${a}-${b}`];
+
+        if (!id) return;
+
+        const edge =
+            document.getElementById(id);
+
+        if (edge) {
+            edge.classList.add("active");
+        }
+
+    }
+
+
+    function renderStructure(items, type) {
+
+        if (!items.length) {
+
+            dsVisual.innerHTML =
+                '<span class="queue-empty">Empty</span>';
+
+            return;
+
+        }
+
+
+        dsVisual.innerHTML = "";
+
+
+        if (type === "queue") {
+
+            items.forEach(
+                (item, index) => {
+
+                    const span =
+                        document.createElement("span");
+
+                    span.className =
+                        "queue-item";
+
+                    if (index === 0) {
+                        span.classList.add("front");
+                    }
+
+                    span.textContent = item;
+
+                    dsVisual.appendChild(span);
+
+                }
+            );
+
+        } else {
+
+            items.forEach(
+                (item, index) => {
+
+                    const span =
+                        document.createElement("span");
+
+                    span.className =
+                        "stack-item";
+
+                    if (index === items.length - 1) {
+                        span.classList.add("top");
+                    }
+
+                    span.textContent = item;
+
+                    dsVisual.appendChild(span);
+
+                }
+            );
+
+        }
+
+    }
+
+
+    function renderOrder(order) {
+
+        traversalOrder.innerHTML = "";
+
+        order.forEach(
+            node => {
+
+                const span =
+                    document.createElement("span");
+
+                span.textContent = node;
+
+                traversalOrder.appendChild(span);
+
+            }
+        );
+
+    }
+
+
+    async function runBFS() {
+
+        if (running) return;
+
+        running = true;
+
+        resetGraph();
+
+        running = true;
+
+        dsTitle.textContent =
+            "Queue — FIFO";
+
+
+        const visited = new Set();
+
+        const queue = ["A"];
+
+        const order = [];
+
+
+        visited.add("A");
+
+
+        renderStructure(
+            queue,
+            "queue"
+        );
+
+
+        traversalStatus.textContent =
+            "BFS started from A.";
+
+
+        while (
+            queue.length &&
+            running
+        ) {
+
+            const node =
+                queue.shift();
+
+
+            currentVertex.textContent =
+                node;
+
+
+            highlightNode(
+                node,
+                "current"
+            );
+
+
+            if (order.length) {
+
+                const previous =
+                    order[order.length - 1];
+
+                highlightEdge(
+                    previous,
+                    node
+                );
+
+            }
+
+
+            order.push(node);
+
+            renderOrder(order);
+
+
+            renderStructure(
+                queue,
+                "queue"
+            );
+
+
+            await sleep(700);
+
+
+            const element =
+                document.getElementById(
+                    nodeMap[node]
+                );
+
+            if (element) {
+
+                element.classList.remove(
+                    "current"
+                );
+
+                element.classList.add(
+                    "visited"
+                );
+
+            }
+
+
+            for (
+                const neighbour of graph[node]
+            ) {
+
+                if (
+                    !visited.has(neighbour)
+                ) {
+
+                    visited.add(neighbour);
+
+                    queue.push(
+                        neighbour
+                    );
+
+                    renderStructure(
+                        queue,
+                        "queue"
+                    );
+
+                    await sleep(250);
+
+                }
+
+            }
+
+        }
+
+
+        if (running) {
+
+            traversalStatus.textContent =
+                "✓ BFS completed.";
+
+        }
+
+
+        running = false;
+
+    }
+
+
+    async function runDFS() {
+
+        if (running) return;
+
+        running = true;
+
+        resetGraph();
+
+        running = true;
+
+        dsTitle.textContent =
+            "Stack — LIFO";
+
+
+        const visited = new Set();
+
+        const stack = ["A"];
+
+        const order = [];
+
+
+        while (
+            stack.length &&
+            running
+        ) {
+
+            const node =
+                stack.pop();
+
+
+            if (
+                visited.has(node)
+            ) {
+                continue;
+            }
+
+
+            visited.add(node);
+
+
+            currentVertex.textContent =
+                node;
+
+
+            highlightNode(
+                node,
+                "current"
+            );
+
+
+            if (order.length) {
+
+                const previous =
+                    order[order.length - 1];
+
+                highlightEdge(
+                    previous,
+                    node
+                );
+
+            }
+
+
+            order.push(node);
+
+            renderOrder(order);
+
+
+            renderStructure(
+                stack,
+                "stack"
+            );
+
+
+            await sleep(700);
+
+
+            const element =
+                document.getElementById(
+                    nodeMap[node]
+                );
+
+            if (element) {
+
+                element.classList.remove(
+                    "current"
+                );
+
+                element.classList.add(
+                    "visited"
+                );
+
+            }
+
+
+            const neighbours =
+                [...graph[node]].reverse();
+
+
+            neighbours.forEach(
+                neighbour => {
+
+                    if (
+                        !visited.has(neighbour)
+                    ) {
+
+                        stack.push(
+                            neighbour
+                        );
+
+                    }
+
+                }
+            );
+
+
+            renderStructure(
+                stack,
+                "stack"
+            );
+
+            await sleep(300);
+
+        }
+
+
+        if (running) {
+
+            traversalStatus.textContent =
+                "✓ DFS completed.";
+
+        }
+
+
+        running = false;
+
+    }
+
+
+    bfsBtn.addEventListener(
+        "click",
+        runBFS
+    );
+
+
+    dfsBtn.addEventListener(
+        "click",
+        runDFS
+    );
+
+
+    resetBtn.addEventListener(
+        "click",
+        resetGraph
+    );
+
+
+    /* =====================================================
+       QUIZ
+       ===================================================== */
+
+    const quizOptions =
+        document.querySelectorAll(
+            ".quiz-option"
+        );
+
+
+    let quizAnswers = 0;
+
+
+    quizOptions.forEach(
+        option => {
+
+            option.addEventListener(
+                "click",
+                () => {
+
+                    const parent =
+                        option.closest(
+                            ".quiz-options"
+                        );
+
+
+                    parent
+                        .querySelectorAll(
+                            ".quiz-option"
+                        )
+                        .forEach(
+                            btn => {
+                                btn.classList.remove(
+                                    "correct",
+                                    "wrong"
+                                );
+                            }
+                        );
+
+
+                    if (
+                        option.dataset.correct ===
+                        "true"
+                    ) {
+
+                        option.classList.add(
+                            "correct"
+                        );
+
+                    } else {
+
+                        option.classList.add(
+                            "wrong"
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+
+    const quizSubmit =
+        document.getElementById(
+            "quizSubmit"
+        );
+
+    const quizScore =
+        document.getElementById(
+            "quizScore"
+        );
+
+
+    quizSubmit.addEventListener(
+        "click",
+        () => {
+
+            const questions =
+                document.querySelectorAll(
+                    ".quiz-question"
+                );
+
+
+            let score = 0;
+
+
+            questions.forEach(
+                question => {
+
+                    const selected =
+                        question.querySelector(
+                            ".quiz-option.correct"
+                        );
+
+                    if (selected) {
+                        score++;
+                    }
+
+                }
+            );
+
+
+            const percentage =
+                Math.round(
+                    (score / questions.length) *
+                    100
+                );
+
+
+            let message;
+
+
+            if (percentage === 100) {
+
+                message =
+                    "🏆 Outstanding! Graph mastery achieved.";
+
+            } else if (percentage >= 80) {
+
+                message =
+                    "🔥 Excellent! You have a strong graph foundation.";
+
+            } else if (percentage >= 60) {
+
+                message =
+                    "👍 Good job! Review the weak areas once more.";
+
+            } else {
+
+                message =
+                    "📚 Keep practicing. Revisit BFS, DFS and graph fundamentals.";
+
+            }
+
+
+            quizScore.textContent =
+                `Score: ${score}/${questions.length} (${percentage}%) — ${message}`;
+
+
+            quizScore.classList.add(
+                "show"
+            );
+
+        }
+    );
+
+
+    /* =====================================================
+       SMOOTH SCROLL
+       ===================================================== */
+
+    document
+        .querySelectorAll(
+            'a[href^="#"]'
+        )
+        .forEach(
+            link => {
+
+                link.addEventListener(
+                    "click",
+                    event => {
+
+                        const target =
+                            document.querySelector(
+                                link.getAttribute(
+                                    "href"
+                                )
+                            );
+
+                        if (!target) return;
+
+                        event.preventDefault();
+
+                        target.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start"
+                        });
+
+                    }
+                );
+
+            }
+        );
+
+
+    /* =====================================================
+       INITIAL STATE
+       ===================================================== */
+
+    resetGraph();
+
+});
+
+</script>
+
+</body>
+</html>

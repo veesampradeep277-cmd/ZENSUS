@@ -1,0 +1,4007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ZENSUS | SQL Lesson 7 - ORDER BY</title>
+
+    <style>
+        /* =========================================================
+           ZENSUS SQL LESSON 7
+           ORDER BY
+           Standalone HTML + CSS + JavaScript
+        ========================================================= */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --secondary: #7c3aed;
+            --success: #16a34a;
+            --warning: #d97706;
+            --danger: #dc2626;
+
+            --bg: #f6f7fb;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+
+            --text: #111827;
+            --text-soft: #475569;
+            --muted: #64748b;
+
+            --border: #e2e8f0;
+            --code-bg: #0b1220;
+            --code-text: #e2e8f0;
+
+            --sidebar: 270px;
+            --radius: 16px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                         Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* =========================================================
+           TOP PROGRESS
+        ========================================================= */
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            z-index: 9999;
+        }
+
+        /* =========================================================
+           SIDEBAR
+        ========================================================= */
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar);
+            height: 100vh;
+            background: #ffffff;
+            border-right: 1px solid var(--border);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .brand {
+            padding: 24px 22px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 23px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-mark {
+            width: 38px;
+            height: 38px;
+            border-radius: 11px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+        }
+
+        .brand small {
+            display: block;
+            margin-top: 5px;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .lesson-label {
+            padding: 18px 22px 8px;
+            font-size: 11px;
+            font-weight: 800;
+            color: #94a3b8;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+        }
+
+        .nav {
+            padding: 6px 12px 20px;
+        }
+
+        .nav a {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            text-decoration: none;
+            color: var(--text-soft);
+            padding: 10px 12px;
+            margin-bottom: 3px;
+            border-radius: 10px;
+            font-size: 13px;
+            transition: 0.2s ease;
+        }
+
+        .nav a:hover {
+            background: #f1f5f9;
+            color: var(--primary);
+        }
+
+        .nav a.active {
+            background: #eef2ff;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .nav-number {
+            width: 25px;
+            height: 25px;
+            border-radius: 7px;
+            background: #f1f5f9;
+            display: grid;
+            place-items: center;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .nav a.active .nav-number {
+            background: var(--primary);
+            color: white;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 15px 18px;
+            border-top: 1px solid var(--border);
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        /* =========================================================
+           MOBILE HEADER
+        ========================================================= */
+
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 62px;
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1001;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+        }
+
+        .mobile-brand {
+            font-weight: 800;
+            font-size: 18px;
+        }
+
+        .menu-btn {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        /* =========================================================
+           MAIN
+        ========================================================= */
+
+        .main {
+            margin-left: var(--sidebar);
+            min-height: 100vh;
+        }
+
+        .container {
+            width: min(1180px, calc(100% - 40px));
+            margin: auto;
+        }
+
+        section {
+            padding: 72px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        section:last-child {
+            border-bottom: none;
+        }
+
+        /* =========================================================
+           HERO
+        ========================================================= */
+
+        .hero {
+            padding: 90px 0 70px;
+            background:
+                radial-gradient(circle at 85% 10%, rgba(99,102,241,0.10), transparent 28%),
+                radial-gradient(circle at 10% 30%, rgba(124,58,237,0.07), transparent 25%);
+        }
+
+        .breadcrumb {
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 18px;
+        }
+
+        .breadcrumb span {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.25fr 0.75fr;
+            gap: 45px;
+            align-items: center;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: #eef2ff;
+            color: var(--primary);
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 17px;
+        }
+
+        h1 {
+            font-size: clamp(38px, 6vw, 68px);
+            line-height: 1.03;
+            letter-spacing: -2.5px;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 span {
+            color: var(--primary);
+        }
+
+        .hero-description {
+            font-size: 18px;
+            color: var(--text-soft);
+            max-width: 700px;
+            margin-bottom: 26px;
+        }
+
+        .hero-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .hero-tag {
+            padding: 7px 11px;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--text-soft);
+        }
+
+        .hero-code {
+            background: var(--code-bg);
+            border-radius: 18px;
+            padding: 25px;
+            box-shadow: 0 22px 55px rgba(15,23,42,0.15);
+            transform: perspective(900px) rotateY(-4deg);
+            animation: floatCode 4s ease-in-out infinite;
+        }
+
+        @keyframes floatCode {
+            0%,100% { transform: perspective(900px) rotateY(-4deg) translateY(0); }
+            50% { transform: perspective(900px) rotateY(-4deg) translateY(-7px); }
+        }
+
+        .terminal-top {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+
+        .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #64748b;
+        }
+
+        .hero-code pre {
+            color: var(--code-text);
+            white-space: pre-wrap;
+            font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .sql-keyword {
+            color: #a78bfa;
+            font-weight: 700;
+        }
+
+        .sql-string {
+            color: #86efac;
+        }
+
+        .sql-comment {
+            color: #94a3b8;
+        }
+
+        /* =========================================================
+           HEADINGS
+        ========================================================= */
+
+        .section-title {
+            max-width: 780px;
+            margin-bottom: 35px;
+        }
+
+        .eyebrow {
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 12px;
+            letter-spacing: 1.1px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        h2 {
+            font-size: clamp(28px, 4vw, 43px);
+            line-height: 1.15;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+        }
+
+        h3 {
+            font-size: 21px;
+            line-height: 1.3;
+            margin-bottom: 10px;
+        }
+
+        h4 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .section-title p,
+        .card p {
+            color: var(--text-soft);
+        }
+
+        /* =========================================================
+           OBJECTIVES
+        ========================================================= */
+
+        .objectives {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .objective {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 23px;
+            border-radius: var(--radius);
+            transition: 0.25s ease;
+        }
+
+        .objective:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(15,23,42,0.08);
+        }
+
+        .objective-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 11px;
+            background: #eef2ff;
+            display: grid;
+            place-items: center;
+            color: var(--primary);
+            font-weight: 900;
+            margin-bottom: 14px;
+        }
+
+        /* =========================================================
+           CARDS
+        ========================================================= */
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 25px;
+        }
+
+        .card ul,
+        .card ol {
+            padding-left: 20px;
+            color: var(--text-soft);
+        }
+
+        .card li {
+            margin: 7px 0;
+        }
+
+        /* =========================================================
+           CODE BOX
+        ========================================================= */
+
+        .code-box {
+            background: var(--code-bg);
+            color: var(--code-text);
+            border-radius: 14px;
+            overflow: hidden;
+            margin: 18px 0;
+            border: 1px solid #1e293b;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: #111827;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .code-header span {
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 700;
+        }
+
+        .copy-btn {
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 6px;
+            padding: 5px 9px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+
+        .copy-btn:hover {
+            background: #334155;
+        }
+
+        .code-box pre {
+            padding: 19px;
+            overflow-x: auto;
+            color: var(--code-text);
+            font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.75;
+        }
+
+        /* =========================================================
+           INFO BOXES
+        ========================================================= */
+
+        .info {
+            border-left: 4px solid var(--primary);
+            background: #eef2ff;
+            padding: 17px 19px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .success {
+            border-left-color: var(--success);
+            background: #f0fdf4;
+        }
+
+        .warning {
+            border-left-color: var(--warning);
+            background: #fffbeb;
+        }
+
+        .danger {
+            border-left-color: var(--danger);
+            background: #fef2f2;
+        }
+
+        .info strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* =========================================================
+           TABLE
+        ========================================================= */
+
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            background: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 650px;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #334155;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        th,
+        td {
+            padding: 13px 15px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+        }
+
+        td {
+            color: var(--text-soft);
+            font-size: 13px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* =========================================================
+           FLOWCHART
+        ========================================================= */
+
+        .flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 35px 0;
+        }
+
+        .flow-box {
+            background: white;
+            border: 2px solid #c7d2fe;
+            border-radius: 13px;
+            padding: 15px 20px;
+            text-align: center;
+            min-width: 145px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            animation: flowPulse 2.8s ease-in-out infinite;
+        }
+
+        .flow-box:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .flow-box:nth-child(5) {
+            animation-delay: 0.8s;
+        }
+
+        .flow-box:nth-child(7) {
+            animation-delay: 1.2s;
+        }
+
+        @keyframes flowPulse {
+            0%,100% {
+                transform: scale(1);
+                box-shadow: none;
+            }
+            50% {
+                transform: scale(1.035);
+                box-shadow: 0 10px 25px rgba(79,70,229,0.10);
+            }
+        }
+
+        .arrow {
+            color: var(--primary);
+            font-size: 23px;
+            font-weight: 900;
+        }
+
+        /* =========================================================
+           ORDER VISUALIZER
+        ========================================================= */
+
+        .sort-demo {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 17px;
+            padding: 25px;
+        }
+
+        .sort-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .sort-controls button {
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--text);
+            padding: 9px 13px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .sort-controls button:hover,
+        .sort-controls button.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .student-row {
+            display: grid;
+            grid-template-columns: 60px 1fr 100px 100px;
+            gap: 10px;
+            align-items: center;
+            padding: 13px 15px;
+            border: 1px solid var(--border);
+            margin-bottom: 7px;
+            border-radius: 9px;
+            background: #f8fafc;
+            animation: rowIn 0.4s ease;
+        }
+
+        @keyframes rowIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .student-row strong {
+            font-size: 13px;
+        }
+
+        .student-row span {
+            font-size: 12px;
+            color: var(--text-soft);
+        }
+
+        /* =========================================================
+           COMPARISON
+        ========================================================= */
+
+        .comparison {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .compare-card {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .compare-head {
+            padding: 13px 16px;
+            font-weight: 800;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .compare-body {
+            padding: 18px;
+        }
+
+        /* =========================================================
+           QUIZ
+        ========================================================= */
+
+        .quiz {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 17px;
+            padding: 25px;
+            margin-bottom: 18px;
+        }
+
+        .question {
+            margin-bottom: 22px;
+        }
+
+        .question-title {
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .option {
+            display: block;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 10px 13px;
+            margin: 7px 0;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .option:hover {
+            border-color: #a5b4fc;
+            background: #f8fafc;
+        }
+
+        .option input {
+            margin-right: 8px;
+        }
+
+        .quiz-btn,
+        .primary-btn {
+            border: none;
+            background: var(--primary);
+            color: white;
+            padding: 11px 17px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-weight: 800;
+        }
+
+        .quiz-btn:hover,
+        .primary-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .quiz-result {
+            margin-top: 15px;
+            padding: 13px;
+            border-radius: 9px;
+            display: none;
+            font-weight: 700;
+        }
+
+        /* =========================================================
+           CHECKLIST
+        ========================================================= */
+
+        .checklist {
+            display: grid;
+            gap: 9px;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            cursor: pointer;
+        }
+
+        .check-item input {
+            accent-color: var(--primary);
+        }
+
+        /* =========================================================
+           INTERVIEW
+        ========================================================= */
+
+        .interview {
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 13px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .interview button {
+            width: 100%;
+            text-align: left;
+            padding: 15px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        .answer {
+            display: none;
+            padding: 0 15px 16px;
+            color: var(--text-soft);
+            font-size: 13px;
+        }
+
+        /* =========================================================
+           FOOTER
+        ========================================================= */
+
+        .lesson-footer {
+            text-align: center;
+            padding: 65px 20px;
+            background: #0f172a;
+            color: white;
+        }
+
+        .lesson-footer h2 {
+            margin-bottom: 12px;
+        }
+
+        .lesson-footer p {
+            color: #94a3b8;
+            max-width: 650px;
+            margin: auto;
+        }
+
+        /* =========================================================
+           REVEAL - SAFE DEFAULT
+        ========================================================= */
+
+        .reveal {
+            opacity: 1;
+            transform: none;
+        }
+
+        .reveal.animate {
+            animation: revealUp 0.7s ease both;
+        }
+
+        @keyframes revealUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* =========================================================
+           RESPONSIVE
+        ========================================================= */
+
+        @media (max-width: 1000px) {
+
+            :root {
+                --sidebar: 235px;
+            }
+
+            .hero-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-code {
+                transform: none;
+            }
+
+            .objectives,
+            .grid-3 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 760px) {
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: 0.25s ease;
+                box-shadow: 10px 0 30px rgba(0,0,0,0.08);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main {
+                margin-left: 0;
+                padding-top: 62px;
+            }
+
+            .container {
+                width: min(100% - 28px, 1180px);
+            }
+
+            section {
+                padding: 55px 0;
+            }
+
+            .hero {
+                padding: 55px 0;
+            }
+
+            .grid-2,
+            .comparison,
+            .objectives,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 43px;
+            }
+
+            .student-row {
+                grid-template-columns: 45px 1fr 80px 80px;
+            }
+        }
+
+        @media (max-width: 480px) {
+
+            h1 {
+                font-size: 37px;
+            }
+
+            h2 {
+                font-size: 29px;
+            }
+
+            .hero-description {
+                font-size: 16px;
+            }
+
+            .hero-code {
+                padding: 17px;
+            }
+
+            .hero-code pre {
+                font-size: 11px;
+            }
+
+            .student-row {
+                grid-template-columns: 40px 1fr;
+            }
+
+            .student-row span:nth-last-child(-n+2) {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- =========================================================
+     MOBILE HEADER
+========================================================= -->
+
+<header class="mobile-header">
+    <div class="mobile-brand">ZENSUS SQL</div>
+    <button class="menu-btn" id="menuBtn">☰</button>
+</header>
+
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+        <div class="brand-logo">
+            <div class="brand-mark">Z</div>
+            ZENSUS
+        </div>
+        <small>SQL Learning Path</small>
+    </div>
+
+    <div class="lesson-label">SQL Lessons</div>
+
+    <nav class="nav">
+
+        <a href="#top">
+            <div class="nav-number">01</div>
+            Introduction
+        </a>
+
+        <a href="#database">
+            <div class="nav-number">02</div>
+            Database Fundamentals
+        </a>
+
+        <a href="#create">
+            <div class="nav-number">03</div>
+            CREATE
+        </a>
+
+        <a href="#insert">
+            <div class="nav-number">04</div>
+            INSERT
+        </a>
+
+        <a href="#select">
+            <div class="nav-number">05</div>
+            SELECT
+        </a>
+
+        <a href="#where">
+            <div class="nav-number">06</div>
+            WHERE
+        </a>
+
+        <a href="#orderby" class="active">
+            <div class="nav-number">07</div>
+            ORDER BY
+        </a>
+
+        <a href="#practice">
+            <div class="nav-number">08</div>
+            Practice
+        </a>
+
+        <a href="#quiz">
+            <div class="nav-number">09</div>
+            Quiz
+        </a>
+
+        <a href="#interview">
+            <div class="nav-number">10</div>
+            Interview
+        </a>
+
+        <a href="#checklist">
+            <div class="nav-number">11</div>
+            Checklist
+        </a>
+
+    </nav>
+
+    <div class="sidebar-footer">
+        ZENSUS • Learn. Build. Become Industry Ready.
+    </div>
+
+</aside>
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<main class="main" id="top">
+
+    <!-- =====================================================
+         HERO
+    ====================================================== -->
+
+    <section class="hero" id="orderby">
+
+        <div class="container">
+
+            <div class="breadcrumb">
+                SQL Learning Path / <span>Lesson 07</span>
+            </div>
+
+            <div class="hero-grid">
+
+                <div>
+
+                    <div class="badge">
+                        SQL • Lesson 07
+                    </div>
+
+                    <h1>
+                        Master <span>ORDER BY</span>
+                    </h1>
+
+                    <p class="hero-description">
+                        Learn how to sort SQL query results with precision —
+                        ascending, descending, multiple columns, expressions,
+                        NULL values, aliases, and real-world ranking patterns.
+                    </p>
+
+                    <div class="hero-tags">
+                        <div class="hero-tag">ASC</div>
+                        <div class="hero-tag">DESC</div>
+                        <div class="hero-tag">Multiple Columns</div>
+                        <div class="hero-tag">Aliases</div>
+                        <div class="hero-tag">NULL Handling</div>
+                        <div class="hero-tag">Top Results</div>
+                    </div>
+
+                </div>
+
+                <div class="hero-code">
+
+                    <div class="terminal-top">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+
+<pre><span class="sql-keyword">SELECT</span>
+    name,
+    marks
+<span class="sql-keyword">FROM</span> students
+<span class="sql-keyword">ORDER BY</span> marks <span class="sql-keyword">DESC</span>;
+
+<span class="sql-comment">-- Highest marks first</span></pre>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         OBJECTIVES
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title reveal">
+
+                <div class="eyebrow">Learning Objectives</div>
+
+                <h2>What you will master</h2>
+
+                <p>
+                    By the end of this lesson, you should be able to control
+                    exactly how SQL result sets are displayed.
+                </p>
+
+            </div>
+
+            <div class="objectives">
+
+                <div class="objective reveal">
+                    <div class="objective-icon">↕</div>
+                    <h3>Sort Results</h3>
+                    <p>
+                        Arrange rows from smallest to largest or largest to
+                        smallest.
+                    </p>
+                </div>
+
+                <div class="objective reveal">
+                    <div class="objective-icon">A↓</div>
+                    <h3>ASC & DESC</h3>
+                    <p>
+                        Understand ascending and descending order.
+                    </p>
+                </div>
+
+                <div class="objective reveal">
+                    <div class="objective-icon">≡</div>
+                    <h3>Multiple Columns</h3>
+                    <p>
+                        Apply primary and secondary sorting rules.
+                    </p>
+                </div>
+
+                <div class="objective reveal">
+                    <div class="objective-icon">#</div>
+                    <h3>Aliases</h3>
+                    <p>
+                        Sort using calculated columns and aliases where
+                        supported.
+                    </p>
+                </div>
+
+                <div class="objective reveal">
+                    <div class="objective-icon">∅</div>
+                    <h3>NULL Values</h3>
+                    <p>
+                        Understand that NULL ordering can vary between SQL
+                        database systems.
+                    </p>
+                </div>
+
+                <div class="objective reveal">
+                    <div class="objective-icon">★</div>
+                    <h3>Real Queries</h3>
+                    <p>
+                        Write interview-ready sorting queries.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         WHAT IS ORDER BY
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">01 • Core Concept</div>
+
+                <h2>What is ORDER BY?</h2>
+
+                <p>
+                    <strong>ORDER BY</strong> is an SQL clause used to sort the
+                    rows returned by a query according to one or more columns
+                    or expressions.
+                </p>
+
+            </div>
+
+            <div class="grid-2">
+
+                <div class="card">
+
+                    <h3>Without ORDER BY</h3>
+
+                    <p>
+                        A database does not guarantee that rows will be
+                        returned in the order you expect.
+                    </p>
+
+                    <div class="code-box">
+
+                        <div class="code-header">
+                            <span>SQL</span>
+                            <button class="copy-btn">Copy</button>
+                        </div>
+
+<pre>SELECT name, marks
+FROM students;</pre>
+
+                    </div>
+
+                    <div class="warning">
+                        <strong>Important</strong>
+                        Never rely on the physical or insertion order of rows.
+                        If you need a specific order, explicitly use ORDER BY.
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>With ORDER BY</h3>
+
+                    <p>
+                        SQL sorts the final result according to your specified
+                        sorting rule.
+                    </p>
+
+                    <div class="code-box">
+
+                        <div class="code-header">
+                            <span>SQL</span>
+                            <button class="copy-btn">Copy</button>
+                        </div>
+
+<pre>SELECT name, marks
+FROM students
+ORDER BY marks DESC;</pre>
+
+                    </div>
+
+                    <div class="success">
+                        <strong>Result</strong>
+                        Students with higher marks appear first.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         SYNTAX
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">02 • Syntax</div>
+
+                <h2>ORDER BY syntax</h2>
+
+                <p>
+                    The basic structure is simple, but it becomes powerful
+                    when multiple sorting rules are combined.
+                </p>
+
+            </div>
+
+            <div class="code-box">
+
+                <div class="code-header">
+                    <span>GENERAL SYNTAX</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre>SELECT column1, column2
+FROM table_name
+ORDER BY column_name ASC;</pre>
+
+            </div>
+
+            <div class="code-box">
+
+                <div class="code-header">
+                    <span>DESCENDING</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre>SELECT column1, column2
+FROM table_name
+ORDER BY column_name DESC;</pre>
+
+            </div>
+
+            <div class="info">
+                <strong>Remember</strong>
+                ASC means ascending order. DESC means descending order.
+                If neither is specified, ASC is normally the default direction
+                for ORDER BY.
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         FLOWCHART
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">03 • Query Flow</div>
+
+                <h2>How ORDER BY works</h2>
+
+                <p>
+                    Think of ORDER BY as the final organizer of your result
+                    set.
+                </p>
+
+            </div>
+
+            <div class="flow">
+
+                <div class="flow-box">
+                    SQL Query
+                </div>
+
+                <div class="arrow">→</div>
+
+                <div class="flow-box">
+                    FROM
+                </div>
+
+                <div class="arrow">→</div>
+
+                <div class="flow-box">
+                    WHERE
+                </div>
+
+                <div class="arrow">→</div>
+
+                <div class="flow-box">
+                    ORDER BY
+                </div>
+
+                <div class="arrow">→</div>
+
+                <div class="flow-box">
+                    Sorted Result
+                </div>
+
+            </div>
+
+            <div class="info">
+                <strong>Conceptual idea</strong>
+                Filtering decides <strong>which rows</strong> you want.
+                ORDER BY decides <strong>how those rows should be arranged</strong>.
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         SAMPLE DATA
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">04 • Dataset</div>
+
+                <h2>Our students table</h2>
+
+                <p>
+                    We will use this dataset throughout the lesson.
+                </p>
+
+            </div>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Department</th>
+                            <th>Marks</th>
+                            <th>Age</th>
+                            <th>City</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>1</td>
+                            <td>Arjun</td>
+                            <td>CSE</td>
+                            <td>91</td>
+                            <td>20</td>
+                            <td>Guntur</td>
+                        </tr>
+
+                        <tr>
+                            <td>2</td>
+                            <td>Priya</td>
+                            <td>ECE</td>
+                            <td>84</td>
+                            <td>21</td>
+                            <td>Vijayawada</td>
+                        </tr>
+
+                        <tr>
+                            <td>3</td>
+                            <td>Rahul</td>
+                            <td>CSE</td>
+                            <td>76</td>
+                            <td>20</td>
+                            <td>Hyderabad</td>
+                        </tr>
+
+                        <tr>
+                            <td>4</td>
+                            <td>Ananya</td>
+                            <td>IT</td>
+                            <td>95</td>
+                            <td>19</td>
+                            <td>Chennai</td>
+                        </tr>
+
+                        <tr>
+                            <td>5</td>
+                            <td>Kiran</td>
+                            <td>CSE</td>
+                            <td>88</td>
+                            <td>21</td>
+                            <td>Guntur</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ASC
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">05 • Ascending</div>
+
+                <h2>ASC — Ascending order</h2>
+
+                <p>
+                    ASC arranges values from lower to higher.
+                </p>
+
+            </div>
+
+            <div class="grid-2">
+
+                <div>
+
+                    <div class="code-box">
+
+                        <div class="code-header">
+                            <span>SQL</span>
+                            <button class="copy-btn">Copy</button>
+                        </div>
+
+<pre>SELECT name, marks
+FROM students
+ORDER BY marks ASC;</pre>
+
+                    </div>
+
+                    <p>
+                        Result conceptually becomes:
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Sorted marks</h3>
+
+                    <ol>
+                        <li>Rahul — 76</li>
+                        <li>Priya — 84</li>
+                        <li>Kiran — 88</li>
+                        <li>Arjun — 91</li>
+                        <li>Ananya — 95</li>
+                    </ol>
+
+                </div>
+
+            </div>
+
+            <div class="info success">
+
+                <strong>Memory trick</strong>
+
+                ASC = Ascending = A → Z = Small → Large
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         DESC
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">06 • Descending</div>
+
+                <h2>DESC — Descending order</h2>
+
+                <p>
+                    DESC reverses the direction and places larger values first.
+                </p>
+
+            </div>
+
+            <div class="code-box">
+
+                <div class="code-header">
+                    <span>SQL</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre>SELECT name, marks
+FROM students
+ORDER BY marks DESC;</pre>
+
+            </div>
+
+            <div class="card">
+
+                <h3>Result</h3>
+
+                <ol>
+                    <li>Ananya — 95</li>
+                    <li>Arjun — 91</li>
+                    <li>Kiran — 88</li>
+                    <li>Priya — 84</li>
+                    <li>Rahul — 76</li>
+                </ol>
+
+            </div>
+
+            <div class="info">
+
+                <strong>Memory trick</strong>
+
+                DESC = Descending = Z → A = Large → Small
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         MULTIPLE COLUMNS
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">07 • Multi-Level Sorting</div>
+
+                <h2>ORDER BY multiple columns</h2>
+
+                <p>
+                    Multiple columns allow you to create a primary,
+                    secondary, and even tertiary sorting rule.
+                </p>
+
+            </div>
+
+            <div class="code-box">
+
+                <div class="code-header">
+                    <span>SQL</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre>SELECT name, department, marks
+FROM students
+ORDER BY department ASC, marks DESC;</pre>
+
+            </div>
+
+            <div class="flow">
+
+                <div class="flow-box">
+                    Department
+                    <br>
+                    <small>Primary sort</small>
+                </div>
+
+                <div class="arrow">→</div>
+
+                <div class="flow-box">
+                    Marks
+                    <br>
+                    <small>Secondary sort</small>
+                </div>
+
+                <div class="arrow">→</div>
+
+                <div class="flow-box">
+                    Final Result
+                </div>
+
+            </div>
+
+            <div class="info">
+
+                <strong>How it works</strong>
+
+                SQL first sorts by <strong>department</strong>.
+                When two rows have the same department, it then sorts those
+                rows by <strong>marks DESC</strong>.
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         SAME VALUES
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">08 • Tie Breaking</div>
+
+                <h2>Why multiple columns matter</h2>
+
+                <p>
+                    Suppose several students have exactly the same marks.
+                    A second column can break the tie.
+                </p>
+
+            </div>
+
+            <div class="code-box">
+
+                <div class="code-header">
+                    <span>SQL</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre>SELECT name, marks
+FROM students
+ORDER BY marks DESC, name ASC;</pre>
+
+            </div>
+
+            <div class="card">
+
+                <h3>Interpretation</h3>
+
+                <ol>
+                    <li>Highest marks first.</li>
+                    <li>If marks are equal, names are sorted alphabetically.</li>
+                </ol>
+
+            </div>
+
+            <div class="warning">
+
+                <strong>Important</strong>
+
+                The second column does not rearrange every row independently.
+                It is used to break ties created by the previous sorting key.
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         STRING SORTING
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">09 • Text Sorting</div>
+
+                <h2>Sorting text values</h2>
+
+                <p>
+                    ORDER BY can sort character/string columns too.
+                </p>
+
+            </div>
+
+            <div class="grid-2">
+
+                <div class="card">
+
+                    <h3>A → Z</h3>
+
+                    <div class="code-box">
+
+                        <div class="code-header">
+                            <span>SQL</span>
+                            <button class="copy-btn">Copy</button>
+                        </div>
+
+<pre>SELECT name
+FROM students
+ORDER BY name ASC;</pre>
+
+                    </div>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Z → A</h3>
+
+                    <div class="code-box">
+
+                        <div class="code-header">
+                            <span>SQL</span>
+                            <button class="copy-btn">Copy</button>
+                        </div>
+
+<pre>SELECT name
+FROM students
+ORDER BY name DESC;</pre>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="info">
+
+                <strong>Database note</strong>
+
+                Exact text sorting behavior can depend on the database's
+                collation and locale settings, especially for uppercase,
+                lowercase, accents, and non-English characters.
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         DATE SORTING
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">10 • Date Sorting</div>
+
+                <h2>Sorting dates</h2>
+
+                <p>
+                    Dates can be sorted chronologically.
+                </p>
+
+            </div>
+
+            <div class="code-box">
+
+                <div class="code-header">
+                    <span>Oldest → Newest</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre>SELECT order_id, order_date
+FROM orders
+ORDER BY order_date ASC;</pre>
+
+            </div>
+
+            <div class="code-box">
+
+                <div class="code-header">
+                    <span>Newest → Oldest</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre>SELECT order_id, order_date
+FROM orders
+ORDER BY order_date DESC;</pre>
+
+            </div>
+
+            <div class="success info">
+
+                <strong>Real-world use</strong>
+
+                E-commerce websites frequently use this concept for:
+                newest orders, recent transactions, latest posts, and
+                historical reports.
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ALIASES
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">11 • Aliases & Expressions</div>
+
+                <h2>ORDER BY calculated values</h2>
+
+                <p>
+                    You can sort using expressions and, in many SQL systems,
+                    aliases defined in the SELECT list.
+                </p>
+
+            </div>
+
+            <div class="code-box">
+
+                <div class="code-header">
+                    <span>Calculated column</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre>SELECT name,
+       marks,
+       marks + 5 AS bonus_marks
+FROM students
+ORDER BY bonus_marks DESC;</pre>
+
+            </div>
+
+            <div class="info">
+
+                <strong>Why this is useful</strong>
+
+                You do not always sort by a stored column. You can sort by
+                a calculated value such as price × quantity, salary + bonus,
+                or a computed score.
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         COLUMN POSITION
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">12 • Advanced Syntax</div>
+
+                <h2>Ordering by column position</h2>
+
+                <p>
+                    Some SQL systems allow ORDER BY to reference the position
+                    of a selected expression.
+                </p>
+
+            </div>
+
+            <div class="code-box">
+
+                <div class="code-header">
+                    <span>Example</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre>SELECT name, marks
+FROM students
+ORDER BY 2 DESC;</pre>
+
+            </div>
+
+            <div class="warning">
+
+                <strong>Should you use this?</strong>
+
+                It can work, but explicit column names or expressions are
+                usually easier to understand and maintain.
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         NULL
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">13 • NULL Values</div>
+
+                <h2>How ORDER BY handles NULL</h2>
+
+                <p>
+                    NULL represents an unknown or missing value. Its position
+                    when sorting depends on the database system and query
+                    syntax.
+                </p>
+
+            </div>
+
+            <div class="code-box">
+
+                <div class="code-header">
+                    <span>Common SQL syntax</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre>SELECT name, marks
+FROM students
+ORDER BY marks DESC;</pre>
+
+            </div>
+
+            <div class="grid-2">
+
+                <div class="card">
+
+                    <h3>Explicit NULLS LAST</h3>
+
+                    <div class="code-box">
+
+                        <div class="code-header">
+                            <span>Supported by some systems</span>
+                            <button class="copy-btn">Copy</button>
+                        </div>
+
+<pre>ORDER BY marks DESC NULLS LAST;</pre>
+
+                    </div>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Important</h3>
+
+                    <p>
+                        Do not assume every database places NULL values in
+                        exactly the same position for ASC and DESC.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         WHERE + ORDER BY
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">14 • WHERE + ORDER BY</div>
+
+                <h2>Filter first, then sort</h2>
+
+                <p>
+                    WHERE and ORDER BY are often used together.
+                </p>
+
+            </div>
+
+            <div class="code-box">
+
+                <div class="code-header">
+                    <span>SQL</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre>SELECT name, department, marks
+FROM students
+WHERE department = 'CSE'
+ORDER BY marks DESC;</pre>
+
+            </div>
+
+            <div class="flow">
+
+                <div class="flow-box">
+                    All Students
+                </div>
+
+                <div class="arrow">→</div>
+
+                <div class="flow-box">
+                    WHERE CSE
+                </div>
+
+                <div class="arrow">→</div>
+
+                <div class="flow-box">
+                    ORDER BY Marks
+                </div>
+
+                <div class="arrow">→</div>
+
+                <div class="flow-box">
+                    CSE Ranking
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         LIMIT / TOP / FETCH
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">15 • Top Results</div>
+
+                <h2>ORDER BY + limiting results</h2>
+
+                <p>
+                    A common real-world pattern is sorting results and then
+                    returning only the top few rows.
+                </p>
+
+            </div>
+
+            <div class="grid-3">
+
+                <div class="card">
+
+                    <h3>MySQL / PostgreSQL / SQLite</h3>
+
+                    <div class="code-box">
+
+<pre>SELECT name, marks
+FROM students
+ORDER BY marks DESC
+LIMIT 3;</pre>
+
+                    </div>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>SQL Server</h3>
+
+                    <div class="code-box">
+
+<pre>SELECT TOP 3 name, marks
+FROM students
+ORDER BY marks DESC;</pre>
+
+                    </div>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Standard-style option</h3>
+
+                    <div class="code-box">
+
+<pre>SELECT name, marks
+FROM students
+ORDER BY marks DESC
+FETCH FIRST 3 ROWS ONLY;</pre>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="info warning">
+
+                <strong>Database dialects differ</strong>
+
+                LIMIT, TOP, and FETCH FIRST are not interchangeable syntax in
+                every database. Always check the SQL dialect you are using.
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         TOP 3 EXAMPLE
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">16 • Interview Pattern</div>
+
+                <h2>Find the top 3 students</h2>
+
+                <p>
+                    This is one of the most common ORDER BY patterns.
+                </p>
+
+            </div>
+
+            <div class="code-box">
+
+                <div class="code-header">
+                    <span>SQL</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre>SELECT name, marks
+FROM students
+ORDER BY marks DESC
+LIMIT 3;</pre>
+
+            </div>
+
+            <div class="card">
+
+                <h3>Concept</h3>
+
+                <p>
+                    First arrange marks from highest to lowest. Then take the
+                    first three rows.
+                </p>
+
+                <div class="flow">
+
+                    <div class="flow-box">
+                        Students
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        marks DESC
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        First 3
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         INTERACTIVE SORT
+    ====================================================== -->
+
+    <section id="practice">
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">17 • Interactive Lab</div>
+
+                <h2>ORDER BY visualizer</h2>
+
+                <p>
+                    Change the sorting rule and watch the result rearrange.
+                    This is a browser simulation, not a real database.
+                </p>
+
+            </div>
+
+            <div class="sort-demo">
+
+                <div class="sort-controls">
+
+                    <button onclick="sortStudents('marksAsc')" id="marksAsc">
+                        Marks ↑
+                    </button>
+
+                    <button onclick="sortStudents('marksDesc')" id="marksDesc">
+                        Marks ↓
+                    </button>
+
+                    <button onclick="sortStudents('nameAsc')" id="nameAsc">
+                        Name A-Z
+                    </button>
+
+                    <button onclick="sortStudents('nameDesc')" id="nameDesc">
+                        Name Z-A
+                    </button>
+
+                    <button onclick="sortStudents('ageAsc')" id="ageAsc">
+                        Age ↑
+                    </button>
+
+                    <button onclick="sortStudents('ageDesc')" id="ageDesc">
+                        Age ↓
+                    </button>
+
+                </div>
+
+                <div id="sortResult"></div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         QUERY EXECUTION ORDER
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">18 • Query Processing</div>
+
+                <h2>Where does ORDER BY fit?</h2>
+
+                <p>
+                    The order you write SQL clauses is not exactly the same
+                    as the conceptual logical processing order.
+                </p>
+
+            </div>
+
+            <div class="card">
+
+                <h3>Written query</h3>
+
+                <div class="code-box">
+
+<pre>SELECT name, marks
+FROM students
+WHERE marks >= 80
+ORDER BY marks DESC;</pre>
+
+                </div>
+
+                <h3>Conceptual logical order</h3>
+
+                <div class="flow">
+
+                    <div class="flow-box">FROM</div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">WHERE</div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">SELECT</div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">ORDER BY</div>
+
+                </div>
+
+            </div>
+
+            <div class="info">
+
+                <strong>Exam point</strong>
+
+                ORDER BY is conceptually applied after filtering and projection
+                in the simplified logical query-processing model. Actual
+                database engines may optimize the physical execution.
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         COMMON MISTAKES
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">19 • Common Mistakes</div>
+
+                <h2>ORDER BY mistakes to avoid</h2>
+
+            </div>
+
+            <div class="grid-2">
+
+                <div class="card">
+
+                    <h3>❌ Mistake 1 — Forgetting DESC</h3>
+
+                    <div class="code-box">
+
+<pre>ORDER BY marks;</pre>
+
+                    </div>
+
+                    <p>
+                        This normally means ascending order, not highest first.
+                    </p>
+
+                    <div class="code-box">
+
+<pre>ORDER BY marks DESC;</pre>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>❌ Mistake 2 — Wrong clause order</h3>
+
+                    <div class="code-box">
+
+<pre>SELECT name
+FROM students
+ORDER BY marks DESC
+WHERE marks > 80;</pre>
+
+                    </div>
+
+                    <p>
+                        WHERE belongs before ORDER BY.
+                    </p>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>❌ Mistake 3 — Assuming row order</h3>
+
+                    <p>
+                        Never assume that rows will appear in insertion order
+                        unless you explicitly request a sort.
+                    </p>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>❌ Mistake 4 — Confusing WHERE and ORDER BY</h3>
+
+                    <p>
+                        WHERE filters rows. ORDER BY sorts the rows that remain.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         WHERE VS ORDER BY
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">20 • Comparison</div>
+
+                <h2>WHERE vs ORDER BY</h2>
+
+            </div>
+
+            <div class="comparison">
+
+                <div class="compare-card">
+
+                    <div class="compare-head">
+                        WHERE
+                    </div>
+
+                    <div class="compare-body">
+
+                        <ul>
+                            <li>Filters rows</li>
+                            <li>Decides which rows remain</li>
+                            <li>Uses conditions</li>
+                            <li>Example: marks &gt; 80</li>
+                        </ul>
+
+                    </div>
+
+                </div>
+
+                <div class="compare-card">
+
+                    <div class="compare-head">
+                        ORDER BY
+                    </div>
+
+                    <div class="compare-body">
+
+                        <ul>
+                            <li>Sorts rows</li>
+                            <li>Decides result order</li>
+                            <li>Uses ASC / DESC</li>
+                            <li>Example: marks DESC</li>
+                        </ul>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         REAL WORLD EXAMPLES
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">21 • Real World</div>
+
+                <h2>ORDER BY in real applications</h2>
+
+                <p>
+                    ORDER BY is everywhere in real software systems.
+                </p>
+
+            </div>
+
+            <div class="grid-3">
+
+                <div class="card">
+
+                    <h3>🎓 Education</h3>
+
+                    <div class="code-box">
+
+<pre>SELECT name, marks
+FROM students
+ORDER BY marks DESC;</pre>
+
+                    </div>
+
+                    <p>
+                        Rank students by marks.
+                    </p>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>🛒 E-Commerce</h3>
+
+                    <div class="code-box">
+
+<pre>SELECT product, price
+FROM products
+ORDER BY price ASC;</pre>
+
+                    </div>
+
+                    <p>
+                        Show cheapest products first.
+                    </p>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>💼 Employees</h3>
+
+                    <div class="code-box">
+
+<pre>SELECT name, salary
+FROM employees
+ORDER BY salary DESC;</pre>
+
+                    </div>
+
+                    <p>
+                        Display highest salaries first.
+                    </p>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>📰 News</h3>
+
+                    <div class="code-box">
+
+<pre>SELECT title, published_at
+FROM articles
+ORDER BY published_at DESC;</pre>
+
+                    </div>
+
+                    <p>
+                        Show latest articles first.
+                    </p>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>🏦 Banking</h3>
+
+                    <div class="code-box">
+
+<pre>SELECT *
+FROM transactions
+ORDER BY transaction_date DESC;</pre>
+
+                    </div>
+
+                    <p>
+                        Show recent transactions first.
+                    </p>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>🎮 Gaming</h3>
+
+                    <div class="code-box">
+
+<pre>SELECT player, score
+FROM leaderboard
+ORDER BY score DESC;</pre>
+
+                    </div>
+
+                    <p>
+                        Build a leaderboard.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ADVANCED PATTERNS
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">22 • Advanced Patterns</div>
+
+                <h2>Interview-ready ORDER BY patterns</h2>
+
+            </div>
+
+            <div class="grid-2">
+
+                <div class="card">
+
+                    <h3>Highest salary</h3>
+
+                    <div class="code-box">
+
+<pre>SELECT name, salary
+FROM employees
+ORDER BY salary DESC
+LIMIT 1;</pre>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>Lowest price</h3>
+
+                    <div class="code-box">
+
+<pre>SELECT product, price
+FROM products
+ORDER BY price ASC
+LIMIT 1;</pre>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>Latest order</h3>
+
+                    <div class="code-box">
+
+<pre>SELECT *
+FROM orders
+ORDER BY order_date DESC
+LIMIT 1;</pre>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>Top 5 scores</h3>
+
+                    <div class="code-box">
+
+<pre>SELECT player, score
+FROM leaderboard
+ORDER BY score DESC
+LIMIT 5;</pre>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         EXAM ANSWER
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">23 • Exam Preparation</div>
+
+                <h2>5-mark answer</h2>
+
+            </div>
+
+            <div class="card">
+
+                <h3>ORDER BY clause in SQL</h3>
+
+                <p>
+                    The ORDER BY clause is used to sort the rows returned by
+                    an SQL query according to one or more columns or
+                    expressions. By default, sorting is generally ascending.
+                    The ASC keyword specifies ascending order, while DESC
+                    specifies descending order.
+                </p>
+
+                <div class="code-box">
+
+<pre>SELECT name, marks
+FROM students
+ORDER BY marks DESC;</pre>
+
+                </div>
+
+                <p>
+                    Multiple columns can also be specified. In that case,
+                    the first column is the primary sorting key and subsequent
+                    columns are used to resolve ties.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         10 MARK ANSWER
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">24 • Long Answer</div>
+
+                <h2>10-mark answer structure</h2>
+
+            </div>
+
+            <div class="card">
+
+                <ol>
+
+                    <li>Definition of ORDER BY.</li>
+
+                    <li>Basic syntax.</li>
+
+                    <li>ASC ordering.</li>
+
+                    <li>DESC ordering.</li>
+
+                    <li>Sorting numbers.</li>
+
+                    <li>Sorting strings.</li>
+
+                    <li>Sorting dates.</li>
+
+                    <li>Multiple-column sorting.</li>
+
+                    <li>Aliases and expressions.</li>
+
+                    <li>NULL ordering.</li>
+
+                    <li>ORDER BY with WHERE.</li>
+
+                    <li>ORDER BY with result limiting.</li>
+
+                    <li>Real-world applications.</li>
+
+                </ol>
+
+                <div class="code-box">
+
+<pre>SELECT department, name, marks
+FROM students
+WHERE marks >= 70
+ORDER BY department ASC, marks DESC;</pre>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         QUIZ
+    ====================================================== -->
+
+    <section id="quiz">
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">25 • Knowledge Check</div>
+
+                <h2>Test yourself</h2>
+
+                <p>
+                    Try answering before checking your score.
+                </p>
+
+            </div>
+
+            <div class="quiz">
+
+                <div class="question">
+
+                    <div class="question-title">
+                        1. Which clause sorts query results?
+                    </div>
+
+                    <label class="option">
+                        <input type="radio" name="q1" value="A">
+                        WHERE
+                    </label>
+
+                    <label class="option">
+                        <input type="radio" name="q1" value="B">
+                        ORDER BY
+                    </label>
+
+                    <label class="option">
+                        <input type="radio" name="q1" value="C">
+                        GROUP BY
+                    </label>
+
+                </div>
+
+
+                <div class="question">
+
+                    <div class="question-title">
+                        2. Which keyword sorts from highest to lowest?
+                    </div>
+
+                    <label class="option">
+                        <input type="radio" name="q2" value="A">
+                        ASC
+                    </label>
+
+                    <label class="option">
+                        <input type="radio" name="q2" value="B">
+                        DESC
+                    </label>
+
+                    <label class="option">
+                        <input type="radio" name="q2" value="C">
+                        HIGH
+                    </label>
+
+                </div>
+
+
+                <div class="question">
+
+                    <div class="question-title">
+                        3. Which is correct?
+                    </div>
+
+                    <label class="option">
+                        <input type="radio" name="q3" value="A">
+                        ORDER BY marks DESC
+                    </label>
+
+                    <label class="option">
+                        <input type="radio" name="q3" value="B">
+                        SORT marks DESC
+                    </label>
+
+                    <label class="option">
+                        <input type="radio" name="q3" value="C">
+                        ORDER marks DESC
+                    </label>
+
+                </div>
+
+
+                <div class="question">
+
+                    <div class="question-title">
+                        4. What does WHERE do?
+                    </div>
+
+                    <label class="option">
+                        <input type="radio" name="q4" value="A">
+                        Sorts rows
+                    </label>
+
+                    <label class="option">
+                        <input type="radio" name="q4" value="B">
+                        Filters rows
+                    </label>
+
+                    <label class="option">
+                        <input type="radio" name="q4" value="C">
+                        Creates tables
+                    </label>
+
+                </div>
+
+
+                <div class="question">
+
+                    <div class="question-title">
+                        5. What happens when multiple columns are used?
+                    </div>
+
+                    <label class="option">
+                        <input type="radio" name="q5" value="A">
+                        All columns are ignored
+                    </label>
+
+                    <label class="option">
+                        <input type="radio" name="q5" value="B">
+                        Later columns can break ties
+                    </label>
+
+                    <label class="option">
+                        <input type="radio" name="q5" value="C">
+                        SQL creates new columns
+                    </label>
+
+                </div>
+
+
+                <button class="quiz-btn" onclick="checkQuiz()">
+                    Check Score
+                </button>
+
+                <div class="quiz-result" id="quizResult"></div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         INTERVIEW
+    ====================================================== -->
+
+    <section id="interview">
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">26 • Interview Preparation</div>
+
+                <h2>ORDER BY interview questions</h2>
+
+            </div>
+
+
+            <div class="interview">
+
+                <button onclick="toggleAnswer(this)">
+                    1. What is ORDER BY?
+                </button>
+
+                <div class="answer">
+                    ORDER BY is an SQL clause used to sort rows in the result
+                    set according to one or more columns or expressions.
+                </div>
+
+            </div>
+
+
+            <div class="interview">
+
+                <button onclick="toggleAnswer(this)">
+                    2. What is the difference between ASC and DESC?
+                </button>
+
+                <div class="answer">
+                    ASC sorts in ascending order, while DESC sorts in
+                    descending order.
+                </div>
+
+            </div>
+
+
+            <div class="interview">
+
+                <button onclick="toggleAnswer(this)">
+                    3. Can ORDER BY use multiple columns?
+                </button>
+
+                <div class="answer">
+                    Yes. The first expression is the primary sort key and
+                    subsequent expressions can be used to break ties.
+                </div>
+
+            </div>
+
+
+            <div class="interview">
+
+                <button onclick="toggleAnswer(this)">
+                    4. Can ORDER BY work with WHERE?
+                </button>
+
+                <div class="answer">
+                    Yes. WHERE filters rows first, and ORDER BY sorts the
+                    resulting rows.
+                </div>
+
+            </div>
+
+
+            <div class="interview">
+
+                <button onclick="toggleAnswer(this)">
+                    5. Is row order guaranteed without ORDER BY?
+                </button>
+
+                <div class="answer">
+                    No. SQL does not guarantee a particular result order
+                    unless an ORDER BY clause explicitly specifies it.
+                </div>
+
+            </div>
+
+
+            <div class="interview">
+
+                <button onclick="toggleAnswer(this)">
+                    6. Can ORDER BY sort calculated values?
+                </button>
+
+                <div class="answer">
+                    Yes. ORDER BY can sort expressions and, depending on the
+                    database, aliases from the SELECT list.
+                </div>
+
+            </div>
+
+
+            <div class="interview">
+
+                <button onclick="toggleAnswer(this)">
+                    7. How do you find the highest salary?
+                </button>
+
+                <div class="answer">
+
+                    A common approach is:
+
+                    <div class="code-box">
+
+<pre>SELECT name, salary
+FROM employees
+ORDER BY salary DESC
+LIMIT 1;</pre>
+
+                    </div>
+
+                    The exact row-limiting syntax depends on the database.
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PRACTICE
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">27 • Coding Practice</div>
+
+                <h2>Practice challenges</h2>
+
+                <p>
+                    Write the queries yourself before looking at solutions.
+                </p>
+
+            </div>
+
+            <div class="grid-2">
+
+                <div class="card">
+
+                    <h3>Challenge 1</h3>
+
+                    <p>
+                        Display all students from highest marks to lowest.
+                    </p>
+
+                    <details>
+                        <summary>Show solution</summary>
+
+                        <div class="code-box">
+
+<pre>SELECT *
+FROM students
+ORDER BY marks DESC;</pre>
+
+                        </div>
+
+                    </details>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>Challenge 2</h3>
+
+                    <p>
+                        Display students alphabetically by name.
+                    </p>
+
+                    <details>
+                        <summary>Show solution</summary>
+
+                        <div class="code-box">
+
+<pre>SELECT *
+FROM students
+ORDER BY name ASC;</pre>
+
+                        </div>
+
+                    </details>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>Challenge 3</h3>
+
+                    <p>
+                        Display students by department and then highest marks.
+                    </p>
+
+                    <details>
+                        <summary>Show solution</summary>
+
+                        <div class="code-box">
+
+<pre>SELECT *
+FROM students
+ORDER BY department ASC, marks DESC;</pre>
+
+                        </div>
+
+                    </details>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>Challenge 4</h3>
+
+                    <p>
+                        Find the top 3 students by marks.
+                    </p>
+
+                    <details>
+                        <summary>Show solution</summary>
+
+                        <div class="code-box">
+
+<pre>SELECT name, marks
+FROM students
+ORDER BY marks DESC
+LIMIT 3;</pre>
+
+                        </div>
+
+                    </details>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         MINI PROJECT
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">28 • Mini Project</div>
+
+                <h2>Student ranking system</h2>
+
+                <p>
+                    Build a simple student ranking query using ORDER BY.
+                </p>
+
+            </div>
+
+            <div class="card">
+
+                <h3>Requirement</h3>
+
+                <p>
+                    Display student name, department and marks. Show the
+                    highest scoring students first. If two students have the
+                    same marks, sort their names alphabetically.
+                </p>
+
+                <div class="code-box">
+
+<pre>SELECT name, department, marks
+FROM students
+ORDER BY marks DESC, name ASC;</pre>
+
+                </div>
+
+                <div class="info success">
+
+                    <strong>Skills used</strong>
+
+                    SELECT + ORDER BY + DESC + ASC + multiple-column sorting
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         RAPID REVISION
+    ====================================================== -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">29 • Rapid Revision</div>
+
+                <h2>ORDER BY in 60 seconds</h2>
+
+            </div>
+
+            <div class="grid-3">
+
+                <div class="card">
+                    <h3>ORDER BY</h3>
+                    <p>Sorts result rows.</p>
+                </div>
+
+                <div class="card">
+                    <h3>ASC</h3>
+                    <p>Ascending: low → high / A → Z.</p>
+                </div>
+
+                <div class="card">
+                    <h3>DESC</h3>
+                    <p>Descending: high → low / Z → A.</p>
+                </div>
+
+                <div class="card">
+                    <h3>Multiple columns</h3>
+                    <p>Later keys resolve ties.</p>
+                </div>
+
+                <div class="card">
+                    <h3>WHERE</h3>
+                    <p>Filters rows before sorting in the conceptual flow.</p>
+                </div>
+
+                <div class="card">
+                    <h3>LIMIT / TOP / FETCH</h3>
+                    <p>Can be used with ORDER BY to retrieve a limited set.</p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         CHECKLIST
+    ====================================================== -->
+
+    <section id="checklist">
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <div class="eyebrow">30 • Completion</div>
+
+                <h2>Lesson 7 checklist</h2>
+
+                <p>
+                    Mark each skill after you understand it.
+                </p>
+
+            </div>
+
+            <div class="checklist">
+
+                <label class="check-item">
+                    <input type="checkbox" data-check="orderby1">
+                    I understand what ORDER BY does.
+                </label>
+
+                <label class="check-item">
+                    <input type="checkbox" data-check="orderby2">
+                    I understand ASC.
+                </label>
+
+                <label class="check-item">
+                    <input type="checkbox" data-check="orderby3">
+                    I understand DESC.
+                </label>
+
+                <label class="check-item">
+                    <input type="checkbox" data-check="orderby4">
+                    I can sort numeric values.
+                </label>
+
+                <label class="check-item">
+                    <input type="checkbox" data-check="orderby5">
+                    I can sort text values.
+                </label>
+
+                <label class="check-item">
+                    <input type="checkbox" data-check="orderby6">
+                    I can sort dates.
+                </label>
+
+                <label class="check-item">
+                    <input type="checkbox" data-check="orderby7">
+                    I can use multiple columns.
+                </label>
+
+                <label class="check-item">
+                    <input type="checkbox" data-check="orderby8">
+                    I understand tie-breaking.
+                </label>
+
+                <label class="check-item">
+                    <input type="checkbox" data-check="orderby9">
+                    I can combine WHERE and ORDER BY.
+                </label>
+
+                <label class="check-item">
+                    <input type="checkbox" data-check="orderby10">
+                    I can solve top-N problems.
+                </label>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         FINAL
+    ====================================================== -->
+
+    <footer class="lesson-footer">
+
+        <h2>Lesson 7 Complete 🎯</h2>
+
+        <p>
+            You now know how to control the order of SQL query results.
+            Next, build on this foundation by mastering more advanced
+            filtering and query techniques.
+        </p>
+
+    </footer>
+
+</main>
+
+
+<script>
+
+    /* =========================================================
+       MOBILE SIDEBAR
+    ========================================================= */
+
+    const menuBtn = document.getElementById("menuBtn");
+    const sidebar = document.getElementById("sidebar");
+
+    if (menuBtn) {
+        menuBtn.addEventListener("click", () => {
+            sidebar.classList.toggle("open");
+        });
+    }
+
+    document.querySelectorAll(".nav a").forEach(link => {
+        link.addEventListener("click", () => {
+            sidebar.classList.remove("open");
+        });
+    });
+
+
+    /* =========================================================
+       SCROLL PROGRESS
+    ========================================================= */
+
+    window.addEventListener("scroll", () => {
+
+        const scrollTop = window.scrollY;
+
+        const documentHeight =
+            document.documentElement.scrollHeight -
+            document.documentElement.clientHeight;
+
+        const progress =
+            documentHeight > 0
+                ? (scrollTop / documentHeight) * 100
+                : 0;
+
+        document.getElementById("progressBar").style.width =
+            progress + "%";
+    });
+
+
+    /* =========================================================
+       COPY CODE
+    ========================================================= */
+
+    document.querySelectorAll(".copy-btn").forEach(button => {
+
+        button.addEventListener("click", async () => {
+
+            const code =
+                button.parentElement.nextElementSibling.innerText;
+
+            try {
+
+                await navigator.clipboard.writeText(code);
+
+                const original = button.innerText;
+
+                button.innerText = "Copied!";
+
+                setTimeout(() => {
+                    button.innerText = original;
+                }, 1200);
+
+            } catch (error) {
+
+                button.innerText = "Copy failed";
+
+                setTimeout(() => {
+                    button.innerText = "Copy";
+                }, 1200);
+
+            }
+
+        });
+
+    });
+
+
+    /* =========================================================
+       REVEAL ANIMATIONS
+       IMPORTANT:
+       Content is visible even if JavaScript fails.
+    ========================================================= */
+
+    const revealElements =
+        document.querySelectorAll(".reveal");
+
+    if ("IntersectionObserver" in window) {
+
+        const observer =
+            new IntersectionObserver((entries) => {
+
+                entries.forEach(entry => {
+
+                    if (entry.isIntersecting) {
+
+                        entry.target.classList.add("animate");
+
+                        observer.unobserve(entry.target);
+
+                    }
+
+                });
+
+            }, {
+                threshold: 0.12
+            });
+
+        revealElements.forEach(element => {
+            observer.observe(element);
+        });
+
+    }
+
+
+    /* =========================================================
+       SORT VISUALIZER
+    ========================================================= */
+
+    const students = [
+
+        {
+            id: 1,
+            name: "Arjun",
+            marks: 91,
+            age: 20
+        },
+
+        {
+            id: 2,
+            name: "Priya",
+            marks: 84,
+            age: 21
+        },
+
+        {
+            id: 3,
+            name: "Rahul",
+            marks: 76,
+            age: 20
+        },
+
+        {
+            id: 4,
+            name: "Ananya",
+            marks: 95,
+            age: 19
+        },
+
+        {
+            id: 5,
+            name: "Kiran",
+            marks: 88,
+            age: 21
+        }
+
+    ];
+
+
+    function displayStudents(data) {
+
+        const container =
+            document.getElementById("sortResult");
+
+        container.innerHTML = "";
+
+        data.forEach(student => {
+
+            const row =
+                document.createElement("div");
+
+            row.className = "student-row";
+
+            row.innerHTML = `
+                <strong>#${student.id}</strong>
+                <strong>${student.name}</strong>
+                <span>Marks: ${student.marks}</span>
+                <span>Age: ${student.age}</span>
+            `;
+
+            container.appendChild(row);
+
+        });
+
+    }
+
+
+    function setActiveButton(id) {
+
+        document
+            .querySelectorAll(".sort-controls button")
+            .forEach(button => {
+
+                button.classList.remove("active");
+
+            });
+
+        const button =
+            document.getElementById(id);
+
+        if (button) {
+            button.classList.add("active");
+        }
+
+    }
+
+
+    function sortStudents(type) {
+
+        let sorted = [...students];
+
+        if (type === "marksAsc") {
+
+            sorted.sort((a, b) =>
+                a.marks - b.marks
+            );
+
+            setActiveButton("marksAsc");
+
+        }
+
+        else if (type === "marksDesc") {
+
+            sorted.sort((a, b) =>
+                b.marks - a.marks
+            );
+
+            setActiveButton("marksDesc");
+
+        }
+
+        else if (type === "nameAsc") {
+
+            sorted.sort((a, b) =>
+                a.name.localeCompare(b.name)
+            );
+
+            setActiveButton("nameAsc");
+
+        }
+
+        else if (type === "nameDesc") {
+
+            sorted.sort((a, b) =>
+                b.name.localeCompare(a.name)
+            );
+
+            setActiveButton("nameDesc");
+
+        }
+
+        else if (type === "ageAsc") {
+
+            sorted.sort((a, b) =>
+                a.age - b.age
+            );
+
+            setActiveButton("ageAsc");
+
+        }
+
+        else if (type === "ageDesc") {
+
+            sorted.sort((a, b) =>
+                b.age - a.age
+            );
+
+            setActiveButton("ageDesc");
+
+        }
+
+        displayStudents(sorted);
+
+    }
+
+
+    displayStudents(students);
+
+
+    /* =========================================================
+       QUIZ
+    ========================================================= */
+
+    function checkQuiz() {
+
+        const answers = {
+            q1: "B",
+            q2: "B",
+            q3: "A",
+            q4: "B",
+            q5: "B"
+        };
+
+        let score = 0;
+
+        Object.keys(answers).forEach(question => {
+
+            const selected =
+                document.querySelector(
+                    `input[name="${question}"]:checked`
+                );
+
+            if (selected &&
+                selected.value === answers[question]) {
+
+                score++;
+
+            }
+
+        });
+
+        const result =
+            document.getElementById("quizResult");
+
+        result.style.display = "block";
+
+        if (score === 5) {
+
+            result.style.background = "#f0fdf4";
+            result.style.color = "#166534";
+
+            result.innerHTML =
+                "Excellent! 🎉 5/5 — ORDER BY mastered.";
+
+        }
+
+        else if (score >= 3) {
+
+            result.style.background = "#fffbeb";
+            result.style.color = "#92400e";
+
+            result.innerHTML =
+                `Good work! ${score}/5. Review the missed concepts once.`;
+
+        }
+
+        else {
+
+            result.style.background = "#fef2f2";
+            result.style.color = "#991b1b";
+
+            result.innerHTML =
+                `${score}/5. Revisit ASC, DESC and multiple-column sorting.`;
+
+        }
+
+    }
+
+
+    /* =========================================================
+       INTERVIEW ACCORDION
+    ========================================================= */
+
+    function toggleAnswer(button) {
+
+        const answer =
+            button.nextElementSibling;
+
+        const isOpen =
+            answer.style.display === "block";
+
+        document.querySelectorAll(".answer").forEach(item => {
+            item.style.display = "none";
+        });
+
+        if (!isOpen) {
+            answer.style.display = "block";
+        }
+
+    }
+
+
+    /* =========================================================
+       CHECKLIST LOCAL STORAGE
+    ========================================================= */
+
+    document
+        .querySelectorAll(".check-item input")
+        .forEach(checkbox => {
+
+            const key =
+                "zensus_sql_" +
+                checkbox.dataset.check;
+
+            checkbox.checked =
+                localStorage.getItem(key) === "true";
+
+            checkbox.addEventListener("change", () => {
+
+                localStorage.setItem(
+                    key,
+                    checkbox.checked
+                );
+
+            });
+
+        });
+
+</script>
+
+</body>
+</html>

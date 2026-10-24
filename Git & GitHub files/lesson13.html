@@ -1,0 +1,3668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Git & GitHub — Lesson 13: GitHub Actions & Basic CI/CD | ZENSUS</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f8fafc;
+            color: #172033;
+            line-height: 1.7;
+        }
+
+        :root {
+            --blue: #2563eb;
+            --blue-dark: #1d4ed8;
+            --blue-light: #eff6ff;
+            --border: #e2e8f0;
+            --muted: #64748b;
+            --dark: #172033;
+            --green: #16a34a;
+            --red: #dc2626;
+            --orange: #d97706;
+            --purple: #7c3aed;
+            --white: #ffffff;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 270px;
+            height: 100vh;
+            background: #ffffff;
+            border-right: 1px solid var(--border);
+            padding: 25px 18px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--blue);
+            margin-bottom: 6px;
+        }
+
+        .course-name {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 25px;
+        }
+
+        .sidebar-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            margin: 20px 8px 8px;
+            font-weight: 700;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 9px 12px;
+            border-radius: 8px;
+            color: #475569;
+            text-decoration: none;
+            font-size: 14px;
+            margin: 2px 0;
+            transition: 0.2s;
+        }
+
+        .nav-link:hover {
+            background: var(--blue-light);
+            color: var(--blue);
+        }
+
+        .nav-link.active {
+            background: var(--blue-light);
+            color: var(--blue);
+            font-weight: 600;
+            border-left: 3px solid var(--blue);
+        }
+
+        /* MAIN */
+
+        .main {
+            margin-left: 270px;
+            padding: 35px 50px 80px;
+            max-width: 1400px;
+        }
+
+        /* TOPBAR */
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .search {
+            width: 330px;
+            padding: 11px 15px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: white;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .search:focus {
+            border-color: var(--blue);
+        }
+
+        .lesson-progress {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .progress-bar {
+            width: 150px;
+            height: 7px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            width: 86.66%;
+            height: 100%;
+            background: var(--blue);
+        }
+
+        /* HERO */
+
+        .hero {
+            background: linear-gradient(135deg, #eff6ff, #ffffff);
+            border: 1px solid #dbeafe;
+            border-radius: 18px;
+            padding: 45px;
+            margin-bottom: 35px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #dbeafe;
+            color: var(--blue-dark);
+            padding: 5px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            line-height: 1.2;
+            margin-bottom: 15px;
+            color: #0f172a;
+        }
+
+        .hero p {
+            color: #475569;
+            max-width: 900px;
+            font-size: 17px;
+        }
+
+        /* CONTENT */
+
+        section {
+            margin-bottom: 55px;
+            scroll-margin-top: 25px;
+        }
+
+        section h2 {
+            font-size: 28px;
+            color: #0f172a;
+            margin-bottom: 15px;
+        }
+
+        section h3 {
+            font-size: 21px;
+            margin: 25px 0 10px;
+            color: #1e293b;
+        }
+
+        p {
+            margin-bottom: 13px;
+            color: #475569;
+        }
+
+        ul,
+        ol {
+            margin: 12px 0 18px 25px;
+            color: #475569;
+        }
+
+        li {
+            margin-bottom: 7px;
+        }
+
+        strong {
+            color: #1e293b;
+        }
+
+        code {
+            font-family: Consolas, Monaco, monospace;
+        }
+
+        /* INFO GRID */
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin: 25px 0;
+        }
+
+        .info-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 22px;
+            transition: 0.25s;
+        }
+
+        .info-card:hover {
+            transform: translateY(-3px);
+            border-color: #bfdbfe;
+        }
+
+        .info-card h3 {
+            margin-top: 0;
+            font-size: 18px;
+            color: var(--blue-dark);
+        }
+
+        /* FLOW */
+
+        .flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 28px 0;
+        }
+
+        .flow-box {
+            background: white;
+            border: 2px solid #bfdbfe;
+            border-radius: 10px;
+            padding: 16px 20px;
+            text-align: center;
+            min-width: 145px;
+        }
+
+        .flow-box strong {
+            display: block;
+            color: var(--blue-dark);
+        }
+
+        .arrow {
+            color: var(--blue);
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        /* CODE */
+
+        .code-wrapper {
+            position: relative;
+            margin: 18px 0;
+        }
+
+        pre {
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 11px;
+            padding: 20px;
+            overflow-x: auto;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            border: 0;
+            background: #334155;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .copy-btn:hover {
+            background: #475569;
+        }
+
+        /* NOTE */
+
+        .note {
+            border-left: 4px solid var(--blue);
+            background: #eff6ff;
+            padding: 17px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .warning {
+            border-left-color: var(--orange);
+            background: #fffbeb;
+        }
+
+        .success {
+            border-left-color: var(--green);
+            background: #f0fdf4;
+        }
+
+        .purple-note {
+            border-left-color: var(--purple);
+            background: #faf5ff;
+        }
+
+        /* TABLE */
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border: 1px solid var(--border);
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            padding: 13px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        td {
+            color: #475569;
+        }
+
+        td code {
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 3px 6px;
+            border-radius: 5px;
+        }
+
+        /* PIPELINE */
+
+        .pipeline {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin: 28px 0;
+        }
+
+        .pipeline-step {
+            position: relative;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 14px;
+            text-align: center;
+        }
+
+        .pipeline-number {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--blue-light);
+            color: var(--blue-dark);
+            font-weight: 800;
+        }
+
+        .pipeline-step strong {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        /* WORKFLOW */
+
+        .workflow {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+
+        .workflow-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .workflow-row:last-child {
+            border-bottom: none;
+        }
+
+        .workflow-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            background: var(--blue-light);
+            color: var(--blue-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+        }
+
+        .workflow-info strong {
+            display: block;
+        }
+
+        .workflow-info span {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        /* SIMULATOR */
+
+        .simulator {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 25px;
+        }
+
+        .sim-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            border: none;
+            background: var(--blue);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background: var(--blue-dark);
+        }
+
+        .btn.green {
+            background: var(--green);
+        }
+
+        .btn.purple {
+            background: var(--purple);
+        }
+
+        .btn.orange {
+            background: var(--orange);
+        }
+
+        .btn.secondary {
+            background: #475569;
+        }
+
+        .sim-output {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 18px;
+            border-radius: 9px;
+            min-height: 290px;
+            font-family: Consolas, Monaco, monospace;
+            white-space: pre-wrap;
+        }
+
+        /* PRACTICE */
+
+        .practice {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 25px;
+        }
+
+        .practice input {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            margin: 10px 0;
+        }
+
+        .answer {
+            display: none;
+            margin-top: 15px;
+            padding: 14px;
+            background: #f0fdf4;
+            border-left: 4px solid var(--green);
+            border-radius: 7px;
+        }
+
+        /* QUIZ */
+
+        .quiz-question {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 22px;
+            margin: 18px 0;
+        }
+
+        .quiz-question h3 {
+            margin-top: 0;
+            font-size: 17px;
+        }
+
+        .option {
+            display: block;
+            padding: 9px 12px;
+            margin: 7px 0;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .option:hover {
+            background: var(--blue-light);
+        }
+
+        .option.correct {
+            background: #dcfce7;
+            border-color: #86efac;
+        }
+
+        .option.wrong {
+            background: #fee2e2;
+            border-color: #fecaca;
+        }
+
+        #quizResult {
+            margin-top: 20px;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        /* TAKEAWAY */
+
+        .takeaway {
+            background: linear-gradient(135deg, #eff6ff, #ffffff);
+            border: 1px solid #bfdbfe;
+            border-radius: 15px;
+            padding: 30px;
+        }
+
+        .takeaway ul {
+            margin-bottom: 0;
+        }
+
+        /* REVEAL */
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: 0.6s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* MOBILE */
+
+        .mobile-header {
+            display: none;
+        }
+
+        @media (max-width: 1100px) {
+
+            .info-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .pipeline {
+                grid-template-columns: 1fr 1fr;
+            }
+
+        }
+
+        @media (max-width: 800px) {
+
+            .sidebar {
+                display: none;
+            }
+
+            .mobile-header {
+                display: block;
+                padding: 18px;
+                background: white;
+                border-bottom: 1px solid var(--border);
+                position: sticky;
+                top: 0;
+                z-index: 1000;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 25px 18px 60px;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search {
+                width: 100%;
+            }
+
+            .hero {
+                padding: 28px;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .info-grid,
+            .pipeline {
+                grid-template-columns: 1fr;
+            }
+
+            .workflow-row {
+                align-items: flex-start;
+            }
+
+        }
+
+    </style>
+</head>
+
+<body>
+
+
+    <!-- MOBILE HEADER -->
+
+    <div class="mobile-header">
+
+        <strong style="color:#2563eb;">
+            ZENSUS
+        </strong>
+
+        <span style="color:#64748b; margin-left:10px;">
+            Git & GitHub — Lesson 13
+        </span>
+
+    </div>
+
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            ZENSUS
+        </div>
+
+        <div class="course-name">
+            Git & GitHub Course
+        </div>
+
+        <div class="sidebar-title">
+            Lesson 13
+        </div>
+
+        <a class="nav-link active" href="#overview">
+            Overview
+        </a>
+
+        <a class="nav-link" href="#automation">
+            What is Automation?
+        </a>
+
+        <a class="nav-link" href="#cicd">
+            CI/CD
+        </a>
+
+        <a class="nav-link" href="#actions">
+            GitHub Actions
+        </a>
+
+        <a class="nav-link" href="#workflow">
+            Workflow Files
+        </a>
+
+        <a class="nav-link" href="#triggers">
+            Events & Triggers
+        </a>
+
+        <a class="nav-link" href="#jobs">
+            Jobs & Steps
+        </a>
+
+        <a class="nav-link" href="#runners">
+            Runners
+        </a>
+
+        <a class="nav-link" href="#yaml">
+            YAML Basics
+        </a>
+
+        <a class="nav-link" href="#example">
+            First CI Workflow
+        </a>
+
+        <a class="nav-link" href="#python">
+            Python Example
+        </a>
+
+        <a class="nav-link" href="#secrets">
+            Secrets
+        </a>
+
+        <a class="nav-link" href="#workflow-status">
+            Workflow Results
+        </a>
+
+        <a class="nav-link" href="#mistakes">
+            Common Mistakes
+        </a>
+
+        <a class="nav-link" href="#simulator">
+            Interactive Simulator
+        </a>
+
+        <a class="nav-link" href="#practice">
+            Practice
+        </a>
+
+        <a class="nav-link" href="#quiz">
+            Quiz
+        </a>
+
+        <a class="nav-link" href="#takeaway">
+            Takeaway
+        </a>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+
+        <!-- TOPBAR -->
+
+        <div class="topbar">
+
+            <input
+                type="text"
+                id="searchInput"
+                class="search"
+                placeholder="Search this lesson..."
+            >
+
+            <div class="lesson-progress">
+
+                Lesson 13 of 15
+
+                <div class="progress-bar">
+
+                    <div class="progress-fill"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- HERO -->
+
+        <section
+            id="overview"
+            class="hero reveal"
+        >
+
+            <span class="badge">
+                GIT & GITHUB • LESSON 13
+            </span>
+
+            <h1>
+                GitHub Actions & Basic CI/CD
+            </h1>
+
+            <p>
+                Learn how GitHub Actions automates development tasks,
+                how CI/CD works, how workflow files are written, and
+                how a repository can automatically build, test, and
+                validate code whenever changes are made.
+            </p>
+
+        </section>
+
+
+        <!-- AUTOMATION -->
+
+        <section
+            id="automation"
+            class="reveal"
+        >
+
+            <h2>
+                1. What Is Automation?
+            </h2>
+
+            <p>
+                <strong>Automation</strong> means using software to perform
+                repetitive tasks automatically instead of doing them manually.
+            </p>
+
+            <p>
+                In software development, teams repeatedly perform tasks such as:
+            </p>
+
+            <div class="info-grid">
+
+                <div class="info-card">
+
+                    <h3>
+                        🧪 Testing
+                    </h3>
+
+                    <p>
+                        Run automated tests whenever code changes.
+                    </p>
+
+                </div>
+
+                <div class="info-card">
+
+                    <h3>
+                        🔨 Build
+                    </h3>
+
+                    <p>
+                        Automatically build an application or package.
+                    </p>
+
+                </div>
+
+                <div class="info-card">
+
+                    <h3>
+                        🔍 Quality Checks
+                    </h3>
+
+                    <p>
+                        Run linting, formatting, or static analysis.
+                    </p>
+
+                </div>
+
+                <div class="info-card">
+
+                    <h3>
+                        🚀 Deployment
+                    </h3>
+
+                    <p>
+                        Automatically deliver software to an environment.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="note">
+
+                <strong>
+                    Simple idea:
+                </strong>
+
+                <br><br>
+
+                Instead of saying:
+
+                <br>
+
+                "Every time someone pushes code, a developer should manually
+                run all tests."
+
+                <br><br>
+
+                Automation says:
+
+                <br>
+
+                "When code is pushed, run the tests automatically."
+
+            </div>
+
+        </section>
+
+
+        <!-- CI/CD -->
+
+        <section
+            id="cicd"
+            class="reveal"
+        >
+
+            <h2>
+                2. What Is CI/CD?
+            </h2>
+
+            <p>
+                <strong>CI</strong> means
+                <strong>Continuous Integration</strong>.
+            </p>
+
+            <p>
+                <strong>CD</strong> can mean
+                <strong>Continuous Delivery</strong> or
+                <strong>Continuous Deployment</strong>, depending on the workflow.
+            </p>
+
+
+            <div class="info-grid">
+
+                <div class="info-card">
+
+                    <h3>
+                        Continuous Integration
+                    </h3>
+
+                    <p>
+                        Developers frequently integrate code changes into
+                        a shared repository and automated checks validate
+                        those changes.
+                    </p>
+
+                </div>
+
+                <div class="info-card">
+
+                    <h3>
+                        Continuous Delivery
+                    </h3>
+
+                    <p>
+                        Software is kept in a state where it can be released
+                        when the team decides to deploy it.
+                    </p>
+
+                </div>
+
+                <div class="info-card">
+
+                    <h3>
+                        Continuous Deployment
+                    </h3>
+
+                    <p>
+                        Changes that pass the required pipeline can be
+                        automatically deployed.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <h3>
+                CI/CD Flow
+            </h3>
+
+            <div class="flow">
+
+                <div class="flow-box">
+
+                    <strong>
+                        Code
+                    </strong>
+
+                    Developer changes code
+
+                </div>
+
+                <div class="arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+
+                    <strong>
+                        Push
+                    </strong>
+
+                    Send changes to GitHub
+
+                </div>
+
+                <div class="arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+
+                    <strong>
+                        Build
+                    </strong>
+
+                    Prepare application
+
+                </div>
+
+                <div class="arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+
+                    <strong>
+                        Test
+                    </strong>
+
+                    Run automated checks
+
+                </div>
+
+                <div class="arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+
+                    <strong>
+                        Deploy
+                    </strong>
+
+                    Release if configured
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- GITHUB ACTIONS -->
+
+        <section
+            id="actions"
+            class="reveal"
+        >
+
+            <h2>
+                3. What Is GitHub Actions?
+            </h2>
+
+            <p>
+                <strong>GitHub Actions</strong> is GitHub's automation platform.
+                It allows you to create workflows that run when specified
+                events happen in a repository.
+            </p>
+
+            <p>
+                A workflow can automatically:
+            </p>
+
+            <ul>
+
+                <li>
+                    run tests
+                </li>
+
+                <li>
+                    build applications
+                </li>
+
+                <li>
+                    check code quality
+                </li>
+
+                <li>
+                    create packages or artifacts
+                </li>
+
+                <li>
+                    perform deployment tasks
+                </li>
+
+                <li>
+                    execute scheduled maintenance tasks
+                </li>
+
+            </ul>
+
+
+            <div class="note purple-note">
+
+                <strong>
+                    Important:
+                </strong>
+
+                GitHub Actions does not replace Git.
+
+                <br><br>
+
+                Git manages version history.
+
+                <br>
+
+                GitHub hosts and collaborates around repositories.
+
+                <br>
+
+                GitHub Actions automates tasks around the repository.
+
+            </div>
+
+        </section>
+
+
+        <!-- WORKFLOW -->
+
+        <section
+            id="workflow"
+            class="reveal"
+        >
+
+            <h2>
+                4. What Is a Workflow?
+            </h2>
+
+            <p>
+                A <strong>workflow</strong> is an automated process defined
+                using a YAML file.
+            </p>
+
+            <p>
+                GitHub Actions workflow files are stored inside:
+            </p>
+
+            <div class="code-wrapper">
+
+                <button class="copy-btn">
+                    Copy
+                </button>
+
+                <pre><code>.github/workflows/</code></pre>
+
+            </div>
+
+            <p>
+                For example:
+            </p>
+
+            <div class="code-wrapper">
+
+                <button class="copy-btn">
+                    Copy
+                </button>
+
+                <pre><code>.github/
+└── workflows/
+    └── python-ci.yml</code></pre>
+
+            </div>
+
+
+            <h3>
+                Workflow Structure
+            </h3>
+
+            <div class="pipeline">
+
+                <div class="pipeline-step">
+
+                    <div class="pipeline-number">
+                        1
+                    </div>
+
+                    <strong>
+                        Name
+                    </strong>
+
+                    Workflow identity
+
+                </div>
+
+                <div class="pipeline-step">
+
+                    <div class="pipeline-number">
+                        2
+                    </div>
+
+                    <strong>
+                        Trigger
+                    </strong>
+
+                    When it runs
+
+                </div>
+
+                <div class="pipeline-step">
+
+                    <div class="pipeline-number">
+                        3
+                    </div>
+
+                    <strong>
+                        Jobs
+                    </strong>
+
+                    Units of work
+
+                </div>
+
+                <div class="pipeline-step">
+
+                    <div class="pipeline-number">
+                        4
+                    </div>
+
+                    <strong>
+                        Steps
+                    </strong>
+
+                    Commands/actions
+
+                </div>
+
+                <div class="pipeline-step">
+
+                    <div class="pipeline-number">
+                        5
+                    </div>
+
+                    <strong>
+                        Runner
+                    </strong>
+
+                    Machine executing work
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- TRIGGERS -->
+
+        <section
+            id="triggers"
+            class="reveal"
+        >
+
+            <h2>
+                5. Events & Triggers
+            </h2>
+
+            <p>
+                A workflow needs to know <strong>when</strong> it should run.
+                The event configuration determines that.
+            </p>
+
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Trigger
+                        </th>
+
+                        <th>
+                            Meaning
+                        </th>
+
+                        <th>
+                            Example
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+
+                        <td>
+                            <code>push</code>
+                        </td>
+
+                        <td>
+                            Run when commits are pushed.
+                        </td>
+
+                        <td>
+                            Validate new code.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            <code>pull_request</code>
+                        </td>
+
+                        <td>
+                            Run when a pull request event occurs.
+                        </td>
+
+                        <td>
+                            Test proposed changes.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            <code>workflow_dispatch</code>
+                        </td>
+
+                        <td>
+                            Allow a workflow to be started manually.
+                        </td>
+
+                        <td>
+                            Manual deployment or test.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            <code>schedule</code>
+                        </td>
+
+                        <td>
+                            Run according to a schedule.
+                        </td>
+
+                        <td>
+                            Periodic maintenance.
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+
+            <div class="code-wrapper">
+
+                <button class="copy-btn">
+                    Copy
+                </button>
+
+                <pre><code>on:
+  push:
+  pull_request:</code></pre>
+
+            </div>
+
+            <p>
+                This configuration tells GitHub to run the workflow for
+                push and pull request events.
+            </p>
+
+        </section>
+
+
+        <!-- JOBS -->
+
+        <section
+            id="jobs"
+            class="reveal"
+        >
+
+            <h2>
+                6. Jobs & Steps
+            </h2>
+
+            <p>
+                A workflow contains one or more <strong>jobs</strong>.
+                Each job contains one or more <strong>steps</strong>.
+            </p>
+
+
+            <div class="flow">
+
+                <div class="flow-box">
+
+                    <strong>
+                        Workflow
+                    </strong>
+
+                    Entire automation
+
+                </div>
+
+                <div class="arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+
+                    <strong>
+                        Job
+                    </strong>
+
+                    Unit of work
+
+                </div>
+
+                <div class="arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+
+                    <strong>
+                        Step
+                    </strong>
+
+                    Individual action
+
+                </div>
+
+            </div>
+
+
+            <h3>
+                Example
+            </h3>
+
+            <div class="code-wrapper">
+
+                <button class="copy-btn">
+                    Copy
+                </button>
+
+                <pre><code>jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v4
+
+      - name: Run tests
+        run: npm test</code></pre>
+
+            </div>
+
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Keyword
+                        </th>
+
+                        <th>
+                            Meaning
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+
+                        <td>
+                            <code>jobs</code>
+                        </td>
+
+                        <td>
+                            Defines jobs in the workflow.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            <code>runs-on</code>
+                        </td>
+
+                        <td>
+                            Selects the runner environment.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            <code>steps</code>
+                        </td>
+
+                        <td>
+                            Lists actions or commands executed by the job.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            <code>uses</code>
+                        </td>
+
+                        <td>
+                            Uses an existing GitHub Action.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            <code>run</code>
+                        </td>
+
+                        <td>
+                            Executes a shell command.
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+
+        <!-- RUNNERS -->
+
+        <section
+            id="runners"
+            class="reveal"
+        >
+
+            <h2>
+                7. What Is a Runner?
+            </h2>
+
+            <p>
+                A <strong>runner</strong> is the machine that executes the
+                steps of a GitHub Actions job.
+            </p>
+
+            <p>
+                For example:
+            </p>
+
+            <div class="code-wrapper">
+
+                <button class="copy-btn">
+                    Copy
+                </button>
+
+                <pre><code>runs-on: ubuntu-latest</code></pre>
+
+            </div>
+
+            <p>
+                Common GitHub-hosted runner families include Linux, Windows,
+                and macOS environments.
+            </p>
+
+
+            <div class="info-grid">
+
+                <div class="info-card">
+
+                    <h3>
+                        Linux
+                    </h3>
+
+                    <p>
+                        Common choice for web applications and backend testing.
+                    </p>
+
+                </div>
+
+                <div class="info-card">
+
+                    <h3>
+                        Windows
+                    </h3>
+
+                    <p>
+                        Useful for Windows-specific applications and tooling.
+                    </p>
+
+                </div>
+
+                <div class="info-card">
+
+                    <h3>
+                        macOS
+                    </h3>
+
+                    <p>
+                        Useful when workflows require Apple development environments.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- YAML -->
+
+        <section
+            id="yaml"
+            class="reveal"
+        >
+
+            <h2>
+                8. YAML Basics
+            </h2>
+
+            <p>
+                GitHub Actions workflows are normally written using
+                <strong>YAML</strong>.
+            </p>
+
+            <p>
+                YAML uses indentation to represent structure.
+            </p>
+
+
+            <div class="code-wrapper">
+
+                <button class="copy-btn">
+                    Copy
+                </button>
+
+                <pre><code>name: Example Workflow
+
+on:
+  push:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Say hello
+        run: echo "Hello from GitHub Actions"</code></pre>
+
+            </div>
+
+
+            <div class="note warning">
+
+                <strong>
+                    Be careful with indentation.
+                </strong>
+
+                <br><br>
+
+                YAML structure depends heavily on indentation.
+                Incorrect spacing can cause a workflow configuration error.
+
+            </div>
+
+
+            <h3>
+                Important YAML Ideas
+            </h3>
+
+            <ul>
+
+                <li>
+                    Key-value pairs use <code>key: value</code>.
+                </li>
+
+                <li>
+                    Nested content uses indentation.
+                </li>
+
+                <li>
+                    Lists commonly use <code>-</code>.
+                </li>
+
+                <li>
+                    Strings can often be written without quotes, depending
+                    on their content.
+                </li>
+
+                <li>
+                    Keep indentation consistent.
+                </li>
+
+            </ul>
+
+        </section>
+
+
+        <!-- FIRST CI -->
+
+        <section
+            id="example"
+            class="reveal"
+        >
+
+            <h2>
+                9. Your First CI Workflow
+            </h2>
+
+            <p>
+                Suppose we have a Node.js project and want GitHub to run
+                tests whenever code is pushed or a pull request is opened.
+            </p>
+
+
+            <h3>
+                Step 1 — Create the directory
+            </h3>
+
+            <div class="code-wrapper">
+
+                <button class="copy-btn">
+                    Copy
+                </button>
+
+                <pre><code>.github/workflows/</code></pre>
+
+            </div>
+
+
+            <h3>
+                Step 2 — Create a workflow file
+            </h3>
+
+            <p>
+                For example:
+            </p>
+
+            <div class="code-wrapper">
+
+                <button class="copy-btn">
+                    Copy
+                </button>
+
+                <pre><code>.github/workflows/ci.yml</code></pre>
+
+            </div>
+
+
+            <h3>
+                Step 3 — Add the workflow
+            </h3>
+
+            <div class="code-wrapper">
+
+                <button class="copy-btn">
+                    Copy
+                </button>
+
+                <pre><code>name: Node.js CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test</code></pre>
+
+            </div>
+
+
+            <h3>
+                What Happens?
+            </h3>
+
+            <div class="workflow">
+
+                <div class="workflow-row">
+
+                    <div class="workflow-icon">
+                        1
+                    </div>
+
+                    <div class="workflow-info">
+
+                        <strong>
+                            Push code
+                        </strong>
+
+                        <span>
+                            Developer pushes a commit to GitHub.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="workflow-row">
+
+                    <div class="workflow-icon">
+                        2
+                    </div>
+
+                    <div class="workflow-info">
+
+                        <strong>
+                            GitHub detects the event
+                        </strong>
+
+                        <span>
+                            The push matches the workflow trigger.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="workflow-row">
+
+                    <div class="workflow-icon">
+                        3
+                    </div>
+
+                    <div class="workflow-info">
+
+                        <strong>
+                            Runner starts
+                        </strong>
+
+                        <span>
+                            GitHub provides the configured execution environment.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="workflow-row">
+
+                    <div class="workflow-icon">
+                        4
+                    </div>
+
+                    <div class="workflow-info">
+
+                        <strong>
+                            Dependencies install
+                        </strong>
+
+                        <span>
+                            The project dependencies are installed.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="workflow-row">
+
+                    <div class="workflow-icon">
+                        5
+                    </div>
+
+                    <div class="workflow-info">
+
+                        <strong>
+                            Tests run
+                        </strong>
+
+                        <span>
+                            Automated tests check the code.
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- PYTHON -->
+
+        <section
+            id="python"
+            class="reveal"
+        >
+
+            <h2>
+                10. Python CI Example
+            </h2>
+
+            <p>
+                GitHub Actions can also be used for Python projects.
+            </p>
+
+            <p>
+                A simple workflow can install Python, install dependencies,
+                and run tests.
+            </p>
+
+
+            <div class="code-wrapper">
+
+                <button class="copy-btn">
+                    Copy
+                </button>
+
+                <pre><code>name: Python CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest</code></pre>
+
+            </div>
+
+
+            <div class="note success">
+
+                <strong>
+                    Why this is useful:
+                </strong>
+
+                Every push or pull request can automatically check whether
+                the Python project still passes its tests.
+
+            </div>
+
+        </section>
+
+
+        <!-- SECRETS -->
+
+        <section
+            id="secrets"
+            class="reveal"
+        >
+
+            <h2>
+                11. Secrets & Sensitive Information
+            </h2>
+
+            <p>
+                CI/CD workflows sometimes need sensitive values such as:
+            </p>
+
+            <ul>
+
+                <li>
+                    API keys
+                </li>
+
+                <li>
+                    deployment credentials
+                </li>
+
+                <li>
+                    database passwords
+                </li>
+
+                <li>
+                    access tokens
+                </li>
+
+            </ul>
+
+            <p>
+                Sensitive values should not be hard-coded directly into
+                workflow files or source code.
+            </p>
+
+
+            <h3>
+                Using a Secret
+            </h3>
+
+            <div class="code-wrapper">
+
+                <button class="copy-btn">
+                    Copy
+                </button>
+
+                <pre><code>env:
+  API_KEY: ${{ secrets.API_KEY }}</code></pre>
+
+            </div>
+
+
+            <div class="note warning">
+
+                <strong>
+                    Security rule:
+                </strong>
+
+                Never commit passwords, private keys, access tokens,
+                or other sensitive credentials directly into a repository.
+
+            </div>
+
+        </section>
+
+
+        <!-- RESULTS -->
+
+        <section
+            id="workflow-status"
+            class="reveal"
+        >
+
+            <h2>
+                12. Understanding Workflow Results
+            </h2>
+
+            <p>
+                After a workflow runs, GitHub shows whether the jobs and
+                steps succeeded or failed.
+            </p>
+
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Result
+                        </th>
+
+                        <th>
+                            Meaning
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+
+                        <td>
+                            Success
+                        </td>
+
+                        <td>
+                            Required workflow steps completed successfully.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            Failure
+                        </td>
+
+                        <td>
+                            One or more required steps failed.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            Cancelled
+                        </td>
+
+                        <td>
+                            The workflow execution was stopped.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            Skipped
+                        </td>
+
+                        <td>
+                            A job or step did not run because its conditions
+                            were not met.
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+
+            <h3>
+                Why CI Failure Matters
+            </h3>
+
+            <p>
+                A failed test workflow can provide an early signal that a
+                change needs attention before it is merged or released.
+            </p>
+
+        </section>
+
+
+        <!-- ACTIONS -->
+
+        <section
+            class="reveal"
+        >
+
+            <h2>
+                13. Actions vs Commands
+            </h2>
+
+            <p>
+                A workflow step can use an existing action or execute
+                a shell command.
+            </p>
+
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Type
+                        </th>
+
+                        <th>
+                            Example
+                        </th>
+
+                        <th>
+                            Purpose
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+
+                        <td>
+                            Action
+                        </td>
+
+                        <td>
+                            <code>uses: actions/checkout@v4</code>
+                        </td>
+
+                        <td>
+                            Reuse a packaged automation component.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            Command
+                        </td>
+
+                        <td>
+                            <code>run: pytest</code>
+                        </td>
+
+                        <td>
+                            Execute a shell command.
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+
+            <div class="note">
+
+                <strong>
+                    Think of it this way:
+                </strong>
+
+                <br><br>
+
+                <code>uses</code> → use an existing action.
+
+                <br>
+
+                <code>run</code> → execute your command.
+
+            </div>
+
+        </section>
+
+
+        <!-- COMMON MISTAKES -->
+
+        <section
+            id="mistakes"
+            class="reveal"
+        >
+
+            <h2>
+                14. Common GitHub Actions Mistakes
+            </h2>
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Mistake
+                        </th>
+
+                        <th>
+                            Problem
+                        </th>
+
+                        <th>
+                            Better Approach
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+
+                        <td>
+                            Wrong YAML indentation
+                        </td>
+
+                        <td>
+                            Workflow may not parse correctly.
+                        </td>
+
+                        <td>
+                            Check indentation carefully.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            Wrong workflow location
+                        </td>
+
+                        <td>
+                            GitHub will not treat the file as a workflow.
+                        </td>
+
+                        <td>
+                            Use <code>.github/workflows/</code>.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            Missing checkout
+                        </td>
+
+                        <td>
+                            Job may not have the repository files available.
+                        </td>
+
+                        <td>
+                            Use <code>actions/checkout</code> when needed.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            Hard-coded secrets
+                        </td>
+
+                        <td>
+                            Sensitive information can be exposed.
+                        </td>
+
+                        <td>
+                            Use GitHub secrets or appropriate secure configuration.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            Wrong runtime version
+                        </td>
+
+                        <td>
+                            Tests may fail because the environment differs.
+                        </td>
+
+                        <td>
+                            Configure the required runtime version explicitly.
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            Testing only locally
+                        </td>
+
+                        <td>
+                            Local and CI environments can differ.
+                        </td>
+
+                        <td>
+                            Keep automated CI checks consistent with project needs.
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+
+        <!-- COMPLETE FLOW -->
+
+        <section
+            class="reveal"
+        >
+
+            <h2>
+                15. Complete CI Workflow
+            </h2>
+
+            <div class="pipeline">
+
+                <div class="pipeline-step">
+
+                    <div class="pipeline-number">
+                        1
+                    </div>
+
+                    <strong>
+                        Developer
+                    </strong>
+
+                    Writes code
+
+                </div>
+
+                <div class="pipeline-step">
+
+                    <div class="pipeline-number">
+                        2
+                    </div>
+
+                    <strong>
+                        Git Push
+                    </strong>
+
+                    Sends changes
+
+                </div>
+
+                <div class="pipeline-step">
+
+                    <div class="pipeline-number">
+                        3
+                    </div>
+
+                    <strong>
+                        GitHub
+                    </strong>
+
+                    Detects event
+
+                </div>
+
+                <div class="pipeline-step">
+
+                    <div class="pipeline-number">
+                        4
+                    </div>
+
+                    <strong>
+                        Actions
+                    </strong>
+
+                    Runs workflow
+
+                </div>
+
+                <div class="pipeline-step">
+
+                    <div class="pipeline-number">
+                        5
+                    </div>
+
+                    <strong>
+                        Result
+                    </strong>
+
+                    Pass / Fail
+
+                </div>
+
+            </div>
+
+
+            <div class="note success">
+
+                <strong>
+                    Core idea:
+                </strong>
+
+                GitHub Actions turns repository events into automated
+                development workflows.
+
+            </div>
+
+        </section>
+
+
+        <!-- SIMULATOR -->
+
+        <section
+            id="simulator"
+            class="reveal"
+        >
+
+            <h2>
+                16. Interactive CI/CD Simulator
+            </h2>
+
+            <p>
+                Simulate what happens when code is pushed to a repository
+                with a basic CI workflow.
+            </p>
+
+
+            <div class="simulator">
+
+                <div class="sim-controls">
+
+                    <button
+                        class="btn"
+                        onclick="pushCode()"
+                    >
+                        Push Code
+                    </button>
+
+                    <button
+                        class="btn purple"
+                        onclick="startRunner()"
+                    >
+                        Start Runner
+                    </button>
+
+                    <button
+                        class="btn orange"
+                        onclick="runBuild()"
+                    >
+                        Build
+                    </button>
+
+                    <button
+                        class="btn"
+                        onclick="runTests()"
+                    >
+                        Run Tests
+                    </button>
+
+                    <button
+                        class="btn green"
+                        onclick="passPipeline()"
+                    >
+                        Pass Pipeline
+                    </button>
+
+                    <button
+                        class="btn secondary"
+                        onclick="failPipeline()"
+                    >
+                        Simulate Failure
+                    </button>
+
+                    <button
+                        class="btn secondary"
+                        onclick="resetSimulator()"
+                    >
+                        Reset
+                    </button>
+
+                </div>
+
+                <div
+                    id="simOutput"
+                    class="sim-output"
+                >GITHUB ACTIONS CI/CD SIMULATOR
+
+Code:
+Not pushed
+
+Workflow:
+Waiting
+
+Runner:
+Not started
+
+Build:
+Not started
+
+Tests:
+Not started
+
+Pipeline:
+Waiting
+
+Choose an action to begin.</div>
+
+            </div>
+
+        </section>
+
+
+        <!-- PRACTICE -->
+
+        <section
+            id="practice"
+            class="reveal"
+        >
+
+            <h2>
+                17. Practice Challenges
+            </h2>
+
+            <div class="practice">
+
+                <h3>
+                    Challenge 1
+                </h3>
+
+                <p>
+                    Where are GitHub Actions workflow files normally stored?
+                </p>
+
+                <input
+                    type="text"
+                    id="practice1"
+                    placeholder="Type your answer..."
+                >
+
+                <button
+                    class="btn"
+                    onclick="checkPractice1()"
+                >
+                    Check
+                </button>
+
+                <div
+                    id="practiceResult1"
+                    class="answer"
+                ></div>
+
+
+                <h3>
+                    Challenge 2
+                </h3>
+
+                <p>
+                    What is the difference between <code>uses</code> and
+                    <code>run</code> in a workflow step?
+                </p>
+
+                <input
+                    type="text"
+                    id="practice2"
+                    placeholder="Type your answer..."
+                >
+
+                <button
+                    class="btn"
+                    onclick="checkPractice2()"
+                >
+                    Check
+                </button>
+
+                <div
+                    id="practiceResult2"
+                    class="answer"
+                ></div>
+
+
+                <h3>
+                    Challenge 3
+                </h3>
+
+                <p>
+                    What does CI stand for?
+                </p>
+
+                <input
+                    type="text"
+                    id="practice3"
+                    placeholder="Type your answer..."
+                >
+
+                <button
+                    class="btn"
+                    onclick="checkPractice3()"
+                >
+                    Check
+                </button>
+
+                <div
+                    id="practiceResult3"
+                    class="answer"
+                ></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- QUIZ -->
+
+        <section
+            id="quiz"
+            class="reveal"
+        >
+
+            <h2>
+                18. Knowledge Check
+            </h2>
+
+
+            <div class="quiz-question">
+
+                <h3>
+                    1. What is GitHub Actions used for?
+                </h3>
+
+                <div
+                    class="option"
+                    data-q="1"
+                    data-answer="true"
+                >
+                    Automating tasks and workflows around GitHub repositories
+                </div>
+
+                <div
+                    class="option"
+                    data-q="1"
+                    data-answer="false"
+                >
+                    Replacing Git completely
+                </div>
+
+                <div
+                    class="option"
+                    data-q="1"
+                    data-answer="false"
+                >
+                    Creating a programming language
+                </div>
+
+            </div>
+
+
+            <div class="quiz-question">
+
+                <h3>
+                    2. What does CI stand for?
+                </h3>
+
+                <div
+                    class="option"
+                    data-q="2"
+                    data-answer="true"
+                >
+                    Continuous Integration
+                </div>
+
+                <div
+                    class="option"
+                    data-q="2"
+                    data-answer="false"
+                >
+                    Code Installation
+                </div>
+
+                <div
+                    class="option"
+                    data-q="2"
+                    data-answer="false"
+                >
+                    Continuous Internet
+                </div>
+
+            </div>
+
+
+            <div class="quiz-question">
+
+                <h3>
+                    3. Where are workflow files stored?
+                </h3>
+
+                <div
+                    class="option"
+                    data-q="3"
+                    data-answer="true"
+                >
+                    .github/workflows/
+                </div>
+
+                <div
+                    class="option"
+                    data-q="3"
+                    data-answer="false"
+                >
+                    .git/actions/
+                </div>
+
+                <div
+                    class="option"
+                    data-q="3"
+                    data-answer="false"
+                >
+                    github/actions/
+                </div>
+
+            </div>
+
+
+            <div class="quiz-question">
+
+                <h3>
+                    4. What does <code>runs-on</code> specify?
+                </h3>
+
+                <div
+                    class="option"
+                    data-q="4"
+                    data-answer="true"
+                >
+                    The runner environment for a job
+                </div>
+
+                <div
+                    class="option"
+                    data-q="4"
+                    data-answer="false"
+                >
+                    The Git commit message
+                </div>
+
+                <div
+                    class="option"
+                    data-q="4"
+                    data-answer="false"
+                >
+                    The repository name
+                </div>
+
+            </div>
+
+
+            <div class="quiz-question">
+
+                <h3>
+                    5. What does <code>run</code> do?
+                </h3>
+
+                <div
+                    class="option"
+                    data-q="5"
+                    data-answer="true"
+                >
+                    Executes a shell command
+                </div>
+
+                <div
+                    class="option"
+                    data-q="5"
+                    data-answer="false"
+                >
+                    Creates a GitHub account
+                </div>
+
+                <div
+                    class="option"
+                    data-q="5"
+                    data-answer="false"
+                >
+                    Deletes the workflow
+                </div>
+
+            </div>
+
+
+            <div class="quiz-question">
+
+                <h3>
+                    6. What should be used for sensitive credentials?
+                </h3>
+
+                <div
+                    class="option"
+                    data-q="6"
+                    data-answer="true"
+                >
+                    Secure secrets or environment configuration
+                </div>
+
+                <div
+                    class="option"
+                    data-q="6"
+                    data-answer="false"
+                >
+                    Hard-coding passwords in the workflow
+                </div>
+
+                <div
+                    class="option"
+                    data-q="6"
+                    data-answer="false"
+                >
+                    Putting API keys in public comments
+                </div>
+
+            </div>
+
+
+            <button
+                class="btn"
+                onclick="calculateQuiz()"
+            >
+                Submit Quiz
+            </button>
+
+            <div id="quizResult"></div>
+
+        </section>
+
+
+        <!-- TAKEAWAY -->
+
+        <section
+            id="takeaway"
+            class="takeaway reveal"
+        >
+
+            <h2>
+                19. Lesson Takeaway
+            </h2>
+
+            <p>
+                GitHub Actions allows developers to automate repetitive
+                development tasks directly from their GitHub repositories.
+            </p>
+
+            <ul>
+
+                <li>
+                    <strong>Automation</strong> reduces repetitive manual work.
+                </li>
+
+                <li>
+                    <strong>CI</strong> automatically validates integrated code changes.
+                </li>
+
+                <li>
+                    <strong>CD</strong> extends automation toward reliable delivery
+                    or deployment.
+                </li>
+
+                <li>
+                    <strong>GitHub Actions</strong> executes automated workflows.
+                </li>
+
+                <li>
+                    Workflow files are normally stored inside
+                    <code>.github/workflows/</code>.
+                </li>
+
+                <li>
+                    A workflow contains <strong>jobs</strong>, and jobs contain
+                    <strong>steps</strong>.
+                </li>
+
+                <li>
+                    <code>uses</code> invokes an existing action, while
+                    <code>run</code> executes a command.
+                </li>
+
+                <li>
+                    <strong>Runners</strong> provide the environment in which
+                    jobs execute.
+                </li>
+
+                <li>
+                    Secrets should be handled securely rather than hard-coded.
+                </li>
+
+            </ul>
+
+
+            <div
+                class="success note"
+                style="margin-top:25px;"
+            >
+
+                <strong>
+                    Next Lesson:
+                </strong>
+
+                Git Best Practices & Common Git Mistakes
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script>
+
+        /* COPY BUTTONS */
+
+        document
+            .querySelectorAll(".copy-btn")
+            .forEach(button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        const code =
+                            button.parentElement
+                                .querySelector("code")
+                                .innerText;
+
+                        navigator.clipboard.writeText(
+                            code
+                        );
+
+                        const oldText =
+                            button.innerText;
+
+                        button.innerText =
+                            "Copied!";
+
+                        setTimeout(
+                            () => {
+
+                                button.innerText =
+                                    oldText;
+
+                            },
+                            1200
+                        );
+
+                    }
+                );
+
+            });
+
+
+        /* SEARCH */
+
+        const searchInput =
+            document.getElementById(
+                "searchInput"
+            );
+
+        searchInput.addEventListener(
+            "input",
+            function () {
+
+                const query =
+                    this.value
+                        .toLowerCase()
+                        .trim();
+
+                document
+                    .querySelectorAll("section")
+                    .forEach(section => {
+
+                        const text =
+                            section.innerText
+                                .toLowerCase();
+
+                        if (
+                            !query ||
+                            text.includes(query)
+                        ) {
+
+                            section.classList
+                                .remove("hidden");
+
+                        } else {
+
+                            section.classList
+                                .add("hidden");
+
+                        }
+
+                    });
+
+            }
+        );
+
+
+        /* SCROLL REVEAL */
+
+        const observer =
+            new IntersectionObserver(
+                entries => {
+
+                    entries.forEach(entry => {
+
+                        if (
+                            entry.isIntersecting
+                        ) {
+
+                            entry.target.classList
+                                .add("visible");
+
+                        }
+
+                    });
+
+                },
+                {
+                    threshold: 0.08
+                }
+            );
+
+
+        document
+            .querySelectorAll(".reveal")
+            .forEach(section => {
+
+                observer.observe(section);
+
+            });
+
+
+        /* ACTIVE SIDEBAR */
+
+        const sections =
+            document.querySelectorAll(
+                "section[id]"
+            );
+
+        const navLinks =
+            document.querySelectorAll(
+                ".nav-link"
+            );
+
+        window.addEventListener(
+            "scroll",
+            () => {
+
+                let current = "";
+
+                sections.forEach(section => {
+
+                    const top =
+                        section.offsetTop -
+                        150;
+
+                    if (
+                        window.scrollY >= top
+                    ) {
+
+                        current =
+                            section.id;
+
+                    }
+
+                });
+
+                navLinks.forEach(link => {
+
+                    link.classList
+                        .remove("active");
+
+                    if (
+                        link.getAttribute("href") ===
+                        "#" + current
+                    ) {
+
+                        link.classList
+                            .add("active");
+
+                    }
+
+                });
+
+            }
+        );
+
+
+        /* CI/CD SIMULATOR */
+
+        let codePushed = false;
+        let runnerStarted = false;
+        let buildCompleted = false;
+        let testsCompleted = false;
+        let pipelineStatus = "Waiting";
+
+
+        function renderSimulator(
+            action
+        ) {
+
+            let output =
+                "GITHUB ACTIONS CI/CD SIMULATOR\n\n";
+
+            output +=
+                "Code:\n" +
+                (
+                    codePushed
+                        ? "Pushed to GitHub"
+                        : "Not pushed"
+                ) +
+                "\n\n";
+
+            output +=
+                "Workflow:\n" +
+                (
+                    codePushed
+                        ? "Triggered"
+                        : "Waiting"
+                ) +
+                "\n\n";
+
+            output +=
+                "Runner:\n" +
+                (
+                    runnerStarted
+                        ? "Running"
+                        : "Not started"
+                ) +
+                "\n\n";
+
+            output +=
+                "Build:\n" +
+                (
+                    buildCompleted
+                        ? "Completed"
+                        : "Not completed"
+                ) +
+                "\n\n";
+
+            output +=
+                "Tests:\n" +
+                (
+                    testsCompleted
+                        ? "Passed"
+                        : "Not completed"
+                ) +
+                "\n\n";
+
+            output +=
+                "Pipeline:\n" +
+                pipelineStatus +
+                "\n\n";
+
+            output +=
+                "ACTION:\n" +
+                action;
+
+            document.getElementById(
+                "simOutput"
+            ).innerText = output;
+
+        }
+
+
+        function pushCode() {
+
+            codePushed = true;
+
+            renderSimulator(
+                "Developer pushed a new commit. GitHub detected the push event."
+            );
+
+        }
+
+
+        function startRunner() {
+
+            if (!codePushed) {
+
+                renderSimulator(
+                    "Push code first so the workflow has a triggering event."
+                );
+
+                return;
+
+            }
+
+            runnerStarted = true;
+
+            renderSimulator(
+                "GitHub Actions started an Ubuntu runner for the job."
+            );
+
+        }
+
+
+        function runBuild() {
+
+            if (!runnerStarted) {
+
+                renderSimulator(
+                    "Start the runner before running the build."
+                );
+
+                return;
+
+            }
+
+            buildCompleted = true;
+
+            renderSimulator(
+                "Build completed successfully."
+            );
+
+        }
+
+
+        function runTests() {
+
+            if (!buildCompleted) {
+
+                renderSimulator(
+                    "Complete the build before running the tests."
+                );
+
+                return;
+
+            }
+
+            testsCompleted = true;
+
+            renderSimulator(
+                "Automated tests completed successfully."
+            );
+
+        }
+
+
+        function passPipeline() {
+
+            if (!testsCompleted) {
+
+                renderSimulator(
+                    "Run the automated tests before marking the pipeline as passed."
+                );
+
+                return;
+
+            }
+
+            pipelineStatus =
+                "SUCCESS ✓";
+
+            renderSimulator(
+                "All required checks passed. The CI pipeline succeeded."
+            );
+
+        }
+
+
+        function failPipeline() {
+
+            pipelineStatus =
+                "FAILED ✕";
+
+            renderSimulator(
+                "A workflow step failed. The pipeline requires attention."
+            );
+
+        }
+
+
+        function resetSimulator() {
+
+            codePushed = false;
+            runnerStarted = false;
+            buildCompleted = false;
+            testsCompleted = false;
+            pipelineStatus = "Waiting";
+
+            renderSimulator(
+                "Simulator reset. Push code to begin."
+            );
+
+        }
+
+
+        /* PRACTICE */
+
+        function normalizeAnswer(
+            value
+        ) {
+
+            return value
+                .trim()
+                .replace(/\s+/g, " ")
+                .toLowerCase();
+
+        }
+
+
+        function showPracticeResult(
+            id,
+            message
+        ) {
+
+            const element =
+                document.getElementById(id);
+
+            element.style.display =
+                "block";
+
+            element.innerHTML =
+                message;
+
+        }
+
+
+        function checkPractice1() {
+
+            const answer =
+                normalizeAnswer(
+                    document.getElementById(
+                        "practice1"
+                    ).value
+                );
+
+            if (
+                answer.includes(".github/workflows") ||
+                answer.includes("github workflows")
+            ) {
+
+                showPracticeResult(
+                    "practiceResult1",
+                    "✓ Correct! Workflow files are normally stored inside .github/workflows/."
+                );
+
+            } else {
+
+                showPracticeResult(
+                    "practiceResult1",
+                    "Think about the special .github directory and its workflows folder."
+                );
+
+            }
+
+        }
+
+
+        function checkPractice2() {
+
+            const answer =
+                normalizeAnswer(
+                    document.getElementById(
+                        "practice2"
+                    ).value
+                );
+
+            if (
+                answer.includes("uses") &&
+                answer.includes("run")
+            ) {
+
+                showPracticeResult(
+                    "practiceResult2",
+                    "✓ Correct! uses invokes an existing action, while run executes a shell command."
+                );
+
+            } else {
+
+                showPracticeResult(
+                    "practiceResult2",
+                    "Remember: uses → existing action, run → shell command."
+                );
+
+            }
+
+        }
+
+
+        function checkPractice3() {
+
+            const answer =
+                normalizeAnswer(
+                    document.getElementById(
+                        "practice3"
+                    ).value
+                );
+
+            if (
+                answer.includes("continuous integration")
+            ) {
+
+                showPracticeResult(
+                    "practiceResult3",
+                    "✓ Correct! CI stands for Continuous Integration."
+                );
+
+            } else {
+
+                showPracticeResult(
+                    "practiceResult3",
+                    "CI stands for Continuous Integration."
+                );
+
+            }
+
+        }
+
+
+        /* QUIZ */
+
+        const selectedAnswers = {};
+
+        document
+            .querySelectorAll(".option")
+            .forEach(option => {
+
+                option.addEventListener(
+                    "click",
+                    () => {
+
+                        const question =
+                            option.dataset.q;
+
+                        document
+                            .querySelectorAll(
+                                '.option[data-q="' +
+                                question +
+                                '"]'
+                            )
+                            .forEach(item => {
+
+                                item.classList
+                                    .remove(
+                                        "correct",
+                                        "wrong"
+                                    );
+
+                            });
+
+                        const isCorrect =
+                            option.dataset.answer ===
+                            "true";
+
+                        option.classList.add(
+                            isCorrect
+                                ? "correct"
+                                : "wrong"
+                        );
+
+                        selectedAnswers[
+                            question
+                        ] = isCorrect;
+
+                    }
+                );
+
+            });
+
+
+        function calculateQuiz() {
+
+            const total = 6;
+
+            let score = 0;
+
+            Object.values(
+                selectedAnswers
+            ).forEach(answer => {
+
+                if (answer) {
+                    score++;
+                }
+
+            });
+
+            const result =
+                document.getElementById(
+                    "quizResult"
+                );
+
+            result.innerText =
+                "Your Score: " +
+                score +
+                " / " +
+                total;
+
+            if (
+                score === total
+            ) {
+
+                result.innerText +=
+                    " — Excellent! You understand GitHub Actions and CI/CD.";
+
+            } else if (
+                score >= 4
+            ) {
+
+                result.innerText +=
+                    " — Good work! Review workflows and triggers once more.";
+
+            } else {
+
+                result.innerText +=
+                    " — Review the lesson and try again.";
+
+            }
+
+        }
+
+    </script>
+
+</body>
+</html>

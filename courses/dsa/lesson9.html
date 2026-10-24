@@ -1,0 +1,3877 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS | Lesson 9 — Searching & Binary Search</title>
+
+<link rel="stylesheet" href="lesson9.css">
+
+<style>
+/* =========================================================
+   EXTRA LESSON-9 COMPONENTS
+   These styles make the new concepts work even if lesson9.css
+   is being updated separately.
+========================================================= */
+
+.concept-grid,
+.template-grid,
+.pattern-grid,
+.challenge-grid,
+.proof-grid,
+.interview-pattern-grid {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:20px;
+    margin-top:28px;
+}
+
+.info-card,
+.template-card,
+.challenge-card,
+.proof-card,
+.interview-pattern {
+    padding:26px;
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:18px;
+    background:rgba(255,255,255,.035);
+}
+
+.info-card h3,
+.template-card h3,
+.challenge-card h3,
+.proof-card h3,
+.interview-pattern h3 {
+    margin:8px 0 12px;
+}
+
+.info-card p,
+.template-card p,
+.challenge-card p,
+.proof-card p,
+.interview-pattern p {
+    line-height:1.7;
+}
+
+.number-badge {
+    display:inline-flex;
+    width:38px;
+    height:38px;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    background:rgba(255,255,255,.10);
+    font-weight:800;
+}
+
+.search-space-map {
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:16px;
+    margin-top:28px;
+}
+
+.space-box {
+    padding:24px;
+    border-radius:18px;
+    text-align:center;
+    border:1px solid rgba(255,255,255,.10);
+    background:rgba(255,255,255,.035);
+}
+
+.space-box .symbol {
+    font-size:34px;
+    margin-bottom:10px;
+}
+
+.space-box code {
+    display:block;
+    margin-top:12px;
+}
+
+.template-number {
+    font-size:44px;
+    font-weight:900;
+    opacity:.35;
+}
+
+.template-code {
+    margin-top:18px;
+    padding:18px;
+    overflow:auto;
+    border-radius:12px;
+    background:#090d14;
+}
+
+.invariant-box {
+    margin-top:28px;
+    padding:28px;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,.12);
+    background:linear-gradient(
+        135deg,
+        rgba(255,255,255,.06),
+        rgba(255,255,255,.02)
+    );
+}
+
+.invariant-line {
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+    margin:15px 0;
+}
+
+.invariant-line b {
+    min-width:30px;
+}
+
+.compare-table {
+    width:100%;
+    border-collapse:collapse;
+    margin-top:24px;
+    overflow:hidden;
+    border-radius:14px;
+}
+
+.compare-table th,
+.compare-table td {
+    padding:15px;
+    text-align:left;
+    border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.compare-table th {
+    background:rgba(255,255,255,.07);
+}
+
+.duplicate-demo {
+    margin-top:25px;
+    padding:25px;
+    border-radius:18px;
+    background:rgba(255,255,255,.035);
+    border:1px solid rgba(255,255,255,.10);
+}
+
+.duplicate-array {
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:20px 0;
+}
+
+.duplicate-array span {
+    min-width:54px;
+    height:54px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:12px;
+    background:rgba(255,255,255,.08);
+    font-weight:800;
+}
+
+.duplicate-array span.target {
+    outline:2px solid currentColor;
+}
+
+.boundary-animation {
+    margin-top:25px;
+    padding:24px;
+    border-radius:18px;
+    background:#090d14;
+}
+
+.boundary-row {
+    display:flex;
+    gap:8px;
+    margin:16px 0;
+}
+
+.boundary-row span {
+    flex:1;
+    text-align:center;
+    padding:14px 4px;
+    border-radius:8px;
+    background:rgba(255,255,255,.07);
+}
+
+.boundary-row .false-state {
+    opacity:.45;
+}
+
+.boundary-row .true-state {
+    font-weight:800;
+}
+
+.answer-pipeline {
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:10px;
+    margin-top:25px;
+}
+
+.pipeline-step {
+    text-align:center;
+    padding:20px 10px;
+    border-radius:14px;
+    background:rgba(255,255,255,.05);
+}
+
+.pipeline-step strong {
+    display:block;
+    margin-bottom:7px;
+}
+
+.monotonic-demo {
+    margin-top:24px;
+    padding:24px;
+    border-radius:16px;
+    background:#090d14;
+}
+
+.monotonic-values {
+    display:flex;
+    gap:7px;
+    flex-wrap:wrap;
+    margin-top:15px;
+}
+
+.monotonic-values span {
+    padding:9px 14px;
+    border-radius:8px;
+    background:rgba(255,255,255,.08);
+}
+
+.monotonic-values .true {
+    font-weight:800;
+}
+
+.pattern-tag {
+    display:inline-block;
+    margin-top:12px;
+    padding:7px 11px;
+    border-radius:999px;
+    background:rgba(255,255,255,.08);
+    font-size:.85rem;
+}
+
+.proof-step {
+    display:flex;
+    gap:16px;
+    margin:18px 0;
+}
+
+.proof-step span {
+    width:36px;
+    height:36px;
+    min-width:36px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,255,255,.10);
+    font-weight:800;
+}
+
+.challenge-card {
+    cursor:pointer;
+    transition:.2s ease;
+}
+
+.challenge-card:hover {
+    transform:translateY(-3px);
+}
+
+.challenge-answer {
+    margin-top:15px;
+    padding:15px;
+    border-radius:10px;
+    background:rgba(255,255,255,.05);
+}
+
+.interview-pattern-grid {
+    grid-template-columns:repeat(3,minmax(0,1fr));
+}
+
+.interview-pattern .difficulty {
+    display:inline-block;
+    padding:5px 9px;
+    border-radius:999px;
+    font-size:.75rem;
+    background:rgba(255,255,255,.08);
+    margin-bottom:10px;
+}
+
+.quiz-explanation {
+    margin-top:12px;
+    padding:14px;
+    border-radius:10px;
+    background:rgba(255,255,255,.05);
+    line-height:1.6;
+}
+
+.checklist {
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+    margin-top:20px;
+}
+
+.check-item {
+    padding:16px;
+    border-radius:12px;
+    background:rgba(255,255,255,.045);
+}
+
+@media(max-width:900px) {
+    .concept-grid,
+    .template-grid,
+    .pattern-grid,
+    .challenge-grid,
+    .proof-grid,
+    .interview-pattern-grid,
+    .search-space-map,
+    .answer-pipeline,
+    .checklist {
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =========================================================
+     TOP BAR
+========================================================= -->
+
+<header class="topbar">
+
+    <a class="brand" href="#">ZENSUS<span>.</span></a>
+
+    <div class="lesson-pill">
+        DSA • LESSON 09
+    </div>
+
+    <div class="top-progress">
+        <span id="progressFill"></span>
+    </div>
+
+</header>
+
+
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
+
+<aside class="sidebar">
+
+    <div class="toc-title">
+        LESSON MAP
+    </div>
+
+    <a href="#intro" class="toc active">01 · Searching</a>
+    <a href="#searchspace" class="toc">02 · Search Space</a>
+    <a href="#linear" class="toc">03 · Linear Search</a>
+    <a href="#binary" class="toc">04 · Binary Search</a>
+    <a href="#templates" class="toc">05 · 3 Templates</a>
+    <a href="#invariant" class="toc">06 · Invariants</a>
+    <a href="#boundaries" class="toc">07 · Boundaries</a>
+    <a href="#patterns" class="toc">08 · Patterns</a>
+    <a href="#answer" class="toc">09 · Search on Answer</a>
+    <a href="#advanced" class="toc">10 · Advanced Search</a>
+    <a href="#proof" class="toc">11 · Correctness</a>
+    <a href="#recognition" class="toc">12 · Recognition</a>
+    <a href="#challenge" class="toc">13 · Challenge</a>
+    <a href="#mistakes" class="toc">14 · Mistakes</a>
+    <a href="#quiz" class="toc">15 · Quiz</a>
+    <a href="#mastery" class="toc">16 · Mastery</a>
+
+</aside>
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<main class="page">
+
+
+<!-- =========================================================
+     HERO
+========================================================= -->
+
+<section class="hero" id="intro">
+
+    <div class="eyebrow">
+        DSA / SEARCHING ALGORITHMS
+    </div>
+
+    <h1>
+        Searching &
+        <span>Binary Search</span>
+    </h1>
+
+    <p class="hero-sub">
+        Don't memorize binary search. Learn how to identify the
+        search space, define the invariant, eliminate impossible
+        candidates, prove correctness, and recognize interview
+        patterns from beginner to advanced.
+    </p>
+
+    <div class="hero-tags">
+        <span>Linear Search</span>
+        <span>Search Space</span>
+        <span>Binary Search</span>
+        <span>Invariants</span>
+        <span>Boundaries</span>
+        <span>Rotated Arrays</span>
+        <span>Answer Search</span>
+        <span>Interview Patterns</span>
+    </div>
+
+    <div class="hero-actions">
+        <a href="#searchspace" class="btn primary">
+            Start Learning →
+        </a>
+
+        <a href="#challenge" class="btn">
+            Test Yourself
+        </a>
+    </div>
+
+    <div class="hero-visual">
+
+        <div class="code-orb">
+
+<span class="kw">while</span> left <span class="op">&lt;=</span> right:
+<br>
+&nbsp;&nbsp;mid = left + (right-left)//<span class="num">2</span>
+<br>
+&nbsp;&nbsp;<span class="kw">if</span> nums[mid] == target:
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> mid
+<br>
+&nbsp;&nbsp;<span class="kw">elif</span> nums[mid] &lt; target:
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;left = mid + <span class="num">1</span>
+<br>
+&nbsp;&nbsp;<span class="kw">else</span>:
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;right = mid - <span class="num">1</span>
+
+        </div>
+
+        <div class="hero-rule">
+
+            <b>Core idea</b>
+
+            <span>
+                Don't search harder.
+            </span>
+
+            <strong>
+                Eliminate faster.
+            </strong>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     SEARCH SPACE
+========================================================= -->
+
+<section class="section" id="searchspace">
+
+    <div class="section-label">
+        <b>02</b>
+        <span>SEARCH SPACE</span>
+    </div>
+
+    <h2>
+        Before searching, ask: What exactly am I searching?
+    </h2>
+
+    <p class="lead">
+        The most important binary-search skill is not writing
+        <code>while</code>. It is correctly defining the space
+        containing the answer.
+    </p>
+
+
+    <div class="concept-box">
+
+        <div class="box-title">
+            🧠 Search Space
+        </div>
+
+        <p>
+            A <b>search space</b> is the set of all candidates
+            that could still be the answer.
+        </p>
+
+        <p>
+            Binary search repeatedly removes candidates that
+            are proven impossible.
+        </p>
+
+    </div>
+
+
+    <div class="search-space-map">
+
+        <div class="space-box">
+
+            <div class="symbol">📦</div>
+
+            <h3>Array Values</h3>
+
+            <p>
+                Search for a target inside sorted values.
+            </p>
+
+            <code>[2, 5, 8, 12, 19]</code>
+
+        </div>
+
+
+        <div class="space-box">
+
+            <div class="symbol">📍</div>
+
+            <h3>Indices</h3>
+
+            <p>
+                Search for the first/last valid position.
+            </p>
+
+            <code>0 ... n-1</code>
+
+        </div>
+
+
+        <div class="space-box">
+
+            <div class="symbol">🎯</div>
+
+            <h3>Answer Space</h3>
+
+            <p>
+                Search possible numeric answers.
+            </p>
+
+            <code>minimum speed = ?</code>
+
+        </div>
+
+    </div>
+
+
+    <div class="grid two">
+
+        <article class="card">
+
+            <span class="card-icon">1️⃣</span>
+
+            <h3>Array Search</h3>
+
+            <p>
+                "Does 37 exist in this sorted array?"
+            </p>
+
+            <div class="tag-row">
+                <span>Values are ordered</span>
+                <span>O(log n)</span>
+            </div>
+
+        </article>
+
+
+        <article class="card">
+
+            <span class="card-icon">2️⃣</span>
+
+            <h3>Boundary Search</h3>
+
+            <p>
+                "Where does the property change?"
+            </p>
+
+            <div class="tag-row">
+                <span>First true</span>
+                <span>Last true</span>
+            </div>
+
+        </article>
+
+
+        <article class="card">
+
+            <span class="card-icon">3️⃣</span>
+
+            <h3>Answer Search</h3>
+
+            <p>
+                "What is the smallest possible capacity?"
+            </p>
+
+            <div class="tag-row">
+                <span>Feasibility check</span>
+                <span>Monotonic</span>
+            </div>
+
+        </article>
+
+
+        <article class="card">
+
+            <span class="card-icon">4️⃣</span>
+
+            <h3>Index Search</h3>
+
+            <p>
+                "Find the first index satisfying a condition."
+            </p>
+
+            <div class="tag-row">
+                <span>Boundary</span>
+                <span>Invariant</span>
+            </div>
+
+        </article>
+
+    </div>
+
+
+    <div class="callout success">
+
+        <b>Interview rule:</b>
+
+        Before coding, literally say:
+
+        <br><br>
+
+        <b>
+            "My search space is ______."
+        </b>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     LINEAR SEARCH
+========================================================= -->
+
+<section class="section" id="linear">
+
+    <div class="section-label">
+        <b>03</b>
+        <span>SEARCHING FUNDAMENTALS</span>
+    </div>
+
+    <h2>
+        Linear Search
+    </h2>
+
+    <p class="lead">
+        Linear search checks candidates one by one. It does not
+        require sorted data.
+    </p>
+
+
+    <div class="algorithm-card">
+
+        <div class="algorithm-head">
+            <span>ALGORITHM</span>
+            <h3>Linear Search</h3>
+        </div>
+
+        <div class="flowchart">
+
+            <div class="flow-node start">
+                START
+            </div>
+
+            <div class="arrow">
+                ↓
+            </div>
+
+            <div class="flow-node">
+                Set i = 0
+            </div>
+
+            <div class="arrow">
+                ↓
+            </div>
+
+            <div class="flow-node decision">
+                i &lt; n?
+            </div>
+
+            <div class="branch">
+                <span>NO → NOT FOUND</span>
+                <span>YES ↓</span>
+            </div>
+
+            <div class="flow-node">
+                Compare arr[i] with target
+            </div>
+
+            <div class="branch">
+                <span>EQUAL → RETURN i</span>
+                <span>NOT EQUAL ↓</span>
+            </div>
+
+            <div class="flow-node">
+                i = i + 1
+            </div>
+
+            <div class="arrow">
+                ↺ Repeat
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="code-grid">
+
+        <div class="code-panel">
+
+            <div class="code-title">
+                Python
+            </div>
+
+<pre><code><span class="kw">def</span> <span class="fn">linear_search</span>(arr, target):
+
+    <span class="kw">for</span> i <span class="kw">in</span> range(len(arr)):
+
+        <span class="kw">if</span> arr[i] == target:
+            <span class="kw">return</span> i
+
+    <span class="kw">return</span> -1</code></pre>
+
+        </div>
+
+
+        <div class="explain-panel">
+
+            <h3>
+                Complexity
+            </h3>
+
+            <p>
+                Best case:
+                <b>O(1)</b>
+            </p>
+
+            <p>
+                Worst case:
+                <b>O(n)</b>
+            </p>
+
+            <p>
+                Space:
+                <b>O(1)</b>
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     BINARY SEARCH
+========================================================= -->
+
+<section class="section" id="binary">
+
+    <div class="section-label">
+        <b>04</b>
+        <span>BINARY SEARCH</span>
+    </div>
+
+    <h2>
+        Binary Search: Eliminate Half
+    </h2>
+
+    <p class="lead">
+        Binary search works when the search space has enough
+        order or monotonic structure to prove that an entire
+        portion can be discarded.
+    </p>
+
+
+    <div class="big-idea">
+
+        <div class="big-number">
+            ½
+        </div>
+
+        <div>
+
+            <b>
+                Every decision removes approximately half
+                of the remaining candidates.
+            </b>
+
+            <br>
+
+            <span>
+                n → n/2 → n/4 → n/8 → ... → 1
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- VISUALIZER -->
+
+    <div class="search-demo">
+
+        <div class="demo-head">
+
+            <div>
+                <span class="live-dot"></span>
+                BINARY SEARCH VISUALIZER
+            </div>
+
+            <button class="small-btn" id="resetDemo">
+                Reset
+            </button>
+
+        </div>
+
+
+        <div class="array" id="searchArray"></div>
+
+
+        <div class="demo-info">
+
+            <span>
+                Target:
+                <b id="targetValue">23</b>
+            </span>
+
+            <span>
+                Left:
+                <b id="leftValue">0</b>
+            </span>
+
+            <span>
+                Mid:
+                <b id="midValue">4</b>
+            </span>
+
+            <span>
+                Right:
+                <b id="rightValue">8</b>
+            </span>
+
+        </div>
+
+
+        <div class="demo-controls">
+
+            <button class="btn primary" id="stepSearch">
+                Next Step →
+            </button>
+
+            <button class="btn" id="autoSearch">
+                Auto Play
+            </button>
+
+        </div>
+
+
+        <p class="demo-note" id="demoNote">
+            Start by checking the middle element.
+        </p>
+
+    </div>
+
+
+    <!-- CORE ALGORITHM -->
+
+    <div class="algorithm-card">
+
+        <div class="algorithm-head">
+
+            <span>
+                CORE ALGORITHM
+            </span>
+
+            <h3>
+                Binary Search — Closed Interval [left, right]
+            </h3>
+
+        </div>
+
+
+        <div class="flowchart horizontal">
+
+            <div class="flow-node start">
+                START
+            </div>
+
+            <div class="arrow">
+                →
+            </div>
+
+            <div class="flow-node">
+                left = 0
+                <br>
+                right = n - 1
+            </div>
+
+            <div class="arrow">
+                →
+            </div>
+
+            <div class="flow-node decision">
+                left ≤ right?
+            </div>
+
+            <div class="arrow">
+                YES →
+            </div>
+
+            <div class="flow-node">
+                mid = left + (right-left)//2
+            </div>
+
+            <div class="arrow">
+                →
+            </div>
+
+            <div class="flow-node decision">
+                Compare target & arr[mid]
+            </div>
+
+        </div>
+
+
+        <div class="branch large">
+
+            <span>
+                == → RETURN MID
+            </span>
+
+            <span>
+                &lt; → RIGHT = MID - 1
+            </span>
+
+            <span>
+                &gt; → LEFT = MID + 1
+            </span>
+
+        </div>
+
+
+        <div class="flow-end">
+
+            left &gt; right → NOT FOUND
+
+        </div>
+
+    </div>
+
+
+    <div class="code-grid">
+
+        <div class="code-panel">
+
+            <div class="code-title">
+                Canonical Python
+            </div>
+
+<pre><code><span class="kw">def</span> <span class="fn">binary_search</span>(arr, target):
+
+    left = 0
+    right = len(arr) - 1
+
+    <span class="kw">while</span> left &lt;= right:
+
+        mid = left + (right - left) // 2
+
+        <span class="kw">if</span> arr[mid] == target:
+            <span class="kw">return</span> mid
+
+        <span class="kw">elif</span> arr[mid] &lt; target:
+            left = mid + 1
+
+        <span class="kw">else</span>:
+            right = mid - 1
+
+    <span class="kw">return</span> -1</code></pre>
+
+        </div>
+
+
+        <div class="explain-panel">
+
+            <h3>
+                Why these updates?
+            </h3>
+
+            <p>
+                <code>left = mid + 1</code>
+                means mid and everything before it are impossible.
+            </p>
+
+            <p>
+                <code>right = mid - 1</code>
+                means mid and everything after it are impossible.
+            </p>
+
+            <p>
+                <code>left &lt;= right</code>
+                checks the final remaining candidate.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     THREE TEMPLATES
+========================================================= -->
+
+<section class="section" id="templates">
+
+    <div class="section-label">
+        <b>05</b>
+        <span>THE 3 BINARY SEARCH TEMPLATES</span>
+    </div>
+
+    <h2>
+        Stop memorizing dozens of solutions
+    </h2>
+
+    <p class="lead">
+        A huge number of binary-search interview problems can
+        be reduced to three fundamental templates.
+    </p>
+
+
+    <div class="template-grid">
+
+        <!-- TEMPLATE 1 -->
+
+        <article class="template-card">
+
+            <div class="template-number">
+                01
+            </div>
+
+            <h3>
+                Exact Match
+            </h3>
+
+            <p>
+                Find whether a target exists and return its position.
+            </p>
+
+            <div class="recognize">
+                Sorted array + exact target
+            </div>
+
+<pre class="template-code"><code>left = 0
+right = n - 1
+
+while left &lt;= right:
+
+    mid = left + (right-left)//2
+
+    if arr[mid] == target:
+        return mid
+
+    elif arr[mid] &lt; target:
+        left = mid + 1
+
+    else:
+        right = mid - 1
+
+return -1</code></pre>
+
+        </article>
+
+
+        <!-- TEMPLATE 2 -->
+
+        <article class="template-card">
+
+            <div class="template-number">
+                02
+            </div>
+
+            <h3>
+                Boundary Search
+            </h3>
+
+            <p>
+                Find the first or last position satisfying a condition.
+            </p>
+
+            <div class="recognize">
+                Think: first true / last true
+            </div>
+
+<pre class="template-code"><code>ans = -1
+
+while left &lt;= right:
+
+    mid = left + (right-left)//2
+
+    if condition(mid):
+        ans = mid
+        right = mid - 1
+    else:
+        left = mid + 1
+
+return ans</code></pre>
+
+        </article>
+
+
+        <!-- TEMPLATE 3 -->
+
+        <article class="template-card">
+
+            <div class="template-number">
+                03
+            </div>
+
+            <h3>
+                Binary Search on Answer
+            </h3>
+
+            <p>
+                Search possible numeric answers instead of array values.
+            </p>
+
+            <div class="recognize">
+                Optimize X + monotonic feasibility
+            </div>
+
+<pre class="template-code"><code>lo = minimum_answer
+hi = maximum_answer
+
+while lo &lt;= hi:
+
+    mid = lo + (hi-lo)//2
+
+    if feasible(mid):
+        answer = mid
+        hi = mid - 1
+    else:
+        lo = mid + 1
+
+return answer</code></pre>
+
+        </article>
+
+
+        <!-- TEMPLATE 4 -->
+
+        <article class="template-card">
+
+            <div class="template-number">
+                ★
+            </div>
+
+            <h3>
+                The Universal Mental Model
+            </h3>
+
+            <p>
+                Every template asks the same question:
+                what can I prove is impossible?
+            </p>
+
+<pre class="template-code"><code>DEFINE SEARCH SPACE
+
+        ↓
+
+CHECK MID
+
+        ↓
+
+PROVE ONE SIDE IMPOSSIBLE
+
+        ↓
+
+DISCARD IT
+
+        ↓
+
+REPEAT</code></pre>
+
+        </article>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     INVARIANT
+========================================================= -->
+
+<section class="section" id="invariant">
+
+    <div class="section-label">
+        <b>06</b>
+        <span>INVARIANTS</span>
+    </div>
+
+    <h2>
+        The invariant: your binary-search safety net
+    </h2>
+
+    <p class="lead">
+        An invariant is a statement that remains true before
+        and after every iteration.
+    </p>
+
+
+    <div class="invariant-box">
+
+        <div class="box-title">
+            🔒 Closed Interval Invariant
+        </div>
+
+        <div class="invariant-line">
+            <b>01</b>
+            <span>
+                At every iteration,
+                <code>[left, right]</code>
+                contains every index that could still be the answer.
+            </span>
+        </div>
+
+        <div class="invariant-line">
+            <b>02</b>
+            <span>
+                Anything outside the interval has already been
+                proven impossible.
+            </span>
+        </div>
+
+        <div class="invariant-line">
+            <b>03</b>
+            <span>
+                When <code>left &gt; right</code>, there are no
+                candidates remaining.
+            </span>
+        </div>
+
+    </div>
+
+
+    <div class="grid two">
+
+        <article class="card">
+
+            <h3>
+                What does [left, right] mean?
+            </h3>
+
+            <p>
+                It means:
+            </p>
+
+            <div class="callout">
+                "These are the only positions I still believe
+                could contain the answer."
+            </div>
+
+        </article>
+
+
+        <article class="card">
+
+            <h3>
+                Why is this powerful?
+            </h3>
+
+            <p>
+                Every update must preserve this statement.
+                If your update breaks it, your algorithm is wrong.
+            </p>
+
+        </article>
+
+    </div>
+
+
+    <div class="golden-rule">
+
+        <span>
+            INTERVIEW FORMULA
+        </span>
+
+        <h3>
+            State your invariant before coding.
+        </h3>
+
+        <p>
+            "My current interval contains all possible answers.
+            Whenever I discard a side, I have proven that side
+            cannot contain the answer."
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     MID + LOOP CONDITIONS
+========================================================= -->
+
+<section class="section" id="boundaries">
+
+    <div class="section-label">
+        <b>07</b>
+        <span>MID & BOUNDARIES</span>
+    </div>
+
+    <h2>
+        Understand the boundaries, not just the syntax
+    </h2>
+
+
+    <h3>
+        Why does this midpoint formula work?
+    </h3>
+
+<pre class="template-code"><code>mid = left + (right - left) // 2</code></pre>
+
+
+    <div class="concept-grid">
+
+        <article class="info-card">
+
+            <span class="number-badge">
+                1
+            </span>
+
+            <h3>
+                left + half the distance
+            </h3>
+
+            <p>
+                <code>right - left</code> gives the distance between
+                the boundaries.
+            </p>
+
+        </article>
+
+
+        <article class="info-card">
+
+            <span class="number-badge">
+                2
+            </span>
+
+            <h3>
+                Integer division
+            </h3>
+
+            <p>
+                <code>// 2</code> gives the integer midpoint.
+            </p>
+
+        </article>
+
+
+        <article class="info-card">
+
+            <span class="number-badge">
+                3
+            </span>
+
+            <h3>
+                Overflow safety
+            </h3>
+
+            <p>
+                In fixed-width languages, <code>(left + right)</code>
+                can overflow when both values are large.
+            </p>
+
+        </article>
+
+
+        <article class="info-card">
+
+            <span class="number-badge">
+                4
+            </span>
+
+            <h3>
+                Same mathematical midpoint
+            </h3>
+
+            <p>
+                The formula still represents the middle of the
+                current interval.
+            </p>
+
+        </article>
+
+    </div>
+
+
+    <h3 style="margin-top:45px;">
+        Loop condition: <code>&lt;=</code> vs <code>&lt;</code>
+    </h3>
+
+
+    <table class="compare-table">
+
+        <thead>
+
+            <tr>
+                <th>Condition</th>
+                <th>Interval idea</th>
+                <th>Typical use</th>
+                <th>Important point</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+                <td><code>left &lt;= right</code></td>
+                <td>Closed interval [L,R]</td>
+                <td>Exact search</td>
+                <td>One final element is still checked</td>
+            </tr>
+
+            <tr>
+                <td><code>left &lt; right</code></td>
+                <td>Boundary convergence</td>
+                <td>First true / minimum</td>
+                <td>Loop stops when boundaries meet</td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+
+    <div class="callout">
+
+        <b>Important:</b>
+
+        Neither condition is universally "better."
+
+        The correct condition depends on your interval definition
+        and what your loop is designed to return.
+
+    </div>
+
+
+    <!-- DUPLICATES -->
+
+    <div class="duplicate-demo">
+
+        <div class="box-title">
+            🎯 Duplicate Visualization
+        </div>
+
+        <p>
+            Consider:
+        </p>
+
+        <div class="duplicate-array">
+
+            <span>1</span>
+            <span class="target">2</span>
+            <span class="target">2</span>
+            <span class="target">2</span>
+            <span>3</span>
+
+        </div>
+
+        <p>
+            Target = <b>2</b>
+        </p>
+
+        <p>
+            A normal binary search may return any of the three
+            occurrences.
+        </p>
+
+        <p>
+            For the <b>first occurrence</b>, finding 2 is not enough.
+            Record it, then continue searching left.
+        </p>
+
+        <p>
+            For the <b>last occurrence</b>, record it, then continue
+            searching right.
+        </p>
+
+    </div>
+
+
+    <div class="code-grid">
+
+        <div class="code-panel">
+
+            <div class="code-title">
+                First occurrence
+            </div>
+
+<pre><code>ans = -1
+
+while left &lt;= right:
+
+    mid = left + (right-left)//2
+
+    if arr[mid] == target:
+
+        ans = mid
+        right = mid - 1
+
+    elif arr[mid] &lt; target:
+        left = mid + 1
+
+    else:
+        right = mid - 1
+
+return ans</code></pre>
+
+        </div>
+
+
+        <div class="code-panel">
+
+            <div class="code-title">
+                Last occurrence
+            </div>
+
+<pre><code>ans = -1
+
+while left &lt;= right:
+
+    mid = left + (right-left)//2
+
+    if arr[mid] == target:
+
+        ans = mid
+        left = mid + 1
+
+    elif arr[mid] &lt; target:
+        left = mid + 1
+
+    else:
+        right = mid - 1
+
+return ans</code></pre>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     PATTERNS
+========================================================= -->
+
+<section class="section" id="patterns">
+
+    <div class="section-label">
+        <b>08</b>
+        <span>CORE INTERVIEW PATTERNS</span>
+    </div>
+
+    <h2>
+        Binary-search patterns you must recognize
+    </h2>
+
+
+    <div class="pattern-grid">
+
+        <article class="pattern">
+            <div class="pnum">A</div>
+            <h3>Exact Search</h3>
+            <p>
+                Find target in sorted array.
+            </p>
+            <span class="pattern-tag">
+                target == arr[mid]
+            </span>
+        </article>
+
+
+        <article class="pattern">
+            <div class="pnum">B</div>
+            <h3>First Occurrence</h3>
+            <p>
+                Find leftmost target.
+            </p>
+            <span class="pattern-tag">
+                found → go left
+            </span>
+        </article>
+
+
+        <article class="pattern">
+            <div class="pnum">C</div>
+            <h3>Last Occurrence</h3>
+            <p>
+                Find rightmost target.
+            </p>
+            <span class="pattern-tag">
+                found → go right
+            </span>
+        </article>
+
+
+        <article class="pattern">
+            <div class="pnum">D</div>
+            <h3>Lower Bound</h3>
+            <p>
+                First index where arr[i] ≥ target.
+            </p>
+            <span class="pattern-tag">
+                first true
+            </span>
+        </article>
+
+
+        <article class="pattern">
+            <div class="pnum">E</div>
+            <h3>Upper Bound</h3>
+            <p>
+                First index where arr[i] &gt; target.
+            </p>
+            <span class="pattern-tag">
+                first greater
+            </span>
+        </article>
+
+
+        <article class="pattern">
+            <div class="pnum">F</div>
+            <h3>Rotated Array</h3>
+            <p>
+                Identify which half is sorted.
+            </p>
+            <span class="pattern-tag">
+                sorted half
+            </span>
+        </article>
+
+
+        <article class="pattern">
+            <div class="pnum">G</div>
+            <h3>Peak Element</h3>
+            <p>
+                Move toward the side that can contain a peak.
+            </p>
+            <span class="pattern-tag">
+                directional
+            </span>
+        </article>
+
+
+        <article class="pattern">
+            <div class="pnum">H</div>
+            <h3>Nearly Sorted</h3>
+            <p>
+                Check nearby positions around mid.
+            </p>
+            <span class="pattern-tag">
+                mid ± 1
+            </span>
+        </article>
+
+
+        <article class="pattern">
+            <div class="pnum">I</div>
+            <h3>Infinite Array</h3>
+            <p>
+                Expand the search window first.
+            </p>
+            <span class="pattern-tag">
+                exponential range
+            </span>
+        </article>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     BINARY SEARCH ON ANSWER
+========================================================= -->
+
+<section class="section" id="answer">
+
+    <div class="section-label">
+        <b>09</b>
+        <span>BINARY SEARCH ON ANSWER ⭐</span>
+    </div>
+
+    <h2>
+        When there is no sorted array
+    </h2>
+
+    <p class="lead">
+        One of the most important interview upgrades is realizing
+        that binary search does not require an array.
+    </p>
+
+
+    <div class="big-idea">
+
+        <div class="big-number">
+            ?
+        </div>
+
+        <div>
+
+            <b>
+                Search the possible answers.
+            </b>
+
+            <br>
+
+            Example:
+            "What is the minimum speed that can finish the work?"
+        </div>
+
+    </div>
+
+
+    <div class="answer-pipeline">
+
+        <div class="pipeline-step">
+            <strong>01</strong>
+            Identify answer range
+        </div>
+
+        <div class="pipeline-step">
+            <strong>02</strong>
+            Pick mid
+        </div>
+
+        <div class="pipeline-step">
+            <strong>03</strong>
+            Check feasible(mid)
+        </div>
+
+        <div class="pipeline-step">
+            <strong>04</strong>
+            Prove monotonicity
+        </div>
+
+        <div class="pipeline-step">
+            <strong>05</strong>
+            Discard half
+        </div>
+
+    </div>
+
+
+    <div class="concept-grid">
+
+        <article class="info-card">
+
+            <h3>
+                Step 1 — Identify answer space
+            </h3>
+
+            <p>
+                Example:
+                minimum eating speed is between
+                <code>1</code> and <code>max(piles)</code>.
+            </p>
+
+        </article>
+
+
+        <article class="info-card">
+
+            <h3>
+                Step 2 — Define feasibility
+            </h3>
+
+            <p>
+                Create a function:
+                <code>feasible(x)</code>
+                that tells whether candidate x works.
+            </p>
+
+        </article>
+
+
+        <article class="info-card">
+
+            <h3>
+                Step 3 — Prove monotonicity
+            </h3>
+
+            <p>
+                If speed 10 works, then speeds 11, 12, 13...
+                also work.
+            </p>
+
+        </article>
+
+
+        <article class="info-card">
+
+            <h3>
+                Step 4 — Choose optimization direction
+            </h3>
+
+            <p>
+                For minimum feasible value:
+                when feasible(mid) is true, move left.
+            </p>
+
+        </article>
+
+    </div>
+
+
+    <div class="monotonic-demo">
+
+        <h3>
+            Monotonicity
+        </h3>
+
+        <p>
+            Binary search needs a predictable True/False transition.
+        </p>
+
+        <div class="monotonic-values">
+
+            <span class="false">
+                1 → F
+            </span>
+
+            <span class="false">
+                2 → F
+            </span>
+
+            <span class="false">
+                3 → F
+            </span>
+
+            <span class="false">
+                4 → F
+            </span>
+
+            <span class="true">
+                5 → T
+            </span>
+
+            <span class="true">
+                6 → T
+            </span>
+
+            <span class="true">
+                7 → T
+            </span>
+
+            <span class="true">
+                8 → T
+            </span>
+
+        </div>
+
+        <p>
+            Pattern:
+            <b>FFFFTTTT</b>
+        </p>
+
+    </div>
+
+
+    <!-- KOKO -->
+
+    <div class="problem-card">
+
+        <span class="problem-label">
+            CLASSIC PROBLEM
+        </span>
+
+        <h3>
+            Koko Eating Bananas
+        </h3>
+
+        <p>
+            Find the minimum eating speed K such that all bananas
+            can be eaten within H hours.
+        </p>
+
+
+        <h4>
+            Search space
+        </h4>
+
+<pre class="template-code"><code>lo = 1
+hi = max(piles)</code></pre>
+
+
+        <h4>
+            Feasibility
+        </h4>
+
+<pre class="template-code"><code>hours = 0
+
+for pile in piles:
+    hours += ceil(pile / speed)
+
+return hours &lt;= H</code></pre>
+
+
+        <h4>
+            Binary search
+        </h4>
+
+<pre class="template-code"><code>def min_speed(piles, h):
+
+    lo = 1
+    hi = max(piles)
+    ans = hi
+
+    while lo &lt;= hi:
+
+        mid = lo + (hi-lo)//2
+
+        if feasible(mid):
+
+            ans = mid
+            hi = mid - 1
+
+        else:
+
+            lo = mid + 1
+
+    return ans</code></pre>
+
+
+        <div class="pattern-recognition">
+
+            <b>Recognition:</b>
+
+            We are not searching the piles.
+
+            We are searching possible speeds.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     ADVANCED INTERVIEW PATTERNS
+========================================================= -->
+
+<section class="section" id="advanced">
+
+    <div class="section-label">
+        <b>10</b>
+        <span>ADVANCED SEARCH PATTERNS</span>
+    </div>
+
+    <h2>
+        Problems that repeatedly appear in interviews
+    </h2>
+
+
+    <div class="interview-pattern-grid">
+
+        <article class="interview-pattern">
+
+            <span class="difficulty">
+                MEDIUM
+            </span>
+
+            <h3>
+                Nearly Sorted Array
+            </h3>
+
+            <p>
+                The target can be near the expected position.
+                Check mid and neighboring positions.
+            </p>
+
+            <code>mid - 1, mid, mid + 1</code>
+
+        </article>
+
+
+        <article class="interview-pattern">
+
+            <span class="difficulty">
+                MEDIUM
+            </span>
+
+            <h3>
+                Infinite Sorted Array
+            </h3>
+
+            <p>
+                The array length is unknown. Double the search
+                window until the target is inside the range.
+            </p>
+
+            <code>1, 2, 4, 8, 16...</code>
+
+        </article>
+
+
+        <article class="interview-pattern">
+
+            <span class="difficulty">
+                MEDIUM
+            </span>
+
+            <h3>
+                Minimum in Rotated Array
+            </h3>
+
+            <p>
+                Compare mid with the right boundary to determine
+                which side contains the minimum.
+            </p>
+
+            <code>nums[mid] &gt; nums[right]</code>
+
+        </article>
+
+
+        <article class="interview-pattern">
+
+            <span class="difficulty">
+                MEDIUM
+            </span>
+
+            <h3>
+                Rotation Count
+            </h3>
+
+            <p>
+                The index of the minimum element tells how many
+                positions the sorted array was rotated.
+            </p>
+
+            <code>rotation = min_index</code>
+
+        </article>
+
+
+        <article class="interview-pattern">
+
+            <span class="difficulty">
+                MEDIUM
+            </span>
+
+            <h3>
+                Single Element
+            </h3>
+
+            <p>
+                In a sorted array where every other value appears
+                twice, use index parity.
+            </p>
+
+            <code>mid ^ 1</code>
+
+        </article>
+
+
+        <article class="interview-pattern">
+
+            <span class="difficulty">
+                HARD
+            </span>
+
+            <h3>
+                Median of Two Sorted Arrays
+            </h3>
+
+            <p>
+                Binary search the partition rather than directly
+                searching values.
+            </p>
+
+            <code>partition A + partition B</code>
+
+        </article>
+
+
+        <article class="interview-pattern">
+
+            <span class="difficulty">
+                HARD
+            </span>
+
+            <h3>
+                Allocate Books
+            </h3>
+
+            <p>
+                Search the minimum possible maximum pages assigned
+                to a student.
+            </p>
+
+            <code>minimize maximum</code>
+
+        </article>
+
+
+        <article class="interview-pattern">
+
+            <span class="difficulty">
+                MEDIUM
+            </span>
+
+            <h3>
+                Aggressive Cows
+            </h3>
+
+            <p>
+                Search the maximum minimum distance between cows.
+            </p>
+
+            <code>maximize minimum</code>
+
+        </article>
+
+
+        <article class="interview-pattern">
+
+            <span class="difficulty">
+                MEDIUM
+            </span>
+
+            <h3>
+                Ship Packages
+            </h3>
+
+            <p>
+                Search the minimum ship capacity that can finish
+                all packages within D days.
+            </p>
+
+            <code>minimum feasible capacity</code>
+
+        </article>
+
+
+        <article class="interview-pattern">
+
+            <span class="difficulty">
+                HARD
+            </span>
+
+            <h3>
+                Split Array Largest Sum
+            </h3>
+
+            <p>
+                Minimize the largest subarray sum using feasibility.
+            </p>
+
+            <code>minimize maximum</code>
+
+        </article>
+
+    </div>
+
+
+    <!-- ROTATED ARRAY -->
+
+    <div class="code-grid" style="margin-top:35px;">
+
+        <div class="code-panel">
+
+            <div class="code-title">
+                Search in Rotated Sorted Array
+            </div>
+
+<pre><code><span class="kw">def</span> <span class="fn">search_rotated</span>(nums, target):
+
+    left = 0
+    right = len(nums) - 1
+
+    <span class="kw">while</span> left &lt;= right:
+
+        mid = left + (right-left)//2
+
+        <span class="kw">if</span> nums[mid] == target:
+            <span class="kw">return</span> mid
+
+        <span class="kw">if</span> nums[left] &lt;= nums[mid]:
+
+            <span class="kw">if</span> nums[left] &lt;= target &lt; nums[mid]:
+                right = mid - 1
+            <span class="kw">else</span>:
+                left = mid + 1
+
+        <span class="kw">else</span>:
+
+            <span class="kw">if</span> nums[mid] &lt; target &lt;= nums[right]:
+                left = mid + 1
+            <span class="kw">else</span>:
+                right = mid - 1
+
+    <span class="kw">return</span> -1</code></pre>
+
+        </div>
+
+
+        <div class="explain-panel">
+
+            <h3>
+                The reasoning
+            </h3>
+
+            <p>
+                <b>1.</b>
+                At least one half is sorted.
+            </p>
+
+            <p>
+                <b>2.</b>
+                Identify the sorted half.
+            </p>
+
+            <p>
+                <b>3.</b>
+                Ask whether the target lies inside that sorted range.
+            </p>
+
+            <p>
+                <b>4.</b>
+                Keep the appropriate half.
+            </p>
+
+            <div class="callout">
+                Don't memorize the branches.
+                Understand the invariant:
+                <b>one side has usable order.</b>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     PROOF
+========================================================= -->
+
+<section class="section" id="proof">
+
+    <div class="section-label">
+        <b>11</b>
+        <span>CORRECTNESS</span>
+    </div>
+
+    <h2>
+        Why is discarding half actually safe?
+    </h2>
+
+    <p class="lead">
+        Binary search is not magic. Its correctness comes from
+        a logical proof.
+    </p>
+
+
+    <div class="proof-grid">
+
+        <article class="proof-card">
+
+            <h3>
+                Case 1 — target == arr[mid]
+            </h3>
+
+            <p>
+                We found the target.
+                Returning mid is safe.
+            </p>
+
+        </article>
+
+
+        <article class="proof-card">
+
+            <h3>
+                Case 2 — target &gt; arr[mid]
+            </h3>
+
+            <p>
+                Because the array is sorted, every value before
+                or at mid is ≤ arr[mid].
+                Therefore none can be the target.
+            </p>
+
+        </article>
+
+
+        <article class="proof-card">
+
+            <h3>
+                Case 3 — target &lt; arr[mid]
+            </h3>
+
+            <p>
+                Because the array is sorted, every value at or after
+                mid is ≥ arr[mid].
+                Therefore none can be the target.
+            </p>
+
+        </article>
+
+
+        <article class="proof-card">
+
+            <h3>
+                Therefore
+            </h3>
+
+            <p>
+                The discarded half contains no valid answer.
+                Removing it preserves the invariant.
+            </p>
+
+        </article>
+
+    </div>
+
+
+    <div class="golden-rule">
+
+        <span>
+            CORRECTNESS IN ONE SENTENCE
+        </span>
+
+        <h3>
+            We discard only what we have proved impossible.
+        </h3>
+
+    </div>
+
+
+    <div class="invariant-box">
+
+        <div class="box-title">
+            🔬 Loop Invariant Proof
+        </div>
+
+        <div class="proof-step">
+
+            <span>
+                1
+            </span>
+
+            <div>
+                <b>Initialization</b>
+
+                <p>
+                    Initially,
+                    <code>[0, n-1]</code>
+                    contains every possible index.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="proof-step">
+
+            <span>
+                2
+            </span>
+
+            <div>
+                <b>Maintenance</b>
+
+                <p>
+                    After comparing with mid, we remove only a side
+                    that cannot contain the target.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="proof-step">
+
+            <span>
+                3
+            </span>
+
+            <div>
+                <b>Termination</b>
+
+                <p>
+                    If target is found, return it.
+                    If <code>left &gt; right</code>, no candidate remains,
+                    so the target does not exist.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     PATTERN RECOGNITION
+========================================================= -->
+
+<section class="section" id="recognition">
+
+    <div class="section-label">
+        <b>12</b>
+        <span>PATTERN RECOGNITION</span>
+    </div>
+
+    <h2>
+        Train your brain to detect binary search
+    </h2>
+
+
+    <div class="recognition-board">
+
+        <div class="recognition-step">
+
+            <span>
+                01
+            </span>
+
+            <b>
+                What is the search space?
+            </b>
+
+            <small>
+                Values? Indices? Numeric answers?
+            </small>
+
+        </div>
+
+
+        <div class="connector">
+            ↓
+        </div>
+
+
+        <div class="recognition-step">
+
+            <span>
+                02
+            </span>
+
+            <b>
+                Is there order or monotonicity?
+            </b>
+
+            <small>
+                Sorted values or FFFFFTTTT?
+            </small>
+
+        </div>
+
+
+        <div class="connector">
+            ↓
+        </div>
+
+
+        <div class="recognition-step">
+
+            <span>
+                03
+            </span>
+
+            <b>
+                What does mid tell me?
+            </b>
+
+            <small>
+                Which candidates become impossible?
+            </small>
+
+        </div>
+
+
+        <div class="connector">
+            ↓
+        </div>
+
+
+        <div class="recognition-step final">
+
+            <span>
+                04
+            </span>
+
+            <b>
+                What answer must I preserve?
+            </b>
+
+            <small>
+                Return now or save and continue?
+            </small>
+
+        </div>
+
+    </div>
+
+
+    <div class="recognition-examples">
+
+        <div>
+            <b>
+                "Find 17 in a sorted array"
+            </b>
+
+            <span>
+                → Exact search
+            </span>
+        </div>
+
+        <div>
+            <b>
+                "Find the first index where value ≥ 17"
+            </b>
+
+            <span>
+                → Lower bound
+            </span>
+        </div>
+
+        <div>
+            <b>
+                "Find the minimum speed needed"
+            </b>
+
+            <span>
+                → Binary search on answer
+            </span>
+        </div>
+
+        <div>
+            <b>
+                "Search this rotated sorted array"
+            </b>
+
+            <span>
+                → Sorted-half pattern
+            </span>
+        </div>
+
+        <div>
+            <b>
+                "Find a peak"
+            </b>
+
+            <span>
+                → Directional binary search
+            </span>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     PATTERN RECOGNITION CHALLENGE
+========================================================= -->
+
+<section class="section" id="challenge">
+
+    <div class="section-label">
+        <b>13</b>
+        <span>THINK BEFORE YOU CODE</span>
+    </div>
+
+    <h2>
+        Pattern-Recognition Challenge
+    </h2>
+
+    <p class="lead">
+        This time the problem will NOT tell you to use binary search.
+        Your job is to identify the algorithm yourself.
+    </p>
+
+
+    <div class="challenge-grid">
+
+        <article class="challenge-card">
+
+            <span class="problem-label">
+                CHALLENGE 01
+            </span>
+
+            <h3>
+                Minimum Speed
+            </h3>
+
+            <p>
+                A machine must process several workloads within
+                a fixed number of hours. You may increase its speed.
+                What is the minimum speed that guarantees completion?
+            </p>
+
+            <div class="challenge-answer">
+
+                <b>
+                    Think:
+                </b>
+
+                <br><br>
+
+                What is the answer space?
+
+                <br>
+
+                Is feasibility monotonic?
+
+            </div>
+
+        </article>
+
+
+        <article class="challenge-card">
+
+            <span class="problem-label">
+                CHALLENGE 02
+            </span>
+
+            <h3>
+                Hidden Position
+            </h3>
+
+            <p>
+                You have a sorted list of numbers and need to find
+                the first position where a number is greater than
+                or equal to X.
+            </p>
+
+            <div class="challenge-answer">
+
+                <b>
+                    Think:
+                </b>
+
+                <br><br>
+
+                Are you looking for an exact value,
+                or a boundary?
+
+            </div>
+
+        </article>
+
+
+        <article class="challenge-card">
+
+            <span class="problem-label">
+                CHALLENGE 03
+            </span>
+
+            <h3>
+                Distance Problem
+            </h3>
+
+            <p>
+                Place K objects in sorted positions so that the
+                minimum distance between any two objects is as large
+                as possible.
+            </p>
+
+            <div class="challenge-answer">
+
+                <b>
+                    Think:
+                </b>
+
+                <br><br>
+
+                Are you maximizing a numeric answer?
+
+            </div>
+
+        </article>
+
+
+        <article class="challenge-card">
+
+            <span class="problem-label">
+                CHALLENGE 04
+            </span>
+
+            <h3>
+                Rotated Data
+            </h3>
+
+            <p>
+                [15, 18, 2, 3, 6, 12]
+                contains numbers originally sorted but rotated.
+                Find whether 3 exists.
+            </p>
+
+            <div class="challenge-answer">
+
+                <b>
+                    Think:
+                </b>
+
+                <br><br>
+
+                Is one half still sorted?
+
+            </div>
+
+        </article>
+
+    </div>
+
+
+    <div class="callout success">
+
+        <b>
+            Expert habit:
+        </b>
+
+        Don't ask:
+
+        "Which binary-search code do I remember?"
+
+        <br><br>
+
+        Ask:
+
+        <b>
+            "What candidates can I prove are impossible?"
+        </b>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     COMMON MISTAKES
+========================================================= -->
+
+<section class="section" id="mistakes">
+
+    <div class="section-label">
+        <b>14</b>
+        <span>COMMON MISTAKES</span>
+    </div>
+
+    <h2>
+        Why binary search fails in interviews
+    </h2>
+
+
+    <div class="mistakes">
+
+        <article>
+            <b>01</b>
+            <h3>
+                Wrong loop condition
+            </h3>
+            <p>
+                The condition must match your interval definition.
+            </p>
+        </article>
+
+
+        <article>
+            <b>02</b>
+            <h3>
+                Wrong boundary update
+            </h3>
+            <p>
+                <code>left = mid</code>
+                can cause an infinite loop.
+            </p>
+        </article>
+
+
+        <article>
+            <b>03</b>
+            <h3>
+                Forgetting duplicates
+            </h3>
+            <p>
+                Finding the target is not enough for first/last occurrence.
+            </p>
+        </article>
+
+
+        <article>
+            <b>04</b>
+            <h3>
+                No invariant
+            </h3>
+            <p>
+                You must know exactly what the current interval represents.
+            </p>
+        </article>
+
+
+        <article>
+            <b>05</b>
+            <h3>
+                Non-monotonic condition
+            </h3>
+            <p>
+                If the predicate behaves like
+                F T F T, ordinary binary search is invalid.
+            </p>
+        </article>
+
+
+        <article>
+            <b>06</b>
+            <h3>
+                Wrong answer direction
+            </h3>
+            <p>
+                Minimum feasible and maximum feasible require opposite
+                boundary movement.
+            </p>
+        </article>
+
+
+        <article>
+            <b>07</b>
+            <h3>
+                Incorrect answer range
+            </h3>
+            <p>
+                In answer search, bad lower/upper bounds can eliminate
+                the real answer.
+            </p>
+        </article>
+
+
+        <article>
+            <b>08</b>
+            <h3>
+                Memorizing branches
+            </h3>
+            <p>
+                Understand why the discarded side is impossible.
+            </p>
+        </article>
+
+    </div>
+
+
+    <div class="golden-rule">
+
+        <span>
+            GOLDEN RULE
+        </span>
+
+        <h3>
+            Before writing code, define:
+        </h3>
+
+        <p>
+            <b>
+                Search space → invariant → mid → decision →
+                discarded region → answer.
+            </b>
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     QUIZ
+========================================================= -->
+
+<section class="section" id="quiz">
+
+    <div class="section-label">
+        <b>15</b>
+        <span>INTERVIEW QUIZ</span>
+    </div>
+
+    <h2>
+        Check your understanding
+    </h2>
+
+
+    <!-- Q1 -->
+
+    <div class="quiz" data-answer="b">
+
+        <p class="q-number">
+            QUESTION 01
+        </p>
+
+        <h3>
+            What makes binary search possible?
+        </h3>
+
+        <button data-choice="a">
+            A. The array must contain unique values
+        </button>
+
+        <button data-choice="b">
+            B. The search space has order or monotonic structure
+        </button>
+
+        <button data-choice="c">
+            C. The array must have an even number of elements
+        </button>
+
+        <button data-choice="d">
+            D. Recursion is mandatory
+        </button>
+
+        <div class="quiz-result"></div>
+
+    </div>
+
+
+    <!-- Q2 -->
+
+    <div class="quiz" data-answer="c">
+
+        <p class="q-number">
+            QUESTION 02
+        </p>
+
+        <h3>
+            For first occurrence, what happens after finding target?
+        </h3>
+
+        <button data-choice="a">
+            A. Return immediately
+        </button>
+
+        <button data-choice="b">
+            B. left = mid + 1
+        </button>
+
+        <button data-choice="c">
+            C. Save mid and search left
+        </button>
+
+        <button data-choice="d">
+            D. Restart the array
+        </button>
+
+        <div class="quiz-result"></div>
+
+    </div>
+
+
+    <!-- Q3 -->
+
+    <div class="quiz" data-answer="a">
+
+        <p class="q-number">
+            QUESTION 03
+        </p>
+
+        <h3>
+            Which pattern represents a monotonic predicate?
+        </h3>
+
+        <button data-choice="a">
+            A. F F F F T T T T
+        </button>
+
+        <button data-choice="b">
+            B. F T F T F T
+        </button>
+
+        <button data-choice="c">
+            C. T F T F T F
+        </button>
+
+        <button data-choice="d">
+            D. Random results
+        </button>
+
+        <div class="quiz-result"></div>
+
+    </div>
+
+
+    <!-- Q4 -->
+
+    <div class="quiz" data-answer="d">
+
+        <p class="q-number">
+            QUESTION 04
+        </p>
+
+        <h3>
+            In binary search on answer, what does mid represent?
+        </h3>
+
+        <button data-choice="a">
+            A. Always an array index
+        </button>
+
+        <button data-choice="b">
+            B. Always the target
+        </button>
+
+        <button data-choice="c">
+            C. The current array length
+        </button>
+
+        <button data-choice="d">
+            D. A candidate answer
+        </button>
+
+        <div class="quiz-result"></div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     MASTERY
+========================================================= -->
+
+<section class="section" id="mastery">
+
+    <div class="section-label">
+        <b>16</b>
+        <span>MASTERY PATH</span>
+    </div>
+
+    <h2>
+        Beginner → Interview Ready
+    </h2>
+
+
+    <div class="mastery-path">
+
+        <div class="mastery-level">
+
+            <span>
+                LEVEL 1
+            </span>
+
+            <h3>
+                Foundation
+            </h3>
+
+            <ul>
+                <li>Linear Search</li>
+                <li>Classic Binary Search</li>
+                <li>Dry Run</li>
+                <li>O(log n)</li>
+                <li>Search Space</li>
+            </ul>
+
+        </div>
+
+
+        <div class="mastery-level">
+
+            <span>
+                LEVEL 2
+            </span>
+
+            <h3>
+                Boundaries
+            </h3>
+
+            <ul>
+                <li>First Occurrence</li>
+                <li>Last Occurrence</li>
+                <li>Lower Bound</li>
+                <li>Upper Bound</li>
+                <li>Count Occurrences</li>
+            </ul>
+
+        </div>
+
+
+        <div class="mastery-level">
+
+            <span>
+                LEVEL 3
+            </span>
+
+            <h3>
+                Structural Patterns
+            </h3>
+
+            <ul>
+                <li>Rotated Array</li>
+                <li>Minimum Rotated Array</li>
+                <li>Peak Element</li>
+                <li>Nearly Sorted Array</li>
+                <li>Infinite Array</li>
+                <li>Single Element</li>
+            </ul>
+
+        </div>
+
+
+        <div class="mastery-level">
+
+            <span>
+                LEVEL 4
+            </span>
+
+            <h3>
+                Answer Search
+            </h3>
+
+            <ul>
+                <li>Koko Eating Bananas</li>
+                <li>Ship Packages</li>
+                <li>Allocate Books</li>
+                <li>Aggressive Cows</li>
+                <li>Split Array Largest Sum</li>
+            </ul>
+
+        </div>
+
+
+        <div class="mastery-level">
+
+            <span>
+                LEVEL 5
+            </span>
+
+            <h3>
+                Advanced
+            </h3>
+
+            <ul>
+                <li>Median of Two Sorted Arrays</li>
+                <li>Complex Partitions</li>
+                <li>Proof of Correctness</li>
+                <li>Pattern Recognition</li>
+                <li>Optimization Problems</li>
+            </ul>
+
+        </div>
+
+    </div>
+
+
+    <!-- 20 PROBLEM SET -->
+
+    <div class="practice-list">
+
+        <h3>
+            🔥 20-PROBLEM MASTERY SET
+        </h3>
+
+        <div class="practice-grid">
+
+            <span>
+                01. Linear Search
+            </span>
+
+            <span>
+                02. Classic Binary Search
+            </span>
+
+            <span>
+                03. Search Insert Position
+            </span>
+
+            <span>
+                04. First Occurrence
+            </span>
+
+            <span>
+                05. Last Occurrence
+            </span>
+
+            <span>
+                06. Count Occurrences
+            </span>
+
+            <span>
+                07. Lower Bound
+            </span>
+
+            <span>
+                08. Upper Bound
+            </span>
+
+            <span>
+                09. Floor / Ceil
+            </span>
+
+            <span>
+                10. Integer Square Root
+            </span>
+
+            <span>
+                11. Peak Element
+            </span>
+
+            <span>
+                12. Minimum in Rotated Array
+            </span>
+
+            <span>
+                13. Search Rotated Array
+            </span>
+
+            <span>
+                14. Single Element
+            </span>
+
+            <span>
+                15. Koko Eating Bananas
+            </span>
+
+            <span>
+                16. Ship Packages Within D Days
+            </span>
+
+            <span>
+                17. Allocate Books
+            </span>
+
+            <span>
+                18. Aggressive Cows
+            </span>
+
+            <span>
+                19. Split Array Largest Sum
+            </span>
+
+            <span>
+                20. Median of Two Sorted Arrays
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- INTERVIEW CHECKLIST -->
+
+    <div class="interview">
+
+        <div class="interview-title">
+            🎯 INTERVIEW CHECKLIST
+        </div>
+
+
+        <div class="checklist">
+
+            <div class="check-item">
+                ✓ Can I define the search space?
+            </div>
+
+            <div class="check-item">
+                ✓ Can I explain O(log n)?
+            </div>
+
+            <div class="check-item">
+                ✓ Can I state my invariant?
+            </div>
+
+            <div class="check-item">
+                ✓ Can I implement exact search?
+            </div>
+
+            <div class="check-item">
+                ✓ Can I find first/last occurrence?
+            </div>
+
+            <div class="check-item">
+                ✓ Do I understand lower/upper bound?
+            </div>
+
+            <div class="check-item">
+                ✓ Can I search rotated arrays?
+            </div>
+
+            <div class="check-item">
+                ✓ Can I find a peak?
+            </div>
+
+            <div class="check-item">
+                ✓ Can I identify monotonicity?
+            </div>
+
+            <div class="check-item">
+                ✓ Can I binary-search an answer?
+            </div>
+
+            <div class="check-item">
+                ✓ Can I prove discarded candidates are impossible?
+            </div>
+
+            <div class="check-item">
+                ✓ Can I solve without being told "use binary search"?
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- FINAL -->
+
+    <div class="final-card">
+
+        <div class="final-icon">
+            🧠
+        </div>
+
+        <h2>
+            Master the search space, not the code.
+        </h2>
+
+        <p>
+            Binary search becomes easy when you stop thinking
+            about the algorithm as a piece of code.
+        </p>
+
+        <p>
+            Think:
+            <b>
+                Search Space → Mid → Evidence → Eliminate →
+                Invariant → Repeat.
+            </b>
+        </p>
+
+        <a href="#intro" class="btn primary">
+            Review Lesson ↑
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<footer>
+
+    <span>
+        ZENSUS
+    </span>
+
+    · DSA LESSON 09 · SEARCHING & BINARY SEARCH
+
+</footer>
+
+
+</main>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
+
+<script>
+
+/* =========================================================
+   SCROLL PROGRESS + ACTIVE TOC
+========================================================= */
+
+const fill =
+    document.getElementById("progressFill");
+
+const sections =
+    [...document.querySelectorAll(".section, .hero")];
+
+const links =
+    [...document.querySelectorAll(".toc")];
+
+function updateProgress(){
+
+    const h = document.documentElement;
+
+    const total =
+        h.scrollHeight - h.clientHeight;
+
+    const percent =
+        total > 0
+        ? (h.scrollTop / total) * 100
+        : 0;
+
+    fill.style.width =
+        Math.min(100, Math.max(0, percent)) + "%";
+
+
+    let current =
+        sections[0]?.id;
+
+
+    sections.forEach(section => {
+
+        if(
+            window.scrollY >=
+            section.offsetTop - 180
+        ){
+
+            current =
+                section.id;
+
+        }
+
+    });
+
+
+    links.forEach(link => {
+
+        link.classList.toggle(
+            "active",
+            link.getAttribute("href") ===
+            "#" + current
+        );
+
+    });
+
+}
+
+window.addEventListener(
+    "scroll",
+    updateProgress
+);
+
+updateProgress();
+
+
+/* =========================================================
+   BINARY SEARCH VISUALIZER
+========================================================= */
+
+const values =
+    [3,7,11,15,19,23,28,31,40];
+
+const target =
+    23;
+
+const arrayEl =
+    document.getElementById("searchArray");
+
+let L = 0;
+
+let R =
+    values.length - 1;
+
+let finished =
+    false;
+
+
+function drawArray(mid=-1, found=-1){
+
+    arrayEl.innerHTML = "";
+
+
+    values.forEach((value,index)=>{
+
+        const element =
+            document.createElement("span");
+
+        element.className =
+            "bar";
+
+
+        if(
+            index < L ||
+            index > R
+        ){
+
+            element.classList.add(
+                "discarded"
+            );
+
+        }
+
+
+        if(index === mid){
+
+            element.classList.add(
+                "mid-active"
+            );
+
+        }
+
+
+        if(index === found){
+
+            element.classList.add(
+                "found"
+            );
+
+        }
+
+
+        element.innerHTML =
+            `<b>${value}</b>
+             <small>${index}</small>`;
+
+
+        arrayEl.appendChild(
+            element
+        );
+
+    });
+
+
+    document.getElementById(
+        "leftValue"
+    ).textContent = L;
+
+
+    document.getElementById(
+        "rightValue"
+    ).textContent = R;
+
+
+    document.getElementById(
+        "midValue"
+    ).textContent =
+        mid >= 0
+        ? mid
+        : "—";
+
+}
+
+
+function reset(){
+
+    L = 0;
+
+    R =
+        values.length - 1;
+
+    finished = false;
+
+
+    document.getElementById(
+        "demoNote"
+    ).textContent =
+        "Start by checking the middle element.";
+
+
+    drawArray(4);
+
+}
+
+
+function step(){
+
+    if(finished)
+        return;
+
+
+    if(L > R){
+
+        finished = true;
+
+        document.getElementById(
+            "demoNote"
+        ).textContent =
+            "Not found — the search space is empty.";
+
+        drawArray();
+
+        return;
+
+    }
+
+
+    const M =
+        L +
+        Math.floor((R-L)/2);
+
+
+    if(values[M] === target){
+
+        finished = true;
+
+        document.getElementById(
+            "demoNote"
+        ).textContent =
+            `Found ${target} at index ${M}. 🎯`;
+
+        drawArray(M,M);
+
+    }
+
+
+    else if(values[M] < target){
+
+        document.getElementById(
+            "demoNote"
+        ).textContent =
+            `${values[M]} is too small → discard the left half. Move left to ${M+1}.`;
+
+        L =
+            M + 1;
+
+        drawArray(M);
+
+    }
+
+
+    else{
+
+        document.getElementById(
+            "demoNote"
+        ).textContent =
+            `${values[M]} is too large → discard the right half. Move right to ${M-1}.`;
+
+        R =
+            M - 1;
+
+        drawArray(M);
+
+    }
+
+}
+
+
+document.getElementById(
+    "stepSearch"
+).addEventListener(
+    "click",
+    step
+);
+
+
+document.getElementById(
+    "resetDemo"
+).addEventListener(
+    "click",
+    reset
+);
+
+
+document.getElementById(
+    "autoSearch"
+).addEventListener(
+    "click",
+    ()=>{
+
+        reset();
+
+        const timer =
+            setInterval(()=>{
+
+                step();
+
+                if(finished)
+                    clearInterval(timer);
+
+            },900);
+
+    }
+);
+
+
+reset();
+
+
+/* =========================================================
+   QUIZ SYSTEM
+========================================================= */
+
+document
+.querySelectorAll(".quiz")
+.forEach(quiz => {
+
+    quiz
+    .querySelectorAll("button")
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            ()=>{
+
+                const result =
+                    quiz.querySelector(
+                        ".quiz-result"
+                    );
+
+                const correct =
+                    button.dataset.choice ===
+                    quiz.dataset.answer;
+
+
+                quiz
+                .querySelectorAll("button")
+                .forEach(
+                    b => b.disabled = true
+                );
+
+
+                button.classList.add(
+                    correct
+                    ? "correct"
+                    : "wrong"
+                );
+
+
+                result.className =
+                    "quiz-result " +
+                    (
+                        correct
+                        ? "good"
+                        : "bad"
+                    );
+
+
+                result.textContent =
+                    correct
+                    ? "✓ Correct — excellent pattern recognition."
+                    : "✗ Not quite. Revisit the search-space and invariant concepts.";
+
+            }
+        );
+
+    });
+
+});
+
+
+/* =========================================================
+   SMOOTH INTERNAL NAVIGATION
+========================================================= */
+
+document
+.querySelectorAll('a[href^="#"]')
+.forEach(link => {
+
+    link.addEventListener(
+        "click",
+        event => {
+
+            const id =
+                link.getAttribute("href");
+
+            const targetElement =
+                document.querySelector(id);
+
+            if(targetElement){
+
+                event.preventDefault();
+
+                targetElement.scrollIntoView({
+                    behavior:"smooth",
+                    block:"start"
+                });
+
+            }
+
+        }
+    );
+
+});
+
+
+/* =========================================================
+   REVEAL ANIMATION
+========================================================= */
+
+const revealItems =
+    document.querySelectorAll(
+        ".info-card, .template-card, .pattern, .interview-pattern, .proof-card"
+    );
+
+
+const observer =
+    new IntersectionObserver(
+        entries => {
+
+            entries.forEach(entry => {
+
+                if(entry.isIntersecting){
+
+                    entry.target.style.opacity =
+                        "1";
+
+                    entry.target.style.transform =
+                        "translateY(0)";
+
+                    observer.unobserve(
+                        entry.target
+                    );
+
+                }
+
+            });
+
+        },
+        {
+            threshold:.08
+        }
+    );
+
+
+revealItems.forEach(item => {
+
+    item.style.opacity =
+        "0";
+
+    item.style.transform =
+        "translateY(18px)";
+
+    item.style.transition =
+        "opacity .5s ease, transform .5s ease";
+
+    observer.observe(item);
+
+});
+
+</script>
+
+</body>
+</html>
+```

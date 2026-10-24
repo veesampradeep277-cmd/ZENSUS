@@ -1,0 +1,3752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 10 — Pointers | ZENSUS C++</title>
+
+<style>
+/* =========================================================
+   ZENSUS — LESSON 10 POINTERS
+   Standalone CSS
+   ========================================================= */
+
+:root{
+    --primary:#2563eb;
+    --secondary:#7c3aed;
+    --success:#16a34a;
+    --warning:#d97706;
+    --danger:#dc2626;
+
+    --bg:#f7f9fc;
+    --surface:#ffffff;
+    --surface-2:#f1f5f9;
+    --text:#0f172a;
+    --muted:#64748b;
+    --border:#e2e8f0;
+
+    --shadow:0 10px 30px rgba(15,23,42,.07);
+    --shadow-lg:0 18px 45px rgba(15,23,42,.10);
+
+    --sidebar:280px;
+    --header:72px;
+    --radius:20px;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+/* =========================
+   TOP PROGRESS
+   ========================= */
+
+.progress-bar{
+    position:fixed;
+    top:0;
+    left:0;
+    height:4px;
+    width:0;
+    background:var(--primary);
+    z-index:9999;
+}
+
+/* =========================
+   SIDEBAR
+   ========================= */
+
+.sidebar{
+    position:fixed;
+    top:0;
+    left:0;
+    width:var(--sidebar);
+    height:100vh;
+    background:var(--surface);
+    border-right:1px solid var(--border);
+    z-index:1000;
+    overflow-y:auto;
+}
+
+.brand{
+    height:var(--header);
+    display:flex;
+    align-items:center;
+    padding:0 24px;
+    border-bottom:1px solid var(--border);
+}
+
+.brand-logo{
+    width:38px;
+    height:38px;
+    border-radius:11px;
+    background:var(--primary);
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:900;
+    margin-right:11px;
+}
+
+.brand-name{
+    font-size:21px;
+    font-weight:900;
+    letter-spacing:.5px;
+}
+
+.course-label{
+    padding:24px 24px 10px;
+    color:var(--muted);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1.3px;
+    font-weight:800;
+}
+
+.nav{
+    padding:0 13px 25px;
+}
+
+.nav a{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:11px 13px;
+    margin:3px 0;
+    border-radius:12px;
+    color:var(--muted);
+    text-decoration:none;
+    font-size:14px;
+    font-weight:650;
+    transition:.2s ease;
+}
+
+.nav a:hover{
+    background:#eff6ff;
+    color:var(--primary);
+    transform:translateX(2px);
+}
+
+.nav a.active{
+    background:#eff6ff;
+    color:var(--primary);
+}
+
+.nav-number{
+    width:25px;
+    height:25px;
+    border-radius:8px;
+    background:var(--surface-2);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:11px;
+    font-weight:800;
+}
+
+.nav a.active .nav-number{
+    background:var(--primary);
+    color:white;
+}
+
+/* =========================
+   MAIN
+   ========================= */
+
+.main{
+    margin-left:var(--sidebar);
+    min-height:100vh;
+}
+
+.header{
+    height:var(--header);
+    position:sticky;
+    top:0;
+    z-index:900;
+    background:rgba(255,255,255,.94);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 34px;
+}
+
+.header-title{
+    font-weight:800;
+    font-size:14px;
+}
+
+.header-right{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.lesson-badge{
+    background:#eff6ff;
+    color:var(--primary);
+    border:1px solid #dbeafe;
+    padding:6px 12px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:800;
+}
+
+.menu-btn{
+    display:none;
+    border:0;
+    background:var(--surface-2);
+    border-radius:10px;
+    padding:8px 11px;
+    cursor:pointer;
+    font-size:18px;
+}
+
+/* =========================
+   CONTENT
+   ========================= */
+
+.content{
+    max-width:1200px;
+    margin:auto;
+    padding:42px 34px 80px;
+}
+
+section{
+    scroll-margin-top:95px;
+    margin-bottom:32px;
+}
+
+/* =========================
+   HERO
+   ========================= */
+
+.hero{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:28px;
+    padding:48px;
+    box-shadow:var(--shadow);
+    position:relative;
+    overflow:hidden;
+}
+
+.hero::after{
+    content:"";
+    position:absolute;
+    width:250px;
+    height:250px;
+    border-radius:50%;
+    right:-100px;
+    top:-100px;
+    background:#eff6ff;
+    z-index:0;
+}
+
+.hero-content{
+    position:relative;
+    z-index:1;
+}
+
+.eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    padding:7px 12px;
+    border-radius:999px;
+    background:#eff6ff;
+    color:var(--primary);
+    font-size:12px;
+    font-weight:850;
+    margin-bottom:18px;
+}
+
+.hero h1{
+    font-size:clamp(38px,5vw,66px);
+    line-height:1.04;
+    letter-spacing:-2.5px;
+    margin-bottom:20px;
+}
+
+.hero h1 span{
+    color:var(--primary);
+    font-weight:900;
+}
+
+.hero p{
+    max-width:760px;
+    color:var(--muted);
+    font-size:17px;
+}
+
+.hero-tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    margin-top:25px;
+}
+
+.tag{
+    padding:8px 12px;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:999px;
+    font-size:12px;
+    font-weight:750;
+}
+
+/* =========================
+   CARDS
+   ========================= */
+
+.card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:30px;
+    box-shadow:var(--shadow);
+    margin-bottom:22px;
+}
+
+.card h2{
+    font-size:28px;
+    letter-spacing:-.7px;
+    margin-bottom:9px;
+}
+
+.card h3{
+    font-size:20px;
+    margin:22px 0 9px;
+}
+
+.card p{
+    color:#475569;
+    margin:8px 0;
+}
+
+.card ul,
+.card ol{
+    padding-left:22px;
+    color:#475569;
+}
+
+.card li{
+    margin:6px 0;
+}
+
+.section-kicker{
+    color:var(--primary);
+    text-transform:uppercase;
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:1.3px;
+    margin-bottom:7px;
+}
+
+/* =========================
+   OBJECTIVES
+   ========================= */
+
+.objectives{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+}
+
+.objective{
+    padding:21px;
+    border:1px solid var(--border);
+    border-radius:16px;
+    background:var(--surface);
+}
+
+.objective-icon{
+    width:38px;
+    height:38px;
+    border-radius:11px;
+    background:#eff6ff;
+    color:var(--primary);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:900;
+    margin-bottom:13px;
+}
+
+.objective strong{
+    display:block;
+    margin-bottom:5px;
+}
+
+.objective span{
+    color:var(--muted);
+    font-size:13px;
+}
+
+/* =========================
+   CODE
+   ========================= */
+
+.code-wrap{
+    background:#0f172a;
+    border-radius:15px;
+    overflow:hidden;
+    margin:18px 0;
+    border:1px solid #1e293b;
+}
+
+.code-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 15px;
+    background:#111827;
+    color:#94a3b8;
+    font-size:12px;
+    font-weight:700;
+}
+
+.copy-btn{
+    border:1px solid #334155;
+    background:#1e293b;
+    color:#e2e8f0;
+    padding:5px 9px;
+    border-radius:7px;
+    cursor:pointer;
+    font-size:11px;
+}
+
+.copy-btn:hover{
+    background:#334155;
+}
+
+pre{
+    margin:0;
+    padding:22px;
+    overflow-x:auto;
+    color:#e2e8f0;
+    font-family:
+        "Cascadia Code",
+        "Consolas",
+        "Courier New",
+        monospace;
+    font-size:14px;
+    line-height:1.75;
+    white-space:pre;
+}
+
+code{
+    font-family:inherit;
+}
+
+.inline-code{
+    background:#eef2ff;
+    color:#4338ca;
+    padding:2px 6px;
+    border-radius:5px;
+    font-family:monospace;
+    font-size:.92em;
+}
+
+/* =========================
+   INFO BOXES
+   ========================= */
+
+.info-box{
+    border-left:4px solid var(--primary);
+    background:#eff6ff;
+    padding:16px 18px;
+    border-radius:0 12px 12px 0;
+    margin:18px 0;
+}
+
+.success-box{
+    border-left-color:var(--success);
+    background:#f0fdf4;
+}
+
+.warning-box{
+    border-left-color:var(--warning);
+    background:#fffbeb;
+}
+
+.danger-box{
+    border-left-color:var(--danger);
+    background:#fef2f2;
+}
+
+.info-box strong{
+    display:block;
+    margin-bottom:4px;
+}
+
+/* =========================
+   MEMORY VISUALIZATION
+   ========================= */
+
+.memory-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin-top:20px;
+}
+
+.memory-cell{
+    border:2px solid var(--border);
+    border-radius:15px;
+    overflow:hidden;
+    background:white;
+    transition:.3s ease;
+}
+
+.memory-cell:hover{
+    transform:translateY(-4px);
+    border-color:#bfdbfe;
+}
+
+.memory-address{
+    padding:9px 13px;
+    background:#f8fafc;
+    color:var(--muted);
+    font-family:monospace;
+    font-size:12px;
+}
+
+.memory-value{
+    padding:20px;
+    text-align:center;
+    font-size:26px;
+    font-weight:900;
+}
+
+.memory-label{
+    padding:8px 13px;
+    border-top:1px solid var(--border);
+    color:var(--muted);
+    font-size:12px;
+}
+
+/* =========================
+   POINTER FLOW
+   ========================= */
+
+.pointer-flow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin:25px 0;
+}
+
+.flow-box{
+    min-width:145px;
+    padding:18px;
+    border-radius:15px;
+    border:2px solid var(--border);
+    background:white;
+    text-align:center;
+    transition:.3s ease;
+}
+
+.flow-box.active{
+    border-color:var(--primary);
+    transform:translateY(-6px);
+    box-shadow:0 10px 25px rgba(37,99,235,.12);
+}
+
+.flow-box .big{
+    font-family:monospace;
+    font-size:20px;
+    font-weight:900;
+    color:var(--primary);
+}
+
+.flow-box small{
+    display:block;
+    color:var(--muted);
+    margin-top:5px;
+}
+
+.arrow{
+    color:var(--primary);
+    font-size:25px;
+    font-weight:900;
+}
+
+/* =========================
+   TWO COLUMNS
+   ========================= */
+
+.two-col{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.three-col{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+/* =========================
+   TABLE
+   ========================= */
+
+.table-wrap{
+    overflow-x:auto;
+    margin-top:18px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:650px;
+}
+
+th,
+td{
+    padding:13px 15px;
+    text-align:left;
+    border-bottom:1px solid var(--border);
+}
+
+th{
+    background:#f8fafc;
+    font-size:13px;
+}
+
+td{
+    color:#475569;
+    font-size:14px;
+}
+
+/* =========================
+   INTERACTIVE LAB
+   ========================= */
+
+.lab{
+    background:#f8fafc;
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:22px;
+    margin-top:20px;
+}
+
+.lab-controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.lab input{
+    padding:11px 13px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    outline:none;
+    width:150px;
+    background:white;
+}
+
+.lab input:focus{
+    border-color:var(--primary);
+}
+
+.btn{
+    border:0;
+    padding:10px 15px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:800;
+    background:var(--primary);
+    color:white;
+    transition:.2s ease;
+}
+
+.btn:hover{
+    transform:translateY(-2px);
+}
+
+.btn.secondary{
+    background:#e2e8f0;
+    color:#0f172a;
+}
+
+.lab-output{
+    min-height:100px;
+    background:#0f172a;
+    color:#e2e8f0;
+    border-radius:12px;
+    padding:17px;
+    font-family:monospace;
+    white-space:pre-wrap;
+}
+
+/* =========================
+   QUIZ
+   ========================= */
+
+.quiz-question{
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:18px;
+    margin:13px 0;
+}
+
+.quiz-question h4{
+    margin-bottom:12px;
+}
+
+.option{
+    display:block;
+    padding:10px 12px;
+    margin:7px 0;
+    background:#f8fafc;
+    border:1px solid var(--border);
+    border-radius:9px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.option:hover{
+    border-color:#93c5fd;
+    background:#eff6ff;
+}
+
+.quiz-result{
+    margin-top:18px;
+    font-weight:800;
+}
+
+/* =========================
+   ACCORDION
+   ========================= */
+
+.accordion{
+    border:1px solid var(--border);
+    border-radius:14px;
+    overflow:hidden;
+    margin:10px 0;
+}
+
+.accordion button{
+    width:100%;
+    text-align:left;
+    border:0;
+    background:white;
+    padding:16px;
+    cursor:pointer;
+    font-weight:800;
+    display:flex;
+    justify-content:space-between;
+}
+
+.accordion-content{
+    display:none;
+    padding:0 16px 17px;
+    color:var(--muted);
+    background:white;
+}
+
+.accordion.open .accordion-content{
+    display:block;
+}
+
+/* =========================
+   CHECKLIST
+   ========================= */
+
+.checklist{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+.check-item{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    background:#f8fafc;
+    padding:12px;
+    border-radius:11px;
+}
+
+.check-item input{
+    margin-top:5px;
+    accent-color:var(--primary);
+}
+
+/* =========================
+   FOOTER
+   ========================= */
+
+.footer{
+    text-align:center;
+    color:var(--muted);
+    padding:30px;
+    border-top:1px solid var(--border);
+    margin-top:30px;
+}
+
+.footer strong{
+    color:var(--text);
+}
+
+/* =========================
+   REVEAL
+   ========================= */
+
+.reveal{
+    opacity:0;
+    transform:translateY(22px);
+    transition:opacity .6s ease, transform .6s ease;
+}
+
+.reveal.show{
+    opacity:1;
+    transform:none;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media(max-width:1050px){
+
+    :root{
+        --sidebar:240px;
+    }
+
+    .objectives,
+    .three-col{
+        grid-template-columns:1fr 1fr;
+    }
+}
+
+@media(max-width:800px){
+
+    .sidebar{
+        transform:translateX(-100%);
+        transition:.25s ease;
+    }
+
+    .sidebar.open{
+        transform:translateX(0);
+    }
+
+    .main{
+        margin-left:0;
+    }
+
+    .menu-btn{
+        display:block;
+    }
+
+    .header{
+        padding:0 18px;
+    }
+
+    .content{
+        padding:25px 17px 60px;
+    }
+
+    .hero{
+        padding:30px 22px;
+    }
+
+    .hero h1{
+        letter-spacing:-1.5px;
+    }
+
+    .objectives,
+    .two-col,
+    .three-col,
+    .memory-grid,
+    .checklist{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:550px){
+
+    .hero h1{
+        font-size:39px;
+    }
+
+    .card{
+        padding:21px;
+    }
+
+    .card h2{
+        font-size:24px;
+    }
+
+    pre{
+        font-size:12px;
+    }
+
+    .lesson-badge{
+        display:none;
+    }
+}
+
+/* Respect reduced motion */
+@media(prefers-reduced-motion:reduce){
+
+    html{
+        scroll-behavior:auto;
+    }
+
+    *,
+    *::before,
+    *::after{
+        animation:none !important;
+        transition:none !important;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- =========================================================
+     SIDEBAR
+     ========================================================= -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+        <div class="brand-logo">Z</div>
+        <div class="brand-name">ZENSUS</div>
+    </div>
+
+    <div class="course-label">C++ Course</div>
+
+    <nav class="nav">
+
+        <a href="#top" class="active">
+            <span class="nav-number">10</span>
+            Pointers
+        </a>
+
+        <a href="#objectives">
+            <span class="nav-number">01</span>
+            Objectives
+        </a>
+
+        <a href="#memory">
+            <span class="nav-number">02</span>
+            Memory
+        </a>
+
+        <a href="#basics">
+            <span class="nav-number">03</span>
+            Pointer Basics
+        </a>
+
+        <a href="#operators">
+            <span class="nav-number">04</span>
+            &amp; and *
+        </a>
+
+        <a href="#visual">
+            <span class="nav-number">05</span>
+            Visualization
+        </a>
+
+        <a href="#arithmetic">
+            <span class="nav-number">06</span>
+            Pointer Arithmetic
+        </a>
+
+        <a href="#arrays">
+            <span class="nav-number">07</span>
+            Arrays &amp; Pointers
+        </a>
+
+        <a href="#functions">
+            <span class="nav-number">08</span>
+            Functions
+        </a>
+
+        <a href="#double">
+            <span class="nav-number">09</span>
+            Double Pointer
+        </a>
+
+        <a href="#dynamic">
+            <span class="nav-number">10</span>
+            Dynamic Memory
+        </a>
+
+        <a href="#const">
+            <span class="nav-number">11</span>
+            Const Pointers
+        </a>
+
+        <a href="#mistakes">
+            <span class="nav-number">12</span>
+            Mistakes
+        </a>
+
+        <a href="#lab">
+            <span class="nav-number">13</span>
+            Interactive Lab
+        </a>
+
+        <a href="#quiz">
+            <span class="nav-number">14</span>
+            Quiz
+        </a>
+
+        <a href="#interview">
+            <span class="nav-number">15</span>
+            Interview
+        </a>
+
+        <a href="#practice">
+            <span class="nav-number">16</span>
+            Practice
+        </a>
+
+        <a href="#checklist">
+            <span class="nav-number">17</span>
+            Checklist
+        </a>
+
+    </nav>
+
+</aside>
+
+<!-- =========================================================
+     MAIN
+     ========================================================= -->
+
+<main class="main">
+
+<header class="header">
+
+    <div style="display:flex;align-items:center;gap:12px;">
+        <button class="menu-btn" id="menuBtn">☰</button>
+        <div class="header-title">C++ • Lesson 10</div>
+    </div>
+
+    <div class="header-right">
+        <span class="lesson-badge">Pointers</span>
+    </div>
+
+</header>
+
+<div class="content" id="top">
+
+<!-- =========================================================
+     HERO
+     ========================================================= -->
+
+<section class="hero reveal">
+
+    <div class="hero-content">
+
+        <div class="eyebrow">
+            C++ LESSON 10
+        </div>
+
+        <h1>
+            Master <span>Pointers</span>
+        </h1>
+
+        <p>
+            Learn how C++ works with memory addresses, references,
+            dynamic memory, arrays and functions using pointers.
+            From absolute beginner concepts to interview-level problems.
+        </p>
+
+        <div class="hero-tags">
+            <span class="tag">Memory</span>
+            <span class="tag">Addresses</span>
+            <span class="tag">Dereferencing</span>
+            <span class="tag">Arrays</span>
+            <span class="tag">Functions</span>
+            <span class="tag">Dynamic Memory</span>
+            <span class="tag">Interview Ready</span>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     OBJECTIVES
+     ========================================================= -->
+
+<section id="objectives" class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">Learning objectives</div>
+
+        <h2>What you will master</h2>
+
+        <div class="objectives">
+
+            <div class="objective">
+                <div class="objective-icon">01</div>
+                <strong>Understand memory</strong>
+                <span>Learn variables, addresses and memory locations.</span>
+            </div>
+
+            <div class="objective">
+                <div class="objective-icon">02</div>
+                <strong>Use pointers</strong>
+                <span>Declare, initialize and dereference pointers.</span>
+            </div>
+
+            <div class="objective">
+                <div class="objective-icon">03</div>
+                <strong>Work with arrays</strong>
+                <span>Understand the relationship between arrays and pointers.</span>
+            </div>
+
+            <div class="objective">
+                <div class="objective-icon">04</div>
+                <strong>Use functions</strong>
+                <span>Modify values through pointer parameters.</span>
+            </div>
+
+            <div class="objective">
+                <div class="objective-icon">05</div>
+                <strong>Manage memory</strong>
+                <span>Understand new, delete and memory leaks.</span>
+            </div>
+
+            <div class="objective">
+                <div class="objective-icon">06</div>
+                <strong>Avoid bugs</strong>
+                <span>Recognize null, dangling and uninitialized pointers.</span>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     WHAT IS A POINTER?
+     ========================================================= -->
+
+<section id="basics" class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">01 • Foundation</div>
+
+        <h2>What is a Pointer?</h2>
+
+        <p>
+            A <strong>pointer</strong> is a variable that stores the
+            memory address of another object or function.
+        </p>
+
+        <div class="info-box">
+            <strong>Simple definition</strong>
+            A pointer does not normally store the actual value.
+            It stores the location where that value can be found.
+        </div>
+
+        <h3>Real-world analogy</h3>
+
+        <p>
+            Imagine your house has a location such as:
+            <strong>House No. 42</strong>.
+            Your friend does not need to carry your entire house.
+            They only need its address to find it.
+        </p>
+
+        <div class="pointer-flow">
+
+            <div class="flow-box">
+                <div class="big">x</div>
+                <small>Stores value</small>
+            </div>
+
+            <div class="arrow">←</div>
+
+            <div class="flow-box">
+                <div class="big">42</div>
+                <small>Actual data</small>
+            </div>
+
+            <div class="arrow">↔</div>
+
+            <div class="flow-box">
+                <div class="big">p</div>
+                <small>Stores address</small>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     MEMORY
+     ========================================================= -->
+
+<section id="memory" class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">02 • Memory model</div>
+
+        <h2>Variables Live in Memory</h2>
+
+        <p>
+            When you create a variable, the program stores it somewhere
+            in memory. That location has an address.
+        </p>
+
+        <div class="code-wrap">
+
+            <div class="code-head">
+                <span>C++</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                    Copy
+                </button>
+            </div>
+
+            <pre><code>int age = 19;
+
+std::cout &lt;&lt; age &lt;&lt; '\n';
+std::cout &lt;&lt; &amp;age &lt;&lt; '\n';</code></pre>
+
+        </div>
+
+        <p>
+            The first statement prints the <strong>value</strong>.
+            The second uses <span class="inline-code">&amp;</span>
+            to obtain the variable's address.
+        </p>
+
+        <div class="memory-grid">
+
+            <div class="memory-cell">
+                <div class="memory-address">Address: 0x1000</div>
+                <div class="memory-value">19</div>
+                <div class="memory-label">Variable: age</div>
+            </div>
+
+            <div class="memory-cell">
+                <div class="memory-address">Address: 0x1008</div>
+                <div class="memory-value">0x1000</div>
+                <div class="memory-label">Pointer: p</div>
+            </div>
+
+            <div class="memory-cell">
+                <div class="memory-address">Address: 0x1010</div>
+                <div class="memory-value">...</div>
+                <div class="memory-label">Other memory</div>
+            </div>
+
+        </div>
+
+        <div class="warning-box info-box">
+            <strong>Important</strong>
+            The addresses shown above are only illustrative.
+            Actual memory addresses vary between executions and systems.
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     ADDRESS AND DEREFERENCE
+     ========================================================= -->
+
+<section id="operators" class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">03 • Core operators</div>
+
+        <h2>The Two Symbols You Must Understand</h2>
+
+        <div class="two-col">
+
+            <div class="card" style="margin:0;box-shadow:none;background:#f8fafc;">
+
+                <h3>&amp; — Address-of</h3>
+
+                <p>
+                    Gets the address of an object.
+                </p>
+
+                <div class="code-wrap">
+                    <div class="code-head">
+                        <span>Address</span>
+                    </div>
+
+                    <pre><code>int x = 50;
+
+std::cout &lt;&lt; &amp;x;</code></pre>
+                </div>
+
+                <p>
+                    Think:
+                    <strong>"Where is x stored?"</strong>
+                </p>
+
+            </div>
+
+            <div class="card" style="margin:0;box-shadow:none;background:#f8fafc;">
+
+                <h3>* — Dereference</h3>
+
+                <p>
+                    Accesses the object referred to by a pointer.
+                </p>
+
+                <div class="code-wrap">
+                    <div class="code-head">
+                        <span>Dereference</span>
+                    </div>
+
+                    <pre><code>int x = 50;
+int* p = &amp;x;
+
+std::cout &lt;&lt; *p;</code></pre>
+                </div>
+
+                <p>
+                    Think:
+                    <strong>"Go to that address and get the value."</strong>
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     DECLARATION
+     ========================================================= -->
+
+<section class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">04 • Syntax</div>
+
+        <h2>Declaring a Pointer</h2>
+
+        <div class="code-wrap">
+
+            <div class="code-head">
+                <span>pointer.cpp</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                    Copy
+                </button>
+            </div>
+
+            <pre><code>int x = 100;
+
+int* p = &amp;x;
+
+std::cout &lt;&lt; x &lt;&lt; '\n';
+std::cout &lt;&lt; p &lt;&lt; '\n';
+std::cout &lt;&lt; *p &lt;&lt; '\n';</code></pre>
+
+        </div>
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Expression</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td><span class="inline-code">x</span></td>
+                        <td>Value stored in x</td>
+                    </tr>
+
+                    <tr>
+                        <td><span class="inline-code">&amp;x</span></td>
+                        <td>Address of x</td>
+                    </tr>
+
+                    <tr>
+                        <td><span class="inline-code">p</span></td>
+                        <td>Address stored inside p</td>
+                    </tr>
+
+                    <tr>
+                        <td><span class="inline-code">*p</span></td>
+                        <td>Value at the address stored in p</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     POINTER VISUALIZATION
+     ========================================================= -->
+
+<section id="visual" class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">05 • Visualization</div>
+
+        <h2>See How a Pointer Works</h2>
+
+        <p>
+            Suppose we have:
+        </p>
+
+        <div class="code-wrap">
+
+            <div class="code-head">
+                <span>Example</span>
+            </div>
+
+            <pre><code>int x = 25;
+int* p = &amp;x;</code></pre>
+
+        </div>
+
+        <div class="pointer-flow">
+
+            <div class="flow-box" id="boxX">
+
+                <div class="big">x</div>
+
+                <small>
+                    value = 25<br>
+                    address = 0x1000
+                </small>
+
+            </div>
+
+            <div class="arrow">←</div>
+
+            <div class="flow-box" id="boxP">
+
+                <div class="big">p</div>
+
+                <small>
+                    stores 0x1000
+                </small>
+
+            </div>
+
+        </div>
+
+        <button class="btn" onclick="animatePointer()">
+            ▶ Animate Pointer
+        </button>
+
+        <div class="info-box">
+
+            <strong>The complete idea</strong>
+
+            <ol>
+                <li><span class="inline-code">x</span> stores 25.</li>
+                <li><span class="inline-code">&amp;x</span> gives the address of x.</li>
+                <li><span class="inline-code">p</span> stores that address.</li>
+                <li><span class="inline-code">*p</span> accesses the value 25.</li>
+            </ol>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     MODIFY THROUGH POINTER
+     ========================================================= -->
+
+<section class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">06 • Dereferencing</div>
+
+        <h2>Changing a Value Through a Pointer</h2>
+
+        <p>
+            A pointer can be used to modify the object it points to,
+            provided that the object is modifiable.
+        </p>
+
+        <div class="code-wrap">
+
+            <div class="code-head">
+                <span>modify.cpp</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                    Copy
+                </button>
+            </div>
+
+            <pre><code>int x = 10;
+
+int* p = &amp;x;
+
+*p = 50;
+
+std::cout &lt;&lt; x;</code></pre>
+
+        </div>
+
+        <div class="success-box info-box">
+
+            <strong>Output</strong>
+
+            <span class="inline-code">50</span>
+
+            <p>
+                Why? Because <span class="inline-code">*p</span>
+                refers to the same object as <span class="inline-code">x</span>.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     POINTER TYPES
+     ========================================================= -->
+
+<section class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">07 • Types</div>
+
+        <h2>Pointer Types</h2>
+
+        <p>
+            A pointer has a type. The pointer type describes the type
+            of object it is intended to point to.
+        </p>
+
+        <div class="code-wrap">
+
+            <div class="code-head">
+                <span>pointer_types.cpp</span>
+            </div>
+
+            <pre><code>int age = 19;
+double price = 99.5;
+char grade = 'A';
+bool passed = true;
+
+int* p1 = &amp;age;
+double* p2 = &amp;price;
+char* p3 = &amp;grade;
+bool* p4 = &amp;passed;</code></pre>
+
+        </div>
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Pointer</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td>int</td>
+                        <td>int*</td>
+                    </tr>
+                    <tr>
+                        <td>double</td>
+                        <td>double*</td>
+                    </tr>
+                    <tr>
+                        <td>char</td>
+                        <td>char*</td>
+                    </tr>
+                    <tr>
+                        <td>bool</td>
+                        <td>bool*</td>
+                    </tr>
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     NULLPTR
+     ========================================================= -->
+
+<section class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">08 • Safety</div>
+
+        <h2>What is nullptr?</h2>
+
+        <p>
+            <span class="inline-code">nullptr</span> represents a
+            null pointer value. It means the pointer is not currently
+            pointing to an object or function.
+        </p>
+
+        <div class="code-wrap">
+
+            <div class="code-head">
+                <span>safe_pointer.cpp</span>
+            </div>
+
+            <pre><code>int* p = nullptr;
+
+if (p == nullptr) {
+    std::cout &lt;&lt; "Pointer is null\n";
+}</code></pre>
+
+        </div>
+
+        <div class="danger-box info-box">
+
+            <strong>Never dereference a null pointer</strong>
+
+            <pre style="background:transparent;color:#7f1d1d;padding:0;margin-top:8px;"><code>// Dangerous
+// *p = 10;</code></pre>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     POINTER ARITHMETIC
+     ========================================================= -->
+
+<section id="arithmetic" class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">09 • Advanced basics</div>
+
+        <h2>Pointer Arithmetic</h2>
+
+        <p>
+            Pointer arithmetic is especially useful when working with arrays.
+            If <span class="inline-code">p</span> points to an element of an
+            array, moving to <span class="inline-code">p + 1</span> moves
+            to the next element of that array.
+        </p>
+
+        <div class="code-wrap">
+
+            <div class="code-head">
+                <span>pointer_arithmetic.cpp</span>
+            </div>
+
+            <pre><code>int arr[] = {10, 20, 30, 40};
+
+int* p = arr;
+
+std::cout &lt;&lt; *p &lt;&lt; '\n';
+
+p++;
+
+std::cout &lt;&lt; *p &lt;&lt; '\n';</code></pre>
+
+        </div>
+
+        <p>
+            Output:
+        </p>
+
+        <div class="code-wrap">
+
+            <pre><code>10
+20</code></pre>
+
+        </div>
+
+        <div class="info-box">
+
+            <strong>Important</strong>
+
+            Pointer arithmetic is scaled by the pointed-to type.
+            For example, adding 1 to an <span class="inline-code">int*</span>
+            moves to the next int element, not simply one raw byte.
+        </div>
+
+        <h3>Common operations</h3>
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Operation</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td>p + 1</td>
+                        <td>Next element</td>
+                    </tr>
+                    <tr>
+                        <td>p - 1</td>
+                        <td>Previous element</td>
+                    </tr>
+                    <tr>
+                        <td>p++</td>
+                        <td>Move to next element</td>
+                    </tr>
+                    <tr>
+                        <td>p--</td>
+                        <td>Move to previous element</td>
+                    </tr>
+                    <tr>
+                        <td>p2 - p1</td>
+                        <td>Distance between pointers into the same array</td>
+                    </tr>
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     ARRAYS
+     ========================================================= -->
+
+<section id="arrays" class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">10 • Arrays + pointers</div>
+
+        <h2>Arrays and Pointers</h2>
+
+        <p>
+            In many expressions, an array name converts to a pointer
+            to its first element.
+        </p>
+
+        <div class="code-wrap">
+
+            <div class="code-head">
+                <span>array_pointer.cpp</span>
+            </div>
+
+            <pre><code>int arr[] = {10, 20, 30};
+
+int* p = arr;
+
+std::cout &lt;&lt; *p &lt;&lt; '\n';
+std::cout &lt;&lt; *(p + 1) &lt;&lt; '\n';
+std::cout &lt;&lt; *(p + 2) &lt;&lt; '\n';</code></pre>
+
+        </div>
+
+        <div class="memory-grid">
+
+            <div class="memory-cell">
+                <div class="memory-address">arr + 0</div>
+                <div class="memory-value">10</div>
+                <div class="memory-label">*(p + 0)</div>
+            </div>
+
+            <div class="memory-cell">
+                <div class="memory-address">arr + 1</div>
+                <div class="memory-value">20</div>
+                <div class="memory-label">*(p + 1)</div>
+            </div>
+
+            <div class="memory-cell">
+                <div class="memory-address">arr + 2</div>
+                <div class="memory-value">30</div>
+                <div class="memory-label">*(p + 2)</div>
+            </div>
+
+        </div>
+
+        <div class="success-box info-box">
+
+            <strong>Key relationship</strong>
+
+            <p>
+                <span class="inline-code">arr[i]</span>
+                is equivalent to
+                <span class="inline-code">*(arr + i)</span>.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     POINTERS AND FUNCTIONS
+     ========================================================= -->
+
+<section id="functions" class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">11 • Functions</div>
+
+        <h2>Passing Pointers to Functions</h2>
+
+        <p>
+            A pointer parameter can allow a function to modify an
+            existing object supplied by the caller.
+        </p>
+
+        <div class="code-wrap">
+
+            <div class="code-head">
+                <span>function_pointer.cpp</span>
+            </div>
+
+            <pre><code>void changeValue(int* p) {
+    *p = 100;
+}
+
+int main() {
+
+    int x = 10;
+
+    changeValue(&amp;x);
+
+    std::cout &lt;&lt; x;
+
+    return 0;
+}</code></pre>
+
+        </div>
+
+        <p>
+            The function receives the address of <span class="inline-code">x</span>.
+            Dereferencing the pointer accesses the original object.
+        </p>
+
+        <h3>Call by value vs pointer parameter</h3>
+
+        <div class="two-col">
+
+            <div class="card" style="margin:0;box-shadow:none;background:#f8fafc;">
+
+                <h3>By value</h3>
+
+                <div class="code-wrap">
+                    <pre><code>void change(int x) {
+    x = 100;
+}</code></pre>
+                </div>
+
+                <p>
+                    Changes only the local copy.
+                </p>
+
+            </div>
+
+            <div class="card" style="margin:0;box-shadow:none;background:#f8fafc;">
+
+                <h3>Using pointer</h3>
+
+                <div class="code-wrap">
+                    <pre><code>void change(int* x) {
+    *x = 100;
+}</code></pre>
+                </div>
+
+                <p>
+                    Can modify the caller's object.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     DOUBLE POINTER
+     ========================================================= -->
+
+<section id="double" class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">12 • Advanced</div>
+
+        <h2>Pointer to Pointer</h2>
+
+        <p>
+            A pointer can itself have an address. A pointer to pointer
+            stores the address of another pointer.
+        </p>
+
+        <div class="code-wrap">
+
+            <div class="code-head">
+                <span>double_pointer.cpp</span>
+            </div>
+
+            <pre><code>int x = 50;
+
+int* p = &amp;x;
+
+int** pp = &amp;p;
+
+std::cout &lt;&lt; x &lt;&lt; '\n';
+std::cout &lt;&lt; *p &lt;&lt; '\n';
+std::cout &lt;&lt; **pp &lt;&lt; '\n';</code></pre>
+
+        </div>
+
+        <div class="pointer-flow">
+
+            <div class="flow-box">
+                <div class="big">x</div>
+                <small>50</small>
+            </div>
+
+            <div class="arrow">←</div>
+
+            <div class="flow-box">
+                <div class="big">p</div>
+                <small>&amp;x</small>
+            </div>
+
+            <div class="arrow">←</div>
+
+            <div class="flow-box">
+                <div class="big">pp</div>
+                <small>&amp;p</small>
+            </div>
+
+        </div>
+
+        <div class="info-box">
+
+            <strong>Remember</strong>
+
+            <p>
+                <span class="inline-code">p</span> → address of x
+            </p>
+
+            <p>
+                <span class="inline-code">*p</span> → value of x
+            </p>
+
+            <p>
+                <span class="inline-code">pp</span> → address of p
+            </p>
+
+            <p>
+                <span class="inline-code">*pp</span> → p
+            </p>
+
+            <p>
+                <span class="inline-code">**pp</span> → x
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     DYNAMIC MEMORY
+     ========================================================= -->
+
+<section id="dynamic" class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">13 • Dynamic memory</div>
+
+        <h2>Dynamic Memory Allocation</h2>
+
+        <p>
+            C++ provides <span class="inline-code">new</span> to
+            dynamically create objects and <span class="inline-code">delete</span>
+            to release memory obtained with <span class="inline-code">new</span>.
+        </p>
+
+        <div class="code-wrap">
+
+            <div class="code-head">
+                <span>dynamic.cpp</span>
+            </div>
+
+            <pre><code>int* p = new int(25);
+
+std::cout &lt;&lt; *p &lt;&lt; '\n';
+
+delete p;
+
+p = nullptr;</code></pre>
+
+        </div>
+
+        <h3>Dynamic array</h3>
+
+        <div class="code-wrap">
+
+            <div class="code-head">
+                <span>dynamic_array.cpp</span>
+            </div>
+
+            <pre><code>int n = 5;
+
+int* arr = new int[n];
+
+for (int i = 0; i &lt; n; i++) {
+    arr[i] = i + 1;
+}
+
+delete[] arr;
+
+arr = nullptr;</code></pre>
+
+        </div>
+
+        <div class="warning-box info-box">
+
+            <strong>Important pairing rule</strong>
+
+            <p>
+                Memory allocated with <span class="inline-code">new</span>
+                should be released with <span class="inline-code">delete</span>.
+            </p>
+
+            <p>
+                Memory allocated with <span class="inline-code">new[]</span>
+                should be released with <span class="inline-code">delete[]</span>.
+            </p>
+
+        </div>
+
+        <h3>Modern C++ note</h3>
+
+        <p>
+            In modern C++, prefer standard containers such as
+            <span class="inline-code">std::vector</span> and smart pointers
+            such as <span class="inline-code">std::unique_ptr</span> where appropriate,
+            rather than manually managing memory whenever possible.
+        </p>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     CONST POINTERS
+     ========================================================= -->
+
+<section id="const" class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">14 • Important interview topic</div>
+
+        <h2>Const and Pointers</h2>
+
+        <p>
+            The position of <span class="inline-code">const</span>
+            changes what is protected.
+        </p>
+
+        <h3>Pointer to const</h3>
+
+        <div class="code-wrap">
+            <pre><code>int x = 10;
+
+const int* p = &amp;x;
+
+// *p = 20;   // Not allowed through p
+
+x = 20;       // x itself can still change</code></pre>
+        </div>
+
+        <h3>Const pointer</h3>
+
+        <div class="code-wrap">
+            <pre><code>int x = 10;
+int y = 20;
+
+int* const p = &amp;x;
+
+*p = 30;
+
+// p = &amp;y;   // Not allowed</code></pre>
+        </div>
+
+        <h3>Const pointer to const</h3>
+
+        <div class="code-wrap">
+            <pre><code>int x = 10;
+
+const int* const p = &amp;x;
+
+// *p = 20;   // Not allowed
+// p = nullptr; // Not allowed</code></pre>
+        </div>
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Syntax</th>
+                        <th>Can change value through pointer?</th>
+                        <th>Can change pointer itself?</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>const int* p</td>
+                        <td>No</td>
+                        <td>Yes</td>
+                    </tr>
+
+                    <tr>
+                        <td>int* const p</td>
+                        <td>Yes</td>
+                        <td>No</td>
+                    </tr>
+
+                    <tr>
+                        <td>const int* const p</td>
+                        <td>No</td>
+                        <td>No</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     POINTER DIFFERENCE
+     ========================================================= -->
+
+<section class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">15 • Understanding deeply</div>
+
+        <h2>Pointer vs Value vs Address</h2>
+
+        <div class="code-wrap">
+
+            <div class="code-head">
+                <span>Remember this</span>
+            </div>
+
+            <pre><code>int x = 100;
+int* p = &amp;x;</code></pre>
+
+        </div>
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Expression</th>
+                        <th>What it represents</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>x</td>
+                        <td>The value 100</td>
+                    </tr>
+
+                    <tr>
+                        <td>&amp;x</td>
+                        <td>Address of x</td>
+                    </tr>
+
+                    <tr>
+                        <td>p</td>
+                        <td>The address stored in p</td>
+                    </tr>
+
+                    <tr>
+                        <td>*p</td>
+                        <td>The object/value located at that address</td>
+                    </tr>
+
+                    <tr>
+                        <td>&amp;p</td>
+                        <td>Address of pointer p</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     COMMON POINTER ERRORS
+     ========================================================= -->
+
+<section id="mistakes" class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">16 • Debugging</div>
+
+        <h2>Common Pointer Mistakes</h2>
+
+        <div class="accordion">
+
+            <button onclick="toggleAccordion(this)">
+                1. Uninitialized pointer
+                <span>+</span>
+            </button>
+
+            <div class="accordion-content">
+
+                <p>
+                    A local pointer that has not been initialized does not
+                    safely point to a valid object.
+                </p>
+
+                <div class="code-wrap">
+                    <pre><code>int* p;
+
+// *p = 10;  // Undefined behavior</code></pre>
+                </div>
+
+                <p>
+                    Prefer initializing it, often to
+                    <span class="inline-code">nullptr</span> if it has no target yet.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="accordion">
+
+            <button onclick="toggleAccordion(this)">
+                2. Null pointer dereference
+                <span>+</span>
+            </button>
+
+            <div class="accordion-content">
+
+                <div class="code-wrap">
+                    <pre><code>int* p = nullptr;
+
+// *p = 10;  // Invalid</code></pre>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="accordion">
+
+            <button onclick="toggleAccordion(this)">
+                3. Dangling pointer
+                <span>+</span>
+            </button>
+
+            <div class="accordion-content">
+
+                <p>
+                    A dangling pointer refers to an object whose lifetime
+                    has ended.
+                </p>
+
+                <div class="code-wrap">
+                    <pre><code>int* p = new int(10);
+
+delete p;
+
+// p now does not point to a live int object.</code></pre>
+                </div>
+
+                <p>
+                    Setting <span class="inline-code">p = nullptr</span>
+                    after deletion is a useful defensive practice.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="accordion">
+
+            <button onclick="toggleAccordion(this)">
+                4. Memory leak
+                <span>+</span>
+            </button>
+
+            <div class="accordion-content">
+
+                <p>
+                    A memory leak can occur when dynamically allocated
+                    memory is no longer reachable and has not been released.
+                </p>
+
+                <div class="code-wrap">
+                    <pre><code>int* p = new int(100);
+
+// Forgot to delete p</code></pre>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="accordion">
+
+            <button onclick="toggleAccordion(this)">
+                5. Wrong delete
+                <span>+</span>
+            </button>
+
+            <div class="accordion-content">
+
+                <div class="code-wrap">
+                    <pre><code>int* arr = new int[5];
+
+// delete arr;     // Wrong
+delete[] arr;      // Correct</code></pre>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     REAL WORLD
+     ========================================================= -->
+
+<section class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">17 • Real-world understanding</div>
+
+        <h2>Where Are Pointers Used?</h2>
+
+        <div class="three-col">
+
+            <div class="objective">
+                <div class="objective-icon">01</div>
+                <strong>Data Structures</strong>
+                <span>
+                    Linked lists, trees, graphs and many low-level structures
+                    rely heavily on pointer concepts.
+                </span>
+            </div>
+
+            <div class="objective">
+                <div class="objective-icon">02</div>
+                <strong>Operating Systems</strong>
+                <span>
+                    Low-level programming frequently requires direct
+                    manipulation of memory and objects.
+                </span>
+            </div>
+
+            <div class="objective">
+                <div class="objective-icon">03</div>
+                <strong>Performance</strong>
+                <span>
+                    Pointers can provide efficient access to existing objects
+                    without copying them.
+                </span>
+            </div>
+
+            <div class="objective">
+                <div class="objective-icon">04</div>
+                <strong>Embedded Systems</strong>
+                <span>
+                    Hardware-oriented C++ programs often work close to memory
+                    and devices.
+                </span>
+            </div>
+
+            <div class="objective">
+                <div class="objective-icon">05</div>
+                <strong>Dynamic Structures</strong>
+                <span>
+                    Dynamically created objects can be connected and managed
+                    through pointers.
+                </span>
+            </div>
+
+            <div class="objective">
+                <div class="objective-icon">06</div>
+                <strong>Interviews</strong>
+                <span>
+                    Pointer questions test memory, arrays, functions and
+                    problem-solving fundamentals.
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     FLOWCHART
+     ========================================================= -->
+
+<section class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">18 • Flowchart</div>
+
+        <h2>Pointer Execution Flow</h2>
+
+        <div class="pointer-flow">
+
+            <div class="flow-box">
+                <div class="big">Variable</div>
+                <small>Stores data</small>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="flow-box">
+                <div class="big">&amp;variable</div>
+                <small>Gets address</small>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="flow-box">
+                <div class="big">pointer</div>
+                <small>Stores address</small>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="flow-box">
+                <div class="big">*pointer</div>
+                <small>Accesses object</small>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     INTERACTIVE LAB
+     ========================================================= -->
+
+<section id="lab" class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">19 • Interactive laboratory</div>
+
+        <h2>Pointer Memory Lab</h2>
+
+        <p>
+            Enter a value and simulate how a pointer refers to that value.
+            This is a browser-based learning simulation, not a C++ compiler.
+        </p>
+
+        <div class="lab">
+
+            <div class="lab-controls">
+
+                <input
+                    id="pointerValue"
+                    type="number"
+                    value="25"
+                    placeholder="Enter value"
+                >
+
+                <button class="btn" onclick="createPointer()">
+                    Create Pointer
+                </button>
+
+                <button class="btn secondary" onclick="modifyPointer()">
+                    *p = 100
+                </button>
+
+                <button class="btn secondary" onclick="resetPointer()">
+                    Reset
+                </button>
+
+            </div>
+
+            <div class="memory-grid">
+
+                <div class="memory-cell">
+
+                    <div class="memory-address">
+                        Address: 0x1000
+                    </div>
+
+                    <div
+                        class="memory-value"
+                        id="simValue"
+                    >
+                        25
+                    </div>
+
+                    <div class="memory-label">
+                        x
+                    </div>
+
+                </div>
+
+                <div class="memory-cell">
+
+                    <div class="memory-address">
+                        Address: 0x2000
+                    </div>
+
+                    <div
+                        class="memory-value"
+                        id="simPointer"
+                    >
+                        0x1000
+                    </div>
+
+                    <div class="memory-label">
+                        p
+                    </div>
+
+                </div>
+
+                <div class="memory-cell">
+
+                    <div class="memory-address">
+                        Expression
+                    </div>
+
+                    <div
+                        class="memory-value"
+                        id="simDereference"
+                    >
+                        25
+                    </div>
+
+                    <div class="memory-label">
+                        *p
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div
+                class="lab-output"
+                id="labOutput"
+            >int x = 25;
+int* p = &amp;x;
+
+p stores the address of x.
+*p gives the value of x.</div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     POINTER PRACTICE VISUALIZER
+     ========================================================= -->
+
+<section class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">20 • Pointer arithmetic lab</div>
+
+        <h2>Array Pointer Visualizer</h2>
+
+        <p>
+            Watch a pointer move through an array.
+        </p>
+
+        <div class="lab">
+
+            <div class="pointer-flow" id="arrayVisualizer">
+
+                <div class="flow-box active">
+                    <div class="big">10</div>
+                    <small>index 0</small>
+                </div>
+
+                <div class="flow-box">
+                    <div class="big">20</div>
+                    <small>index 1</small>
+                </div>
+
+                <div class="flow-box">
+                    <div class="big">30</div>
+                    <small>index 2</small>
+                </div>
+
+                <div class="flow-box">
+                    <div class="big">40</div>
+                    <small>index 3</small>
+                </div>
+
+                <div class="flow-box">
+                    <div class="big">50</div>
+                    <small>index 4</small>
+                </div>
+
+            </div>
+
+            <button class="btn" onclick="moveArrayPointer()">
+                Move Pointer →
+            </button>
+
+            <p id="arrayStatus" style="margin-top:15px;">
+                p currently points to index 0 → value 10
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     MINI PROJECT
+     ========================================================= -->
+
+<section class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">21 • Mini project</div>
+
+        <h2>Mini Project — Swap Two Numbers Using Pointers</h2>
+
+        <p>
+            One of the classic pointer problems is swapping two values
+            through their addresses.
+        </p>
+
+        <div class="code-wrap">
+
+            <div class="code-head">
+                <span>swap.cpp</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                    Copy
+                </button>
+            </div>
+
+            <pre><code>#include &lt;iostream&gt;
+
+void swapNumbers(int* a, int* b) {
+
+    int temp = *a;
+
+    *a = *b;
+
+    *b = temp;
+}
+
+int main() {
+
+    int x = 10;
+    int y = 20;
+
+    std::cout &lt;&lt; "Before: "
+              &lt;&lt; x &lt;&lt; " "
+              &lt;&lt; y &lt;&lt; '\n';
+
+    swapNumbers(&amp;x, &amp;y);
+
+    std::cout &lt;&lt; "After: "
+              &lt;&lt; x &lt;&lt; " "
+              &lt;&lt; y &lt;&lt; '\n';
+
+    return 0;
+}</code></pre>
+
+        </div>
+
+        <div class="success-box info-box">
+
+            <strong>Output</strong>
+
+            <pre style="background:transparent;color:#166534;padding:0;"><code>Before: 10 20
+After: 20 10</code></pre>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     COMMON INTERVIEW QUESTIONS
+     ========================================================= -->
+
+<section id="interview" class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">22 • Interview preparation</div>
+
+        <h2>Pointer Interview Questions</h2>
+
+        <div class="accordion">
+
+            <button onclick="toggleAccordion(this)">
+                What is a pointer?
+                <span>+</span>
+            </button>
+
+            <div class="accordion-content">
+                A pointer is an object that stores an address or another
+                pointer value and can be used to access the object it points to.
+            </div>
+
+        </div>
+
+        <div class="accordion">
+
+            <button onclick="toggleAccordion(this)">
+                What is the difference between &amp; and *?
+                <span>+</span>
+            </button>
+
+            <div class="accordion-content">
+                In the pointer context, <strong>&amp;</strong> can obtain an
+                object's address, while <strong>*</strong> can dereference a
+                pointer to access the referred object. Their meaning depends
+                on context.
+            </div>
+
+        </div>
+
+        <div class="accordion">
+
+            <button onclick="toggleAccordion(this)">
+                What is nullptr?
+                <span>+</span>
+            </button>
+
+            <div class="accordion-content">
+                nullptr is the C++ null pointer literal. It represents a
+                null pointer value.
+            </div>
+
+        </div>
+
+        <div class="accordion">
+
+            <button onclick="toggleAccordion(this)">
+                What is a dangling pointer?
+                <span>+</span>
+            </button>
+
+            <div class="accordion-content">
+                A dangling pointer refers to an object whose lifetime has ended.
+            </div>
+
+        </div>
+
+        <div class="accordion">
+
+            <button onclick="toggleAccordion(this)">
+                What is a memory leak?
+                <span>+</span>
+            </button>
+
+            <div class="accordion-content">
+                A memory leak can occur when dynamically allocated memory
+                is no longer reachable and has not been released.
+            </div>
+
+        </div>
+
+        <div class="accordion">
+
+            <button onclick="toggleAccordion(this)">
+                What is pointer arithmetic?
+                <span>+</span>
+            </button>
+
+            <div class="accordion-content">
+                Pointer arithmetic allows a pointer into an array to move
+                between elements using operations such as +, -, ++ and --.
+            </div>
+
+        </div>
+
+        <div class="accordion">
+
+            <button onclick="toggleAccordion(this)">
+                What is a double pointer?
+                <span>+</span>
+            </button>
+
+            <div class="accordion-content">
+                A double pointer, such as int**, stores the address of another
+                pointer.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     EXAM QUESTIONS
+     ========================================================= -->
+
+<section class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">23 • Exam preparation</div>
+
+        <h2>Important Exam Questions</h2>
+
+        <ol>
+
+            <li>Define pointer with an example.</li>
+
+            <li>Explain address-of and dereference operators.</li>
+
+            <li>Explain pointer declaration and initialization.</li>
+
+            <li>Explain pointer arithmetic with an example.</li>
+
+            <li>Explain the relationship between arrays and pointers.</li>
+
+            <li>Explain passing pointers to functions.</li>
+
+            <li>Explain pointer to pointer.</li>
+
+            <li>Explain dynamic memory allocation using new and delete.</li>
+
+            <li>Differentiate new/delete and new[]/delete[].</li>
+
+            <li>Explain dangling pointers and memory leaks.</li>
+
+            <li>Explain const pointers.</li>
+
+            <li>Write a C++ program to swap two numbers using pointers.</li>
+
+        </ol>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     QUIZ
+     ========================================================= -->
+
+<section id="quiz" class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">24 • Knowledge check</div>
+
+        <h2>Pointer Quiz</h2>
+
+        <div class="quiz-question">
+
+            <h4>1. What does &amp;x represent?</h4>
+
+            <label class="option">
+                <input type="radio" name="q1" value="0">
+                Value of x
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q1" value="1">
+                Address of x
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q1" value="0">
+                Size of x
+            </label>
+
+        </div>
+
+        <div class="quiz-question">
+
+            <h4>2. What does *p generally do when p is a valid pointer?</h4>
+
+            <label class="option">
+                <input type="radio" name="q2" value="1">
+                Accesses the object pointed to by p
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q2" value="0">
+                Creates a new pointer
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q2" value="0">
+                Deletes p
+            </label>
+
+        </div>
+
+        <div class="quiz-question">
+
+            <h4>3. Which is the modern C++ null pointer literal?</h4>
+
+            <label class="option">
+                <input type="radio" name="q3" value="0">
+                NULL only
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q3" value="1">
+                nullptr
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q3" value="0">
+                empty
+            </label>
+
+        </div>
+
+        <div class="quiz-question">
+
+            <h4>4. Which should match new int[5]?</h4>
+
+            <label class="option">
+                <input type="radio" name="q4" value="0">
+                delete
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q4" value="1">
+                delete[]
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q4" value="0">
+                free[]
+            </label>
+
+        </div>
+
+        <div class="quiz-question">
+
+            <h4>5. What does **pp mean when pp is an int**?</h4>
+
+            <label class="option">
+                <input type="radio" name="q5" value="1">
+                The final int object reached through two pointer levels
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q5" value="0">
+                The address of pp
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q5" value="0">
+                A multiplication operation
+            </label>
+
+        </div>
+
+        <button class="btn" onclick="checkQuiz()">
+            Check Answers
+        </button>
+
+        <div class="quiz-result" id="quizResult"></div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     PRACTICE
+     ========================================================= -->
+
+<section id="practice" class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">25 • Coding practice</div>
+
+        <h2>Practice Problems</h2>
+
+        <div class="three-col">
+
+            <div class="objective">
+                <div class="objective-icon">01</div>
+                <strong>Easy</strong>
+                <span>
+                    Print a variable's value and address using a pointer.
+                </span>
+            </div>
+
+            <div class="objective">
+                <div class="objective-icon">02</div>
+                <strong>Easy</strong>
+                <span>
+                    Modify a variable using a pointer.
+                </span>
+            </div>
+
+            <div class="objective">
+                <div class="objective-icon">03</div>
+                <strong>Easy</strong>
+                <span>
+                    Find the sum of an array using pointer traversal.
+                </span>
+            </div>
+
+            <div class="objective">
+                <div class="objective-icon">04</div>
+                <strong>Medium</strong>
+                <span>
+                    Reverse an array using two pointers.
+                </span>
+            </div>
+
+            <div class="objective">
+                <div class="objective-icon">05</div>
+                <strong>Medium</strong>
+                <span>
+                    Swap two numbers using pointers.
+                </span>
+            </div>
+
+            <div class="objective">
+                <div class="objective-icon">06</div>
+                <strong>Medium</strong>
+                <span>
+                    Find the largest array element using pointer arithmetic.
+                </span>
+            </div>
+
+            <div class="objective">
+                <div class="objective-icon">07</div>
+                <strong>Advanced</strong>
+                <span>
+                    Implement a simple linked list node using pointers.
+                </span>
+            </div>
+
+            <div class="objective">
+                <div class="objective-icon">08</div>
+                <strong>Advanced</strong>
+                <span>
+                    Use a pointer to pointer to modify a pointer.
+                </span>
+            </div>
+
+            <div class="objective">
+                <div class="objective-icon">09</div>
+                <strong>Interview</strong>
+                <span>
+                    Explain the difference between pointer and reference.
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     RAPID REVISION
+     ========================================================= -->
+
+<section class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">26 • Rapid revision</div>
+
+        <h2>One-Minute Pointer Revision</h2>
+
+        <div class="info-box">
+
+            <p><strong>Pointer:</strong> stores an address/value that can be used to refer to an object.</p>
+
+            <p><strong>&amp;x:</strong> address of x.</p>
+
+            <p><strong>p:</strong> address/value stored in pointer p.</p>
+
+            <p><strong>*p:</strong> object referred to by p.</p>
+
+            <p><strong>nullptr:</strong> null pointer value.</p>
+
+            <p><strong>p + 1:</strong> next element when p points into an array.</p>
+
+            <p><strong>int**:</strong> pointer to pointer.</p>
+
+            <p><strong>new:</strong> dynamically creates an object.</p>
+
+            <p><strong>delete:</strong> releases a single object obtained from new.</p>
+
+            <p><strong>delete[]:</strong> releases an array obtained from new[].</p>
+
+            <p><strong>Dangling pointer:</strong> points to an object whose lifetime has ended.</p>
+
+            <p><strong>Memory leak:</strong> allocated memory is not properly released and becomes unreachable.</p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     CHECKLIST
+     ========================================================= -->
+
+<section id="checklist" class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">27 • Completion</div>
+
+        <h2>Lesson 10 Checklist</h2>
+
+        <p>
+            Mark each concept after you understand it.
+        </p>
+
+        <div class="checklist">
+
+            <label class="check-item">
+                <input type="checkbox" data-check="pointer1">
+                <span>Understand what a pointer is</span>
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-check="pointer2">
+                <span>Understand memory addresses</span>
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-check="pointer3">
+                <span>Understand &amp; address-of</span>
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-check="pointer4">
+                <span>Understand * dereference</span>
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-check="pointer5">
+                <span>Declare and initialize pointers</span>
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-check="pointer6">
+                <span>Understand nullptr</span>
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-check="pointer7">
+                <span>Understand pointer arithmetic</span>
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-check="pointer8">
+                <span>Connect arrays and pointers</span>
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-check="pointer9">
+                <span>Pass pointers to functions</span>
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-check="pointer10">
+                <span>Understand double pointers</span>
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-check="pointer11">
+                <span>Understand new and delete</span>
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-check="pointer12">
+                <span>Recognize dangling pointers and leaks</span>
+            </label>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
+     NEXT LESSON
+     ========================================================= -->
+
+<section class="reveal">
+
+    <div class="card">
+
+        <div class="section-kicker">Next</div>
+
+        <h2>Ready for Lesson 11?</h2>
+
+        <p>
+            You now understand one of the most important low-level
+            concepts in C++. The next step is to use pointers in
+            larger data structures and object-oriented programming.
+        </p>
+
+        <div class="info-box success-box">
+
+            <strong>C++ Roadmap</strong>
+
+            Lesson 10 → <strong>Pointers</strong><br>
+            Lesson 11 → <strong>References &amp; OOP Foundations</strong>
+        </div>
+
+    </div>
+
+</section>
+
+</div>
+
+<footer class="footer">
+
+    <strong>ZENSUS</strong> — Learn. Build. Become Future Ready.
+
+    <br>
+
+    C++ Course • Lesson 10 — Pointers
+
+</footer>
+
+</main>
+
+<!-- =========================================================
+     JAVASCRIPT
+     ========================================================= -->
+
+<script>
+
+/* =========================================================
+   MOBILE SIDEBAR
+   ========================================================= */
+
+const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.getElementById("sidebar");
+
+if(menuBtn){
+    menuBtn.addEventListener("click", function(){
+        sidebar.classList.toggle("open");
+    });
+}
+
+document.querySelectorAll(".nav a").forEach(link => {
+
+    link.addEventListener("click", function(){
+
+        if(window.innerWidth <= 800){
+            sidebar.classList.remove("open");
+        }
+
+    });
+
+});
+
+/* =========================================================
+   SCROLL PROGRESS
+   ========================================================= */
+
+function updateProgress(){
+
+    const scrollTop =
+        window.scrollY ||
+        document.documentElement.scrollTop;
+
+    const height =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+
+    const progress =
+        height > 0 ? (scrollTop / height) * 100 : 0;
+
+    document.getElementById("progressBar").style.width =
+        progress + "%";
+}
+
+window.addEventListener("scroll", updateProgress);
+
+updateProgress();
+
+/* =========================================================
+   REVEAL ANIMATIONS
+   ========================================================= */
+
+const revealElements =
+    document.querySelectorAll(".reveal");
+
+const revealObserver =
+    new IntersectionObserver(
+        entries => {
+
+            entries.forEach(entry => {
+
+                if(entry.isIntersecting){
+
+                    entry.target.classList.add("show");
+
+                }
+
+            });
+
+        },
+        {
+            threshold:.08
+        }
+    );
+
+revealElements.forEach(element => {
+    revealObserver.observe(element);
+});
+
+/* =========================================================
+   ACTIVE NAVIGATION
+   ========================================================= */
+
+const sections =
+    document.querySelectorAll("section[id]");
+
+const navLinks =
+    document.querySelectorAll(".nav a");
+
+function updateActiveNav(){
+
+    let current = "";
+
+    sections.forEach(section => {
+
+        const top = section.offsetTop;
+
+        if(window.scrollY >= top - 150){
+            current = section.getAttribute("id");
+        }
+
+    });
+
+    navLinks.forEach(link => {
+
+        link.classList.remove("active");
+
+        const href =
+            link.getAttribute("href");
+
+        if(href === "#" + current){
+            link.classList.add("active");
+        }
+
+    });
+}
+
+window.addEventListener("scroll", updateActiveNav);
+
+/* =========================================================
+   COPY CODE
+   ========================================================= */
+
+function copyCode(button){
+
+    const codeWrap =
+        button.closest(".code-wrap");
+
+    const code =
+        codeWrap.querySelector("pre").innerText;
+
+    navigator.clipboard.writeText(code)
+        .then(() => {
+
+            const oldText = button.innerText;
+
+            button.innerText = "Copied!";
+
+            setTimeout(() => {
+                button.innerText = oldText;
+            }, 1200);
+
+        })
+        .catch(() => {
+
+            button.innerText = "Copy failed";
+
+            setTimeout(() => {
+                button.innerText = "Copy";
+            }, 1200);
+
+        });
+
+}
+
+/* =========================================================
+   POINTER ANIMATION
+   ========================================================= */
+
+function animatePointer(){
+
+    const x =
+        document.getElementById("boxX");
+
+    const p =
+        document.getElementById("boxP");
+
+    x.classList.remove("active");
+    p.classList.remove("active");
+
+    setTimeout(() => {
+        p.classList.add("active");
+    }, 200);
+
+    setTimeout(() => {
+        x.classList.add("active");
+    }, 700);
+
+    setTimeout(() => {
+        p.classList.remove("active");
+        x.classList.remove("active");
+    }, 1500);
+}
+
+/* =========================================================
+   ACCORDION
+   ========================================================= */
+
+function toggleAccordion(button){
+
+    const parent =
+        button.parentElement;
+
+    const currentlyOpen =
+        parent.classList.contains("open");
+
+    document
+        .querySelectorAll(".accordion")
+        .forEach(item => {
+            item.classList.remove("open");
+
+            const span =
+                item.querySelector("button span");
+
+            if(span){
+                span.textContent = "+";
+            }
+        });
+
+    if(!currentlyOpen){
+
+        parent.classList.add("open");
+
+        const span =
+            button.querySelector("span");
+
+        if(span){
+            span.textContent = "−";
+        }
+
+    }
+
+}
+
+/* =========================================================
+   POINTER LAB
+   ========================================================= */
+
+let currentValue = 25;
+
+function createPointer(){
+
+    const input =
+        document.getElementById("pointerValue");
+
+    const value =
+        Number(input.value);
+
+    if(Number.isNaN(value)){
+        return;
+    }
+
+    currentValue = value;
+
+    document.getElementById("simValue")
+        .textContent = value;
+
+    document.getElementById("simDereference")
+        .textContent = value;
+
+    document.getElementById("simPointer")
+        .textContent = "0x1000";
+
+    document.getElementById("labOutput")
+        .textContent =
+`int x = ${value};
+int* p = &x;
+
+p stores the address of x.
+*p gives ${value}.`;
+
+}
+
+function modifyPointer(){
+
+    currentValue = 100;
+
+    document.getElementById("simValue")
+        .textContent = "100";
+
+    document.getElementById("simDereference")
+        .textContent = "100";
+
+    document.getElementById("labOutput")
+        .textContent =
+`int x = ${currentValue};
+int* p = &x;
+
+*p = 100;
+
+Because p points to x,
+changing *p changes x.`;
+
+}
+
+function resetPointer(){
+
+    currentValue = 25;
+
+    document.getElementById("pointerValue")
+        .value = 25;
+
+    createPointer();
+
+}
+
+/* =========================================================
+   ARRAY POINTER VISUALIZER
+   ========================================================= */
+
+let arrayIndex = 0;
+
+function moveArrayPointer(){
+
+    const boxes =
+        document
+        .querySelectorAll("#arrayVisualizer .flow-box");
+
+    boxes.forEach(box => {
+        box.classList.remove("active");
+    });
+
+    arrayIndex++;
+
+    if(arrayIndex >= boxes.length){
+        arrayIndex = 0;
+    }
+
+    boxes[arrayIndex].classList.add("active");
+
+    const values =
+        [10,20,30,40,50];
+
+    document.getElementById("arrayStatus")
+        .textContent =
+        `p currently points to index ${arrayIndex} → value ${values[arrayIndex]}`;
+}
+
+/* =========================================================
+   QUIZ
+   ========================================================= */
+
+function checkQuiz(){
+
+    let score = 0;
+
+    for(let i = 1; i <= 5; i++){
+
+        const answer =
+            document.querySelector(
+                `input[name="q${i}"]:checked`
+            );
+
+        if(answer && answer.value === "1"){
+            score++;
+        }
+
+    }
+
+    const result =
+        document.getElementById("quizResult");
+
+    if(score === 5){
+
+        result.textContent =
+            "🎉 Perfect! 5/5 — You understand the pointer fundamentals.";
+
+    }
+    else if(score >= 3){
+
+        result.textContent =
+            `Good work! You scored ${score}/5. Review the missed concepts once.`;
+
+    }
+    else{
+
+        result.textContent =
+            `You scored ${score}/5. Revisit the pointer basics and try again.`;
+
+    }
+
+}
+
+/* =========================================================
+   CHECKLIST LOCAL STORAGE
+   ========================================================= */
+
+document
+    .querySelectorAll(".check-item input")
+    .forEach(box => {
+
+        const key =
+            "zensus_" + box.dataset.check;
+
+        box.checked =
+            localStorage.getItem(key) === "true";
+
+        box.addEventListener("change", function(){
+
+            localStorage.setItem(
+                key,
+                box.checked
+            );
+
+        });
+
+    });
+
+/* =========================================================
+   INITIALIZATION
+   ========================================================= */
+
+createPointer();
+
+</script>
+
+</body>
+</html>

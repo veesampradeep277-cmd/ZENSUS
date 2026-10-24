@@ -1,0 +1,4290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ZENSUS | SQL Lesson 4 — INSERT</title>
+
+    <style>
+        /* =========================================================
+           ZENSUS SQL LESSON 4
+           Topic: INSERT
+           Standalone HTML + CSS + JavaScript
+           ========================================================= */
+
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --secondary: #7c3aed;
+            --accent: #06b6d4;
+
+            --bg: #f6f8fc;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+
+            --text: #172033;
+            --muted: #64748b;
+
+            --border: #e2e8f0;
+
+            --success: #16a34a;
+            --warning: #d97706;
+            --danger: #dc2626;
+
+            --code-bg: #0b1220;
+            --code-text: #e2e8f0;
+
+            --shadow-sm: 0 4px 16px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 12px 35px rgba(15, 23, 42, 0.09);
+
+            --radius: 18px;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family:
+                Inter,
+                ui-sans-serif,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* =========================================================
+           SCROLL PROGRESS
+           ========================================================= */
+
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+            z-index: 9999;
+        }
+
+        /* =========================================================
+           MOBILE TOPBAR
+           ========================================================= */
+
+        .mobile-topbar {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: rgba(255,255,255,0.96);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            backdrop-filter: blur(12px);
+        }
+
+        .mobile-brand {
+            font-weight: 900;
+            font-size: 20px;
+            letter-spacing: -0.5px;
+        }
+
+        .mobile-brand span {
+            color: var(--primary);
+        }
+
+        .menu-btn {
+            width: 42px;
+            height: 42px;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        /* =========================================================
+           SIDEBAR
+           ========================================================= */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: #ffffff;
+            border-right: 1px solid var(--border);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 24px 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 10px 28px;
+        }
+
+        .brand-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+            box-shadow: 0 8px 20px rgba(79,70,229,0.22);
+        }
+
+        .brand-text {
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: -0.8px;
+        }
+
+        .brand-text span {
+            color: var(--primary);
+        }
+
+        .course-label {
+            padding: 0 10px 10px;
+            font-size: 11px;
+            font-weight: 800;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+        }
+
+        .lesson-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .lesson-nav a {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 11px 12px;
+            border-radius: 12px;
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 650;
+            transition: 0.2s ease;
+        }
+
+        .lesson-nav a:hover {
+            background: #f1f5f9;
+            color: var(--primary);
+            transform: translateX(2px);
+        }
+
+        .lesson-nav a.active {
+            color: var(--primary);
+            background: #eef2ff;
+            font-weight: 800;
+        }
+
+        .lesson-number {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border-radius: 8px;
+            background: #f1f5f9;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .active .lesson-number {
+            background: var(--primary);
+            color: white;
+        }
+
+        .sidebar-bottom {
+            margin-top: 30px;
+            padding: 15px 10px;
+            border-top: 1px solid var(--border);
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .progress-track {
+            height: 7px;
+            background: #e2e8f0;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 25%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: inherit;
+        }
+
+        /* =========================================================
+           MAIN
+           ========================================================= */
+
+        .main {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+        }
+
+        .container {
+            width: min(1120px, calc(100% - 44px));
+            margin: 0 auto;
+        }
+
+        /* =========================================================
+           HERO
+           ========================================================= */
+
+        .hero {
+            padding: 70px 0 40px;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.25fr 0.75fr;
+            gap: 28px;
+            align-items: stretch;
+        }
+
+        .hero-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 26px;
+            padding: 42px;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-card::after {
+            content: "";
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            right: -80px;
+            top: -80px;
+            background: rgba(79,70,229,0.07);
+            border-radius: 50%;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: #eef2ff;
+            color: var(--primary);
+            border: 1px solid #c7d2fe;
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 850;
+            margin-bottom: 17px;
+        }
+
+        .hero h1 {
+            font-size: clamp(38px, 5vw, 62px);
+            line-height: 1.03;
+            letter-spacing: -2.5px;
+            margin-bottom: 18px;
+        }
+
+        .hero h1 span {
+            color: var(--primary);
+        }
+
+        .hero-description {
+            color: var(--muted);
+            font-size: 17px;
+            max-width: 720px;
+            margin-bottom: 25px;
+        }
+
+        .hero-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .meta-pill {
+            padding: 8px 12px;
+            border-radius: 10px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            font-size: 12px;
+            font-weight: 750;
+            color: #475569;
+        }
+
+        .hero-code {
+            background: var(--code-bg);
+            color: var(--code-text);
+            border-radius: 22px;
+            padding: 28px;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .code-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: 750;
+            margin-bottom: 17px;
+        }
+
+        .dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #475569;
+        }
+
+        .hero-code pre,
+        .hero-code code,
+        .code-box pre,
+        .code-box code {
+            color: var(--code-text);
+            font-family:
+                "Cascadia Code",
+                "Fira Code",
+                Consolas,
+                monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .sql-keyword {
+            color: #93c5fd;
+            font-weight: 700;
+        }
+
+        .sql-string {
+            color: #86efac;
+        }
+
+        .sql-number {
+            color: #fcd34d;
+        }
+
+        .sql-comment {
+            color: #64748b;
+        }
+
+        /* =========================================================
+           SECTION
+           ========================================================= */
+
+        section {
+            padding: 38px 0;
+        }
+
+        .section-heading {
+            margin-bottom: 22px;
+        }
+
+        .section-kicker {
+            color: var(--primary);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            font-weight: 900;
+            margin-bottom: 7px;
+        }
+
+        .section-heading h2 {
+            font-size: clamp(28px, 4vw, 38px);
+            line-height: 1.15;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+        }
+
+        .section-heading p {
+            color: var(--muted);
+            max-width: 760px;
+        }
+
+        /* =========================================================
+           OBJECTIVES
+           ========================================================= */
+
+        .objectives {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+
+        .objective {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .objective-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 11px;
+            display: grid;
+            place-items: center;
+            background: #eef2ff;
+            color: var(--primary);
+            font-weight: 900;
+            margin-bottom: 13px;
+        }
+
+        .objective h3 {
+            font-size: 15px;
+            margin-bottom: 5px;
+        }
+
+        .objective p {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        /* =========================================================
+           CARDS
+           ========================================================= */
+
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 27px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 18px;
+        }
+
+        .card h3 {
+            font-size: 21px;
+            margin-bottom: 9px;
+        }
+
+        .card h4 {
+            font-size: 16px;
+            margin: 20px 0 8px;
+        }
+
+        .card p {
+            color: #475569;
+            margin-bottom: 12px;
+        }
+
+        .card ul,
+        .card ol {
+            margin: 12px 0 12px 22px;
+            color: #475569;
+        }
+
+        .card li {
+            margin-bottom: 7px;
+        }
+
+        /* =========================================================
+           INFO GRID
+           ========================================================= */
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .info-box {
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 19px;
+            background: var(--surface-2);
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text);
+        }
+
+        .info-box p {
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .tip {
+            border-left: 4px solid var(--primary);
+            background: #eef2ff;
+            padding: 15px 17px;
+            border-radius: 10px;
+            margin-top: 17px;
+            color: #3730a3;
+            font-size: 14px;
+        }
+
+        .warning {
+            border-left: 4px solid var(--warning);
+            background: #fff7ed;
+            padding: 15px 17px;
+            border-radius: 10px;
+            margin-top: 17px;
+            color: #9a3412;
+            font-size: 14px;
+        }
+
+        .danger {
+            border-left: 4px solid var(--danger);
+            background: #fef2f2;
+            padding: 15px 17px;
+            border-radius: 10px;
+            margin-top: 17px;
+            color: #991b1b;
+            font-size: 14px;
+        }
+
+        .success {
+            border-left: 4px solid var(--success);
+            background: #f0fdf4;
+            padding: 15px 17px;
+            border-radius: 10px;
+            margin-top: 17px;
+            color: #166534;
+            font-size: 14px;
+        }
+
+        /* =========================================================
+           CODE BOX
+           ========================================================= */
+
+        .code-box {
+            background: var(--code-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 16px 0;
+            overflow-x: auto;
+            border: 1px solid #1e293b;
+            position: relative;
+        }
+
+        .copy-code {
+            position: absolute;
+            right: 12px;
+            top: 12px;
+            border: 1px solid #334155;
+            background: #111827;
+            color: #cbd5e1;
+            border-radius: 8px;
+            padding: 6px 9px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .copy-code:hover {
+            background: #1e293b;
+        }
+
+        /* =========================================================
+           FLOWCHART
+           ========================================================= */
+
+        .flowchart {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 25px 0;
+        }
+
+        .flow-step {
+            min-width: 145px;
+            text-align: center;
+            padding: 17px 14px;
+            border-radius: 15px;
+            background: white;
+            border: 2px solid #cbd5e1;
+            box-shadow: var(--shadow-sm);
+            font-weight: 800;
+            font-size: 13px;
+            animation: floatStep 3s ease-in-out infinite;
+        }
+
+        .flow-step:nth-child(2) {
+            animation-delay: .2s;
+        }
+
+        .flow-step:nth-child(3) {
+            animation-delay: .4s;
+        }
+
+        .flow-step:nth-child(4) {
+            animation-delay: .6s;
+        }
+
+        .flow-step:nth-child(5) {
+            animation-delay: .8s;
+        }
+
+        .flow-arrow {
+            color: var(--primary);
+            font-size: 24px;
+            font-weight: 900;
+        }
+
+        @keyframes floatStep {
+            0%,100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* =========================================================
+           TABLE VISUALIZATION
+           ========================================================= */
+
+        .table-demo {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            margin-top: 18px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 620px;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 13px 15px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 850;
+            color: #334155;
+        }
+
+        tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .new-row {
+            animation: rowInsert .8s ease;
+        }
+
+        @keyframes rowInsert {
+            from {
+                opacity: 0;
+                transform: translateX(-25px);
+                background: #dcfce7;
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+                background: transparent;
+            }
+        }
+
+        /* =========================================================
+           INTERACTIVE SIMULATOR
+           ========================================================= */
+
+        .simulator {
+            background: #0f172a;
+            border-radius: 22px;
+            padding: 25px;
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .simulator-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .simulator-title {
+            font-size: 20px;
+            font-weight: 850;
+        }
+
+        .sim-status {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .sim-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .sim-panel {
+            background: #111c30;
+            border: 1px solid #263449;
+            border-radius: 16px;
+            padding: 17px;
+        }
+
+        .sim-panel h4 {
+            margin: 0 0 10px;
+            color: #cbd5e1;
+        }
+
+        .sim-input {
+            width: 100%;
+            background: #020617;
+            border: 1px solid #334155;
+            color: #e2e8f0;
+            border-radius: 10px;
+            padding: 11px 12px;
+            outline: none;
+            margin-bottom: 10px;
+        }
+
+        .sim-input:focus {
+            border-color: #818cf8;
+        }
+
+        .sim-btn {
+            border: 0;
+            background: var(--primary);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 800;
+            transition: .2s ease;
+        }
+
+        .sim-btn:hover {
+            transform: translateY(-1px);
+            background: #6366f1;
+        }
+
+        .sim-btn.secondary {
+            background: #334155;
+        }
+
+        .sim-output {
+            min-height: 120px;
+            background: #020617;
+            border: 1px solid #263449;
+            border-radius: 12px;
+            padding: 14px;
+            color: #cbd5e1;
+            font-family: Consolas, monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+
+        /* =========================================================
+           COMPARISON
+           ========================================================= */
+
+        .comparison {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .compare-card {
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            background: white;
+        }
+
+        .compare-card.good {
+            border-top: 4px solid var(--success);
+        }
+
+        .compare-card.bad {
+            border-top: 4px solid var(--danger);
+        }
+
+        .compare-card h4 {
+            margin-top: 0;
+        }
+
+        /* =========================================================
+           QUIZ
+           ========================================================= */
+
+        .quiz-question {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .quiz-question h4 {
+            margin: 0 0 13px;
+            font-size: 15px;
+        }
+
+        .option {
+            display: block;
+            width: 100%;
+            text-align: left;
+            border: 1px solid var(--border);
+            background: white;
+            padding: 11px 13px;
+            border-radius: 10px;
+            margin: 7px 0;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .option:hover {
+            border-color: #a5b4fc;
+            background: #eef2ff;
+        }
+
+        .option.selected {
+            border-color: var(--primary);
+            background: #eef2ff;
+        }
+
+        .option.correct {
+            border-color: var(--success);
+            background: #dcfce7;
+        }
+
+        .option.wrong {
+            border-color: var(--danger);
+            background: #fee2e2;
+        }
+
+        .quiz-result {
+            margin-top: 18px;
+            padding: 16px;
+            border-radius: 12px;
+            background: #eef2ff;
+            color: #3730a3;
+            display: none;
+            font-weight: 800;
+        }
+
+        /* =========================================================
+           ACCORDION
+           ========================================================= */
+
+        .accordion {
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .accordion button {
+            width: 100%;
+            background: white;
+            border: 0;
+            padding: 16px 18px;
+            text-align: left;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 0 18px 18px;
+            background: white;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .accordion.open .accordion-content {
+            display: block;
+        }
+
+        /* =========================================================
+           CHECKLIST
+           ========================================================= */
+
+        .checklist {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+        }
+
+        .check-item input {
+            margin-top: 5px;
+            accent-color: var(--primary);
+        }
+
+        .check-item.done {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+
+        /* =========================================================
+           NEXT LESSON
+           ========================================================= */
+
+        .next-lesson {
+            background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+            border: 1px solid #c7d2fe;
+            border-radius: 22px;
+            padding: 28px;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            align-items: center;
+            margin: 30px 0 70px;
+        }
+
+        .next-lesson h3 {
+            margin-bottom: 5px;
+        }
+
+        .next-lesson p {
+            color: var(--muted);
+        }
+
+        .next-btn {
+            flex-shrink: 0;
+            background: var(--primary);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 11px;
+            font-weight: 850;
+        }
+
+        /* =========================================================
+           FOOTER
+           ========================================================= */
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 28px 0 40px;
+            color: #94a3b8;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        /* =========================================================
+           REVEAL
+           IMPORTANT:
+           Content remains visible even if JS fails.
+           ========================================================= */
+
+        .reveal {
+            opacity: 1;
+            transform: none;
+        }
+
+        .js-animation .reveal {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity .65s ease, transform .65s ease;
+        }
+
+        .js-animation .reveal.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* =========================================================
+           RESPONSIVE
+           ========================================================= */
+
+        @media (max-width: 1050px) {
+            .hero-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .objectives {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 850px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform .25s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+                box-shadow: 20px 0 50px rgba(15,23,42,.15);
+            }
+
+            .mobile-topbar {
+                display: flex;
+            }
+
+            .main {
+                margin-left: 0;
+                padding-top: 64px;
+            }
+
+            .hero {
+                padding-top: 35px;
+            }
+
+            .sim-grid,
+            .info-grid,
+            .comparison,
+            .checklist {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                width: min(100% - 26px, 1120px);
+            }
+
+            .hero-card {
+                padding: 28px 22px;
+            }
+
+            .hero-code {
+                padding: 20px;
+            }
+
+            .objectives {
+                grid-template-columns: 1fr;
+            }
+
+            section {
+                padding: 28px 0;
+            }
+
+            .card {
+                padding: 21px 17px;
+            }
+
+            .next-lesson {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- =========================================================
+         MOBILE TOPBAR
+         ========================================================= -->
+
+    <div class="mobile-topbar">
+        <div class="mobile-brand">
+            ZEN<span>SUS</span>
+        </div>
+
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+            ☰
+        </button>
+    </div>
+
+    <!-- =========================================================
+         SIDEBAR
+         ========================================================= -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="brand">
+            <div class="brand-logo">Z</div>
+
+            <div class="brand-text">
+                ZEN<span>SUS</span>
+            </div>
+        </div>
+
+        <div class="course-label">
+            SQL Mastery
+        </div>
+
+        <nav class="lesson-nav">
+
+            <a href="lesson1.html">
+                <span class="lesson-number">01</span>
+                Introduction to SQL
+            </a>
+
+            <a href="lesson2.html">
+                <span class="lesson-number">02</span>
+                Database Fundamentals
+            </a>
+
+            <a href="lesson3.html">
+                <span class="lesson-number">03</span>
+                CREATE
+            </a>
+
+            <a href="#top" class="active">
+                <span class="lesson-number">04</span>
+                INSERT
+            </a>
+
+            <a href="lesson5.html">
+                <span class="lesson-number">05</span>
+                SELECT
+            </a>
+
+            <a href="lesson6.html">
+                <span class="lesson-number">06</span>
+                WHERE
+            </a>
+
+            <a href="lesson7.html">
+                <span class="lesson-number">07</span>
+                UPDATE
+            </a>
+
+            <a href="lesson8.html">
+                <span class="lesson-number">08</span>
+                DELETE
+            </a>
+
+            <a href="lesson9.html">
+                <span class="lesson-number">09</span>
+                Constraints
+            </a>
+
+            <a href="lesson10.html">
+                <span class="lesson-number">10</span>
+                SQL Functions
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <div class="progress-label">
+                <span>Course progress</span>
+                <strong>40%</strong>
+            </div>
+
+            <div class="progress-track">
+                <div class="progress-fill"></div>
+            </div>
+
+        </div>
+
+    </aside>
+
+    <!-- =========================================================
+         MAIN
+         ========================================================= -->
+
+    <main class="main" id="top">
+
+        <!-- =====================================================
+             HERO
+             ===================================================== -->
+
+        <section class="hero">
+
+            <div class="container">
+
+                <div class="hero-grid">
+
+                    <div class="hero-card reveal">
+
+                        <div class="eyebrow">
+                            SQL MASTERY · LESSON 04
+                        </div>
+
+                        <h1>
+                            SQL <span>INSERT</span>
+                        </h1>
+
+                        <p class="hero-description">
+                            Learn how to add real data into database tables
+                            using SQL INSERT — from your first row to
+                            multi-row inserts, DEFAULT values, NULL,
+                            constraints, and INSERT...SELECT.
+                        </p>
+
+                        <div class="hero-meta">
+                            <span class="meta-pill">Beginner → Advanced</span>
+                            <span class="meta-pill">CRUD: Create</span>
+                            <span class="meta-pill">Hands-on</span>
+                            <span class="meta-pill">Interview Ready</span>
+                        </div>
+
+                    </div>
+
+                    <div class="hero-code">
+
+                        <div class="code-title">
+                            <span>insert.sql</span>
+
+                            <div class="dots">
+                                <span class="dot"></span>
+                                <span class="dot"></span>
+                                <span class="dot"></span>
+                            </div>
+                        </div>
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> students
+    (name, age, department)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-string">'Pradeep'</span>, <span class="sql-number">19</span>, <span class="sql-string">'CSE'</span>);
+
+<span class="sql-comment">-- A new row is added!</span></code></pre>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             OBJECTIVES
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+                    <div class="section-kicker">Learning objectives</div>
+
+                    <h2>What you will master</h2>
+
+                    <p>
+                        By the end of this lesson, you should be able to
+                        confidently insert data into SQL tables and understand
+                        what happens when the database validates your row.
+                    </p>
+                </div>
+
+                <div class="objectives">
+
+                    <div class="objective reveal">
+                        <div class="objective-icon">01</div>
+                        <h3>Basic INSERT</h3>
+                        <p>Insert one row into a table using explicit columns.</p>
+                    </div>
+
+                    <div class="objective reveal">
+                        <div class="objective-icon">02</div>
+                        <h3>Multiple Rows</h3>
+                        <p>Add many records using one INSERT statement.</p>
+                    </div>
+
+                    <div class="objective reveal">
+                        <div class="objective-icon">03</div>
+                        <h3>Constraints</h3>
+                        <p>Understand NOT NULL, UNIQUE, PK, FK and CHECK.</p>
+                    </div>
+
+                    <div class="objective reveal">
+                        <div class="objective-icon">04</div>
+                        <h3>INSERT...SELECT</h3>
+                        <p>Copy selected data from one table into another.</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             WHAT IS INSERT?
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+                    <div class="section-kicker">01 · Foundation</div>
+                    <h2>What is INSERT?</h2>
+                    <p>
+                        INSERT is the SQL command used to add new rows
+                        (records) to an existing table.
+                    </p>
+                </div>
+
+                <div class="card reveal">
+
+                    <h3>Think of a database table like a spreadsheet</h3>
+
+                    <p>
+                        A table contains <strong>columns</strong> and
+                        <strong>rows</strong>.
+                    </p>
+
+                    <p>
+                        When you use INSERT, you are telling the database:
+                    </p>
+
+                    <div class="tip">
+                        "Create a new row and put these values into these columns."
+                    </div>
+
+                    <div class="table-demo">
+
+                        <table>
+
+                            <thead>
+                                <tr>
+                                    <th>student_id</th>
+                                    <th>name</th>
+                                    <th>age</th>
+                                    <th>department</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="studentTableBody">
+
+                                <tr>
+                                    <td>101</td>
+                                    <td>Anil</td>
+                                    <td>20</td>
+                                    <td>CSE</td>
+                                </tr>
+
+                                <tr>
+                                    <td>102</td>
+                                    <td>Sneha</td>
+                                    <td>19</td>
+                                    <td>ECE</td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                    <p style="margin-top:18px;">
+                        Suppose we execute:
+                    </p>
+
+                    <div class="code-box">
+
+                        <button class="copy-code">
+                            Copy
+                        </button>
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> students
+    (student_id, name, age, department)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-number">103</span>, <span class="sql-string">'Pradeep'</span>, <span class="sql-number">19</span>, <span class="sql-string">'CSE'</span>);</code></pre>
+
+                    </div>
+
+                    <p>
+                        The database creates one additional row.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             FLOWCHART
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">02 · Visualization</div>
+
+                    <h2>How INSERT works</h2>
+
+                    <p>
+                        The database does not blindly store your values.
+                        It validates the row before writing it.
+                    </p>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="flowchart">
+
+                        <div class="flow-step">
+                            SQL INSERT
+                        </div>
+
+                        <div class="flow-arrow">→</div>
+
+                        <div class="flow-step">
+                            Match Columns
+                        </div>
+
+                        <div class="flow-arrow">→</div>
+
+                        <div class="flow-step">
+                            Validate Data
+                        </div>
+
+                        <div class="flow-arrow">→</div>
+
+                        <div class="flow-step">
+                            Check Constraints
+                        </div>
+
+                        <div class="flow-arrow">→</div>
+
+                        <div class="flow-step">
+                            Store Row
+                        </div>
+
+                    </div>
+
+                    <div class="success">
+                        If every rule is satisfied → the row is inserted.
+                    </div>
+
+                    <div class="danger">
+                        If a constraint or data rule is violated → the INSERT fails.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             BASIC SYNTAX
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">03 · Syntax</div>
+
+                    <h2>Basic INSERT syntax</h2>
+
+                    <p>
+                        The safest habit is to explicitly specify the columns
+                        you are inserting into.
+                    </p>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <h3>General syntax</h3>
+
+                    <div class="code-box">
+
+                        <button class="copy-code">
+                            Copy
+                        </button>
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> table_name
+    (column1, column2, column3)
+<span class="sql-keyword">VALUES</span>
+    (value1, value2, value3);</code></pre>
+
+                    </div>
+
+                    <h4>Example</h4>
+
+                    <div class="code-box">
+
+                        <button class="copy-code">
+                            Copy
+                        </button>
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> students
+    (name, age, department)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-string">'Ravi'</span>, <span class="sql-number">20</span>, <span class="sql-string">'CSE'</span>);</code></pre>
+
+                    </div>
+
+                    <div class="info-grid">
+
+                        <div class="info-box">
+                            <strong>INSERT INTO</strong>
+                            <p>Specifies the table receiving the new row.</p>
+                        </div>
+
+                        <div class="info-box">
+                            <strong>Column list</strong>
+                            <p>Specifies exactly which columns receive values.</p>
+                        </div>
+
+                        <div class="info-box">
+                            <strong>VALUES</strong>
+                            <p>Provides the actual values being inserted.</p>
+                        </div>
+
+                        <div class="info-box">
+                            <strong>Semicolon</strong>
+                            <p>Terminates the SQL statement in most environments.</p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             WHY COLUMN LIST
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">04 · Best practice</div>
+
+                    <h2>Always prefer an explicit column list</h2>
+
+                </div>
+
+                <div class="comparison reveal">
+
+                    <div class="compare-card good">
+
+                        <h4>✓ Recommended</h4>
+
+                        <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> students
+    (name, age, department)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-string">'Ravi'</span>, <span class="sql-number">20</span>, <span class="sql-string">'CSE'</span>);</code></pre>
+
+                        </div>
+
+                        <p>
+                            Clear, readable and safer when the table structure
+                            changes.
+                        </p>
+
+                    </div>
+
+                    <div class="compare-card bad">
+
+                        <h4>⚠ Possible but fragile</h4>
+
+                        <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> students
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-number">103</span>, <span class="sql-string">'Ravi'</span>, <span class="sql-number">20</span>, <span class="sql-string">'CSE'</span>);</code></pre>
+
+                        </div>
+
+                        <p>
+                            This depends on the exact physical column order
+                            and expected number of columns.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="tip reveal">
+                    <strong>Interview rule:</strong>
+                    Explicit column lists are generally the better production
+                    practice.
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             INSERT SINGLE ROW
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">05 · Core skill</div>
+
+                    <h2>Insert a single row</h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <p>
+                        Suppose we have:
+                    </p>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">CREATE TABLE</span> students (
+    student_id <span class="sql-keyword">INT PRIMARY KEY</span>,
+    name <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">100</span>),
+    age <span class="sql-keyword">INT</span>,
+    department <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">50</span>)
+);</code></pre>
+
+                    </div>
+
+                    <p>
+                        Insert one student:
+                    </p>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> students
+    (student_id, name, age, department)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-number">101</span>, <span class="sql-string">'Anil'</span>, <span class="sql-number">20</span>, <span class="sql-string">'CSE'</span>);</code></pre>
+
+                    </div>
+
+                    <p>
+                        Result:
+                    </p>
+
+                    <div class="table-demo">
+
+                        <table>
+
+                            <thead>
+                                <tr>
+                                    <th>student_id</th>
+                                    <th>name</th>
+                                    <th>age</th>
+                                    <th>department</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr>
+                                    <td>101</td>
+                                    <td>Anil</td>
+                                    <td>20</td>
+                                    <td>CSE</td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             MULTIPLE ROWS
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">06 · Efficiency</div>
+
+                    <h2>Insert multiple rows</h2>
+
+                    <p>
+                        You can insert several rows in a single statement.
+                    </p>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> students
+    (student_id, name, age, department)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-number">101</span>, <span class="sql-string">'Anil'</span>, <span class="sql-number">20</span>, <span class="sql-string">'CSE'</span>),
+    (<span class="sql-number">102</span>, <span class="sql-string">'Sneha'</span>, <span class="sql-number">19</span>, <span class="sql-string">'ECE'</span>),
+    (<span class="sql-number">103</span>, <span class="sql-string">'Ravi'</span>, <span class="sql-number">20</span>, <span class="sql-string">'IT'</span>);</code></pre>
+
+                    </div>
+
+                    <div class="success">
+                        One INSERT statement can contain multiple VALUES rows.
+                    </div>
+
+                    <h4>Why is this useful?</h4>
+
+                    <ul>
+                        <li>Less repetitive SQL.</li>
+                        <li>Useful for seed/sample data.</li>
+                        <li>Can reduce application/database round trips.</li>
+                        <li>Often cleaner than issuing many separate statements.</li>
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             DEFAULT
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">07 · Defaults</div>
+
+                    <h2>Using DEFAULT values</h2>
+
+                    <p>
+                        A column can have a predefined value that the database
+                        uses when no explicit value is supplied.
+                    </p>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">CREATE TABLE</span> users (
+    id <span class="sql-keyword">INT PRIMARY KEY</span>,
+    name <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">100</span>),
+    status <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">20</span>)
+        <span class="sql-keyword">DEFAULT</span> <span class="sql-string">'active'</span>
+);</code></pre>
+
+                    </div>
+
+                    <p>
+                        You can explicitly request the default:
+                    </p>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> users
+    (id, name, status)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-number">1</span>, <span class="sql-string">'Pradeep'</span>, <span class="sql-keyword">DEFAULT</span>);</code></pre>
+
+                    </div>
+
+                    <p>
+                        Or omit the column from the INSERT column list:
+                    </p>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> users
+    (id, name)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-number">2</span>, <span class="sql-string">'Ravi'</span>);</code></pre>
+
+                    </div>
+
+                    <div class="tip">
+                        The exact behavior of omitted columns depends on the
+                        column definition. A default may be used, or NULL may
+                        be used if allowed, or the statement may fail.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             NULL
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">08 · Important</div>
+
+                    <h2>NULL is not the same as "NULL"</h2>
+
+                    <p>
+                        This is one of the most common beginner mistakes.
+                    </p>
+
+                </div>
+
+                <div class="comparison reveal">
+
+                    <div class="compare-card good">
+
+                        <h4>✓ Actual NULL</h4>
+
+                        <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> students
+    (name, age)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-string">'Ravi'</span>, <span class="sql-keyword">NULL</span>);</code></pre>
+
+                        </div>
+
+                        <p>
+                            NULL represents a missing/unknown value.
+                        </p>
+
+                    </div>
+
+                    <div class="compare-card bad">
+
+                        <h4>✗ String "NULL"</h4>
+
+                        <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> students
+    (name, age)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-string">'Ravi'</span>, <span class="sql-string">'NULL'</span>);</code></pre>
+
+                        </div>
+
+                        <p>
+                            This attempts to store the text NULL, not SQL NULL.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             DATA TYPES
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">09 · Data values</div>
+
+                    <h2>How different values are written</h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="table-demo">
+
+                        <table>
+
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Typical SQL literal</th>
+                                    <th>Example</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                <tr>
+                                    <td>Integer</td>
+                                    <td>Number</td>
+                                    <td><code>19</code></td>
+                                </tr>
+
+                                <tr>
+                                    <td>Decimal</td>
+                                    <td>Number</td>
+                                    <td><code>8.63</code></td>
+                                </tr>
+
+                                <tr>
+                                    <td>Text</td>
+                                    <td>Single quotes</td>
+                                    <td><code>'CSE'</code></td>
+                                </tr>
+
+                                <tr>
+                                    <td>NULL</td>
+                                    <td>NULL keyword</td>
+                                    <td><code>NULL</code></td>
+                                </tr>
+
+                                <tr>
+                                    <td>Date</td>
+                                    <td>Dialect-dependent literal/functions</td>
+                                    <td><code>'2026-09-11'</code></td>
+                                </tr>
+
+                                <tr>
+                                    <td>Boolean</td>
+                                    <td>Dialect-dependent</td>
+                                    <td><code>TRUE</code></td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                    <div class="warning">
+                        SQL dialects differ. PostgreSQL, MySQL, SQL Server,
+                        Oracle and SQLite do not have identical data-type and
+                        literal behavior. Learn the SQL standard concepts,
+                        then check your database's syntax.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             IDENTITY / AUTO INCREMENT
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">10 · Generated IDs</div>
+
+                    <h2>Auto-generated / identity columns</h2>
+
+                    <p>
+                        In real applications, you usually do not manually
+                        enter every ID.
+                    </p>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <p>
+                        Many databases support automatically generated
+                        numeric identifiers, but the syntax differs by
+                        database system.
+                    </p>
+
+                    <div class="info-grid">
+
+                        <div class="info-box">
+
+                            <strong>MySQL</strong>
+
+                            <p>
+                                Commonly uses
+                                <code>AUTO_INCREMENT</code>.
+                            </p>
+
+                        </div>
+
+                        <div class="info-box">
+
+                            <strong>SQL Server</strong>
+
+                            <p>
+                                Commonly uses
+                                <code>IDENTITY</code>.
+                            </p>
+
+                        </div>
+
+                        <div class="info-box">
+
+                            <strong>PostgreSQL</strong>
+
+                            <p>
+                                Supports identity columns such as
+                                <code>GENERATED ... AS IDENTITY</code>.
+                            </p>
+
+                        </div>
+
+                        <div class="info-box">
+
+                            <strong>SQLite</strong>
+
+                            <p>
+                                Has its own rowid/integer primary-key behavior
+                                and AUTOINCREMENT option.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <h4>Conceptual example</h4>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> students
+    (name, age, department)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-string">'Pradeep'</span>, <span class="sql-number">19</span>, <span class="sql-string">'CSE'</span>);</code></pre>
+
+                    </div>
+
+                    <p>
+                        If the ID column is configured for automatic generation,
+                        the database can generate the identifier for you.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             CONSTRAINTS
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">11 · Database validation</div>
+
+                    <h2>INSERT and constraints</h2>
+
+                    <p>
+                        Constraints are rules that protect the integrity of
+                        your database.
+                    </p>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="table-demo">
+
+                        <table>
+
+                            <thead>
+                                <tr>
+                                    <th>Constraint</th>
+                                    <th>Purpose</th>
+                                    <th>Possible INSERT problem</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                <tr>
+                                    <td>PRIMARY KEY</td>
+                                    <td>Uniquely identifies each row</td>
+                                    <td>Duplicate ID</td>
+                                </tr>
+
+                                <tr>
+                                    <td>UNIQUE</td>
+                                    <td>Prevents duplicate values</td>
+                                    <td>Existing email reused</td>
+                                </tr>
+
+                                <tr>
+                                    <td>NOT NULL</td>
+                                    <td>Requires a value</td>
+                                    <td>Required column omitted</td>
+                                </tr>
+
+                                <tr>
+                                    <td>FOREIGN KEY</td>
+                                    <td>Maintains relationship</td>
+                                    <td>Referenced parent doesn't exist</td>
+                                </tr>
+
+                                <tr>
+                                    <td>CHECK</td>
+                                    <td>Restricts allowed values</td>
+                                    <td>Age is negative</td>
+                                </tr>
+
+                                <tr>
+                                    <td>DEFAULT</td>
+                                    <td>Provides fallback value</td>
+                                    <td>Usually helps omitted columns</td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <h3>Example: constraints in action</h3>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">CREATE TABLE</span> students (
+    id <span class="sql-keyword">INT PRIMARY KEY</span>,
+    email <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">100</span>) <span class="sql-keyword">UNIQUE</span>,
+    name <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">100</span>) <span class="sql-keyword">NOT NULL</span>,
+    age <span class="sql-keyword">INT CHECK</span> (age &gt;= <span class="sql-number">17</span>)
+);</code></pre>
+
+                    </div>
+
+                    <h4>Valid INSERT</h4>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> students
+    (id, email, name, age)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-number">1</span>, <span class="sql-string">'a@example.com'</span>, <span class="sql-string">'Anil'</span>, <span class="sql-number">20</span>);</code></pre>
+
+                    </div>
+
+                    <h4>Invalid INSERT: age violates CHECK</h4>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> students
+    (id, email, name, age)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-number">2</span>, <span class="sql-string">'b@example.com'</span>, <span class="sql-string">'Ravi'</span>, <span class="sql-number">10</span>);</code></pre>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             FOREIGN KEY
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">12 · Relationships</div>
+
+                    <h2>INSERT with FOREIGN KEY</h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <p>
+                        Imagine two tables:
+                    </p>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-comment">-- Parent table</span>
+
+<span class="sql-keyword">CREATE TABLE</span> departments (
+    department_id <span class="sql-keyword">INT PRIMARY KEY</span>,
+    name <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">50</span>)
+);
+
+<span class="sql-comment">-- Child table</span>
+
+<span class="sql-keyword">CREATE TABLE</span> students (
+    student_id <span class="sql-keyword">INT PRIMARY KEY</span>,
+    name <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">100</span>),
+    department_id <span class="sql-keyword">INT</span>,
+    <span class="sql-keyword">FOREIGN KEY</span> (department_id)
+        <span class="sql-keyword">REFERENCES</span> departments(department_id)
+);</code></pre>
+
+                    </div>
+
+                    <p>
+                        First create the referenced department:
+                    </p>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> departments
+    (department_id, name)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-number">10</span>, <span class="sql-string">'Computer Science'</span>);</code></pre>
+
+                    </div>
+
+                    <p>
+                        Then insert the student:
+                    </p>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> students
+    (student_id, name, department_id)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-number">101</span>, <span class="sql-string">'Pradeep'</span>, <span class="sql-number">10</span>);</code></pre>
+
+                    </div>
+
+                    <div class="tip">
+                        The value <strong>10</strong> must refer to a valid
+                        department according to the foreign-key rule.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             INSERT SELECT
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">13 · Advanced INSERT</div>
+
+                    <h2>INSERT ... SELECT</h2>
+
+                    <p>
+                        One of the most important advanced INSERT techniques:
+                        insert rows produced by a SELECT query.
+                    </p>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <h3>Concept</h3>
+
+                    <p>
+                        Instead of manually providing VALUES, you can obtain
+                        the rows from another table or query.
+                    </p>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> cse_students
+    (student_id, name)
+<span class="sql-keyword">SELECT</span>
+    student_id,
+    name
+<span class="sql-keyword">FROM</span> students
+<span class="sql-keyword">WHERE</span> department = <span class="sql-string">'CSE'</span>;</code></pre>
+
+                    </div>
+
+                    <div class="flowchart">
+
+                        <div class="flow-step">
+                            Source Table
+                        </div>
+
+                        <div class="flow-arrow">→</div>
+
+                        <div class="flow-step">
+                            SELECT
+                        </div>
+
+                        <div class="flow-arrow">→</div>
+
+                        <div class="flow-step">
+                            Filter
+                        </div>
+
+                        <div class="flow-arrow">→</div>
+
+                        <div class="flow-step">
+                            INSERT
+                        </div>
+
+                        <div class="flow-arrow">→</div>
+
+                        <div class="flow-step">
+                            Target Table
+                        </div>
+
+                    </div>
+
+                    <div class="warning">
+                        The selected columns must be compatible with the target
+                        columns in number, order, and data type.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             INSERT SELECT REAL WORLD
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">14 · Real-world example</div>
+
+                    <h2>INSERT...SELECT in a real system</h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <p>
+                        Imagine an e-commerce company wants to create a
+                        table containing only active customers.
+                    </p>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> active_customers
+    (customer_id, name, email)
+<span class="sql-keyword">SELECT</span>
+    customer_id,
+    name,
+    email
+<span class="sql-keyword">FROM</span> customers
+<span class="sql-keyword">WHERE</span> status = <span class="sql-string">'active'</span>;</code></pre>
+
+                    </div>
+
+                    <p>
+                        The database reads matching rows from
+                        <code>customers</code> and inserts them into
+                        <code>active_customers</code>.
+                    </p>
+
+                    <div class="success">
+                        This is useful for data migration, archival,
+                        reporting tables, staging workflows and ETL processes.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             INTERACTIVE SIMULATOR
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">15 · Interactive lab</div>
+
+                    <h2>INSERT simulator</h2>
+
+                    <p>
+                        Practice the INSERT concept directly in your browser.
+                        This is a learning simulation, not a real SQL database.
+                    </p>
+
+                </div>
+
+                <div class="simulator reveal">
+
+                    <div class="simulator-header">
+
+                        <div class="simulator-title">
+                            Student INSERT Lab
+                        </div>
+
+                        <div class="sim-status">
+                            Browser simulation
+                        </div>
+
+                    </div>
+
+                    <div class="sim-grid">
+
+                        <div class="sim-panel">
+
+                            <h4>Enter student data</h4>
+
+                            <input
+                                class="sim-input"
+                                id="simId"
+                                type="number"
+                                placeholder="Student ID"
+                            >
+
+                            <input
+                                class="sim-input"
+                                id="simName"
+                                type="text"
+                                placeholder="Student name"
+                            >
+
+                            <input
+                                class="sim-input"
+                                id="simAge"
+                                type="number"
+                                placeholder="Age"
+                            >
+
+                            <input
+                                class="sim-input"
+                                id="simDept"
+                                type="text"
+                                placeholder="Department"
+                            >
+
+                            <button class="sim-btn" id="insertBtn">
+                                ▶ INSERT ROW
+                            </button>
+
+                            <button
+                                class="sim-btn secondary"
+                                id="clearSimBtn"
+                                style="margin-left:7px;"
+                            >
+                                Clear
+                            </button>
+
+                        </div>
+
+                        <div class="sim-panel">
+
+                            <h4>Generated SQL</h4>
+
+                            <div
+                                class="sim-output"
+                                id="simOutput"
+                            >
+INSERT INTO students
+    (student_id, name, age, department)
+VALUES
+    (...);
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div style="margin-top:18px;">
+
+                        <div class="sim-panel">
+
+                            <h4>Simulated table</h4>
+
+                            <div class="table-demo">
+
+                                <table id="simTable">
+
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Age</th>
+                                            <th>Department</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+
+                                        <tr>
+                                            <td>101</td>
+                                            <td>Anil</td>
+                                            <td>20</td>
+                                            <td>CSE</td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>102</td>
+                                            <td>Sneha</td>
+                                            <td>19</td>
+                                            <td>ECE</td>
+                                        </tr>
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             COMMON MISTAKES
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">16 · Debugging</div>
+
+                    <h2>Common INSERT mistakes</h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="accordion">
+
+                        <button>
+                            01. Number of columns ≠ number of values
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+
+                            <div class="code-box">
+
+<pre><code><span class="sql-comment">-- Wrong</span>
+
+<span class="sql-keyword">INSERT INTO</span> students
+    (name, age, department)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-string">'Ravi'</span>, <span class="sql-number">20</span>);</code></pre>
+
+                            </div>
+
+                            <p>
+                                Three target columns were specified but only
+                                two values were supplied.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            02. Forgetting quotes around text
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+
+                            <div class="code-box">
+
+<pre><code><span class="sql-comment">-- Usually wrong</span>
+
+<span class="sql-keyword">INSERT INTO</span> students
+    (name)
+<span class="sql-keyword">VALUES</span>
+    (Ravi);</code></pre>
+
+                            </div>
+
+                            <p>
+                                Text values normally use single quotes:
+                                <code>'Ravi'</code>.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            03. Using "NULL" instead of NULL
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+
+                            <p>
+                                <code>NULL</code> is the SQL null value.
+                                <code>'NULL'</code> is text.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            04. Duplicate PRIMARY KEY
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+
+                            <p>
+                                A primary-key value must uniquely identify
+                                a row. Inserting an existing key normally
+                                causes a constraint violation.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            05. Violating FOREIGN KEY
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+
+                            <p>
+                                A child row cannot normally reference a
+                                nonexistent parent row when foreign-key
+                                enforcement is active.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            06. Wrong column order
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+
+                            <p>
+                                Always make sure each value corresponds to
+                                the intended column. Explicit column lists
+                                make this much easier to reason about.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             TRANSACTIONS
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">17 · Professional SQL</div>
+
+                    <h2>INSERT and transactions</h2>
+
+                    <p>
+                        In production systems, INSERT operations are often
+                        controlled using transactions.
+                    </p>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">BEGIN</span>;
+
+<span class="sql-keyword">INSERT INTO</span> students
+    (student_id, name, age)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-number">201</span>, <span class="sql-string">'Arjun'</span>, <span class="sql-number">20</span>);
+
+<span class="sql-keyword">INSERT INTO</span> students
+    (student_id, name, age)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-number">202</span>, <span class="sql-string">'Meena'</span>, <span class="sql-number">19</span>);
+
+<span class="sql-keyword">COMMIT</span>;</code></pre>
+
+                    </div>
+
+                    <p>
+                        <strong>COMMIT</strong> confirms the transaction.
+                    </p>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">ROLLBACK</span>;</code></pre>
+
+                    </div>
+
+                    <p>
+                        ROLLBACK can undo changes made within the current
+                        transaction, subject to the database's transaction
+                        behavior.
+                    </p>
+
+                    <div class="warning">
+                        Transaction syntax and autocommit behavior vary by
+                        database system and client.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             REAL WORLD EXAMPLES
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">18 · Applications</div>
+
+                    <h2>Real-world INSERT examples</h2>
+
+                </div>
+
+                <div class="info-grid">
+
+                    <div class="card reveal">
+
+                        <h3>🎓 Student system</h3>
+
+                        <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> students
+    (name, roll_no, branch)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-string">'Pradeep'</span>, <span class="sql-string">'23A81A05XX'</span>, <span class="sql-string">'CSE'</span>);</code></pre>
+
+                        </div>
+
+                    </div>
+
+                    <div class="card reveal">
+
+                        <h3>🛒 Product system</h3>
+
+                        <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> products
+    (name, price, stock)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-string">'Keyboard'</span>, <span class="sql-number">999</span>, <span class="sql-number">50</span>);</code></pre>
+
+                        </div>
+
+                    </div>
+
+                    <div class="card reveal">
+
+                        <h3>👨‍💼 Employee system</h3>
+
+                        <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> employees
+    (name, department, salary)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-string">'Rahul'</span>, <span class="sql-string">'Engineering'</span>, <span class="sql-number">65000</span>);</code></pre>
+
+                        </div>
+
+                    </div>
+
+                    <div class="card reveal">
+
+                        <h3>📦 Order system</h3>
+
+                        <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> orders
+    (customer_id, product_id, quantity)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-number">101</span>, <span class="sql-number">5001</span>, <span class="sql-number">2</span>);</code></pre>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             EXAM ANSWER
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">19 · Exam preparation</div>
+
+                    <h2>5-mark answer: SQL INSERT</h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <h3>Definition</h3>
+
+                    <p>
+                        INSERT is a Data Manipulation Language (DML) command
+                        used to add one or more new rows into an existing
+                        database table.
+                    </p>
+
+                    <h4>Syntax</h4>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> table_name
+    (column1, column2)
+<span class="sql-keyword">VALUES</span>
+    (value1, value2);</code></pre>
+
+                    </div>
+
+                    <h4>Example</h4>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> students
+    (id, name, age)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-number">1</span>, <span class="sql-string">'Ravi'</span>, <span class="sql-number">20</span>);</code></pre>
+
+                    </div>
+
+                    <h4>Types</h4>
+
+                    <ol>
+                        <li>Single-row INSERT</li>
+                        <li>Multiple-row INSERT</li>
+                        <li>INSERT with DEFAULT</li>
+                        <li>INSERT...SELECT</li>
+                    </ol>
+
+                    <p>
+                        During insertion, the database checks data types and
+                        constraints such as PRIMARY KEY, UNIQUE, NOT NULL,
+                        FOREIGN KEY and CHECK.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             10 MARK ANSWER
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">20 · Long answer</div>
+
+                    <h2>10-mark answer structure</h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <ol>
+
+                        <li>
+                            Define INSERT and explain its purpose.
+                        </li>
+
+                        <li>
+                            Explain the basic INSERT syntax.
+                        </li>
+
+                        <li>
+                            Demonstrate inserting a single row.
+                        </li>
+
+                        <li>
+                            Demonstrate inserting multiple rows.
+                        </li>
+
+                        <li>
+                            Explain explicit column lists.
+                        </li>
+
+                        <li>
+                            Explain DEFAULT and omitted columns.
+                        </li>
+
+                        <li>
+                            Explain NULL.
+                        </li>
+
+                        <li>
+                            Explain constraint validation.
+                        </li>
+
+                        <li>
+                            Explain INSERT...SELECT.
+                        </li>
+
+                        <li>
+                            Give a real-world example and mention common errors.
+                        </li>
+
+                    </ol>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             INTERVIEW QUESTIONS
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">21 · Interview preparation</div>
+
+                    <h2>Interview questions</h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="accordion">
+
+                        <button>
+                            What is INSERT in SQL?
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+                            INSERT is a DML statement used to add new rows
+                            into a table.
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            Can INSERT add multiple rows?
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+                            Yes. Many SQL databases support multiple VALUES
+                            rows in one INSERT statement.
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            Why specify column names in INSERT?
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+                            It makes the statement clearer and less dependent
+                            on table column order.
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            What is INSERT...SELECT?
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+                            It inserts rows returned by a SELECT query into
+                            another table.
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            What happens if a PRIMARY KEY is duplicated?
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+                            The database normally rejects the INSERT because
+                            a primary key must uniquely identify rows.
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            What is the difference between NULL and 'NULL'?
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+                            NULL represents the SQL null value; 'NULL' is a
+                            text string.
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            What is DEFAULT?
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+                            DEFAULT defines a value that the database can use
+                            when a value is not explicitly supplied.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             QUIZ
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">22 · Knowledge check</div>
+
+                    <h2>INSERT mastery quiz</h2>
+
+                    <p>
+                        Test whether you really understood the lesson.
+                    </p>
+
+                </div>
+
+                <div class="card reveal" id="quiz">
+
+                    <!-- Q1 -->
+
+                    <div class="quiz-question">
+
+                        <h4>
+                            1. Which SQL command is used to add new rows?
+                        </h4>
+
+                        <button class="option" data-q="1" data-answer="false">
+                            SELECT
+                        </button>
+
+                        <button class="option" data-q="1" data-answer="true">
+                            INSERT
+                        </button>
+
+                        <button class="option" data-q="1" data-answer="false">
+                            UPDATE
+                        </button>
+
+                        <button class="option" data-q="1" data-answer="false">
+                            DELETE
+                        </button>
+
+                    </div>
+
+                    <!-- Q2 -->
+
+                    <div class="quiz-question">
+
+                        <h4>
+                            2. Which is the recommended INSERT style?
+                        </h4>
+
+                        <button class="option" data-q="2" data-answer="true">
+                            INSERT INTO table (columns) VALUES (values)
+                        </button>
+
+                        <button class="option" data-q="2" data-answer="false">
+                            INSERT VALUES only
+                        </button>
+
+                        <button class="option" data-q="2" data-answer="false">
+                            INSERT table
+                        </button>
+
+                        <button class="option" data-q="2" data-answer="false">
+                            ADD ROW
+                        </button>
+
+                    </div>
+
+                    <!-- Q3 -->
+
+                    <div class="quiz-question">
+
+                        <h4>
+                            3. What represents SQL NULL?
+                        </h4>
+
+                        <button class="option" data-q="3" data-answer="false">
+                            'NULL'
+                        </button>
+
+                        <button class="option" data-q="3" data-answer="true">
+                            NULL
+                        </button>
+
+                        <button class="option" data-q="3" data-answer="false">
+                            "NULL"
+                        </button>
+
+                        <button class="option" data-q="3" data-answer="false">
+                            EMPTY
+                        </button>
+
+                    </div>
+
+                    <!-- Q4 -->
+
+                    <div class="quiz-question">
+
+                        <h4>
+                            4. Which feature provides a fallback value?
+                        </h4>
+
+                        <button class="option" data-q="4" data-answer="false">
+                            PRIMARY KEY
+                        </button>
+
+                        <button class="option" data-q="4" data-answer="true">
+                            DEFAULT
+                        </button>
+
+                        <button class="option" data-q="4" data-answer="false">
+                            FOREIGN KEY
+                        </button>
+
+                        <button class="option" data-q="4" data-answer="false">
+                            UNIQUE
+                        </button>
+
+                    </div>
+
+                    <!-- Q5 -->
+
+                    <div class="quiz-question">
+
+                        <h4>
+                            5. Which syntax inserts rows returned by a query?
+                        </h4>
+
+                        <button class="option" data-q="5" data-answer="true">
+                            INSERT...SELECT
+                        </button>
+
+                        <button class="option" data-q="5" data-answer="false">
+                            INSERT...WHERE
+                        </button>
+
+                        <button class="option" data-q="5" data-answer="false">
+                            ADD...SELECT
+                        </button>
+
+                        <button class="option" data-q="5" data-answer="false">
+                            COPY...WHERE
+                        </button>
+
+                    </div>
+
+                    <button
+                        class="sim-btn"
+                        id="submitQuiz"
+                        style="margin-top:5px;"
+                    >
+                        Check Score
+                    </button>
+
+                    <div
+                        class="quiz-result"
+                        id="quizResult"
+                    ></div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             PRACTICE CHALLENGES
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">23 · Practice</div>
+
+                    <h2>SQL INSERT challenges</h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <h3>Challenge 1 — Beginner</h3>
+
+                    <p>
+                        Create a table named <code>students</code> containing:
+                    </p>
+
+                    <ul>
+                        <li>id</li>
+                        <li>name</li>
+                        <li>age</li>
+                        <li>branch</li>
+                    </ul>
+
+                    <p>
+                        Insert one student.
+                    </p>
+
+                    <h4>Your target:</h4>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-comment">-- Write your solution here</span>
+
+<span class="sql-keyword">CREATE TABLE</span> ...
+
+<span class="sql-keyword">INSERT INTO</span> ...</code></pre>
+
+                    </div>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <h3>Challenge 2 — Intermediate</h3>
+
+                    <p>
+                        Insert five students using a single INSERT statement.
+                    </p>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <h3>Challenge 3 — Advanced</h3>
+
+                    <p>
+                        Create a table containing a DEFAULT status of
+                        <code>'active'</code>.
+                        Insert a student without explicitly providing status.
+                    </p>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <h3>Challenge 4 — Interview level</h3>
+
+                    <p>
+                        Given a <code>students</code> table, insert only CSE
+                        students into a separate <code>cse_students</code>
+                        table using <code>INSERT...SELECT</code>.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             MINI PROJECT
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">24 · Mini project</div>
+
+                    <h2>Mini project: Student Registration System</h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <p>
+                        Build the database layer for a student registration
+                        system.
+                    </p>
+
+                    <h4>Step 1 — Create table</h4>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">CREATE TABLE</span> students (
+    id <span class="sql-keyword">INT PRIMARY KEY</span>,
+    name <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">100</span>) <span class="sql-keyword">NOT NULL</span>,
+    email <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">150</span>) <span class="sql-keyword">UNIQUE</span>,
+    age <span class="sql-keyword">INT</span>,
+    branch <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">50</span>),
+    status <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">20</span>)
+        <span class="sql-keyword">DEFAULT</span> <span class="sql-string">'active'</span>
+);</code></pre>
+
+                    </div>
+
+                    <h4>Step 2 — Register students</h4>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">INSERT INTO</span> students
+    (id, name, email, age, branch)
+<span class="sql-keyword">VALUES</span>
+    (<span class="sql-number">1</span>, <span class="sql-string">'Pradeep'</span>, <span class="sql-string">'pradeep@example.com'</span>, <span class="sql-number">19</span>, <span class="sql-string">'CSE'</span>),
+    (<span class="sql-number">2</span>, <span class="sql-string">'Anil'</span>, <span class="sql-string">'anil@example.com'</span>, <span class="sql-number">20</span>, <span class="sql-string">'ECE'</span>),
+    (<span class="sql-number">3</span>, <span class="sql-string">'Sneha'</span>, <span class="sql-string">'sneha@example.com'</span>, <span class="sql-number">19</span>, <span class="sql-string">'IT'</span>);</code></pre>
+
+                    </div>
+
+                    <h4>Step 3 — Think like a developer</h4>
+
+                    <ul>
+                        <li>What if the email already exists?</li>
+                        <li>What if the name is missing?</li>
+                        <li>What if age is invalid?</li>
+                        <li>What if the ID already exists?</li>
+                        <li>Which columns should have DEFAULT values?</li>
+                        <li>Which fields should be NOT NULL?</li>
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             RAPID REVISION
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">25 · Rapid revision</div>
+
+                    <h2>INSERT in 60 seconds</h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <ul>
+
+                        <li>
+                            <strong>INSERT</strong> adds new rows.
+                        </li>
+
+                        <li>
+                            Prefer explicit column lists.
+                        </li>
+
+                        <li>
+                            Text values usually use single quotes.
+                        </li>
+
+                        <li>
+                            <strong>NULL</strong> is not the same as
+                            <strong>'NULL'</strong>.
+                        </li>
+
+                        <li>
+                            Multiple rows can often be inserted using one
+                            VALUES clause.
+                        </li>
+
+                        <li>
+                            DEFAULT can provide a predefined value.
+                        </li>
+
+                        <li>
+                            Constraints are checked during insertion.
+                        </li>
+
+                        <li>
+                            PRIMARY KEY values must be unique.
+                        </li>
+
+                        <li>
+                            FOREIGN KEY values must satisfy relationship rules.
+                        </li>
+
+                        <li>
+                            INSERT...SELECT inserts rows returned by SELECT.
+                        </li>
+
+                        <li>
+                            Transactions can be used to control groups of changes.
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             CHECKLIST
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">26 · Completion</div>
+
+                    <h2>Lesson completion checklist</h2>
+
+                    <p>
+                        Tick each skill after you can explain it without notes.
+                    </p>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="checklist">
+
+                        <label class="check-item">
+                            <input type="checkbox" data-check="1">
+                            <span>I understand what INSERT does.</span>
+                        </label>
+
+                        <label class="check-item">
+                            <input type="checkbox" data-check="2">
+                            <span>I can insert one row.</span>
+                        </label>
+
+                        <label class="check-item">
+                            <input type="checkbox" data-check="3">
+                            <span>I can insert multiple rows.</span>
+                        </label>
+
+                        <label class="check-item">
+                            <input type="checkbox" data-check="4">
+                            <span>I know why column lists matter.</span>
+                        </label>
+
+                        <label class="check-item">
+                            <input type="checkbox" data-check="5">
+                            <span>I understand NULL vs 'NULL'.</span>
+                        </label>
+
+                        <label class="check-item">
+                            <input type="checkbox" data-check="6">
+                            <span>I understand DEFAULT.</span>
+                        </label>
+
+                        <label class="check-item">
+                            <input type="checkbox" data-check="7">
+                            <span>I understand INSERT constraints.</span>
+                        </label>
+
+                        <label class="check-item">
+                            <input type="checkbox" data-check="8">
+                            <span>I can explain FOREIGN KEY validation.</span>
+                        </label>
+
+                        <label class="check-item">
+                            <input type="checkbox" data-check="9">
+                            <span>I understand INSERT...SELECT.</span>
+                        </label>
+
+                        <label class="check-item">
+                            <input type="checkbox" data-check="10">
+                            <span>I can write INSERT queries independently.</span>
+                        </label>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             NEXT LESSON
+             ===================================================== -->
+
+        <div class="container">
+
+            <div class="next-lesson reveal">
+
+                <div>
+                    <div class="section-kicker">
+                        NEXT LESSON
+                    </div>
+
+                    <h3>
+                        Lesson 5 — SELECT
+                    </h3>
+
+                    <p>
+                        Learn how to retrieve data from your database using
+                        SELECT, FROM, DISTINCT, aliases and more.
+                    </p>
+                </div>
+
+                <a
+                    href="lesson5.html"
+                    class="next-btn"
+                >
+                    Continue →
+                </a>
+
+            </div>
+
+        </div>
+
+        <!-- =====================================================
+             FOOTER
+             ===================================================== -->
+
+        <footer>
+
+            <div class="container">
+
+                <p>
+                    © 2026 ZENSUS · Learn. Build. Grow.
+                </p>
+
+                <p style="margin-top:5px;">
+                    SQL Mastery · Lesson 04 — INSERT
+                </p>
+
+            </div>
+
+        </footer>
+
+    </main>
+
+    <!-- =========================================================
+         JAVASCRIPT
+         ========================================================= -->
+
+    <script>
+
+        /* =========================================================
+           SAFE INITIALIZATION
+           ========================================================= */
+
+        document.documentElement.classList.add("js-animation");
+
+        /* =========================================================
+           SCROLL PROGRESS
+           ========================================================= */
+
+        const scrollProgress =
+            document.getElementById("scrollProgress");
+
+        function updateScrollProgress() {
+
+            const scrollTop =
+                window.scrollY;
+
+            const documentHeight =
+                document.documentElement.scrollHeight -
+                window.innerHeight;
+
+            const percentage =
+                documentHeight > 0
+                    ? (scrollTop / documentHeight) * 100
+                    : 0;
+
+            scrollProgress.style.width =
+                percentage + "%";
+        }
+
+        window.addEventListener(
+            "scroll",
+            updateScrollProgress,
+            { passive: true }
+        );
+
+        updateScrollProgress();
+
+        /* =========================================================
+           MOBILE MENU
+           ========================================================= */
+
+        const menuBtn =
+            document.getElementById("menuBtn");
+
+        const sidebar =
+            document.getElementById("sidebar");
+
+        if (menuBtn && sidebar) {
+
+            menuBtn.addEventListener("click", function () {
+
+                sidebar.classList.toggle("open");
+
+            });
+
+            document
+                .querySelectorAll(".lesson-nav a")
+                .forEach(function (link) {
+
+                    link.addEventListener("click", function () {
+
+                        sidebar.classList.remove("open");
+
+                    });
+
+                });
+
+        }
+
+        /* =========================================================
+           REVEAL ANIMATION
+           SAFE FALLBACK
+           ========================================================= */
+
+        const revealElements =
+            document.querySelectorAll(".reveal");
+
+        if ("IntersectionObserver" in window) {
+
+            const observer =
+                new IntersectionObserver(
+                    function (entries) {
+
+                        entries.forEach(function (entry) {
+
+                            if (entry.isIntersecting) {
+
+                                entry.target.classList.add("show");
+
+                                observer.unobserve(entry.target);
+
+                            }
+
+                        });
+
+                    },
+                    {
+                        threshold: 0.08
+                    }
+                );
+
+            revealElements.forEach(function (element) {
+
+                observer.observe(element);
+
+            });
+
+            /* Safety fallback:
+               if something prevents observer execution,
+               content becomes visible after 2.5 seconds. */
+
+            setTimeout(function () {
+
+                revealElements.forEach(function (element) {
+
+                    element.classList.add("show");
+
+                });
+
+            }, 2500);
+
+        } else {
+
+            revealElements.forEach(function (element) {
+
+                element.classList.add("show");
+
+            });
+
+        }
+
+        /* =========================================================
+           COPY CODE BUTTONS
+           ========================================================= */
+
+        document
+            .querySelectorAll(".copy-code")
+            .forEach(function (button) {
+
+                button.addEventListener("click", async function () {
+
+                    const codeBox =
+                        button.parentElement;
+
+                    const code =
+                        codeBox.querySelector("code");
+
+                    if (!code) return;
+
+                    const text =
+                        code.innerText;
+
+                    try {
+
+                        await navigator.clipboard.writeText(text);
+
+                        const original =
+                            button.textContent;
+
+                        button.textContent =
+                            "Copied!";
+
+                        setTimeout(function () {
+
+                            button.textContent =
+                                original;
+
+                        }, 1200);
+
+                    } catch (error) {
+
+                        button.textContent =
+                            "Copy failed";
+
+                    }
+
+                });
+
+            });
+
+        /* =========================================================
+           ACCORDIONS
+           ========================================================= */
+
+        document
+            .querySelectorAll(".accordion button")
+            .forEach(function (button) {
+
+                button.addEventListener("click", function () {
+
+                    const accordion =
+                        button.parentElement;
+
+                    accordion.classList.toggle("open");
+
+                    const symbol =
+                        button.querySelector("span");
+
+                    if (accordion.classList.contains("open")) {
+
+                        symbol.textContent = "−";
+
+                    } else {
+
+                        symbol.textContent = "+";
+
+                    }
+
+                });
+
+            });
+
+        /* =========================================================
+           INSERT SIMULATOR
+           ========================================================= */
+
+        const simId =
+            document.getElementById("simId");
+
+        const simName =
+            document.getElementById("simName");
+
+        const simAge =
+            document.getElementById("simAge");
+
+        const simDept =
+            document.getElementById("simDept");
+
+        const simOutput =
+            document.getElementById("simOutput");
+
+        const insertBtn =
+            document.getElementById("insertBtn");
+
+        const clearSimBtn =
+            document.getElementById("clearSimBtn");
+
+        const simTable =
+            document.getElementById("simTable");
+
+        function escapeSQLString(value) {
+
+            return String(value)
+                .replace(/'/g, "''");
+
+        }
+
+        if (insertBtn) {
+
+            insertBtn.addEventListener("click", function () {
+
+                const id =
+                    simId.value.trim();
+
+                const name =
+                    simName.value.trim();
+
+                const age =
+                    simAge.value.trim();
+
+                const dept =
+                    simDept.value.trim();
+
+                if (!id || !name || !age || !dept) {
+
+                    simOutput.textContent =
+                        "ERROR:\n\nPlease enter all four fields.";
+
+                    return;
+
+                }
+
+                const sql =
+`INSERT INTO students
+    (student_id, name, age, department)
+VALUES
+    (${id}, '${escapeSQLString(name)}', ${age}, '${escapeSQLString(dept)}');`;
+
+                simOutput.textContent =
+                    sql;
+
+                const tbody =
+                    simTable.querySelector("tbody");
+
+                const row =
+                    document.createElement("tr");
+
+                row.className =
+                    "new-row";
+
+                row.innerHTML = `
+                    <td>${id}</td>
+                    <td>${name}</td>
+                    <td>${age}</td>
+                    <td>${dept}</td>
+                `;
+
+                tbody.appendChild(row);
+
+                simId.value = "";
+                simName.value = "";
+                simAge.value = "";
+                simDept.value = "";
+
+            });
+
+        }
+
+        if (clearSimBtn) {
+
+            clearSimBtn.addEventListener("click", function () {
+
+                simId.value = "";
+                simName.value = "";
+                simAge.value = "";
+                simDept.value = "";
+
+                simOutput.textContent =
+`INSERT INTO students
+    (student_id, name, age, department)
+VALUES
+    (...);`;
+
+            });
+
+        }
+
+        /* =========================================================
+           QUIZ
+           ========================================================= */
+
+        const selectedAnswers = {};
+
+        document
+            .querySelectorAll(".option")
+            .forEach(function (option) {
+
+                option.addEventListener("click", function () {
+
+                    const question =
+                        option.dataset.q;
+
+                    document
+                        .querySelectorAll(
+                            `.option[data-q="${question}"]`
+                        )
+                        .forEach(function (item) {
+
+                            item.classList.remove("selected");
+
+                        });
+
+                    option.classList.add("selected");
+
+                    selectedAnswers[question] =
+                        option.dataset.answer === "true";
+
+                });
+
+            });
+
+        const submitQuiz =
+            document.getElementById("submitQuiz");
+
+        const quizResult =
+            document.getElementById("quizResult");
+
+        if (submitQuiz) {
+
+            submitQuiz.addEventListener("click", function () {
+
+                let score = 0;
+
+                const total = 5;
+
+                for (let i = 1; i <= total; i++) {
+
+                    if (selectedAnswers[i]) {
+
+                        score++;
+
+                    }
+
+                }
+
+                document
+                    .querySelectorAll(".option")
+                    .forEach(function (option) {
+
+                        const q =
+                            option.dataset.q;
+
+                        if (
+                            selectedAnswers[q] !== undefined
+                        ) {
+
+                            if (
+                                option.dataset.answer === "true"
+                            ) {
+
+                                option.classList.add("correct");
+
+                            } else if (
+                                option.classList.contains("selected")
+                            ) {
+
+                                option.classList.add("wrong");
+
+                            }
+
+                        }
+
+                    });
+
+                let message = "";
+
+                if (score === 5) {
+
+                    message =
+                        "🔥 Perfect! 5/5 — INSERT mastered.";
+
+                } else if (score >= 4) {
+
+                    message =
+                        "Excellent! " +
+                        score +
+                        "/5 — You are interview-ready.";
+
+                } else if (score >= 3) {
+
+                    message =
+                        "Good progress! " +
+                        score +
+                        "/5 — Review the advanced sections.";
+
+                } else {
+
+                    message =
+                        "Keep practicing. " +
+                        score +
+                        "/5 — Revisit the syntax and constraints.";
+
+                }
+
+                quizResult.style.display =
+                    "block";
+
+                quizResult.textContent =
+                    message;
+
+            });
+
+        }
+
+        /* =========================================================
+           CHECKLIST + LOCAL STORAGE
+           ========================================================= */
+
+        const checklistItems =
+            document.querySelectorAll(
+                ".check-item input"
+            );
+
+        checklistItems.forEach(function (checkbox) {
+
+            const key =
+                "zensus_sql_lesson4_check_" +
+                checkbox.dataset.check;
+
+            const saved =
+                localStorage.getItem(key);
+
+            if (saved === "true") {
+
+                checkbox.checked = true;
+
+                checkbox
+                    .parentElement
+                    .classList.add("done");
+
+            }
+
+            checkbox.addEventListener("change", function () {
+
+                localStorage.setItem(
+                    key,
+                    checkbox.checked
+                );
+
+                checkbox
+                    .parentElement
+                    .classList.toggle(
+                        "done",
+                        checkbox.checked
+                    );
+
+            });
+
+        });
+
+        /* =========================================================
+           HASH SCROLL
+           ========================================================= */
+
+        window.addEventListener("load", function () {
+
+            if (window.location.hash) {
+
+                setTimeout(function () {
+
+                    const target =
+                        document.querySelector(
+                            window.location.hash
+                        );
+
+                    if (target) {
+
+                        target.scrollIntoView({
+                            behavior: "smooth"
+                        });
+
+                    }
+
+                }, 300);
+
+            }
+
+        });
+
+    </script>
+
+</body>
+</html>

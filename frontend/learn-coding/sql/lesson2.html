@@ -1,0 +1,5041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS | SQL Lesson 2 - Database Fundamentals</title>
+
+<style>
+/* =========================================================
+   ZENSUS SQL LESSON 2
+   DATABASE FUNDAMENTALS
+   Standalone HTML + CSS + JS
+   ========================================================= */
+
+:root{
+    --primary:#2563eb;
+    --primary-dark:#1d4ed8;
+    --secondary:#7c3aed;
+    --success:#16a34a;
+    --warning:#f59e0b;
+    --danger:#dc2626;
+
+    --bg:#f5f7fb;
+    --surface:#ffffff;
+    --surface-2:#f8fafc;
+
+    --text:#172033;
+    --muted:#64748b;
+    --border:#e2e8f0;
+
+    --sidebar:#0f172a;
+    --sidebar-text:#dbeafe;
+    --sidebar-muted:#94a3b8;
+
+    --code:#0b1220;
+    --code-text:#e2e8f0;
+
+    --shadow:0 8px 30px rgba(15,23,42,.07);
+
+    --sidebar-width:300px;
+    --header-height:70px;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+/* =========================================================
+   SCROLL BAR
+   ========================================================= */
+
+::-webkit-scrollbar{
+    width:9px;
+}
+
+::-webkit-scrollbar-track{
+    background:#eef2f7;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#cbd5e1;
+    border-radius:20px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+    background:#94a3b8;
+}
+
+/* =========================================================
+   TOP PROGRESS
+   ========================================================= */
+
+.progress-bar{
+    position:fixed;
+    top:0;
+    left:0;
+    height:3px;
+    width:0%;
+    background:linear-gradient(
+        90deg,
+        var(--primary),
+        var(--secondary)
+    );
+    z-index:9999;
+}
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar{
+    position:fixed;
+    top:0;
+    left:0;
+    width:var(--sidebar-width);
+    height:100vh;
+
+    background:var(--sidebar);
+    color:white;
+
+    padding:22px 16px;
+
+    overflow-y:auto;
+    z-index:1000;
+
+    border-right:1px solid rgba(255,255,255,.05);
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    padding:5px 10px 22px;
+
+    border-bottom:1px solid rgba(255,255,255,.09);
+}
+
+.brand-logo{
+    width:42px;
+    height:42px;
+
+    border-radius:13px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:linear-gradient(
+        135deg,
+        #2563eb,
+        #7c3aed
+    );
+
+    font-weight:900;
+    font-size:18px;
+
+    box-shadow:
+        0 8px 20px rgba(37,99,235,.3);
+}
+
+.brand-info h2{
+    font-size:16px;
+    letter-spacing:.3px;
+}
+
+.brand-info p{
+    font-size:12px;
+    color:#94a3b8;
+}
+
+.lesson-label{
+    margin:27px 12px 12px;
+
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:1px;
+
+    color:#64748b;
+}
+
+.nav{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+}
+
+.nav a{
+    display:flex;
+    align-items:center;
+    gap:11px;
+
+    color:var(--sidebar-text);
+    text-decoration:none;
+
+    padding:10px 13px;
+
+    border-radius:10px;
+
+    font-size:14px;
+
+    transition:.25s ease;
+}
+
+.nav a:hover{
+    background:#17233a;
+    transform:translateX(2px);
+}
+
+.nav a.active{
+    background:#1e2a40;
+
+    border-left:3px solid #2563eb;
+
+    color:white;
+
+    padding-left:10px;
+
+    box-shadow:
+        inset 0 0 20px rgba(37,99,235,.05);
+}
+
+/* =========================================================
+   MAIN AREA
+   ========================================================= */
+
+.main{
+    margin-left:var(--sidebar-width);
+    min-height:100vh;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.header{
+    position:sticky;
+    top:0;
+
+    height:var(--header-height);
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 35px;
+
+    background:rgba(255,255,255,.94);
+
+    backdrop-filter:blur(12px);
+
+    border-bottom:1px solid var(--border);
+
+    z-index:500;
+}
+
+.header-title{
+    font-size:14px;
+    font-weight:700;
+    color:#475569;
+}
+
+.header-badge{
+    display:flex;
+    align-items:center;
+    gap:7px;
+
+    padding:6px 11px;
+
+    background:#eff6ff;
+
+    color:#1d4ed8;
+
+    border-radius:20px;
+
+    font-size:12px;
+    font-weight:800;
+}
+
+.mobile-menu{
+    display:none;
+
+    border:0;
+    background:#eff6ff;
+
+    color:var(--primary);
+
+    padding:8px 11px;
+
+    border-radius:9px;
+
+    cursor:pointer;
+
+    font-size:18px;
+}
+
+/* =========================================================
+   CONTENT
+   ========================================================= */
+
+.content{
+    max-width:1150px;
+    margin:auto;
+
+    padding:55px 45px 90px;
+}
+
+section{
+    scroll-margin-top:95px;
+    margin-bottom:80px;
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero{
+    position:relative;
+
+    display:grid;
+    grid-template-columns:1.25fr .75fr;
+
+    gap:30px;
+
+    padding:40px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:25px;
+
+    box-shadow:var(--shadow);
+
+    overflow:hidden;
+}
+
+.hero::after{
+    content:"";
+
+    position:absolute;
+
+    width:300px;
+    height:300px;
+
+    right:-130px;
+    top:-140px;
+
+    background:#dbeafe;
+
+    border-radius:50%;
+
+    opacity:.65;
+}
+
+.eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+
+    padding:6px 11px;
+
+    border-radius:20px;
+
+    background:#eef2ff;
+
+    color:#4f46e5;
+
+    font-size:12px;
+    font-weight:800;
+
+    margin-bottom:17px;
+}
+
+.hero h1{
+    font-size:clamp(32px,5vw,53px);
+
+    line-height:1.08;
+
+    letter-spacing:-1.8px;
+
+    margin-bottom:20px;
+}
+
+.hero h1 span{
+    color:var(--primary);
+    font-weight:900;
+}
+
+.hero p{
+    color:var(--muted);
+
+    max-width:650px;
+
+    font-size:16px;
+
+    margin-bottom:25px;
+}
+
+.hero-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+}
+
+.badge{
+    padding:7px 12px;
+
+    border:1px solid var(--border);
+
+    background:#f8fafc;
+
+    border-radius:20px;
+
+    font-size:12px;
+    font-weight:700;
+}
+
+/* =========================================================
+   HERO CODE
+   ========================================================= */
+
+.hero-code{
+    position:relative;
+    z-index:2;
+
+    background:var(--code);
+
+    border-radius:17px;
+
+    padding:20px;
+
+    box-shadow:
+        0 15px 40px rgba(15,23,42,.18);
+}
+
+.terminal-top{
+    display:flex;
+    align-items:center;
+    gap:7px;
+
+    margin-bottom:15px;
+}
+
+.dot{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:#64748b;
+}
+
+.hero-code pre{
+    margin:0;
+
+    color:var(--code-text);
+
+    font-family:
+        "Cascadia Code",
+        "Fira Code",
+        Consolas,
+        monospace;
+
+    font-size:13px;
+
+    line-height:1.75;
+
+    white-space:pre-wrap;
+}
+
+.sql-keyword{
+    color:#93c5fd;
+}
+
+.sql-string{
+    color:#86efac;
+}
+
+.sql-comment{
+    color:#94a3b8;
+}
+
+/* =========================================================
+   SECTION HEAD
+   ========================================================= */
+
+.section-head{
+    margin-bottom:27px;
+}
+
+.section-number{
+    color:var(--primary);
+
+    font-size:12px;
+
+    font-weight:900;
+
+    letter-spacing:1.5px;
+
+    text-transform:uppercase;
+
+    margin-bottom:7px;
+}
+
+.section-head h2{
+    font-size:31px;
+
+    line-height:1.2;
+
+    letter-spacing:-.7px;
+
+    margin-bottom:8px;
+}
+
+.section-head p{
+    color:var(--muted);
+
+    max-width:760px;
+}
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+
+    gap:18px;
+}
+
+.card{
+    background:var(--surface);
+
+    border:1px solid var(--border);
+
+    border-radius:17px;
+
+    padding:23px;
+
+    box-shadow:var(--shadow);
+
+    transition:.25s ease;
+}
+
+.card:hover{
+    transform:translateY(-3px);
+
+    box-shadow:
+        0 14px 35px rgba(15,23,42,.09);
+}
+
+.card-icon{
+    width:42px;
+    height:42px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:12px;
+
+    background:#eff6ff;
+
+    margin-bottom:15px;
+
+    font-size:20px;
+}
+
+.card h3{
+    font-size:17px;
+
+    margin-bottom:8px;
+}
+
+.card p{
+    color:var(--muted);
+
+    font-size:14px;
+}
+
+/* =========================================================
+   CALLOUT
+   ========================================================= */
+
+.callout{
+    padding:20px 22px;
+
+    background:#eff6ff;
+
+    border-left:4px solid var(--primary);
+
+    border-radius:13px;
+
+    margin:22px 0;
+}
+
+.callout strong{
+    color:#1d4ed8;
+}
+
+/* =========================================================
+   OBJECTIVES
+   ========================================================= */
+
+.objectives{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+
+    gap:12px;
+}
+
+.objective{
+    display:flex;
+    gap:12px;
+
+    padding:15px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:13px;
+}
+
+.check{
+    flex:none;
+
+    width:25px;
+    height:25px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:#dcfce7;
+
+    color:#15803d;
+
+    border-radius:50%;
+
+    font-size:13px;
+    font-weight:900;
+}
+
+.objective span{
+    font-size:14px;
+}
+
+/* =========================================================
+   DATABASE VISUAL
+   ========================================================= */
+
+.database-stage{
+    position:relative;
+
+    min-height:390px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:
+        radial-gradient(
+            circle at center,
+            #eff6ff 0,
+            #f8fafc 48%,
+            #ffffff 100%
+        );
+
+    border:1px solid var(--border);
+
+    border-radius:22px;
+
+    overflow:hidden;
+}
+
+.db-center{
+    width:180px;
+    height:180px;
+
+    border-radius:50%;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+
+    background:white;
+
+    border:4px solid #2563eb;
+
+    box-shadow:
+        0 0 0 15px rgba(37,99,235,.07),
+        0 20px 45px rgba(37,99,235,.18);
+
+    z-index:3;
+
+    animation:pulseDB 2.5s infinite;
+}
+
+.db-center .db-icon{
+    font-size:42px;
+}
+
+.db-center strong{
+    font-size:17px;
+}
+
+.db-center small{
+    color:var(--muted);
+}
+
+.db-node{
+    position:absolute;
+
+    width:150px;
+
+    padding:13px;
+
+    text-align:center;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:13px;
+
+    box-shadow:var(--shadow);
+
+    font-size:13px;
+
+    font-weight:700;
+}
+
+.node-1{top:30px;left:10%;}
+.node-2{top:30px;right:10%;}
+.node-3{bottom:30px;left:10%;}
+.node-4{bottom:30px;right:10%;}
+
+.connection{
+    position:absolute;
+
+    height:2px;
+
+    background:#93c5fd;
+
+    transform-origin:left center;
+
+    opacity:.7;
+}
+
+.line1{
+    width:180px;
+
+    top:42%;
+
+    left:23%;
+
+    transform:rotate(25deg);
+}
+
+.line2{
+    width:180px;
+
+    top:42%;
+
+    right:23%;
+
+    transform:rotate(155deg);
+}
+
+.line3{
+    width:180px;
+
+    bottom:42%;
+
+    left:23%;
+
+    transform:rotate(-25deg);
+}
+
+.line4{
+    width:180px;
+
+    bottom:42%;
+
+    right:23%;
+
+    transform:rotate(-155deg);
+}
+
+@keyframes pulseDB{
+    0%,100%{
+        box-shadow:
+            0 0 0 15px rgba(37,99,235,.07),
+            0 20px 45px rgba(37,99,235,.18);
+    }
+
+    50%{
+        box-shadow:
+            0 0 0 28px rgba(37,99,235,.04),
+            0 25px 55px rgba(37,99,235,.23);
+    }
+}
+
+/* =========================================================
+   FLOWCHART
+   ========================================================= */
+
+.flowchart{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    flex-wrap:wrap;
+
+    gap:10px;
+
+    padding:30px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:20px;
+}
+
+.flow-box{
+    min-width:145px;
+
+    padding:16px;
+
+    text-align:center;
+
+    background:#f8fafc;
+
+    border:2px solid #dbeafe;
+
+    border-radius:13px;
+
+    font-weight:800;
+
+    font-size:14px;
+
+    transition:.3s;
+}
+
+.flow-box:hover{
+    border-color:var(--primary);
+
+    transform:translateY(-4px);
+}
+
+.flow-arrow{
+    font-size:22px;
+
+    color:var(--primary);
+
+    font-weight:900;
+}
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.table-wrap{
+    overflow-x:auto;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:17px;
+
+    box-shadow:var(--shadow);
+}
+
+table{
+    width:100%;
+
+    border-collapse:collapse;
+
+    min-width:650px;
+}
+
+th,
+td{
+    padding:14px 16px;
+
+    border-bottom:1px solid var(--border);
+
+    text-align:left;
+
+    font-size:14px;
+}
+
+th{
+    background:#f8fafc;
+
+    font-size:13px;
+
+    color:#334155;
+}
+
+tr:last-child td{
+    border-bottom:0;
+}
+
+/* =========================================================
+   CODE BLOCKS
+   ========================================================= */
+
+.code-box{
+    background:var(--code);
+
+    border-radius:16px;
+
+    overflow:hidden;
+
+    margin:20px 0;
+
+    box-shadow:
+        0 12px 35px rgba(15,23,42,.13);
+}
+
+.code-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:11px 16px;
+
+    background:#111827;
+
+    color:#94a3b8;
+
+    font-size:12px;
+
+    font-weight:800;
+}
+
+.copy-btn{
+    border:1px solid #334155;
+
+    background:#1e293b;
+
+    color:#e2e8f0;
+
+    border-radius:7px;
+
+    padding:5px 9px;
+
+    cursor:pointer;
+
+    font-size:11px;
+}
+
+.copy-btn:hover{
+    background:#334155;
+}
+
+.code-box pre{
+    margin:0;
+
+    padding:21px;
+
+    overflow-x:auto;
+
+    color:var(--code-text);
+
+    font-family:
+        "Cascadia Code",
+        "Fira Code",
+        Consolas,
+        monospace;
+
+    font-size:13px;
+
+    line-height:1.7;
+
+    white-space:pre;
+}
+
+.code-box code{
+    color:var(--code-text);
+}
+
+/* =========================================================
+   KEYWORDS
+   ========================================================= */
+
+.keyword{
+    color:#93c5fd;
+}
+
+.string{
+    color:#86efac;
+}
+
+.number{
+    color:#fcd34d;
+}
+
+.comment{
+    color:#94a3b8;
+}
+
+/* =========================================================
+   DATABASE TABLE VISUAL
+   ========================================================= */
+
+.db-table{
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:17px;
+
+    overflow:hidden;
+
+    box-shadow:var(--shadow);
+
+    margin-top:20px;
+}
+
+.db-table-title{
+    padding:15px 18px;
+
+    background:#f8fafc;
+
+    font-weight:900;
+
+    display:flex;
+    justify-content:space-between;
+
+    border-bottom:1px solid var(--border);
+}
+
+.db-table-title span{
+    color:var(--primary);
+
+    font-size:12px;
+}
+
+.db-row{
+    display:grid;
+
+    grid-template-columns:70px 1.5fr 1.2fr 1fr;
+
+    padding:13px 17px;
+
+    border-bottom:1px solid #eef2f7;
+
+    font-size:13px;
+
+    transition:.25s;
+}
+
+.db-row:hover{
+    background:#eff6ff;
+}
+
+.db-row.header{
+    background:#f1f5f9;
+
+    font-weight:900;
+}
+
+.pk{
+    color:#7c3aed;
+
+    font-weight:900;
+}
+
+/* =========================================================
+   NORMALIZATION / RELATIONSHIP
+   ========================================================= */
+
+.relationship{
+    display:grid;
+
+    grid-template-columns:1fr 100px 1fr;
+
+    align-items:center;
+
+    gap:15px;
+
+    margin-top:25px;
+}
+
+.rel-card{
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:16px;
+
+    padding:20px;
+
+    box-shadow:var(--shadow);
+}
+
+.rel-line{
+    height:3px;
+
+    background:#93c5fd;
+
+    position:relative;
+}
+
+.rel-line::after{
+    content:"1 : N";
+
+    position:absolute;
+
+    left:50%;
+    top:50%;
+
+    transform:translate(-50%,-50%);
+
+    background:#eff6ff;
+
+    color:#1d4ed8;
+
+    padding:4px 8px;
+
+    border-radius:20px;
+
+    font-size:11px;
+
+    font-weight:900;
+}
+
+/* =========================================================
+   INTERACTIVE LAB
+   ========================================================= */
+
+.lab{
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:20px;
+
+    padding:25px;
+
+    box-shadow:var(--shadow);
+}
+
+.lab-controls{
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:10px;
+
+    margin-bottom:18px;
+}
+
+.lab-btn{
+    border:0;
+
+    padding:10px 14px;
+
+    background:#eff6ff;
+
+    color:#1d4ed8;
+
+    border-radius:9px;
+
+    cursor:pointer;
+
+    font-weight:800;
+
+    transition:.2s;
+}
+
+.lab-btn:hover{
+    background:#dbeafe;
+
+    transform:translateY(-1px);
+}
+
+.lab-output{
+    min-height:170px;
+
+    padding:18px;
+
+    background:#0b1220;
+
+    border-radius:13px;
+
+    color:#e2e8f0;
+
+    font-family:
+        "Cascadia Code",
+        Consolas,
+        monospace;
+
+    font-size:13px;
+
+    white-space:pre-wrap;
+}
+
+/* =========================================================
+   CONCEPT GRID
+   ========================================================= */
+
+.concept-list{
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:15px;
+}
+
+.concept{
+    display:flex;
+
+    gap:13px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    padding:18px;
+
+    border-radius:14px;
+}
+
+.concept-icon{
+    width:38px;
+    height:38px;
+
+    flex:none;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:10px;
+
+    background:#eef2ff;
+}
+
+.concept h4{
+    margin-bottom:4px;
+
+    font-size:15px;
+}
+
+.concept p{
+    color:var(--muted);
+
+    font-size:13px;
+}
+
+/* =========================================================
+   ACCORDION
+   ========================================================= */
+
+.accordion{
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:15px;
+
+    overflow:hidden;
+
+    margin-bottom:10px;
+}
+
+.accordion button{
+    width:100%;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    border:0;
+
+    background:white;
+
+    padding:17px 20px;
+
+    cursor:pointer;
+
+    font-size:14px;
+
+    font-weight:800;
+
+    color:var(--text);
+
+    text-align:left;
+}
+
+.accordion-content{
+    max-height:0;
+
+    overflow:hidden;
+
+    transition:max-height .35s ease;
+
+    color:var(--muted);
+
+    font-size:14px;
+}
+
+.accordion-content div{
+    padding:0 20px 18px;
+}
+
+/* =========================================================
+   QUIZ
+   ========================================================= */
+
+.quiz{
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:20px;
+
+    padding:25px;
+
+    box-shadow:var(--shadow);
+}
+
+.question{
+    padding:20px 0;
+
+    border-bottom:1px solid var(--border);
+}
+
+.question:last-child{
+    border-bottom:0;
+}
+
+.question h4{
+    margin-bottom:12px;
+}
+
+.options{
+    display:grid;
+
+    gap:8px;
+}
+
+.option{
+    border:1px solid var(--border);
+
+    background:#f8fafc;
+
+    padding:10px 13px;
+
+    border-radius:9px;
+
+    cursor:pointer;
+
+    font-size:13px;
+
+    transition:.2s;
+}
+
+.option:hover{
+    border-color:#93c5fd;
+
+    background:#eff6ff;
+}
+
+.option.correct{
+    background:#dcfce7;
+
+    border-color:#86efac;
+
+    color:#166534;
+}
+
+.option.wrong{
+    background:#fee2e2;
+
+    border-color:#fca5a5;
+
+    color:#991b1b;
+}
+
+.quiz-result{
+    margin-top:18px;
+
+    font-weight:900;
+
+    color:var(--primary);
+}
+
+/* =========================================================
+   CHECKLIST
+   ========================================================= */
+
+.checklist{
+    display:grid;
+
+    gap:10px;
+}
+
+.check-item{
+    display:flex;
+
+    align-items:center;
+
+    gap:11px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:12px;
+
+    padding:13px 15px;
+}
+
+.check-item input{
+    width:17px;
+    height:17px;
+
+    accent-color:var(--primary);
+}
+
+.check-item label{
+    cursor:pointer;
+
+    font-size:14px;
+}
+
+/* =========================================================
+   PRACTICE
+   ========================================================= */
+
+.practice-grid{
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:16px;
+}
+
+.practice-card{
+    background:white;
+
+    border:1px solid var(--border);
+
+    border-radius:16px;
+
+    padding:20px;
+}
+
+.level{
+    display:inline-block;
+
+    padding:4px 8px;
+
+    border-radius:20px;
+
+    background:#eff6ff;
+
+    color:#1d4ed8;
+
+    font-size:10px;
+
+    font-weight:900;
+
+    margin-bottom:10px;
+}
+
+.practice-card h3{
+    font-size:16px;
+
+    margin-bottom:7px;
+}
+
+.practice-card p{
+    color:var(--muted);
+
+    font-size:13px;
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.footer{
+    padding:40px 20px;
+
+    border-top:1px solid var(--border);
+
+    text-align:center;
+
+    color:var(--muted);
+
+    font-size:13px;
+}
+
+/* =========================================================
+   REVEAL ANIMATION
+   ========================================================= */
+
+.reveal{
+    opacity:0;
+
+    transform:translateY(25px);
+
+    transition:
+        opacity .65s ease,
+        transform .65s ease;
+}
+
+.reveal.show{
+    opacity:1;
+
+    transform:translateY(0);
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(max-width:1000px){
+
+    :root{
+        --sidebar-width:260px;
+    }
+
+    .hero{
+        grid-template-columns:1fr;
+    }
+
+    .grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .practice-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:760px){
+
+    .sidebar{
+        transform:translateX(-100%);
+
+        transition:.3s ease;
+    }
+
+    .sidebar.open{
+        transform:translateX(0);
+    }
+
+    .main{
+        margin-left:0;
+    }
+
+    .mobile-menu{
+        display:block;
+    }
+
+    .header{
+        padding:0 18px;
+    }
+
+    .content{
+        padding:35px 18px 70px;
+    }
+
+    .hero{
+        padding:25px;
+
+        border-radius:18px;
+    }
+
+    .grid,
+    .objectives,
+    .concept-list,
+    .practice-grid{
+        grid-template-columns:1fr;
+    }
+
+    .database-stage{
+        min-height:560px;
+    }
+
+    .db-node{
+        width:135px;
+    }
+
+    .node-1{
+        top:30px;
+        left:50%;
+
+        transform:translateX(-50%);
+    }
+
+    .node-2{
+        top:150px;
+        right:15px;
+    }
+
+    .node-3{
+        bottom:150px;
+        left:15px;
+    }
+
+    .node-4{
+        bottom:30px;
+        left:50%;
+
+        transform:translateX(-50%);
+    }
+
+    .db-center{
+        width:145px;
+        height:145px;
+    }
+
+    .connection{
+        display:none;
+    }
+
+    .relationship{
+        grid-template-columns:1fr;
+    }
+
+    .rel-line{
+        width:3px;
+        height:45px;
+
+        margin:auto;
+    }
+
+    .flowchart{
+        flex-direction:column;
+    }
+
+    .flow-arrow{
+        transform:rotate(90deg);
+    }
+
+    .section-head h2{
+        font-size:27px;
+    }
+}
+
+@media(prefers-reduced-motion:reduce){
+
+    *,
+    *::before,
+    *::after{
+        animation:none !important;
+
+        transition:none !important;
+
+        scroll-behavior:auto !important;
+    }
+
+    .reveal{
+        opacity:1;
+
+        transform:none;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- =======================================================
+     SIDEBAR
+     ======================================================= -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+
+        <div class="brand-logo">
+            Z
+        </div>
+
+        <div class="brand-info">
+            <h2>ZENSUS</h2>
+            <p>SQL Mastery</p>
+        </div>
+
+    </div>
+
+    <div class="lesson-label">
+        LESSON 02
+    </div>
+
+    <nav class="nav">
+
+        <a href="#overview" class="active">
+            🏠 Overview
+        </a>
+
+        <a href="#database">
+            🗄️ Database
+        </a>
+
+        <a href="#dbms">
+            ⚙️ DBMS
+        </a>
+
+        <a href="#tables">
+            📊 Tables
+        </a>
+
+        <a href="#keys">
+            🔑 Keys
+        </a>
+
+        <a href="#relationships">
+            🔗 Relationships
+        </a>
+
+        <a href="#schema">
+            🧩 Schema
+        </a>
+
+        <a href="#architecture">
+            🏗️ Architecture
+        </a>
+
+        <a href="#sql">
+            💻 SQL Connection
+        </a>
+
+        <a href="#lab">
+            🧪 Interactive Lab
+        </a>
+
+        <a href="#normalization">
+            📐 Normalization
+        </a>
+
+        <a href="#transactions">
+            🔄 Transactions
+        </a>
+
+        <a href="#interview">
+            🎤 Interview
+        </a>
+
+        <a href="#quiz">
+            🧠 Quiz
+        </a>
+
+        <a href="#practice">
+            🚀 Practice
+        </a>
+
+        <a href="#checklist">
+            ✅ Checklist
+        </a>
+
+    </nav>
+
+</aside>
+
+
+<!-- =======================================================
+     MAIN
+     ======================================================= -->
+
+<main class="main">
+
+<header class="header">
+
+    <button class="mobile-menu" id="mobileMenu">
+        ☰
+    </button>
+
+    <div class="header-title">
+        SQL → Lesson 2 → Database Fundamentals
+    </div>
+
+    <div class="header-badge">
+        ● Beginner → Intermediate
+    </div>
+
+</header>
+
+
+<div class="content">
+
+
+<!-- =======================================================
+     HERO
+     ======================================================= -->
+
+<section id="overview" class="reveal">
+
+<div class="hero">
+
+    <div>
+
+        <div class="eyebrow">
+            🗄️ SQL FUNDAMENTALS
+        </div>
+
+        <h1>
+            Understand the
+            <span>Database</span>
+            Behind SQL
+        </h1>
+
+        <p>
+            Before writing advanced SQL queries, you need to understand
+            what a database actually is, how DBMS works, how tables store
+            information, how relationships connect data, and how SQL
+            communicates with the database.
+        </p>
+
+        <div class="hero-meta">
+
+            <span class="badge">Database</span>
+            <span class="badge">DBMS</span>
+            <span class="badge">Tables</span>
+            <span class="badge">Keys</span>
+            <span class="badge">Relationships</span>
+            <span class="badge">Schema</span>
+
+        </div>
+
+    </div>
+
+
+    <div class="hero-code">
+
+        <div class="terminal-top">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+
+<pre><span class="sql-comment">-- Create a database</span>
+
+<span class="sql-keyword">CREATE DATABASE</span> zensus;
+
+<span class="sql-comment">-- Select the database</span>
+
+<span class="sql-keyword">USE</span> zensus;
+
+<span class="sql-comment">-- Create a table</span>
+
+<span class="sql-keyword">CREATE TABLE</span> students (
+    id <span class="sql-keyword">INT PRIMARY KEY</span>,
+    name <span class="sql-keyword">VARCHAR</span>(50),
+    course <span class="sql-keyword">VARCHAR</span>(50)
+);</pre>
+
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     OBJECTIVES
+     ======================================================= -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        01 — Learning Objectives
+    </div>
+
+    <h2>What you will master</h2>
+
+    <p>
+        By the end of this lesson, you should understand the complete
+        foundation required before moving into advanced SQL.
+    </p>
+
+</div>
+
+
+<div class="objectives">
+
+    <div class="objective">
+        <div class="check">✓</div>
+        <span>Understand what a database is and why it is required.</span>
+    </div>
+
+    <div class="objective">
+        <div class="check">✓</div>
+        <span>Understand DBMS and its responsibilities.</span>
+    </div>
+
+    <div class="objective">
+        <div class="check">✓</div>
+        <span>Understand databases, tables, rows and columns.</span>
+    </div>
+
+    <div class="objective">
+        <div class="check">✓</div>
+        <span>Understand primary keys and foreign keys.</span>
+    </div>
+
+    <div class="objective">
+        <div class="check">✓</div>
+        <span>Understand one-to-one, one-to-many and many-to-many relationships.</span>
+    </div>
+
+    <div class="objective">
+        <div class="check">✓</div>
+        <span>Understand schema and database architecture.</span>
+    </div>
+
+    <div class="objective">
+        <div class="check">✓</div>
+        <span>Understand SQL's role in database management.</span>
+    </div>
+
+    <div class="objective">
+        <div class="check">✓</div>
+        <span>Understand normalization and transactions at a basic level.</span>
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     WHAT IS DATABASE
+     ======================================================= -->
+
+<section id="database" class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        02 — Database
+    </div>
+
+    <h2>What is a Database?</h2>
+
+    <p>
+        A database is an organized collection of data that allows
+        information to be stored, searched, updated and managed efficiently.
+    </p>
+
+</div>
+
+
+<div class="callout">
+
+<strong>Simple definition:</strong>
+
+A database is a structured place where related information
+is stored so that applications can efficiently access and manage it.
+
+</div>
+
+
+<div class="grid">
+
+    <div class="card">
+
+        <div class="card-icon">📚</div>
+
+        <h3>Without Database</h3>
+
+        <p>
+            Information may be scattered across files, spreadsheets,
+            documents and folders, making searching and updating difficult.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-icon">🗄️</div>
+
+        <h3>With Database</h3>
+
+        <p>
+            Related information can be organized into tables and retrieved
+            efficiently using queries.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-icon">⚡</div>
+
+        <h3>Fast Access</h3>
+
+        <p>
+            Database systems provide mechanisms such as indexes and query
+            optimization to retrieve data efficiently.
+        </p>
+
+    </div>
+
+</div>
+
+
+<h3 style="margin-top:30px;">
+    Real-world examples
+</h3>
+
+
+<div class="grid" style="margin-top:15px;">
+
+    <div class="card">
+        <div class="card-icon">🏦</div>
+        <h3>Bank</h3>
+        <p>Customers, accounts, transactions and loans.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-icon">🛒</div>
+        <h3>E-Commerce</h3>
+        <p>Products, users, orders, payments and delivery.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-icon">🎓</div>
+        <h3>College</h3>
+        <p>Students, faculty, courses, marks and attendance.</p>
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     DATABASE VISUAL
+     ======================================================= -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        03 — Visual Understanding
+    </div>
+
+    <h2>How a Database Organizes Information</h2>
+
+    <p>
+        Think of a database as the central storage system for an application.
+    </p>
+
+</div>
+
+
+<div class="database-stage">
+
+    <div class="connection line1"></div>
+    <div class="connection line2"></div>
+    <div class="connection line3"></div>
+    <div class="connection line4"></div>
+
+
+    <div class="db-node node-1">
+        👨‍🎓 Students
+        <br>
+        <small>Student information</small>
+    </div>
+
+    <div class="db-node node-2">
+        📚 Courses
+        <br>
+        <small>Course information</small>
+    </div>
+
+    <div class="db-node node-3">
+        📝 Exams
+        <br>
+        <small>Marks & results</small>
+    </div>
+
+    <div class="db-node node-4">
+        👨‍🏫 Faculty
+        <br>
+        <small>Teacher information</small>
+    </div>
+
+
+    <div class="db-center">
+
+        <div class="db-icon">
+            🗄️
+        </div>
+
+        <strong>ZENSUS DB</strong>
+
+        <small>Database</small>
+
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     DBMS
+     ======================================================= -->
+
+<section id="dbms" class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        04 — DBMS
+    </div>
+
+    <h2>What is DBMS?</h2>
+
+    <p>
+        A Database Management System is software that allows users and
+        applications to create, store, retrieve, modify and manage data.
+    </p>
+
+</div>
+
+
+<div class="callout">
+
+<strong>Database vs DBMS:</strong>
+
+The database is the organized data.
+The DBMS is the software that manages that data.
+
+</div>
+
+
+<div class="flowchart">
+
+    <div class="flow-box">
+        👤 User
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        💻 Application
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        🗣️ SQL
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        ⚙️ DBMS
+    </div>
+
+    <div class="flow-arrow">
+        →
+    </div>
+
+    <div class="flow-box">
+        🗄️ Database
+    </div>
+
+</div>
+
+
+<h3 style="margin-top:30px;">
+    Major DBMS responsibilities
+</h3>
+
+
+<div class="grid" style="margin-top:18px;">
+
+    <div class="card">
+        <div class="card-icon">💾</div>
+        <h3>Storage</h3>
+        <p>Manages persistent storage of data.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-icon">🔎</div>
+        <h3>Retrieval</h3>
+        <p>Processes queries to retrieve required information.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-icon">🔐</div>
+        <h3>Security</h3>
+        <p>Controls who can access or modify data.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-icon">🔄</div>
+        <h3>Transactions</h3>
+        <p>Helps maintain consistent database operations.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-icon">💥</div>
+        <h3>Recovery</h3>
+        <p>Provides mechanisms to recover from failures.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-icon">👥</div>
+        <h3>Concurrency</h3>
+        <p>Coordinates multiple users accessing data simultaneously.</p>
+    </div>
+
+</div>
+
+
+<h3 style="margin-top:30px;">
+    Popular database systems
+</h3>
+
+
+<div class="table-wrap" style="margin-top:15px;">
+
+<table>
+
+<thead>
+<tr>
+    <th>Database</th>
+    <th>Type</th>
+    <th>Common Usage</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+    <td>MySQL</td>
+    <td>Relational</td>
+    <td>Web applications</td>
+</tr>
+
+<tr>
+    <td>PostgreSQL</td>
+    <td>Relational</td>
+    <td>Enterprise / applications</td>
+</tr>
+
+<tr>
+    <td>Oracle Database</td>
+    <td>Relational</td>
+    <td>Enterprise systems</td>
+</tr>
+
+<tr>
+    <td>Microsoft SQL Server</td>
+    <td>Relational</td>
+    <td>Business applications</td>
+</tr>
+
+<tr>
+    <td>SQLite</td>
+    <td>Relational</td>
+    <td>Embedded applications</td>
+</tr>
+
+<tr>
+    <td>MongoDB</td>
+    <td>Document database</td>
+    <td>Document-oriented applications</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     TABLES
+     ======================================================= -->
+
+<section id="tables" class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        05 — Tables
+    </div>
+
+    <h2>Database → Table → Row → Column</h2>
+
+    <p>
+        Relational databases organize data primarily using tables.
+        Understanding these four terms is essential for SQL.
+    </p>
+
+</div>
+
+
+<div class="db-table">
+
+    <div class="db-table-title">
+
+        <span>students</span>
+
+        <span>TABLE</span>
+
+    </div>
+
+
+    <div class="db-row header">
+
+        <div>ID</div>
+        <div>Name</div>
+        <div>Course</div>
+        <div>CGPA</div>
+
+    </div>
+
+
+    <div class="db-row">
+
+        <div class="pk">101</div>
+        <div>Pradeep</div>
+        <div>CSE</div>
+        <div>8.63</div>
+
+    </div>
+
+
+    <div class="db-row">
+
+        <div class="pk">102</div>
+        <div>Anil</div>
+        <div>ECE</div>
+        <div>8.20</div>
+
+    </div>
+
+
+    <div class="db-row">
+
+        <div class="pk">103</div>
+        <div>Rahul</div>
+        <div>CSE</div>
+        <div>9.10</div>
+
+    </div>
+
+</div>
+
+
+<div class="concept-list" style="margin-top:20px;">
+
+    <div class="concept">
+
+        <div class="concept-icon">🗃️</div>
+
+        <div>
+            <h4>Table</h4>
+            <p>A collection of related records organized into rows and columns.</p>
+        </div>
+
+    </div>
+
+
+    <div class="concept">
+
+        <div class="concept-icon">↔️</div>
+
+        <div>
+            <h4>Row / Record</h4>
+            <p>Represents one complete record in a table.</p>
+        </div>
+
+    </div>
+
+
+    <div class="concept">
+
+        <div class="concept-icon">📏</div>
+
+        <div>
+            <h4>Column / Attribute</h4>
+            <p>Represents one property of the records.</p>
+        </div>
+
+    </div>
+
+
+    <div class="concept">
+
+        <div class="concept-icon">🎯</div>
+
+        <div>
+            <h4>Cell</h4>
+            <p>The intersection of one row and one column.</p>
+        </div>
+
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     SQL TABLE CREATION
+     ======================================================= -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        06 — First Database Structure
+    </div>
+
+    <h2>Creating a Table</h2>
+
+    <p>
+        SQL allows us to define the structure of a relational table.
+    </p>
+
+</div>
+
+
+<div class="code-box">
+
+<div class="code-header">
+
+    <span>SQL — students table</span>
+
+    <button class="copy-btn"
+            onclick="copyCode(this)">
+        Copy
+    </button>
+
+</div>
+
+<pre><code>CREATE TABLE students (
+    student_id INT,
+    name VARCHAR(100),
+    department VARCHAR(50),
+    cgpa DECIMAL(3,2)
+);</code></pre>
+
+</div>
+
+
+<div class="callout">
+
+<strong>Important:</strong>
+
+`CREATE TABLE` defines the structure.
+It does not automatically insert student records.
+
+</div>
+
+
+<h3>Insert data</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+
+    <span>SQL — INSERT</span>
+
+    <button class="copy-btn"
+            onclick="copyCode(this)">
+        Copy
+    </button>
+
+</div>
+
+<pre><code>INSERT INTO students
+(student_id, name, department, cgpa)
+VALUES
+(101, 'Pradeep', 'CSE', 8.63);</code></pre>
+
+</div>
+
+
+<h3>Read data</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+
+    <span>SQL — SELECT</span>
+
+    <button class="copy-btn"
+            onclick="copyCode(this)">
+        Copy
+    </button>
+
+</div>
+
+<pre><code>SELECT *
+FROM students;</code></pre>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     KEYS
+     ======================================================= -->
+
+<section id="keys" class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        07 — Keys
+    </div>
+
+    <h2>Understanding Database Keys</h2>
+
+    <p>
+        Keys help identify records and connect related tables.
+    </p>
+
+</div>
+
+
+<div class="grid">
+
+    <div class="card">
+
+        <div class="card-icon">🔑</div>
+
+        <h3>Primary Key</h3>
+
+        <p>
+            Uniquely identifies each row in a table.
+            It cannot contain NULL values.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-icon">🔗</div>
+
+        <h3>Foreign Key</h3>
+
+        <p>
+            A column or set of columns that references a key
+            in another table to establish a relationship.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-icon">🧩</div>
+
+        <h3>Composite Key</h3>
+
+        <p>
+            A key formed using two or more columns together.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-icon">⭐</div>
+
+        <h3>Candidate Key</h3>
+
+        <p>
+            A minimal set of attributes capable of uniquely identifying a row.
+        </p>
+
+    </div>
+
+</div>
+
+
+<h3 style="margin-top:30px;">
+    Primary Key Example
+</h3>
+
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>SQL</span>
+
+    <button class="copy-btn"
+            onclick="copyCode(this)">
+        Copy
+    </button>
+</div>
+
+<pre><code>CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    department VARCHAR(50)
+);</code></pre>
+
+</div>
+
+
+<h3>
+    Foreign Key Example
+</h3>
+
+
+<div class="code-box">
+
+<div class="code-header">
+    <span>SQL</span>
+
+    <button class="copy-btn"
+            onclick="copyCode(this)">
+        Copy
+    </button>
+</div>
+
+<pre><code>CREATE TABLE departments (
+    department_id INT PRIMARY KEY,
+    department_name VARCHAR(100)
+);
+
+CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    department_id INT,
+
+    FOREIGN KEY (department_id)
+    REFERENCES departments(department_id)
+);</code></pre>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     RELATIONSHIPS
+     ======================================================= -->
+
+<section id="relationships" class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        08 — Relationships
+    </div>
+
+    <h2>How Tables Connect</h2>
+
+    <p>
+        Real-world data is rarely stored in one giant table.
+        Relationships allow multiple tables to work together.
+    </p>
+
+</div>
+
+
+<div class="grid">
+
+    <div class="card">
+
+        <div class="card-icon">1️⃣</div>
+
+        <h3>One-to-One</h3>
+
+        <p>
+            One record in Table A corresponds to one record in Table B.
+        </p>
+
+        <div class="callout">
+            Person → Passport
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-icon">1️⃣➡️♾️</div>
+
+        <h3>One-to-Many</h3>
+
+        <p>
+            One record can be related to many records in another table.
+        </p>
+
+        <div class="callout">
+            Department → Students
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-icon">♾️↔️♾️</div>
+
+        <h3>Many-to-Many</h3>
+
+        <p>
+            Many records on both sides can be related.
+            A junction table is commonly used.
+        </p>
+
+        <div class="callout">
+            Students ↔ Courses
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="relationship">
+
+    <div class="rel-card">
+
+        <strong>Departments</strong>
+
+        <p style="color:#64748b;font-size:13px;">
+            department_id<br>
+            department_name
+        </p>
+
+    </div>
+
+    <div class="rel-line"></div>
+
+    <div class="rel-card">
+
+        <strong>Students</strong>
+
+        <p style="color:#64748b;font-size:13px;">
+            student_id<br>
+            name<br>
+            department_id
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="callout">
+
+<strong>Remember:</strong>
+
+A foreign key is commonly used to represent a relationship
+between tables in a relational database.
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     SCHEMA
+     ======================================================= -->
+
+<section id="schema" class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        09 — Schema
+    </div>
+
+    <h2>What is a Database Schema?</h2>
+
+    <p>
+        A schema describes the logical structure of a database:
+        tables, columns, relationships, constraints and other database objects.
+    </p>
+
+</div>
+
+
+<div class="flowchart">
+
+    <div class="flow-box">
+        🗄️ Database
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-box">
+        📊 Tables
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-box">
+        📏 Columns
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-box">
+        🔑 Constraints
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-box">
+        🔗 Relationships
+    </div>
+
+</div>
+
+
+<div class="grid" style="margin-top:22px;">
+
+    <div class="card">
+
+        <h3>Schema defines</h3>
+
+        <p>
+            Structure, data types, constraints, relationships
+            and database objects.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Data is different</h3>
+
+        <p>
+            The schema describes how data is organized;
+            actual records are the data stored inside that structure.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Think Blueprint</h3>
+
+        <p>
+            A useful analogy is an architectural blueprint:
+            it describes the structure before or independently of
+            the actual contents.
+        </p>
+
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     ARCHITECTURE
+     ======================================================= -->
+
+<section id="architecture" class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        10 — Architecture
+    </div>
+
+    <h2>How an Application Talks to a Database</h2>
+
+    <p>
+        In a typical application, the user does not directly manipulate
+        the database files. The application communicates through database software.
+    </p>
+
+</div>
+
+
+<div class="flowchart">
+
+    <div class="flow-box">
+        👤 User
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-box">
+        🌐 Frontend
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-box">
+        ⚙️ Backend
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-box">
+        🗣️ SQL
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-box">
+        🗄️ Database
+    </div>
+
+</div>
+
+
+<div class="callout">
+
+<strong>Example:</strong>
+
+When you log into a website, the backend may execute a database query
+to find the account associated with the submitted username or email.
+The exact architecture varies by application.
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     SQL CONNECTION
+     ======================================================= -->
+
+<section id="sql" class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        11 — SQL Connection
+    </div>
+
+    <h2>Where Does SQL Fit?</h2>
+
+    <p>
+        SQL is the language commonly used to define, query and manipulate
+        data in relational database systems.
+    </p>
+
+</div>
+
+
+<div class="grid">
+
+    <div class="card">
+
+        <div class="card-icon">🏗️</div>
+
+        <h3>DDL</h3>
+
+        <p>
+            Data Definition Language.
+            Used for database structure.
+        </p>
+
+        <div class="callout">
+            CREATE<br>
+            ALTER<br>
+            DROP
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-icon">✏️</div>
+
+        <h3>DML</h3>
+
+        <p>
+            Data Manipulation Language.
+            Used to modify data.
+        </p>
+
+        <div class="callout">
+            INSERT<br>
+            UPDATE<br>
+            DELETE
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-icon">🔎</div>
+
+        <h3>DQL</h3>
+
+        <p>
+            Common educational classification for querying data.
+        </p>
+
+        <div class="callout">
+            SELECT
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-icon">🔐</div>
+
+        <h3>DCL</h3>
+
+        <p>
+            Data Control Language.
+            Used for permissions.
+        </p>
+
+        <div class="callout">
+            GRANT<br>
+            REVOKE
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-icon">🔄</div>
+
+        <h3>TCL</h3>
+
+        <p>
+            Transaction Control Language.
+            Used to manage transactions.
+        </p>
+
+        <div class="callout">
+            COMMIT<br>
+            ROLLBACK
+        </div>
+
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     INTERACTIVE LAB
+     ======================================================= -->
+
+<section id="lab" class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        12 — Interactive Lab
+    </div>
+
+    <h2>Explore a Database</h2>
+
+    <p>
+        This browser lab simulates database operations.
+        It does not connect to a real SQL server.
+    </p>
+
+</div>
+
+
+<div class="lab">
+
+    <div class="lab-controls">
+
+        <button class="lab-btn"
+                onclick="dbAction('create')">
+            CREATE TABLE
+        </button>
+
+        <button class="lab-btn"
+                onclick="dbAction('insert')">
+            INSERT ROW
+        </button>
+
+        <button class="lab-btn"
+                onclick="dbAction('select')">
+            SELECT *
+        </button>
+
+        <button class="lab-btn"
+                onclick="dbAction('update')">
+            UPDATE
+        </button>
+
+        <button class="lab-btn"
+                onclick="dbAction('delete')">
+            DELETE
+        </button>
+
+        <button class="lab-btn"
+                onclick="dbAction('reset')">
+            RESET
+        </button>
+
+    </div>
+
+
+    <div class="lab-output" id="labOutput">
+Click a button to simulate a database operation...
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     NORMALIZATION
+     ======================================================= -->
+
+<section id="normalization" class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        13 — Normalization
+    </div>
+
+    <h2>Database Normalization</h2>
+
+    <p>
+        Normalization is a database design technique used to organize
+        data and reduce unnecessary duplication and update anomalies.
+    </p>
+
+</div>
+
+
+<div class="callout">
+
+<strong>Beginner idea:</strong>
+
+Instead of storing the same information repeatedly,
+we try to divide data into logically related tables.
+
+</div>
+
+
+<div class="grid">
+
+    <div class="card">
+
+        <div class="card-icon">1️⃣</div>
+
+        <h3>1NF</h3>
+
+        <p>
+            First Normal Form focuses on atomic values and avoiding
+            repeating groups in a relational design.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-icon">2️⃣</div>
+
+        <h3>2NF</h3>
+
+        <p>
+            Builds on 1NF and addresses partial dependency
+            for designs involving composite keys.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-icon">3️⃣</div>
+
+        <h3>3NF</h3>
+
+        <p>
+            Builds on 2NF and removes inappropriate transitive
+            dependencies between non-key attributes.
+        </p>
+
+    </div>
+
+</div>
+
+
+<h3 style="margin-top:30px;">
+    Example
+</h3>
+
+
+<div class="table-wrap" style="margin-top:15px;">
+
+<table>
+
+<thead>
+
+<tr>
+    <th>Student</th>
+    <th>Department</th>
+    <th>Department Head</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+    <td>101 - Pradeep</td>
+    <td>CSE</td>
+    <td>Dr. Rao</td>
+</tr>
+
+<tr>
+    <td>102 - Anil</td>
+    <td>CSE</td>
+    <td>Dr. Rao</td>
+</tr>
+
+<tr>
+    <td>103 - Rahul</td>
+    <td>ECE</td>
+    <td>Dr. Kumar</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+
+<div class="callout">
+
+If department information is repeated for every student,
+changing the department head can require multiple updates.
+
+A normalized design can separate department information
+into its own table.
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     TRANSACTIONS
+     ======================================================= -->
+
+<section id="transactions" class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        14 — Transactions
+    </div>
+
+    <h2>What is a Database Transaction?</h2>
+
+    <p>
+        A transaction is a logical unit of database work that should be
+        handled according to the database system's transaction rules.
+    </p>
+
+</div>
+
+
+<div class="flowchart">
+
+    <div class="flow-box">
+        ▶️ BEGIN
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-box">
+        💳 Operations
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-box">
+        ✅ COMMIT
+    </div>
+
+    <div class="flow-arrow">OR</div>
+
+    <div class="flow-box">
+        ↩️ ROLLBACK
+    </div>
+
+</div>
+
+
+<div class="grid" style="margin-top:25px;">
+
+    <div class="card">
+        <div class="card-icon">⚛️</div>
+        <h3>Atomicity</h3>
+        <p>
+            A transaction's operations are treated as a unit:
+            they all succeed or the transaction is rolled back.
+        </p>
+    </div>
+
+    <div class="card">
+        <div class="card-icon">✔️</div>
+        <h3>Consistency</h3>
+        <p>
+            A successful transaction should preserve defined
+            database integrity rules.
+        </p>
+    </div>
+
+    <div class="card">
+        <div class="card-icon">👥</div>
+        <h3>Isolation</h3>
+        <p>
+            Concurrent transactions are controlled so that
+            intermediate states are handled appropriately.
+        </p>
+    </div>
+
+    <div class="card">
+        <div class="card-icon">💾</div>
+        <h3>Durability</h3>
+        <p>
+            Once committed, changes are intended to survive
+            normal system failures according to the DBMS guarantees.
+        </p>
+    </div>
+
+</div>
+
+
+<div class="code-box">
+
+<div class="code-header">
+
+    <span>Transaction example</span>
+
+    <button class="copy-btn"
+            onclick="copyCode(this)">
+        Copy
+    </button>
+
+</div>
+
+<pre><code>START TRANSACTION;
+
+UPDATE accounts
+SET balance = balance - 500
+WHERE account_id = 101;
+
+UPDATE accounts
+SET balance = balance + 500
+WHERE account_id = 202;
+
+COMMIT;</code></pre>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     CONSTRAINTS
+     ======================================================= -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        15 — Constraints
+    </div>
+
+    <h2>Database Constraints</h2>
+
+    <p>
+        Constraints are rules applied to data to help maintain integrity.
+    </p>
+
+</div>
+
+
+<div class="grid">
+
+    <div class="card">
+
+        <div class="card-icon">🔑</div>
+
+        <h3>PRIMARY KEY</h3>
+
+        <p>
+            Uniquely identifies rows.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-icon">🚫</div>
+
+        <h3>NOT NULL</h3>
+
+        <p>
+            Prevents a column from containing NULL.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-icon">🎯</div>
+
+        <h3>UNIQUE</h3>
+
+        <p>
+            Enforces uniqueness according to the DBMS rules.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-icon">📏</div>
+
+        <h3>CHECK</h3>
+
+        <p>
+            Requires a condition to be satisfied.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-icon">🔗</div>
+
+        <h3>FOREIGN KEY</h3>
+
+        <p>
+            Maintains referential relationships between tables.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-icon">📦</div>
+
+        <h3>DEFAULT</h3>
+
+        <p>
+            Supplies a default value when one is not explicitly provided.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="code-box">
+
+<div class="code-header">
+
+    <span>SQL constraints</span>
+
+    <button class="copy-btn"
+            onclick="copyCode(this)">
+        Copy
+    </button>
+
+</div>
+
+<pre><code>CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE,
+    age INT CHECK (age >= 16),
+    city VARCHAR(50) DEFAULT 'Guntur'
+);</code></pre>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     INDEX
+     ======================================================= -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        16 — Performance Preview
+    </div>
+
+    <h2>What is an Index?</h2>
+
+    <p>
+        An index is a database structure that can help the DBMS find
+        rows more efficiently for suitable queries.
+    </p>
+
+</div>
+
+
+<div class="callout">
+
+<strong>Real-world analogy:</strong>
+
+A book's index helps you find a topic without reading every page.
+A database index can similarly help locate rows without scanning
+every row in suitable situations.
+
+</div>
+
+
+<div class="code-box">
+
+<div class="code-header">
+
+    <span>Create an index</span>
+
+    <button class="copy-btn"
+            onclick="copyCode(this)">
+        Copy
+    </button>
+
+</div>
+
+<pre><code>CREATE INDEX idx_student_name
+ON students(name);</code></pre>
+
+</div>
+
+
+<div class="grid">
+
+    <div class="card">
+
+        <h3>Benefit</h3>
+
+        <p>
+            Can significantly improve suitable read/search operations.
+        </p>
+
+    </div>
+
+    <div class="card">
+
+        <h3>Trade-off</h3>
+
+        <p>
+            Indexes consume storage and can add overhead to inserts,
+            updates and deletes.
+        </p>
+
+    </div>
+
+    <div class="card">
+
+        <h3>Important</h3>
+
+        <p>
+            More indexes are not automatically better.
+            Index design depends on workload and query patterns.
+        </p>
+
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     DATABASE DESIGN FLOW
+     ======================================================= -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        17 — Design Process
+    </div>
+
+    <h2>How to Design a Database</h2>
+
+    <p>
+        Professional database design starts with understanding the problem,
+        not immediately writing SQL.
+    </p>
+
+</div>
+
+
+<div class="flowchart">
+
+    <div class="flow-box">
+        1️⃣ Requirements
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-box">
+        2️⃣ Entities
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-box">
+        3️⃣ Attributes
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-box">
+        4️⃣ Relationships
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-box">
+        5️⃣ Tables
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-box">
+        6️⃣ Constraints
+    </div>
+
+</div>
+
+
+<div class="callout">
+
+<strong>Example — College Management System:</strong>
+
+Entities → Student, Course, Faculty, Department, Exam.
+
+Then identify their attributes, relationships and constraints,
+and finally translate the design into SQL tables.
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     COMMON MISTAKES
+     ======================================================= -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        18 — Common Mistakes
+    </div>
+
+    <h2>Beginner Mistakes to Avoid</h2>
+
+</div>
+
+
+<div class="grid">
+
+    <div class="card">
+
+        <h3>❌ Database = DBMS</h3>
+
+        <p>
+            They are related but not identical.
+            Database is the data/structure; DBMS is software that manages it.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>❌ Row = Column</h3>
+
+        <p>
+            A row represents a record.
+            A column represents an attribute/property.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>❌ Primary Key = Foreign Key</h3>
+
+        <p>
+            A primary key identifies rows in its own table.
+            A foreign key establishes a reference to another table's key.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>❌ One giant table</h3>
+
+        <p>
+            Poor design can cause duplication and update anomalies.
+            Related tables are often separated appropriately.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>❌ Ignoring NULL</h3>
+
+        <p>
+            NULL represents missing/unknown information and has
+            special behavior in SQL comparisons.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>❌ Adding indexes everywhere</h3>
+
+        <p>
+            Indexes improve some reads but have storage and write costs.
+        </p>
+
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     INTERVIEW
+     ======================================================= -->
+
+<section id="interview" class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        19 — Interview Preparation
+    </div>
+
+    <h2>Interview Questions</h2>
+
+    <p>
+        These are common database fundamentals questions asked in
+        SQL and software interviews.
+    </p>
+
+</div>
+
+
+<div class="accordion">
+
+<button>
+    What is a database?
+    <span>＋</span>
+</button>
+
+<div class="accordion-content">
+<div>
+A database is an organized collection of data designed so that
+information can be stored, accessed, updated and managed efficiently.
+</div>
+</div>
+
+</div>
+
+
+<div class="accordion">
+
+<button>
+    What is DBMS?
+    <span>＋</span>
+</button>
+
+<div class="accordion-content">
+<div>
+A DBMS is software that provides mechanisms for storing, retrieving,
+modifying, securing and managing data in databases.
+</div>
+</div>
+
+</div>
+
+
+<div class="accordion">
+
+<button>
+    What is a primary key?
+    <span>＋</span>
+</button>
+
+<div class="accordion-content">
+<div>
+A primary key is a column or set of columns used to uniquely identify
+rows in a table. A primary key cannot contain NULL values.
+</div>
+</div>
+
+</div>
+
+
+<div class="accordion">
+
+<button>
+    What is a foreign key?
+    <span>＋</span>
+</button>
+
+<div class="accordion-content">
+<div>
+A foreign key is a column or set of columns used to reference a key
+in another table and establish referential relationships.
+</div>
+</div>
+
+</div>
+
+
+<div class="accordion">
+
+<button>
+    What is normalization?
+    <span>＋</span>
+</button>
+
+<div class="accordion-content">
+<div>
+Normalization is a database design approach that organizes data
+to reduce unnecessary redundancy and update anomalies.
+</div>
+</div>
+
+</div>
+
+
+<div class="accordion">
+
+<button>
+    What is the difference between DELETE and DROP?
+    <span>＋</span>
+</button>
+
+<div class="accordion-content">
+<div>
+DELETE removes rows from a table. DROP removes a database object
+such as a table itself. Exact transactional behavior depends on the DBMS.
+</div>
+</div>
+
+</div>
+
+
+<div class="accordion">
+
+<button>
+    What is an index?
+    <span>＋</span>
+</button>
+
+<div class="accordion-content">
+<div>
+An index is a database structure that can accelerate suitable
+data-access operations, at the cost of additional storage and
+write-maintenance overhead.
+</div>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     QUIZ
+     ======================================================= -->
+
+<section id="quiz" class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        20 — Knowledge Check
+    </div>
+
+    <h2>Database Fundamentals Quiz</h2>
+
+    <p>
+        Test your understanding before moving to the next lesson.
+    </p>
+
+</div>
+
+
+<div class="quiz">
+
+
+<div class="question">
+
+<h4>1. What uniquely identifies a row in a relational table?</h4>
+
+<div class="options">
+
+<div class="option"
+     data-correct="true"
+     onclick="answer(this,1)">
+    A. Primary Key
+</div>
+
+<div class="option"
+     data-correct="false"
+     onclick="answer(this,1)">
+    B. Foreign Key
+</div>
+
+<div class="option"
+     data-correct="false"
+     onclick="answer(this,1)">
+    C. Index only
+</div>
+
+<div class="option"
+     data-correct="false"
+     onclick="answer(this,1)">
+    D. Schema
+</div>
+
+</div>
+
+</div>
+
+
+<div class="question">
+
+<h4>2. What does DBMS stand for?</h4>
+
+<div class="options">
+
+<div class="option"
+     data-correct="false"
+     onclick="answer(this,2)">
+    A. Database Machine System
+</div>
+
+<div class="option"
+     data-correct="true"
+     onclick="answer(this,2)">
+    B. Database Management System
+</div>
+
+<div class="option"
+     data-correct="false"
+     onclick="answer(this,2)">
+    C. Data Memory System
+</div>
+
+<div class="option"
+     data-correct="false"
+     onclick="answer(this,2)">
+    D. Database Monitoring Service
+</div>
+
+</div>
+
+</div>
+
+
+<div class="question">
+
+<h4>3. Which key usually references another table?</h4>
+
+<div class="options">
+
+<div class="option"
+     data-correct="false"
+     onclick="answer(this,3)">
+    A. Primary Key
+</div>
+
+<div class="option"
+     data-correct="true"
+     onclick="answer(this,3)">
+    B. Foreign Key
+</div>
+
+<div class="option"
+     data-correct="false"
+     onclick="answer(this,3)">
+    C. Candidate Key
+</div>
+
+<div class="option"
+     data-correct="false"
+     onclick="answer(this,3)">
+    D. Index
+</div>
+
+</div>
+
+</div>
+
+
+<div class="question">
+
+<h4>4. Which relationship can connect one department to many students?</h4>
+
+<div class="options">
+
+<div class="option"
+     data-correct="false"
+     onclick="answer(this,4)">
+    A. One-to-One
+</div>
+
+<div class="option"
+     data-correct="true"
+     onclick="answer(this,4)">
+    B. One-to-Many
+</div>
+
+<div class="option"
+     data-correct="false"
+     onclick="answer(this,4)">
+    C. Zero-to-Zero
+</div>
+
+<div class="option"
+     data-correct="false"
+     onclick="answer(this,4)">
+    D. One-to-Nothing
+</div>
+
+</div>
+
+</div>
+
+
+<div class="question">
+
+<h4>5. What is the main goal of normalization?</h4>
+
+<div class="options">
+
+<div class="option"
+     data-correct="false"
+     onclick="answer(this,5)">
+    A. Make every table larger
+</div>
+
+<div class="option"
+     data-correct="true"
+     onclick="answer(this,5)">
+    B. Organize data and reduce unnecessary redundancy
+</div>
+
+<div class="option"
+     data-correct="false"
+     onclick="answer(this,5)">
+    C. Remove all relationships
+</div>
+
+<div class="option"
+     data-correct="false"
+     onclick="answer(this,5)">
+    D. Avoid using keys
+</div>
+
+</div>
+
+</div>
+
+
+<div class="quiz-result" id="quizResult">
+    Score: 0 / 5
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     PRACTICE
+     ======================================================= -->
+
+<section id="practice" class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        21 — Practice
+    </div>
+
+    <h2>Build Your Database Skills</h2>
+
+    <p>
+        Practice these problems before moving into advanced SQL queries.
+    </p>
+
+</div>
+
+
+<div class="practice-grid">
+
+    <div class="practice-card">
+
+        <span class="level">BEGINNER</span>
+
+        <h3>Student Database</h3>
+
+        <p>
+            Design a students table with ID, name, department,
+            email and CGPA.
+        </p>
+
+    </div>
+
+
+    <div class="practice-card">
+
+        <span class="level">BEGINNER</span>
+
+        <h3>Department Relationship</h3>
+
+        <p>
+            Create departments and students tables and connect them
+            using a foreign key.
+        </p>
+
+    </div>
+
+
+    <div class="practice-card">
+
+        <span class="level">INTERMEDIATE</span>
+
+        <h3>College Schema</h3>
+
+        <p>
+            Design tables for students, courses, faculty and exams.
+        </p>
+
+    </div>
+
+
+    <div class="practice-card">
+
+        <span class="level">INTERMEDIATE</span>
+
+        <h3>Many-to-Many Design</h3>
+
+        <p>
+            Model Students ↔ Courses using an appropriate junction table.
+        </p>
+
+    </div>
+
+
+    <div class="practice-card">
+
+        <span class="level">INTERMEDIATE</span>
+
+        <h3>Normalization</h3>
+
+        <p>
+            Take a duplicated student-department dataset and
+            redesign it into normalized tables.
+        </p>
+
+    </div>
+
+
+    <div class="practice-card">
+
+        <span class="level">INTERVIEW</span>
+
+        <h3>Explain Your Schema</h3>
+
+        <p>
+            Explain why you selected each primary key, foreign key,
+            relationship and constraint.
+        </p>
+
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     5 MARK ANSWER
+     ======================================================= -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        22 — Exam Preparation
+    </div>
+
+    <h2>5-Mark Answer: Database & DBMS</h2>
+
+</div>
+
+
+<div class="card">
+
+<p>
+A <strong>database</strong> is an organized collection of related data
+that can be stored, accessed and managed efficiently. A
+<strong>Database Management System (DBMS)</strong> is software used to
+manage databases.
+</p>
+
+<br>
+
+<p>
+The major functions of a DBMS include data storage, retrieval,
+security, concurrency control, transaction management and recovery.
+Examples include MySQL, PostgreSQL, Oracle Database,
+Microsoft SQL Server and SQLite.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     10 MARK ANSWER
+     ======================================================= -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        23 — 10-Mark Answer
+    </div>
+
+    <h2>Database Fundamentals — Complete Answer</h2>
+
+</div>
+
+
+<div class="card">
+
+<h3>Definition</h3>
+
+<p>
+A database is an organized collection of related information.
+A DBMS is software that manages this information and provides
+controlled access to it.
+</p>
+
+<br>
+
+<h3>Major Components</h3>
+
+<p>
+A relational database contains tables consisting of rows and columns.
+Keys identify records and establish relationships between tables.
+Constraints help maintain data integrity.
+</p>
+
+<br>
+
+<h3>Relationships</h3>
+
+<p>
+The major relationship types are one-to-one, one-to-many and
+many-to-many.
+</p>
+
+<br>
+
+<h3>Normalization</h3>
+
+<p>
+Normalization organizes data into suitable related tables and
+helps reduce unnecessary redundancy and update anomalies.
+</p>
+
+<br>
+
+<h3>Transactions</h3>
+
+<p>
+Transactions allow database operations to be handled as logical units.
+The ACID properties are Atomicity, Consistency, Isolation and Durability.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     RAPID REVISION
+     ======================================================= -->
+
+<section class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        24 — Rapid Revision
+    </div>
+
+    <h2>Database Fundamentals in 60 Seconds</h2>
+
+</div>
+
+
+<div class="grid">
+
+    <div class="card">
+        <h3>Database</h3>
+        <p>Organized collection of data.</p>
+    </div>
+
+    <div class="card">
+        <h3>DBMS</h3>
+        <p>Software that manages databases.</p>
+    </div>
+
+    <div class="card">
+        <h3>Table</h3>
+        <p>Collection of related records.</p>
+    </div>
+
+    <div class="card">
+        <h3>Row</h3>
+        <p>One record.</p>
+    </div>
+
+    <div class="card">
+        <h3>Column</h3>
+        <p>One attribute/property.</p>
+    </div>
+
+    <div class="card">
+        <h3>Primary Key</h3>
+        <p>Uniquely identifies rows.</p>
+    </div>
+
+    <div class="card">
+        <h3>Foreign Key</h3>
+        <p>References a key in another table.</p>
+    </div>
+
+    <div class="card">
+        <h3>Schema</h3>
+        <p>Logical structure of a database.</p>
+    </div>
+
+    <div class="card">
+        <h3>Normalization</h3>
+        <p>Organizes data and reduces unnecessary redundancy.</p>
+    </div>
+
+    <div class="card">
+        <h3>Transaction</h3>
+        <p>Logical unit of database work.</p>
+    </div>
+
+    <div class="card">
+        <h3>Index</h3>
+        <p>Can accelerate suitable data access.</p>
+    </div>
+
+    <div class="card">
+        <h3>SQL</h3>
+        <p>Language used with relational databases.</p>
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     CHECKLIST
+     ======================================================= -->
+
+<section id="checklist" class="reveal">
+
+<div class="section-head">
+
+    <div class="section-number">
+        25 — Completion
+    </div>
+
+    <h2>Lesson 2 Checklist</h2>
+
+    <p>
+        Complete every item before moving to Lesson 3.
+    </p>
+
+</div>
+
+
+<div class="checklist">
+
+    <div class="check-item">
+        <input type="checkbox" id="c1">
+        <label for="c1">
+            I understand what a database is.
+        </label>
+    </div>
+
+    <div class="check-item">
+        <input type="checkbox" id="c2">
+        <label for="c2">
+            I understand DBMS.
+        </label>
+    </div>
+
+    <div class="check-item">
+        <input type="checkbox" id="c3">
+        <label for="c3">
+            I understand tables, rows and columns.
+        </label>
+    </div>
+
+    <div class="check-item">
+        <input type="checkbox" id="c4">
+        <label for="c4">
+            I understand primary keys and foreign keys.
+        </label>
+    </div>
+
+    <div class="check-item">
+        <input type="checkbox" id="c5">
+        <label for="c5">
+            I understand database relationships.
+        </label>
+    </div>
+
+    <div class="check-item">
+        <input type="checkbox" id="c6">
+        <label for="c6">
+            I understand schema.
+        </label>
+    </div>
+
+    <div class="check-item">
+        <input type="checkbox" id="c7">
+        <label for="c7">
+            I understand normalization basics.
+        </label>
+    </div>
+
+    <div class="check-item">
+        <input type="checkbox" id="c8">
+        <label for="c8">
+            I understand transactions and ACID basics.
+        </label>
+    </div>
+
+    <div class="check-item">
+        <input type="checkbox" id="c9">
+        <label for="c9">
+            I can create a basic SQL table.
+        </label>
+    </div>
+
+    <div class="check-item">
+        <input type="checkbox" id="c10">
+        <label for="c10">
+            I can explain database fundamentals in an interview.
+        </label>
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     NEXT LESSON
+     ======================================================= -->
+
+<section class="reveal">
+
+<div class="card"
+     style="
+     text-align:center;
+     padding:40px;
+     background:linear-gradient(
+        135deg,
+        #eff6ff,
+        #f5f3ff
+     );
+     ">
+
+    <div class="section-number">
+        NEXT LESSON
+    </div>
+
+    <h2 style="font-size:30px;margin-bottom:10px;">
+        Lesson 3 — SQL Data Types & Constraints
+    </h2>
+
+    <p style="
+        color:#64748b;
+        max-width:650px;
+        margin:0 auto;
+    ">
+        Next, go deeper into SQL data types, NULL,
+        constraints, DEFAULT, UNIQUE, CHECK, PRIMARY KEY,
+        FOREIGN KEY and practical table design.
+    </p>
+
+</div>
+
+</section>
+
+
+</div>
+
+
+<footer class="footer">
+
+    <strong>ZENSUS</strong> · SQL Mastery
+
+    <br>
+
+    Learn → Practice → Build → Get Placement Ready
+
+</footer>
+
+</main>
+
+
+<script>
+
+/* =========================================================
+   MOBILE SIDEBAR
+   ========================================================= */
+
+const mobileMenu =
+    document.getElementById("mobileMenu");
+
+const sidebar =
+    document.getElementById("sidebar");
+
+mobileMenu.addEventListener("click", () => {
+
+    sidebar.classList.toggle("open");
+
+});
+
+
+document.querySelectorAll(".nav a")
+.forEach(link => {
+
+    link.addEventListener("click", () => {
+
+        sidebar.classList.remove("open");
+
+    });
+
+});
+
+
+/* =========================================================
+   SCROLL PROGRESS
+   ========================================================= */
+
+window.addEventListener("scroll", () => {
+
+    const scrollTop =
+        window.scrollY;
+
+    const documentHeight =
+        document.documentElement.scrollHeight
+        - window.innerHeight;
+
+    const progress =
+        documentHeight > 0
+        ? (scrollTop / documentHeight) * 100
+        : 0;
+
+    document.getElementById("progressBar")
+        .style.width = progress + "%";
+
+});
+
+
+/* =========================================================
+   REVEAL ANIMATION
+   ========================================================= */
+
+const observer =
+    new IntersectionObserver(
+        entries => {
+
+            entries.forEach(entry => {
+
+                if(entry.isIntersecting){
+
+                    entry.target.classList.add("show");
+
+                }
+
+            });
+
+        },
+        {
+            threshold:.08
+        }
+    );
+
+
+document.querySelectorAll(".reveal")
+.forEach(el => observer.observe(el));
+
+
+/* =========================================================
+   ACTIVE SIDEBAR
+   ========================================================= */
+
+const sections =
+    document.querySelectorAll(
+        "section[id]"
+    );
+
+const navLinks =
+    document.querySelectorAll(
+        ".nav a"
+    );
+
+
+window.addEventListener("scroll", () => {
+
+    let current = "";
+
+    sections.forEach(section => {
+
+        const top =
+            section.offsetTop - 150;
+
+        if(window.scrollY >= top){
+
+            current =
+                section.getAttribute("id");
+
+        }
+
+    });
+
+
+    navLinks.forEach(link => {
+
+        link.classList.remove("active");
+
+        if(
+            link.getAttribute("href")
+            === "#" + current
+        ){
+
+            link.classList.add("active");
+
+        }
+
+    });
+
+});
+
+
+/* =========================================================
+   COPY CODE
+   ========================================================= */
+
+function copyCode(button){
+
+    const codeBox =
+        button.closest(".code-box");
+
+    const code =
+        codeBox.querySelector("code");
+
+    navigator.clipboard.writeText(
+        code.innerText
+    )
+    .then(() => {
+
+        const original =
+            button.innerText;
+
+        button.innerText =
+            "Copied ✓";
+
+        setTimeout(() => {
+
+            button.innerText =
+                original;
+
+        },1500);
+
+    })
+    .catch(() => {
+
+        button.innerText =
+            "Copy failed";
+
+        setTimeout(() => {
+
+            button.innerText =
+                "Copy";
+
+        },1500);
+
+    });
+
+}
+
+
+/* =========================================================
+   DATABASE LAB
+   ========================================================= */
+
+function dbAction(action){
+
+    const output =
+        document.getElementById(
+            "labOutput"
+        );
+
+    const messages = {
+
+        create:
+`> CREATE TABLE students;
+
+✓ Table "students" created.
+
+Columns:
+  student_id
+  name
+  department
+  cgpa
+
+Status: SUCCESS`,
+
+        insert:
+`> INSERT INTO students VALUES (...);
+
+✓ New student record inserted.
+
+student_id : 101
+name       : Pradeep
+department : CSE
+cgpa       : 8.63
+
+Status: SUCCESS`,
+
+        select:
+`> SELECT * FROM students;
+
+┌─────┬─────────┬────────────┬──────┐
+│ ID  │ Name    │ Department │ CGPA │
+├─────┼─────────┼────────────┼──────┤
+│ 101 │ Pradeep │ CSE        │ 8.63 │
+│ 102 │ Anil    │ ECE        │ 8.20 │
+│ 103 │ Rahul   │ CSE        │ 9.10 │
+└─────┴─────────┴────────────┴──────┘
+
+3 rows returned.`,
+
+        update:
+`> UPDATE students
+  SET cgpa = 8.90
+  WHERE student_id = 101;
+
+✓ 1 row updated.
+
+New CGPA: 8.90
+
+Status: SUCCESS`,
+
+        delete:
+`> DELETE FROM students
+  WHERE student_id = 103;
+
+✓ 1 row deleted.
+
+Remaining records: 2
+
+Status: SUCCESS`,
+
+        reset:
+`> RESET DATABASE LAB;
+
+✓ Simulation reset.
+
+Ready for another operation.`
+
+    };
+
+
+    output.textContent =
+        messages[action];
+
+}
+
+
+/* =========================================================
+   ACCORDIONS
+   ========================================================= */
+
+document.querySelectorAll(".accordion button")
+.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        const content =
+            button.nextElementSibling;
+
+        const isOpen =
+            content.style.maxHeight;
+
+        document
+            .querySelectorAll(
+                ".accordion-content"
+            )
+            .forEach(item => {
+
+                item.style.maxHeight = null;
+
+            });
+
+
+        document
+            .querySelectorAll(
+                ".accordion button span"
+            )
+            .forEach(icon => {
+
+                icon.textContent = "＋";
+
+            });
+
+
+        if(!isOpen){
+
+            content.style.maxHeight =
+                content.scrollHeight + "px";
+
+            button.querySelector("span")
+                .textContent = "−";
+
+        }
+
+    });
+
+});
+
+
+/* =========================================================
+   QUIZ
+   ========================================================= */
+
+let score = 0;
+
+const answered = {};
+
+
+function answer(option, questionNumber){
+
+    if(answered[questionNumber]){
+        return;
+    }
+
+    answered[questionNumber] = true;
+
+
+    const isCorrect =
+        option.dataset.correct === "true";
+
+
+    if(isCorrect){
+
+        option.classList.add("correct");
+
+        score++;
+
+    }else{
+
+        option.classList.add("wrong");
+
+        const parent =
+            option.parentElement;
+
+        const correct =
+            parent.querySelector(
+                '[data-correct="true"]'
+            );
+
+        if(correct){
+            correct.classList.add("correct");
+        }
+
+    }
+
+
+    document.getElementById("quizResult")
+        .textContent =
+        "Score: " + score + " / 5";
+
+}
+
+
+/* =========================================================
+   CHECKLIST LOCAL STORAGE
+   ========================================================= */
+
+const checkboxes =
+    document.querySelectorAll(
+        ".check-item input"
+    );
+
+
+checkboxes.forEach(box => {
+
+    const saved =
+        localStorage.getItem(
+            "zensus_sql_lesson2_" + box.id
+        );
+
+    box.checked =
+        saved === "true";
+
+
+    box.addEventListener("change", () => {
+
+        localStorage.setItem(
+            "zensus_sql_lesson2_" + box.id,
+            box.checked
+        );
+
+    });
+
+});
+
+
+/* =========================================================
+   INITIAL REVEAL
+   ========================================================= */
+
+setTimeout(() => {
+
+    document
+        .querySelectorAll(".reveal")
+        .forEach(el => {
+
+            const rect =
+                el.getBoundingClientRect();
+
+            if(
+                rect.top <
+                window.innerHeight
+            ){
+
+                el.classList.add("show");
+
+            }
+
+        });
+
+},100);
+
+</script>
+
+</body>
+</html>

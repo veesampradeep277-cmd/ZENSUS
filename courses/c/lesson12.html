@@ -1,0 +1,5113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Lesson 12 — Unions in C | ZENSUS</title>
+
+<style>
+/* =========================================================
+   ZENSUS — LESSON 12 : UNIONS IN C
+   Standalone CSS
+========================================================= */
+
+:root{
+    --primary:#2563eb;
+    --primary-dark:#1d4ed8;
+    --purple:#7c3aed;
+    --green:#16a34a;
+    --orange:#ea580c;
+    --red:#dc2626;
+
+    --bg:#f6f8fc;
+    --surface:#ffffff;
+    --surface-2:#f8fafc;
+    --border:#e2e8f0;
+
+    --text:#172033;
+    --muted:#64748b;
+    --code:#111827;
+
+    --shadow:0 10px 30px rgba(15,23,42,.07);
+    --radius:18px;
+    --sidebar:270px;
+    --topbar:70px;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+/* ================= TOPBAR ================= */
+
+.topbar{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    height:var(--topbar);
+
+    background:rgba(255,255,255,.95);
+    backdrop-filter:blur(12px);
+
+    border-bottom:1px solid var(--border);
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 24px;
+
+    z-index:1000;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-weight:800;
+}
+
+.logo{
+    width:40px;
+    height:40px;
+
+    border-radius:12px;
+
+    display:grid;
+    place-items:center;
+
+    background:linear-gradient(135deg,var(--primary),var(--purple));
+    color:white;
+
+    font-weight:900;
+    font-size:18px;
+}
+
+.top-title{
+    font-size:15px;
+}
+
+.top-subtitle{
+    color:var(--muted);
+    font-size:12px;
+}
+
+.menu-btn{
+    display:none;
+
+    border:0;
+    background:var(--surface-2);
+
+    padding:10px 13px;
+    border-radius:10px;
+
+    cursor:pointer;
+    font-size:20px;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar{
+    position:fixed;
+
+    top:var(--topbar);
+    left:0;
+    bottom:0;
+
+    width:var(--sidebar);
+
+    background:#fff;
+    border-right:1px solid var(--border);
+
+    overflow-y:auto;
+
+    padding:22px 14px;
+
+    z-index:900;
+}
+
+.sidebar-title{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    font-weight:800;
+
+    color:var(--muted);
+
+    margin:4px 12px 12px;
+}
+
+.lesson-list{
+    list-style:none;
+}
+
+.lesson-list li{
+    margin-bottom:4px;
+}
+
+.lesson-list a{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    padding:10px 12px;
+
+    text-decoration:none;
+    color:#475569;
+
+    border-radius:10px;
+
+    font-size:13px;
+
+    transition:.2s;
+}
+
+.lesson-list a:hover{
+    background:#eff6ff;
+    color:var(--primary);
+}
+
+.lesson-list a.active{
+    background:#eff6ff;
+    color:var(--primary);
+    font-weight:800;
+}
+
+.lesson-number{
+    width:25px;
+    height:25px;
+
+    border-radius:8px;
+
+    display:grid;
+    place-items:center;
+
+    background:#f1f5f9;
+
+    font-size:11px;
+    font-weight:800;
+}
+
+.active .lesson-number{
+    background:var(--primary);
+    color:white;
+}
+
+.sidebar-progress{
+    margin-top:25px;
+    padding:15px;
+
+    border:1px solid var(--border);
+    border-radius:14px;
+
+    background:var(--surface-2);
+}
+
+.progress-head{
+    display:flex;
+    justify-content:space-between;
+
+    font-size:12px;
+    font-weight:700;
+
+    margin-bottom:8px;
+}
+
+.progress-track{
+    height:7px;
+
+    background:#e2e8f0;
+    border-radius:100px;
+
+    overflow:hidden;
+}
+
+.progress-fill{
+    width:80%;
+
+    height:100%;
+
+    background:linear-gradient(
+        90deg,
+        var(--primary),
+        var(--purple)
+    );
+
+    border-radius:100px;
+}
+
+/* ================= MAIN ================= */
+
+main{
+    margin-left:var(--sidebar);
+    padding-top:var(--topbar);
+}
+
+.container{
+    width:min(1180px,calc(100% - 40px));
+    margin:auto;
+
+    padding:35px 0 70px;
+}
+
+/* ================= HERO ================= */
+
+.hero{
+    background:var(--surface);
+
+    border:1px solid var(--border);
+    border-radius:26px;
+
+    padding:45px;
+
+    box-shadow:var(--shadow);
+
+    position:relative;
+    overflow:hidden;
+
+    margin-bottom:28px;
+}
+
+.hero::after{
+    content:"";
+
+    position:absolute;
+
+    width:260px;
+    height:260px;
+
+    right:-100px;
+    top:-100px;
+
+    background:rgba(37,99,235,.08);
+
+    border-radius:50%;
+}
+
+.eyebrow{
+    display:inline-flex;
+    align-items:center;
+
+    gap:8px;
+
+    padding:7px 12px;
+
+    border-radius:100px;
+
+    background:#eff6ff;
+
+    color:var(--primary);
+
+    font-size:12px;
+
+    font-weight:800;
+
+    margin-bottom:18px;
+}
+
+.hero h1{
+    font-size:clamp(34px,5vw,58px);
+
+    line-height:1.1;
+
+    letter-spacing:-.04em;
+
+    margin-bottom:15px;
+}
+
+.hero h1 span{
+    color:var(--primary);
+}
+
+.hero p{
+    max-width:780px;
+
+    color:var(--muted);
+
+    font-size:17px;
+}
+
+.hero-meta{
+    display:flex;
+    flex-wrap:wrap;
+
+    gap:10px;
+
+    margin-top:25px;
+}
+
+.badge{
+    padding:7px 12px;
+
+    border-radius:100px;
+
+    border:1px solid var(--border);
+
+    background:#fff;
+
+    font-size:12px;
+    font-weight:700;
+}
+
+/* ================= CARDS ================= */
+
+.card{
+    background:var(--surface);
+
+    border:1px solid var(--border);
+
+    border-radius:var(--radius);
+
+    padding:30px;
+
+    box-shadow:var(--shadow);
+
+    margin-bottom:24px;
+}
+
+.section-title{
+    display:flex;
+    align-items:flex-start;
+    gap:14px;
+
+    margin-bottom:18px;
+}
+
+.section-number{
+    flex:none;
+
+    width:38px;
+    height:38px;
+
+    border-radius:11px;
+
+    display:grid;
+    place-items:center;
+
+    background:#eff6ff;
+
+    color:var(--primary);
+
+    font-weight:900;
+}
+
+.section-title h2{
+    font-size:25px;
+    line-height:1.25;
+}
+
+.section-title p{
+    color:var(--muted);
+    font-size:14px;
+    margin-top:4px;
+}
+
+h3{
+    font-size:20px;
+    margin:25px 0 10px;
+}
+
+h4{
+    font-size:16px;
+    margin:20px 0 8px;
+}
+
+p{
+    margin-bottom:12px;
+}
+
+ul,ol{
+    padding-left:22px;
+}
+
+li{
+    margin-bottom:7px;
+}
+
+/* ================= CALLOUT ================= */
+
+.callout{
+    padding:18px 20px;
+
+    border-left:4px solid var(--primary);
+
+    background:#eff6ff;
+
+    border-radius:12px;
+
+    margin:18px 0;
+}
+
+.callout strong{
+    color:var(--primary);
+}
+
+.warning{
+    background:#fff7ed;
+    border-left-color:var(--orange);
+}
+
+.warning strong{
+    color:var(--orange);
+}
+
+.success{
+    background:#f0fdf4;
+    border-left-color:var(--green);
+}
+
+.success strong{
+    color:var(--green);
+}
+
+.danger{
+    background:#fef2f2;
+    border-left-color:var(--red);
+}
+
+.danger strong{
+    color:var(--red);
+}
+
+/* ================= GRID ================= */
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+}
+
+.grid-3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.mini-card{
+    padding:20px;
+
+    background:var(--surface-2);
+
+    border:1px solid var(--border);
+
+    border-radius:15px;
+}
+
+.mini-card h3{
+    margin-top:0;
+    font-size:17px;
+}
+
+.mini-card p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+/* ================= CODE ================= */
+
+.code-wrap{
+    margin:18px 0;
+
+    border-radius:15px;
+
+    overflow:hidden;
+
+    background:var(--code);
+
+    border:1px solid #1f2937;
+}
+
+.code-head{
+    display:flex;
+
+    align-items:center;
+    justify-content:space-between;
+
+    padding:10px 14px;
+
+    background:#1f2937;
+
+    color:#cbd5e1;
+
+    font-size:12px;
+}
+
+.copy-btn{
+    border:1px solid #475569;
+
+    background:#334155;
+
+    color:#fff;
+
+    padding:6px 10px;
+
+    border-radius:7px;
+
+    cursor:pointer;
+
+    font-size:11px;
+}
+
+.copy-btn:hover{
+    background:#475569;
+}
+
+pre{
+    padding:20px;
+
+    overflow-x:auto;
+
+    color:#e5e7eb;
+
+    font-family:
+        "Cascadia Code",
+        "Fira Code",
+        Consolas,
+        monospace;
+
+    font-size:13px;
+
+    line-height:1.65;
+}
+
+code{
+    font-family:
+        "Cascadia Code",
+        "Fira Code",
+        Consolas,
+        monospace;
+}
+
+.inline-code{
+    background:#eef2ff;
+
+    color:#3730a3;
+
+    padding:2px 6px;
+
+    border-radius:5px;
+
+    font-family:monospace;
+
+    font-size:.9em;
+}
+
+/* ================= FLOWCHART ================= */
+
+.flowchart{
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    flex-wrap:wrap;
+
+    gap:10px;
+
+    padding:25px;
+
+    background:#f8fafc;
+
+    border:1px solid var(--border);
+
+    border-radius:15px;
+
+    margin:20px 0;
+}
+
+.flow-box{
+    min-width:145px;
+
+    padding:14px 18px;
+
+    text-align:center;
+
+    border:2px solid #bfdbfe;
+
+    background:#eff6ff;
+
+    color:#1e3a8a;
+
+    border-radius:12px;
+
+    font-weight:800;
+
+    animation:pulseBox 2.5s infinite;
+}
+
+.flow-arrow{
+    font-size:24px;
+    color:var(--muted);
+}
+
+@keyframes pulseBox{
+    0%,100%{
+        transform:translateY(0);
+    }
+
+    50%{
+        transform:translateY(-4px);
+    }
+}
+
+/* ================= MEMORY ================= */
+
+.memory{
+    margin:25px 0;
+
+    border:1px solid var(--border);
+
+    border-radius:15px;
+
+    padding:22px;
+
+    background:#f8fafc;
+}
+
+.memory-title{
+    text-align:center;
+
+    font-weight:800;
+
+    margin-bottom:15px;
+}
+
+.memory-block{
+    display:flex;
+
+    max-width:650px;
+
+    margin:auto;
+
+    border:2px solid #94a3b8;
+
+    border-radius:10px;
+
+    overflow:hidden;
+
+    background:white;
+}
+
+.memory-cell{
+    flex:1;
+
+    min-height:70px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-right:1px solid #cbd5e1;
+
+    font-size:12px;
+
+    transition:.3s;
+}
+
+.memory-cell:last-child{
+    border-right:0;
+}
+
+.memory-cell strong{
+    font-size:15px;
+}
+
+.memory-cell.active{
+    background:#dbeafe;
+
+    color:#1d4ed8;
+
+    box-shadow:inset 0 -4px 0 var(--primary);
+}
+
+.memory-address{
+    text-align:center;
+
+    color:var(--muted);
+
+    font-family:monospace;
+
+    font-size:12px;
+
+    margin-top:8px;
+}
+
+/* ================= TABLE ================= */
+
+.table-wrap{
+    overflow-x:auto;
+
+    margin:18px 0;
+}
+
+table{
+    width:100%;
+
+    border-collapse:collapse;
+
+    min-width:650px;
+}
+
+th,td{
+    padding:13px 14px;
+
+    text-align:left;
+
+    border-bottom:1px solid var(--border);
+}
+
+th{
+    background:#f8fafc;
+
+    font-size:13px;
+}
+
+td{
+    font-size:14px;
+}
+
+tr:hover td{
+    background:#fafcff;
+}
+
+/* ================= BUTTON ================= */
+
+.btn{
+    border:0;
+
+    padding:11px 17px;
+
+    border-radius:10px;
+
+    background:var(--primary);
+
+    color:#fff;
+
+    font-weight:800;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.btn:hover{
+    background:var(--primary-dark);
+
+    transform:translateY(-1px);
+}
+
+.btn.secondary{
+    background:#e2e8f0;
+
+    color:#334155;
+}
+
+/* ================= LAB ================= */
+
+.lab{
+    background:#f8fafc;
+
+    border:1px solid var(--border);
+
+    border-radius:16px;
+
+    padding:22px;
+
+    margin-top:18px;
+}
+
+.lab-controls{
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:10px;
+
+    margin:15px 0;
+}
+
+.lab-output{
+    background:#111827;
+
+    color:#d1fae5;
+
+    padding:16px;
+
+    border-radius:10px;
+
+    font-family:monospace;
+
+    min-height:50px;
+
+    white-space:pre-wrap;
+}
+
+/* ================= TAGGED UNION ================= */
+
+.tag-selector{
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:10px;
+
+    margin:15px 0;
+}
+
+.tag-btn{
+    padding:9px 14px;
+
+    border:1px solid var(--border);
+
+    border-radius:9px;
+
+    background:#fff;
+
+    cursor:pointer;
+
+    font-weight:700;
+}
+
+.tag-btn.active{
+    background:#eff6ff;
+
+    color:var(--primary);
+
+    border-color:#93c5fd;
+}
+
+.tag-display{
+    padding:20px;
+
+    border-radius:14px;
+
+    background:white;
+
+    border:2px dashed #cbd5e1;
+
+    text-align:center;
+}
+
+/* ================= ACCORDION ================= */
+
+.accordion{
+    border:1px solid var(--border);
+
+    border-radius:12px;
+
+    overflow:hidden;
+
+    margin-bottom:10px;
+}
+
+.acc-btn{
+    width:100%;
+
+    border:0;
+
+    background:#fff;
+
+    padding:16px 18px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    text-align:left;
+
+    cursor:pointer;
+
+    font-weight:800;
+
+    color:var(--text);
+}
+
+.acc-content{
+    display:none;
+
+    padding:0 18px 17px;
+
+    background:#fff;
+
+    color:var(--muted);
+
+    font-size:14px;
+}
+
+.accordion.open .acc-content{
+    display:block;
+}
+
+/* ================= QUIZ ================= */
+
+.quiz-question{
+    padding:20px;
+
+    border:1px solid var(--border);
+
+    border-radius:14px;
+
+    margin-bottom:14px;
+
+    background:#fff;
+}
+
+.option{
+    display:block;
+
+    padding:10px 12px;
+
+    margin-top:8px;
+
+    border:1px solid var(--border);
+
+    border-radius:9px;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.option:hover{
+    background:#f8fafc;
+}
+
+.quiz-result{
+    margin-top:15px;
+
+    padding:15px;
+
+    border-radius:10px;
+
+    display:none;
+
+    font-weight:800;
+}
+
+/* ================= REVEAL ================= */
+
+.reveal{
+    display:none;
+
+    margin-top:15px;
+
+    padding:18px;
+
+    background:#f0fdf4;
+
+    border-left:4px solid var(--green);
+
+    border-radius:10px;
+}
+
+.reveal.show{
+    display:block;
+}
+
+/* ================= CHECKLIST ================= */
+
+.checklist{
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:10px;
+
+    margin-top:15px;
+}
+
+.check{
+    display:flex;
+
+    gap:10px;
+
+    padding:12px;
+
+    background:#f8fafc;
+
+    border:1px solid var(--border);
+
+    border-radius:10px;
+
+    font-size:14px;
+}
+
+/* ================= FOOTER ================= */
+
+footer{
+    margin-top:40px;
+
+    padding:30px;
+
+    text-align:center;
+
+    color:var(--muted);
+
+    border-top:1px solid var(--border);
+}
+
+.footer-logo{
+    font-weight:900;
+
+    color:var(--primary);
+
+    margin-bottom:5px;
+}
+
+/* ================= BACK TOP ================= */
+
+#backTop{
+    position:fixed;
+
+    right:22px;
+    bottom:22px;
+
+    width:43px;
+    height:43px;
+
+    border:0;
+
+    border-radius:12px;
+
+    background:var(--primary);
+
+    color:#fff;
+
+    font-size:18px;
+
+    cursor:pointer;
+
+    display:none;
+
+    z-index:1000;
+
+    box-shadow:var(--shadow);
+}
+
+/* ================= REVEAL ANIMATION ================= */
+
+.reveal-on-scroll{
+    opacity:0;
+
+    transform:translateY(20px);
+
+    transition:.7s ease;
+}
+
+.reveal-on-scroll.visible{
+    opacity:1;
+
+    transform:translateY(0);
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:1000px){
+
+    :root{
+        --sidebar:230px;
+    }
+
+    .hero{
+        padding:35px;
+    }
+
+    .grid-3{
+        grid-template-columns:1fr 1fr;
+    }
+}
+
+@media(max-width:800px){
+
+    .menu-btn{
+        display:block;
+    }
+
+    .sidebar{
+        transform:translateX(-100%);
+
+        transition:.3s;
+
+        box-shadow:10px 0 30px rgba(0,0,0,.1);
+    }
+
+    .sidebar.open{
+        transform:translateX(0);
+    }
+
+    main{
+        margin-left:0;
+    }
+
+    .container{
+        width:min(100% - 24px,1180px);
+    }
+
+    .grid,
+    .grid-3,
+    .checklist{
+        grid-template-columns:1fr;
+    }
+
+    .hero{
+        padding:28px 22px;
+    }
+
+    .hero h1{
+        font-size:38px;
+    }
+
+    .card{
+        padding:22px 18px;
+    }
+
+    .flow-arrow{
+        transform:rotate(90deg);
+    }
+}
+
+@media(max-width:500px){
+
+    .top-title{
+        display:none;
+    }
+
+    .hero h1{
+        font-size:32px;
+    }
+
+    .hero p{
+        font-size:15px;
+    }
+
+    .memory-block{
+        flex-direction:column;
+    }
+
+    .memory-cell{
+        border-right:0;
+
+        border-bottom:1px solid #cbd5e1;
+    }
+
+    .memory-cell:last-child{
+        border-bottom:0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =========================================================
+     TOP BAR
+========================================================= -->
+
+<header class="topbar">
+
+    <div class="brand">
+
+        <div class="logo">Z</div>
+
+        <div>
+            <div class="top-title">
+                ZENSUS
+            </div>
+
+            <div class="top-subtitle">
+                C Programming • Lesson 12
+            </div>
+        </div>
+
+    </div>
+
+    <button class="menu-btn" id="menuBtn">
+        ☰
+    </button>
+
+</header>
+
+
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-title">
+        C Programming Roadmap
+    </div>
+
+    <ul class="lesson-list">
+
+        <li>
+            <a href="#">
+                <span class="lesson-number">01</span>
+                Introduction
+            </a>
+        </li>
+
+        <li>
+            <a href="#">
+                <span class="lesson-number">02</span>
+                Variables & Data Types
+            </a>
+        </li>
+
+        <li>
+            <a href="#">
+                <span class="lesson-number">03</span>
+                Input & Output
+            </a>
+        </li>
+
+        <li>
+            <a href="#">
+                <span class="lesson-number">04</span>
+                Operators
+            </a>
+        </li>
+
+        <li>
+            <a href="#">
+                <span class="lesson-number">05</span>
+                Conditional Statements
+            </a>
+        </li>
+
+        <li>
+            <a href="#">
+                <span class="lesson-number">06</span>
+                Loops
+            </a>
+        </li>
+
+        <li>
+            <a href="#">
+                <span class="lesson-number">07</span>
+                Functions
+            </a>
+        </li>
+
+        <li>
+            <a href="#">
+                <span class="lesson-number">08</span>
+                Arrays
+            </a>
+        </li>
+
+        <li>
+            <a href="#">
+                <span class="lesson-number">09</span>
+                Strings
+            </a>
+        </li>
+
+        <li>
+            <a href="#">
+                <span class="lesson-number">10</span>
+                Pointers
+            </a>
+        </li>
+
+        <li>
+            <a href="#">
+                <span class="lesson-number">11</span>
+                Structures
+            </a>
+        </li>
+
+        <li>
+            <a href="#top" class="active">
+                <span class="lesson-number">12</span>
+                Unions
+            </a>
+        </li>
+
+        <li>
+            <a href="#">
+                <span class="lesson-number">13</span>
+                File Handling
+            </a>
+        </li>
+
+        <li>
+            <a href="#">
+                <span class="lesson-number">14</span>
+                Dynamic Memory
+            </a>
+        </li>
+
+        <li>
+            <a href="#">
+                <span class="lesson-number">15</span>
+                Mini Projects
+            </a>
+        </li>
+
+    </ul>
+
+    <div class="sidebar-progress">
+
+        <div class="progress-head">
+            <span>Course Progress</span>
+            <span>80%</span>
+        </div>
+
+        <div class="progress-track">
+            <div class="progress-fill"></div>
+        </div>
+
+    </div>
+
+</aside>
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<main>
+
+<div class="container" id="top">
+
+
+<!-- =========================================================
+     HERO
+========================================================= -->
+
+<section class="hero reveal-on-scroll">
+
+    <div class="eyebrow">
+        LESSON 12 • C PROGRAMMING
+    </div>
+
+    <h1>
+        C <span>Unions</span>
+    </h1>
+
+    <p>
+        Share memory intelligently. Learn how unions overlap storage,
+        how active members work, how unions differ from structures,
+        and how professional C programs use tagged unions for
+        flexible data representation.
+    </p>
+
+    <div class="hero-meta">
+
+        <span class="badge">
+            🟢 Beginner → Advanced
+        </span>
+
+        <span class="badge">
+            💻 Interview Ready
+        </span>
+
+        <span class="badge">
+            🧠 Memory Concepts
+        </span>
+
+        <span class="badge">
+            🎯 Lesson 12 / 15
+        </span>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     01 OBJECTIVES
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+    <div class="section-number">01</div>
+
+    <div>
+        <h2>Learning Objectives</h2>
+        <p>What you should know after completing this lesson.</p>
+    </div>
+
+</div>
+
+<div class="grid">
+
+<div class="mini-card">
+<h3>Understand Unions</h3>
+<p>
+Learn what a union is and why multiple members share
+the same memory location.
+</p>
+</div>
+
+<div class="mini-card">
+<h3>Memory Management</h3>
+<p>
+Understand overlapping storage, size, alignment and
+memory efficiency.
+</p>
+</div>
+
+<div class="mini-card">
+<h3>Structures vs Unions</h3>
+<p>
+Know exactly when to use a structure and when a union
+is more appropriate.
+</p>
+</div>
+
+<div class="mini-card">
+<h3>Tagged Unions</h3>
+<p>
+Learn the professional pattern used to safely represent
+different possible data types.
+</p>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     02 WHY UNION
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">02</div>
+
+<div>
+<h2>Why Do We Need Unions?</h2>
+<p>Think about memory before learning syntax.</p>
+</div>
+
+</div>
+
+<p>
+Imagine you have a storage box. At one moment you want to store
+a book. At another moment you want to store a laptop.
+You do not need two boxes if only one item is required at a time.
+</p>
+
+<div class="callout">
+
+<strong>Core idea:</strong>
+
+A union provides one shared storage area that can represent
+different members at different times.
+
+</div>
+
+<div class="grid">
+
+<div class="mini-card">
+
+<h3>Structure</h3>
+
+<p>
+Every member gets its own storage.
+</p>
+
+<p>
+Think:
+<strong>one box per item.</strong>
+</p>
+
+</div>
+
+<div class="mini-card">
+
+<h3>Union</h3>
+
+<p>
+All members share the same storage.
+</p>
+
+<p>
+Think:
+<strong>one box, different possible contents.</strong>
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     03 DEFINITION
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">03</div>
+
+<div>
+<h2>What Is a Union?</h2>
+<p>The fundamental definition.</p>
+</div>
+
+</div>
+
+<p>
+A <strong>union</strong> is a user-defined data type in C in which
+all members occupy overlapping storage.
+</p>
+
+<p>
+Unlike a structure, where every member has its own storage,
+a union allows different members to use the same memory area.
+</p>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>C — Basic Union</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>union Data {
+    int i;
+    float f;
+    char c;
+};</code></pre>
+
+</div>
+
+<div class="flowchart">
+
+<div class="flow-box">
+Declare Union
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">
+Choose Member
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">
+Write Value
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">
+Read Current Member
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     04 DECLARATION
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">04</div>
+
+<div>
+<h2>Declaring a Union Variable</h2>
+<p>Create an object of the union type.</p>
+</div>
+
+</div>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>Declaration</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>union Data {
+    int i;
+    float f;
+    char c;
+};
+
+int main() {
+
+    union Data d;
+
+    return 0;
+}</code></pre>
+
+</div>
+
+<p>
+The statement:
+</p>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>C</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>union Data d;</code></pre>
+
+</div>
+
+<p>
+creates a union object named <span class="inline-code">d</span>.
+</p>
+
+</section>
+
+
+<!-- =========================================================
+     05 INITIALIZATION
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">05</div>
+
+<div>
+<h2>Union Initialization</h2>
+<p>Choose the member that starts with a value.</p>
+</div>
+
+</div>
+
+<h3>Designated Initialization</h3>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>C</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>union Data d = {
+    .i = 100
+};</code></pre>
+
+</div>
+
+<p>
+This initializes the <span class="inline-code">i</span> member.
+</p>
+
+<h3>First-Member Initialization</h3>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>C</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>union Data d = {100};</code></pre>
+
+</div>
+
+<p>
+For this union, the first member is <span class="inline-code">i</span>,
+so the initializer initializes <span class="inline-code">i</span>.
+</p>
+
+<div class="callout warning">
+
+<strong>Important:</strong>
+
+A union initializer initializes one union member as the
+designated/current member. Use designated initializers when
+you want the code to clearly communicate which member is intended.
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     06 MEMBER ACCESS
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">06</div>
+
+<div>
+<h2>Accessing Union Members</h2>
+<p>Use the dot operator.</p>
+</div>
+
+</div>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>Member Access</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>#include &lt;stdio.h&gt;
+
+union Data {
+    int i;
+    float f;
+    char c;
+};
+
+int main() {
+
+    union Data d;
+
+    d.i = 50;
+
+    printf("Integer = %d\n", d.i);
+
+    d.f = 3.14f;
+
+    printf("Float = %.2f\n", d.f);
+
+    d.c = 'A';
+
+    printf("Character = %c\n", d.c);
+
+    return 0;
+}</code></pre>
+
+</div>
+
+<div class="callout">
+
+<strong>Remember:</strong>
+
+Writing another member changes which stored member you should
+treat as the current meaningful value.
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     07 MEMORY VISUALIZATION
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">07</div>
+
+<div>
+<h2>Union Memory Visualization</h2>
+<p>The most important concept in this lesson.</p>
+</div>
+
+</div>
+
+<p>
+Suppose we have:
+</p>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>C</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>union Data {
+    int i;
+    float f;
+    char c;
+};</code></pre>
+
+</div>
+
+<p>
+All members overlap the same storage area.
+</p>
+
+<div class="memory">
+
+<div class="memory-title">
+One Shared Storage Area
+</div>
+
+<div class="memory-block">
+
+<div class="memory-cell active">
+<strong>i</strong>
+<span>int view</span>
+</div>
+
+<div class="memory-cell">
+<strong>f</strong>
+<span>float view</span>
+</div>
+
+<div class="memory-cell">
+<strong>c</strong>
+<span>char view</span>
+</div>
+
+</div>
+
+<div class="memory-address">
+Conceptual view: members refer to overlapping storage
+</div>
+
+</div>
+
+<div class="flowchart">
+
+<div class="flow-box">
+One Memory Area
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">
+int View
+</div>
+
+<div class="flow-arrow">or</div>
+
+<div class="flow-box">
+float View
+</div>
+
+<div class="flow-arrow">or</div>
+
+<div class="flow-box">
+char View
+</div>
+
+</div>
+
+<div class="callout success">
+
+<strong>Key insight:</strong>
+
+The union does not reserve independent storage for
+<i>i</i>, <i>f</i>, and <i>c</i> like a structure does.
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     08 STRUCT VS UNION
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">08</div>
+
+<div>
+<h2>Structure vs Union</h2>
+<p>The most common interview question.</p>
+</div>
+
+</div>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Feature</th>
+<th>Structure</th>
+<th>Union</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td>Member storage</td>
+<td>Separate</td>
+<td>Overlapping</td>
+</tr>
+
+<tr>
+<td>All members simultaneously meaningful?</td>
+<td>Yes</td>
+<td>Normally one current member at a time</td>
+</tr>
+
+<tr>
+<td>Memory usage</td>
+<td>Usually larger</td>
+<td>Often smaller</td>
+</tr>
+
+<tr>
+<td>Member addresses</td>
+<td>Different offsets</td>
+<td>Same starting storage address</td>
+</tr>
+
+<tr>
+<td>Use case</td>
+<td>Record with multiple fields</td>
+<td>Alternative representations</td>
+</tr>
+
+<tr>
+<td>Member access</td>
+<td><span class="inline-code">.</span></td>
+<td><span class="inline-code">.</span></td>
+</tr>
+
+<tr>
+<td>Pointer access</td>
+<td><span class="inline-code">-></span></td>
+<td><span class="inline-code">-></span></td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>Structure</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>struct Example {
+    int i;
+    float f;
+    char c;
+};</code></pre>
+
+</div>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>Union</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>union Example {
+    int i;
+    float f;
+    char c;
+};</code></pre>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     09 SIZE OF UNION
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">09</div>
+
+<div>
+<h2>Size of a Union</h2>
+<p>Understand the memory rule correctly.</p>
+</div>
+
+</div>
+
+<p>
+The size of a union is implementation-dependent. It must be
+large enough to provide storage suitable for its members and
+their alignment requirements. Padding may also affect the result.
+</p>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>sizeof()</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>#include &lt;stdio.h&gt;
+
+union Data {
+    int i;
+    float f;
+    char c;
+};
+
+int main() {
+
+    printf("%zu\n", sizeof(union Data));
+
+    return 0;
+}</code></pre>
+
+</div>
+
+<div class="callout warning">
+
+<strong>Interview trap:</strong>
+
+Do not blindly say:
+
+“Union size is always exactly the size of its largest member.”
+
+A better answer is:
+
+<strong>
+Union size is implementation-dependent and is sufficient for
+its members, including alignment requirements and possible padding.
+</strong>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     10 ACTIVE MEMBER
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">10</div>
+
+<div>
+<h2>The Active / Current Member</h2>
+<p>How to think safely about union values.</p>
+</div>
+
+</div>
+
+<p>
+Consider:
+</p>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>C</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>union Data d;
+
+d.i = 100;</code></pre>
+
+</div>
+
+<p>
+At this point, <span class="inline-code">i</span> is the member whose
+stored value we should treat as the current meaningful value.
+</p>
+
+<p>
+If we later execute:
+</p>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>C</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>d.f = 25.5f;</code></pre>
+
+</div>
+
+<p>
+the union's storage is now being used for the float member.
+The previous integer value should not be treated as an independently
+stored value.
+</p>
+
+<div class="callout danger">
+
+<strong>Important:</strong>
+
+Do not think of a union as a structure where every field remembers
+its own independent value.
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     11 TYPE PUNNING
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">11</div>
+
+<div>
+<h2>Union Type Punning</h2>
+<p>An advanced and implementation-sensitive topic.</p>
+</div>
+
+</div>
+
+<p>
+Sometimes programmers use unions to inspect the same underlying
+object representation through another member type. This is often
+called <strong>type punning</strong>.
+</p>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>Conceptual Example</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>union {
+    float f;
+    unsigned int bits;
+} value;
+
+value.f = 3.14f;
+
+/*
+   Some implementations use:
+   value.bits
+   to inspect the representation.
+*/</code></pre>
+
+</div>
+
+<div class="callout warning">
+
+<strong>Portability warning:</strong>
+
+Union type punning has nuanced rules in C and can depend on the
+implementation and the exact context. Do not present it as a
+universally portable way to reinterpret arbitrary types.
+
+</div>
+
+<h3>Portable Representation Copying</h3>
+
+<p>
+When the goal is to copy an object's representation into another
+object of a different type, <span class="inline-code">memcpy()</span>
+is often the clearer portable technique.
+</p>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>C — memcpy()</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>#include &lt;string.h&gt;
+
+float x = 3.14f;
+unsigned int bits;
+
+memcpy(&amp;bits, &amp;x, sizeof bits);</code></pre>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     12 POINTER TO UNION
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">12</div>
+
+<div>
+<h2>Pointer to a Union</h2>
+<p>Combine unions with pointers.</p>
+</div>
+
+</div>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>C</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>#include &lt;stdio.h&gt;
+
+union Data {
+    int i;
+    float f;
+};
+
+int main() {
+
+    union Data d;
+
+    union Data *ptr = &amp;d;
+
+    ptr-&gt;i = 500;
+
+    printf("%d\n", ptr-&gt;i);
+
+    return 0;
+}</code></pre>
+
+</div>
+
+<div class="callout">
+
+<strong>Remember:</strong>
+
+For a union object use <span class="inline-code">.</span>.
+
+For a pointer to a union use <span class="inline-code">-></span>.
+
+</div>
+
+<table>
+
+<tr>
+<th>Object</th>
+<th>Syntax</th>
+</tr>
+
+<tr>
+<td>Union object</td>
+<td><span class="inline-code">d.i</span></td>
+</tr>
+
+<tr>
+<td>Pointer to union</td>
+<td><span class="inline-code">ptr->i</span></td>
+</tr>
+
+</table>
+
+</section>
+
+
+<!-- =========================================================
+     13 TYPEDEF
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">13</div>
+
+<div>
+<h2>typedef with Union</h2>
+<p>Make union declarations cleaner.</p>
+</div>
+
+</div>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>C</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>typedef union {
+
+    int id;
+    float score;
+
+} Data;</code></pre>
+
+</div>
+
+<p>
+Now you can simply write:
+</p>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>C</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>Data d;
+
+d.id = 101;</code></pre>
+
+</div>
+
+<div class="success callout">
+
+<strong>Professional style:</strong>
+
+Using <span class="inline-code">typedef</span> can make code easier
+to read when a union type is used frequently.
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     14 ARRAYS OF UNION
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">14</div>
+
+<div>
+<h2>Array of Unions</h2>
+<p>Store multiple union objects.</p>
+</div>
+
+</div>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>C</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>union Data values[3];
+
+values[0].i = 10;
+values[1].i = 20;
+values[2].i = 30;</code></pre>
+
+</div>
+
+<p>
+Each array element is a separate union object, but within each
+element its members still overlap.
+</p>
+
+<div class="flowchart">
+
+<div class="flow-box">
+Array
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">
+Union #0
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">
+Shared Storage
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">
+Union #1
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">
+Union #2
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     15 UNION IN STRUCT
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">15</div>
+
+<div>
+<h2>Union Inside a Structure</h2>
+<p>A very important real-world pattern.</p>
+</div>
+
+</div>
+
+<p>
+A structure can contain a union.
+This is extremely useful when a record has common information
+plus one of several possible payloads.
+</p>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>C</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>struct SensorData {
+
+    int sensorId;
+
+    union {
+        int temperature;
+        float voltage;
+    } value;
+};</code></pre>
+
+</div>
+
+<p>
+Here the structure stores the sensor ID plus a shared payload.
+</p>
+
+</section>
+
+
+<!-- =========================================================
+     16 STRUCT IN UNION
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">16</div>
+
+<div>
+<h2>Structure Inside a Union</h2>
+<p>Unions can contain complex members too.</p>
+</div>
+
+</div>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>C</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>struct Point {
+    int x;
+    int y;
+};
+
+union ShapeData {
+
+    struct Point point;
+
+    int radius;
+
+};</code></pre>
+
+</div>
+
+<p>
+The union can represent either the point data or the radius
+according to the program's logic.
+</p>
+
+</section>
+
+
+<!-- =========================================================
+     17 TAGGED UNION
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">17</div>
+
+<div>
+<h2>Tagged / Discriminated Unions</h2>
+<p>The professional way to track which union member is active.</p>
+</div>
+
+</div>
+
+<p>
+A union itself does not automatically store a tag telling you
+which member your program intends to use.
+A common professional solution is to store a separate
+<strong>enum tag</strong>.
+</p>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>C — Tagged Union</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>#include &lt;stdio.h&gt;
+
+enum ValueType {
+    INT_VALUE,
+    FLOAT_VALUE,
+    TEXT_VALUE
+};
+
+struct Value {
+
+    enum ValueType type;
+
+    union {
+
+        int i;
+        float f;
+        char text[20];
+
+    } data;
+};
+
+int main() {
+
+    struct Value value;
+
+    value.type = INT_VALUE;
+    value.data.i = 100;
+
+    if (value.type == INT_VALUE) {
+        printf("%d\n", value.data.i);
+    }
+
+    return 0;
+}</code></pre>
+
+</div>
+
+<div class="flowchart">
+
+<div class="flow-box">
+Read Tag
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">
+INT?
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">
+Read data.i
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">
+Process
+</div>
+
+</div>
+
+<div class="callout success">
+
+<strong>Interview-level concept:</strong>
+
+The enum tells the program which union member is intended to be
+the current active representation.
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     18 TAGGED UNION INTERACTIVE LAB
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">18</div>
+
+<div>
+<h2>Interactive Tagged Union Lab</h2>
+<p>See how the tag controls which data should be interpreted.</p>
+</div>
+
+</div>
+
+<div class="lab">
+
+<h3>Choose a Data Type</h3>
+
+<div class="tag-selector">
+
+<button class="tag-btn active" data-type="int">
+Integer
+</button>
+
+<button class="tag-btn" data-type="float">
+Float
+</button>
+
+<button class="tag-btn" data-type="text">
+Text
+</button>
+
+</div>
+
+<div class="tag-display" id="tagDisplay">
+
+<strong>Tag:</strong> INT_VALUE
+
+<br><br>
+
+Union member:
+
+<span class="inline-code">data.i</span>
+
+<br>
+
+Value:
+
+<strong id="tagValue">100</strong>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     19 UNION WITH POINTER
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">19</div>
+
+<div>
+<h2>Union with Pointer Members</h2>
+<p>Useful, but memory ownership becomes your responsibility.</p>
+</div>
+
+</div>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>C</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>union Payload {
+
+    int number;
+
+    char *text;
+
+};</code></pre>
+
+</div>
+
+<p>
+If <span class="inline-code">text</span> is active, the union stores
+a pointer value, not the characters themselves.
+</p>
+
+<div class="callout warning">
+
+<strong>Important:</strong>
+
+The union does not automatically allocate or free memory pointed
+to by a pointer member. The programmer is responsible for the
+pointer's lifetime and ownership rules.
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     20 FUNCTION POINTER
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">20</div>
+
+<div>
+<h2>Function Pointers in Unions</h2>
+<p>An advanced systems-programming concept.</p>
+</div>
+
+</div>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>C</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>void start(void) {
+    printf("Start\n");
+}
+
+void stop(void) {
+    printf("Stop\n");
+
+}
+
+union Controller {
+
+    void (*startFn)(void);
+
+    void (*stopFn)(void);
+
+};</code></pre>
+
+</div>
+
+<p>
+C does not have class methods like C++, but function pointers
+can be stored in structures or unions to build callback and
+state-machine designs.
+</p>
+
+</section>
+
+
+<!-- =========================================================
+     21 UNION ASSIGNMENT
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">21</div>
+
+<div>
+<h2>Union Assignment</h2>
+<p>Copy compatible union objects.</p>
+</div>
+
+</div>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>C</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>union Data {
+
+    int i;
+    float f;
+
+};
+
+int main() {
+
+    union Data a;
+    union Data b;
+
+    a.i = 100;
+
+    b = a;
+
+    return 0;
+}</code></pre>
+
+</div>
+
+<p>
+Compatible union objects can be assigned using the assignment
+operator. The union object is copied as a value, while your program
+still needs to respect which member is intended to be meaningful.
+</p>
+
+</section>
+
+
+<!-- =========================================================
+     22 UNION COMPARISON
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">22</div>
+
+<div>
+<h2>Can We Compare Unions Using ==?</h2>
+<p>A classic interview trick.</p>
+</div>
+
+</div>
+
+<div class="callout danger">
+
+<strong>No.</strong>
+
+C does not provide the <span class="inline-code">==</span> operator
+for comparing union objects directly.
+
+</div>
+
+<p>
+For a tagged union, compare the tag first and then compare the
+appropriate active member.
+</p>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>Correct Approach</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>if (a.type == b.type) {
+
+    if (a.type == INT_VALUE) {
+
+        if (a.data.i == b.data.i) {
+            printf("Equal\n");
+        }
+
+    }
+
+}</code></pre>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     23 ANONYMOUS UNION
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">23</div>
+
+<div>
+<h2>Anonymous Unions</h2>
+<p>A C11 feature that can simplify member access.</p>
+</div>
+
+</div>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>C11</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>struct Data {
+
+    int type;
+
+    union {
+
+        int i;
+        float f;
+
+    };
+
+};</code></pre>
+
+</div>
+
+<p>
+With an anonymous union, the union does not have a named member.
+The contained members can be accessed directly through the
+surrounding structure where supported by the C standard.
+</p>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>Access</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>struct Data d;
+
+d.i = 100;</code></pre>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     24 EMBEDDED SYSTEMS
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">24</div>
+
+<div>
+<h2>Real-World Applications</h2>
+<p>Where unions become genuinely useful.</p>
+</div>
+
+</div>
+
+<div class="grid-3">
+
+<div class="mini-card">
+
+<h3>🔌 Embedded Systems</h3>
+
+<p>
+Represent different kinds of sensor or device data using
+shared storage.
+</p>
+
+</div>
+
+<div class="mini-card">
+
+<h3>📡 Protocol Messages</h3>
+
+<p>
+A message may contain different payload formats depending
+on its message type.
+</p>
+
+</div>
+
+<div class="mini-card">
+
+<h3>🎮 Game Engines</h3>
+
+<p>
+Represent variant data such as integer, float or object
+references in a compact form.
+</p>
+
+</div>
+
+<div class="mini-card">
+
+<h3>⚙️ Operating Systems</h3>
+
+<p>
+Low-level structures may use unions when multiple
+representations share storage.
+</p>
+
+</div>
+
+<div class="mini-card">
+
+<h3>📦 Memory Optimization</h3>
+
+<p>
+Useful when only one of several possible values is needed
+at a time.
+</p>
+
+</div>
+
+<div class="mini-card">
+
+<h3>🔄 State Machines</h3>
+
+<p>
+Tagged unions can represent different state-specific
+payloads.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     25 REAL WORLD EXAMPLE
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">25</div>
+
+<div>
+<h2>Real-World Example — Sensor Payload</h2>
+<p>One device can report different types of measurements.</p>
+</div>
+
+</div>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>C</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>#include &lt;stdio.h&gt;
+
+enum SensorType {
+    TEMPERATURE,
+    VOLTAGE
+};
+
+struct Sensor {
+
+    int id;
+
+    enum SensorType type;
+
+    union {
+
+        int temperature;
+        float voltage;
+
+    } data;
+};
+
+int main() {
+
+    struct Sensor s;
+
+    s.id = 101;
+
+    s.type = TEMPERATURE;
+
+    s.data.temperature = 32;
+
+    printf("Sensor ID: %d\n", s.id);
+    printf("Temperature: %d C\n",
+           s.data.temperature);
+
+    return 0;
+}</code></pre>
+
+</div>
+
+<div class="callout success">
+
+<strong>Why this design is useful:</strong>
+
+The sensor has common information such as an ID, while the
+payload changes depending on the sensor type.
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     26 MEMORY EFFICIENCY
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">26</div>
+
+<div>
+<h2>Why Unions Save Memory</h2>
+<p>Compare storage conceptually.</p>
+</div>
+
+</div>
+
+<div class="grid">
+
+<div class="mini-card">
+
+<h3>Structure</h3>
+
+<pre><code>struct Data {
+    int i;
+    float f;
+    char c;
+};</code></pre>
+
+<p>
+Each field requires its own storage, subject to alignment
+and padding.
+</p>
+
+</div>
+
+<div class="mini-card">
+
+<h3>Union</h3>
+
+<pre><code>union Data {
+    int i;
+    float f;
+    char c;
+};</code></pre>
+
+<p>
+The members overlap, so only one shared storage region is
+needed for the union object.
+</p>
+
+</div>
+
+</div>
+
+<div class="callout">
+
+<strong>Use union when:</strong>
+
+The program logically needs alternative representations rather
+than several independent values at the same time.
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     27 ALIGNMENT
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">27</div>
+
+<div>
+<h2>Alignment and Padding</h2>
+<p>The advanced memory detail.</p>
+</div>
+
+</div>
+
+<p>
+C implementations may require objects to be stored at suitable
+memory boundaries. A union therefore has alignment requirements
+based on its members.
+</p>
+
+<div class="callout warning">
+
+<strong>Remember:</strong>
+
+Do not assume a union's size or exact memory layout is identical
+across every compiler, architecture and ABI.
+
+</div>
+
+<div class="flowchart">
+
+<div class="flow-box">
+Union Members
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">
+Alignment Requirements
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">
+Implementation Layout
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">
+sizeof(union)
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     28 SELF REFERENCE
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">28</div>
+
+<div>
+<h2>Can a Union Contain Itself?</h2>
+<p>An important type-system question.</p>
+</div>
+
+</div>
+
+<div class="callout danger">
+
+<strong>Directly: No.</strong>
+
+A union cannot contain a member whose type is the same union type,
+because that would require infinite storage.
+
+</div>
+
+<p>
+But a union can contain a pointer to itself.
+</p>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>C</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>union Node {
+
+    int value;
+
+    union Node *next;
+
+};</code></pre>
+
+</div>
+
+<p>
+The pointer has a finite size, so this is possible.
+</p>
+
+</section>
+
+
+<!-- =========================================================
+     29 FLOWCHART
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">29</div>
+
+<div>
+<h2>Union Decision Flow</h2>
+<p>How to decide whether a union is appropriate.</p>
+</div>
+
+</div>
+
+<div class="flowchart">
+
+<div class="flow-box">
+Need multiple values?
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">
+Yes
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">
+Must coexist?
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">
+Use struct
+</div>
+
+</div>
+
+<div class="flowchart">
+
+<div class="flow-box">
+Alternative values
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">
+Only one meaningful at a time?
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">
+Consider union
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-box">
+Add tag if needed
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     30 INTERACTIVE UNION MEMORY LAB
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">30</div>
+
+<div>
+<h2>Interactive Union Memory Lab</h2>
+<p>Watch the shared storage concept.</p>
+</div>
+
+</div>
+
+<div class="lab">
+
+<p>
+Click a member to make it the conceptual current member.
+</p>
+
+<div class="lab-controls">
+
+<button class="btn" onclick="activateUnion('int')">
+Write int
+</button>
+
+<button class="btn" onclick="activateUnion('float')">
+Write float
+</button>
+
+<button class="btn" onclick="activateUnion('char')">
+Write char
+</button>
+
+</div>
+
+<div class="memory-block">
+
+<div class="memory-cell" id="cellInt">
+<strong>int</strong>
+<span>member</span>
+</div>
+
+<div class="memory-cell" id="cellFloat">
+<strong>float</strong>
+<span>member</span>
+</div>
+
+<div class="memory-cell" id="cellChar">
+<strong>char</strong>
+<span>member</span>
+</div>
+
+</div>
+
+<br>
+
+<div class="lab-output" id="unionOutput">
+No member selected.
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     31 COMMON MISTAKES
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">31</div>
+
+<div>
+<h2>Common Mistakes</h2>
+<p>Errors students frequently make.</p>
+</div>
+
+</div>
+
+<div class="grid">
+
+<div class="mini-card">
+
+<h3>❌ Mistake 1</h3>
+
+<p>
+Thinking a union stores all members independently.
+</p>
+
+<p>
+<strong>Fix:</strong> Members overlap storage.
+</p>
+
+</div>
+
+<div class="mini-card">
+
+<h3>❌ Mistake 2</h3>
+
+<p>
+Assuming union size is always exactly the largest member.
+</p>
+
+<p>
+<strong>Fix:</strong> Consider implementation and alignment.
+</p>
+
+</div>
+
+<div class="mini-card">
+
+<h3>❌ Mistake 3</h3>
+
+<p>
+Reading a different member without understanding the
+language/implementation rules.
+</p>
+
+<p>
+<strong>Fix:</strong> Treat the intended current member carefully.
+</p>
+
+</div>
+
+<div class="mini-card">
+
+<h3>❌ Mistake 4</h3>
+
+<p>
+Using a union without tracking which member is active.
+</p>
+
+<p>
+<strong>Fix:</strong> Use a tag for variant data.
+</p>
+
+</div>
+
+<div class="mini-card">
+
+<h3>❌ Mistake 5</h3>
+
+<p>
+Using <span class="inline-code">.</span> with a union pointer.
+</p>
+
+<p>
+<strong>Fix:</strong> Use <span class="inline-code">-></span>.
+</p>
+
+</div>
+
+<div class="mini-card">
+
+<h3>❌ Mistake 6</h3>
+
+<p>
+Forgetting pointer-member memory ownership.
+</p>
+
+<p>
+<strong>Fix:</strong> Manage allocation and lifetime explicitly.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     32 BEST PRACTICES
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">32</div>
+
+<div>
+<h2>Best Practices</h2>
+<p>Write safer and more maintainable union-based code.</p>
+</div>
+
+</div>
+
+<div class="checklist">
+
+<div class="check">
+<span>✓</span>
+Use unions when alternatives share storage logically.
+</div>
+
+<div class="check">
+<span>✓</span>
+Use an enum tag for variant data.
+</div>
+
+<div class="check">
+<span>✓</span>
+Keep tag and union payload synchronized.
+</div>
+
+<div class="check">
+<span>✓</span>
+Use designated initializers for clarity.
+</div>
+
+<div class="check">
+<span>✓</span>
+Use <span class="inline-code">sizeof</span> instead of assumptions.
+</div>
+
+<div class="check">
+<span>✓</span>
+Be cautious with type punning.
+</div>
+
+<div class="check">
+<span>✓</span>
+Use <span class="inline-code">memcpy</span> for portable representation copying.
+</div>
+
+<div class="check">
+<span>✓</span>
+Document implementation-specific layouts.
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     33 COMPLEXITY
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">33</div>
+
+<div>
+<h2>Time Complexity</h2>
+<p>Union operations are generally constant-time.</p>
+</div>
+
+</div>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Operation</th>
+<th>Complexity</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td>Member access</td>
+<td>O(1)</td>
+</tr>
+
+<tr>
+<td>Member assignment</td>
+<td>O(1)</td>
+</tr>
+
+<tr>
+<td>Pointer access</td>
+<td>O(1)</td>
+</tr>
+
+<tr>
+<td>Union assignment</td>
+<td>O(size of copied object)</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<p>
+The important advantage of unions is generally <strong>memory
+representation</strong>, not algorithmic speed.
+</p>
+
+</section>
+
+
+<!-- =========================================================
+     34 EXAM PREPARATION
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">34</div>
+
+<div>
+<h2>Exam Preparation</h2>
+<p>JNTUK / university-style preparation.</p>
+</div>
+
+</div>
+
+<h3>2-Mark Questions</h3>
+
+<ul>
+
+<li>Define a union.</li>
+
+<li>What is the difference between structure and union?</li>
+
+<li>What is the use of a union?</li>
+
+<li>What is an active member?</li>
+
+<li>What is a tagged union?</li>
+
+</ul>
+
+<h3>5-Mark Question</h3>
+
+<div class="callout">
+
+<strong>Question:</strong>
+
+Explain unions in C with syntax and an example.
+
+<br><br>
+
+<strong>Answer structure:</strong>
+
+Definition → syntax → declaration → member access →
+memory concept → example → conclusion.
+
+</div>
+
+<h3>10-Mark Question</h3>
+
+<div class="callout success">
+
+<strong>Question:</strong>
+
+Explain unions in C in detail. Compare structures and unions
+with suitable examples.
+
+<br><br>
+
+Include:
+
+<ul>
+
+<li>Definition</li>
+<li>Syntax</li>
+<li>Declaration</li>
+<li>Initialization</li>
+<li>Memory representation</li>
+<li>Union size</li>
+<li>Member access</li>
+<li>Structure vs union</li>
+<li>Tagged union</li>
+<li>Applications</li>
+<li>Example program</li>
+
+</ul>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     35 INTERVIEW QUESTIONS
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">35</div>
+
+<div>
+<h2>Interview Questions</h2>
+<p>Click a question to reveal the answer.</p>
+</div>
+
+</div>
+
+
+<div class="accordion">
+
+<button class="acc-btn">
+What is a union in C?
+<span>+</span>
+</button>
+
+<div class="acc-content">
+
+A union is a user-defined type whose members share overlapping
+storage. Unlike a structure, its members do not each receive
+independent storage.
+
+</div>
+
+</div>
+
+
+<div class="accordion">
+
+<button class="acc-btn">
+What is the main difference between struct and union?
+<span>+</span>
+</button>
+
+<div class="acc-content">
+
+A structure gives its members separate storage, while a union
+overlaps its members in the same storage region.
+
+</div>
+
+</div>
+
+
+<div class="accordion">
+
+<button class="acc-btn">
+Why does a union save memory?
+<span>+</span>
+</button>
+
+<div class="acc-content">
+
+Because different members reuse the same storage rather than
+requiring separate storage for every member.
+
+</div>
+
+</div>
+
+
+<div class="accordion">
+
+<button class="acc-btn">
+Can a union contain a structure?
+<span>+</span>
+</button>
+
+<div class="acc-content">
+
+Yes. A union can contain a structure as one of its members.
+
+</div>
+
+</div>
+
+
+<div class="accordion">
+
+<button class="acc-btn">
+Can a structure contain a union?
+<span>+</span>
+</button>
+
+<div class="acc-content">
+
+Yes. This is commonly used in tagged/discriminated union
+designs.
+
+</div>
+
+</div>
+
+
+<div class="accordion">
+
+<button class="acc-btn">
+Can a union contain a pointer?
+<span>+</span>
+</button>
+
+<div class="acc-content">
+
+Yes. A union can contain pointer members. The union does not,
+however, automatically manage the memory referenced by those
+pointers.
+
+</div>
+
+</div>
+
+
+<div class="accordion">
+
+<button class="acc-btn">
+Can we compare two unions using ==?
+<span>+</span>
+</button>
+
+<div class="acc-content">
+
+No. C does not define direct equality comparison for union
+objects. Compare the relevant tag and active member instead.
+
+</div>
+
+</div>
+
+
+<div class="accordion">
+
+<button class="acc-btn">
+What is a tagged union?
+<span>+</span>
+</button>
+
+<div class="acc-content">
+
+A tagged union combines a union with a separate tag, commonly
+an enum, that records which union member the program intends
+to use.
+
+</div>
+
+</div>
+
+
+<div class="accordion">
+
+<button class="acc-btn">
+What is type punning?
+<span>+</span>
+</button>
+
+<div class="acc-content">
+
+Type punning means examining the same underlying representation
+through a different type. Union-based approaches can be
+implementation-sensitive, so portability must be considered.
+
+</div>
+
+</div>
+
+
+<div class="accordion">
+
+<button class="acc-btn">
+Can a union contain itself?
+<span>+</span>
+</button>
+
+<div class="acc-content">
+
+Not directly, because that would require infinite storage.
+It can contain a pointer to its own type.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     36 QUIZ
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">36</div>
+
+<div>
+<h2>Quick Quiz</h2>
+<p>Test your understanding.</p>
+</div>
+
+</div>
+
+<form id="quizForm">
+
+<div class="quiz-question">
+
+<strong>1. What is shared by union members?</strong>
+
+<label class="option">
+<input type="radio" name="q1" value="a">
+Different memory blocks
+</label>
+
+<label class="option">
+<input type="radio" name="q1" value="b">
+Overlapping storage
+</label>
+
+<label class="option">
+<input type="radio" name="q1" value="c">
+Different arrays
+</label>
+
+</div>
+
+
+<div class="quiz-question">
+
+<strong>2. Which operator accesses a union member from a union object?</strong>
+
+<label class="option">
+<input type="radio" name="q2" value="a">
+.
+</label>
+
+<label class="option">
+<input type="radio" name="q2" value="b">
+#
+</label>
+
+<label class="option">
+<input type="radio" name="q2" value="c">
+@
+</label>
+
+</div>
+
+
+<div class="quiz-question">
+
+<strong>3. Which is useful for tracking the active union member?</strong>
+
+<label class="option">
+<input type="radio" name="q3" value="a">
+enum tag
+</label>
+
+<label class="option">
+<input type="radio" name="q3" value="b">
+goto
+</label>
+
+<label class="option">
+<input type="radio" name="q3" value="c">
+printf
+</label>
+
+</div>
+
+
+<div class="quiz-question">
+
+<strong>4. Can C unions be directly compared with ==?</strong>
+
+<label class="option">
+<input type="radio" name="q4" value="a">
+Yes
+</label>
+
+<label class="option">
+<input type="radio" name="q4" value="b">
+No
+</label>
+
+</div>
+
+
+<div class="quiz-question">
+
+<strong>5. Which is generally the safer portable tool for copying object representation?</strong>
+
+<label class="option">
+<input type="radio" name="q5" value="a">
+memcpy
+</label>
+
+<label class="option">
+<input type="radio" name="q5" value="b">
+goto
+</label>
+
+<label class="option">
+<input type="radio" name="q5" value="c">
+switch only
+</label>
+
+</div>
+
+<button type="button" class="btn" onclick="checkQuiz()">
+Check Answers
+</button>
+
+<div class="quiz-result" id="quizResult"></div>
+
+</form>
+
+</section>
+
+
+<!-- =========================================================
+     37 PRACTICE
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">37</div>
+
+<div>
+<h2>Coding Practice</h2>
+<p>Move from theory to implementation.</p>
+</div>
+
+</div>
+
+<div class="grid">
+
+<div class="mini-card">
+
+<h3>🟢 Beginner</h3>
+
+<p>
+Create a union containing an integer, float and character.
+Assign and print each member separately.
+</p>
+
+</div>
+
+<div class="mini-card">
+
+<h3>🟡 Intermediate</h3>
+
+<p>
+Create a structure containing a union that stores either
+an employee ID or salary.
+</p>
+
+</div>
+
+<div class="mini-card">
+
+<h3>🟠 Advanced</h3>
+
+<p>
+Implement a tagged union supporting integer, float and
+string values.
+</p>
+
+</div>
+
+<div class="mini-card">
+
+<h3>🔴 Interview</h3>
+
+<p>
+Create a message system where different message types have
+different payloads using a tagged union.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     38 PRACTICE SOLUTION
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">38</div>
+
+<div>
+<h2>Practice Solution — Tagged Value</h2>
+<p>A compact interview-style implementation.</p>
+</div>
+
+</div>
+
+<div class="code-wrap">
+
+<div class="code-head">
+
+<span>Complete C Program</span>
+
+<button class="copy-btn">
+Copy
+</button>
+
+</div>
+
+<pre><code>#include &lt;stdio.h&gt;
+
+enum Type {
+    TYPE_INT,
+    TYPE_FLOAT,
+    TYPE_TEXT
+};
+
+struct Value {
+
+    enum Type type;
+
+    union {
+
+        int i;
+        float f;
+        char text[30];
+
+    } data;
+};
+
+int main() {
+
+    struct Value value;
+
+    value.type = TYPE_FLOAT;
+    value.data.f = 98.6f;
+
+    switch (value.type) {
+
+        case TYPE_INT:
+            printf("Integer: %d\n",
+                   value.data.i);
+            break;
+
+        case TYPE_FLOAT:
+            printf("Float: %.2f\n",
+                   value.data.f);
+            break;
+
+        case TYPE_TEXT:
+            printf("Text: %s\n",
+                   value.data.text);
+            break;
+    }
+
+    return 0;
+}</code></pre>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     39 RAPID REVISION
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">39</div>
+
+<div>
+<h2>Rapid Revision</h2>
+<p>Everything you need to remember before an exam or interview.</p>
+</div>
+
+</div>
+
+<div class="checklist">
+
+<div class="check">
+✓ Union members share overlapping storage.
+</div>
+
+<div class="check">
+✓ Structure members have separate storage.
+</div>
+
+<div class="check">
+✓ Use <span class="inline-code">.</span> with union objects.
+</div>
+
+<div class="check">
+✓ Use <span class="inline-code">-></span> with union pointers.
+</div>
+
+<div class="check">
+✓ Union size is implementation-dependent.
+</div>
+
+<div class="check">
+✓ One member is normally treated as the current meaningful member.
+</div>
+
+<div class="check">
+✓ Tagged unions use an enum or similar discriminator.
+</div>
+
+<div class="check">
+✓ Direct union comparison with == is not supported.
+</div>
+
+<div class="check">
+✓ A union can contain structures and pointers.
+</div>
+
+<div class="check">
+✓ A union cannot directly contain itself.
+</div>
+
+<div class="check">
+✓ Type punning requires portability awareness.
+</div>
+
+<div class="check">
+✓ memcpy() can be used for representation copying.
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     40 FINAL SUMMARY
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">40</div>
+
+<div>
+<h2>Lesson Summary</h2>
+<p>From basic unions to professional designs.</p>
+</div>
+
+</div>
+
+<p>
+A union is one of the most important low-level data representation
+features in C. Its members share overlapping storage, allowing
+different representations to occupy the same memory area.
+</p>
+
+<p>
+The most important distinction is:
+</p>
+
+<div class="grid">
+
+<div class="mini-card">
+
+<h3>STRUCT</h3>
+
+<p>
+Multiple independent values coexist.
+</p>
+
+<p>
+<strong>Separate storage.</strong>
+</p>
+
+</div>
+
+<div class="mini-card">
+
+<h3>UNION</h3>
+
+<p>
+Alternative representations share storage.
+</p>
+
+<p>
+<strong>Overlapping storage.</strong>
+</p>
+
+</div>
+
+</div>
+
+<div class="callout success">
+
+<strong>Mastery formula:</strong>
+
+Union → Shared Memory → Current Member → Tagged Union →
+Memory Efficiency → Systems Programming.
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     41 NEXT LESSON
+========================================================= -->
+
+<section class="card reveal-on-scroll">
+
+<div class="section-title">
+
+<div class="section-number">41</div>
+
+<div>
+<h2>What's Next?</h2>
+<p>Continue the C programming journey.</p>
+</div>
+
+</div>
+
+<div class="grid">
+
+<div class="mini-card">
+
+<h3>📁 Lesson 13</h3>
+
+<p>
+<strong>File Handling</strong>
+</p>
+
+<p>
+Learn how C programs create, read, write, append and manage
+files.
+</p>
+
+</div>
+
+<div class="mini-card">
+
+<h3>🧠 Lesson 14</h3>
+
+<p>
+<strong>Dynamic Memory Allocation</strong>
+</p>
+
+<p>
+Learn malloc, calloc, realloc, free and dynamic data structures.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+</div>
+
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<footer>
+
+<div class="footer-logo">
+ZENSUS
+</div>
+
+<p>
+Learn • Code • Build • Grow
+</p>
+
+<p>
+C Programming — Lesson 12: Unions
+</p>
+
+</footer>
+
+</main>
+
+
+<!-- BACK TO TOP -->
+
+<button id="backTop">
+↑
+</button>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
+
+<script>
+
+/* =========================================================
+   MOBILE SIDEBAR
+========================================================= */
+
+const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.getElementById("sidebar");
+
+menuBtn.addEventListener("click", () => {
+
+    sidebar.classList.toggle("open");
+
+});
+
+
+/* =========================================================
+   CLOSE SIDEBAR AFTER LINK CLICK
+========================================================= */
+
+document.querySelectorAll(".sidebar a").forEach(link => {
+
+    link.addEventListener("click", () => {
+
+        if(window.innerWidth <= 800){
+
+            sidebar.classList.remove("open");
+
+        }
+
+    });
+
+});
+
+
+/* =========================================================
+   COPY CODE BUTTON
+========================================================= */
+
+document.querySelectorAll(".copy-btn").forEach(button => {
+
+    button.addEventListener("click", async () => {
+
+        const code =
+            button
+            .closest(".code-wrap")
+            .querySelector("code")
+            .innerText;
+
+        try{
+
+            await navigator.clipboard.writeText(code);
+
+            const oldText = button.innerText;
+
+            button.innerText = "Copied!";
+
+            setTimeout(() => {
+
+                button.innerText = oldText;
+
+            },1500);
+
+        }catch(error){
+
+            button.innerText = "Copy failed";
+
+            setTimeout(() => {
+
+                button.innerText = "Copy";
+
+            },1500);
+
+        }
+
+    });
+
+});
+
+
+/* =========================================================
+   ACCORDION
+========================================================= */
+
+document.querySelectorAll(".acc-btn").forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        const parent =
+            button.parentElement;
+
+        parent.classList.toggle("open");
+
+        const icon =
+            button.querySelector("span");
+
+        icon.textContent =
+            parent.classList.contains("open")
+            ? "−"
+            : "+";
+
+    });
+
+});
+
+
+/* =========================================================
+   TAGGED UNION LAB
+========================================================= */
+
+const tagButtons =
+    document.querySelectorAll(".tag-btn");
+
+const tagDisplay =
+    document.getElementById("tagDisplay");
+
+const tagValue =
+    document.getElementById("tagValue");
+
+
+tagButtons.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        tagButtons.forEach(btn => {
+
+            btn.classList.remove("active");
+
+        });
+
+        button.classList.add("active");
+
+        const type =
+            button.dataset.type;
+
+        if(type === "int"){
+
+            tagDisplay.innerHTML = `
+                <strong>Tag:</strong> INT_VALUE
+                <br><br>
+                Union member:
+                <span class="inline-code">data.i</span>
+                <br>
+                Value:
+                <strong>100</strong>
+            `;
+
+        }
+
+        else if(type === "float"){
+
+            tagDisplay.innerHTML = `
+                <strong>Tag:</strong> FLOAT_VALUE
+                <br><br>
+                Union member:
+                <span class="inline-code">data.f</span>
+                <br>
+                Value:
+                <strong>98.60</strong>
+            `;
+
+        }
+
+        else{
+
+            tagDisplay.innerHTML = `
+                <strong>Tag:</strong> TEXT_VALUE
+                <br><br>
+                Union member:
+                <span class="inline-code">data.text</span>
+                <br>
+                Value:
+                <strong>Hello ZENSUS</strong>
+            `;
+
+        }
+
+    });
+
+});
+
+
+/* =========================================================
+   UNION MEMORY LAB
+========================================================= */
+
+function activateUnion(type){
+
+    const cells = {
+
+        int:
+            document.getElementById("cellInt"),
+
+        float:
+            document.getElementById("cellFloat"),
+
+        char:
+            document.getElementById("cellChar")
+
+    };
+
+    Object.values(cells).forEach(cell => {
+
+        cell.classList.remove("active");
+
+    });
+
+    cells[type].classList.add("active");
+
+    const output =
+        document.getElementById("unionOutput");
+
+    if(type === "int"){
+
+        output.textContent =
+`Active member: int
+
+Write:
+unionData.i = 100;
+
+Concept:
+The shared storage is being used as an int.`;
+
+    }
+
+    else if(type === "float"){
+
+        output.textContent =
+`Active member: float
+
+Write:
+unionData.f = 25.50f;
+
+Concept:
+The same storage is now being used for a float.`;
+
+    }
+
+    else{
+
+        output.textContent =
+`Active member: char
+
+Write:
+unionData.c = 'A';
+
+Concept:
+The same union storage is now being used for a char.`;
+
+    }
+
+}
+
+
+/* =========================================================
+   QUIZ
+========================================================= */
+
+function checkQuiz(){
+
+    const answers = {
+
+        q1:"b",
+        q2:"a",
+        q3:"a",
+        q4:"b",
+        q5:"a"
+
+    };
+
+    let score = 0;
+
+    Object.keys(answers).forEach(question => {
+
+        const selected =
+            document.querySelector(
+                `input[name="${question}"]:checked`
+            );
+
+        if(selected &&
+           selected.value === answers[question]){
+
+            score++;
+
+        }
+
+    });
+
+    const result =
+        document.getElementById("quizResult");
+
+    result.style.display = "block";
+
+    if(score === 5){
+
+        result.style.background = "#f0fdf4";
+        result.style.color = "#166534";
+
+        result.textContent =
+            `🎉 Perfect! ${score}/5 — Union concepts mastered!`;
+
+    }
+
+    else if(score >= 3){
+
+        result.style.background = "#eff6ff";
+        result.style.color = "#1d4ed8";
+
+        result.textContent =
+            `Good job! ${score}/5 — Review the concepts you missed.`;
+
+    }
+
+    else{
+
+        result.style.background = "#fef2f2";
+        result.style.color = "#991b1b";
+
+        result.textContent =
+            `Score: ${score}/5 — Revisit the lesson and try again.`;
+
+    }
+
+}
+
+
+/* =========================================================
+   SCROLL REVEAL
+========================================================= */
+
+const revealElements =
+    document.querySelectorAll(".reveal-on-scroll");
+
+const observer =
+    new IntersectionObserver(
+        entries => {
+
+            entries.forEach(entry => {
+
+                if(entry.isIntersecting){
+
+                    entry.target.classList.add("visible");
+
+                }
+
+            });
+
+        },
+        {
+            threshold:.08
+        }
+    );
+
+
+revealElements.forEach(element => {
+
+    observer.observe(element);
+
+});
+
+
+/* =========================================================
+   BACK TO TOP
+========================================================= */
+
+const backTop =
+    document.getElementById("backTop");
+
+window.addEventListener("scroll", () => {
+
+    if(window.scrollY > 500){
+
+        backTop.style.display = "grid";
+
+    }else{
+
+        backTop.style.display = "none";
+
+    }
+
+});
+
+
+backTop.addEventListener("click", () => {
+
+    window.scrollTo({
+
+        top:0,
+        behavior:"smooth"
+
+    });
+
+});
+
+
+/* =========================================================
+   ACTIVE SIDEBAR
+========================================================= */
+
+window.addEventListener("scroll", () => {
+
+    const current =
+        document.querySelector(
+            '.lesson-list a.active'
+        );
+
+    if(current){
+
+        current.classList.add("active");
+
+    }
+
+});
+
+
+</script>
+
+</body>
+</html>

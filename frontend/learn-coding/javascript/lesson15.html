@@ -1,0 +1,4482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS | Asynchronous JavaScript</title>
+
+<style>
+:root{
+    --bg:#f6f8fc;
+    --surface:#ffffff;
+    --surface2:#f8fafc;
+    --text:#172033;
+    --muted:#667085;
+    --primary:#4f46e5;
+    --primary2:#6366f1;
+    --purple:#7c3aed;
+    --green:#059669;
+    --orange:#ea580c;
+    --red:#dc2626;
+    --cyan:#0891b2;
+    --border:#e4e7ec;
+    --shadow:0 10px 30px rgba(15,23,42,.07);
+    --code:#0d1117;
+    --codeText:#e6edf3;
+    --sidebar:260px;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+.progress{
+    position:fixed;
+    top:0;
+    left:0;
+    height:4px;
+    width:0;
+    background:linear-gradient(90deg,var(--primary),var(--purple));
+    z-index:9999;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    width:var(--sidebar);
+    height:100vh;
+    background:#fff;
+    border-right:1px solid var(--border);
+    padding:22px 16px;
+    overflow-y:auto;
+    z-index:1000;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:25px;
+    padding:5px 8px;
+}
+
+.logo-mark{
+    width:38px;
+    height:38px;
+    border-radius:12px;
+    background:linear-gradient(135deg,#4f46e5,#7c3aed);
+    color:white;
+    display:grid;
+    place-items:center;
+    font-weight:800;
+}
+
+.logo-text{
+    font-size:20px;
+    font-weight:800;
+}
+
+.logo-text span{
+    color:var(--primary);
+}
+
+.course-label{
+    font-size:11px;
+    font-weight:800;
+    color:#98a2b3;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    padding:0 9px;
+    margin-bottom:10px;
+}
+
+.nav{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+}
+
+.nav a{
+    text-decoration:none;
+    color:#667085;
+    padding:9px 11px;
+    border-radius:9px;
+    font-size:13px;
+    transition:.2s;
+}
+
+.nav a:hover{
+    background:#f0f2ff;
+    color:var(--primary);
+}
+
+.nav a.active{
+    background:#eef2ff;
+    color:var(--primary);
+    font-weight:700;
+}
+
+.lesson-badge{
+    margin-top:20px;
+    background:#f7f5ff;
+    border:1px solid #e5ddff;
+    border-radius:14px;
+    padding:14px;
+}
+
+.lesson-badge strong{
+    display:block;
+    color:var(--purple);
+    font-size:13px;
+}
+
+.lesson-badge small{
+    color:var(--muted);
+}
+
+/* MAIN */
+
+.main{
+    margin-left:var(--sidebar);
+    min-height:100vh;
+}
+
+.topbar{
+    height:65px;
+    background:rgba(255,255,255,.94);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 32px;
+    position:sticky;
+    top:0;
+    z-index:900;
+}
+
+.breadcrumb{
+    font-size:13px;
+    color:var(--muted);
+}
+
+.breadcrumb strong{
+    color:var(--text);
+}
+
+.menu-btn{
+    display:none;
+    border:none;
+    background:#eef2ff;
+    color:var(--primary);
+    padding:8px 11px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+/* CONTENT */
+
+.container{
+    width:min(1120px,calc(100% - 40px));
+    margin:auto;
+    padding:38px 0 80px;
+}
+
+.hero{
+    background:linear-gradient(135deg,#fff,#f5f3ff);
+    border:1px solid var(--border);
+    border-radius:24px;
+    padding:45px;
+    box-shadow:var(--shadow);
+    position:relative;
+    overflow:hidden;
+}
+
+.hero:after{
+    content:"ASYNC";
+    position:absolute;
+    right:-25px;
+    bottom:-45px;
+    font-size:125px;
+    font-weight:900;
+    color:rgba(79,70,229,.045);
+    pointer-events:none;
+}
+
+.eyebrow{
+    display:inline-flex;
+    background:#eef2ff;
+    color:var(--primary);
+    padding:6px 11px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:800;
+    margin-bottom:15px;
+}
+
+.hero h1{
+    font-size:clamp(35px,5vw,58px);
+    line-height:1.08;
+    letter-spacing:-2px;
+    max-width:850px;
+}
+
+.hero h1 span{
+    color:var(--primary);
+}
+
+.hero p{
+    color:var(--muted);
+    max-width:800px;
+    margin-top:17px;
+    font-size:17px;
+}
+
+.hero-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:24px;
+}
+
+.meta{
+    padding:7px 12px;
+    background:white;
+    border:1px solid var(--border);
+    border-radius:999px;
+    font-size:12px;
+    color:var(--muted);
+}
+
+/* SECTIONS */
+
+.section{
+    margin-top:35px;
+    scroll-margin-top:90px;
+}
+
+.section-title{
+    margin-bottom:17px;
+}
+
+.section-title .number{
+    color:var(--primary);
+    font-weight:800;
+    font-size:13px;
+}
+
+.section-title h2{
+    font-size:29px;
+    letter-spacing:-.7px;
+}
+
+.section-title p{
+    color:var(--muted);
+    margin-top:3px;
+}
+
+.card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:24px;
+    box-shadow:0 6px 20px rgba(15,23,42,.04);
+}
+
+.grid{
+    display:grid;
+    gap:18px;
+}
+
+.grid-2{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+}
+
+.grid-3{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+}
+
+.grid-4{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+}
+
+/* OBJECTIVES */
+
+.objective{
+    display:flex;
+    gap:13px;
+    align-items:flex-start;
+}
+
+.check{
+    min-width:27px;
+    height:27px;
+    border-radius:8px;
+    background:#eef2ff;
+    color:var(--primary);
+    display:grid;
+    place-items:center;
+    font-weight:800;
+}
+
+.objective strong{
+    display:block;
+    font-size:14px;
+}
+
+.objective span{
+    font-size:13px;
+    color:var(--muted);
+}
+
+/* CODE */
+
+pre{
+    background:var(--code);
+    color:var(--codeText);
+    border-radius:13px;
+    padding:20px;
+    overflow-x:auto;
+    margin:15px 0;
+    font-family:Consolas,"Courier New",monospace;
+    font-size:13px;
+    line-height:1.7;
+    border:1px solid #222936;
+}
+
+code{
+    font-family:Consolas,"Courier New",monospace;
+}
+
+.inline-code{
+    background:#eef2f7;
+    color:#7c3aed;
+    padding:2px 6px;
+    border-radius:5px;
+    font-family:Consolas,monospace;
+    font-size:.9em;
+}
+
+/* CALLOUT */
+
+.callout{
+    border-left:4px solid var(--primary);
+    background:#f5f7ff;
+    padding:15px 17px;
+    border-radius:10px;
+    margin:16px 0;
+}
+
+.callout.warning{
+    border-color:var(--orange);
+    background:#fff8f1;
+}
+
+.callout.success{
+    border-color:var(--green);
+    background:#effcf7;
+}
+
+.callout.danger{
+    border-color:var(--red);
+    background:#fff4f4;
+}
+
+.callout strong{
+    display:block;
+    margin-bottom:3px;
+}
+
+/* FEATURE */
+
+.feature{
+    transition:.25s;
+}
+
+.feature:hover{
+    transform:translateY(-4px);
+    box-shadow:var(--shadow);
+}
+
+.feature-icon{
+    width:43px;
+    height:43px;
+    display:grid;
+    place-items:center;
+    border-radius:12px;
+    background:#eef2ff;
+    color:var(--primary);
+    font-weight:900;
+    margin-bottom:13px;
+}
+
+.feature h3{
+    font-size:17px;
+    margin-bottom:5px;
+}
+
+.feature p{
+    font-size:13px;
+    color:var(--muted);
+}
+
+/* FLOW */
+
+.visualizer{
+    background:#fafbff;
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:22px;
+}
+
+.flow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.flow-box{
+    min-width:125px;
+    text-align:center;
+    padding:15px;
+    background:white;
+    border:2px solid #dfe3ff;
+    border-radius:12px;
+    font-size:13px;
+    font-weight:700;
+    transition:.35s;
+}
+
+.flow-box.active{
+    border-color:var(--primary);
+    background:#eef2ff;
+    transform:scale(1.05);
+}
+
+.flow-box.success{
+    border-color:var(--green);
+    background:#effcf7;
+}
+
+.arrow{
+    color:var(--primary);
+    font-weight:900;
+    font-size:20px;
+}
+
+/* EVENT LOOP */
+
+.loop-stage{
+    display:grid;
+    grid-template-columns:1fr 1.3fr 1fr;
+    gap:15px;
+    align-items:stretch;
+}
+
+.loop-column{
+    background:#f8fafc;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:15px;
+    min-height:230px;
+}
+
+.loop-column h3{
+    font-size:14px;
+    margin-bottom:12px;
+}
+
+.queue{
+    min-height:160px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.queue-item{
+    background:white;
+    border:1px solid #dfe3ea;
+    border-radius:9px;
+    padding:9px;
+    font-size:12px;
+    text-align:center;
+    transition:.5s;
+}
+
+.queue-item.active{
+    border-color:var(--primary);
+    background:#eef2ff;
+    transform:translateX(5px);
+}
+
+/* TIMELINE */
+
+.timeline{
+    position:relative;
+    padding-left:25px;
+}
+
+.timeline:before{
+    content:"";
+    position:absolute;
+    left:7px;
+    top:0;
+    bottom:0;
+    width:2px;
+    background:#e0e5ee;
+}
+
+.timeline-item{
+    position:relative;
+    margin-bottom:22px;
+}
+
+.timeline-item:before{
+    content:"";
+    position:absolute;
+    left:-23px;
+    top:6px;
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    background:var(--primary);
+    border:3px solid #eef2ff;
+}
+
+.timeline-item strong{
+    display:block;
+    font-size:14px;
+}
+
+.timeline-item p{
+    color:var(--muted);
+    font-size:13px;
+}
+
+/* BUTTONS */
+
+.controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:14px;
+}
+
+.btn{
+    border:none;
+    border-radius:9px;
+    padding:10px 15px;
+    background:var(--primary);
+    color:white;
+    cursor:pointer;
+    font-weight:700;
+    transition:.2s;
+}
+
+.btn:hover{
+    transform:translateY(-1px);
+}
+
+.btn.secondary{
+    background:#eef2ff;
+    color:var(--primary);
+}
+
+.btn.green{
+    background:var(--green);
+}
+
+.btn.orange{
+    background:var(--orange);
+}
+
+input,select,textarea{
+    width:100%;
+    padding:11px 13px;
+    border:1px solid #d8dee8;
+    border-radius:9px;
+    background:white;
+    color:var(--text);
+    outline:none;
+    font-family:inherit;
+}
+
+input:focus,select:focus,textarea:focus{
+    border-color:var(--primary);
+    box-shadow:0 0 0 3px rgba(79,70,229,.1);
+}
+
+label{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    color:#475467;
+    margin-bottom:6px;
+}
+
+/* OUTPUT */
+
+.output{
+    margin-top:15px;
+    background:#0d1117;
+    color:#d1d5db;
+    padding:15px;
+    border-radius:10px;
+    min-height:48px;
+    white-space:pre-wrap;
+    font-family:Consolas,monospace;
+    font-size:13px;
+}
+
+.output.success{
+    color:#86efac;
+}
+
+.output.error{
+    color:#fca5a5;
+}
+
+/* TABLE */
+
+.table-wrap{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:650px;
+}
+
+th,td{
+    padding:13px;
+    border-bottom:1px solid var(--border);
+    text-align:left;
+    font-size:13px;
+}
+
+th{
+    background:#f8fafc;
+}
+
+td{
+    color:#667085;
+}
+
+/* TAGS */
+
+.tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+    margin-top:12px;
+}
+
+.tag{
+    background:#f2f4f7;
+    color:#475467;
+    padding:5px 9px;
+    border-radius:7px;
+    font-size:11px;
+    font-weight:700;
+}
+
+/* QUIZ */
+
+.quiz-question{
+    padding:18px 0;
+    border-bottom:1px solid var(--border);
+}
+
+.quiz-question:last-child{
+    border-bottom:none;
+}
+
+.quiz-question h4{
+    font-size:15px;
+    margin-bottom:10px;
+}
+
+.option{
+    display:block;
+    margin:7px 0;
+    padding:9px 11px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    cursor:pointer;
+    font-size:13px;
+    color:#667085;
+}
+
+.option:hover{
+    border-color:var(--primary);
+    background:#f8f8ff;
+}
+
+.option input{
+    width:auto;
+    margin-right:8px;
+}
+
+/* CHECKLIST */
+
+.checklist{
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+}
+
+.check-item{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    padding:11px;
+    background:#fafbfc;
+    border:1px solid var(--border);
+    border-radius:9px;
+    font-size:13px;
+}
+
+.check-item input{
+    width:auto;
+}
+
+.check-item.done span{
+    text-decoration:line-through;
+    color:#98a2b3;
+}
+
+/* METRICS */
+
+.metric-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+}
+
+.metric{
+    background:white;
+    border:1px solid var(--border);
+    padding:14px;
+    border-radius:10px;
+}
+
+.metric small{
+    color:#98a2b3;
+}
+
+.metric strong{
+    display:block;
+    font-size:22px;
+}
+
+/* REVEAL */
+
+.reveal{
+    opacity:1;
+    transform:none;
+}
+
+.js-enabled .reveal{
+    opacity:0;
+    transform:translateY(18px);
+    transition:opacity .6s ease,transform .6s ease;
+}
+
+.js-enabled .reveal.visible{
+    opacity:1;
+    transform:translateY(0);
+}
+
+/* FOOTER */
+
+.footer{
+    text-align:center;
+    padding:45px 20px;
+    color:#98a2b3;
+    font-size:12px;
+}
+
+/* MOBILE */
+
+@media(max-width:850px){
+
+    .sidebar{
+        transform:translateX(-100%);
+        transition:.3s;
+    }
+
+    .sidebar.open{
+        transform:translateX(0);
+    }
+
+    .main{
+        margin-left:0;
+    }
+
+    .menu-btn{
+        display:block;
+    }
+
+    .topbar{
+        padding:0 18px;
+    }
+
+    .container{
+        width:min(100% - 24px,1120px);
+        padding-top:25px;
+    }
+
+    .hero{
+        padding:28px 22px;
+    }
+
+    .grid-2,
+    .grid-3,
+    .grid-4{
+        grid-template-columns:1fr;
+    }
+
+    .loop-stage{
+        grid-template-columns:1fr;
+    }
+
+    .metric-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:500px){
+
+    .hero h1{
+        font-size:34px;
+    }
+
+    .section-title h2{
+        font-size:24px;
+    }
+
+    .card{
+        padding:18px;
+    }
+
+    .metric-grid{
+        grid-template-columns:1fr;
+    }
+
+    .flow-box{
+        min-width:105px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="progress" id="progress"></div>
+
+<!-- =========================================================
+     SIDEBAR
+     ========================================================= -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="logo">
+        <div class="logo-mark">Z</div>
+        <div class="logo-text">ZEN<span>SUS</span></div>
+    </div>
+
+    <div class="course-label">JavaScript Course</div>
+
+    <nav class="nav">
+
+        <a href="#overview" class="active">01 · Overview</a>
+        <a href="#sync">02 · Sync vs Async</a>
+        <a href="#need">03 · Why Async?</a>
+        <a href="#callstack">04 · Call Stack</a>
+        <a href="#eventloop">05 · Event Loop</a>
+        <a href="#callbacks">06 · Callbacks</a>
+        <a href="#timers">07 · Timers</a>
+        <a href="#promises">08 · Promises</a>
+        <a href="#microtasks">09 · Microtasks</a>
+        <a href="#promiseall">10 · Promise Combinators</a>
+        <a href="#asyncawait">11 · Async/Await</a>
+        <a href="#errors">12 · Error Handling</a>
+        <a href="#parallel">13 · Sequential vs Parallel</a>
+        <a href="#fetch">14 · API Pattern</a>
+        <a href="#advanced">15 · Advanced Concepts</a>
+        <a href="#flowchart">16 · Flowchart</a>
+        <a href="#labs">17 · Interactive Labs</a>
+        <a href="#mistakes">18 · Mistakes</a>
+        <a href="#exam">19 · Exam Prep</a>
+        <a href="#interview">20 · Interview</a>
+        <a href="#quiz">21 · Quiz</a>
+        <a href="#practice">22 · Practice</a>
+        <a href="#project">23 · Mini Project</a>
+        <a href="#checklist">24 · Checklist</a>
+        <a href="#revision">25 · Revision</a>
+
+    </nav>
+
+    <div class="lesson-badge">
+        <strong>JS · Lesson 15</strong>
+        <small>Asynchronous JavaScript</small>
+    </div>
+
+</aside>
+
+
+<!-- =========================================================
+     MAIN
+     ========================================================= -->
+
+<main class="main">
+
+<header class="topbar">
+
+    <div class="breadcrumb">
+        JavaScript / <strong>Lesson 15 — Asynchronous JavaScript</strong>
+    </div>
+
+    <button class="menu-btn" id="menuBtn">☰</button>
+
+</header>
+
+
+<div class="container">
+
+<!-- =========================================================
+     HERO
+     ========================================================= -->
+
+<section class="hero reveal" id="overview">
+
+    <div class="eyebrow">⚡ JAVASCRIPT · LESSON 15</div>
+
+    <h1>
+        Asynchronous
+        <span>JavaScript</span>
+    </h1>
+
+    <p>
+        Learn how JavaScript handles timers, API requests, Promises,
+        microtasks, the Event Loop and async/await — and understand
+        what actually happens behind the scenes.
+    </p>
+
+    <div class="hero-meta">
+        <span class="meta">Beginner → Advanced</span>
+        <span class="meta">Event Loop</span>
+        <span class="meta">Promises</span>
+        <span class="meta">Async/Await</span>
+        <span class="meta">API Ready</span>
+        <span class="meta">Interview Ready</span>
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     OBJECTIVES
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <div class="section-title">
+        <span class="number">LEARNING OBJECTIVES</span>
+        <h2>What you will master</h2>
+        <p>By the end of this lesson, you should understand asynchronous JavaScript from the inside out.</p>
+    </div>
+
+    <div class="grid grid-2">
+
+        <div class="card objective">
+            <div class="check">✓</div>
+            <div>
+                <strong>Synchronous vs Asynchronous</strong>
+                <span>Understand blocking and non-blocking execution.</span>
+            </div>
+        </div>
+
+        <div class="card objective">
+            <div class="check">✓</div>
+            <div>
+                <strong>Call Stack</strong>
+                <span>Understand how JavaScript executes functions.</span>
+            </div>
+        </div>
+
+        <div class="card objective">
+            <div class="check">✓</div>
+            <div>
+                <strong>Event Loop</strong>
+                <span>Understand how asynchronous callbacks are scheduled.</span>
+            </div>
+        </div>
+
+        <div class="card objective">
+            <div class="check">✓</div>
+            <div>
+                <strong>Callbacks</strong>
+                <span>Understand the foundation of asynchronous programming.</span>
+            </div>
+        </div>
+
+        <div class="card objective">
+            <div class="check">✓</div>
+            <div>
+                <strong>Promises</strong>
+                <span>Understand pending, fulfilled and rejected states.</span>
+            </div>
+        </div>
+
+        <div class="card objective">
+            <div class="check">✓</div>
+            <div>
+                <strong>Microtasks</strong>
+                <span>Understand Promise callbacks and execution priority.</span>
+            </div>
+        </div>
+
+        <div class="card objective">
+            <div class="check">✓</div>
+            <div>
+                <strong>async / await</strong>
+                <span>Write readable asynchronous code.</span>
+            </div>
+        </div>
+
+        <div class="card objective">
+            <div class="check">✓</div>
+            <div>
+                <strong>Concurrency</strong>
+                <span>Run independent operations efficiently in parallel.</span>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     SYNC VS ASYNC
+     ========================================================= -->
+
+<section class="section reveal" id="sync">
+
+    <div class="section-title">
+        <span class="number">02 · FOUNDATION</span>
+        <h2>Synchronous vs Asynchronous JavaScript</h2>
+        <p>The first concept you must understand.</p>
+    </div>
+
+    <div class="grid grid-2">
+
+        <div class="card">
+
+            <h3>🧱 Synchronous</h3>
+
+            <p>
+                Statements execute one after another. A long-running task
+                can prevent later code from executing.
+            </p>
+
+<pre><code>console.log("A");
+
+console.log("B");
+
+console.log("C");</code></pre>
+
+            <p>
+                Output:
+            </p>
+
+<pre><code>A
+B
+C</code></pre>
+
+        </div>
+
+        <div class="card">
+
+            <h3>⚡ Asynchronous</h3>
+
+            <p>
+                Some operations can be scheduled to complete later while
+                JavaScript continues executing other work.
+            </p>
+
+<pre><code>console.log("A");
+
+setTimeout(() => {
+    console.log("B");
+}, 1000);
+
+console.log("C");</code></pre>
+
+            <p>
+                Output:
+            </p>
+
+<pre><code>A
+C
+B</code></pre>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     WHY ASYNC
+     ========================================================= -->
+
+<section class="section reveal" id="need">
+
+    <div class="section-title">
+        <span class="number">03 · WHY ASYNC?</span>
+        <h2>Why do we need asynchronous JavaScript?</h2>
+    </div>
+
+    <div class="card">
+
+        <p>
+            JavaScript is commonly used for applications that interact with
+            external systems. Waiting for every slow operation before doing
+            anything else would make applications feel unresponsive.
+        </p>
+
+        <div class="grid grid-3" style="margin-top:20px">
+
+            <div class="card feature">
+                <div class="feature-icon">🌐</div>
+                <h3>Network Requests</h3>
+                <p>Waiting for servers and APIs.</p>
+            </div>
+
+            <div class="card feature">
+                <div class="feature-icon">⏱</div>
+                <h3>Timers</h3>
+                <p>Scheduling work for later.</p>
+            </div>
+
+            <div class="card feature">
+                <div class="feature-icon">💾</div>
+                <h3>File / Database Work</h3>
+                <p>Operations that may take time outside JavaScript execution.</p>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     CALL STACK
+     ========================================================= -->
+
+<section class="section reveal" id="callstack">
+
+    <div class="section-title">
+        <span class="number">04 · JAVASCRIPT ENGINE</span>
+        <h2>The Call Stack</h2>
+        <p>The Call Stack keeps track of currently executing JavaScript functions.</p>
+    </div>
+
+    <div class="card">
+
+<pre><code>function first() {
+    second();
+}
+
+function second() {
+    console.log("Hello");
+}
+
+first();</code></pre>
+
+        <div class="timeline">
+
+            <div class="timeline-item">
+                <strong>1. Global code starts</strong>
+                <p>The program begins executing.</p>
+            </div>
+
+            <div class="timeline-item">
+                <strong>2. first() is pushed</strong>
+                <p>The function is placed on the Call Stack.</p>
+            </div>
+
+            <div class="timeline-item">
+                <strong>3. second() is pushed</strong>
+                <p>second() is now at the top of the stack.</p>
+            </div>
+
+            <div class="timeline-item">
+                <strong>4. console.log executes</strong>
+                <p>The message is printed.</p>
+            </div>
+
+            <div class="timeline-item">
+                <strong>5. Functions are popped</strong>
+                <p>Execution returns back through the stack.</p>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     EVENT LOOP
+     ========================================================= -->
+
+<section class="section reveal" id="eventloop">
+
+    <div class="section-title">
+        <span class="number">05 · CORE CONCEPT</span>
+        <h2>The Event Loop</h2>
+        <p>This is the heart of understanding asynchronous JavaScript.</p>
+    </div>
+
+    <div class="card">
+
+        <div class="loop-stage">
+
+            <div class="loop-column">
+
+                <h3>📥 Task Sources</h3>
+
+                <div class="queue">
+
+                    <div class="queue-item">Timer</div>
+                    <div class="queue-item">DOM Event</div>
+                    <div class="queue-item">Network</div>
+
+                </div>
+
+            </div>
+
+
+            <div class="loop-column">
+
+                <h3>🧠 JavaScript Engine</h3>
+
+                <div class="queue">
+
+                    <div class="queue-item active">
+                        Call Stack
+                    </div>
+
+                    <div class="queue-item">
+                        Event Loop
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="loop-column">
+
+                <h3>📤 Queues</h3>
+
+                <div class="queue">
+
+                    <div class="queue-item">
+                        Microtask Queue
+                    </div>
+
+                    <div class="queue-item">
+                        Task Queue
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="callout success">
+
+            <strong>Important Mental Model</strong>
+
+            JavaScript executes synchronous code on the Call Stack.
+            Host environments such as browsers provide APIs for operations
+            such as timers and networking. When callbacks become ready,
+            they are queued, and the Event Loop helps schedule them when
+            the Call Stack is available.
+
+        </div>
+
+        <button class="btn" onclick="animateEventLoop()">
+            ▶ Animate Event Loop
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     CALLBACKS
+     ========================================================= -->
+
+<section class="section reveal" id="callbacks">
+
+    <div class="section-title">
+        <span class="number">06 · CALLBACKS</span>
+        <h2>Callbacks</h2>
+        <p>A callback is a function passed to another function to be called later.</p>
+    </div>
+
+    <div class="card">
+
+<pre><code>function greet(name, callback) {
+
+    console.log("Hello " + name);
+
+    callback();
+}
+
+function finish() {
+    console.log("Finished!");
+}
+
+greet("Pradeep", finish);</code></pre>
+
+        <h3>Asynchronous Callback</h3>
+
+<pre><code>console.log("Start");
+
+setTimeout(() => {
+
+    console.log("Timer finished");
+
+}, 1000);
+
+console.log("End");</code></pre>
+
+        <div class="callout warning">
+
+            <strong>Callback Hell</strong>
+
+            Deeply nested callbacks can become difficult to read and maintain.
+            Promises and async/await provide cleaner abstractions for many
+            asynchronous workflows.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     TIMERS
+     ========================================================= -->
+
+<section class="section reveal" id="timers">
+
+    <div class="section-title">
+        <span class="number">07 · TIMERS</span>
+        <h2>setTimeout and setInterval</h2>
+    </div>
+
+    <div class="grid grid-2">
+
+        <div class="card">
+
+            <h3>setTimeout()</h3>
+
+<pre><code>setTimeout(() => {
+
+    console.log("Runs later");
+
+}, 2000);</code></pre>
+
+            <p>
+                The delay specifies when the timer callback becomes eligible
+                to be queued; it does not guarantee exact execution at that
+                moment.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>setInterval()</h3>
+
+<pre><code>const id = setInterval(() => {
+
+    console.log("Tick");
+
+}, 1000);
+
+clearInterval(id);</code></pre>
+
+            <p>
+                Use <code>clearInterval()</code> to stop a repeating timer.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="card" style="margin-top:18px">
+
+        <h3>⏱ Timer Demonstration</h3>
+
+        <div class="output" id="timerOutput">
+            Timer not started.
+        </div>
+
+        <div class="controls">
+
+            <button class="btn" onclick="startTimerDemo()">
+                Start 3 Second Timer
+            </button>
+
+            <button class="btn secondary" onclick="cancelTimerDemo()">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     PROMISES
+     ========================================================= -->
+
+<section class="section reveal" id="promises">
+
+    <div class="section-title">
+        <span class="number">08 · PROMISES</span>
+        <h2>Promises</h2>
+        <p>A Promise represents the eventual result of an asynchronous operation.</p>
+    </div>
+
+    <div class="card">
+
+        <div class="flow" id="promiseStates">
+
+            <div class="flow-box active">
+                Pending
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="flow-box">
+                Fulfilled
+            </div>
+
+            <div class="arrow">or</div>
+
+            <div class="flow-box">
+                Rejected
+            </div>
+
+        </div>
+
+        <div class="controls">
+
+            <button class="btn" onclick="promiseSuccess()">
+                Resolve
+            </button>
+
+            <button class="btn orange" onclick="promiseFailure()">
+                Reject
+            </button>
+
+        </div>
+
+<pre><code>const promise = new Promise((resolve, reject) => {
+
+    const success = true;
+
+    if (success) {
+        resolve("Success!");
+    } else {
+        reject("Failed!");
+    }
+
+});
+
+promise
+    .then(result => {
+        console.log(result);
+    })
+    .catch(error => {
+        console.log(error);
+    })
+    .finally(() => {
+        console.log("Finished");
+    });</code></pre>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     MICROTASKS
+     ========================================================= -->
+
+<section class="section reveal" id="microtasks">
+
+    <div class="section-title">
+        <span class="number">09 · EVENT LOOP DEEP DIVE</span>
+        <h2>Microtasks vs Tasks</h2>
+        <p>One of the most important interview concepts in JavaScript.</p>
+    </div>
+
+    <div class="card">
+
+<pre><code>console.log("1");
+
+setTimeout(() => {
+    console.log("2");
+}, 0);
+
+Promise.resolve().then(() => {
+    console.log("3");
+});
+
+console.log("4");</code></pre>
+
+        <div class="callout success">
+
+            <strong>Typical output</strong>
+
+<pre><code>1
+4
+3
+2</code></pre>
+
+            Promise reaction callbacks are microtasks. After the current
+            synchronous work finishes, microtasks are processed before
+            the next task such as the timer callback.
+
+        </div>
+
+        <h3>Think in this order</h3>
+
+        <div class="flow">
+
+            <div class="flow-box">Synchronous Code</div>
+
+            <div class="arrow">→</div>
+
+            <div class="flow-box">Microtasks</div>
+
+            <div class="arrow">→</div>
+
+            <div class="flow-box">Next Task</div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     PROMISE COMBINATORS
+     ========================================================= -->
+
+<section class="section reveal" id="promiseall">
+
+    <div class="section-title">
+        <span class="number">10 · PROMISE COMBINATORS</span>
+        <h2>Promise.all, allSettled, race and any</h2>
+        <p>Choose the right strategy when handling multiple asynchronous operations.</p>
+    </div>
+
+    <div class="card table-wrap">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Behavior</th>
+                    <th>Useful When</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td><code>Promise.all()</code></td>
+                    <td>Fulfills when all fulfill; rejects when one rejects.</td>
+                    <td>All results are required.</td>
+                </tr>
+
+                <tr>
+                    <td><code>Promise.allSettled()</code></td>
+                    <td>Waits for every Promise to settle.</td>
+                    <td>You need success and failure results.</td>
+                </tr>
+
+                <tr>
+                    <td><code>Promise.race()</code></td>
+                    <td>Settles when the first Promise settles.</td>
+                    <td>First completion determines the result.</td>
+                </tr>
+
+                <tr>
+                    <td><code>Promise.any()</code></td>
+                    <td>Fulfills when the first Promise fulfills.</td>
+                    <td>Any successful result is acceptable.</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="card" style="margin-top:18px">
+
+<pre><code>const userPromise = fetchUser();
+const coursesPromise = fetchCourses();
+
+const [user, courses] =
+    await Promise.all([
+        userPromise,
+        coursesPromise
+    ]);</code></pre>
+
+        <div class="callout">
+            <strong>Key idea</strong>
+            If two operations are independent, starting them together can
+            reduce total waiting time compared with awaiting each one
+            sequentially.
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     ASYNC AWAIT
+     ========================================================= -->
+
+<section class="section reveal" id="asyncawait">
+
+    <div class="section-title">
+        <span class="number">11 · MODERN ASYNC</span>
+        <h2>async / await</h2>
+        <p>Promises become easier to read with async/await syntax.</p>
+    </div>
+
+    <div class="grid grid-2">
+
+        <div class="card">
+
+            <h3>Promise Style</h3>
+
+<pre><code>getUser()
+    .then(user => {
+        return getCourses(user.id);
+    })
+    .then(courses => {
+        console.log(courses);
+    })
+    .catch(error => {
+        console.log(error);
+    });</code></pre>
+
+        </div>
+
+        <div class="card">
+
+            <h3>async/await Style</h3>
+
+<pre><code>async function load() {
+
+    try {
+
+        const user = await getUser();
+
+        const courses =
+            await getCourses(user.id);
+
+        console.log(courses);
+
+    } catch (error) {
+
+        console.log(error);
+
+    }
+}</code></pre>
+
+        </div>
+
+    </div>
+
+    <div class="callout success">
+
+        <strong>Important</strong>
+
+        An <code>async</code> function always returns a Promise.
+        <code>await</code> can be used inside async functions and pauses
+        that async function until the awaited Promise settles.
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     ERROR HANDLING
+     ========================================================= -->
+
+<section class="section reveal" id="errors">
+
+    <div class="section-title">
+        <span class="number">12 · RELIABILITY</span>
+        <h2>Error Handling in Async Code</h2>
+    </div>
+
+    <div class="card">
+
+<pre><code>async function loadData() {
+
+    try {
+
+        const response =
+            await fetch("/api/students");
+
+        if (!response.ok) {
+            throw new Error(
+                "HTTP error: " + response.status
+            );
+        }
+
+        const data =
+            await response.json();
+
+        console.log(data);
+
+    } catch (error) {
+
+        console.error(
+            "Loading failed:",
+            error
+        );
+
+    } finally {
+
+        console.log("Request finished");
+
+    }
+}</code></pre>
+
+        <div class="callout danger">
+
+            <strong>Important</strong>
+
+            A rejected Promise should be handled somewhere appropriate.
+            Do not silently ignore errors.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     SEQUENTIAL VS PARALLEL
+     ========================================================= -->
+
+<section class="section reveal" id="parallel">
+
+    <div class="section-title">
+        <span class="number">13 · PERFORMANCE</span>
+        <h2>Sequential vs Parallel Async Operations</h2>
+        <p>A major real-world performance concept.</p>
+    </div>
+
+    <div class="grid grid-2">
+
+        <div class="card">
+
+            <h3>🐢 Sequential</h3>
+
+<pre><code>const user =
+    await getUser();
+
+const courses =
+    await getCourses();
+
+const notifications =
+    await getNotifications();</code></pre>
+
+            <p>
+                If the operations are independent, the waits may stack up.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>⚡ Parallel</h3>
+
+<pre><code>const [
+    user,
+    courses,
+    notifications
+] = await Promise.all([
+
+    getUser(),
+    getCourses(),
+    getNotifications()
+
+]);</code></pre>
+
+            <p>
+                Independent operations can be started together.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="card" style="margin-top:18px">
+
+        <h3>Performance Simulator</h3>
+
+        <div class="grid grid-2">
+
+            <div>
+
+                <p>
+                    Three operations:
+                    <strong>1.5s + 1.0s + 2.0s</strong>
+                </p>
+
+                <button class="btn" onclick="runSequential()">
+                    Simulate Sequential
+                </button>
+
+            </div>
+
+            <div>
+
+                <p>
+                    Same three independent operations together.
+                </p>
+
+                <button class="btn green" onclick="runParallel()">
+                    Simulate Parallel
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="output" id="performanceOutput">
+            Choose a simulation.
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     API PATTERN
+     ========================================================= -->
+
+<section class="section reveal" id="fetch">
+
+    <div class="section-title">
+        <span class="number">14 · REAL-WORLD DEVELOPMENT</span>
+        <h2>Asynchronous API Pattern</h2>
+        <p>This is the pattern you will use frequently in frontend development.</p>
+    </div>
+
+    <div class="card">
+
+<pre><code>async function loadStudents() {
+
+    try {
+
+        const response =
+            await fetch("/api/students");
+
+        if (!response.ok) {
+            throw new Error("Request failed");
+        }
+
+        const students =
+            await response.json();
+
+        console.log(students);
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+
+}</code></pre>
+
+        <div class="flow">
+
+            <div class="flow-box">User Action</div>
+            <div class="arrow">→</div>
+            <div class="flow-box">fetch()</div>
+            <div class="arrow">→</div>
+            <div class="flow-box">Server</div>
+            <div class="arrow">→</div>
+            <div class="flow-box">Promise</div>
+            <div class="arrow">→</div>
+            <div class="flow-box">UI Update</div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     ADVANCED
+     ========================================================= -->
+
+<section class="section reveal" id="advanced">
+
+    <div class="section-title">
+        <span class="number">15 · ADVANCED CONCEPTS</span>
+        <h2>Beyond the Basics</h2>
+    </div>
+
+    <div class="grid grid-3">
+
+        <div class="card feature">
+
+            <div class="feature-icon">↔</div>
+
+            <h3>Concurrency</h3>
+
+            <p>
+                Multiple asynchronous operations can make progress during
+                overlapping periods.
+            </p>
+
+        </div>
+
+        <div class="card feature">
+
+            <div class="feature-icon">⏳</div>
+
+            <h3>Debouncing</h3>
+
+            <p>
+                Delay execution until rapid input stops, useful for search
+                boxes and resize handlers.
+            </p>
+
+<pre><code>let timer;
+
+function search(value) {
+
+    clearTimeout(timer);
+
+    timer = setTimeout(() => {
+        console.log(value);
+    }, 400);
+}</code></pre>
+
+        </div>
+
+        <div class="card feature">
+
+            <div class="feature-icon">🔁</div>
+
+            <h3>Throttling</h3>
+
+            <p>
+                Limit how frequently a function executes during repeated events.
+            </p>
+
+        </div>
+
+        <div class="card feature">
+
+            <div class="feature-icon">🚫</div>
+
+            <h3>Cancellation</h3>
+
+            <p>
+                APIs such as AbortController can be used to cancel supported
+                asynchronous operations such as fetch requests.
+            </p>
+
+<pre><code>const controller =
+    new AbortController();
+
+fetch("/api/data", {
+    signal: controller.signal
+});
+
+controller.abort();</code></pre>
+
+        </div>
+
+        <div class="card feature">
+
+            <div class="feature-icon">📦</div>
+
+            <h3>Async Iteration</h3>
+
+            <p>
+                Modern JavaScript also supports async iterators and
+                <code>for await...of</code>.
+            </p>
+
+        </div>
+
+        <div class="card feature">
+
+            <div class="feature-icon">🧵</div>
+
+            <h3>Web Workers</h3>
+
+            <p>
+                CPU-heavy JavaScript can be moved to workers so the main UI
+                thread remains responsive.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     FLOWCHART
+     ========================================================= -->
+
+<section class="section reveal" id="flowchart">
+
+    <div class="section-title">
+        <span class="number">16 · VISUAL THINKING</span>
+        <h2>Complete Async JavaScript Flow</h2>
+        <p>Understand the journey of an asynchronous operation.</p>
+    </div>
+
+    <div class="card visualizer">
+
+        <div class="flow" id="asyncFlow">
+
+            <div class="flow-box active">JavaScript Code</div>
+
+            <div class="arrow">→</div>
+
+            <div class="flow-box">Async API</div>
+
+            <div class="arrow">→</div>
+
+            <div class="flow-box">Operation</div>
+
+            <div class="arrow">→</div>
+
+            <div class="flow-box">Queue</div>
+
+            <div class="arrow">→</div>
+
+            <div class="flow-box">Event Loop</div>
+
+            <div class="arrow">→</div>
+
+            <div class="flow-box">Call Stack</div>
+
+            <div class="arrow">→</div>
+
+            <div class="flow-box">Result</div>
+
+        </div>
+
+        <div class="controls">
+
+            <button class="btn" onclick="animateAsyncFlow()">
+                ▶ Play Animation
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     INTERACTIVE LABS
+     ========================================================= -->
+
+<section class="section reveal" id="labs">
+
+    <div class="section-title">
+        <span class="number">17 · INTERACTIVE LABS</span>
+        <h2>Async JavaScript Playground</h2>
+        <p>Experiment with asynchronous behavior.</p>
+    </div>
+
+
+    <!-- ORDER LAB -->
+
+    <div class="card">
+
+        <h3>🔬 Execution Order Lab</h3>
+
+        <p style="color:var(--muted);font-size:13px">
+            Predict the output before clicking Run.
+        </p>
+
+<pre><code>console.log("A");
+
+setTimeout(() => {
+    console.log("B");
+}, 0);
+
+Promise.resolve().then(() => {
+    console.log("C");
+});
+
+console.log("D");</code></pre>
+
+        <button class="btn" onclick="runOrderLab()">
+            Run Example
+        </button>
+
+        <div class="output" id="orderOutput">
+            Output will appear here.
+        </div>
+
+    </div>
+
+
+    <!-- PROMISE LAB -->
+
+    <div class="card" style="margin-top:18px">
+
+        <h3>🎯 Promise Playground</h3>
+
+        <label>Choose Promise result</label>
+
+        <select id="promiseChoice">
+
+            <option value="success">
+                Success
+            </option>
+
+            <option value="failure">
+                Failure
+            </option>
+
+        </select>
+
+        <div class="controls">
+
+            <button class="btn" onclick="runPromiseLab()">
+                Execute Promise
+            </button>
+
+        </div>
+
+        <div class="output" id="promiseOutput">
+            Result will appear here.
+        </div>
+
+    </div>
+
+
+    <!-- ASYNC LAB -->
+
+    <div class="card" style="margin-top:18px">
+
+        <h3>⚡ Async/Await Playground</h3>
+
+        <label>Operation duration</label>
+
+        <select id="durationChoice">
+
+            <option value="1000">1 second</option>
+            <option value="2000">2 seconds</option>
+            <option value="3000">3 seconds</option>
+
+        </select>
+
+        <button class="btn" onclick="runAwaitLab()" style="margin-top:12px">
+            Start Async Operation
+        </button>
+
+        <div class="output" id="awaitOutput">
+            Waiting to start...
+        </div>
+
+    </div>
+
+
+    <!-- DEBOUNCE -->
+
+    <div class="card" style="margin-top:18px">
+
+        <h3>⌨️ Debounce Lab</h3>
+
+        <label>Type quickly</label>
+
+        <input
+            id="debounceInput"
+            placeholder="Start typing..."
+        >
+
+        <div class="output" id="debounceOutput">
+            Waiting...
+        </div>
+
+    </div>
+
+
+    <!-- ALL LAB -->
+
+    <div class="card" style="margin-top:18px">
+
+        <h3>🚀 Promise.all Visualizer</h3>
+
+        <div class="flow" id="allFlow">
+
+            <div class="flow-box">API 1</div>
+
+            <div class="flow-box">API 2</div>
+
+            <div class="flow-box">API 3</div>
+
+        </div>
+
+        <button class="btn" onclick="runAllLab()" style="margin-top:15px">
+            Run All
+        </button>
+
+        <div class="output" id="allOutput">
+            Waiting...
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     COMMON MISTAKES
+     ========================================================= -->
+
+<section class="section reveal" id="mistakes">
+
+    <div class="section-title">
+        <span class="number">18 · DEBUGGING</span>
+        <h2>Common Async JavaScript Mistakes</h2>
+    </div>
+
+    <div class="grid grid-2">
+
+        <div class="card">
+
+            <h3>❌ Forgetting await</h3>
+
+<pre><code>const data = getData();
+
+console.log(data);</code></pre>
+
+            <p>
+                If getData() returns a Promise, data is a Promise rather
+                than the final result.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>❌ Awaiting independent tasks sequentially</h3>
+
+<pre><code>const a = await getA();
+const b = await getB();</code></pre>
+
+            <p>
+                If A and B are independent, consider starting them together.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>❌ Assuming setTimeout(0) means immediately</h3>
+
+            <p>
+                The callback must wait until the current synchronous work and
+                relevant queued work allow it to run.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>❌ Ignoring Promise rejection</h3>
+
+<pre><code>someAsyncOperation()
+    .then(result => {
+        console.log(result);
+    });</code></pre>
+
+            <p>
+                Handle failures appropriately with catch or try/catch.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>❌ Confusing Promise.all and allSettled</h3>
+
+            <p>
+                Promise.all fails fast when one Promise rejects.
+                allSettled waits for all to settle.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>❌ Blocking the main thread</h3>
+
+            <p>
+                Asynchronous APIs do not automatically make CPU-heavy
+                JavaScript non-blocking. Large synchronous computations can
+                still block the main thread.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     COMPARISON
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <div class="section-title">
+        <span class="number">QUICK REFERENCE</span>
+        <h2>Async JavaScript Toolkit</h2>
+    </div>
+
+    <div class="card table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Tool</th>
+                    <th>Purpose</th>
+                    <th>Typical Example</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>Callback</td>
+                    <td>Run a function later</td>
+                    <td>Event handlers</td>
+                </tr>
+
+                <tr>
+                    <td>setTimeout</td>
+                    <td>Schedule one timer callback</td>
+                    <td>Delayed action</td>
+                </tr>
+
+                <tr>
+                    <td>Promise</td>
+                    <td>Represent future result</td>
+                    <td>Network operation</td>
+                </tr>
+
+                <tr>
+                    <td>async/await</td>
+                    <td>Readable Promise syntax</td>
+                    <td>API functions</td>
+                </tr>
+
+                <tr>
+                    <td>Promise.all</td>
+                    <td>Wait for all successful results</td>
+                    <td>Independent APIs</td>
+                </tr>
+
+                <tr>
+                    <td>AbortController</td>
+                    <td>Cancel supported operations</td>
+                    <td>Cancel fetch</td>
+                </tr>
+
+                <tr>
+                    <td>Debounce</td>
+                    <td>Wait until input settles</td>
+                    <td>Search box</td>
+                </tr>
+
+                <tr>
+                    <td>Throttle</td>
+                    <td>Limit frequency</td>
+                    <td>Scroll events</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     EXAM PREP
+     ========================================================= -->
+
+<section class="section reveal" id="exam">
+
+    <div class="section-title">
+        <span class="number">19 · EXAM PREPARATION</span>
+        <h2>College / JNTUK Exam Prep</h2>
+    </div>
+
+    <div class="grid grid-2">
+
+        <div class="card">
+
+            <h3>⭐ 5-Mark Question</h3>
+
+            <p>
+                <strong>Explain asynchronous JavaScript.</strong>
+            </p>
+
+            <div class="callout">
+
+                <strong>Answer Structure</strong>
+
+                Define asynchronous JavaScript →
+                explain synchronous vs asynchronous →
+                callbacks →
+                Promises →
+                async/await →
+                advantages.
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <h3>⭐ 10-Mark Question</h3>
+
+            <p>
+                <strong>
+                    Explain the Event Loop and asynchronous programming
+                    in JavaScript with suitable examples.
+                </strong>
+            </p>
+
+            <div class="callout success">
+
+                <strong>Answer Structure</strong>
+
+                Introduction → Call Stack → Web APIs / host environment →
+                callback/task queues → microtask queue →
+                Event Loop → callbacks →
+                Promises → async/await →
+                example → advantages → conclusion.
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     INTERVIEW
+     ========================================================= -->
+
+<section class="section reveal" id="interview">
+
+    <div class="section-title">
+        <span class="number">20 · INTERVIEW PREPARATION</span>
+        <h2>Important Interview Questions</h2>
+    </div>
+
+    <div class="card">
+
+        <h3>1. Is JavaScript synchronous or asynchronous?</h3>
+
+        <p>
+            JavaScript execution itself is commonly described as single-threaded
+            and synchronous, while host environments provide asynchronous APIs
+            and scheduling mechanisms that allow non-blocking application behavior.
+        </p>
+
+        <hr style="border:0;border-top:1px solid var(--border);margin:20px 0">
+
+        <h3>2. What is the Event Loop?</h3>
+
+        <p>
+            The Event Loop coordinates when queued asynchronous callbacks can
+            be processed relative to the Call Stack and microtask queue.
+        </p>
+
+        <hr style="border:0;border-top:1px solid var(--border);margin:20px 0">
+
+        <h3>3. What is a Promise?</h3>
+
+        <p>
+            A Promise represents the eventual completion or failure of an
+            asynchronous operation and its resulting value.
+        </p>
+
+        <hr style="border:0;border-top:1px solid var(--border);margin:20px 0">
+
+        <h3>4. What are the states of a Promise?</h3>
+
+        <p>
+            Pending, fulfilled and rejected.
+        </p>
+
+        <hr style="border:0;border-top:1px solid var(--border);margin:20px 0">
+
+        <h3>5. What is the difference between async/await and Promises?</h3>
+
+        <p>
+            async/await is syntax built around Promises that lets asynchronous
+            control flow be written in a more sequential style.
+        </p>
+
+        <hr style="border:0;border-top:1px solid var(--border);margin:20px 0">
+
+        <h3>6. What is a microtask?</h3>
+
+        <p>
+            A microtask is a higher-priority queued unit of work such as a
+            Promise reaction callback. Microtasks are processed after the
+            current JavaScript stack completes and before the next task is
+            processed.
+        </p>
+
+        <hr style="border:0;border-top:1px solid var(--border);margin:20px 0">
+
+        <h3>7. Promise.all vs Promise.allSettled?</h3>
+
+        <p>
+            Promise.all fulfills only if all input Promises fulfill and rejects
+            when one rejects. Promise.allSettled waits for every input Promise
+            to settle and reports each outcome.
+        </p>
+
+        <hr style="border:0;border-top:1px solid var(--border);margin:20px 0">
+
+        <h3>8. Why doesn't setTimeout(fn, 0) run immediately?</h3>
+
+        <p>
+            The callback is scheduled for later. It must wait for the current
+            synchronous execution to finish and for the event-loop scheduling
+            rules to allow the callback to execute.
+        </p>
+
+        <hr style="border:0;border-top:1px solid var(--border);margin:20px 0">
+
+        <h3>9. How can you run independent API calls in parallel?</h3>
+
+<pre><code>const [a, b, c] =
+    await Promise.all([
+        getA(),
+        getB(),
+        getC()
+    ]);</code></pre>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     QUIZ
+     ========================================================= -->
+
+<section class="section reveal" id="quiz">
+
+    <div class="section-title">
+        <span class="number">21 · KNOWLEDGE CHECK</span>
+        <h2>Asynchronous JavaScript Quiz</h2>
+        <p>Test your understanding.</p>
+    </div>
+
+    <div class="card">
+
+<form id="quizForm">
+
+<!-- Q1 -->
+
+<div class="quiz-question">
+
+<h4>1. What is the usual execution model of JavaScript code?</h4>
+
+<label class="option">
+<input type="radio" name="q1" value="a">
+Single-threaded execution
+</label>
+
+<label class="option">
+<input type="radio" name="q1" value="b">
+Every function runs on a new thread
+</label>
+
+<label class="option">
+<input type="radio" name="q1" value="c">
+Only asynchronous execution
+</label>
+
+</div>
+
+
+<!-- Q2 -->
+
+<div class="quiz-question">
+
+<h4>2. Which object represents a future asynchronous result?</h4>
+
+<label class="option">
+<input type="radio" name="q2" value="a">
+Set
+</label>
+
+<label class="option">
+<input type="radio" name="q2" value="b">
+Promise
+</label>
+
+<label class="option">
+<input type="radio" name="q2" value="c">
+Map
+</label>
+
+</div>
+
+
+<!-- Q3 -->
+
+<div class="quiz-question">
+
+<h4>3. Which is NOT a Promise state?</h4>
+
+<label class="option">
+<input type="radio" name="q3" value="a">
+Pending
+</label>
+
+<label class="option">
+<input type="radio" name="q3" value="b">
+Fulfilled
+</label>
+
+<label class="option">
+<input type="radio" name="q3" value="c">
+Waiting
+</label>
+
+</div>
+
+
+<!-- Q4 -->
+
+<div class="quiz-question">
+
+<h4>4. Which keyword is used to wait for a Promise inside an async function?</h4>
+
+<label class="option">
+<input type="radio" name="q4" value="a">
+await
+</label>
+
+<label class="option">
+<input type="radio" name="q4" value="b">
+pause
+</label>
+
+<label class="option">
+<input type="radio" name="q4" value="c">
+wait
+</label>
+
+</div>
+
+
+<!-- Q5 -->
+
+<div class="quiz-question">
+
+<h4>5. Which Promise method waits for all inputs to fulfill?</h4>
+
+<label class="option">
+<input type="radio" name="q5" value="a">
+Promise.any()
+</label>
+
+<label class="option">
+<input type="radio" name="q5" value="b">
+Promise.all()
+</label>
+
+<label class="option">
+<input type="radio" name="q5" value="c">
+Promise.race()
+</label>
+
+</div>
+
+
+<!-- Q6 -->
+
+<div class="quiz-question">
+
+<h4>6. Which queue contains Promise reaction callbacks?</h4>
+
+<label class="option">
+<input type="radio" name="q6" value="a">
+Microtask queue
+</label>
+
+<label class="option">
+<input type="radio" name="q6" value="b">
+Only the timer queue
+</label>
+
+<label class="option">
+<input type="radio" name="q6" value="c">
+Call Stack permanently
+</label>
+
+</div>
+
+
+<!-- Q7 -->
+
+<div class="quiz-question">
+
+<h4>7. What does an async function return?</h4>
+
+<label class="option">
+<input type="radio" name="q7" value="a">
+A Promise
+</label>
+
+<label class="option">
+<input type="radio" name="q7" value="b">
+A Set
+</label>
+
+<label class="option">
+<input type="radio" name="q7" value="c">
+Nothing
+</label>
+
+</div>
+
+
+<!-- Q8 -->
+
+<div class="quiz-question">
+
+<h4>8. Which method waits for every Promise to settle?</h4>
+
+<label class="option">
+<input type="radio" name="q8" value="a">
+Promise.race()
+</label>
+
+<label class="option">
+<input type="radio" name="q8" value="b">
+Promise.allSettled()
+</label>
+
+<label class="option">
+<input type="radio" name="q8" value="c">
+Promise.any()
+</label>
+
+</div>
+
+
+<!-- Q9 -->
+
+<div class="quiz-question">
+
+<h4>9. What does setTimeout(fn, 0) mean?</h4>
+
+<label class="option">
+<input type="radio" name="q9" value="a">
+Run immediately before current code
+</label>
+
+<label class="option">
+<input type="radio" name="q9" value="b">
+Schedule the callback for later
+</label>
+
+<label class="option">
+<input type="radio" name="q9" value="c">
+Never run the callback
+</label>
+
+</div>
+
+
+<!-- Q10 -->
+
+<div class="quiz-question">
+
+<h4>10. Which is useful for cancelling a supported fetch request?</h4>
+
+<label class="option">
+<input type="radio" name="q10" value="a">
+AbortController
+</label>
+
+<label class="option">
+<input type="radio" name="q10" value="b">
+PromiseStop
+</label>
+
+<label class="option">
+<input type="radio" name="q10" value="c">
+CancelPromise
+</label>
+
+</div>
+
+
+<button
+    type="button"
+    class="btn"
+    onclick="checkQuiz()"
+>
+Check Quiz
+</button>
+
+</form>
+
+<div class="output" id="quizResult">
+Your score will appear here.
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     PRACTICE
+     ========================================================= -->
+
+<section class="section reveal" id="practice">
+
+    <div class="section-title">
+        <span class="number">22 · CODING PRACTICE</span>
+        <h2>Practice Problems</h2>
+        <p>Try solving these before checking examples online.</p>
+    </div>
+
+    <div class="grid grid-2">
+
+        <div class="card">
+            <h3>01 · Delay Function</h3>
+            <p>
+                Create a Promise-based delay function that resolves after
+                a specified number of milliseconds.
+            </p>
+            <div class="tags">
+                <span class="tag">Promise</span>
+                <span class="tag">setTimeout</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>02 · Async Greeting</h3>
+            <p>
+                Create an async function that waits for a greeting Promise
+                and prints the result.
+            </p>
+            <div class="tags">
+                <span class="tag">async</span>
+                <span class="tag">await</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>03 · Parallel Requests</h3>
+            <p>
+                Use Promise.all to execute three independent asynchronous
+                operations together.
+            </p>
+            <div class="tags">
+                <span class="tag">Promise.all</span>
+                <span class="tag">Concurrency</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>04 · Error Handling</h3>
+            <p>
+                Create an async function that catches a rejected Promise
+                using try/catch.
+            </p>
+            <div class="tags">
+                <span class="tag">try/catch</span>
+                <span class="tag">Promise</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>05 · Timeout</h3>
+            <p>
+                Create a timeout Promise and use Promise.race to reject or
+                resolve based on which operation finishes first.
+            </p>
+            <div class="tags">
+                <span class="tag">race</span>
+                <span class="tag">Timer</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>06 · Debounced Search</h3>
+            <p>
+                Build a search input that waits 500ms after the user stops
+                typing before running the search.
+            </p>
+            <div class="tags">
+                <span class="tag">Debounce</span>
+                <span class="tag">Events</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>07 · Promise Chain</h3>
+            <p>
+                Create a three-step Promise chain where the output of each
+                step becomes the input to the next.
+            </p>
+            <div class="tags">
+                <span class="tag">then()</span>
+                <span class="tag">catch()</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>08 · Fetch Wrapper</h3>
+            <p>
+                Create a reusable async function that performs fetch,
+                checks response.ok and returns JSON.
+            </p>
+            <div class="tags">
+                <span class="tag">fetch</span>
+                <span class="tag">API</span>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     MINI PROJECT
+     ========================================================= -->
+
+<section class="section reveal" id="project">
+
+    <div class="section-title">
+        <span class="number">23 · MINI PROJECT</span>
+        <h2>🚀 ZENSUS Async Student Dashboard</h2>
+        <p>Build a mini dashboard that simulates multiple asynchronous API requests.</p>
+    </div>
+
+    <div class="card">
+
+        <p style="color:var(--muted);font-size:13px">
+
+            The dashboard will simulate loading:
+            student profile, courses, notifications and performance data.
+
+            It demonstrates <strong>Promises</strong>,
+            <strong>async/await</strong>,
+            <strong>Promise.all</strong>,
+            <strong>template literals</strong>,
+            <strong>array methods</strong> and
+            <strong>error handling</strong>.
+
+        </p>
+
+        <button class="btn" onclick="loadStudentDashboard()" style="margin-top:15px">
+            🚀 Load Dashboard
+        </button>
+
+        <div class="output" id="dashboardStatus">
+            Dashboard has not been loaded.
+        </div>
+
+        <div
+            class="metric-grid"
+            id="dashboardMetrics"
+            style="margin-top:18px"
+        >
+
+            <div class="metric">
+                <small>Student</small>
+                <strong>—</strong>
+            </div>
+
+            <div class="metric">
+                <small>Courses</small>
+                <strong>—</strong>
+            </div>
+
+            <div class="metric">
+                <small>Average</small>
+                <strong>—</strong>
+            </div>
+
+            <div class="metric">
+                <small>Notifications</small>
+                <strong>—</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     CHECKLIST
+     ========================================================= -->
+
+<section class="section reveal" id="checklist">
+
+    <div class="section-title">
+        <span class="number">24 · PROGRESS</span>
+        <h2>Lesson Checklist</h2>
+        <p>Your progress is saved in this browser.</p>
+    </div>
+
+    <div class="card">
+
+        <div class="checklist" id="checklistBox">
+
+            <label class="check-item">
+                <input type="checkbox" data-key="sync">
+                <span>I understand synchronous vs asynchronous execution</span>
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-key="stack">
+                <span>I understand the Call Stack</span>
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-key="eventloop">
+                <span>I understand the Event Loop</span>
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-key="callbacks">
+                <span>I understand callbacks</span>
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-key="promises">
+                <span>I understand Promise states</span>
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-key="microtasks">
+                <span>I understand microtasks</span>
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-key="combinators">
+                <span>I understand Promise combinators</span>
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-key="async">
+                <span>I can write async/await code</span>
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-key="errors">
+                <span>I can handle asynchronous errors</span>
+            </label>
+
+            <label class="check-item">
+                <input type="checkbox" data-key="parallel">
+                <span>I understand sequential vs parallel operations</span>
+            </label>
+
+        </div>
+
+        <div class="output" id="progressOutput">
+            0% completed
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     RAPID REVISION
+     ========================================================= -->
+
+<section class="section reveal" id="revision">
+
+    <div class="section-title">
+        <span class="number">25 · RAPID REVISION</span>
+        <h2>Asynchronous JavaScript Cheat Sheet</h2>
+        <p>Review the entire lesson quickly.</p>
+    </div>
+
+    <div class="card">
+
+<pre><code>// Callback
+setTimeout(() => {
+    console.log("Later");
+}, 1000);
+
+
+// Promise
+const promise = new Promise(
+    (resolve, reject) => {
+
+        resolve("Success");
+
+    }
+);
+
+
+// Promise handling
+promise
+    .then(result => console.log(result))
+    .catch(error => console.log(error))
+    .finally(() => console.log("Done"));
+
+
+// Async function
+async function load() {
+
+    const result =
+        await promise;
+
+    console.log(result);
+}
+
+
+// Promise.all
+const results =
+    await Promise.all([
+        getUser(),
+        getCourses(),
+        getNotifications()
+    ]);
+
+
+// allSettled
+const results =
+    await Promise.allSettled([
+        task1(),
+        task2()
+    ]);
+
+
+// Race
+const result =
+    await Promise.race([
+        request(),
+        timeout()
+    ]);
+
+
+// Any
+const result =
+    await Promise.any([
+        server1(),
+        server2(),
+        server3()
+    ]);
+
+
+// Optional cancellation
+const controller =
+    new AbortController();
+
+fetch("/api/data", {
+    signal: controller.signal
+});
+
+controller.abort();
+
+
+// Debounce
+clearTimeout(timer);
+
+timer = setTimeout(() => {
+    search();
+}, 500);</code></pre>
+
+    </div>
+
+
+    <div class="card" style="margin-top:18px">
+
+        <h3>🧠 Remember These 12 Rules</h3>
+
+        <div class="grid grid-2" style="margin-top:15px">
+
+            <div class="callout">
+                <strong>1. Sync code runs now.</strong>
+                JavaScript executes synchronous work on the Call Stack.
+            </div>
+
+            <div class="callout">
+                <strong>2. Async work finishes later.</strong>
+                Results are scheduled through host/runtime mechanisms.
+            </div>
+
+            <div class="callout">
+                <strong>3. Promise = future result.</strong>
+                It can be pending, fulfilled or rejected.
+            </div>
+
+            <div class="callout">
+                <strong>4. async returns a Promise.</strong>
+                Every async function returns a Promise.
+            </div>
+
+            <div class="callout">
+                <strong>5. await works with Promises.</strong>
+                It pauses the current async function until settlement.
+            </div>
+
+            <div class="callout">
+                <strong>6. Microtasks matter.</strong>
+                Promise reactions are processed before the next task.
+            </div>
+
+            <div class="callout">
+                <strong>7. 0ms isn't immediate.</strong>
+                setTimeout schedules a callback for later.
+            </div>
+
+            <div class="callout">
+                <strong>8. Handle errors.</strong>
+                Use catch or try/catch where appropriate.
+            </div>
+
+            <div class="callout">
+                <strong>9. Independent tasks can run together.</strong>
+                Promise.all can reduce unnecessary waiting.
+            </div>
+
+            <div class="callout">
+                <strong>10. allSettled is different.</strong>
+                It waits for every input regardless of success/failure.
+            </div>
+
+            <div class="callout">
+                <strong>11. Async doesn't mean CPU work is free.</strong>
+                Heavy synchronous computation can still block the main thread.
+            </div>
+
+            <div class="callout">
+                <strong>12. Think in execution order.</strong>
+                Predict stack → microtask → task behavior.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     FINAL
+     ========================================================= -->
+
+<section class="section reveal">
+
+    <div class="card" style="text-align:center;padding:38px">
+
+        <div class="eyebrow">🎯 LESSON COMPLETE</div>
+
+        <h2 style="font-size:30px">
+            You now understand asynchronous JavaScript.
+        </h2>
+
+        <p style="color:var(--muted);max-width:760px;margin:10px auto">
+
+            The real skill is not memorizing Promise syntax.
+            It is being able to predict what JavaScript executes now,
+            what gets scheduled for later, which queue receives the work,
+            and how the result eventually returns to your application.
+
+        </p>
+
+        <div class="tags" style="justify-content:center">
+
+            <span class="tag">Callbacks</span>
+            <span class="tag">Timers</span>
+            <span class="tag">Call Stack</span>
+            <span class="tag">Event Loop</span>
+            <span class="tag">Promises</span>
+            <span class="tag">Microtasks</span>
+            <span class="tag">async/await</span>
+            <span class="tag">Promise.all</span>
+            <span class="tag">Concurrency</span>
+            <span class="tag">Fetch</span>
+
+        </div>
+
+        <div style="margin-top:25px">
+
+            <a
+                href="#overview"
+                class="btn"
+                style="text-decoration:none;display:inline-block"
+            >
+                ↑ Back to Top
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<div class="footer">
+
+    <strong>ZENSUS</strong> · Learn. Build. Grow.
+    <br>
+    JavaScript Course · Lesson 15 · Asynchronous JavaScript
+
+</div>
+
+</div>
+</main>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+     ========================================================= -->
+
+<script>
+
+document.documentElement.classList.add("js-enabled");
+
+
+/* =========================================================
+   MOBILE MENU
+   ========================================================= */
+
+const menuBtn =
+    document.getElementById("menuBtn");
+
+const sidebar =
+    document.getElementById("sidebar");
+
+menuBtn.addEventListener("click", () => {
+
+    sidebar.classList.toggle("open");
+
+});
+
+document.querySelectorAll(".nav a").forEach(link => {
+
+    link.addEventListener("click", () => {
+
+        sidebar.classList.remove("open");
+
+    });
+
+});
+
+
+/* =========================================================
+   SCROLL PROGRESS
+   ========================================================= */
+
+window.addEventListener("scroll", () => {
+
+    const scrollTop =
+        window.scrollY;
+
+    const height =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+
+    const percentage =
+        height > 0
+            ? (scrollTop / height) * 100
+            : 0;
+
+    document.getElementById("progress").style.width =
+        percentage + "%";
+
+});
+
+
+/* =========================================================
+   REVEAL
+   ========================================================= */
+
+const revealObserver =
+    new IntersectionObserver(
+
+        entries => {
+
+            entries.forEach(entry => {
+
+                if(entry.isIntersecting){
+
+                    entry.target.classList.add("visible");
+
+                    revealObserver.unobserve(
+                        entry.target
+                    );
+
+                }
+
+            });
+
+        },
+
+        {
+            threshold:.08
+        }
+
+    );
+
+document.querySelectorAll(".reveal")
+    .forEach(element => {
+
+        revealObserver.observe(element);
+
+    });
+
+
+/* =========================================================
+   ACTIVE NAV
+   ========================================================= */
+
+const sections =
+    document.querySelectorAll(
+        ".section[id], .hero[id]"
+    );
+
+const navLinks =
+    document.querySelectorAll(".nav a");
+
+window.addEventListener("scroll", () => {
+
+    let current = "";
+
+    sections.forEach(section => {
+
+        const top =
+            section.offsetTop - 130;
+
+        if(window.scrollY >= top){
+
+            current =
+                section.getAttribute("id");
+
+        }
+
+    });
+
+    navLinks.forEach(link => {
+
+        link.classList.remove("active");
+
+        if(
+            link.getAttribute("href") ===
+            "#" + current
+        ){
+
+            link.classList.add("active");
+
+        }
+
+    });
+
+});
+
+
+/* =========================================================
+   EVENT LOOP ANIMATION
+   ========================================================= */
+
+function animateEventLoop(){
+
+    const items =
+        document.querySelectorAll(
+            ".loop-column .queue-item"
+        );
+
+    items.forEach(item => {
+
+        item.classList.remove("active");
+
+    });
+
+    items.forEach((item,index) => {
+
+        setTimeout(() => {
+
+            items.forEach(
+                current =>
+                    current.classList.remove("active")
+            );
+
+            item.classList.add("active");
+
+        }, index * 600);
+
+    });
+
+}
+
+
+/* =========================================================
+   TIMER DEMO
+   ========================================================= */
+
+let timerId = null;
+
+function startTimerDemo(){
+
+    clearTimeout(timerId);
+
+    let remaining = 3;
+
+    const output =
+        document.getElementById("timerOutput");
+
+    output.textContent =
+        "Timer started...\n3 seconds remaining";
+
+    const interval =
+        setInterval(() => {
+
+            remaining--;
+
+            if(remaining > 0){
+
+                output.textContent =
+                    "Timer running...\n" +
+                    remaining +
+                    " seconds remaining";
+
+            }else{
+
+                clearInterval(interval);
+
+            }
+
+        },1000);
+
+    timerId =
+        setTimeout(() => {
+
+            output.textContent =
+                "⏰ Timer completed!";
+
+        },3000);
+
+}
+
+
+function cancelTimerDemo(){
+
+    clearTimeout(timerId);
+
+    document.getElementById("timerOutput").textContent =
+        "Timer cancelled.";
+
+}
+
+
+/* =========================================================
+   PROMISE STATES
+   ========================================================= */
+
+function promiseSuccess(){
+
+    const boxes =
+        document.querySelectorAll(
+            "#promiseStates .flow-box"
+        );
+
+    boxes.forEach(box => {
+
+        box.classList.remove(
+            "active",
+            "success"
+        );
+
+    });
+
+    boxes[1].classList.add("success");
+
+}
+
+
+function promiseFailure(){
+
+    const boxes =
+        document.querySelectorAll(
+            "#promiseStates .flow-box"
+        );
+
+    boxes.forEach(box => {
+
+        box.classList.remove(
+            "active",
+            "success"
+        );
+
+    });
+
+    boxes[2].classList.add("success");
+
+}
+
+
+/* =========================================================
+   ASYNC FLOW
+   ========================================================= */
+
+function animateAsyncFlow(){
+
+    const boxes =
+        document.querySelectorAll(
+            "#asyncFlow .flow-box"
+        );
+
+    boxes.forEach(box => {
+
+        box.classList.remove("active");
+
+    });
+
+    boxes.forEach((box,index) => {
+
+        setTimeout(() => {
+
+            boxes.forEach(
+                item =>
+                    item.classList.remove("active")
+            );
+
+            box.classList.add("active");
+
+        },index * 550);
+
+    });
+
+}
+
+
+/* =========================================================
+   ORDER LAB
+   ========================================================= */
+
+function runOrderLab(){
+
+    const output =
+        document.getElementById("orderOutput");
+
+    output.textContent =
+        "Running...\n";
+
+    setTimeout(() => {
+
+        output.textContent =
+            "A\nD\nC\nB";
+
+    },700);
+
+}
+
+
+/* =========================================================
+   PROMISE LAB
+   ========================================================= */
+
+function runPromiseLab(){
+
+    const choice =
+        document.getElementById("promiseChoice").value;
+
+    const output =
+        document.getElementById("promiseOutput");
+
+    output.textContent =
+        "Promise pending...";
+
+    new Promise((resolve,reject) => {
+
+        setTimeout(() => {
+
+            if(choice === "success"){
+
+                resolve("Promise fulfilled successfully.");
+
+            }else{
+
+                reject("Promise rejected.");
+
+            }
+
+        },1000);
+
+    })
+    .then(result => {
+
+        output.textContent =
+            "✓ " + result;
+
+        output.classList.add("success");
+        output.classList.remove("error");
+
+    })
+    .catch(error => {
+
+        output.textContent =
+            "✕ " + error;
+
+        output.classList.add("error");
+        output.classList.remove("success");
+
+    });
+
+}
+
+
+/* =========================================================
+   ASYNC/AWAIT LAB
+   ========================================================= */
+
+function runAwaitLab(){
+
+    const duration =
+        Number(
+            document.getElementById(
+                "durationChoice"
+            ).value
+        );
+
+    const output =
+        document.getElementById("awaitOutput");
+
+    async function performTask(){
+
+        output.textContent =
+            "⏳ Awaiting asynchronous operation...";
+
+        const result =
+            await new Promise(resolve => {
+
+                setTimeout(() => {
+
+                    resolve(
+                        "Operation completed after " +
+                        duration / 1000 +
+                        " second(s)."
+                    );
+
+                },duration);
+
+            });
+
+        output.textContent =
+            "✓ " + result;
+
+        output.classList.add("success");
+
+    }
+
+    performTask();
+
+}
+
+
+/* =========================================================
+   DEBOUNCE
+   ========================================================= */
+
+let debounceTimer;
+
+document
+    .getElementById("debounceInput")
+    .addEventListener("input", event => {
+
+        clearTimeout(debounceTimer);
+
+        const value =
+            event.target.value;
+
+        document.getElementById(
+            "debounceOutput"
+        ).textContent =
+            "Typing... waiting for 500ms";
+
+        debounceTimer =
+            setTimeout(() => {
+
+                document.getElementById(
+                    "debounceOutput"
+                ).textContent =
+                    "Search executed for:\n" +
+                    value;
+
+            },500);
+
+    });
+
+
+/* =========================================================
+   PROMISE.ALL LAB
+   ========================================================= */
+
+function runAllLab(){
+
+    const boxes =
+        document.querySelectorAll(
+            "#allFlow .flow-box"
+        );
+
+    const output =
+        document.getElementById("allOutput");
+
+    boxes.forEach(box => {
+
+        box.classList.remove(
+            "active",
+            "success"
+        );
+
+    });
+
+    output.textContent =
+        "Starting API 1, API 2 and API 3 together...";
+
+    const tasks =
+        boxes.map((box,index) => {
+
+            return new Promise(resolve => {
+
+                const delay =
+                    [1200,2200,1600][index];
+
+                setTimeout(() => {
+
+                    box.classList.add("success");
+
+                    resolve(
+                        "API " +
+                        (index + 1) +
+                        " completed"
+                    );
+
+                },delay);
+
+            });
+
+        });
+
+    Promise.all(tasks)
+        .then(results => {
+
+            output.textContent =
+                "✓ Promise.all completed\n\n" +
+                results.join("\n");
+
+            output.classList.add("success");
+
+        });
+
+}
+
+
+/* =========================================================
+   SEQUENTIAL SIMULATION
+   ========================================================= */
+
+async function runSequential(){
+
+    const output =
+        document.getElementById(
+            "performanceOutput"
+        );
+
+    output.textContent =
+        "Sequential execution started...";
+
+    const start =
+        performance.now();
+
+    await wait(1500);
+
+    await wait(1000);
+
+    await wait(2000);
+
+    const elapsed =
+        performance.now() - start;
+
+    output.textContent =
+        "Sequential execution completed.\n\n" +
+        "Approximate elapsed time: " +
+        (elapsed / 1000).toFixed(2) +
+        " seconds.";
+
+}
+
+
+/* =========================================================
+   PARALLEL SIMULATION
+   ========================================================= */
+
+async function runParallel(){
+
+    const output =
+        document.getElementById(
+            "performanceOutput"
+        );
+
+    output.textContent =
+        "Parallel execution started...";
+
+    const start =
+        performance.now();
+
+    await Promise.all([
+
+        wait(1500),
+
+        wait(1000),
+
+        wait(2000)
+
+    ]);
+
+    const elapsed =
+        performance.now() - start;
+
+    output.textContent =
+        "Parallel execution completed.\n\n" +
+        "Approximate elapsed time: " +
+        (elapsed / 1000).toFixed(2) +
+        " seconds.";
+
+}
+
+
+function wait(ms){
+
+    return new Promise(resolve => {
+
+        setTimeout(resolve,ms);
+
+    });
+
+}
+
+
+/* =========================================================
+   MINI PROJECT
+   ========================================================= */
+
+function fakeAPI(data,delay){
+
+    return new Promise(resolve => {
+
+        setTimeout(() => {
+
+            resolve(data);
+
+        },delay);
+
+    });
+
+}
+
+
+async function loadStudentDashboard(){
+
+    const status =
+        document.getElementById(
+            "dashboardStatus"
+        );
+
+    const metrics =
+        document.getElementById(
+            "dashboardMetrics"
+        );
+
+    status.textContent =
+        "⏳ Loading profile, courses, performance and notifications...";
+
+    try{
+
+        const [
+            student,
+            courses,
+            performance,
+            notifications
+        ] = await Promise.all([
+
+            fakeAPI({
+                name:"Pradeep",
+                branch:"CSE"
+            },1200),
+
+            fakeAPI([
+                "JavaScript",
+                "Python",
+                "SQL",
+                "DSA"
+            ],1700),
+
+            fakeAPI([
+                85,
+                92,
+                78,
+                90
+            ],2000),
+
+            fakeAPI([
+                "New DSA challenge",
+                "JavaScript lesson completed"
+            ],1000)
+
+        ]);
+
+        const average =
+            performance.reduce(
+                (sum,mark) => sum + mark,
+                0
+            ) / performance.length;
+
+        metrics.innerHTML = "";
+
+        const data = [
+
+            [
+                "Student",
+                student.name
+            ],
+
+            [
+                "Courses",
+                courses.length
+            ],
+
+            [
+                "Average",
+                average.toFixed(1) + "%"
+            ],
+
+            [
+                "Notifications",
+                notifications.length
+            ]
+
+        ];
+
+        data.forEach(([label,value]) => {
+
+            const metric =
+                document.createElement("div");
+
+            metric.className =
+                "metric";
+
+            const small =
+                document.createElement("small");
+
+            small.textContent =
+                label;
+
+            const strong =
+                document.createElement("strong");
+
+            strong.textContent =
+                value;
+
+            metric.appendChild(small);
+            metric.appendChild(strong);
+
+            metrics.appendChild(metric);
+
+        });
+
+        status.textContent =
+            `✓ Welcome ${student.name}!\n\n` +
+            `Branch: ${student.branch}\n` +
+            `Courses loaded: ${courses.join(", ")}\n` +
+            `Performance average: ${average.toFixed(1)}%\n` +
+            `Notifications: ${notifications.join(" | ")}`;
+
+        status.classList.add("success");
+
+    }catch(error){
+
+        status.textContent =
+            "✕ Dashboard loading failed.";
+
+        status.classList.add("error");
+
+    }
+
+}
+
+
+/* =========================================================
+   QUIZ
+   ========================================================= */
+
+function checkQuiz(){
+
+    const answers = {
+
+        q1:"a",
+        q2:"b",
+        q3:"c",
+        q4:"a",
+        q5:"b",
+        q6:"a",
+        q7:"a",
+        q8:"b",
+        q9:"b",
+        q10:"a"
+
+    };
+
+    let score = 0;
+
+    const total =
+        Object.keys(answers).length;
+
+    Object.keys(answers).forEach(question => {
+
+        const selected =
+            document.querySelector(
+                'input[name="' +
+                question +
+                '"]:checked'
+            );
+
+        if(
+            selected &&
+            selected.value ===
+            answers[question]
+        ){
+
+            score++;
+
+        }
+
+    });
+
+    const percentage =
+        Math.round(
+            (score / total) * 100
+        );
+
+    let message;
+
+    if(percentage >= 90){
+
+        message =
+            "🔥 Excellent! You understand asynchronous JavaScript very well.";
+
+    }else if(percentage >= 70){
+
+        message =
+            "👍 Good job! Review the Event Loop and Promise combinators.";
+
+    }else if(percentage >= 50){
+
+        message =
+            "📚 Good beginning. Revisit the examples and retry.";
+
+    }else{
+
+        message =
+            "💪 Keep practicing. Focus first on Call Stack, Event Loop and Promises.";
+
+    }
+
+    const output =
+        document.getElementById(
+            "quizResult"
+        );
+
+    output.textContent =
+        "Score: " +
+        score +
+        "/" +
+        total +
+        " (" +
+        percentage +
+        "%)\n\n" +
+        message;
+
+    output.classList.remove(
+        "success",
+        "error"
+    );
+
+    if(percentage >= 70){
+
+        output.classList.add(
+            "success"
+        );
+
+    }else{
+
+        output.classList.add(
+            "error"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   CHECKLIST
+   ========================================================= */
+
+const checklistKey =
+    "zensus-js-lesson15-checklist";
+
+const checklistItems =
+    document.querySelectorAll(
+        '#checklistBox input[type="checkbox"]'
+    );
+
+
+function updateChecklist(){
+
+    const state = {};
+
+    checklistItems.forEach(item => {
+
+        state[item.dataset.key] =
+            item.checked;
+
+        const parent =
+            item.closest(".check-item");
+
+        if(item.checked){
+
+            parent.classList.add("done");
+
+        }else{
+
+            parent.classList.remove("done");
+
+        }
+
+    });
+
+    localStorage.setItem(
+        checklistKey,
+        JSON.stringify(state)
+    );
+
+    updateChecklistProgress();
+
+}
+
+
+function updateChecklistProgress(){
+
+    let completed = 0;
+
+    checklistItems.forEach(item => {
+
+        if(item.checked){
+            completed++;
+        }
+
+    });
+
+    const percentage =
+        Math.round(
+            (completed / checklistItems.length) *
+            100
+        );
+
+    document.getElementById(
+        "progressOutput"
+    ).textContent =
+        completed +
+        " / " +
+        checklistItems.length +
+        " completed — " +
+        percentage +
+        "%";
+
+}
+
+
+function loadChecklist(){
+
+    try{
+
+        const saved =
+            JSON.parse(
+                localStorage.getItem(
+                    checklistKey
+                )
+            );
+
+        if(!saved){
+
+            updateChecklistProgress();
+
+            return;
+
+        }
+
+        checklistItems.forEach(item => {
+
+            item.checked =
+                saved[item.dataset.key] === true;
+
+        });
+
+        updateChecklist();
+
+    }catch(error){
+
+        updateChecklistProgress();
+
+    }
+
+}
+
+
+checklistItems.forEach(item => {
+
+    item.addEventListener(
+        "change",
+        updateChecklist
+    );
+
+});
+
+
+loadChecklist();
+
+
+/* =========================================================
+   INITIAL VIEW
+   ========================================================= */
+
+window.addEventListener("load", () => {
+
+    document
+        .querySelectorAll(
+            ".hero,.section"
+        )
+        .forEach(element => {
+
+            if(
+                element.getBoundingClientRect()
+                    .top <
+                window.innerHeight
+            ){
+
+                element.classList.add(
+                    "visible"
+                );
+
+            }
+
+        });
+
+});
+
+</script>
+
+</body>
+</html>

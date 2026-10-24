@@ -1,0 +1,2800 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS React — Lesson 7: Event Handling</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+    --bg:#f7f8fc;
+    --surface:#ffffff;
+    --surface-soft:#f2f4f8;
+    --text:#172033;
+    --muted:#657084;
+    --primary:#635bff;
+    --primary-dark:#5048df;
+    --border:#e3e7ef;
+    --green:#16a34a;
+    --red:#dc2626;
+    --orange:#ea580c;
+    --blue:#2563eb;
+    --dark:#0f1320;
+    --dark2:#181d2b;
+    --dark3:#242b3d;
+    --shadow:0 10px 35px rgba(25,35,65,.08);
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+button,
+input{
+    font:inherit;
+}
+
+.topbar{
+    height:68px;
+    position:sticky;
+    top:0;
+    z-index:100;
+    background:rgba(255,255,255,.94);
+    backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--border);
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 30px;
+}
+
+.logo{
+    font-size:22px;
+    font-weight:850;
+    letter-spacing:-.7px;
+}
+
+.logo span{
+    color:var(--primary);
+}
+
+.lesson-badge{
+    padding:7px 14px;
+    border-radius:30px;
+    background:#eeecff;
+    color:var(--primary);
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:.4px;
+}
+
+.layout{
+    display:grid;
+    grid-template-columns:270px minmax(0,1fr);
+    max-width:1500px;
+    margin:auto;
+}
+
+.sidebar{
+    position:sticky;
+    top:68px;
+    height:calc(100vh - 68px);
+    overflow:auto;
+
+    background:#fff;
+    border-right:1px solid var(--border);
+
+    padding:27px 17px;
+}
+
+.sidebar-title{
+    font-size:11px;
+    color:#8a93a5;
+    font-weight:850;
+    letter-spacing:1.4px;
+    text-transform:uppercase;
+    margin-bottom:14px;
+}
+
+.sidebar a{
+    display:block;
+    text-decoration:none;
+    color:#596579;
+    font-size:13.5px;
+
+    padding:9px 12px;
+    margin:3px 0;
+
+    border-radius:9px;
+    transition:.2s;
+}
+
+.sidebar a:hover{
+    background:#f2f0ff;
+    color:var(--primary);
+}
+
+.sidebar a.active{
+    background:#eeecff;
+    color:var(--primary);
+    font-weight:750;
+}
+
+main{
+    width:100%;
+    max-width:1000px;
+    margin:auto;
+    padding:55px 50px 100px;
+}
+
+.hero{
+    position:relative;
+    overflow:hidden;
+
+    background:linear-gradient(135deg,#131625,#29254e);
+    color:white;
+
+    padding:56px;
+    border-radius:26px;
+    margin-bottom:60px;
+
+    box-shadow:0 20px 60px rgba(35,30,80,.18);
+}
+
+.hero::before{
+    content:"";
+    position:absolute;
+
+    width:330px;
+    height:330px;
+
+    right:-110px;
+    top:-120px;
+
+    border-radius:50%;
+    background:#635bff;
+    opacity:.25;
+}
+
+.hero::after{
+    content:"";
+    position:absolute;
+
+    width:220px;
+    height:220px;
+
+    left:-120px;
+    bottom:-120px;
+
+    border-radius:50%;
+    background:#a78bfa;
+    opacity:.18;
+}
+
+.hero-content{
+    position:relative;
+    z-index:2;
+}
+
+.eyebrow{
+    color:#bdb8ff;
+    font-size:11px;
+    font-weight:850;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    margin-bottom:14px;
+}
+
+.hero h1{
+    font-size:clamp(38px,5vw,62px);
+    line-height:1.02;
+    letter-spacing:-2.5px;
+    margin-bottom:20px;
+}
+
+.hero h1 span{
+    color:#aaa3ff;
+}
+
+.hero p{
+    color:#d8d9e5;
+    max-width:760px;
+    font-size:17px;
+}
+
+.section{
+    scroll-margin-top:90px;
+    margin-bottom:72px;
+}
+
+.section h2{
+    font-size:32px;
+    letter-spacing:-1.1px;
+    line-height:1.2;
+    margin-bottom:15px;
+}
+
+.section h3{
+    font-size:21px;
+    margin:31px 0 10px;
+}
+
+.section p{
+    color:var(--muted);
+    margin:11px 0;
+}
+
+ul{
+    margin:15px 0 15px 22px;
+    color:var(--muted);
+}
+
+li{
+    margin:5px 0;
+}
+
+code{
+    font-family:Consolas,monospace;
+    background:#eff1f5;
+    color:#b42318;
+    border-radius:5px;
+    padding:2px 6px;
+}
+
+pre{
+    background:var(--dark);
+    color:#e7eaf2;
+
+    padding:24px;
+    border-radius:15px;
+
+    overflow:auto;
+    margin:18px 0;
+
+    font-family:Consolas,"Courier New",monospace;
+    font-size:14px;
+    line-height:1.7;
+
+    box-shadow:0 15px 40px rgba(0,0,0,.12);
+}
+
+.info{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:15px;
+    padding:21px 23px;
+    margin:23px 0;
+    box-shadow:var(--shadow);
+}
+
+.highlight{
+    border-left:4px solid var(--primary);
+    background:#f1efff;
+    border-radius:9px;
+    padding:18px 20px;
+    margin:22px 0;
+}
+
+.success{
+    border-left:4px solid var(--green);
+    background:#ecfdf3;
+    border-radius:9px;
+    padding:18px 20px;
+    margin:22px 0;
+}
+
+.warning{
+    border-left:4px solid var(--orange);
+    background:#fff7ed;
+    border-radius:9px;
+    padding:18px 20px;
+    margin:22px 0;
+}
+
+.danger{
+    border-left:4px solid var(--red);
+    background:#fff5f5;
+    border-radius:9px;
+    padding:18px 20px;
+    margin:22px 0;
+}
+
+.card-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+    margin:25px 0;
+}
+
+.card{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:17px;
+    padding:24px;
+    box-shadow:var(--shadow);
+    transition:.25s;
+}
+
+.card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 15px 40px rgba(30,40,70,.11);
+}
+
+.card h3{
+    margin:0 0 8px;
+}
+
+.card p{
+    font-size:14px;
+}
+
+.visual{
+    background:var(--dark);
+    color:white;
+    border-radius:20px;
+    padding:29px;
+    margin:28px 0;
+    overflow:hidden;
+}
+
+.visual-title{
+    color:#919aaf;
+    font-size:11px;
+    letter-spacing:1.5px;
+    font-weight:800;
+    text-transform:uppercase;
+    margin-bottom:22px;
+}
+
+.flow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:13px;
+    flex-wrap:wrap;
+}
+
+.node{
+    min-width:140px;
+    text-align:center;
+    padding:17px 16px;
+
+    background:var(--dark2);
+    border:1px solid #333c52;
+    border-radius:13px;
+
+    transition:.3s;
+}
+
+.node.active{
+    animation:nodePulse 1.6s infinite;
+}
+
+.node small{
+    display:block;
+    color:#8993a9;
+    margin-top:3px;
+}
+
+.arrow{
+    color:#aaa3ff;
+    font-size:24px;
+    font-weight:800;
+}
+
+@keyframes nodePulse{
+    0%,100%{
+        box-shadow:0 0 0 rgba(99,91,255,0);
+        transform:translateY(0);
+    }
+
+    50%{
+        box-shadow:0 0 30px rgba(99,91,255,.42);
+        transform:translateY(-3px);
+    }
+}
+
+/* Event playground */
+
+.playground{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:28px;
+    box-shadow:var(--shadow);
+    margin:25px 0;
+}
+
+.playground-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+}
+
+.event-button{
+    width:100%;
+    padding:18px;
+    border:1px solid var(--border);
+    background:#f8f9fb;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:750;
+    color:var(--text);
+    transition:.2s;
+}
+
+.event-button:hover{
+    transform:translateY(-2px);
+    border-color:var(--primary);
+    background:#f4f2ff;
+}
+
+.event-log{
+    margin-top:18px;
+    min-height:80px;
+    border-radius:12px;
+    padding:16px;
+    background:#10131c;
+    color:#a7f3d0;
+    font-family:Consolas,monospace;
+    font-size:13px;
+}
+
+/* Mouse */
+
+.mouse-box{
+    height:180px;
+    border:2px dashed #cfd4df;
+    border-radius:15px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+    background:#fafbfc;
+
+    transition:.25s;
+}
+
+.mouse-box.hovered{
+    background:#eeecff;
+    border-color:var(--primary);
+    transform:scale(1.01);
+}
+
+.mouse-box strong{
+    display:block;
+    font-size:20px;
+}
+
+/* Keyboard */
+
+.keyboard{
+    display:flex;
+    justify-content:center;
+    gap:9px;
+    flex-wrap:wrap;
+    margin:22px 0;
+}
+
+.key{
+    min-width:58px;
+    padding:12px 15px;
+    text-align:center;
+
+    border:1px solid #3a4357;
+    background:#1b2130;
+    color:#dce0ea;
+
+    border-radius:9px;
+
+    box-shadow:0 4px 0 #0b0e16;
+    transition:.1s;
+}
+
+.key.active{
+    transform:translateY(4px);
+    box-shadow:none;
+    background:#635bff;
+    color:white;
+}
+
+.key-status{
+    text-align:center;
+    color:#aeb6c8;
+    margin-top:15px;
+}
+
+/* Event object */
+
+.event-inspector{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+}
+
+.inspector{
+    background:#10131c;
+    color:#e7eaf2;
+    border-radius:15px;
+    padding:22px;
+}
+
+.inspector-title{
+    color:#9099ad;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin-bottom:13px;
+}
+
+.event-property{
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+
+    border-bottom:1px solid #282e3d;
+    padding:8px 0;
+
+    font-family:Consolas,monospace;
+    font-size:13px;
+}
+
+.event-property span:last-child{
+    color:#86efac;
+}
+
+/* Form */
+
+.form-demo{
+    background:#f8f9fc;
+    border:1px solid var(--border);
+    border-radius:15px;
+    padding:24px;
+}
+
+.form-demo input{
+    width:100%;
+    padding:13px 14px;
+    border:1px solid #d9dee8;
+    border-radius:9px;
+    outline:none;
+    margin:8px 0 12px;
+}
+
+.form-demo input:focus{
+    border-color:var(--primary);
+    box-shadow:0 0 0 3px rgba(99,91,255,.1);
+}
+
+.form-result{
+    margin-top:15px;
+    padding:12px;
+    background:#ecfdf3;
+    color:#166534;
+    border-radius:9px;
+    display:none;
+}
+
+/* Propagation */
+
+.propagation-area{
+    display:flex;
+    justify-content:center;
+    padding:20px;
+}
+
+.outer{
+    width:430px;
+    padding:25px;
+
+    background:#eeeefc;
+    border:2px solid #b9b4ff;
+    border-radius:18px;
+
+    text-align:center;
+}
+
+.middle{
+    margin-top:20px;
+    padding:25px;
+
+    background:#eaf5ff;
+    border:2px solid #93c5fd;
+    border-radius:16px;
+}
+
+.inner{
+    margin-top:20px;
+    padding:22px;
+
+    background:#ecfdf3;
+    border:2px solid #86efac;
+    border-radius:14px;
+
+    cursor:pointer;
+    font-weight:800;
+}
+
+.propagation-log{
+    background:var(--dark);
+    color:#a7f3d0;
+    border-radius:12px;
+    padding:16px;
+    margin-top:18px;
+
+    min-height:80px;
+    font-family:Consolas,monospace;
+    font-size:13px;
+}
+
+/* Quiz */
+
+.quiz{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:17px;
+    padding:25px;
+    margin:18px 0;
+    box-shadow:var(--shadow);
+}
+
+.quiz-question{
+    font-weight:800;
+    margin-bottom:15px;
+}
+
+.option{
+    display:block;
+    width:100%;
+
+    border:1px solid var(--border);
+    background:#fafbfc;
+
+    padding:12px 15px;
+    margin:7px 0;
+
+    border-radius:9px;
+    cursor:pointer;
+
+    text-align:left;
+    transition:.2s;
+}
+
+.option:hover{
+    border-color:var(--primary);
+    background:#f5f3ff;
+}
+
+.option.correct{
+    border-color:#86efac;
+    background:#ecfdf3;
+    color:#166534;
+}
+
+.option.wrong{
+    border-color:#fca5a5;
+    background:#fef2f2;
+    color:#991b1b;
+}
+
+.quiz-result{
+    margin-top:10px;
+    font-weight:750;
+}
+
+/* Event table */
+
+.event-table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+    border-radius:15px;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+    margin:25px 0;
+}
+
+.event-table th,
+.event-table td{
+    padding:14px 15px;
+    border-bottom:1px solid var(--border);
+    text-align:left;
+}
+
+.event-table th{
+    background:#f1f3f7;
+}
+
+.footer{
+    text-align:center;
+    border-top:1px solid var(--border);
+    padding-top:30px;
+    color:#7b8497;
+}
+
+@media(max-width:900px){
+
+    .layout{
+        grid-template-columns:1fr;
+    }
+
+    .sidebar{
+        display:none;
+    }
+
+    main{
+        padding:35px 20px 80px;
+    }
+
+    .hero{
+        padding:36px 25px;
+    }
+
+    .card-grid,
+    .playground-grid,
+    .event-inspector{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:550px){
+
+    .topbar{
+        padding:0 16px;
+    }
+
+    .lesson-badge{
+        display:none;
+    }
+
+    .section h2{
+        font-size:27px;
+    }
+
+    .outer{
+        width:100%;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <div class="logo">
+        ZEN<span>SUS</span>
+    </div>
+
+    <div class="lesson-badge">
+        REACT • LESSON 07
+    </div>
+
+</header>
+
+
+<div class="layout">
+
+<aside class="sidebar">
+
+    <div class="sidebar-title">
+        Lesson 7 — Event Handling
+    </div>
+
+    <a href="#events" class="active">Events in React</a>
+    <a href="#system">React Event System</a>
+    <a href="#onclick">onClick</a>
+    <a href="#onchange">onChange</a>
+    <a href="#onsubmit">onSubmit</a>
+    <a href="#mouse">Mouse Events</a>
+    <a href="#keyboard">Keyboard Events</a>
+    <a href="#functions">Passing Functions</a>
+    <a href="#handler">Event Handlers</a>
+    <a href="#object">Event Objects</a>
+    <a href="#synthetic">Synthetic Events</a>
+    <a href="#arguments">Arguments</a>
+    <a href="#prevent">Prevent Default</a>
+    <a href="#propagation">Event Propagation</a>
+    <a href="#bubbling">Event Bubbling</a>
+    <a href="#capturing">Event Capturing</a>
+    <a href="#mistakes">Common Mistakes</a>
+    <a href="#quiz">Quick Quiz</a>
+
+</aside>
+
+
+<main>
+
+<!-- HERO -->
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <div class="eyebrow">
+            ZENSUS React Course • Lesson 07
+        </div>
+
+        <h1>
+            Event <span>Handling</span>
+        </h1>
+
+        <p>
+            Learn how React listens to user interactions, executes event
+            handlers, works with event objects, controls forms and
+            understands event propagation.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- EVENTS -->
+
+<section class="section" id="events">
+
+<h2>01. Events in React</h2>
+
+<p>
+An <strong>event</strong> is something that happens in an application
+because of an action or activity.
+</p>
+
+<p>
+Examples include:
+</p>
+
+<ul>
+<li>Clicking a button</li>
+<li>Typing inside an input</li>
+<li>Submitting a form</li>
+<li>Moving the mouse</li>
+<li>Pressing a keyboard key</li>
+<li>Entering or leaving an element</li>
+</ul>
+
+<div class="card-grid">
+
+<div class="card">
+
+<h3>👆 Mouse Events</h3>
+
+<p>
+Mouse interactions such as clicking, entering and leaving elements.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>⌨️ Keyboard Events</h3>
+
+<p>
+React can respond to keyboard actions such as key presses.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>📝 Form Events</h3>
+
+<p>
+Forms use events to react to typing, submission and changes.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>🔄 UI Events</h3>
+
+<p>
+Events allow a component to respond dynamically to the user.
+</p>
+
+</div>
+
+</div>
+
+<div class="highlight">
+
+<strong>Core idea:</strong>
+
+<p>
+An event is the bridge between what the user does and how your React
+application responds.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- SYSTEM -->
+
+<section class="section" id="system">
+
+<h2>02. React Event System</h2>
+
+<p>
+React provides a consistent event-handling model for components.
+You attach event handlers directly to JSX elements using event props.
+</p>
+
+<pre>
+&lt;button onClick={handleClick}&gt;
+    Click Me
+&lt;/button&gt;
+</pre>
+
+<div class="visual">
+
+<div class="visual-title">
+THE REACT EVENT FLOW
+</div>
+
+<div class="flow">
+
+<div class="node active">
+User Action
+<small>click / type</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Browser Event
+<small>event occurs</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node active">
+React Handler
+<small>handleClick()</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+State / UI
+<small>application responds</small>
+</div>
+
+</div>
+
+</div>
+
+<p>
+React uses camelCase event names such as <code>onClick</code> and
+<code>onChange</code>.
+</p>
+
+<div class="warning">
+
+<strong>HTML vs React:</strong>
+
+<pre>
+HTML:
+&lt;button onclick="handleClick()"&gt;
+
+React:
+&lt;button onClick={handleClick}&gt;
+</pre>
+
+</div>
+
+</section>
+
+
+<!-- ONCLICK -->
+
+<section class="section" id="onclick">
+
+<h2>03. <code>onClick</code></h2>
+
+<p>
+<code>onClick</code> runs a function when an element is clicked.
+</p>
+
+<pre>
+function handleClick(){
+    console.log("Button clicked");
+}
+
+function App(){
+
+    return (
+        &lt;button onClick={handleClick}&gt;
+            Click Me
+        &lt;/button&gt;
+    );
+}
+</pre>
+
+<h3>Interactive demonstration</h3>
+
+<div class="playground">
+
+<button
+class="event-button"
+onclick="clickDemo()">
+
+Click this button
+
+</button>
+
+<div id="clickLog" class="event-log">
+Waiting for click...
+</div>
+
+</div>
+
+<div class="success">
+
+<strong>Important:</strong>
+
+<p>
+Pass the function reference:
+
+<code>onClick={handleClick}</code>
+</p>
+
+</div>
+
+</section>
+
+
+<!-- ONCHANGE -->
+
+<section class="section" id="onchange">
+
+<h2>04. <code>onChange</code></h2>
+
+<p>
+<code>onChange</code> is commonly used with form controls.
+It allows React to respond when the value of an input changes.
+</p>
+
+<pre>
+function App(){
+
+    const [name, setName] = useState("");
+
+    return (
+        &lt;input
+            value={name}
+            onChange={(event) =&gt;
+                setName(event.target.value)
+            }
+        /&gt;
+    );
+}
+</pre>
+
+<h3>Live Input Visualizer</h3>
+
+<div class="playground">
+
+<input
+id="liveInput"
+type="text"
+placeholder="Type something..."
+style="
+width:100%;
+padding:14px;
+border:1px solid #dce1ea;
+border-radius:9px;
+outline:none;
+"
+oninput="inputDemo(event)"
+>
+
+<div
+style="
+margin-top:15px;
+padding:16px;
+background:#f4f2ff;
+border-radius:10px;
+">
+
+<strong>Current value:</strong>
+
+<span id="inputValue">
+Nothing typed yet
+</span>
+
+</div>
+
+</div>
+
+<div class="info">
+
+<strong>Typical use cases:</strong>
+
+<ul>
+<li>Login forms</li>
+<li>Search boxes</li>
+<li>Registration forms</li>
+<li>Filters</li>
+<li>Live validation</li>
+</ul>
+
+</div>
+
+</section>
+
+
+<!-- ONSUBMIT -->
+
+<section class="section" id="onsubmit">
+
+<h2>05. <code>onSubmit</code></h2>
+
+<p>
+The <code>onSubmit</code> event runs when a form is submitted.
+</p>
+
+<pre>
+function handleSubmit(event){
+
+    event.preventDefault();
+
+    console.log("Form submitted");
+}
+
+&lt;form onSubmit={handleSubmit}&gt;
+
+    &lt;input /&gt;
+
+    &lt;button type="submit"&gt;
+        Submit
+    &lt;/button&gt;
+
+&lt;/form&gt;
+</pre>
+
+<h3>Interactive Form</h3>
+
+<div class="form-demo">
+
+<form onsubmit="submitDemo(event)">
+
+<label>
+<strong>Name</strong>
+</label>
+
+<input
+id="nameInput"
+type="text"
+placeholder="Enter your name"
+required
+>
+
+<button class="event-button" type="submit">
+Submit Form
+</button>
+
+<div id="formResult" class="form-result"></div>
+
+</form>
+
+</div>
+
+<div class="highlight">
+
+<strong>Why use <code>preventDefault()</code>?</strong>
+
+<p>
+Traditional browser form submission can reload or navigate the page.
+React applications often prevent that default behavior and handle the
+form using JavaScript.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- MOUSE -->
+
+<section class="section" id="mouse">
+
+<h2>06. Mouse Events</h2>
+
+<p>
+React supports many mouse-related events.
+Two important ones are <code>onMouseEnter</code> and
+<code>onMouseLeave</code>.
+</p>
+
+<table class="event-table">
+
+<tr>
+<th>Event</th>
+<th>When it occurs</th>
+</tr>
+
+<tr>
+<td><code>onClick</code></td>
+<td>Element is clicked</td>
+</tr>
+
+<tr>
+<td><code>onMouseEnter</code></td>
+<td>Pointer enters an element</td>
+</tr>
+
+<tr>
+<td><code>onMouseLeave</code></td>
+<td>Pointer leaves an element</td>
+</tr>
+
+<tr>
+<td><code>onMouseMove</code></td>
+<td>Pointer moves over an element</td>
+</tr>
+
+<tr>
+<td><code>onDoubleClick</code></td>
+<td>Element is double-clicked</td>
+</tr>
+
+</table>
+
+<h3>Mouse Enter / Leave Playground</h3>
+
+<div class="playground">
+
+<div
+id="mouseBox"
+class="mouse-box"
+onmouseenter="mouseEnterDemo()"
+onmouseleave="mouseLeaveDemo()"
+>
+
+<div>
+
+<strong id="mouseTitle">
+Move your mouse here
+</strong>
+
+<span id="mouseStatus">
+onMouseEnter / onMouseLeave
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- KEYBOARD -->
+
+<section class="section" id="keyboard">
+
+<h2>07. Keyboard Events</h2>
+
+<p>
+React can listen for keyboard interactions using events such as:
+</p>
+
+<ul>
+<li><code>onKeyDown</code></li>
+<li><code>onKeyUp</code></li>
+</ul>
+
+<pre>
+function handleKeyDown(event){
+
+    console.log(event.key);
+
+}
+
+&lt;input onKeyDown={handleKeyDown} /&gt;
+</pre>
+
+<div class="visual">
+
+<div class="visual-title">
+PRESS ANY KEY INSIDE THE INPUT
+</div>
+
+<input
+id="keyboardInput"
+style="
+width:100%;
+padding:14px;
+border-radius:9px;
+border:1px solid #3b4458;
+background:#1b2030;
+color:white;
+outline:none;
+"
+placeholder="Click here and press a key..."
+onkeydown="keyboardDemo(event)"
+>
+
+<div class="keyboard">
+
+<div class="key">A</div>
+<div class="key">S</div>
+<div class="key">D</div>
+<div class="key">Enter</div>
+<div class="key">Space</div>
+<div class="key">Esc</div>
+
+</div>
+
+<div
+id="keyStatus"
+class="key-status"
+>
+Waiting for keyboard input...
+</div>
+
+</div>
+
+<h3>Real-world examples</h3>
+
+<div class="card-grid">
+
+<div class="card">
+<h3>⌨️ Search</h3>
+<p>
+Detect Enter to submit a search query.
+</p>
+</div>
+
+<div class="card">
+<h3>🎮 Games</h3>
+<p>
+Keyboard events can control movement and actions.
+</p>
+</div>
+
+<div class="card">
+<h3>📋 Shortcuts</h3>
+<p>
+Applications can respond to combinations such as Ctrl + K.
+</p>
+</div>
+
+<div class="card">
+<h3>♿ Accessibility</h3>
+<p>
+Keyboard interactions help users navigate without a mouse.
+</p>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- FUNCTIONS -->
+
+<section class="section" id="functions">
+
+<h2>08. Passing Functions</h2>
+
+<p>
+React expects an event handler function.
+You normally pass the function reference rather than immediately calling it.
+</p>
+
+<pre>
+function handleClick(){
+    console.log("Clicked");
+}
+
+&lt;button onClick={handleClick}&gt;
+    Click
+&lt;/button&gt;
+</pre>
+
+<div class="danger">
+
+<strong>Common mistake:</strong>
+
+<pre>
+&lt;button onClick={handleClick()}&gt;
+</pre>
+
+<p>
+This calls the function while React is rendering instead of waiting for
+the click.
+</p>
+
+</div>
+
+<div class="success">
+
+<strong>Correct:</strong>
+
+<pre>
+&lt;button onClick={handleClick}&gt;
+</pre>
+
+</div>
+
+<h3>When you need arguments</h3>
+
+<pre>
+function greet(name){
+    console.log("Hello", name);
+}
+
+&lt;button onClick={() =&gt; greet("Pradeep")}&gt;
+    Greet
+&lt;/button&gt;
+</pre>
+
+</section>
+
+
+<!-- HANDLER -->
+
+<section class="section" id="handler">
+
+<h2>09. Event Handler Functions</h2>
+
+<p>
+An event handler is a function that contains the logic React should execute
+when an event occurs.
+</p>
+
+<pre>
+function handleLogin(){
+
+    console.log("Login button clicked");
+
+}
+
+function Login(){
+
+    return (
+        &lt;button onClick={handleLogin}&gt;
+            Login
+        &lt;/button&gt;
+    );
+}
+</pre>
+
+<div class="highlight">
+
+<strong>Professional habit:</strong>
+
+<p>
+Give handlers meaningful names such as:
+</p>
+
+<ul>
+<li><code>handleSubmit</code></li>
+<li><code>handleLogin</code></li>
+<li><code>handleChange</code></li>
+<li><code>handleDelete</code></li>
+<li><code>handleKeyDown</code></li>
+</ul>
+
+</div>
+
+</section>
+
+
+<!-- EVENT OBJECT -->
+
+<section class="section" id="object">
+
+<h2>10. Event Objects</h2>
+
+<p>
+When React calls your event handler, it can provide an event object
+containing useful information about the event.
+</p>
+
+<pre>
+function handleClick(event){
+
+    console.log(event);
+
+}
+</pre>
+
+<p>
+For input fields, a very common expression is:
+</p>
+
+<pre>
+event.target.value
+</pre>
+
+<h3>Live Event Inspector</h3>
+
+<div class="playground">
+
+<button
+class="event-button"
+onclick="inspectEvent(event)"
+>
+Inspect Click Event
+</button>
+
+<div class="event-inspector" style="margin-top:18px;">
+
+<div class="inspector">
+
+<div class="inspector-title">
+Event Information
+</div>
+
+<div class="event-property">
+<span>type</span>
+<span id="eventType">—</span>
+</div>
+
+<div class="event-property">
+<span>target</span>
+<span id="eventTarget">—</span>
+</div>
+
+<div class="event-property">
+<span>button</span>
+<span id="eventButton">—</span>
+</div>
+
+</div>
+
+<div class="inspector">
+
+<div class="inspector-title">
+Coordinates
+</div>
+
+<div class="event-property">
+<span>clientX</span>
+<span id="eventX">—</span>
+</div>
+
+<div class="event-property">
+<span>clientY</span>
+<span id="eventY">—</span>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- SYNTHETIC -->
+
+<section class="section" id="synthetic">
+
+<h2>11. Synthetic Events</h2>
+
+<p>
+React provides a normalized event interface so event handling can behave
+consistently across supported environments.
+</p>
+
+<div class="visual">
+
+<div class="visual-title">
+CONCEPTUAL EVENT LAYER
+</div>
+
+<div class="flow">
+
+<div class="node">
+Browser
+<small>native event</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node active">
+React Event
+<small>normalized interface</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Your Handler
+<small>application logic</small>
+</div>
+
+</div>
+
+</div>
+
+<p>
+This means developers can work with React's event API rather than writing
+browser-specific event handling for every component.
+</p>
+
+<div class="info">
+
+<strong>Student takeaway:</strong>
+
+<p>
+You do not need to memorize browser internals to use React events effectively.
+Focus first on the React event names, handler functions and event object.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- ARGUMENTS -->
+
+<section class="section" id="arguments">
+
+<h2>12. Arguments in Event Handlers</h2>
+
+<p>
+Sometimes an event handler needs both the event object and your own data.
+</p>
+
+<pre>
+function handleDelete(id, event){
+
+    console.log("Deleting:", id);
+
+}
+
+&lt;button
+    onClick={(event) =&gt;
+        handleDelete(101, event)
+    }
+&gt;
+    Delete
+&lt;/button&gt;
+</pre>
+
+<h3>Another common pattern</h3>
+
+<pre>
+function handleUser(id){
+
+    console.log(id);
+
+}
+
+&lt;button
+    onClick={() =&gt; handleUser(25)}
+&gt;
+    Open User
+&lt;/button&gt;
+</pre>
+
+<div class="highlight">
+
+<strong>Remember:</strong>
+
+<p>
+Use an arrow function when you need to supply your own arguments.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- PREVENT DEFAULT -->
+
+<section class="section" id="prevent">
+
+<h2>13. Preventing Default Behavior</h2>
+
+<p>
+Browsers have built-in behaviors for many events.
+React allows you to prevent those behaviors using
+<code>event.preventDefault()</code>.
+</p>
+
+<pre>
+function handleSubmit(event){
+
+    event.preventDefault();
+
+    // custom React logic
+
+}
+</pre>
+
+<h3>Examples</h3>
+
+<ul>
+<li>Preventing a form from reloading the page</li>
+<li>Preventing a link from navigating</li>
+<li>Creating custom interactions</li>
+</ul>
+
+<div class="warning">
+
+<strong>Important distinction:</strong>
+
+<p>
+<code>preventDefault()</code> prevents the browser's default action.
+It does <strong>not</strong> stop the event from propagating through
+the DOM.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- PROPAGATION -->
+
+<section class="section" id="propagation">
+
+<h2>14. Event Propagation</h2>
+
+<p>
+Event propagation describes how an event travels through the DOM tree.
+</p>
+
+<div class="visual">
+
+<div class="visual-title">
+THREE-PHASE EVENT MODEL
+</div>
+
+<div class="flow">
+
+<div class="node">
+Capture
+<small>outer → inner</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node active">
+Target
+<small>actual element</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Bubble
+<small>inner → outer</small>
+</div>
+
+</div>
+
+</div>
+
+<p>
+The two major propagation phases students should understand are:
+</p>
+
+<div class="card-grid">
+
+<div class="card">
+
+<h3>⬇️ Capturing</h3>
+
+<p>
+The event travels from an outer ancestor toward the target.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>⬆️ Bubbling</h3>
+
+<p>
+The event travels from the target back through its ancestors.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- BUBBLING -->
+
+<section class="section" id="bubbling">
+
+<h2>15. Event Bubbling</h2>
+
+<p>
+In the bubbling phase, an event triggered on a child can propagate upward
+through its parent elements.
+</p>
+
+<div class="propagation-area">
+
+<div
+class="outer"
+onclick="bubbleOuter()"
+>
+
+Outer
+
+<div
+class="middle"
+onclick="bubbleMiddle()"
+>
+
+Middle
+
+<div
+class="inner"
+onclick="bubbleInner()"
+>
+
+Click Inner
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div
+id="propagationLog"
+class="propagation-log"
+>
+Click "Click Inner" to observe bubbling...
+</div>
+
+<h3>Stopping propagation</h3>
+
+<pre>
+function handleClick(event){
+
+    event.stopPropagation();
+
+}
+</pre>
+
+<div class="warning">
+
+<strong>Important:</strong>
+
+<p>
+<code>stopPropagation()</code> stops the event from continuing through
+the propagation path.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- CAPTURING -->
+
+<section class="section" id="capturing">
+
+<h2>16. Event Capturing</h2>
+
+<p>
+Capturing happens before the event reaches its target.
+The event travels from the outer ancestor toward the target.
+</p>
+
+<div class="visual">
+
+<div class="visual-title">
+CAPTURING VS BUBBLING
+</div>
+
+<div style="text-align:center;">
+
+<div style="margin:10px;color:#aeb6c7;">
+CAPTURE
+</div>
+
+<div style="
+width:80%;
+margin:10px auto;
+padding:13px;
+border:1px solid #4c5670;
+border-radius:10px;
+">
+Parent
+</div>
+
+<div style="
+width:60%;
+margin:10px auto;
+padding:13px;
+border:1px solid #4c5670;
+border-radius:10px;
+">
+Child
+</div>
+
+<div style="
+width:40%;
+margin:10px auto;
+padding:13px;
+border:1px solid #86efac;
+border-radius:10px;
+color:#86efac;
+">
+TARGET
+</div>
+
+<div style="margin:10px;color:#aaa3ff;">
+BUBBLE
+</div>
+
+</div>
+
+</div>
+
+<h3>Capture handler in React</h3>
+
+<pre>
+&lt;div onClickCapture={handleCapture}&gt;
+
+    &lt;button onClick={handleClick}&gt;
+        Click
+    &lt;/button&gt;
+
+&lt;/div&gt;
+</pre>
+
+<div class="success">
+
+<strong>Remember:</strong>
+
+<p>
+<code>onClickCapture</code> handles the capturing phase.
+Regular <code>onClick</code> participates in the bubbling phase.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- REAL WORLD -->
+
+<section class="section">
+
+<h2>17. Real-World Event Architecture</h2>
+
+<p>
+Professional React applications combine events with state and component
+logic.
+</p>
+
+<div class="visual">
+
+<div class="visual-title">
+LOGIN EXAMPLE
+</div>
+
+<div class="flow">
+
+<div class="node">
+User Types
+<small>onChange</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+State
+<small>email/password</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+Submit
+<small>onSubmit</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node active">
+Validation
+<small>logic</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+UI
+<small>success/error</small>
+</div>
+
+</div>
+
+</div>
+
+<p>
+This is the foundation behind interactive forms, dashboards, search
+interfaces, authentication pages and almost every modern React application.
+</p>
+
+</section>
+
+
+<!-- MISTAKES -->
+
+<section class="section" id="mistakes">
+
+<h2>18. Common Event Mistakes</h2>
+
+<div class="card-grid">
+
+<div class="card">
+
+<h3 style="color:#dc2626;">
+❌ Calling instead of passing
+</h3>
+
+<pre>
+onClick={handleClick()}
+</pre>
+
+<p>
+This executes during rendering.
+</p>
+
+<p>
+<strong>Correct:</strong>
+<code>onClick={handleClick}</code>
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h3 style="color:#dc2626;">
+❌ Wrong event name
+</h3>
+
+<pre>
+onclick={handleClick}
+</pre>
+
+<p>
+React uses camelCase:
+</p>
+
+<p>
+<code>onClick</code>
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h3 style="color:#dc2626;">
+❌ Forgetting event object
+</h3>
+
+<pre>
+function handleChange(){
+
+    console.log(event.target.value);
+
+}
+</pre>
+
+<p>
+Pass the event parameter explicitly.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h3 style="color:#dc2626;">
+❌ Forgetting preventDefault
+</h3>
+
+<pre>
+function submit(event){
+
+    // form may perform
+    // its default action
+
+}
+</pre>
+
+<p>
+Use <code>event.preventDefault()</code> when appropriate.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h3 style="color:#dc2626;">
+❌ Mutating state inside events
+</h3>
+
+<pre>
+items.push(newItem);
+</pre>
+
+<p>
+Use the state setter and immutable updates.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h3 style="color:#dc2626;">
+❌ Confusing propagation
+</h3>
+
+<p>
+Remember that preventing the default browser action and stopping event
+propagation are different concepts.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- CHEATSHEET -->
+
+<section class="section">
+
+<h2>19. React Event Cheat Sheet</h2>
+
+<table class="event-table">
+
+<tr>
+<th>Event</th>
+<th>Typical use</th>
+</tr>
+
+<tr>
+<td><code>onClick</code></td>
+<td>Buttons, cards, actions</td>
+</tr>
+
+<tr>
+<td><code>onChange</code></td>
+<td>Inputs, selects, textareas</td>
+</tr>
+
+<tr>
+<td><code>onSubmit</code></td>
+<td>Forms</td>
+</tr>
+
+<tr>
+<td><code>onMouseEnter</code></td>
+<td>Pointer enters element</td>
+</tr>
+
+<tr>
+<td><code>onMouseLeave</code></td>
+<td>Pointer leaves element</td>
+</tr>
+
+<tr>
+<td><code>onKeyDown</code></td>
+<td>Key is pressed</td>
+</tr>
+
+<tr>
+<td><code>onKeyUp</code></td>
+<td>Key is released</td>
+</tr>
+
+<tr>
+<td><code>onClickCapture</code></td>
+<td>Click during capture phase</td>
+</tr>
+
+</table>
+
+</section>
+
+
+<!-- QUIZ -->
+
+<section class="section" id="quiz">
+
+<h2>20. Quick Quiz</h2>
+
+<p>
+Test your understanding before moving to the next lesson.
+</p>
+
+
+<div class="quiz">
+
+<div class="quiz-question">
+1. Which event is normally used for a React button click?
+</div>
+
+<button class="option" onclick="answer(this,false)">
+A. onclick
+</button>
+
+<button class="option" onclick="answer(this,true)">
+B. onClick
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. clickEvent
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="quiz-question">
+2. What should normally be passed to onClick?
+</div>
+
+<button class="option" onclick="answer(this,true)">
+A. A function reference
+</button>
+
+<button class="option" onclick="answer(this,false)">
+B. The result of calling the function
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. A string
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="quiz-question">
+3. Which property commonly retrieves an input's current value?
+</div>
+
+<button class="option" onclick="answer(this,false)">
+A. event.value
+</button>
+
+<button class="option" onclick="answer(this,true)">
+B. event.target.value
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. event.input
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="quiz-question">
+4. What does preventDefault() do?
+</div>
+
+<button class="option" onclick="answer(this,true)">
+A. Prevents the browser's default action
+</button>
+
+<button class="option" onclick="answer(this,false)">
+B. Deletes the event
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. Stops React rendering
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="quiz-question">
+5. In bubbling, the event travels primarily in which direction?
+</div>
+
+<button class="option" onclick="answer(this,false)">
+A. Parent to child
+</button>
+
+<button class="option" onclick="answer(this,true)">
+B. Target toward ancestors
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. Browser to server
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="quiz-question">
+6. Which React event prop is associated with the capture phase?
+</div>
+
+<button class="option" onclick="answer(this,false)">
+A. onClickBubble
+</button>
+
+<button class="option" onclick="answer(this,true)">
+B. onClickCapture
+</button>
+
+<button class="option" onclick="answer(this,false)">
+C. onCaptureClick
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+</section>
+
+
+<!-- MASTER -->
+
+<section class="section">
+
+<h2>21. Master the Event Mental Model</h2>
+
+<div class="visual">
+
+<div class="visual-title">
+THE ZENSUS REACT EVENT MODEL
+</div>
+
+<div class="flow">
+
+<div class="node active">
+👤 USER
+<small>does something</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+⚡ EVENT
+<small>click / type / submit</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+🎯 HANDLER
+<small>handleClick()</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node">
+🧠 LOGIC
+<small>state / validation</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="node active">
+✨ UI
+<small>updated result</small>
+</div>
+
+</div>
+
+</div>
+
+<div class="highlight">
+
+<strong>Master this formula:</strong>
+
+<p style="font-size:18px;margin-top:8px;">
+
+<strong>
+User Action → Event → Handler → Logic → State → Re-render → UI
+</strong>
+
+</p>
+
+</div>
+
+<div class="success">
+
+<strong>After this lesson, you should be able to:</strong>
+
+<ul>
+<li>Explain how events work in React.</li>
+<li>Use <code>onClick</code>, <code>onChange</code> and <code>onSubmit</code>.</li>
+<li>Handle mouse and keyboard interactions.</li>
+<li>Write clean event handler functions.</li>
+<li>Read useful information from the event object.</li>
+<li>Pass custom arguments to handlers.</li>
+<li>Prevent default browser behavior.</li>
+<li>Explain bubbling and capturing.</li>
+<li>Use <code>stopPropagation()</code> when appropriate.</li>
+<li>Connect events with React state.</li>
+</ul>
+
+</div>
+
+</section>
+
+
+<div class="footer">
+
+<strong>ZENSUS React Course</strong>
+
+<br>
+
+Learn • Build • Practice • Master
+
+</div>
+
+
+</main>
+
+</div>
+
+
+<script>
+
+/* ---------------------------
+   CLICK DEMO
+--------------------------- */
+
+function clickDemo(){
+
+    const log = document.getElementById("clickLog");
+
+    const time =
+        new Date().toLocaleTimeString();
+
+    log.textContent =
+        "✓ onClick fired → handleClick() → " +
+        time;
+}
+
+
+/* ---------------------------
+   INPUT DEMO
+--------------------------- */
+
+function inputDemo(event){
+
+    const value =
+        event.target.value;
+
+    document.getElementById("inputValue")
+        .textContent =
+        value || "Nothing typed yet";
+}
+
+
+/* ---------------------------
+   FORM DEMO
+--------------------------- */
+
+function submitDemo(event){
+
+    event.preventDefault();
+
+    const name =
+        document.getElementById("nameInput").value;
+
+    const result =
+        document.getElementById("formResult");
+
+    result.style.display = "block";
+
+    result.textContent =
+        "✓ Form handled by React-style logic. Hello, " +
+        name + "!";
+}
+
+
+/* ---------------------------
+   MOUSE DEMO
+--------------------------- */
+
+function mouseEnterDemo(){
+
+    const box =
+        document.getElementById("mouseBox");
+
+    box.classList.add("hovered");
+
+    document.getElementById("mouseTitle")
+        .textContent =
+        "Pointer entered!";
+
+    document.getElementById("mouseStatus")
+        .textContent =
+        "onMouseEnter fired";
+}
+
+function mouseLeaveDemo(){
+
+    const box =
+        document.getElementById("mouseBox");
+
+    box.classList.remove("hovered");
+
+    document.getElementById("mouseTitle")
+        .textContent =
+        "Move your mouse here";
+
+    document.getElementById("mouseStatus")
+        .textContent =
+        "onMouseLeave fired";
+}
+
+
+/* ---------------------------
+   KEYBOARD DEMO
+--------------------------- */
+
+function keyboardDemo(event){
+
+    const keys =
+        document.querySelectorAll(".key");
+
+    keys.forEach(key => {
+
+        key.classList.remove("active");
+
+        if(
+            key.textContent.toLowerCase()
+            === event.key.toLowerCase()
+        ){
+            key.classList.add("active");
+        }
+
+        if(
+            event.code === "Space" &&
+            key.textContent === "Space"
+        ){
+            key.classList.add("active");
+        }
+
+    });
+
+    document.getElementById("keyStatus")
+        .textContent =
+        "onKeyDown → key: " +
+        event.key +
+        " • code: " +
+        event.code;
+}
+
+
+/* ---------------------------
+   EVENT INSPECTOR
+--------------------------- */
+
+function inspectEvent(event){
+
+    document.getElementById("eventType")
+        .textContent =
+        event.type;
+
+    document.getElementById("eventTarget")
+        .textContent =
+        event.target.tagName;
+
+    document.getElementById("eventButton")
+        .textContent =
+        event.button;
+
+    document.getElementById("eventX")
+        .textContent =
+        event.clientX;
+
+    document.getElementById("eventY")
+        .textContent =
+        event.clientY;
+}
+
+
+/* ---------------------------
+   BUBBLING DEMO
+--------------------------- */
+
+function bubbleOuter(){
+
+    document.getElementById("propagationLog")
+        .innerHTML +=
+        "<br>↑ Outer handler";
+}
+
+function bubbleMiddle(){
+
+    document.getElementById("propagationLog")
+        .innerHTML =
+        "✓ Middle handler";
+
+    document.getElementById("propagationLog")
+        .innerHTML +=
+        "<br>↑ Event continues upward";
+}
+
+function bubbleInner(){
+
+    document.getElementById("propagationLog")
+        .innerHTML =
+        "🎯 Inner handler fired";
+
+    document.getElementById("propagationLog")
+        .innerHTML +=
+        "<br>↑ Bubbling begins";
+}
+
+
+/* ---------------------------
+   QUIZ
+--------------------------- */
+
+function answer(button, correct){
+
+    const quiz =
+        button.closest(".quiz");
+
+    const options =
+        quiz.querySelectorAll(".option");
+
+    const result =
+        quiz.querySelector(".quiz-result");
+
+    options.forEach(option => {
+
+        option.disabled = true;
+
+    });
+
+    if(correct){
+
+        button.classList.add("correct");
+
+        result.textContent =
+            "✓ Correct! Excellent.";
+
+        result.style.color =
+            "#16a34a";
+
+    }else{
+
+        button.classList.add("wrong");
+
+        result.textContent =
+            "✗ Not quite. Review the concept.";
+
+        result.style.color =
+            "#dc2626";
+
+        options.forEach(option => {
+
+            const click =
+                option.getAttribute("onclick");
+
+            if(click &&
+               click.includes("true")){
+
+                option.classList.add("correct");
+
+            }
+
+        });
+
+    }
+
+}
+
+
+/* ---------------------------
+   SIDEBAR ACTIVE SECTION
+--------------------------- */
+
+const sections =
+    document.querySelectorAll(".section");
+
+const links =
+    document.querySelectorAll(".sidebar a");
+
+window.addEventListener("scroll", () => {
+
+    let current = "";
+
+    sections.forEach(section => {
+
+        const top =
+            section.offsetTop - 130;
+
+        if(window.scrollY >= top){
+
+            current =
+                section.getAttribute("id");
+
+        }
+
+    });
+
+    links.forEach(link => {
+
+        link.classList.remove("active");
+
+        if(
+            link.getAttribute("href")
+            === "#" + current
+        ){
+
+            link.classList.add("active");
+
+        }
+
+    });
+
+});
+
+</script>
+
+</body>
+</html>
+

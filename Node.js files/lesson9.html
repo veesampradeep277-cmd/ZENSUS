@@ -1,0 +1,3608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ZENSUS AI | Lesson 09 - Routing in Express.js</title>
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #eaf2ff;
+            --navy: #0f172a;
+            --text: #1e293b;
+            --muted: #64748b;
+            --bg: #f7faff;
+            --white: #ffffff;
+            --line: #dbe7f5;
+            --success: #15803d;
+            --success-bg: #ecfdf3;
+            --danger: #b91c1c;
+            --warning: #b45309;
+            --code: #0b1220;
+            --code-text: #dbeafe;
+            --shadow: 0 10px 30px rgba(37, 99, 235, 0.08);
+            --radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* ================= TOPBAR ================= */
+
+        .topbar {
+            height: 70px;
+            background: rgba(255, 255, 255, 0.96);
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(12px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-mark {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: 11px;
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+            letter-spacing: -1px;
+            box-shadow: 0 7px 18px rgba(37, 99, 235, .22);
+        }
+
+        .brand-name {
+            font-size: 19px;
+            font-weight: 800;
+            color: var(--navy);
+            letter-spacing: .5px;
+        }
+
+        .brand-sub {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .top-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .pill {
+            padding: 7px 12px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted);
+            background: white;
+        }
+
+        .pill.blue {
+            color: var(--primary);
+            background: var(--primary-light);
+            border-color: #cfe0ff;
+        }
+
+        /* ================= LAYOUT ================= */
+
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 270px;
+            background: white;
+            border-right: 1px solid var(--line);
+            position: fixed;
+            top: 70px;
+            bottom: 0;
+            left: 0;
+            overflow-y: auto;
+            padding: 24px 16px;
+            z-index: 900;
+        }
+
+        .sidebar-title {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--muted);
+            padding: 0 12px 12px;
+        }
+
+        .toc a {
+            display: block;
+            padding: 9px 12px;
+            border-radius: 9px;
+            margin-bottom: 3px;
+            color: var(--muted);
+            font-size: 13px;
+            transition: .2s ease;
+        }
+
+        .toc a:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .toc a.active {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 700;
+            border-left: 3px solid var(--primary);
+        }
+
+        .content {
+            margin-left: 270px;
+            width: calc(100% - 270px);
+            max-width: 1250px;
+            padding: 42px 45px 80px;
+        }
+
+        /* ================= HERO ================= */
+
+        .hero {
+            background:
+                radial-gradient(circle at 85% 20%, rgba(37,99,235,.12), transparent 30%),
+                linear-gradient(135deg, #ffffff, #f3f8ff);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            padding: 48px;
+            box-shadow: var(--shadow);
+            margin-bottom: 28px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .lesson-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1px solid #cfe0ff;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .7px;
+        }
+
+        .hero h1 {
+            margin-top: 18px;
+            font-size: clamp(34px, 5vw, 58px);
+            line-height: 1.08;
+            color: var(--navy);
+            letter-spacing: -2px;
+        }
+
+        .hero h1 span {
+            color: var(--primary);
+        }
+
+        .hero p {
+            margin-top: 18px;
+            max-width: 800px;
+            font-size: 17px;
+            color: var(--muted);
+        }
+
+        .hero-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .meta {
+            padding: 8px 13px;
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        /* ================= SECTIONS ================= */
+
+        .section {
+            margin-top: 34px;
+            scroll-margin-top: 95px;
+        }
+
+        .section-card {
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 30px;
+            box-shadow: 0 6px 22px rgba(15, 23, 42, .04);
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .number {
+            min-width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: var(--primary-light);
+            color: var(--primary);
+            display: grid;
+            place-items: center;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        h2 {
+            color: var(--navy);
+            font-size: 27px;
+            line-height: 1.25;
+        }
+
+        h3 {
+            color: var(--navy);
+            margin: 24px 0 10px;
+            font-size: 19px;
+        }
+
+        h4 {
+            color: var(--navy);
+            margin: 15px 0 7px;
+        }
+
+        p {
+            margin-bottom: 13px;
+        }
+
+        .lead {
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        /* ================= CARDS ================= */
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .info-card {
+            border: 1px solid var(--line);
+            border-radius: 13px;
+            padding: 20px;
+            background: #fbfdff;
+        }
+
+        .info-card strong {
+            display: block;
+            color: var(--navy);
+            margin-bottom: 7px;
+        }
+
+        .info-card p {
+            color: var(--muted);
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        /* ================= CODE ================= */
+
+        .code-wrap {
+            margin: 20px 0;
+            border-radius: 13px;
+            overflow: hidden;
+            background: var(--code);
+            box-shadow: 0 12px 30px rgba(15, 23, 42, .13);
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: #111b2e;
+            border-bottom: 1px solid #253149;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .copy-btn {
+            background: #1e293b;
+            color: #dbeafe;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            padding: 5px 9px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .copy-btn:hover {
+            background: #334155;
+        }
+
+        pre {
+            padding: 20px;
+            overflow-x: auto;
+            color: var(--code-text);
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .keyword {
+            color: #93c5fd;
+        }
+
+        .string {
+            color: #86efac;
+        }
+
+        .comment {
+            color: #64748b;
+        }
+
+        .output {
+            background: #f1f5f9;
+            border: 1px solid var(--line);
+            padding: 15px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            font-size: 13px;
+            color: var(--navy);
+            margin: 12px 0 20px;
+        }
+
+        /* ================= CALLOUT ================= */
+
+        .callout {
+            border-left: 4px solid var(--primary);
+            background: var(--primary-light);
+            padding: 16px 18px;
+            border-radius: 0 10px 10px 0;
+            margin: 20px 0;
+        }
+
+        .callout strong {
+            color: var(--primary-dark);
+        }
+
+        .warning {
+            border-left-color: var(--warning);
+            background: #fff7ed;
+        }
+
+        .success {
+            border-left-color: var(--success);
+            background: var(--success-bg);
+        }
+
+        /* ================= TABLE ================= */
+
+        .table-wrap {
+            overflow-x: auto;
+            margin-top: 18px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th,
+        td {
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--line);
+            font-size: 13px;
+        }
+
+        th {
+            color: var(--navy);
+            background: #f5f9ff;
+        }
+
+        td {
+            color: var(--muted);
+        }
+
+        /* ================= FLOW ================= */
+
+        .flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 28px 0;
+        }
+
+        .flow-box {
+            padding: 16px 20px;
+            border: 1px solid #cfe0ff;
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            border-radius: 11px;
+            font-weight: 800;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .arrow {
+            color: var(--primary);
+            font-size: 20px;
+            font-weight: 900;
+        }
+
+        /* ================= ROUTING LAB ================= */
+
+        .routing-lab {
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 22px;
+            background: #fbfdff;
+        }
+
+        .route-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .route-btn {
+            border: 1px solid var(--line);
+            background: white;
+            color: var(--muted);
+            padding: 9px 13px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .route-btn:hover,
+        .route-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .request-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .terminal {
+            background: var(--code);
+            color: #dbeafe;
+            padding: 18px;
+            border-radius: 11px;
+            font-family: Consolas, monospace;
+            font-size: 13px;
+            min-height: 145px;
+        }
+
+        .route-result {
+            border: 1px solid var(--line);
+            background: white;
+            padding: 18px;
+            border-radius: 11px;
+            min-height: 145px;
+        }
+
+        .status {
+            display: inline-block;
+            background: var(--success-bg);
+            color: var(--success);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        /* ================= EVENT VISUAL ================= */
+
+        .event-system {
+            border: 1px solid var(--line);
+            background: #fbfdff;
+            border-radius: 16px;
+            padding: 24px;
+            overflow: hidden;
+        }
+
+        .event-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .event-node {
+            min-width: 130px;
+            text-align: center;
+            padding: 17px;
+            border-radius: 12px;
+            background: white;
+            border: 1px solid var(--line);
+            transition: .3s;
+        }
+
+        .event-node.active {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 22px rgba(37, 99, 235, .14);
+        }
+
+        .event-arrow {
+            color: var(--primary);
+            font-weight: 900;
+            font-size: 20px;
+        }
+
+        .event-log {
+            background: var(--code);
+            color: #bfdbfe;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            min-height: 75px;
+            font-family: Consolas, monospace;
+            font-size: 12px;
+        }
+
+        .emit-btn {
+            margin-top: 18px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        /* ================= QUIZ ================= */
+
+        .quiz-question {
+            padding: 20px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            margin-bottom: 14px;
+            background: #fbfdff;
+        }
+
+        .quiz-question p {
+            font-weight: 700;
+            color: var(--navy);
+        }
+
+        .quiz-option {
+            display: block;
+            width: 100%;
+            text-align: left;
+            border: 1px solid var(--line);
+            background: white;
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-top: 7px;
+            cursor: pointer;
+            color: var(--muted);
+        }
+
+        .quiz-option:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .quiz-option.correct {
+            background: var(--success-bg);
+            border-color: #86efac;
+            color: var(--success);
+        }
+
+        .quiz-option.wrong {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: var(--danger);
+        }
+
+        .quiz-result {
+            margin-top: 18px;
+            padding: 15px;
+            border-radius: 10px;
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            font-weight: 700;
+            display: none;
+        }
+
+        /* ================= ACCORDION ================= */
+
+        .accordion {
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .accordion button {
+            width: 100%;
+            padding: 16px;
+            text-align: left;
+            border: none;
+            background: white;
+            color: var(--navy);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 0 16px 16px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .accordion.open .accordion-content {
+            display: block;
+        }
+
+        /* ================= PROGRESS ================= */
+
+        .progress-card {
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 35px;
+        }
+
+        .progress-bar {
+            height: 9px;
+            background: #e2e8f0;
+            border-radius: 999px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), #60a5fa);
+            transition: width .4s ease;
+        }
+
+        .complete-btn {
+            padding: 11px 17px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 800;
+        }
+
+        .complete-btn.completed {
+            background: var(--success);
+        }
+
+        /* ================= NAV ================= */
+
+        .lesson-nav {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 35px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            border: 1px solid var(--line);
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            transition: .2s;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn small {
+            color: var(--muted);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .nav-btn strong {
+            color: var(--primary);
+        }
+
+        /* ================= FOOTER ================= */
+
+        footer {
+            margin-top: 45px;
+            padding-top: 25px;
+            border-top: 1px solid var(--line);
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        /* ================= RESPONSIVE ================= */
+
+        @media (max-width: 1000px) {
+            .sidebar {
+                width: 220px;
+            }
+
+            .content {
+                margin-left: 220px;
+                width: calc(100% - 220px);
+                padding: 30px;
+            }
+
+            .grid-3 {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .top-info .pill:not(.blue) {
+                display: none;
+            }
+
+            .sidebar {
+                position: relative;
+                top: 0;
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--line);
+            }
+
+            .layout {
+                display: block;
+            }
+
+            .content {
+                margin-left: 0;
+                width: 100%;
+                padding: 22px 16px 60px;
+            }
+
+            .hero {
+                padding: 30px 22px;
+            }
+
+            .hero h1 {
+                font-size: 38px;
+            }
+
+            .grid,
+            .grid-3,
+            .request-box {
+                grid-template-columns: 1fr;
+            }
+
+            .section-card {
+                padding: 22px;
+            }
+
+            .lesson-nav {
+                flex-direction: column;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                transition: none !important;
+                animation: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- ================= TOP BAR ================= -->
+
+<header class="topbar">
+
+    <div class="brand">
+        <div class="brand-mark">Z</div>
+
+        <div>
+            <div class="brand-name">ZENSUS</div>
+            <div class="brand-sub">AI Learning System</div>
+        </div>
+    </div>
+
+    <div class="top-info">
+        <div class="pill">Node.js Track</div>
+        <div class="pill blue">Lesson 09</div>
+    </div>
+
+</header>
+
+
+<div class="layout">
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-title">
+            Lesson Contents
+        </div>
+
+        <nav class="toc">
+
+            <a href="#intro">Introduction</a>
+            <a href="#routing">What is Routing?</a>
+            <a href="#route-structure">Route Structure</a>
+            <a href="#methods">HTTP Methods</a>
+            <a href="#basic-routes">Basic Routes</a>
+            <a href="#params">Route Parameters</a>
+            <a href="#query">Query Parameters</a>
+            <a href="#multiple">Multiple Routes</a>
+            <a href="#router">Express Router</a>
+            <a href="#dynamic">Dynamic Routing</a>
+            <a href="#middleware">Routing & Middleware</a>
+            <a href="#rest">REST API Routing</a>
+            <a href="#lab">Routing Lab</a>
+            <a href="#errors">Common Mistakes</a>
+            <a href="#project">Mini Project</a>
+            <a href="#quiz">Quiz</a>
+            <a href="#interview">Interview Questions</a>
+            <a href="#challenge">Coding Challenge</a>
+            <a href="#complete">Complete Lesson</a>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+
+    <main class="content">
+
+        <!-- HERO -->
+
+        <section class="hero" id="intro">
+
+            <span class="lesson-label">
+                LESSON 09 • EXPRESS.JS
+            </span>
+
+            <h1>
+                Routing in <span>Express.js</span>
+            </h1>
+
+            <p>
+                Learn how Express.js receives HTTP requests, matches URLs and
+                HTTP methods, executes route handlers, and sends the correct
+                response to the client.
+            </p>
+
+            <div class="hero-meta">
+                <span class="meta">⏱ 45–60 Minutes</span>
+                <span class="meta">📚 Intermediate Beginner</span>
+                <span class="meta">⚡ Express.js</span>
+                <span class="meta">🧪 Interactive Labs</span>
+            </div>
+
+        </section>
+
+
+        <!-- ================= LEARNING OBJECTIVES ================= -->
+
+        <section class="section">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">01</div>
+
+                    <div>
+                        <h2>What You Will Learn</h2>
+                    </div>
+
+                </div>
+
+                <div class="grid">
+
+                    <div class="info-card">
+                        <span class="tag">CONCEPT</span>
+                        <strong>Understand Express Routing</strong>
+                        <p>
+                            Learn how URLs and HTTP methods are connected to
+                            specific server-side functions.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <span class="tag">HTTP</span>
+                        <strong>Use HTTP Methods</strong>
+                        <p>
+                            Work with GET, POST, PUT, PATCH and DELETE routes.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <span class="tag">DYNAMIC</span>
+                        <strong>Dynamic Routes</strong>
+                        <p>
+                            Capture values from URLs using route parameters.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <span class="tag">ARCHITECTURE</span>
+                        <strong>Express Router</strong>
+                        <p>
+                            Organize large applications using modular routers.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= WHAT IS ROUTING ================= -->
+
+        <section class="section" id="routing">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">02</div>
+
+                    <div>
+                        <h2>What is Routing?</h2>
+                    </div>
+
+                </div>
+
+                <p>
+                    <strong>Routing</strong> is the process of deciding what
+                    server-side code should execute when a client requests a
+                    particular URL using a particular HTTP method.
+                </p>
+
+                <p class="lead">
+                    In an Express application, routing connects a request such
+                    as <code>GET /users</code> to a JavaScript function that
+                    handles that request.
+                </p>
+
+                <div class="flow">
+
+                    <div class="flow-box">
+                        Browser
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        HTTP Request
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        Express Router
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        Route Handler
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        Response
+                    </div>
+
+                </div>
+
+                <div class="callout">
+                    <strong>Simple idea:</strong>
+                    Routing answers one important question:
+                    <strong>"Which function should handle this request?"</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= ROUTE STRUCTURE ================= -->
+
+        <section class="section" id="route-structure">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">03</div>
+
+                    <div>
+                        <h2>Express Route Structure</h2>
+                    </div>
+
+                </div>
+
+                <p>
+                    A basic Express route contains three important parts:
+                </p>
+
+                <div class="grid-3">
+
+                    <div class="info-card">
+                        <span class="tag">METHOD</span>
+                        <strong>HTTP Method</strong>
+                        <p>
+                            Defines what operation the client wants to perform.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <span class="tag">PATH</span>
+                        <strong>URL Path</strong>
+                        <p>
+                            Identifies the resource or endpoint being requested.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <span class="tag">HANDLER</span>
+                        <strong>Callback Function</strong>
+                        <p>
+                            Contains the logic that runs when the route matches.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="code-wrap">
+
+                    <div class="code-header">
+                        <span>app.js</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+
+                    <pre><code>app.get('/about', (req, res) => {
+    res.send('About Page');
+});</code></pre>
+
+                </div>
+
+                <p>
+                    Here:
+                </p>
+
+                <ul>
+                    <li><strong>GET</strong> → HTTP method</li>
+                    <li><strong>/about</strong> → route path</li>
+                    <li><strong>(req, res) =&gt; { ... }</strong> → route handler</li>
+                </ul>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= HTTP METHODS ================= -->
+
+        <section class="section" id="methods">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">04</div>
+
+                    <div>
+                        <h2>HTTP Methods in Express</h2>
+                    </div>
+
+                </div>
+
+                <p>
+                    Express provides methods such as
+                    <code>app.get()</code>, <code>app.post()</code>,
+                    <code>app.put()</code>, <code>app.patch()</code> and
+                    <code>app.delete()</code>.
+                </p>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Typical Purpose</th>
+                                <th>Example</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <tr>
+                                <td>GET</td>
+                                <td>Retrieve data</td>
+                                <td>GET /users</td>
+                            </tr>
+
+                            <tr>
+                                <td>POST</td>
+                                <td>Create or submit data</td>
+                                <td>POST /users</td>
+                            </tr>
+
+                            <tr>
+                                <td>PUT</td>
+                                <td>Replace a resource</td>
+                                <td>PUT /users/10</td>
+                            </tr>
+
+                            <tr>
+                                <td>PATCH</td>
+                                <td>Partially update a resource</td>
+                                <td>PATCH /users/10</td>
+                            </tr>
+
+                            <tr>
+                                <td>DELETE</td>
+                                <td>Remove a resource</td>
+                                <td>DELETE /users/10</td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <div class="callout">
+                    <strong>Important:</strong>
+                    A route is not identified by its path alone.
+                    The HTTP method is also part of the route definition.
+                </div>
+
+                <p>
+                    Therefore these are different routes:
+                </p>
+
+                <div class="code-wrap">
+
+                    <div class="code-header">
+                        <span>routes.js</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+
+                    <pre><code>app.get('/users', (req, res) => {
+    res.send('Get users');
+});
+
+app.post('/users', (req, res) => {
+    res.send('Create user');
+});</code></pre>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= BASIC ROUTES ================= -->
+
+        <section class="section" id="basic-routes">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">05</div>
+
+                    <div>
+                        <h2>Creating Basic Routes</h2>
+                    </div>
+
+                </div>
+
+                <p>
+                    The simplest Express application can contain several
+                    routes for different pages.
+                </p>
+
+                <div class="code-wrap">
+
+                    <div class="code-header">
+                        <span>server.js</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+
+                    <pre><code>const express = require('express');
+
+const app = express();
+
+app.get('/', (req, res) => {
+    res.send('Welcome to ZENSUS');
+});
+
+app.get('/about', (req, res) => {
+    res.send('About ZENSUS');
+});
+
+app.get('/contact', (req, res) => {
+    res.send('Contact Page');
+});
+
+app.listen(3000, () => {
+    console.log('Server running on port 3000');
+});</code></pre>
+
+                </div>
+
+                <h3>How it works</h3>
+
+                <div class="grid">
+
+                    <div class="info-card">
+                        <strong>GET /</strong>
+                        <p>Returns the home page.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <strong>GET /about</strong>
+                        <p>Returns the about page.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <strong>GET /contact</strong>
+                        <p>Returns the contact page.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <strong>Unknown path</strong>
+                        <p>No matching route is found.</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= ROUTE PARAMETERS ================= -->
+
+        <section class="section" id="params">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">06</div>
+
+                    <div>
+                        <h2>Route Parameters</h2>
+                    </div>
+
+                </div>
+
+                <p>
+                    Sometimes the value needed by the server is part of the
+                    URL itself.
+                </p>
+
+                <p>
+                    For example:
+                </p>
+
+                <div class="code-wrap">
+
+                    <div class="code-header">
+                        <span>Dynamic route</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+
+                    <pre><code>app.get('/users/:id', (req, res) => {
+
+    const userId = req.params.id;
+
+    res.send(`User ID: ${userId}`);
+
+});</code></pre>
+
+                </div>
+
+                <p>
+                    The <code>:id</code> part is a route parameter.
+                    Express places its value inside <code>req.params</code>.
+                </p>
+
+                <h3>Example requests</h3>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Request</th>
+                                <th>req.params.id</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr>
+                                <td>/users/10</td>
+                                <td>10</td>
+                            </tr>
+
+                            <tr>
+                                <td>/users/25</td>
+                                <td>25</td>
+                            </tr>
+
+                            <tr>
+                                <td>/users/abc</td>
+                                <td>abc</td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <div class="callout success">
+                    <strong>Remember:</strong>
+                    Route parameters are commonly used when identifying one
+                    particular resource.
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= QUERY PARAMETERS ================= -->
+
+        <section class="section" id="query">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">07</div>
+
+                    <div>
+                        <h2>Query Parameters</h2>
+                    </div>
+
+                </div>
+
+                <p>
+                    Query parameters appear after a <code>?</code> in a URL.
+                    They are commonly used for filtering, searching,
+                    sorting and pagination.
+                </p>
+
+                <div class="code-wrap">
+
+                    <div class="code-header">
+                        <span>Query example</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+
+                    <pre><code>app.get('/products', (req, res) => {
+
+    const category = req.query.category;
+
+    res.send(`Category: ${category}`);
+
+});</code></pre>
+
+                </div>
+
+                <p>
+                    Request:
+                </p>
+
+                <div class="output">
+                    /products?category=laptops
+                </div>
+
+                <p>
+                    Result:
+                </p>
+
+                <div class="output">
+                    Category: laptops
+                </div>
+
+                <h3>Multiple query parameters</h3>
+
+                <div class="code-wrap">
+
+                    <div class="code-header">
+                        <span>Multiple query values</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+
+                    <pre><code>app.get('/products', (req, res) => {
+
+    const category = req.query.category;
+    const sort = req.query.sort;
+
+    res.json({
+        category: category,
+        sort: sort
+    });
+
+});</code></pre>
+
+                </div>
+
+                <div class="output">
+                    /products?category=laptops&amp;sort=price
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= MULTIPLE ROUTES ================= -->
+
+        <section class="section" id="multiple">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">08</div>
+
+                    <div>
+                        <h2>Organizing Multiple Routes</h2>
+                    </div>
+
+                </div>
+
+                <p>
+                    An application can contain many endpoints.
+                    Keeping everything in one large file quickly becomes
+                    difficult to maintain.
+                </p>
+
+                <div class="grid">
+
+                    <div class="info-card">
+                        <strong>/users</strong>
+                        <p>User-related operations.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <strong>/products</strong>
+                        <p>Product-related operations.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <strong>/orders</strong>
+                        <p>Order-related operations.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <strong>/auth</strong>
+                        <p>Authentication-related operations.</p>
+                    </div>
+
+                </div>
+
+                <p>
+                    Express provides <strong>Router</strong> to organize
+                    these routes into separate modules.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= EXPRESS ROUTER ================= -->
+
+        <section class="section" id="router">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">09</div>
+
+                    <div>
+                        <h2>Express Router</h2>
+                    </div>
+
+                </div>
+
+                <p>
+                    <code>express.Router()</code> creates a modular routing
+                    system. It allows related routes to be grouped together.
+                </p>
+
+                <h3>Step 1 — Create user routes</h3>
+
+                <div class="code-wrap">
+
+                    <div class="code-header">
+                        <span>routes/users.js</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+
+                    <pre><code>const express = require('express');
+
+const router = express.Router();
+
+router.get('/', (req, res) => {
+    res.send('All Users');
+});
+
+router.get('/:id', (req, res) => {
+    res.send(`User ${req.params.id}`);
+});
+
+module.exports = router;</code></pre>
+
+                </div>
+
+                <h3>Step 2 — Connect the router</h3>
+
+                <div class="code-wrap">
+
+                    <div class="code-header">
+                        <span>server.js</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+
+                    <pre><code>const express = require('express');
+
+const app = express();
+
+const userRoutes = require('./routes/users');
+
+app.use('/users', userRoutes);
+
+app.listen(3000, () => {
+    console.log('Server running');
+});</code></pre>
+
+                </div>
+
+                <h3>What happens?</h3>
+
+                <div class="flow">
+
+                    <div class="flow-box">
+                        /users
+                    </div>
+
+                    <div class="arrow">+</div>
+
+                    <div class="flow-box">
+                        router.get('/')
+                    </div>
+
+                    <div class="arrow">=</div>
+
+                    <div class="flow-box">
+                        GET /users
+                    </div>
+
+                </div>
+
+                <div class="flow">
+
+                    <div class="flow-box">
+                        /users
+                    </div>
+
+                    <div class="arrow">+</div>
+
+                    <div class="flow-box">
+                        router.get('/:id')
+                    </div>
+
+                    <div class="arrow">=</div>
+
+                    <div class="flow-box">
+                        GET /users/10
+                    </div>
+
+                </div>
+
+                <div class="callout">
+                    <strong>Key idea:</strong>
+                    The path given to <code>app.use()</code> is combined with
+                    the path defined inside the router.
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= DYNAMIC ROUTING ================= -->
+
+        <section class="section" id="dynamic">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">10</div>
+
+                    <div>
+                        <h2>Dynamic Routing</h2>
+                    </div>
+
+                </div>
+
+                <p>
+                    Dynamic routes allow one route definition to handle
+                    many related URLs.
+                </p>
+
+                <div class="code-wrap">
+
+                    <div class="code-header">
+                        <span>products.js</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+
+                    <pre><code>app.get('/products/:productId', (req, res) => {
+
+    const id = req.params.productId;
+
+    res.json({
+        message: 'Product requested',
+        productId: id
+    });
+
+});</code></pre>
+
+                </div>
+
+                <p>
+                    The same route can handle:
+                </p>
+
+                <div class="grid-3">
+
+                    <div class="info-card">
+                        <strong>/products/101</strong>
+                        <p>productId = 101</p>
+                    </div>
+
+                    <div class="info-card">
+                        <strong>/products/205</strong>
+                        <p>productId = 205</p>
+                    </div>
+
+                    <div class="info-card">
+                        <strong>/products/500</strong>
+                        <p>productId = 500</p>
+                    </div>
+
+                </div>
+
+                <h3>Multiple parameters</h3>
+
+                <div class="code-wrap">
+
+                    <div class="code-header">
+                        <span>Multiple parameters</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+
+                    <pre><code>app.get('/users/:userId/orders/:orderId',
+    (req, res) => {
+
+    res.json({
+        user: req.params.userId,
+        order: req.params.orderId
+    });
+
+});</code></pre>
+
+                </div>
+
+                <div class="output">
+                    GET /users/15/orders/9001
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= MIDDLEWARE ================= -->
+
+        <section class="section" id="middleware">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">11</div>
+
+                    <div>
+                        <h2>Routing and Middleware</h2>
+                    </div>
+
+                </div>
+
+                <p>
+                    Middleware functions execute during the request-response
+                    lifecycle. They can inspect a request, modify it,
+                    perform authentication, log information, or pass control
+                    to the next middleware or route handler.
+                </p>
+
+                <div class="code-wrap">
+
+                    <div class="code-header">
+                        <span>middleware example</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+
+                    <pre><code>const logger = (req, res, next) => {
+
+    console.log(req.method, req.url);
+
+    next();
+
+};
+
+app.use(logger);
+
+app.get('/dashboard', (req, res) => {
+
+    res.send('Dashboard');
+
+});</code></pre>
+
+                </div>
+
+                <div class="flow">
+
+                    <div class="flow-box">
+                        Request
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        Middleware
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        Route Handler
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        Response
+                    </div>
+
+                </div>
+
+                <div class="callout warning">
+                    <strong>Important:</strong>
+                    If middleware does not send a response and does not call
+                    <code>next()</code>, the request may remain unfinished.
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= REST ================= -->
+
+        <section class="section" id="rest">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">12</div>
+
+                    <div>
+                        <h2>REST API Routing</h2>
+                    </div>
+
+                </div>
+
+                <p>
+                    Express routing is commonly used to build REST APIs.
+                    A resource such as users can have multiple operations.
+                </p>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Endpoint</th>
+                                <th>Operation</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <tr>
+                                <td>GET</td>
+                                <td>/users</td>
+                                <td>Get all users</td>
+                            </tr>
+
+                            <tr>
+                                <td>GET</td>
+                                <td>/users/:id</td>
+                                <td>Get one user</td>
+                            </tr>
+
+                            <tr>
+                                <td>POST</td>
+                                <td>/users</td>
+                                <td>Create user</td>
+                            </tr>
+
+                            <tr>
+                                <td>PUT</td>
+                                <td>/users/:id</td>
+                                <td>Replace user</td>
+                            </tr>
+
+                            <tr>
+                                <td>PATCH</td>
+                                <td>/users/:id</td>
+                                <td>Update part of user</td>
+                            </tr>
+
+                            <tr>
+                                <td>DELETE</td>
+                                <td>/users/:id</td>
+                                <td>Delete user</td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <h3>Example REST routes</h3>
+
+                <div class="code-wrap">
+
+                    <div class="code-header">
+                        <span>users.js</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+
+                    <pre><code>router.get('/', (req, res) => {
+    res.json({ message: 'All users' });
+});
+
+router.get('/:id', (req, res) => {
+    res.json({
+        message: 'Single user',
+        id: req.params.id
+    });
+});
+
+router.post('/', (req, res) => {
+    res.status(201).json({
+        message: 'User created'
+    });
+});
+
+router.patch('/:id', (req, res) => {
+    res.json({
+        message: 'User updated',
+        id: req.params.id
+    });
+});
+
+router.delete('/:id', (req, res) => {
+    res.json({
+        message: 'User deleted',
+        id: req.params.id
+    });
+});</code></pre>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= ROUTING LAB ================= -->
+
+        <section class="section" id="lab">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">13</div>
+
+                    <div>
+                        <h2>Interactive Routing Lab</h2>
+                    </div>
+
+                </div>
+
+                <p class="lead">
+                    Select a method and endpoint. Watch how Express determines
+                    which route handler should execute.
+                </p>
+
+                <div class="routing-lab">
+
+                    <div class="route-controls">
+
+                        <button class="route-btn active"
+                                data-method="GET"
+                                data-path="/">
+                            GET /
+                        </button>
+
+                        <button class="route-btn"
+                                data-method="GET"
+                                data-path="/users">
+                            GET /users
+                        </button>
+
+                        <button class="route-btn"
+                                data-method="GET"
+                                data-path="/users/42">
+                            GET /users/42
+                        </button>
+
+                        <button class="route-btn"
+                                data-method="POST"
+                                data-path="/users">
+                            POST /users
+                        </button>
+
+                        <button class="route-btn"
+                                data-method="DELETE"
+                                data-path="/users/42">
+                            DELETE /users/42
+                        </button>
+
+                    </div>
+
+                    <div class="request-box">
+
+                        <div class="terminal" id="requestTerminal">
+                            &gt; GET /
+                            <br><br>
+                            Sending request...
+                        </div>
+
+                        <div class="route-result" id="routeResult">
+
+                            <span class="status">
+                                ROUTE MATCHED
+                            </span>
+
+                            <h4>Home Route</h4>
+
+                            <p>
+                                Express executes:
+                            </p>
+
+                            <code>
+                                app.get('/', handler)
+                            </code>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= EVENT CONNECTION ================= -->
+
+        <section class="section">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">14</div>
+
+                    <div>
+                        <h2>What Happens Inside a Route?</h2>
+                    </div>
+
+                </div>
+
+                <p>
+                    When a request reaches an Express application, routing
+                    helps determine whether the request matches a registered
+                    route.
+                </p>
+
+                <div class="flow">
+
+                    <div class="flow-box">
+                        Client Request
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        Express
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        Match Method
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        Match Path
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="flow-box">
+                        Handler
+                    </div>
+
+                </div>
+
+                <p>
+                    For example, if the client sends:
+                </p>
+
+                <div class="output">
+                    GET /users/25
+                </div>
+
+                <p>
+                    Express can match it with:
+                </p>
+
+                <div class="output">
+                    app.get('/users/:id', handler)
+                </div>
+
+                <p>
+                    The value <code>25</code> becomes available through:
+                </p>
+
+                <div class="output">
+                    req.params.id
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= ROUTING VISUAL ================= -->
+
+        <section class="section">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">15</div>
+
+                    <div>
+                        <h2>Route Matching Visualizer</h2>
+                    </div>
+
+                </div>
+
+                <div class="event-system">
+
+                    <div class="event-row">
+
+                        <div class="event-node" id="nodeRequest">
+                            <strong>HTTP Request</strong>
+                            <small>GET /users/10</small>
+                        </div>
+
+                        <div class="event-arrow">→</div>
+
+                        <div class="event-node" id="nodeExpress">
+                            <strong>Express</strong>
+                            <small>Router</small>
+                        </div>
+
+                        <div class="event-arrow">→</div>
+
+                        <div class="event-node" id="nodeMatch">
+                            <strong>Route Match</strong>
+                            <small>/users/:id</small>
+                        </div>
+
+                        <div class="event-arrow">→</div>
+
+                        <div class="event-node" id="nodeHandler">
+                            <strong>Handler</strong>
+                            <small>Response</small>
+                        </div>
+
+                    </div>
+
+                    <button class="emit-btn" id="animateRoute">
+                        ▶ Simulate Request
+                    </button>
+
+                    <div class="event-log" id="eventLog">
+                        Waiting for request...
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= STATUS CODES ================= -->
+
+        <section class="section">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">16</div>
+
+                    <div>
+                        <h2>Status Codes in Express Routes</h2>
+                    </div>
+
+                </div>
+
+                <p>
+                    Routes should return meaningful HTTP status codes so that
+                    clients understand the result of an operation.
+                </p>
+
+                <div class="grid-3">
+
+                    <div class="info-card">
+                        <span class="tag">200</span>
+                        <strong>OK</strong>
+                        <p>Request completed successfully.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <span class="tag">201</span>
+                        <strong>Created</strong>
+                        <p>A new resource was created.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <span class="tag">204</span>
+                        <strong>No Content</strong>
+                        <p>Successful request with no response body.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <span class="tag">400</span>
+                        <strong>Bad Request</strong>
+                        <p>Client sent invalid data.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <span class="tag">404</span>
+                        <strong>Not Found</strong>
+                        <p>Requested resource does not exist.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <span class="tag">500</span>
+                        <strong>Server Error</strong>
+                        <p>An unexpected server-side error occurred.</p>
+                    </div>
+
+                </div>
+
+                <h3>Using status()</h3>
+
+                <div class="code-wrap">
+
+                    <div class="code-header">
+                        <span>Status response</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+
+                    <pre><code>app.post('/users', (req, res) => {
+
+    // User created
+
+    res.status(201).json({
+        message: 'User created'
+    });
+
+});</code></pre>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= 404 ================= -->
+
+        <section class="section" id="errors">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">17</div>
+
+                    <div>
+                        <h2>Handling Unknown Routes</h2>
+                    </div>
+
+                </div>
+
+                <p>
+                    A client may request a URL for which no route exists.
+                    A common approach is to add a final middleware that
+                    returns a 404 response.
+                </p>
+
+                <div class="code-wrap">
+
+                    <div class="code-header">
+                        <span>404 handler</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+
+                    <pre><code>app.use((req, res) => {
+
+    res.status(404).json({
+        error: 'Route not found'
+    });
+
+});</code></pre>
+
+                </div>
+
+                <div class="callout">
+                    <strong>Why at the end?</strong>
+                    Express processes middleware and routes in their registered
+                    order. This handler should come after the routes you want
+                    to match.
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= COMMON MISTAKES ================= -->
+
+        <section class="section">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">18</div>
+
+                    <div>
+                        <h2>Common Routing Mistakes</h2>
+                    </div>
+
+                </div>
+
+                <div class="grid">
+
+                    <div class="info-card">
+                        <span class="tag">01</span>
+                        <strong>Wrong HTTP Method</strong>
+                        <p>
+                            Defining POST while the client sends GET means
+                            the route will not match.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <span class="tag">02</span>
+                        <strong>Wrong Path</strong>
+                        <p>
+                            /user and /users are different paths.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <span class="tag">03</span>
+                        <strong>Wrong Parameter Access</strong>
+                        <p>
+                            Route parameters use req.params, while query
+                            parameters use req.query.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <span class="tag">04</span>
+                        <strong>Wrong Router Mount</strong>
+                        <p>
+                            Check the path supplied to app.use().
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="callout warning">
+                    <strong>Debugging tip:</strong>
+                    When a route does not work, first check:
+                    <br>
+                    HTTP method → URL path → router mount path →
+                    route parameter → middleware order.
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= MINI PROJECT ================= -->
+
+        <section class="section" id="project">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">19</div>
+
+                    <div>
+                        <h2>Mini Project — User API</h2>
+                    </div>
+
+                </div>
+
+                <p>
+                    Let's combine the concepts and create a small REST-style
+                    user API.
+                </p>
+
+                <div class="code-wrap">
+
+                    <div class="code-header">
+                        <span>server.js</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+
+                    <pre><code>const express = require('express');
+
+const app = express();
+
+app.use(express.json());
+
+const users = [
+    {
+        id: 1,
+        name: 'Pradeep'
+    },
+    {
+        id: 2,
+        name: 'Rahul'
+    }
+];
+
+
+// GET all users
+
+app.get('/users', (req, res) => {
+
+    res.json(users);
+
+});
+
+
+// GET one user
+
+app.get('/users/:id', (req, res) => {
+
+    const id = Number(req.params.id);
+
+    const user = users.find(user => user.id === id);
+
+    if (!user) {
+        return res.status(404).json({
+            error: 'User not found'
+        });
+    }
+
+    res.json(user);
+
+});
+
+
+// CREATE user
+
+app.post('/users', (req, res) => {
+
+    const newUser = {
+        id: users.length + 1,
+        name: req.body.name
+    };
+
+    users.push(newUser);
+
+    res.status(201).json(newUser);
+
+});
+
+
+// UPDATE user
+
+app.patch('/users/:id', (req, res) => {
+
+    const id = Number(req.params.id);
+
+    const user = users.find(user => user.id === id);
+
+    if (!user) {
+        return res.status(404).json({
+            error: 'User not found'
+        });
+    }
+
+    user.name = req.body.name;
+
+    res.json(user);
+
+});
+
+
+// DELETE user
+
+app.delete('/users/:id', (req, res) => {
+
+    const id = Number(req.params.id);
+
+    const index = users.findIndex(user => user.id === id);
+
+    if (index === -1) {
+        return res.status(404).json({
+            error: 'User not found'
+        });
+    }
+
+    users.splice(index, 1);
+
+    res.json({
+        message: 'User deleted'
+    });
+
+});
+
+
+app.listen(3000, () => {
+    console.log('User API running on port 3000');
+});</code></pre>
+
+                </div>
+
+                <h3>API Structure</h3>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Request</th>
+                                <th>Purpose</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <tr>
+                                <td>GET /users</td>
+                                <td>Get all users</td>
+                            </tr>
+
+                            <tr>
+                                <td>GET /users/1</td>
+                                <td>Get user 1</td>
+                            </tr>
+
+                            <tr>
+                                <td>POST /users</td>
+                                <td>Create user</td>
+                            </tr>
+
+                            <tr>
+                                <td>PATCH /users/1</td>
+                                <td>Update user 1</td>
+                            </tr>
+
+                            <tr>
+                                <td>DELETE /users/1</td>
+                                <td>Delete user 1</td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <div class="callout success">
+                    <strong>Architecture takeaway:</strong>
+                    Routing provides the structure that connects API endpoints
+                    to the application logic behind them.
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= QUIZ ================= -->
+
+        <section class="section" id="quiz">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">20</div>
+
+                    <div>
+                        <h2>Knowledge Check</h2>
+                    </div>
+
+                </div>
+
+                <div class="quiz-question">
+
+                    <p>1. Which Express method handles a GET request?</p>
+
+                    <button class="quiz-option" data-correct="true">
+                        app.get()
+                    </button>
+
+                    <button class="quiz-option">
+                        app.fetch()
+                    </button>
+
+                    <button class="quiz-option">
+                        app.request()
+                    </button>
+
+                </div>
+
+
+                <div class="quiz-question">
+
+                    <p>2. Where are route parameters stored?</p>
+
+                    <button class="quiz-option">
+                        req.query
+                    </button>
+
+                    <button class="quiz-option" data-correct="true">
+                        req.params
+                    </button>
+
+                    <button class="quiz-option">
+                        req.body
+                    </button>
+
+                </div>
+
+
+                <div class="quiz-question">
+
+                    <p>3. Which creates a modular Express router?</p>
+
+                    <button class="quiz-option">
+                        express.routes()
+                    </button>
+
+                    <button class="quiz-option">
+                        express.path()
+                    </button>
+
+                    <button class="quiz-option" data-correct="true">
+                        express.Router()
+                    </button>
+
+                </div>
+
+
+                <div class="quiz-question">
+
+                    <p>4. What is typically used for query parameters?</p>
+
+                    <button class="quiz-option">
+                        req.params
+                    </button>
+
+                    <button class="quiz-option" data-correct="true">
+                        req.query
+                    </button>
+
+                    <button class="quiz-option">
+                        req.route
+                    </button>
+
+                </div>
+
+
+                <button class="emit-btn" id="checkQuiz">
+                    Check Answers
+                </button>
+
+                <div class="quiz-result" id="quizResult"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= INTERVIEW ================= -->
+
+        <section class="section" id="interview">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">21</div>
+
+                    <div>
+                        <h2>Interview Questions</h2>
+                    </div>
+
+                </div>
+
+                <div class="accordion">
+
+                    <button>What is routing in Express.js?</button>
+
+                    <div class="accordion-content">
+                        Routing is the process of determining which server
+                        handler should execute for a specific HTTP method and
+                        URL path.
+                    </div>
+
+                </div>
+
+                <div class="accordion">
+
+                    <button>
+                        What is the difference between req.params and req.query?
+                    </button>
+
+                    <div class="accordion-content">
+                        req.params contains values captured from route
+                        parameters such as /users/:id. req.query contains
+                        query-string values such as /users?role=admin.
+                    </div>
+
+                </div>
+
+                <div class="accordion">
+
+                    <button>What is express.Router()?</button>
+
+                    <div class="accordion-content">
+                        express.Router() creates a modular router object that
+                        can group related routes and then be mounted into the
+                        main Express application.
+                    </div>
+
+                </div>
+
+                <div class="accordion">
+
+                    <button>
+                        Why do we use different HTTP methods?
+                    </button>
+
+                    <div class="accordion-content">
+                        HTTP methods communicate the intended operation of a
+                        request. GET is generally used for retrieval, POST for
+                        creation or submission, PUT for replacement, PATCH for
+                        partial updates and DELETE for removal.
+                    </div>
+
+                </div>
+
+                <div class="accordion">
+
+                    <button>
+                        What happens if no route matches a request?
+                    </button>
+
+                    <div class="accordion-content">
+                        If no route or middleware handles the request, the
+                        application needs appropriate fallback handling.
+                        A common pattern is a final 404 middleware.
+                    </div>
+
+                </div>
+
+                <div class="accordion">
+
+                    <button>
+                        Why is route order important?
+                    </button>
+
+                    <div class="accordion-content">
+                        Express processes registered middleware and routes in
+                        order. Therefore, the order in which routes and
+                        middleware are declared can affect which handler
+                        receives a request.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= CODING CHALLENGE ================= -->
+
+        <section class="section" id="challenge">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">22</div>
+
+                    <div>
+                        <h2>Hands-On Coding Challenge</h2>
+                    </div>
+
+                </div>
+
+                <p>
+                    Build an Express API for a simple product system.
+                </p>
+
+                <div class="callout">
+
+                    <strong>Your requirements:</strong>
+
+                    <br><br>
+
+                    1. Create a GET route for <code>/products</code>.
+                    <br>
+                    2. Create a GET route for <code>/products/:id</code>.
+                    <br>
+                    3. Create a POST route for <code>/products</code>.
+                    <br>
+                    4. Create a DELETE route for <code>/products/:id</code>.
+                    <br>
+                    5. Return JSON responses.
+                    <br>
+                    6. Return 404 when a product does not exist.
+
+                </div>
+
+                <h3>Starter Code</h3>
+
+                <div class="code-wrap">
+
+                    <div class="code-header">
+                        <span>challenge.js</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+
+                    <pre><code>const express = require('express');
+
+const app = express();
+
+app.use(express.json());
+
+const products = [
+    {
+        id: 1,
+        name: 'Laptop'
+    },
+    {
+        id: 2,
+        name: 'Keyboard'
+    }
+];
+
+// Your routes here
+
+
+app.listen(3000, () => {
+    console.log('Server running on port 3000');
+});</code></pre>
+
+                </div>
+
+                <h3>One Possible Solution</h3>
+
+                <div class="code-wrap">
+
+                    <div class="code-header">
+                        <span>solution.js</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+
+                    <pre><code>app.get('/products', (req, res) => {
+    res.json(products);
+});
+
+app.get('/products/:id', (req, res) => {
+
+    const id = Number(req.params.id);
+
+    const product = products.find(
+        product => product.id === id
+    );
+
+    if (!product) {
+        return res.status(404).json({
+            error: 'Product not found'
+        });
+    }
+
+    res.json(product);
+});
+
+app.post('/products', (req, res) => {
+
+    const product = {
+        id: products.length + 1,
+        name: req.body.name
+    };
+
+    products.push(product);
+
+    res.status(201).json(product);
+});
+
+app.delete('/products/:id', (req, res) => {
+
+    const id = Number(req.params.id);
+
+    const index = products.findIndex(
+        product => product.id === id
+    );
+
+    if (index === -1) {
+        return res.status(404).json({
+            error: 'Product not found'
+        });
+    }
+
+    products.splice(index, 1);
+
+    res.json({
+        message: 'Product deleted'
+    });
+});</code></pre>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= QUICK REVISION ================= -->
+
+        <section class="section">
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+                    <div class="number">23</div>
+
+                    <div>
+                        <h2>Quick Revision</h2>
+                    </div>
+
+                </div>
+
+                <div class="grid">
+
+                    <div class="info-card">
+                        <strong>Routing</strong>
+                        <p>
+                            Connects HTTP requests to route handlers.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <strong>app.get()</strong>
+                        <p>
+                            Handles GET requests.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <strong>req.params</strong>
+                        <p>
+                            Contains route parameter values.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <strong>req.query</strong>
+                        <p>
+                            Contains query-string values.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <strong>express.Router()</strong>
+                        <p>
+                            Creates modular route groups.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <strong>app.use()</strong>
+                        <p>
+                            Mounts middleware or routers.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="callout success">
+
+                    <strong>Core formula:</strong>
+
+                    <br><br>
+
+                    HTTP Method + URL Path + Route Handler
+                    = Express Route
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= COMPLETE ================= -->
+
+        <section class="progress-card" id="complete">
+
+            <h2>Lesson Progress</h2>
+
+            <p class="lead">
+                Complete the lesson after reviewing the concepts, examples,
+                quiz and coding challenge.
+            </p>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <p id="progressText">
+                0% completed
+            </p>
+
+            <button class="complete-btn" id="completeBtn">
+                Mark Lesson Complete
+            </button>
+
+        </section>
+
+
+        <!-- ================= NAVIGATION ================= -->
+
+        <div class="lesson-nav">
+
+            <a href="lesson8.html" class="nav-btn">
+
+                <small>← Previous Lesson</small>
+
+                <strong>
+                    Lesson 08 — Express.js Fundamentals
+                </strong>
+
+            </a>
+
+            <a href="lesson10.html" class="nav-btn" style="text-align:right;">
+
+                <small>Next Lesson →</small>
+
+                <strong>
+                    Lesson 10 — Middleware in Express.js
+                </strong>
+
+            </a>
+
+        </div>
+
+
+        <footer>
+
+            <p>
+                ZENSUS AI Learning System
+            </p>
+
+            <p>
+                Node.js & Express.js • Lesson 09
+            </p>
+
+        </footer>
+
+    </main>
+
+</div>
+
+
+<script>
+
+    /* ============================================================
+       COPY CODE
+    ============================================================ */
+
+    document.querySelectorAll(".copy-btn").forEach(button => {
+
+        button.addEventListener("click", async () => {
+
+            const code = button
+                .closest(".code-wrap")
+                .querySelector("code")
+                .innerText;
+
+            try {
+
+                await navigator.clipboard.writeText(code);
+
+                const original = button.innerText;
+
+                button.innerText = "Copied!";
+
+                setTimeout(() => {
+                    button.innerText = original;
+                }, 1200);
+
+            } catch (error) {
+
+                button.innerText = "Copy failed";
+
+                setTimeout(() => {
+                    button.innerText = "Copy";
+                }, 1200);
+
+            }
+
+        });
+
+    });
+
+
+    /* ============================================================
+       ROUTING LAB
+    ============================================================ */
+
+    const routeButtons = document.querySelectorAll(".route-btn");
+
+    const requestTerminal =
+        document.getElementById("requestTerminal");
+
+    const routeResult =
+        document.getElementById("routeResult");
+
+
+    const routeData = {
+
+        "GET /": {
+            title: "Home Route",
+            code: "app.get('/', handler)",
+            body: "Welcome to ZENSUS"
+        },
+
+        "GET /users": {
+            title: "Users Collection Route",
+            code: "app.get('/users', handler)",
+            body: "Returning all users"
+        },
+
+        "GET /users/42": {
+            title: "Dynamic User Route",
+            code: "app.get('/users/:id', handler)",
+            body: "req.params.id = 42"
+        },
+
+        "POST /users": {
+            title: "Create User Route",
+            code: "app.post('/users', handler)",
+            body: "Creating a new user"
+        },
+
+        "DELETE /users/42": {
+            title: "Delete User Route",
+            code: "app.delete('/users/:id', handler)",
+            body: "Deleting user with ID 42"
+        }
+
+    };
+
+
+    routeButtons.forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            routeButtons.forEach(btn => {
+                btn.classList.remove("active");
+            });
+
+            button.classList.add("active");
+
+            const method = button.dataset.method;
+            const path = button.dataset.path;
+
+            const key = `${method} ${path}`;
+
+            const data = routeData[key];
+
+            requestTerminal.innerHTML = `
+                &gt; ${method} ${path}
+                <br><br>
+                Request received by Express...
+                <br><br>
+                Matching route...
+            `;
+
+            setTimeout(() => {
+
+                routeResult.innerHTML = `
+                    <span class="status">
+                        ROUTE MATCHED
+                    </span>
+
+                    <h4>${data.title}</h4>
+
+                    <p>
+                        Express executes:
+                    </p>
+
+                    <code>
+                        ${data.code}
+                    </code>
+
+                    <p style="margin-top:10px;">
+                        ${data.body}
+                    </p>
+                `;
+
+            }, 350);
+
+        });
+
+    });
+
+
+    /* ============================================================
+       ROUTE ANIMATION
+    ============================================================ */
+
+    const nodes = [
+
+        document.getElementById("nodeRequest"),
+        document.getElementById("nodeExpress"),
+        document.getElementById("nodeMatch"),
+        document.getElementById("nodeHandler")
+
+    ];
+
+    const eventLog =
+        document.getElementById("eventLog");
+
+    document
+        .getElementById("animateRoute")
+        .addEventListener("click", async () => {
+
+            nodes.forEach(node => {
+                node.classList.remove("active");
+            });
+
+            eventLog.innerHTML =
+                "Incoming request: GET /users/10";
+
+            for (let i = 0; i < nodes.length; i++) {
+
+                await new Promise(resolve =>
+                    setTimeout(resolve, 550)
+                );
+
+                nodes[i].classList.add("active");
+
+                if (i === 0) {
+                    eventLog.innerHTML =
+                        "① Client sent GET /users/10";
+                }
+
+                if (i === 1) {
+                    eventLog.innerHTML =
+                        "② Express received the request";
+                }
+
+                if (i === 2) {
+                    eventLog.innerHTML =
+                        "③ Route matched: /users/:id";
+                }
+
+                if (i === 3) {
+                    eventLog.innerHTML =
+                        "④ Handler executes → response sent";
+                }
+
+            }
+
+        });
+
+
+    /* ============================================================
+       ACCORDIONS
+    ============================================================ */
+
+    document
+        .querySelectorAll(".accordion button")
+        .forEach(button => {
+
+            button.addEventListener("click", () => {
+
+                const accordion =
+                    button.parentElement;
+
+                accordion.classList.toggle("open");
+
+            });
+
+        });
+
+
+    /* ============================================================
+       QUIZ
+    ============================================================ */
+
+    let selectedAnswers = [];
+
+    document
+        .querySelectorAll(".quiz-option")
+        .forEach(option => {
+
+            option.addEventListener("click", () => {
+
+                const parent =
+                    option.closest(".quiz-question");
+
+                parent
+                    .querySelectorAll(".quiz-option")
+                    .forEach(item => {
+                        item.classList.remove(
+                            "correct",
+                            "wrong"
+                        );
+                    });
+
+                option.classList.add(
+                    option.dataset.correct === "true"
+                        ? "correct"
+                        : "wrong"
+                );
+
+            });
+
+        });
+
+
+    document
+        .getElementById("checkQuiz")
+        .addEventListener("click", () => {
+
+            const questions =
+                document.querySelectorAll(".quiz-question");
+
+            let score = 0;
+
+            questions.forEach(question => {
+
+                const correct =
+                    question.querySelector(
+                        '[data-correct="true"]'
+                    );
+
+                if (
+                    correct &&
+                    correct.classList.contains("correct")
+                ) {
+                    score++;
+                }
+
+            });
+
+            const result =
+                document.getElementById("quizResult");
+
+            result.style.display = "block";
+
+            result.innerHTML =
+                `You scored ${score} / ${questions.length}. ` +
+                (
+                    score === questions.length
+                        ? "Excellent! You understand Express routing."
+                        : "Review the routing sections and try again."
+                );
+
+        });
+
+
+    /* ============================================================
+       LESSON PROGRESS
+    ============================================================ */
+
+    const progressKey =
+        "zensus_lesson_09_progress";
+
+    const progressFill =
+        document.getElementById("progressFill");
+
+    const progressText =
+        document.getElementById("progressText");
+
+    const completeBtn =
+        document.getElementById("completeBtn");
+
+
+    function updateProgress() {
+
+        const completed =
+            localStorage.getItem(progressKey) === "completed";
+
+        if (completed) {
+
+            progressFill.style.width = "100%";
+
+            progressText.innerText =
+                "100% completed";
+
+            completeBtn.innerText =
+                "✓ Lesson Completed";
+
+            completeBtn.classList.add("completed");
+
+        } else {
+
+            progressFill.style.width = "0%";
+
+            progressText.innerText =
+                "0% completed";
+
+        }
+
+    }
+
+
+    completeBtn.addEventListener("click", () => {
+
+        localStorage.setItem(
+            progressKey,
+            "completed"
+        );
+
+        updateProgress();
+
+    });
+
+
+    updateProgress();
+
+
+    /* ============================================================
+       ACTIVE SIDEBAR SECTION
+    ============================================================ */
+
+    const sections =
+        document.querySelectorAll(".section[id]");
+
+    const tocLinks =
+        document.querySelectorAll(".toc a");
+
+    const observer =
+        new IntersectionObserver(
+            entries => {
+
+                entries.forEach(entry => {
+
+                    if (entry.isIntersecting) {
+
+                        tocLinks.forEach(link => {
+                            link.classList.remove("active");
+                        });
+
+                        const active =
+                            document.querySelector(
+                                `.toc a[href="#${entry.target.id}"]`
+                            );
+
+                        if (active) {
+                            active.classList.add("active");
+                        }
+
+                    }
+
+                });
+
+            },
+            {
+                rootMargin: "-20% 0px -65% 0px"
+            }
+        );
+
+
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+
+
+    /* ============================================================
+       SAVE SCROLL PROGRESS
+    ============================================================ */
+
+    window.addEventListener("scroll", () => {
+
+        const scrollTop =
+            window.scrollY;
+
+        const documentHeight =
+            document.documentElement.scrollHeight
+            - window.innerHeight;
+
+        if (documentHeight <= 0) return;
+
+        const percentage =
+            Math.min(
+                95,
+                Math.round(
+                    (scrollTop / documentHeight) * 100
+                )
+            );
+
+        if (
+            localStorage.getItem(progressKey)
+            !== "completed"
+        ) {
+
+            progressFill.style.width =
+                `${percentage}%`;
+
+            progressText.innerText =
+                `${percentage}% lesson viewed`;
+
+        }
+
+    });
+
+</script>
+
+</body>
+</html>

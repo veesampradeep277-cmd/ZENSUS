@@ -1,0 +1,4555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ZENSUS | SQL Lesson 11 - Subqueries</title>
+
+    <style>
+        /* =========================================================
+           ZENSUS SQL LESSON 11
+           SUBQUERIES
+           ========================================================= */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            background: #f7f9fc;
+            color: #172033;
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --secondary: #7c3aed;
+            --blue: #2563eb;
+            --green: #059669;
+            --orange: #ea580c;
+            --red: #dc2626;
+            --text: #172033;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --card: #ffffff;
+            --soft: #eef2ff;
+            --code: #0f172a;
+            --sidebar: 260px;
+        }
+
+        /* =========================
+           SCROLL PROGRESS
+           ========================= */
+
+        #progressBar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            z-index: 9999;
+        }
+
+        /* =========================
+           SIDEBAR
+           ========================= */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar);
+            height: 100vh;
+            background: #ffffff;
+            border-right: 1px solid var(--border);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .brand {
+            padding: 24px 22px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand-logo {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            color: var(--primary);
+        }
+
+        .brand-subtitle {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 3px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .course-info {
+            padding: 18px;
+            margin: 16px;
+            background: #f8faff;
+            border: 1px solid #e0e7ff;
+            border-radius: 14px;
+        }
+
+        .course-info small {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .course-info strong {
+            display: block;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .nav-title {
+            padding: 8px 20px;
+            color: #94a3b8;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            padding: 0 12px 25px;
+        }
+
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #475569;
+            padding: 10px 12px;
+            margin: 3px 0;
+            border-radius: 9px;
+            font-size: 13px;
+            transition: .25s;
+        }
+
+        .nav-links a:hover {
+            background: #f1f5ff;
+            color: var(--primary);
+            transform: translateX(2px);
+        }
+
+        .nav-links a.active {
+            background: #eef2ff;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .lesson-number {
+            width: 25px;
+            height: 25px;
+            border-radius: 7px;
+            display: grid;
+            place-items: center;
+            background: #f1f5f9;
+            color: #64748b;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .active .lesson-number {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* =========================
+           MAIN
+           ========================= */
+
+        .main {
+            margin-left: var(--sidebar);
+            min-height: 100vh;
+        }
+
+        .topbar {
+            height: 65px;
+            background: rgba(255,255,255,.94);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 34px;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .breadcrumb span {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .progress-pill {
+            font-size: 12px;
+            font-weight: 700;
+            background: #eef2ff;
+            color: var(--primary);
+            padding: 7px 12px;
+            border-radius: 20px;
+        }
+
+        .content {
+            max-width: 1180px;
+            margin: auto;
+            padding: 40px 35px 80px;
+        }
+
+        /* =========================
+           HERO
+           ========================= */
+
+        .hero {
+            position: relative;
+            background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+            border: 1px solid #dfe5ff;
+            border-radius: 26px;
+            padding: 52px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: rgba(79,70,229,.08);
+            right: -100px;
+            top: -100px;
+        }
+
+        .lesson-tag {
+            display: inline-flex;
+            padding: 7px 13px;
+            border-radius: 20px;
+            background: white;
+            color: var(--primary);
+            border: 1px solid #dbe2ff;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .5px;
+            margin-bottom: 18px;
+        }
+
+        .hero h1 {
+            font-size: clamp(32px, 5vw, 54px);
+            line-height: 1.1;
+            max-width: 800px;
+            margin-bottom: 18px;
+            letter-spacing: -1.5px;
+        }
+
+        .hero h1 span {
+            color: var(--primary);
+        }
+
+        .hero p {
+            color: #526078;
+            max-width: 750px;
+            font-size: 17px;
+        }
+
+        .hero-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 28px;
+        }
+
+        .hero-stat {
+            background: white;
+            border: 1px solid #e1e7f5;
+            padding: 9px 13px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* =========================
+           SECTION
+           ========================= */
+
+        section {
+            margin-top: 30px;
+            scroll-margin-top: 85px;
+        }
+
+        .section-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 30px rgba(15,23,42,.035);
+        }
+
+        .section-heading {
+            display: flex;
+            gap: 13px;
+            align-items: flex-start;
+            margin-bottom: 22px;
+        }
+
+        .section-icon {
+            min-width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            background: #eef2ff;
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        h2 {
+            font-size: 27px;
+            line-height: 1.25;
+            margin-bottom: 5px;
+        }
+
+        h3 {
+            font-size: 19px;
+            margin: 22px 0 10px;
+        }
+
+        h4 {
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+
+        .section-subtitle {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        p {
+            margin-bottom: 12px;
+        }
+
+        ul, ol {
+            padding-left: 22px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        /* =========================
+           OBJECTIVES
+           ========================= */
+
+        .objective-grid {
+            display: grid;
+            grid-template-columns: repeat(3,1fr);
+            gap: 14px;
+        }
+
+        .objective {
+            padding: 18px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: #fafbff;
+        }
+
+        .objective strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .objective span {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        /* =========================
+           CODE
+           ========================= */
+
+        .code-wrapper {
+            margin: 18px 0;
+            border-radius: 14px;
+            overflow: hidden;
+            background: var(--code);
+            border: 1px solid #1e293b;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 9px 14px;
+            background: #111c31;
+            border-bottom: 1px solid #263247;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .copy-btn {
+            background: #1e293b;
+            color: #cbd5e1;
+            border: 1px solid #334155;
+            padding: 5px 9px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+
+        .copy-btn:hover {
+            background: #334155;
+        }
+
+        pre {
+            margin: 0;
+            padding: 20px;
+            overflow-x: auto;
+            color: #e2e8f0;
+            font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            white-space: pre;
+        }
+
+        code {
+            font-family: inherit;
+        }
+
+        .inline-code {
+            background: #eef2ff;
+            color: #4338ca;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: Consolas, monospace;
+            font-size: .9em;
+        }
+
+        /* =========================
+           INFO BOXES
+           ========================= */
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2,1fr);
+            gap: 15px;
+            margin-top: 18px;
+        }
+
+        .info-box {
+            padding: 18px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: #fafafa;
+        }
+
+        .info-box.tip {
+            border-left: 4px solid var(--green);
+        }
+
+        .info-box.warning {
+            border-left: 4px solid var(--orange);
+        }
+
+        .info-box.danger {
+            border-left: 4px solid var(--red);
+        }
+
+        .info-box.info {
+            border-left: 4px solid var(--blue);
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .info-box p {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        /* =========================
+           FLOW
+           ========================= */
+
+        .flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 25px 0;
+        }
+
+        .flow-box {
+            padding: 15px 20px;
+            background: #fff;
+            border: 2px solid #c7d2fe;
+            border-radius: 13px;
+            min-width: 150px;
+            text-align: center;
+            font-weight: 800;
+            color: var(--primary-dark);
+            animation: floatBox 3s ease-in-out infinite;
+        }
+
+        .flow-box:nth-child(3) {
+            animation-delay: .5s;
+        }
+
+        .flow-box:nth-child(5) {
+            animation-delay: 1s;
+        }
+
+        .flow-arrow {
+            color: var(--primary);
+            font-size: 23px;
+            font-weight: 900;
+        }
+
+        @keyframes floatBox {
+            0%,100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* =========================
+           SUBQUERY ANIMATION
+           ========================= */
+
+        .subquery-animation {
+            padding: 25px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            margin: 20px 0;
+        }
+
+        .query-pipeline {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .query-card {
+            width: 280px;
+            min-height: 145px;
+            background: white;
+            border: 2px solid #c7d2fe;
+            border-radius: 15px;
+            padding: 18px;
+            position: relative;
+        }
+
+        .query-card.inner {
+            border-color: #a7f3d0;
+        }
+
+        .query-card.outer {
+            border-color: #c4b5fd;
+        }
+
+        .query-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 900;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .query-card pre {
+            padding: 0;
+            background: transparent;
+            color: #334155;
+            font-size: 11px;
+            overflow: hidden;
+        }
+
+        .query-arrow {
+            font-size: 30px;
+            color: var(--primary);
+            animation: pulseArrow 1.4s infinite;
+        }
+
+        @keyframes pulseArrow {
+            0%,100% {
+                opacity: .4;
+                transform: translateX(0);
+            }
+            50% {
+                opacity: 1;
+                transform: translateX(8px);
+            }
+        }
+
+        .result-chip {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: #dcfce7;
+            color: #166534;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        /* =========================
+           TABLE
+           ========================= */
+
+        .table-wrap {
+            overflow-x: auto;
+            margin: 18px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 550px;
+        }
+
+        th {
+            background: #f1f5f9;
+            color: #334155;
+            font-size: 12px;
+            text-align: left;
+            padding: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 11px 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+
+        tr:hover td {
+            background: #fafbff;
+        }
+
+        /* =========================
+           COMPARISON
+           ========================= */
+
+        .comparison {
+            display: grid;
+            grid-template-columns: repeat(2,1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .compare-card {
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .compare-card h4 {
+            color: var(--primary);
+        }
+
+        /* =========================
+           TAGS
+           ========================= */
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            margin: 15px 0;
+        }
+
+        .tag {
+            padding: 5px 9px;
+            border-radius: 7px;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* =========================
+           LAB
+           ========================= */
+
+        .lab {
+            background: #0f172a;
+            border-radius: 20px;
+            padding: 25px;
+            color: #e2e8f0;
+        }
+
+        .lab h2,
+        .lab h3 {
+            color: white;
+        }
+
+        .lab p {
+            color: #94a3b8;
+        }
+
+        .lab-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+            margin: 18px 0;
+        }
+
+        .lab-btn {
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: #cbd5e1;
+            padding: 9px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 700;
+            transition: .2s;
+        }
+
+        .lab-btn:hover,
+        .lab-btn.active {
+            background: #4f46e5;
+            border-color: #6366f1;
+            color: white;
+        }
+
+        .lab-query {
+            background: #020617;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .lab-query pre {
+            color: #dbeafe;
+            padding: 0;
+            font-size: 12px;
+        }
+
+        .lab-result {
+            margin-top: 18px;
+            background: #111827;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .lab-result-title {
+            padding: 10px 14px;
+            background: #1e293b;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .lab-result table {
+            min-width: 100%;
+        }
+
+        .lab-result th {
+            background: #1e293b;
+            color: #cbd5e1;
+            border-color: #334155;
+        }
+
+        .lab-result td {
+            color: #cbd5e1;
+            border-color: #334155;
+        }
+
+        /* =========================
+           QUIZ
+           ========================= */
+
+        .quiz-question {
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            margin: 15px 0;
+            background: #fff;
+        }
+
+        .quiz-question p {
+            font-weight: 800;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 8px;
+        }
+
+        .quiz-option {
+            border: 1px solid var(--border);
+            background: #f8fafc;
+            border-radius: 9px;
+            padding: 10px 13px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: .2s;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--primary);
+            background: #eef2ff;
+        }
+
+        .quiz-option.correct {
+            background: #dcfce7;
+            border-color: #22c55e;
+            color: #166534;
+        }
+
+        .quiz-option.wrong {
+            background: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+
+        .quiz-result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #eef2ff;
+            border-radius: 12px;
+            color: var(--primary-dark);
+            font-weight: 800;
+            display: none;
+        }
+
+        /* =========================
+           CHECKLIST
+           ========================= */
+
+        .checklist {
+            display: grid;
+            gap: 9px;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .check-item input {
+            accent-color: var(--primary);
+            width: 17px;
+            height: 17px;
+        }
+
+        .check-item.done span {
+            text-decoration: line-through;
+            color: #94a3b8;
+        }
+
+        /* =========================
+           BUTTON
+           ========================= */
+
+        .primary-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 11px 17px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 12px;
+        }
+
+        .primary-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* =========================
+           MOBILE
+           ========================= */
+
+        .mobile-menu {
+            display: none;
+            border: none;
+            background: #eef2ff;
+            color: var(--primary);
+            width: 38px;
+            height: 38px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        @media(max-width: 900px) {
+
+            :root {
+                --sidebar: 0px;
+            }
+
+            .sidebar {
+                width: 270px;
+                transform: translateX(-100%);
+                transition: .3s;
+                box-shadow: 10px 0 30px rgba(0,0,0,.12);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .mobile-menu {
+                display: block;
+            }
+
+            .topbar {
+                padding: 0 18px;
+            }
+
+            .content {
+                padding: 25px 18px 60px;
+            }
+
+            .hero {
+                padding: 30px 23px;
+            }
+
+            .objective-grid,
+            .info-grid,
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media(max-width: 550px) {
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .section-card {
+                padding: 21px;
+            }
+
+            .query-pipeline {
+                flex-direction: column;
+            }
+
+            .query-arrow {
+                transform: rotate(90deg);
+            }
+
+            .hero-stats {
+                flex-direction: column;
+            }
+
+            .hero-stat {
+                width: fit-content;
+            }
+
+            .progress-pill {
+                display: none;
+            }
+        }
+
+        /* =========================
+           SAFE REVEAL
+           ========================= */
+
+        .reveal {
+            opacity: 1;
+            transform: none;
+        }
+
+        .reveal.animate {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity .6s ease, transform .6s ease;
+        }
+
+        .reveal.animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="progressBar"></div>
+
+<!-- =========================================================
+     SIDEBAR
+     ========================================================= -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+        <div class="brand-logo">ZENSUS</div>
+        <div class="brand-subtitle">Learn • Build • Prepare</div>
+    </div>
+
+    <div class="course-info">
+        <small>COURSE</small>
+        <strong>SQL Mastery</strong>
+        <small>Lesson 11 of the learning path</small>
+    </div>
+
+    <div class="nav-title">SQL Lessons</div>
+
+    <nav class="nav-links">
+
+        <a href="#top">
+            <span class="lesson-number">01</span>
+            Introduction to SQL
+        </a>
+
+        <a href="#">
+            <span class="lesson-number">02</span>
+            Database Fundamentals
+        </a>
+
+        <a href="#">
+            <span class="lesson-number">03</span>
+            CREATE
+        </a>
+
+        <a href="#">
+            <span class="lesson-number">04</span>
+            INSERT
+        </a>
+
+        <a href="#">
+            <span class="lesson-number">05</span>
+            SELECT
+        </a>
+
+        <a href="#">
+            <span class="lesson-number">06</span>
+            WHERE
+        </a>
+
+        <a href="#">
+            <span class="lesson-number">07</span>
+            ORDER BY
+        </a>
+
+        <a href="#">
+            <span class="lesson-number">08</span>
+            GROUP BY
+        </a>
+
+        <a href="#">
+            <span class="lesson-number">09</span>
+            Aggregate Functions
+        </a>
+
+        <a href="#">
+            <span class="lesson-number">10</span>
+            JOINS
+        </a>
+
+        <a href="#subqueries" class="active">
+            <span class="lesson-number">11</span>
+            Subqueries
+        </a>
+
+        <a href="#">
+            <span class="lesson-number">12</span>
+            Constraints
+        </a>
+
+    </nav>
+
+</aside>
+
+<!-- =========================================================
+     MAIN
+     ========================================================= -->
+
+<main class="main" id="top">
+
+    <header class="topbar">
+
+        <div style="display:flex;align-items:center;gap:12px;">
+
+            <button class="mobile-menu" onclick="toggleSidebar()">☰</button>
+
+            <div class="breadcrumb">
+                SQL / Lesson 11 /
+                <span>Subqueries</span>
+            </div>
+
+        </div>
+
+        <div class="progress-pill">
+            SQL • 11 / 12
+        </div>
+
+    </header>
+
+
+    <div class="content">
+
+        <!-- =====================================================
+             HERO
+             ===================================================== -->
+
+        <section class="hero reveal">
+
+            <div class="lesson-tag">
+                SQL • LESSON 11
+            </div>
+
+            <h1>
+                Subqueries —
+                <span>Think in Layers.</span>
+            </h1>
+
+            <p>
+                Learn how SQL queries can work together by placing one query
+                inside another. Master scalar, multi-row, correlated,
+                EXISTS, IN, ANY, ALL, derived-table and advanced subquery
+                techniques from beginner to interview level.
+            </p>
+
+            <div class="hero-stats">
+
+                <div class="hero-stat">🎯 Beginner → Advanced</div>
+                <div class="hero-stat">⚡ 15+ Patterns</div>
+                <div class="hero-stat">🧠 Interview Ready</div>
+                <div class="hero-stat">💻 Interactive Lab</div>
+                <div class="hero-stat">📊 Real-world SQL</div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             OBJECTIVES
+             ===================================================== -->
+
+        <section class="section-card reveal" id="objectives">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🎯</div>
+
+                <div>
+                    <h2>Learning Objectives</h2>
+                    <div class="section-subtitle">
+                        By the end of this lesson, you should be able to:
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="objective-grid">
+
+                <div class="objective">
+                    <strong>01 · Understand</strong>
+                    <span>Explain what a subquery is and why it is useful.</span>
+                </div>
+
+                <div class="objective">
+                    <strong>02 · Build</strong>
+                    <span>Write scalar and multi-row subqueries.</span>
+                </div>
+
+                <div class="objective">
+                    <strong>03 · Compare</strong>
+                    <span>Understand IN, EXISTS, ANY, ALL and NOT EXISTS.</span>
+                </div>
+
+                <div class="objective">
+                    <strong>04 · Master</strong>
+                    <span>Write correlated subqueries correctly.</span>
+                </div>
+
+                <div class="objective">
+                    <strong>05 · Apply</strong>
+                    <span>Use subqueries with SELECT, FROM, HAVING and DML.</span>
+                </div>
+
+                <div class="objective">
+                    <strong>06 · Optimize</strong>
+                    <span>Choose between subqueries, joins, CTEs and windows.</span>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             WHAT IS SUBQUERY
+             ===================================================== -->
+
+        <section class="section-card reveal" id="subqueries">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🔍</div>
+
+                <div>
+                    <h2>What Is a Subquery?</h2>
+                    <div class="section-subtitle">
+                        A query inside another query.
+                    </div>
+                </div>
+
+            </div>
+
+            <p>
+                A <strong>subquery</strong> is a SQL query written inside
+                another SQL statement.
+            </p>
+
+            <p>
+                The inner query produces a value, a list of values, a table,
+                or an existence result that the outer query can use.
+            </p>
+
+            <div class="flow">
+
+                <div class="flow-box">
+                    Inner Query
+                    <br>
+                    <small>Find information</small>
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    Result
+                    <br>
+                    <small>Value / Set / Table</small>
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    Outer Query
+                    <br>
+                    <small>Make final decision</small>
+                </div>
+
+            </div>
+
+            <h3>Basic Syntax</h3>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>BASIC SUBQUERY</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+
+<pre><code>SELECT column_name
+FROM table_name
+WHERE column_name &gt;
+      (
+          SELECT column_name
+          FROM another_table
+          WHERE condition
+      );</code></pre>
+
+            </div>
+
+            <div class="info-box info">
+
+                <strong>💡 Think of it like this</strong>
+
+                <p>
+                    First ask a smaller question:
+                    <strong>"What is the average mark?"</strong>
+                    Then ask the larger question:
+                    <strong>"Who scored above that average?"</strong>
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             VISUAL ANIMATION
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">⚙️</div>
+
+                <div>
+                    <h2>How a Subquery Works</h2>
+                    <div class="section-subtitle">
+                        Visualize the relationship between inner and outer queries.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="subquery-animation">
+
+                <div class="query-pipeline">
+
+                    <div class="query-card inner">
+
+                        <div class="query-label">
+                            Inner Query
+                        </div>
+
+<pre><code>SELECT AVG(marks)
+FROM students;</code></pre>
+
+                        <span class="result-chip">
+                            Result → 76.5
+                        </span>
+
+                    </div>
+
+                    <div class="query-arrow">
+                        →
+                    </div>
+
+                    <div class="query-card outer">
+
+                        <div class="query-label">
+                            Outer Query
+                        </div>
+
+<pre><code>SELECT name
+FROM students
+WHERE marks &gt; 76.5;</code></pre>
+
+                        <span class="result-chip">
+                            Final Students
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <p>
+                The exact physical execution strategy is controlled by the
+                database optimizer. The inner-query → outer-query model is a
+                useful way to understand the SQL logic, but the database may
+                rewrite or optimize the statement internally.
+            </p>
+
+        </section>
+
+
+        <!-- =====================================================
+             TYPES
+             ===================================================== -->
+
+        <section class="section-card reveal" id="types">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🧩</div>
+
+                <div>
+                    <h2>Types of Subqueries</h2>
+                    <div class="section-subtitle">
+                        Understand subqueries by the result they produce and
+                        where they are used.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="comparison">
+
+                <div class="compare-card">
+
+                    <h4>1. Scalar Subquery</h4>
+
+                    <p>
+                        Returns one value.
+                    </p>
+
+                    <div class="tags">
+                        <span class="tag">One value</span>
+                        <span class="tag">=</span>
+                        <span class="tag">&gt;</span>
+                        <span class="tag">&lt;</span>
+                    </div>
+
+                </div>
+
+                <div class="compare-card">
+
+                    <h4>2. Single-Row Subquery</h4>
+
+                    <p>
+                        Returns one row, often used with comparison operators.
+                    </p>
+
+                    <div class="tags">
+                        <span class="tag">One row</span>
+                        <span class="tag">Comparison</span>
+                    </div>
+
+                </div>
+
+                <div class="compare-card">
+
+                    <h4>3. Multi-Row Subquery</h4>
+
+                    <p>
+                        Returns multiple values.
+                    </p>
+
+                    <div class="tags">
+                        <span class="tag">IN</span>
+                        <span class="tag">ANY</span>
+                        <span class="tag">ALL</span>
+                    </div>
+
+                </div>
+
+                <div class="compare-card">
+
+                    <h4>4. Correlated Subquery</h4>
+
+                    <p>
+                        References a column from the outer query.
+                    </p>
+
+                    <div class="tags">
+                        <span class="tag">Outer reference</span>
+                        <span class="tag">Per-row logic</span>
+                    </div>
+
+                </div>
+
+                <div class="compare-card">
+
+                    <h4>5. Derived Table</h4>
+
+                    <p>
+                        A subquery used in the FROM clause.
+                    </p>
+
+                    <div class="tags">
+                        <span class="tag">FROM</span>
+                        <span class="tag">Temporary result</span>
+                    </div>
+
+                </div>
+
+                <div class="compare-card">
+
+                    <h4>6. Nested Subquery</h4>
+
+                    <p>
+                        A subquery inside another subquery.
+                    </p>
+
+                    <div class="tags">
+                        <span class="tag">Multiple levels</span>
+                        <span class="tag">Advanced</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             DATASET
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🗃️</div>
+
+                <div>
+                    <h2>Example Dataset</h2>
+                    <div class="section-subtitle">
+                        We will use these tables throughout the lesson.
+                    </div>
+                </div>
+
+            </div>
+
+            <h3>Students</h3>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Department</th>
+                            <th>Marks</th>
+                            <th>City</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>101</td>
+                            <td>Aarav</td>
+                            <td>CSE</td>
+                            <td>92</td>
+                            <td>Hyderabad</td>
+                        </tr>
+
+                        <tr>
+                            <td>102</td>
+                            <td>Priya</td>
+                            <td>ECE</td>
+                            <td>81</td>
+                            <td>Vijayawada</td>
+                        </tr>
+
+                        <tr>
+                            <td>103</td>
+                            <td>Rahul</td>
+                            <td>CSE</td>
+                            <td>67</td>
+                            <td>Guntur</td>
+                        </tr>
+
+                        <tr>
+                            <td>104</td>
+                            <td>Sneha</td>
+                            <td>EEE</td>
+                            <td>74</td>
+                            <td>Hyderabad</td>
+                        </tr>
+
+                        <tr>
+                            <td>105</td>
+                            <td>Arjun</td>
+                            <td>CSE</td>
+                            <td>88</td>
+                            <td>Chennai</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <h3>Departments</h3>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Department ID</th>
+                            <th>Name</th>
+                            <th>Location</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>CSE</td>
+                            <td>Hyderabad</td>
+                        </tr>
+
+                        <tr>
+                            <td>2</td>
+                            <td>ECE</td>
+                            <td>Vijayawada</td>
+                        </tr>
+
+                        <tr>
+                            <td>3</td>
+                            <td>EEE</td>
+                            <td>Chennai</td>
+                        </tr>
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             WHERE
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">📍</div>
+
+                <div>
+                    <h2>Subquery in WHERE</h2>
+                    <div class="section-subtitle">
+                        One of the most common applications.
+                    </div>
+                </div>
+
+            </div>
+
+            <p>
+                Suppose we want students who scored above the average mark.
+            </p>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>ABOVE AVERAGE</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+
+<pre><code>SELECT name, marks
+FROM students
+WHERE marks &gt; (
+    SELECT AVG(marks)
+    FROM students
+);</code></pre>
+
+            </div>
+
+            <h3>How to Think About It</h3>
+
+            <ol>
+                <li>Calculate the average marks.</li>
+                <li>The subquery returns one value.</li>
+                <li>Compare every student's marks with that value.</li>
+                <li>Return students whose marks are greater.</li>
+            </ol>
+
+            <div class="info-box tip">
+
+                <strong>Interview Pattern ⭐</strong>
+
+                <p>
+                    "Find employees/students/products above the average"
+                    is a very common subquery problem.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             IN
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">📋</div>
+
+                <div>
+                    <h2>IN with Subqueries</h2>
+                    <div class="section-subtitle">
+                        Use IN when the inner query produces a set of values.
+                    </div>
+                </div>
+
+            </div>
+
+            <p>
+                <span class="inline-code">IN</span> checks whether a value
+                belongs to a set returned by the subquery.
+            </p>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>IN</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+
+<pre><code>SELECT name
+FROM students
+WHERE department IN (
+    SELECT department
+    FROM departments
+    WHERE location = 'Hyderabad'
+);</code></pre>
+
+            </div>
+
+            <div class="flow">
+
+                <div class="flow-box">
+                    Find departments
+                    <br>
+                    <small>located in Hyderabad</small>
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    CSE
+                    <br>
+                    <small>Returned set</small>
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    Find students
+                    <br>
+                    <small>in those departments</small>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             NOT IN NULL TRAP
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">⚠️</div>
+
+                <div>
+                    <h2>The NOT IN + NULL Trap</h2>
+                    <div class="section-subtitle">
+                        One of the most important SQL interview concepts.
+                    </div>
+                </div>
+
+            </div>
+
+            <p>
+                <span class="inline-code">NOT IN</span> can behave unexpectedly
+                if the subquery returns <span class="inline-code">NULL</span>.
+            </p>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>POTENTIAL PROBLEM</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+
+<pre><code>SELECT name
+FROM students
+WHERE department_id NOT IN (
+    SELECT department_id
+    FROM departments
+);</code></pre>
+
+            </div>
+
+            <p>
+                If the inner result contains NULL, comparisons can become
+                UNKNOWN because SQL uses three-valued logic:
+            </p>
+
+            <div class="tags">
+                <span class="tag">TRUE</span>
+                <span class="tag">FALSE</span>
+                <span class="tag">UNKNOWN</span>
+            </div>
+
+            <div class="info-box danger">
+
+                <strong>🚨 Safer Pattern</strong>
+
+                <p>
+                    When checking that no matching row exists and NULLs are
+                    possible, <strong>NOT EXISTS</strong> is often a safer
+                    and clearer choice.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             EXISTS
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">✅</div>
+
+                <div>
+                    <h2>EXISTS</h2>
+                    <div class="section-subtitle">
+                        Ask a yes/no question: does at least one matching row exist?
+                    </div>
+                </div>
+
+            </div>
+
+            <p>
+                <span class="inline-code">EXISTS</span> checks whether the
+                subquery returns at least one row.
+            </p>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>EXISTS</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+
+<pre><code>SELECT c.customer_id, c.name
+FROM customers c
+WHERE EXISTS (
+    SELECT 1
+    FROM orders o
+    WHERE o.customer_id = c.customer_id
+);</code></pre>
+
+            </div>
+
+            <div class="subquery-animation">
+
+                <div class="query-pipeline">
+
+                    <div class="query-card outer">
+
+                        <div class="query-label">
+                            Outer Customer
+                        </div>
+
+<pre><code>Customer #101</code></pre>
+
+                    </div>
+
+                    <div class="query-arrow">
+                        ?
+                    </div>
+
+                    <div class="query-card inner">
+
+                        <div class="query-label">
+                            Inner Orders
+                        </div>
+
+<pre><code>Any order
+for #101?</code></pre>
+
+                        <span class="result-chip">
+                            YES → keep row
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="info-box info">
+
+                <strong>Important</strong>
+
+                <p>
+                    With EXISTS, the actual selected value inside the subquery
+                    usually does not matter. The database is testing whether
+                    a matching row exists. That is why <span class="inline-code">SELECT 1</span>
+                    is commonly written.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             NOT EXISTS
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🚫</div>
+
+                <div>
+                    <h2>NOT EXISTS</h2>
+                    <div class="section-subtitle">
+                        Find rows for which no matching row exists.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>NO ORDERS</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+
+<pre><code>SELECT c.customer_id, c.name
+FROM customers c
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM orders o
+    WHERE o.customer_id = c.customer_id
+);</code></pre>
+
+            </div>
+
+            <p>
+                This asks:
+                <strong>"For this customer, is there no matching order?"</strong>
+            </p>
+
+            <div class="info-box tip">
+
+                <strong>Great interview pattern ⭐</strong>
+
+                <p>
+                    "Find customers who never ordered", "employees with no
+                    projects", and "students with no submissions" are classic
+                    NOT EXISTS problems.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             CORRELATED
+             ===================================================== -->
+
+        <section class="section-card reveal" id="correlated">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🔄</div>
+
+                <div>
+                    <h2>Correlated Subqueries</h2>
+                    <div class="section-subtitle">
+                        The inner query references the current row of the outer query.
+                    </div>
+                </div>
+
+            </div>
+
+            <p>
+                A <strong>correlated subquery</strong> depends on a value from
+                the outer query.
+            </p>
+
+            <p>
+                Consider this classic problem:
+            </p>
+
+            <blockquote style="
+                margin:15px 0;
+                padding:15px 18px;
+                border-left:4px solid #4f46e5;
+                background:#f8fafc;
+                border-radius:8px;
+            ">
+                Find employees whose salary is greater than the average salary
+                of their own department.
+            </blockquote>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>CORRELATED SUBQUERY</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+
+<pre><code>SELECT e.employee_name, e.salary
+FROM employees e
+WHERE e.salary &gt; (
+    SELECT AVG(e2.salary)
+    FROM employees e2
+    WHERE e2.department_id = e.department_id
+);</code></pre>
+
+            </div>
+
+            <h3>Why Is It Correlated?</h3>
+
+            <p>
+                Notice this condition:
+            </p>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>CORRELATION CONDITION</span>
+                </div>
+
+<pre><code>e2.department_id = e.department_id</code></pre>
+
+            </div>
+
+            <p>
+                The inner query uses <span class="inline-code">e.department_id</span>,
+                which comes from the outer query.
+            </p>
+
+            <div class="flow">
+
+                <div class="flow-box">
+                    Outer Employee
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    Get Department
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    Calculate Dept Average
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    Compare Salary
+                </div>
+
+            </div>
+
+            <div class="info-box warning">
+
+                <strong>⚠️ Performance Note</strong>
+
+                <p>
+                    A correlated subquery can be expensive conceptually because
+                    it depends on outer rows. Modern optimizers can transform
+                    many such queries, so never assume the literal nested
+                    structure equals the physical execution plan.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             SCALAR
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">1️⃣</div>
+
+                <div>
+                    <h2>Scalar Subqueries</h2>
+                    <div class="section-subtitle">
+                        A scalar subquery produces a single value.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>SCALAR SUBQUERY</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+
+<pre><code>SELECT name,
+       marks,
+       (
+           SELECT AVG(marks)
+           FROM students
+       ) AS average_marks
+FROM students;</code></pre>
+
+            </div>
+
+            <p>
+                The average is calculated as a single value and can appear
+                beside every student.
+            </p>
+
+            <div class="info-box danger">
+
+                <strong>Important Rule</strong>
+
+                <p>
+                    A scalar subquery must return at most one value in contexts
+                    that require a scalar. If it returns multiple rows, most
+                    database systems raise an error.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             SELECT SUBQUERY
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">📊</div>
+
+                <div>
+                    <h2>Subquery in SELECT</h2>
+                    <div class="section-subtitle">
+                        Use a scalar subquery to calculate an additional value.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>SELECT SUBQUERY</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+
+<pre><code>SELECT
+    e.employee_name,
+    (
+        SELECT d.department_name
+        FROM departments d
+        WHERE d.department_id = e.department_id
+    ) AS department_name
+FROM employees e;</code></pre>
+
+            </div>
+
+            <div class="info-box warning">
+
+                <strong>Design Tip</strong>
+
+                <p>
+                    This can work, but a JOIN is often clearer when you simply
+                    need related columns from another table.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             FROM / DERIVED TABLE
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🧱</div>
+
+                <div>
+                    <h2>Subquery in FROM — Derived Table</h2>
+                    <div class="section-subtitle">
+                        Treat the result of a subquery like a temporary table.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>DERIVED TABLE</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+
+<pre><code>SELECT department_id, avg_salary
+FROM (
+    SELECT
+        department_id,
+        AVG(salary) AS avg_salary
+    FROM employees
+    GROUP BY department_id
+) AS dept_stats
+WHERE avg_salary &gt; 60000;</code></pre>
+
+            </div>
+
+            <div class="flow">
+
+                <div class="flow-box">
+                    Employees
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    GROUP BY
+                    <br>
+                    <small>Department averages</small>
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    Derived Table
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-box">
+                    Filter
+                </div>
+
+            </div>
+
+            <div class="info-box info">
+
+                <strong>Alias</strong>
+
+                <p>
+                    A derived table normally needs an alias, such as
+                    <span class="inline-code">dept_stats</span>, in many SQL
+                    database systems.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             HAVING
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">📈</div>
+
+                <div>
+                    <h2>Subquery with HAVING</h2>
+                    <div class="section-subtitle">
+                        Compare group-level results with another aggregate.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>HAVING + SUBQUERY</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+
+<pre><code>SELECT department_id
+FROM employees
+GROUP BY department_id
+HAVING AVG(salary) &gt; (
+    SELECT AVG(salary)
+    FROM employees
+);</code></pre>
+
+            </div>
+
+            <p>
+                The outer query calculates average salary per department.
+                The subquery calculates the overall company average.
+            </p>
+
+            <p>
+                Only departments whose average is greater than the company
+                average are returned.
+            </p>
+
+        </section>
+
+
+        <!-- =====================================================
+             ANY ALL
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">⚖️</div>
+
+                <div>
+                    <h2>ANY, SOME and ALL</h2>
+                    <div class="section-subtitle">
+                        Compare one value against a set of values.
+                    </div>
+                </div>
+
+            </div>
+
+            <h3>ANY / SOME</h3>
+
+            <p>
+                <span class="inline-code">ANY</span> means the comparison is
+                true for <strong>at least one</strong> value in the subquery.
+                <span class="inline-code">SOME</span> is a synonym in SQL
+                systems that support it.
+            </p>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>ANY</span>
+                </div>
+
+<pre><code>SELECT employee_name, salary
+FROM employees
+WHERE salary &gt; ANY (
+    SELECT salary
+    FROM employees
+    WHERE department_id = 10
+);</code></pre>
+
+            </div>
+
+            <p>
+                This means the salary is greater than at least one salary
+                returned by the inner query.
+            </p>
+
+            <h3>ALL</h3>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>ALL</span>
+                </div>
+
+<pre><code>SELECT employee_name, salary
+FROM employees
+WHERE salary &gt; ALL (
+    SELECT salary
+    FROM employees
+    WHERE department_id = 10
+);</code></pre>
+
+            </div>
+
+            <p>
+                This means the salary must be greater than every salary
+                returned by the inner query.
+            </p>
+
+            <div class="comparison">
+
+                <div class="compare-card">
+
+                    <h4>ANY</h4>
+
+                    <p>
+                        Comparison succeeds for at least one value.
+                    </p>
+
+                    <strong>Think: "one or more"</strong>
+
+                </div>
+
+                <div class="compare-card">
+
+                    <h4>ALL</h4>
+
+                    <p>
+                        Comparison must succeed for every value.
+                    </p>
+
+                    <strong>Think: "every one"</strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             NESTED
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🪆</div>
+
+                <div>
+                    <h2>Nested Subqueries</h2>
+                    <div class="section-subtitle">
+                        A subquery can contain another subquery.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>NESTED SUBQUERY</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+
+<pre><code>SELECT name
+FROM students
+WHERE department IN (
+    SELECT department
+    FROM departments
+    WHERE location IN (
+        SELECT city
+        FROM campuses
+        WHERE active = 1
+    )
+);</code></pre>
+
+            </div>
+
+            <div class="info-box warning">
+
+                <strong>Readability Warning</strong>
+
+                <p>
+                    Nested subqueries are powerful, but too many levels can
+                    become difficult to maintain. Consider a CTE or JOIN when
+                    it makes the logic clearer.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             DML
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">✏️</div>
+
+                <div>
+                    <h2>Subqueries with INSERT, UPDATE and DELETE</h2>
+                    <div class="section-subtitle">
+                        Subqueries are not limited to SELECT statements.
+                    </div>
+                </div>
+
+            </div>
+
+            <h3>INSERT ... SELECT</h3>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>INSERT</span>
+                </div>
+
+<pre><code>INSERT INTO top_students (student_id, name)
+SELECT student_id, name
+FROM students
+WHERE marks &gt;= (
+    SELECT AVG(marks)
+    FROM students
+);</code></pre>
+
+            </div>
+
+            <h3>UPDATE</h3>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>UPDATE</span>
+                </div>
+
+<pre><code>UPDATE employees
+SET salary = salary * 1.10
+WHERE department_id IN (
+    SELECT department_id
+    FROM departments
+    WHERE location = 'Hyderabad'
+);</code></pre>
+
+            </div>
+
+            <h3>DELETE</h3>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>DELETE</span>
+                </div>
+
+<pre><code>DELETE FROM customers c
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM orders o
+    WHERE o.customer_id = c.customer_id
+);</code></pre>
+
+            </div>
+
+            <div class="info-box danger">
+
+                <strong>⚠️ Production Rule</strong>
+
+                <p>
+                    Always test the corresponding SELECT condition before
+                    running UPDATE or DELETE in a real database.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             JOIN VS SUBQUERY
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🔀</div>
+
+                <div>
+                    <h2>Subquery vs JOIN</h2>
+                    <div class="section-subtitle">
+                        Both can solve overlapping problems, but they communicate
+                        different ideas.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="comparison">
+
+                <div class="compare-card">
+
+                    <h4>Subquery</h4>
+
+                    <ul>
+                        <li>Good for nested logic.</li>
+                        <li>Natural for "above average" questions.</li>
+                        <li>EXISTS expresses existence clearly.</li>
+                        <li>Can isolate a calculation.</li>
+                    </ul>
+
+                </div>
+
+                <div class="compare-card">
+
+                    <h4>JOIN</h4>
+
+                    <ul>
+                        <li>Excellent for combining related tables.</li>
+                        <li>Often easier to read for multi-table retrieval.</li>
+                        <li>Useful when columns from both tables are needed.</li>
+                        <li>Can be easier to optimize and reason about.</li>
+                    </ul>
+
+                </div>
+
+            </div>
+
+            <h3>Example</h3>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>SUBQUERY</span>
+                </div>
+
+<pre><code>SELECT name
+FROM students
+WHERE department_id IN (
+    SELECT department_id
+    FROM departments
+    WHERE location = 'Hyderabad'
+);</code></pre>
+
+            </div>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>JOIN</span>
+                </div>
+
+<pre><code>SELECT s.name
+FROM students s
+JOIN departments d
+    ON s.department_id = d.department_id
+WHERE d.location = 'Hyderabad';</code></pre>
+
+            </div>
+
+            <p>
+                Neither form is universally "faster." The database optimizer,
+                indexes, statistics, data distribution and query shape all
+                matter. Use <span class="inline-code">EXPLAIN</span> or your
+                database's execution-plan tools when performance matters.
+            </p>
+
+        </section>
+
+
+        <!-- =====================================================
+             CTE
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🧠</div>
+
+                <div>
+                    <h2>Subqueries vs CTEs</h2>
+                    <div class="section-subtitle">
+                        CTEs can make complex multi-step SQL easier to read.
+                    </div>
+                </div>
+
+            </div>
+
+            <p>
+                A Common Table Expression uses the <span class="inline-code">WITH</span>
+                clause to give a named result a logical name.
+            </p>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>CTE VERSION</span>
+                </div>
+
+<pre><code>WITH dept_stats AS (
+    SELECT
+        department_id,
+        AVG(salary) AS avg_salary
+    FROM employees
+    GROUP BY department_id
+)
+
+SELECT department_id, avg_salary
+FROM dept_stats
+WHERE avg_salary &gt; 60000;</code></pre>
+
+            </div>
+
+            <div class="info-box info">
+
+                <strong>When CTEs help</strong>
+
+                <p>
+                    Use a CTE when a query has multiple logical steps or when
+                    naming an intermediate result makes the SQL much easier
+                    to understand.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             WINDOW FUNCTIONS
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🪟</div>
+
+                <div>
+                    <h2>Subqueries vs Window Functions</h2>
+                    <div class="section-subtitle">
+                        An important advanced SQL decision.
+                    </div>
+                </div>
+
+            </div>
+
+            <p>
+                A correlated subquery can sometimes be replaced by a window
+                function when you want to compare each row with a group-level
+                value while keeping all rows.
+            </p>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>CORRELATED SUBQUERY IDEA</span>
+                </div>
+
+<pre><code>SELECT
+    e.employee_name,
+    e.salary
+FROM employees e
+WHERE e.salary &gt; (
+    SELECT AVG(e2.salary)
+    FROM employees e2
+    WHERE e2.department_id = e.department_id
+);</code></pre>
+
+            </div>
+
+            <p>Another approach in systems supporting window functions:</p>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>WINDOW FUNCTION</span>
+                </div>
+
+<pre><code>SELECT employee_name, salary
+FROM (
+    SELECT
+        employee_name,
+        salary,
+        AVG(salary) OVER (
+            PARTITION BY department_id
+        ) AS dept_avg
+    FROM employees
+) x
+WHERE salary &gt; dept_avg;</code></pre>
+
+            </div>
+
+            <div class="info-box tip">
+
+                <strong>Key Difference</strong>
+
+                <p>
+                    A normal aggregate reduces rows. A window function can
+                    calculate a group statistic while retaining individual
+                    rows.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             LOGICAL ORDER
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🧭</div>
+
+                <div>
+                    <h2>Logical Query Processing</h2>
+                    <div class="section-subtitle">
+                        Understand where subqueries fit conceptually.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="flow">
+
+                <div class="flow-box">FROM</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">WHERE</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">GROUP BY</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">HAVING</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">SELECT</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">ORDER BY</div>
+
+            </div>
+
+            <p>
+                This is a conceptual logical-processing order, not a promise
+                of physical execution. The optimizer may choose a different
+                execution strategy.
+            </p>
+
+        </section>
+
+
+        <!-- =====================================================
+             PERFORMANCE
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🚀</div>
+
+                <div>
+                    <h2>Subquery Performance</h2>
+                    <div class="section-subtitle">
+                        Write correct SQL first, then measure performance.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="info-grid">
+
+                <div class="info-box tip">
+
+                    <strong>1. Index important columns</strong>
+
+                    <p>
+                        Especially columns used for filtering and correlation.
+                    </p>
+
+                </div>
+
+                <div class="info-box tip">
+
+                    <strong>2. Use EXPLAIN</strong>
+
+                    <p>
+                        Inspect the actual execution plan when performance matters.
+                    </p>
+
+                </div>
+
+                <div class="info-box info">
+
+                    <strong>3. Avoid unnecessary nesting</strong>
+
+                    <p>
+                        A simpler JOIN, CTE or window function may communicate
+                        the intent better.
+                    </p>
+
+                </div>
+
+                <div class="info-box info">
+
+                    <strong>4. Select only required columns</strong>
+
+                    <p>
+                        Avoid unnecessary SELECT * in intermediate queries.
+                    </p>
+
+                </div>
+
+                <div class="info-box warning">
+
+                    <strong>5. Correlation matters</strong>
+
+                    <p>
+                        Correlated logic can be expensive depending on the
+                        optimizer and data.
+                    </p>
+
+                </div>
+
+                <div class="info-box warning">
+
+                    <strong>6. Don't guess performance</strong>
+
+                    <p>
+                        Two logically equivalent queries can have different
+                        plans depending on the database.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             INTERACTIVE LAB
+             ===================================================== -->
+
+        <section class="section-card reveal" id="lab">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🧪</div>
+
+                <div>
+                    <h2>Interactive Subquery Lab</h2>
+                    <div class="section-subtitle">
+                        Explore common subquery patterns using a browser simulation.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="lab">
+
+                <h3>Choose a problem</h3>
+
+                <p>
+                    This is a learning simulator. It does not execute SQL
+                    against a real database.
+                </p>
+
+                <div class="lab-controls">
+
+                    <button class="lab-btn active" onclick="runLab('average',this)">
+                        Above Average
+                    </button>
+
+                    <button class="lab-btn" onclick="runLab('in',this)">
+                        IN
+                    </button>
+
+                    <button class="lab-btn" onclick="runLab('exists',this)">
+                        EXISTS
+                    </button>
+
+                    <button class="lab-btn" onclick="runLab('notexists',this)">
+                        NOT EXISTS
+                    </button>
+
+                    <button class="lab-btn" onclick="runLab('correlated',this)">
+                        Correlated
+                    </button>
+
+                    <button class="lab-btn" onclick="runLab('having',this)">
+                        HAVING
+                    </button>
+
+                </div>
+
+                <div class="lab-query">
+
+                    <div style="
+                        font-size:10px;
+                        color:#64748b;
+                        font-weight:800;
+                        margin-bottom:7px;
+                        text-transform:uppercase;
+                    ">
+                        Generated SQL
+                    </div>
+
+                    <pre id="labSQL"></pre>
+
+                </div>
+
+                <div class="lab-result">
+
+                    <div class="lab-result-title">
+                        SIMULATED RESULT
+                    </div>
+
+                    <div id="labResult"></div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             COMMON MISTAKES
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🚧</div>
+
+                <div>
+                    <h2>Common Mistakes</h2>
+                    <div class="section-subtitle">
+                        Avoid these mistakes in exams, interviews and projects.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="info-grid">
+
+                <div class="info-box danger">
+                    <strong>❌ Scalar returns multiple rows</strong>
+                    <p>
+                        A scalar comparison such as = expects a single value.
+                    </p>
+                </div>
+
+                <div class="info-box danger">
+                    <strong>❌ NOT IN with NULL</strong>
+                    <p>
+                        NULL can produce UNKNOWN results.
+                    </p>
+                </div>
+
+                <div class="info-box danger">
+                    <strong>❌ Missing correlation condition</strong>
+                    <p>
+                        A correlated query needs the correct relationship
+                        between inner and outer rows.
+                    </p>
+                </div>
+
+                <div class="info-box warning">
+                    <strong>⚠️ Wrong column type with IN</strong>
+                    <p>
+                        The compared expression and returned values should
+                        be compatible.
+                    </p>
+                </div>
+
+                <div class="info-box warning">
+                    <strong>⚠️ Using aggregate directly in WHERE</strong>
+                    <p>
+                        Aggregates often require a subquery, GROUP BY/HAVING,
+                        window function or another appropriate structure.
+                    </p>
+                </div>
+
+                <div class="info-box warning">
+                    <strong>⚠️ Over-nesting</strong>
+                    <p>
+                        Too many nested levels can make SQL hard to maintain.
+                    </p>
+                </div>
+
+                <div class="info-box info">
+                    <strong>ℹ️ Confusing EXISTS</strong>
+                    <p>
+                        EXISTS checks whether rows exist; it is not primarily
+                        about returning the inner query's selected value.
+                    </p>
+                </div>
+
+                <div class="info-box info">
+                    <strong>ℹ️ Missing derived-table alias</strong>
+                    <p>
+                        Many SQL systems require an alias for a subquery in FROM.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             EXAM 5 MARK
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">📝</div>
+
+                <div>
+                    <h2>Exam Preparation — 5 Marks</h2>
+                    <div class="section-subtitle">
+                        Ready-to-write answer.
+                    </div>
+                </div>
+
+            </div>
+
+            <h3>Define Subquery</h3>
+
+            <p>
+                A subquery is a SQL query embedded inside another SQL query.
+                The inner query produces a value, set of values, row, table,
+                or existence result that is used by the outer query.
+                Subqueries can be used in clauses such as WHERE, SELECT,
+                FROM and HAVING, and can also participate in INSERT, UPDATE
+                and DELETE statements.
+            </p>
+
+            <h3>Types</h3>
+
+            <ol>
+                <li>Scalar subquery</li>
+                <li>Single-row subquery</li>
+                <li>Multi-row subquery</li>
+                <li>Correlated subquery</li>
+                <li>Derived-table subquery</li>
+                <li>Nested subquery</li>
+            </ol>
+
+        </section>
+
+
+        <!-- =====================================================
+             EXAM 10 MARK
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🏆</div>
+
+                <div>
+                    <h2>Exam Preparation — 10 Marks</h2>
+                    <div class="section-subtitle">
+                        Structure your long answer professionally.
+                    </div>
+                </div>
+
+            </div>
+
+            <h3>Subqueries in SQL</h3>
+
+            <p>
+                A subquery is a query nested inside another query. It is used
+                when the result of one query is required by another query.
+                Subqueries improve the ability to express multi-step data
+                retrieval and filtering logic.
+            </p>
+
+            <h3>Major Types</h3>
+
+            <ol>
+                <li>Scalar subqueries return a single value.</li>
+                <li>Single-row subqueries return one row.</li>
+                <li>Multi-row subqueries return multiple values.</li>
+                <li>Correlated subqueries reference the outer query.</li>
+                <li>Derived tables are subqueries used in FROM.</li>
+                <li>Nested subqueries contain multiple query levels.</li>
+            </ol>
+
+            <h3>Common Operators</h3>
+
+            <ul>
+                <li>IN</li>
+                <li>NOT IN</li>
+                <li>EXISTS</li>
+                <li>NOT EXISTS</li>
+                <li>ANY / SOME</li>
+                <li>ALL</li>
+            </ul>
+
+            <h3>Advantages</h3>
+
+            <ul>
+                <li>Express complex conditions.</li>
+                <li>Break a complex problem into logical steps.</li>
+                <li>Useful for aggregate comparisons.</li>
+                <li>EXISTS clearly represents existence tests.</li>
+            </ul>
+
+            <h3>Limitations</h3>
+
+            <ul>
+                <li>Deep nesting may reduce readability.</li>
+                <li>Correlated queries can require careful performance analysis.</li>
+                <li>NULL behavior can make NOT IN tricky.</li>
+                <li>Some problems are clearer with JOINs or CTEs.</li>
+            </ul>
+
+        </section>
+
+
+        <!-- =====================================================
+             INTERVIEW
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🎤</div>
+
+                <div>
+                    <h2>Interview Questions</h2>
+                    <div class="section-subtitle">
+                        Questions you should be able to answer confidently.
+                    </div>
+                </div>
+
+            </div>
+
+            <h3>1. What is a subquery?</h3>
+            <p>
+                A query embedded inside another query.
+            </p>
+
+            <h3>2. What is a scalar subquery?</h3>
+            <p>
+                A subquery that produces a single value in a scalar context.
+            </p>
+
+            <h3>3. What is a correlated subquery?</h3>
+            <p>
+                A subquery that references one or more values from the outer query.
+            </p>
+
+            <h3>4. IN vs EXISTS?</h3>
+            <p>
+                IN compares a value with a set of returned values. EXISTS
+                tests whether at least one matching row exists. The best
+                choice depends on the semantics, NULL behavior and database
+                optimizer.
+            </p>
+
+            <h3>5. Why is NOT EXISTS often safer than NOT IN?</h3>
+            <p>
+                NOT IN can produce unexpected results when the subquery contains
+                NULL because of SQL's three-valued logic.
+            </p>
+
+            <h3>6. What happens if a scalar subquery returns multiple rows?</h3>
+            <p>
+                In most database systems, the statement fails because a scalar
+                context expects at most one value.
+            </p>
+
+            <h3>7. Can subqueries be used in INSERT, UPDATE and DELETE?</h3>
+            <p>
+                Yes. Subqueries can be used in conditions and INSERT ... SELECT
+                patterns.
+            </p>
+
+            <h3>8. Subquery or JOIN?</h3>
+            <p>
+                Choose based on the problem. JOIN is often natural for retrieving
+                related columns; subqueries can be clearer for nested conditions
+                and existence tests.
+            </p>
+
+            <h3>9. What is a derived table?</h3>
+            <p>
+                A subquery placed in the FROM clause and treated as a relational
+                result that can be queried by the outer statement.
+            </p>
+
+            <h3>10. Can a subquery contain another subquery?</h3>
+            <p>
+                Yes. This is called nesting.
+            </p>
+
+        </section>
+
+
+        <!-- =====================================================
+             QUIZ
+             ===================================================== -->
+
+        <section class="section-card reveal" id="quiz">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🧠</div>
+
+                <div>
+                    <h2>Quick Quiz</h2>
+                    <div class="section-subtitle">
+                        Test your understanding.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="quiz-question">
+
+                <p>1. What is a subquery?</p>
+
+                <div class="quiz-options">
+
+                    <div class="quiz-option" data-correct="false">
+                        A database
+                    </div>
+
+                    <div class="quiz-option" data-correct="true">
+                        A query inside another query
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        A primary key
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        A table constraint
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="quiz-question">
+
+                <p>2. Which operator checks whether a matching row exists?</p>
+
+                <div class="quiz-options">
+
+                    <div class="quiz-option" data-correct="false">
+                        IN
+                    </div>
+
+                    <div class="quiz-option" data-correct="true">
+                        EXISTS
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        GROUP BY
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        ORDER BY
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="quiz-question">
+
+                <p>3. Which subquery references the outer query?</p>
+
+                <div class="quiz-options">
+
+                    <div class="quiz-option" data-correct="true">
+                        Correlated subquery
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        Scalar function
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        Static query
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        DDL query
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="quiz-question">
+
+                <p>4. Which can be dangerous when NULL values exist?</p>
+
+                <div class="quiz-options">
+
+                    <div class="quiz-option" data-correct="false">
+                        EXISTS
+                    </div>
+
+                    <div class="quiz-option" data-correct="true">
+                        NOT IN
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        GROUP BY
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        ORDER BY
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="quiz-question">
+
+                <p>5. What does ALL mean?</p>
+
+                <div class="quiz-options">
+
+                    <div class="quiz-option" data-correct="false">
+                        At least one value
+                    </div>
+
+                    <div class="quiz-option" data-correct="true">
+                        The comparison must hold for every returned value
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        No values
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        One row only
+                    </div>
+
+                </div>
+
+            </div>
+
+            <button class="primary-btn" onclick="calculateQuiz()">
+                Check Score
+            </button>
+
+            <div class="quiz-result" id="quizResult"></div>
+
+        </section>
+
+
+        <!-- =====================================================
+             PRACTICE
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">💻</div>
+
+                <div>
+                    <h2>Practice Problems</h2>
+                    <div class="section-subtitle">
+                        Solve these without looking at the answers.
+                    </div>
+                </div>
+
+            </div>
+
+            <ol>
+
+                <li>
+                    Find students whose marks are greater than the average marks.
+                </li>
+
+                <li>
+                    Find employees whose salary is greater than the company
+                    average.
+                </li>
+
+                <li>
+                    Find employees whose salary is greater than their department
+                    average.
+                </li>
+
+                <li>
+                    Find customers who have placed at least one order.
+                </li>
+
+                <li>
+                    Find customers who have never placed an order.
+                </li>
+
+                <li>
+                    Find departments whose average salary is above the company
+                    average.
+                </li>
+
+                <li>
+                    Find products whose price is greater than every product in
+                    category 10.
+                </li>
+
+                <li>
+                    Find employees whose salary is greater than at least one
+                    employee in department 20.
+                </li>
+
+                <li>
+                    Insert above-average students into a separate table.
+                </li>
+
+                <li>
+                    Update salaries of employees belonging to departments in
+                    Hyderabad.
+                </li>
+
+            </ol>
+
+        </section>
+
+
+        <!-- =====================================================
+             MINI PROJECT
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🚀</div>
+
+                <div>
+                    <h2>Mini Project — Student Analytics Engine</h2>
+                    <div class="section-subtitle">
+                        Apply everything you learned.
+                    </div>
+                </div>
+
+            </div>
+
+            <p>
+                Build a SQL-based Student Analytics Engine that answers
+                real-world academic questions.
+            </p>
+
+            <h3>Required Features</h3>
+
+            <ol>
+
+                <li>
+                    Find students above overall average.
+                </li>
+
+                <li>
+                    Find students above their department average.
+                </li>
+
+                <li>
+                    Find departments above overall average.
+                </li>
+
+                <li>
+                    Find students who submitted at least one assignment.
+                </li>
+
+                <li>
+                    Find students who never submitted an assignment.
+                </li>
+
+                <li>
+                    Create a derived table containing department statistics.
+                </li>
+
+                <li>
+                    Use a CTE version of one complex query.
+                </li>
+
+                <li>
+                    Compare a subquery solution with a JOIN solution.
+                </li>
+
+            </ol>
+
+            <div class="info-box tip">
+
+                <strong>Portfolio Upgrade ⭐</strong>
+
+                <p>
+                    Add this project to your ZENSUS coding problems section and
+                    provide multiple solution approaches for each problem.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             CHECKLIST
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">☑️</div>
+
+                <div>
+                    <h2>Lesson Completion Checklist</h2>
+                    <div class="section-subtitle">
+                        Your progress is saved in this browser.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="checklist">
+
+                <label class="check-item">
+                    <input type="checkbox" data-check="1">
+                    <span>I understand what a subquery is.</span>
+                </label>
+
+                <label class="check-item">
+                    <input type="checkbox" data-check="2">
+                    <span>I can write a scalar subquery.</span>
+                </label>
+
+                <label class="check-item">
+                    <input type="checkbox" data-check="3">
+                    <span>I understand IN and NOT IN.</span>
+                </label>
+
+                <label class="check-item">
+                    <input type="checkbox" data-check="4">
+                    <span>I understand EXISTS and NOT EXISTS.</span>
+                </label>
+
+                <label class="check-item">
+                    <input type="checkbox" data-check="5">
+                    <span>I can write correlated subqueries.</span>
+                </label>
+
+                <label class="check-item">
+                    <input type="checkbox" data-check="6">
+                    <span>I understand ANY, SOME and ALL.</span>
+                </label>
+
+                <label class="check-item">
+                    <input type="checkbox" data-check="7">
+                    <span>I can use a subquery in FROM.</span>
+                </label>
+
+                <label class="check-item">
+                    <input type="checkbox" data-check="8">
+                    <span>I understand the NOT IN + NULL problem.</span>
+                </label>
+
+                <label class="check-item">
+                    <input type="checkbox" data-check="9">
+                    <span>I can compare subqueries with JOINs.</span>
+                </label>
+
+                <label class="check-item">
+                    <input type="checkbox" data-check="10">
+                    <span>I completed the practice problems.</span>
+                </label>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             RAPID REVISION
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">⚡</div>
+
+                <div>
+                    <h2>Rapid Revision</h2>
+                    <div class="section-subtitle">
+                        Remember these patterns before an interview.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Concept</th>
+                            <th>Meaning</th>
+                            <th>Typical Use</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Scalar</td>
+                            <td>One value</td>
+                            <td>AVG / MAX / MIN comparison</td>
+                        </tr>
+
+                        <tr>
+                            <td>IN</td>
+                            <td>Value belongs to set</td>
+                            <td>Membership filtering</td>
+                        </tr>
+
+                        <tr>
+                            <td>EXISTS</td>
+                            <td>Matching row exists</td>
+                            <td>Existence tests</td>
+                        </tr>
+
+                        <tr>
+                            <td>NOT EXISTS</td>
+                            <td>No matching row</td>
+                            <td>Missing relationships</td>
+                        </tr>
+
+                        <tr>
+                            <td>ANY</td>
+                            <td>At least one comparison succeeds</td>
+                            <td>Compare against a set</td>
+                        </tr>
+
+                        <tr>
+                            <td>ALL</td>
+                            <td>Every comparison succeeds</td>
+                            <td>Compare against entire set</td>
+                        </tr>
+
+                        <tr>
+                            <td>Correlated</td>
+                            <td>References outer row</td>
+                            <td>Per-group/per-row comparison</td>
+                        </tr>
+
+                        <tr>
+                            <td>Derived table</td>
+                            <td>Subquery in FROM</td>
+                            <td>Intermediate result</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             FINAL
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div style="
+                text-align:center;
+                padding:25px 10px;
+            ">
+
+                <div style="
+                    font-size:40px;
+                    margin-bottom:12px;
+                ">
+                    🧠
+                </div>
+
+                <h2>
+                    You now understand SQL Subqueries.
+                </h2>
+
+                <p style="
+                    max-width:700px;
+                    margin:10px auto 20px;
+                    color:#64748b;
+                ">
+                    The next level is not simply writing deeper queries.
+                    It is learning to choose the clearest and most efficient
+                    SQL structure for the problem.
+                </p>
+
+                <div class="tags" style="justify-content:center;">
+
+                    <span class="tag">Scalar</span>
+                    <span class="tag">IN</span>
+                    <span class="tag">EXISTS</span>
+                    <span class="tag">NOT EXISTS</span>
+                    <span class="tag">ANY</span>
+                    <span class="tag">ALL</span>
+                    <span class="tag">Correlated</span>
+                    <span class="tag">Derived Tables</span>
+                    <span class="tag">CTEs</span>
+                    <span class="tag">Window Functions</span>
+
+                </div>
+
+                <p style="
+                    margin-top:25px;
+                    font-size:13px;
+                    font-weight:700;
+                    color:#4f46e5;
+                ">
+                    Next Lesson → SQL Constraints
+                </p>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</main>
+
+
+<script>
+    /* =========================================================
+       ZENSUS SQL LESSON 11 JAVASCRIPT
+       ========================================================= */
+
+    /* =========================
+       MOBILE SIDEBAR
+       ========================= */
+
+    function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("open");
+    }
+
+
+    /* =========================
+       SCROLL PROGRESS
+       ========================= */
+
+    window.addEventListener("scroll", function () {
+
+        const scrollTop = window.scrollY;
+
+        const height =
+            document.documentElement.scrollHeight -
+            document.documentElement.clientHeight;
+
+        const progress = (scrollTop / height) * 100;
+
+        document.getElementById("progressBar").style.width =
+            progress + "%";
+
+    });
+
+
+    /* =========================
+       COPY CODE
+       ========================= */
+
+    function copyCode(button) {
+
+        const wrapper = button.closest(".code-wrapper");
+
+        const code = wrapper.querySelector("pre").innerText;
+
+        navigator.clipboard.writeText(code).then(() => {
+
+            const oldText = button.innerText;
+
+            button.innerText = "Copied!";
+
+            setTimeout(() => {
+                button.innerText = oldText;
+            }, 1200);
+
+        }).catch(() => {
+
+            button.innerText = "Copy failed";
+
+            setTimeout(() => {
+                button.innerText = "Copy";
+            }, 1200);
+
+        });
+
+    }
+
+
+    /* =========================
+       REVEAL ANIMATIONS
+       ========================= */
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const elements =
+            document.querySelectorAll(".reveal");
+
+        elements.forEach(el => {
+            el.classList.add("animate");
+        });
+
+        const observer =
+            new IntersectionObserver((entries) => {
+
+                entries.forEach(entry => {
+
+                    if (entry.isIntersecting) {
+
+                        entry.target.classList.add("visible");
+
+                    }
+
+                });
+
+            }, {
+                threshold: 0.08
+            });
+
+        elements.forEach(el => observer.observe(el));
+
+    });
+
+
+    /* =========================================================
+       SUBQUERY LAB
+       ========================================================= */
+
+    const students = [
+        {
+            id: 101,
+            name: "Aarav",
+            department: "CSE",
+            marks: 92
+        },
+        {
+            id: 102,
+            name: "Priya",
+            department: "ECE",
+            marks: 81
+        },
+        {
+            id: 103,
+            name: "Rahul",
+            department: "CSE",
+            marks: 67
+        },
+        {
+            id: 104,
+            name: "Sneha",
+            department: "EEE",
+            marks: 74
+        },
+        {
+            id: 105,
+            name: "Arjun",
+            department: "CSE",
+            marks: 88
+        }
+    ];
+
+    const orders = [
+        {
+            customerId: 101
+        },
+        {
+            customerId: 102
+        },
+        {
+            customerId: 105
+        }
+    ];
+
+
+    function average(values) {
+
+        return values.reduce(
+            (sum, value) => sum + value,
+            0
+        ) / values.length;
+
+    }
+
+
+    function renderTable(rows, columns) {
+
+        if (!rows.length) {
+
+            return `
+                <div style="
+                    padding:18px;
+                    color:#94a3b8;
+                ">
+                    No rows returned.
+                </div>
+            `;
+
+        }
+
+        let html = `
+            <table>
+                <thead>
+                    <tr>
+        `;
+
+        columns.forEach(column => {
+
+            html += `<th>${column.label}</th>`;
+
+        });
+
+        html += `
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        rows.forEach(row => {
+
+            html += "<tr>";
+
+            columns.forEach(column => {
+
+                html += `
+                    <td>
+                        ${row[column.key]}
+                    </td>
+                `;
+
+            });
+
+            html += "</tr>";
+
+        });
+
+        html += `
+                </tbody>
+            </table>
+        `;
+
+        return html;
+
+    }
+
+
+    function runLab(type, button) {
+
+        document
+            .querySelectorAll(".lab-btn")
+            .forEach(btn => btn.classList.remove("active"));
+
+        button.classList.add("active");
+
+        let sql = "";
+        let rows = [];
+        let columns = [];
+
+
+        /* =========================
+           ABOVE AVERAGE
+           ========================= */
+
+        if (type === "average") {
+
+            sql = `
+SELECT name, marks
+FROM students
+WHERE marks > (
+    SELECT AVG(marks)
+    FROM students
+);`;
+
+            const avg = average(
+                students.map(s => s.marks)
+            );
+
+            rows = students
+                .filter(s => s.marks > avg)
+                .map(s => ({
+                    name: s.name,
+                    marks: s.marks
+                }));
+
+            columns = [
+                {
+                    key: "name",
+                    label: "Name"
+                },
+                {
+                    key: "marks",
+                    label: "Marks"
+                }
+            ];
+
+        }
+
+
+        /* =========================
+           IN
+           ========================= */
+
+        if (type === "in") {
+
+            sql = `
+SELECT name, department
+FROM students
+WHERE department IN (
+    SELECT department
+    FROM departments
+    WHERE location = 'Hyderabad'
+);`;
+
+            const departments =
+                ["CSE"];
+
+            rows = students
+                .filter(s =>
+                    departments.includes(s.department)
+                )
+                .map(s => ({
+                    name: s.name,
+                    department: s.department
+                }));
+
+            columns = [
+                {
+                    key: "name",
+                    label: "Name"
+                },
+                {
+                    key: "department",
+                    label: "Department"
+                }
+            ];
+
+        }
+
+
+        /* =========================
+           EXISTS
+           ========================= */
+
+        if (type === "exists") {
+
+            sql = `
+SELECT s.name, s.id
+FROM students s
+WHERE EXISTS (
+    SELECT 1
+    FROM orders o
+    WHERE o.customer_id = s.id
+);`;
+
+            rows = students
+                .filter(s =>
+                    orders.some(
+                        o => o.customerId === s.id
+                    )
+                )
+                .map(s => ({
+                    name: s.name,
+                    id: s.id
+                }));
+
+            columns = [
+                {
+                    key: "id",
+                    label: "ID"
+                },
+                {
+                    key: "name",
+                    label: "Name"
+                }
+            ];
+
+        }
+
+
+        /* =========================
+           NOT EXISTS
+           ========================= */
+
+        if (type === "notexists") {
+
+            sql = `
+SELECT s.name, s.id
+FROM students s
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM orders o
+    WHERE o.customer_id = s.id
+);`;
+
+            rows = students
+                .filter(s =>
+                    !orders.some(
+                        o => o.customerId === s.id
+                    )
+                )
+                .map(s => ({
+                    name: s.name,
+                    id: s.id
+                }));
+
+            columns = [
+                {
+                    key: "id",
+                    label: "ID"
+                },
+                {
+                    key: "name",
+                    label: "Name"
+                }
+            ];
+
+        }
+
+
+        /* =========================
+           CORRELATED
+           ========================= */
+
+        if (type === "correlated") {
+
+            sql = `
+SELECT s.name, s.department, s.marks
+FROM students s
+WHERE s.marks > (
+    SELECT AVG(s2.marks)
+    FROM students s2
+    WHERE s2.department = s.department
+);`;
+
+            const departments = {};
+
+            students.forEach(s => {
+
+                if (!departments[s.department]) {
+                    departments[s.department] = [];
+                }
+
+                departments[s.department].push(s.marks);
+
+            });
+
+            rows = students
+                .filter(s => {
+
+                    const deptAvg =
+                        average(
+                            departments[s.department]
+                        );
+
+                    return s.marks > deptAvg;
+
+                })
+                .map(s => ({
+                    name: s.name,
+                    department: s.department,
+                    marks: s.marks
+                }));
+
+            columns = [
+                {
+                    key: "name",
+                    label: "Name"
+                },
+                {
+                    key: "department",
+                    label: "Department"
+                },
+                {
+                    key: "marks",
+                    label: "Marks"
+                }
+            ];
+
+        }
+
+
+        /* =========================
+           HAVING
+           ========================= */
+
+        if (type === "having") {
+
+            sql = `
+SELECT department
+FROM students
+GROUP BY department
+HAVING AVG(marks) > (
+    SELECT AVG(marks)
+    FROM students
+);`;
+
+            const companyAverage =
+                average(
+                    students.map(
+                        s => s.marks
+                    )
+                );
+
+            const groups = {};
+
+            students.forEach(s => {
+
+                if (!groups[s.department]) {
+                    groups[s.department] = [];
+                }
+
+                groups[s.department].push(s.marks);
+
+            });
+
+            rows = Object.keys(groups)
+                .filter(dept =>
+                    average(groups[dept]) >
+                    companyAverage
+                )
+                .map(dept => ({
+                    department: dept
+                }));
+
+            columns = [
+                {
+                    key: "department",
+                    label: "Department"
+                }
+            ];
+
+        }
+
+
+        document.getElementById("labSQL").textContent =
+            sql.trim();
+
+        document.getElementById("labResult").innerHTML =
+            renderTable(rows, columns);
+
+    }
+
+
+    /* Initial lab */
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const firstButton =
+            document.querySelector(".lab-btn");
+
+        runLab("average", firstButton);
+
+    });
+
+
+    /* =========================================================
+       QUIZ
+       ========================================================= */
+
+    document.querySelectorAll(".quiz-option")
+        .forEach(option => {
+
+            option.addEventListener("click", function () {
+
+                const parent =
+                    this.closest(".quiz-options");
+
+                parent
+                    .querySelectorAll(".quiz-option")
+                    .forEach(opt => {
+
+                        opt.classList.remove(
+                            "correct",
+                            "wrong"
+                        );
+
+                    });
+
+                if (
+                    this.dataset.correct === "true"
+                ) {
+
+                    this.classList.add("correct");
+
+                } else {
+
+                    this.classList.add("wrong");
+
+                }
+
+            });
+
+        });
+
+
+    function calculateQuiz() {
+
+        const questions =
+            document.querySelectorAll(
+                ".quiz-question"
+            );
+
+        let score = 0;
+
+        questions.forEach(question => {
+
+            const selected =
+                question.querySelector(
+                    ".quiz-option.correct"
+                );
+
+            if (selected) {
+                score++;
+            }
+
+        });
+
+        const result =
+            document.getElementById("quizResult");
+
+        result.style.display = "block";
+
+        result.innerHTML =
+            `Your Score: ${score} / ${questions.length}
+             ${
+                 score === questions.length
+                 ? " 🎉 Perfect!"
+                 : " — Review the incorrect concepts and try again."
+             }`;
+
+    }
+
+
+    /* =========================================================
+       CHECKLIST LOCAL STORAGE
+       ========================================================= */
+
+    document
+        .querySelectorAll(".check-item input")
+        .forEach(input => {
+
+            const key =
+                "zensus-sql-lesson11-" +
+                input.dataset.check;
+
+            const saved =
+                localStorage.getItem(key);
+
+            if (saved === "true") {
+
+                input.checked = true;
+
+                input
+                    .closest(".check-item")
+                    .classList.add("done");
+
+            }
+
+            input.addEventListener(
+                "change",
+                function () {
+
+                    localStorage.setItem(
+                        key,
+                        this.checked
+                    );
+
+                    this
+                        .closest(".check-item")
+                        .classList.toggle(
+                            "done",
+                            this.checked
+                        );
+
+                }
+            );
+
+        });
+
+
+    /* =========================================================
+       ACTIVE NAVIGATION
+       ========================================================= */
+
+    const sections =
+        document.querySelectorAll(
+            "section[id]"
+        );
+
+    window.addEventListener(
+        "scroll",
+        function () {
+
+            let current = "";
+
+            sections.forEach(section => {
+
+                const top =
+                    section.offsetTop - 120;
+
+                if (
+                    window.scrollY >= top
+                ) {
+                    current = section.id;
+                }
+
+            });
+
+            document
+                .querySelectorAll(".nav-links a")
+                .forEach(link => {
+
+                    link.classList.remove("active");
+
+                    if (
+                        link.getAttribute("href") ===
+                        "#" + current
+                    ) {
+                        link.classList.add("active");
+                    }
+
+                });
+
+        }
+    );
+
+</script>
+
+</body>
+</html>

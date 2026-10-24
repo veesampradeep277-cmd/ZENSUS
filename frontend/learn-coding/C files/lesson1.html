@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zensus — C Programming Learning Lab</title>
+<style>
+:root{--bg:#07111f;--panel:#0d1a2d;--panel2:#13243d;--text:#eaf2ff;--muted:#a9b8ce;--cyan:#58e6ff;--purple:#a78bfa;--green:#63e6be;--line:#253955}
+*{box-sizing:border-box;scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 10% 0%,#142b4c 0,#07111f 35%,#050b15 100%);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;line-height:1.6}a{color:inherit;text-decoration:none}.wrap{max-width:1200px;margin:auto;padding:0 20px}
+nav{position:sticky;top:0;z-index:99;background:#07111fe8;backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}.nav{min-height:64px;display:flex;align-items:center;justify-content:space-between}.brand{font-weight:950;font-size:21px;letter-spacing:-.8px;display:flex;align-items:center;gap:9px}.brand-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--cyan),var(--purple));display:grid;place-items:center;color:#06101c;font-size:15px;font-weight:1000;box-shadow:0 6px 22px #58e6ff22}.brand-name{background:linear-gradient(90deg,#fff,var(--cyan),var(--purple));color:transparent;background-clip:text;-webkit-background-clip:text}.brand b{color:var(--cyan)}.links{display:flex;gap:6px;flex-wrap:wrap}.links a{font-size:13px;color:var(--muted);padding:7px 9px;border-radius:8px}.links a:hover{background:var(--panel2);color:#fff}
+.hero{text-align:center;padding:88px 0 72px;overflow:hidden}.pill{display:inline-block;border:1px solid var(--line);background:#ffffff08;padding:7px 13px;border-radius:99px;color:var(--cyan);font-size:13px}.hero h1{font-size:clamp(42px,7vw,76px);line-height:1.02;letter-spacing:-3px;margin:20px 0}.grad{background:linear-gradient(90deg,var(--cyan),var(--purple));color:transparent;background-clip:text;-webkit-background-clip:text}.hero p{max-width:800px;margin:auto;color:var(--muted);font-size:18px}.cta{display:inline-block;margin-top:25px;padding:12px 20px;border-radius:12px;background:linear-gradient(90deg,var(--cyan),var(--purple));color:#06101c;font-weight:900}
+section{padding:65px 0}.title{text-align:center;margin-bottom:34px}.title h2{font-size:34px;margin:0 0 5px}.title p{color:var(--muted);margin:0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:18px}.card{background:#0d1a2df0;border:1px solid var(--line);border-radius:17px;padding:21px;transition:.25s}.card:hover{transform:translateY(-5px);border-color:#46658c}.tag{display:inline-block;padding:3px 9px;border-radius:20px;background:#ffffff08;color:var(--cyan);font-size:12px}.card h3{margin:10px 0 6px}.card p{color:var(--muted)}
+.flow{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:12px;margin:30px 0}.node{min-width:135px;text-align:center;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);animation:glow 3s infinite}.arrow{color:var(--cyan);font-size:24px}@keyframes glow{50%{box-shadow:0 0 0 7px #58e6ff08}}
+.code{background:#050a12;border:1px solid #20304a;border-radius:13px;overflow:auto;padding:18px}.code pre{margin:0;color:#dce7ff}.kw{color:#c084fc}.fn{color:#67e8f9}.str{color:#86efac}.com{color:#71829d}.output{margin-top:10px;padding:12px;border-left:3px solid var(--green);background:#63e6be09;color:#c9ffe9;border-radius:6px}.tip{border-left:4px solid var(--cyan);background:#58e6ff09;padding:14px 17px;border-radius:0 10px 10px 0;color:#d9ecff}
+table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}th,td{padding:12px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--cyan)}.memory{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.cell{padding:16px;text-align:center;border:1px solid var(--line);background:var(--panel);border-radius:10px}.cell small{display:block;color:var(--muted)}
+details{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px 16px;margin:9px 0}summary{cursor:pointer;font-weight:700}
+.quiz{max-width:800px;margin:auto}.q{background:var(--panel);border:1px solid var(--line);padding:17px;border-radius:13px;margin:13px 0}.q button{display:block;width:100%;text-align:left;margin:7px 0;padding:10px 13px;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:9px;cursor:pointer}.q button:hover{border-color:var(--cyan)}#score{text-align:center;font-size:21px;font-weight:800;margin-top:18px}
+footer{text-align:center;padding:40px 20px;color:var(--muted);border-top:1px solid var(--line)}footer a{color:var(--cyan)}
+@media(max-width:720px){.links{display:none}.hero{padding-top:60px}.flow{flex-direction:column}.arrow{transform:rotate(90deg)}}
+
+/* Zensus interactive graphs */
+.graph-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.graph-card{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:18px;overflow:hidden}
+.graph-card h3{margin:0 0 6px}
+.graph-card p{color:var(--muted);font-size:.92rem;margin:0 0 12px}
+.chart-wrap{height:300px;position:relative}
+.chart-wrap canvas{width:100%;height:100%;display:block}
+.graph-controls{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.graph-controls button{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:inherit;border-radius:999px;padding:7px 12px;cursor:pointer}
+.graph-controls button.active{background:var(--accent);color:#07111a;border-color:var(--accent)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.82rem;color:var(--muted);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;background:var(--accent)}
+.dot2{background:#8b7cff}.dot3{background:#ffb86b}
+.graph-note{font-size:.82rem;color:var(--muted);margin-top:8px}
+@media(max-width:800px){.graph-grid{grid-template-columns:1fr}}
+
+</style>
+</head>
+<body>
+<nav><div class="wrap nav">
+<div class="brand"><span class="brand-mark">Z</span><span class="brand-name">Zensus</span></div>
+<div class="links"><a href="#roadmap">Roadmap</a><a href="#intro">Intro</a><a href="#history">History</a><a href="#syntax">Syntax</a><a href="#logic">Logic</a><a href="#functions">Functions</a><a href="#arrays">Arrays</a><a href="#pointers">Pointers</a><a href="#memory">Memory</a><a href="#struct">Structs</a><a href="#files">Files</a><a href="#dsa">DSA</a><a href="#graphs">Graphs</a><a href="#mistakes">Mistakes</a>
+      <a href="#quiz">Quiz</a></div>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+<span class="pill">⚡ ZENSUS LEARNING LAB • C PROGRAMMING → DSA → INTERVIEW</span>
+<h1>Master <span class="grad">C</span><br>step by step.</h1>
+<p>An original learning website organized for fast understanding, practice, and real problem-solving.</p>
+<a class="cta" href="#roadmap">Start the Roadmap ↓</a>
+</div></header>
+
+<section id="roadmap"><div class="wrap">
+<div class="title"><h2>Complete C Roadmap</h2><p>Learn concepts in this order. Practice after every stage.</p></div>
+<div class="flow">
+<div class="node">1. Basics</div><div class="arrow">→</div><div class="node">2. History</div><div class="arrow">→</div><div class="node">2. Logic</div><div class="arrow">→</div><div class="node">3. Functions</div><div class="arrow">→</div><div class="node">4. Arrays & Strings</div><div class="arrow">→</div><div class="node">5. Pointers</div><div class="arrow">→</div><div class="node">6. Structures</div><div class="arrow">→</div><div class="node">7. Files + DSA</div>
+</div>
+<div class="grid">
+<div class="card"><span class="tag">LEVEL 1</span><h3>Foundations</h3><p>Introduction, compiler, syntax, comments, variables, data types, constants, type conversion, input/output.</p></div>
+<div class="card"><span class="tag">LEVEL 2</span><h3>Decision + Loops</h3><p>Operators, if, if-else, else-if, switch, while, do-while, for, nested loops, break, continue.</p></div>
+<div class="card"><span class="tag">LEVEL 3</span><h3>Functions</h3><p>Declarations, definitions, arguments, return values, scope, recursion, library functions and function pointers.</p></div>
+<div class="card"><span class="tag">LEVEL 4</span><h3>Arrays + Strings</h3><p>1D/2D arrays, traversal, searching, sorting, strings, common string operations.</p></div>
+<div class="card"><span class="tag">LEVEL 5</span><h3>Pointers + Memory</h3><p>Addresses, dereferencing, pointer arithmetic, arrays/pointers, malloc, calloc, realloc and free.</p></div>
+<div class="card"><span class="tag">LEVEL 6</span><h3>Real C</h3><p>Structures, unions, typedef, enums, files, preprocessor, macros, command-line arguments and debugging.</p></div>
+<div class="card"><span class="tag">LEVEL 7</span><h3>DSA + Projects</h3><p>Linked lists, stacks, queues, trees, searching, sorting and small C projects.</p></div>
+</div>
+</div></section>
+
+<section id="intro"><div class="wrap">
+<div class="title"><h2>1. Introduction to C</h2><p>First understand what C does.</p></div>
+<div class="grid">
+<div class="card"><h3>What is C?</h3><p>C is a general-purpose programming language designed for efficient, low-level and systems-oriented programming. It is used in areas such as operating systems and embedded systems.</p></div>
+<div class="card"><h3>Why learn C?</h3><p>C teaches core programming ideas and gives you a strong understanding of memory, data representation, control flow and algorithms.</p></div>
+<div class="card"><h3>How a C program runs</h3><p>Think: source code → compiler → object/machine code → linker → executable → CPU executes it.</p></div>
+</div>
+<div class="flow">
+<div class="node">C Source<br><small>main.c</small></div><div class="arrow">→</div>
+<div class="node">Preprocess</div><div class="arrow">→</div>
+<div class="node">Compile</div><div class="arrow">→</div>
+<div class="node">Link</div><div class="arrow">→</div>
+<div class="node">Run</div>
+</div>
+<div class="tip"><b>Memory trick:</b> <b>Write → Translate → Build → Run.</b> You write C; the toolchain translates it; the linker builds the executable; the computer runs it.</div>
+</div></section>
+
+
+<section id="history"><div class="wrap">
+  <div class="title">
+    <h2>2. History of C & Who Invented It?</h2>
+    <p>Understand where C came from and why it became so important.</p>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <span class="tag">INVENTOR</span>
+      <h3>Dennis Ritchie</h3>
+      <p><b>Dennis M. Ritchie</b> developed the C programming language at <b>Bell Laboratories</b>. W3Schools describes C as being created by Dennis Ritchie at Bell Labs in <b>1972</b>, while GeeksforGeeks similarly identifies Ritchie and Bell Laboratories in 1972.</p>
+    </div>
+
+    <div class="card">
+      <span class="tag">PURPOSE</span>
+      <h3>Built for UNIX</h3>
+      <p>C was developed alongside the early <b>UNIX</b> operating system. It was designed as a practical system programming language that could provide efficient, low-level control while being easier to work with than assembly language.</p>
+    </div>
+
+    <div class="card">
+      <span class="tag">ANCESTORS</span>
+      <h3>BCPL → B → C</h3>
+      <p>C evolved from earlier languages. <b>BCPL</b> influenced <b>B</b>, developed by Ken Thompson, and Dennis Ritchie then developed C from B by adding types and other important features.</p>
+    </div>
+  </div>
+
+  <div class="flow">
+    <div class="node">BCPL<br><small>Martin Richards</small></div>
+    <div class="arrow">→</div>
+    <div class="node">B<br><small>Ken Thompson</small></div>
+    <div class="arrow">→</div>
+    <div class="node">C<br><small>Dennis Ritchie</small></div>
+    <div class="arrow">→</div>
+    <div class="node">UNIX<br><small>System software</small></div>
+  </div>
+
+  <div class="card">
+    <h3>A Short Timeline</h3>
+    <table>
+      <tr><th>Period</th><th>What happened</th></tr>
+      <tr><td>1969–1973</td><td>C emerged during the early development of UNIX at Bell Laboratories.</td></tr>
+      <tr><td>1972</td><td>The most creative period of C's development occurred; this is the year commonly associated with the creation of C.</td></tr>
+      <tr><td>1973</td><td>UNIX was largely rewritten in C, demonstrating that C could be used effectively for system software.</td></tr>
+      <tr><td>1978</td><td>Dennis Ritchie and Brian Kernighan published <i>The C Programming Language</i>, commonly known as the K&R book.</td></tr>
+      <tr><td>1989–1990</td><td>C was standardized as ANSI C (C89) and then adopted internationally as ISO C (C90).</td></tr>
+    </table>
+  </div>
+
+  <div class="tip" style="margin-top:18px">
+    <b>Remember:</b> C was not created in isolation. It evolved from BCPL through B and was developed to make UNIX and other system software practical to write efficiently.
+  </div>
+
+  <div class="card" style="margin-top:18px">
+    <h3>Why C Became So Influential</h3>
+    <p>C combines efficiency, portability and relatively low-level control over memory and hardware. Its syntax and ideas also influenced many later programming languages. That is why learning C remains useful for understanding programming fundamentals, memory and systems programming.</p>
+  </div>
+</div></section>
+
+<section id="syntax"><div class="wrap">
+<div class="title"><h2>3. Your First C Program</h2><p>Learn the structure instead of copying it blindly.</p></div>
+<div class="code"><pre><span class="com">#include &lt;stdio.h&gt;</span>
+
+<span class="kw">int</span> <span class="fn">main</span>() {
+    <span class="fn">printf</span>(<span class="str">"Hello, World!\\n"</span>);
+    <span class="kw">return</span> 0;
+}</pre></div>
+<div class="grid">
+<div class="card"><h3>#include &lt;stdio.h&gt;</h3><p>Includes declarations for standard input/output functions such as <code>printf</code> and <code>scanf</code>.</p></div>
+<div class="card"><h3>int main()</h3><p>The program's main entry function. Execution starts here in a normal hosted C program.</p></div>
+<div class="card"><h3>printf()</h3><p>Prints formatted output to the standard output stream.</p></div>
+<div class="card"><h3>return 0;</h3><p>Ends <code>main</code> and returns a success status to the environment.</p></div>
+</div>
+<div class="output"><b>Output:</b> Hello, World!</div>
+</div></section>
+
+<section><div class="wrap">
+<div class="title"><h2>4. Variables & Data Types</h2><p>Variable = named storage used by your program.</p></div>
+<table><tr><th>Type</th><th>Typical purpose</th><th>Example</th></tr>
+<tr><td>int</td><td>Whole numbers</td><td><code>int age = 20;</code></td></tr>
+<tr><td>float</td><td>Decimal values</td><td><code>float price = 12.5f;</code></td></tr>
+<tr><td>double</td><td>More precision for decimal values</td><td><code>double pi = 3.14159;</code></td></tr>
+<tr><td>char</td><td>One character</td><td><code>char grade = 'A';</code></td></tr>
+</table>
+<div class="code" style="margin-top:18px"><pre><span class="kw">int</span> age = 20;
+<span class="kw">float</span> marks = 85.5f;
+<span class="kw">char</span> grade = <span class="str">'A'</span>;
+
+<span class="fn">printf</span>(<span class="str">"Age = %d\\n"</span>, age);
+<span class="fn">printf</span>(<span class="str">"Marks = %.1f\\n"</span>, marks);
+<span class="fn">printf</span>(<span class="str">"Grade = %c\\n"</span>, grade);</pre></div>
+</div></section>
+
+<section id="logic"><div class="wrap">
+<div class="title"><h2>5. Decision Making & Loops</h2><p>Programs become useful when they can choose and repeat.</p></div>
+<div class="flow">
+<div class="node">Condition</div><div class="arrow">→</div><div class="node">TRUE<br>Do A</div><div class="arrow">↘</div><div class="node">FALSE<br>Do B</div>
+</div>
+<div class="grid">
+<div class="card"><h3>if / else</h3><p>Use when the program must choose between conditions.</p><div class="code"><pre><span class="kw">if</span> (age &gt;= 18)
+    <span class="fn">printf</span>(<span class="str">"Adult"</span>);
+<span class="kw">else</span>
+    <span class="fn">printf</span>(<span class="str">"Minor"</span>);</pre></div></div>
+<div class="card"><h3>switch</h3><p>Useful when selecting among several discrete cases.</p><div class="code"><pre><span class="kw">switch</span>(choice) {
+  <span class="kw">case</span> 1: <span class="fn">printf</span>(<span class="str">"Add"</span>); <span class="kw">break</span>;
+  <span class="kw">case</span> 2: <span class="fn">printf</span>(<span class="str">"Exit"</span>); <span class="kw">break</span>;
+  <span class="kw">default</span>: <span class="fn">printf</span>(<span class="str">"Invalid"</span>);
+}</pre></div></div>
+<div class="card"><h3>Loops</h3><p><b>for</b> is common when the count is known. <b>while</b> checks before each iteration. <b>do-while</b> runs the body at least once.</p></div>
+</div>
+<div class="flow">
+<div class="node">Start</div><div class="arrow">→</div><div class="node">Check condition</div><div class="arrow">→</div><div class="node">Body</div><div class="arrow">↩</div><div class="node">Update</div>
+</div>
+</div></section>
+
+<section id="functions"><div class="wrap">
+<div class="title"><h2>6. Functions</h2><p>Break a large problem into small reusable pieces.</p></div>
+<div class="flow"><div class="node">main()</div><div class="arrow">→</div><div class="node">call function</div><div class="arrow">→</div><div class="node">function works</div><div class="arrow">→</div><div class="node">return result</div></div>
+<div class="code"><pre><span class="kw">int</span> <span class="fn">add</span>(<span class="kw">int</span> a, <span class="kw">int</span> b) {
+    <span class="kw">return</span> a + b;
+}
+
+<span class="kw">int</span> <span class="fn">main</span>() {
+    <span class="kw">int</span> result = <span class="fn">add</span>(10, 20);
+    <span class="fn">printf</span>(<span class="str">"%d"</span>, result);
+    <span class="kw">return</span> 0;
+}</pre></div>
+<div class="tip"><b>Best mental model:</b> parameters go <b>into</b> a function; the return value comes <b>out</b>.</div>
+</div></section>
+
+<section id="arrays"><div class="wrap">
+<div class="title"><h2>7. Arrays & Strings</h2><p>Store multiple related values and process them systematically.</p></div>
+<div class="grid">
+<div class="card"><h3>1D Array</h3><div class="code"><pre><span class="kw">int</span> marks[5] = {70,80,65,90,75};
+<span class="kw">for</span>(<span class="kw">int</span> i=0;i&lt;5;i++)
+    <span class="fn">printf</span>(<span class="str">"%d "</span>, marks[i]);</pre></div></div>
+<div class="card"><h3>2D Array</h3><p>Think of it as rows and columns, useful for matrices and tables.</p><div class="code"><pre><span class="kw">int</span> a[2][3] = {
+ {1,2,3},
+ {4,5,6}
+};</pre></div></div>
+<div class="card"><h3>String</h3><p>A C string is a sequence of characters terminated by the null character <code>'\\0'</code>.</p><div class="code"><pre><span class="kw">char</span> name[] = <span class="str">"Raju"</span>;
+<span class="fn">printf</span>(<span class="str">"%s"</span>, name);</pre></div></div>
+</div>
+<div class="tip">Practice pattern: <b>read → traverse → compare → update → print</b>. This pattern appears in many array and string problems.</div>
+</div></section>
+
+<section id="pointers"><div class="wrap">
+<div class="title"><h2>8. Pointers — Understand Memory Visually</h2><p>The key idea: a pointer stores an address.</p></div>
+<div class="code"><pre><span class="kw">int</span> x = 10;
+<span class="kw">int</span> *p = &amp;x;
+
+<span class="fn">printf</span>(<span class="str">"%d\\n"</span>, x);   <span class="com">// value</span>
+<span class="fn">printf</span>(<span class="str">"%p\\n"</span>, (<span class="kw">void</span>*)p); <span class="com">// address</span>
+<span class="fn">printf</span>(<span class="str">"%d\\n"</span>, *p);  <span class="com">// value at address</span></pre></div>
+<div class="memory" style="margin-top:20px">
+<div class="cell">x<small>variable</small><b>10</b></div>
+<div class="cell">Address<small>&amp;x</small><b>0x1000</b></div>
+<div class="cell">p<small>pointer</small><b>0x1000</b></div>
+</div>
+<div class="tip" style="margin-top:18px"><b>&amp;x</b> means “address of x”. <b>*p</b> means “value stored at the address held by p”.</div>
+</div></section>
+
+<section id="memory"><div class="wrap">
+<div class="title"><h2>9. Dynamic Memory</h2><p>Request memory while the program is running.</p></div>
+<div class="grid">
+<div class="card"><h3>malloc()</h3><p>Allocates a block of memory; the contents are not initialized.</p></div>
+<div class="card"><h3>calloc()</h3><p>Allocates memory for multiple elements and initializes the allocated bytes to zero.</p></div>
+<div class="card"><h3>realloc()</h3><p>Changes the size of a previously allocated memory block.</p></div>
+<div class="card"><h3>free()</h3><p>Releases dynamically allocated memory when it is no longer needed.</p></div>
+</div>
+<div class="code" style="margin-top:18px"><pre><span class="kw">int</span> *a = <span class="fn">malloc</span>(5 * <span class="kw">sizeof</span>(<span class="kw">int</span>));
+
+<span class="kw">if</span> (a != NULL) {
+    a[0] = 10;
+    <span class="fn">free</span>(a);
+}</pre></div>
+<div class="tip"><b>Golden rule:</b> memory you allocate dynamically should be released with <code>free()</code> when you are finished with it.</div>
+</div></section>
+
+<section id="struct"><div class="wrap">
+<div class="title"><h2>10. Structures, Unions & Enums</h2><p>Group and represent related information.</p></div>
+<div class="code"><pre><span class="kw">struct</span> Student {
+    <span class="kw">char</span> name[30];
+    <span class="kw">int</span> age;
+    <span class="kw">float</span> marks;
+};
+
+<span class="kw">struct</span> Student s = {<span class="str">"Raju"</span>, 20, 85.5f};</pre></div>
+<div class="grid">
+<div class="card"><h3>Structure</h3><p>Different members can exist together, and each member has its own storage within the object.</p></div>
+<div class="card"><h3>Union</h3><p>Members share the same memory location; typically only one member's stored value is meaningfully used at a time.</p></div>
+<div class="card"><h3>enum</h3><p>Gives names to a set of integer constants, improving readability.</p></div>
+<div class="card"><h3>typedef</h3><p>Creates an alias for a type, often making declarations easier to read.</p></div>
+</div>
+</div></section>
+
+<section id="files"><div class="wrap">
+<div class="title"><h2>11. File Handling & Preprocessor</h2><p>Move from small programs toward practical C.</p></div>
+<div class="flow"><div class="node">open</div><div class="arrow">→</div><div class="node">read / write</div><div class="arrow">→</div><div class="node">close</div></div>
+<div class="code"><pre><span class="kw">FILE</span> *fp = <span class="fn">fopen</span>(<span class="str">"data.txt"</span>, <span class="str">"w"</span>);
+
+<span class="kw">if</span> (fp != NULL) {
+    <span class="fn">fprintf</span>(fp, <span class="str">"Hello file!\\n"</span>);
+    <span class="fn">fclose</span>(fp);
+}</pre></div>
+<div class="grid" style="margin-top:18px">
+<div class="card"><h3>Headers</h3><p>Use headers to share declarations and library interfaces between source files.</p></div>
+<div class="card"><h3>#define</h3><p>The preprocessor can create macros and symbolic constants.</p></div>
+<div class="card"><h3>Debugging</h3><p>Compile often, read compiler messages carefully, test small pieces, and inspect values.</p></div>
+</div>
+</div></section>
+
+<section id="dsa"><div class="wrap">
+<div class="title"><h2>12. C → DSA</h2><p>Once C fundamentals are solid, use them to build data structures.</p></div>
+<div class="grid">
+<div class="card"><h3>Searching</h3><p>Linear search → binary search. Learn the idea, code it, then analyze time complexity.</p></div>
+<div class="card"><h3>Sorting</h3><p>Bubble → selection → insertion → merge → quick sort. Compare time and space complexity.</p></div>
+<div class="card"><h3>Linked List</h3><p>Use structures and pointers to connect nodes dynamically.</p></div>
+<div class="card"><h3>Stack & Queue</h3><p>Learn LIFO and FIFO, then implement them using arrays and linked lists.</p></div>
+<div class="card"><h3>Trees</h3><p>Move from binary trees to BST concepts and traversals.</p></div>
+<div class="card"><h3>Projects</h3><p>Build a calculator, student record system, contact manager or simple quiz application.</p></div>
+</div>
+</div></section>
+
+<section><div class="wrap">
+<div class="title"><h2>13. Best Learning Method</h2><p>Use this cycle for every topic.</p></div>
+<div class="flow"><div class="node">Learn concept</div><div class="arrow">→</div><div class="node">See example</div><div class="arrow">→</div><div class="node">Type code</div><div class="arrow">→</div><div class="node">Change code</div><div class="arrow">→</div><div class="node">Solve 3 problems</div><div class="arrow">→</div><div class="node">Explain it</div></div>
+<div class="tip"><b>Don't just read.</b> After every concept, write a tiny program from memory, change one part, predict the output, then run it and compare.</div>
+</div></section>
+
+
+<section id="graphs" class="section">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">VISUAL LEARNING</div>
+      <h2>Interactive <span>Graphs</span></h2>
+      <p>Use the graphs to understand how C concepts behave instead of memorizing them.</p>
+    </div>
+  </div>
+
+  <div class="graph-grid">
+    <article class="graph-card">
+      <h3>1. Time Complexity</h3>
+      <p>See how different algorithms grow as the input size <b>n</b> increases.</p>
+      <div class="graph-controls" id="complexityControls">
+        <button data-c="O(1)" class="active">O(1)</button>
+        <button data-c="O(log n)">O(log n)</button>
+        <button data-c="O(n)">O(n)</button>
+        <button data-c="O(n log n)">O(n log n)</button>
+        <button data-c="O(n²)">O(n²)</button>
+      </div>
+      <div class="chart-wrap"><canvas id="complexityChart"></canvas></div>
+      <div class="legend"><span><i class="dot"></i> Selected complexity</span></div>
+      <div class="graph-note">Lower growth is generally better for large inputs.</div>
+    </article>
+
+    <article class="graph-card">
+      <h3>2. C Data Type Size</h3>
+      <p>Typical memory sizes. Exact sizes can vary by compiler and platform.</p>
+      <div class="chart-wrap"><canvas id="typeChart"></canvas></div>
+      <div class="graph-note">This is a learning visualization, not a fixed rule for every system.</div>
+    </article>
+
+    <article class="graph-card">
+      <h3>3. Algorithm Growth Comparison</h3>
+      <p>A quick visual comparison of common searching and sorting complexity.</p>
+      <div class="graph-wrap"><canvas id="algoChart"></canvas></div>
+      <div class="legend">
+        <span><i class="dot"></i> Best / efficient</span>
+        <span><i class="dot2"></i> Moderate</span>
+        <span><i class="dot3"></i> Higher growth</span>
+      </div>
+    </article>
+
+    <article class="graph-card">
+      <h3>4. Learning Roadmap Progress</h3>
+      <p>Suggested study weight across the major C → DSA stages.</p>
+      <div class="chart-wrap"><canvas id="roadmapChart"></canvas></div>
+      <div class="graph-note">Use this as a guide; spend extra time on topics you find difficult.</div>
+    </article>
+  </div>
+</section>
+
+
+<section id="mistakes"><div class="wrap">
+  <div class="title">
+    <h2>14. Most Common C Mistakes</h2>
+    <p>Small mistakes every beginner can make — learn to spot them early.</p>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <span class="tag">BEGINNER</span>
+      <h3>1. Missing semicolon</h3>
+      <p>Most C statements end with <code>;</code>. Forgetting it commonly causes a compiler error.</p>
+      <div class="code"><pre><span class="com">// Wrong</span>
+<span class="kw">int</span> age = 20
+
+<span class="com">// Correct</span>
+<span class="kw">int</span> age = 20;</pre></div>
+    </div>
+
+    <div class="card">
+      <span class="tag">SYNTAX</span>
+      <h3>2. Using = instead of ==</h3>
+      <p><code>=</code> assigns a value, while <code>==</code> compares two values. Mixing them up can produce unexpected results.</p>
+      <div class="code"><pre><span class="com">// Comparison</span>
+<span class="kw">if</span> (age == 18) {
+    <span class="fn">printf</span>(<span class="str">"18"</span>);
+}</pre></div>
+    </div>
+
+    <div class="card">
+      <span class="tag">POINTERS</span>
+      <h3>3. Confusing &amp; and *</h3>
+      <p><code>&amp;x</code> means the address of <code>x</code>. <code>*p</code> accesses the value at the address stored in <code>p</code>.</p>
+      <div class="code"><pre><span class="kw">int</span> x = 10;
+<span class="kw">int</span> *p = &amp;x;
+
+<span class="fn">printf</span>(<span class="str">"%d"</span>, *p);</pre></div>
+    </div>
+
+    <div class="card">
+      <span class="tag">ARRAYS</span>
+      <h3>4. Going outside an array</h3>
+      <p>If an array has 5 elements, valid indexes are <code>0</code> through <code>4</code>. Accessing <code>array[5]</code> is outside the array.</p>
+      <div class="code"><pre><span class="kw">int</span> marks[5];
+
+<span class="com">// Correct indexes</span>
+marks[0] = 70;
+marks[4] = 90;</pre></div>
+    </div>
+
+    <div class="card">
+      <span class="tag">STRINGS</span>
+      <h3>5. Forgetting the string terminator</h3>
+      <p>C strings use the null character <code>'\0'</code> to mark the end. Leave enough space when creating a character array for a string.</p>
+      <div class="code"><pre><span class="kw">char</span> name[] = <span class="str">"Raju"</span>;
+
+<span class="com">// The compiler includes '\0'</span>
+<span class="com">// automatically for this string literal.</span></pre></div>
+    </div>
+
+    <div class="card">
+      <span class="tag">MEMORY</span>
+      <h3>6. Forgetting free()</h3>
+      <p>Memory allocated dynamically with <code>malloc()</code>, <code>calloc()</code> or <code>realloc()</code> should be released with <code>free()</code> when it is no longer needed.</p>
+      <div class="code"><pre><span class="kw">int</span> *p = <span class="fn">malloc</span>(5 * <span class="kw">sizeof</span>(<span class="kw">int</span>));
+
+<span class="com">// use p...</span>
+<span class="fn">free</span>(p);</pre></div>
+    </div>
+
+    <div class="card">
+      <span class="tag">INPUT</span>
+      <h3>7. Ignoring input-related details</h3>
+      <p>Pay attention to the format specifier and the address passed to <code>scanf()</code>. For ordinary variables, <code>scanf()</code> generally needs their address.</p>
+      <div class="code"><pre><span class="kw">int</span> age;
+<span class="fn">scanf</span>(<span class="str">"%d"</span>, &amp;age);</pre></div>
+    </div>
+
+    <div class="card">
+      <span class="tag">LOOPS</span>
+      <h3>8. Creating an infinite loop</h3>
+      <p>Make sure a loop's condition can eventually become false, and update the variable controlling the loop.</p>
+      <div class="code"><pre><span class="kw">for</span> (<span class="kw">int</span> i = 0; i &lt; 5; i++) {
+    <span class="fn">printf</span>(<span class="str">"%d "</span>, i);
+}</pre></div>
+    </div>
+
+    <div class="card">
+      <span class="tag">TYPES</span>
+      <h3>9. Using the wrong format specifier</h3>
+      <p>The format string should match the type being printed. For example, <code>%d</code> is commonly used with <code>int</code>, while <code>%c</code> is used with a character.</p>
+      <div class="code"><pre><span class="kw">int</span> age = 20;
+<span class="kw">char</span> grade = <span class="str">'A'</span>;
+
+<span class="fn">printf</span>(<span class="str">"%d %c"</span>, age, grade);</pre></div>
+    </div>
+
+    <div class="card">
+      <span class="tag">FUNCTIONS</span>
+      <h3>10. Returning the wrong thing</h3>
+      <p>Check the function's return type and make sure the returned value matches what the function promises to return.</p>
+      <div class="code"><pre><span class="kw">int</span> <span class="fn">add</span>(<span class="kw">int</span> a, <span class="kw">int</span> b) {
+    <span class="kw">return</span> a + b;
+}</pre></div>
+    </div>
+
+    <div class="card">
+      <span class="tag">LOGIC</span>
+      <h3>11. Off-by-one errors</h3>
+      <p>Loop boundaries are a common source of bugs. Carefully check whether you need <code>&lt;</code> or <code>&lt;=</code>.</p>
+      <div class="code"><pre><span class="kw">for</span> (<span class="kw">int</span> i = 0; i &lt; 5; i++) {
+    <span class="com">// runs 5 times: 0,1,2,3,4</span>
+}</pre></div>
+    </div>
+
+    <div class="card">
+      <span class="tag">DEBUGGING</span>
+      <h3>12. Ignoring compiler warnings</h3>
+      <p>A program compiling successfully does not always mean it is correct. Read warnings and test your program with different inputs.</p>
+    </div>
+  </div>
+
+  <div class="tip" style="margin-top:20px">
+    <b>Beginner checklist:</b> Check semicolons → types → format specifiers → array indexes → conditions → pointer usage → allocated memory → compiler warnings.
+  </div>
+
+  <div class="card" style="margin-top:18px">
+    <h3>Debug Like a Programmer</h3>
+    <p>When something goes wrong, don't immediately rewrite the whole program. First reproduce the problem, read the compiler message, identify the smallest suspicious section, inspect the values, make one change, and test again.</p>
+  </div>
+</div></section>
+
+<section id="quiz"><div class="wrap">
+<div class="title"><h2>Quick C Quiz</h2><p>Test your fundamentals.</p></div>
+<div class="quiz" id="quizBox"></div><div id="score"></div>
+</div></section>
+
+<footer>
+<p><b>Zensus</b> — Learn C. Think in code. Build with confidence.</p>
+
+  <p class="graph-note">History reference: W3Schools C Introduction and GeeksforGeeks “History and Applications of C”. Content is independently written and summarized for learning.</p>
+</footer>
+
+<script>
+const qs=[
+{q:"Which function is the usual entry point of a hosted C program?",o:["start()","main()","run()","begin()"],a:1},
+{q:"Which operator gives the address of a variable?",o:["*","%","&","#"],a:2},
+{q:"Which loop checks its condition before the first iteration?",o:["while","do-while","none","switch"],a:0},
+{q:"Which keyword defines a structure?",o:["object","struct","record","class"],a:1},
+{q:"Which function releases memory allocated by malloc/calloc/realloc?",o:["delete()","remove()","free()","clear()"],a:2},
+{q:"A C string normally ends with which character?",o:["'0'","'\\0'","' '","EOF"],a:1}
+];
+let score=0,answered=0;
+const box=document.getElementById("quizBox");
+qs.forEach((x,i)=>{
+ const d=document.createElement("div");d.className="q";
+ d.innerHTML=`<b>${i+1}. ${x.q}</b>`;
+ x.o.forEach((op,j)=>{
+   const b=document.createElement("button");b.textContent=op;
+   b.onclick=()=>{if(d.dataset.done)return;d.dataset.done=1;answered++;if(j===x.a){score++;b.textContent+=" ✓";}else{b.textContent+=" ✗";}if(answered===qs.length)document.getElementById("score").textContent=`Score: ${score}/${qs.length}`;};
+   d.appendChild(b);
+ });
+ box.appendChild(d);
+});
+
+/* ---------- Zensus Graph Engine ---------- */
+(function(){
+  const root = document.documentElement;
+  const accent = getComputedStyle(root).getPropertyValue('--accent').trim() || '#55d6be';
+  const purple = '#8b7cff';
+  const orange = '#ffb86b';
+  const grid = 'rgba(255,255,255,.09)';
+  const text = 'rgba(255,255,255,.62)';
+
+  function setup(canvas){
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.max(300, rect.width * dpr);
+    canvas.height = Math.max(220, rect.height * dpr);
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    return {ctx,w:rect.width,h:rect.height};
+  }
+  function axes(ctx,w,h,maxY){
+    const l=44,r=14,t=18,b=34;
+    ctx.strokeStyle=grid; ctx.lineWidth=1;
+    for(let i=0;i<=4;i++){
+      const y=t+(h-t-b)*(1-i/4);
+      ctx.beginPath();ctx.moveTo(l,y);ctx.lineTo(w-r,y);ctx.stroke();
+      ctx.fillStyle=text;ctx.font='11px system-ui';
+      ctx.fillText(String(Math.round(maxY*i/4)),7,y+4);
+    }
+    return {l,r,t,b,pw:w-l-r,ph:h-t-b};
+  }
+  function drawLine(canvas, values, labels, color, maxY){
+    const {ctx,w,h}=setup(canvas), a=axes(ctx,w,h,maxY);
+    const pts=values.map((v,i)=>({
+      x:a.l+a.pw*(i/(values.length-1)),
+      y:a.t+a.ph*(1-v/maxY)
+    }));
+    ctx.strokeStyle=color;ctx.lineWidth=3;ctx.lineJoin='round';ctx.lineCap='round';
+    ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();
+    pts.forEach((p,i)=>{
+      ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle=text;ctx.font='11px system-ui';ctx.textAlign='center';
+      if(i%2===0)ctx.fillText(labels[i],p.x,h-10);
+    });
+    ctx.textAlign='start';
+  }
+  function drawBars(canvas, labels, values, colors, maxY, suffix){
+    const {ctx,w,h}=setup(canvas), a=axes(ctx,w,h,maxY);
+    const gap=10, bw=a.pw/values.length-gap;
+    values.forEach((v,i)=>{
+      const x=a.l+i*(a.pw/values.length)+gap/2;
+      const bh=a.ph*(v/maxY), y=a.t+a.ph-bh;
+      ctx.fillStyle=colors[i%colors.length];ctx.globalAlpha=.88;
+      ctx.fillRect(x,y,bw,bh);ctx.globalAlpha=1;
+      ctx.fillStyle=text;ctx.font='11px system-ui';ctx.textAlign='center';
+      ctx.fillText(labels[i],x+bw/2,h-10);
+      ctx.fillStyle='rgba(255,255,255,.82)';ctx.font='11px system-ui';
+      ctx.fillText(String(v)+(suffix||''),x+bw/2,Math.max(12,y-6));
+    });
+    ctx.textAlign='start';
+  }
+
+  const cCanvas=document.getElementById('complexityChart');
+  const typeCanvas=document.getElementById('typeChart');
+  const algoCanvas=document.getElementById('algoChart');
+  const roadmapCanvas=document.getElementById('roadmapChart');
+
+  const complexity={
+    'O(1)': n=>1,
+    'O(log n)': n=>Math.log2(n),
+    'O(n)': n=>n,
+    'O(n log n)': n=>n*Math.log2(n),
+    'O(n²)': n=>n*n
+  };
+  function renderComplexity(name){
+    if(!cCanvas)return;
+    const ns=[1,2,4,8,16,24,32,40,48,56,64];
+    let vals=ns.map(complexity[name]);
+    const max=Math.max(...vals);
+    // Normalize for visual comparison while keeping shape meaningful.
+    vals=vals.map(v=>v/max*100);
+    drawLine(cCanvas,vals,ns.map(String),accent,100);
+  }
+  if(cCanvas){
+    document.querySelectorAll('#complexityControls button').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        document.querySelectorAll('#complexityControls button').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active'); renderComplexity(btn.dataset.c);
+      });
+    });
+    renderComplexity('O(1)');
+  }
+
+  if(typeCanvas){
+    drawBars(typeCanvas,
+      ['char','int','float','double','long long'],
+      [1,4,4,8,8],
+      [accent,purple,orange,accent,purple],8,' B');
+  }
+
+  if(algoCanvas){
+    drawBars(algoCanvas,
+      ['Binary','Linear','Merge','Quick','Bubble'],
+      [1,10,3,3,10],
+      [accent,purple,accent,purple,orange],10,'');
+  }
+
+  if(roadmapCanvas){
+    drawBars(roadmapCanvas,
+      ['Basics','Control','Functions','Arrays','Pointers','Structs','Files','DSA'],
+      [12,12,10,14,16,10,8,18],
+      [accent,purple,orange,accent,purple,orange,accent,purple],20,'%');
+  }
+
+  let resizeTimer;
+  window.addEventListener('resize',()=>{
+    clearTimeout(resizeTimer);
+    resizeTimer=setTimeout(()=>{
+      const active=document.querySelector('#complexityControls button.active');
+      renderComplexity(active?active.dataset.c:'O(1)');
+      if(typeCanvas)drawBars(typeCanvas,['char','int','float','double','long long'],[1,4,4,8,8],[accent,purple,orange,accent,purple],8,' B');
+      if(algoCanvas)drawBars(algoCanvas,['Binary','Linear','Merge','Quick','Bubble'],[1,10,3,3,10],[accent,purple,accent,purple,orange],10,'');
+      if(roadmapCanvas)drawBars(roadmapCanvas,['Basics','Control','Functions','Arrays','Pointers','Structs','Files','DSA'],[12,12,10,14,16,10,8,18],[accent,purple,orange,accent,purple,orange,accent,purple],20,'%');
+    },150);
+  });
+})();
+
+</script>
+</body>
+</html>

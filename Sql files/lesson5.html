@@ -1,0 +1,6163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ZENSUS | SQL Lesson 5 — SELECT</title>
+
+    <style>
+        /* =========================================================
+           ZENSUS SQL LESSON 5
+           TOPIC: SELECT
+           Standalone HTML + CSS + JavaScript
+           ========================================================= */
+
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --secondary: #7c3aed;
+            --accent: #06b6d4;
+
+            --bg: #f6f8fc;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+
+            --text: #172033;
+            --muted: #64748b;
+
+            --border: #e2e8f0;
+
+            --success: #16a34a;
+            --warning: #d97706;
+            --danger: #dc2626;
+
+            --code-bg: #0b1220;
+            --code-text: #e2e8f0;
+
+            --shadow-sm:
+                0 4px 16px rgba(15, 23, 42, 0.06);
+
+            --shadow-md:
+                0 12px 35px rgba(15, 23, 42, 0.09);
+
+            --radius: 18px;
+            --sidebar-width: 270px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family:
+                Inter,
+                ui-sans-serif,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* =========================================================
+           SCROLL PROGRESS
+           ========================================================= */
+
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            width: 0%;
+            background:
+                linear-gradient(
+                    90deg,
+                    var(--primary),
+                    var(--secondary),
+                    var(--accent)
+                );
+            z-index: 9999;
+        }
+
+        /* =========================================================
+           MOBILE TOPBAR
+           ========================================================= */
+
+        .mobile-topbar {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+
+            background: rgba(255, 255, 255, 0.96);
+            border-bottom: 1px solid var(--border);
+
+            z-index: 1000;
+
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 16px;
+
+            backdrop-filter: blur(12px);
+        }
+
+        .mobile-brand {
+            font-weight: 900;
+            font-size: 20px;
+            letter-spacing: -0.5px;
+        }
+
+        .mobile-brand span {
+            color: var(--primary);
+        }
+
+        .menu-btn {
+            width: 42px;
+            height: 42px;
+
+            border:
+                1px solid var(--border);
+
+            background: white;
+
+            border-radius: 12px;
+
+            cursor: pointer;
+
+            font-size: 20px;
+        }
+
+        /* =========================================================
+           SIDEBAR
+           ========================================================= */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+
+            width: var(--sidebar-width);
+
+            background: #ffffff;
+
+            border-right:
+                1px solid var(--border);
+
+            z-index: 900;
+
+            overflow-y: auto;
+
+            padding: 24px 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            padding:
+                0 10px 28px;
+        }
+
+        .brand-logo {
+            width: 40px;
+            height: 40px;
+
+            border-radius: 12px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--primary),
+                    var(--secondary)
+                );
+
+            color: white;
+
+            display: grid;
+            place-items: center;
+
+            font-weight: 900;
+
+            box-shadow:
+                0 8px 20px
+                rgba(79, 70, 229, 0.22);
+        }
+
+        .brand-text {
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: -0.8px;
+        }
+
+        .brand-text span {
+            color: var(--primary);
+        }
+
+        .course-label {
+            padding:
+                0 10px 10px;
+
+            font-size: 11px;
+            font-weight: 800;
+
+            color: #94a3b8;
+
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+        }
+
+        .lesson-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .lesson-nav a {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+
+            padding:
+                11px 12px;
+
+            border-radius: 12px;
+
+            color: #64748b;
+
+            font-size: 14px;
+            font-weight: 650;
+
+            transition: 0.2s ease;
+        }
+
+        .lesson-nav a:hover {
+            background: #f1f5f9;
+            color: var(--primary);
+
+            transform:
+                translateX(2px);
+        }
+
+        .lesson-nav a.active {
+            color: var(--primary);
+            background: #eef2ff;
+            font-weight: 800;
+        }
+
+        .lesson-number {
+            width: 28px;
+            height: 28px;
+
+            display: grid;
+            place-items: center;
+
+            border-radius: 8px;
+
+            background: #f1f5f9;
+
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .active .lesson-number {
+            background: var(--primary);
+            color: white;
+        }
+
+        .sidebar-bottom {
+            margin-top: 30px;
+
+            padding:
+                15px 10px;
+
+            border-top:
+                1px solid var(--border);
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+
+            font-size: 12px;
+            color: var(--muted);
+
+            margin-bottom: 8px;
+        }
+
+        .progress-track {
+            height: 7px;
+
+            background:
+                #e2e8f0;
+
+            border-radius:
+                999px;
+
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 33%;
+            height: 100%;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    var(--primary),
+                    var(--secondary)
+                );
+
+            border-radius: inherit;
+        }
+
+        /* =========================================================
+           MAIN
+           ========================================================= */
+
+        .main {
+            margin-left: var(--sidebar-width);
+
+            min-height: 100vh;
+        }
+
+        .container {
+            width:
+                min(
+                    1120px,
+                    calc(100% - 44px)
+                );
+
+            margin:
+                0 auto;
+        }
+
+        /* =========================================================
+           HERO
+           ========================================================= */
+
+        .hero {
+            padding:
+                70px 0 40px;
+        }
+
+        .hero-grid {
+            display: grid;
+
+            grid-template-columns:
+                1.25fr 0.75fr;
+
+            gap: 28px;
+
+            align-items: stretch;
+        }
+
+        .hero-card {
+            background: white;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 26px;
+
+            padding: 42px;
+
+            box-shadow:
+                var(--shadow-md);
+
+            position: relative;
+
+            overflow: hidden;
+        }
+
+        .hero-card::after {
+            content: "";
+
+            position: absolute;
+
+            width: 240px;
+            height: 240px;
+
+            right: -90px;
+            top: -90px;
+
+            background:
+                rgba(79, 70, 229, 0.07);
+
+            border-radius: 50%;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+
+            align-items: center;
+            gap: 7px;
+
+            background:
+                #eef2ff;
+
+            color:
+                var(--primary);
+
+            border:
+                1px solid #c7d2fe;
+
+            padding:
+                7px 12px;
+
+            border-radius:
+                999px;
+
+            font-size: 12px;
+            font-weight: 850;
+
+            margin-bottom: 17px;
+        }
+
+        .hero h1 {
+            font-size:
+                clamp(40px, 5vw, 64px);
+
+            line-height:
+                1.02;
+
+            letter-spacing:
+                -2.8px;
+
+            margin-bottom:
+                18px;
+        }
+
+        .hero h1 span {
+            color:
+                var(--primary);
+        }
+
+        .hero-description {
+            color:
+                var(--muted);
+
+            font-size:
+                17px;
+
+            max-width:
+                720px;
+
+            margin-bottom:
+                25px;
+        }
+
+        .hero-meta {
+            display:
+                flex;
+
+            flex-wrap:
+                wrap;
+
+            gap:
+                10px;
+        }
+
+        .meta-pill {
+            padding:
+                8px 12px;
+
+            border-radius:
+                10px;
+
+            background:
+                #f8fafc;
+
+            border:
+                1px solid var(--border);
+
+            font-size:
+                12px;
+
+            font-weight:
+                750;
+
+            color:
+                #475569;
+        }
+
+        /* =========================================================
+           CODE
+           ========================================================= */
+
+        .hero-code {
+            background:
+                var(--code-bg);
+
+            color:
+                var(--code-text);
+
+            border-radius:
+                22px;
+
+            padding:
+                28px;
+
+            box-shadow:
+                var(--shadow-md);
+
+            display:
+                flex;
+
+            flex-direction:
+                column;
+
+            justify-content:
+                center;
+
+            overflow:
+                hidden;
+        }
+
+        .code-title {
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+            color:
+                #94a3b8;
+
+            font-size:
+                12px;
+
+            font-weight:
+                750;
+
+            margin-bottom:
+                17px;
+        }
+
+        .dots {
+            display:
+                flex;
+
+            gap:
+                6px;
+        }
+
+        .dot {
+            width:
+                8px;
+
+            height:
+                8px;
+
+            border-radius:
+                50%;
+
+            background:
+                #475569;
+        }
+
+        .hero-code pre,
+        .hero-code code,
+        .code-box pre,
+        .code-box code {
+            color:
+                var(--code-text);
+
+            font-family:
+                "Cascadia Code",
+                "Fira Code",
+                Consolas,
+                monospace;
+
+            font-size:
+                13px;
+
+            line-height:
+                1.8;
+
+            white-space:
+                pre-wrap;
+
+            word-break:
+                break-word;
+        }
+
+        .sql-keyword {
+            color:
+                #93c5fd;
+
+            font-weight:
+                700;
+        }
+
+        .sql-string {
+            color:
+                #86efac;
+        }
+
+        .sql-number {
+            color:
+                #fcd34d;
+        }
+
+        .sql-comment {
+            color:
+                #64748b;
+        }
+
+        /* =========================================================
+           SECTIONS
+           ========================================================= */
+
+        section {
+            padding:
+                38px 0;
+        }
+
+        .section-heading {
+            margin-bottom:
+                22px;
+        }
+
+        .section-kicker {
+            color:
+                var(--primary);
+
+            font-size:
+                12px;
+
+            text-transform:
+                uppercase;
+
+            letter-spacing:
+                1.2px;
+
+            font-weight:
+                900;
+
+            margin-bottom:
+                7px;
+        }
+
+        .section-heading h2 {
+            font-size:
+                clamp(28px, 4vw, 38px);
+
+            line-height:
+                1.15;
+
+            letter-spacing:
+                -1px;
+
+            margin-bottom:
+                8px;
+        }
+
+        .section-heading p {
+            color:
+                var(--muted);
+
+            max-width:
+                780px;
+        }
+
+        /* =========================================================
+           OBJECTIVES
+           ========================================================= */
+
+        .objectives {
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap:
+                14px;
+        }
+
+        .objective {
+            background:
+                white;
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                var(--radius);
+
+            padding:
+                20px;
+
+            box-shadow:
+                var(--shadow-sm);
+        }
+
+        .objective-icon {
+            width:
+                38px;
+
+            height:
+                38px;
+
+            border-radius:
+                11px;
+
+            display:
+                grid;
+
+            place-items:
+                center;
+
+            background:
+                #eef2ff;
+
+            color:
+                var(--primary);
+
+            font-weight:
+                900;
+
+            margin-bottom:
+                13px;
+        }
+
+        .objective h3 {
+            font-size:
+                15px;
+
+            margin-bottom:
+                5px;
+        }
+
+        .objective p {
+            font-size:
+                13px;
+
+            color:
+                var(--muted);
+        }
+
+        /* =========================================================
+           CARDS
+           ========================================================= */
+
+        .card {
+            background:
+                white;
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                var(--radius);
+
+            padding:
+                27px;
+
+            box-shadow:
+                var(--shadow-sm);
+
+            margin-bottom:
+                18px;
+        }
+
+        .card h3 {
+            font-size:
+                21px;
+
+            margin-bottom:
+                9px;
+        }
+
+        .card h4 {
+            font-size:
+                16px;
+
+            margin:
+                20px 0 8px;
+        }
+
+        .card p {
+            color:
+                #475569;
+
+            margin-bottom:
+                12px;
+        }
+
+        .card ul,
+        .card ol {
+            margin:
+                12px 0 12px 22px;
+
+            color:
+                #475569;
+        }
+
+        .card li {
+            margin-bottom:
+                7px;
+        }
+
+        /* =========================================================
+           INFO GRID
+           ========================================================= */
+
+        .info-grid {
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap:
+                18px;
+        }
+
+        .info-box {
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                15px;
+
+            padding:
+                19px;
+
+            background:
+                var(--surface-2);
+        }
+
+        .info-box strong {
+            display:
+                block;
+
+            margin-bottom:
+                5px;
+
+            color:
+                var(--text);
+        }
+
+        .info-box p {
+            font-size:
+                14px;
+
+            margin:
+                0;
+        }
+
+        .tip {
+            border-left:
+                4px solid var(--primary);
+
+            background:
+                #eef2ff;
+
+            padding:
+                15px 17px;
+
+            border-radius:
+                10px;
+
+            margin-top:
+                17px;
+
+            color:
+                #3730a3;
+
+            font-size:
+                14px;
+        }
+
+        .warning {
+            border-left:
+                4px solid var(--warning);
+
+            background:
+                #fff7ed;
+
+            padding:
+                15px 17px;
+
+            border-radius:
+                10px;
+
+            margin-top:
+                17px;
+
+            color:
+                #9a3412;
+
+            font-size:
+                14px;
+        }
+
+        .danger {
+            border-left:
+                4px solid var(--danger);
+
+            background:
+                #fef2f2;
+
+            padding:
+                15px 17px;
+
+            border-radius:
+                10px;
+
+            margin-top:
+                17px;
+
+            color:
+                #991b1b;
+
+            font-size:
+                14px;
+        }
+
+        .success {
+            border-left:
+                4px solid var(--success);
+
+            background:
+                #f0fdf4;
+
+            padding:
+                15px 17px;
+
+            border-radius:
+                10px;
+
+            margin-top:
+                17px;
+
+            color:
+                #166534;
+
+            font-size:
+                14px;
+        }
+
+        /* =========================================================
+           CODE BOX
+           ========================================================= */
+
+        .code-box {
+            background:
+                var(--code-bg);
+
+            border-radius:
+                16px;
+
+            padding:
+                20px;
+
+            margin:
+                16px 0;
+
+            overflow-x:
+                auto;
+
+            border:
+                1px solid #1e293b;
+
+            position:
+                relative;
+        }
+
+        .copy-code {
+            position:
+                absolute;
+
+            right:
+                12px;
+
+            top:
+                12px;
+
+            border:
+                1px solid #334155;
+
+            background:
+                #111827;
+
+            color:
+                #cbd5e1;
+
+            border-radius:
+                8px;
+
+            padding:
+                6px 9px;
+
+            font-size:
+                11px;
+
+            cursor:
+                pointer;
+        }
+
+        .copy-code:hover {
+            background:
+                #1e293b;
+        }
+
+        /* =========================================================
+           VISUAL TABLE
+           ========================================================= */
+
+        .table-demo {
+            overflow-x:
+                auto;
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                15px;
+
+            margin-top:
+                18px;
+        }
+
+        table {
+            width:
+                100%;
+
+            border-collapse:
+                collapse;
+
+            min-width:
+                620px;
+        }
+
+        th,
+        td {
+            text-align:
+                left;
+
+            padding:
+                13px 15px;
+
+            border-bottom:
+                1px solid var(--border);
+
+            font-size:
+                13px;
+        }
+
+        th {
+            background:
+                #f8fafc;
+
+            font-weight:
+                850;
+
+            color:
+                #334155;
+        }
+
+        tr:last-child td {
+            border-bottom:
+                0;
+        }
+
+        .highlight-row {
+            background:
+                #eef2ff;
+        }
+
+        .highlight-cell {
+            background:
+                #dcfce7;
+
+            animation:
+                pulseCell 1.2s ease;
+        }
+
+        @keyframes pulseCell {
+
+            0% {
+                background:
+                    #bbf7d0;
+            }
+
+            100% {
+                background:
+                    #dcfce7;
+            }
+
+        }
+
+        /* =========================================================
+           SELECT FLOW
+           ========================================================= */
+
+        .select-flow {
+            display:
+                flex;
+
+            flex-wrap:
+                wrap;
+
+            justify-content:
+                center;
+
+            align-items:
+                center;
+
+            gap:
+                10px;
+
+            margin:
+                28px 0;
+        }
+
+        .flow-box {
+            min-width:
+                125px;
+
+            padding:
+                17px 13px;
+
+            text-align:
+                center;
+
+            background:
+                white;
+
+            border:
+                2px solid #cbd5e1;
+
+            border-radius:
+                14px;
+
+            font-size:
+                13px;
+
+            font-weight:
+                850;
+
+            box-shadow:
+                var(--shadow-sm);
+
+            animation:
+                flowFloat 3s ease-in-out infinite;
+        }
+
+        .flow-box:nth-child(2) {
+            animation-delay:
+                .15s;
+        }
+
+        .flow-box:nth-child(3) {
+            animation-delay:
+                .3s;
+        }
+
+        .flow-box:nth-child(4) {
+            animation-delay:
+                .45s;
+        }
+
+        .flow-box:nth-child(5) {
+            animation-delay:
+                .6s;
+        }
+
+        @keyframes flowFloat {
+
+            0%, 100% {
+                transform:
+                    translateY(0);
+            }
+
+            50% {
+                transform:
+                    translateY(-5px);
+            }
+
+        }
+
+        .flow-arrow {
+            color:
+                var(--primary);
+
+            font-size:
+                23px;
+
+            font-weight:
+                900;
+        }
+
+        /* =========================================================
+           COMPARISON
+           ========================================================= */
+
+        .comparison {
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap:
+                18px;
+        }
+
+        .compare-card {
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                16px;
+
+            padding:
+                20px;
+
+            background:
+                white;
+        }
+
+        .compare-card.good {
+            border-top:
+                4px solid var(--success);
+        }
+
+        .compare-card.bad {
+            border-top:
+                4px solid var(--danger);
+        }
+
+        .compare-card h4 {
+            margin-top:
+                0;
+        }
+
+        /* =========================================================
+           SIMULATOR
+           ========================================================= */
+
+        .simulator {
+            background:
+                #0f172a;
+
+            border-radius:
+                22px;
+
+            padding:
+                25px;
+
+            color:
+                white;
+
+            box-shadow:
+                var(--shadow-md);
+        }
+
+        .simulator-header {
+            display:
+                flex;
+
+            justify-content:
+                space-between;
+
+            align-items:
+                center;
+
+            gap:
+                15px;
+
+            flex-wrap:
+                wrap;
+
+            margin-bottom:
+                18px;
+        }
+
+        .simulator-title {
+            font-size:
+                20px;
+
+            font-weight:
+                850;
+        }
+
+        .sim-status {
+            font-size:
+                12px;
+
+            color:
+                #94a3b8;
+        }
+
+        .sim-grid {
+            display:
+                grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap:
+                18px;
+        }
+
+        .sim-panel {
+            background:
+                #111c30;
+
+            border:
+                1px solid #263449;
+
+            border-radius:
+                16px;
+
+            padding:
+                17px;
+        }
+
+        .sim-panel h4 {
+            margin:
+                0 0 10px;
+
+            color:
+                #cbd5e1;
+        }
+
+        .sim-input {
+            width:
+                100%;
+
+            background:
+                #020617;
+
+            border:
+                1px solid #334155;
+
+            color:
+                #e2e8f0;
+
+            border-radius:
+                10px;
+
+            padding:
+                11px 12px;
+
+            outline:
+                none;
+
+            margin-bottom:
+                10px;
+        }
+
+        .sim-input:focus {
+            border-color:
+                #818cf8;
+        }
+
+        .sim-select {
+            width:
+                100%;
+
+            background:
+                #020617;
+
+            border:
+                1px solid #334155;
+
+            color:
+                #e2e8f0;
+
+            border-radius:
+                10px;
+
+            padding:
+                11px 12px;
+
+            outline:
+                none;
+
+            margin-bottom:
+                10px;
+        }
+
+        .sim-btn {
+            border:
+                0;
+
+            background:
+                var(--primary);
+
+            color:
+                white;
+
+            padding:
+                10px 15px;
+
+            border-radius:
+                10px;
+
+            cursor:
+                pointer;
+
+            font-weight:
+                800;
+
+            transition:
+                .2s ease;
+        }
+
+        .sim-btn:hover {
+            transform:
+                translateY(-1px);
+
+            background:
+                #6366f1;
+        }
+
+        .sim-btn.secondary {
+            background:
+                #334155;
+        }
+
+        .sim-output {
+            min-height:
+                130px;
+
+            background:
+                #020617;
+
+            border:
+                1px solid #263449;
+
+            border-radius:
+                12px;
+
+            padding:
+                14px;
+
+            color:
+                #cbd5e1;
+
+            font-family:
+                Consolas,
+                monospace;
+
+            font-size:
+                12px;
+
+            white-space:
+                pre-wrap;
+
+            overflow-x:
+                auto;
+        }
+
+        /* =========================================================
+           QUERY BUILDER
+           ========================================================= */
+
+        .query-builder {
+            display:
+                grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap:
+                18px;
+        }
+
+        .builder-panel {
+            background:
+                #f8fafc;
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                16px;
+
+            padding:
+                18px;
+        }
+
+        .builder-panel h4 {
+            margin-top:
+                0;
+        }
+
+        .builder-check {
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                9px;
+
+            padding:
+                8px 0;
+
+            font-size:
+                14px;
+
+            color:
+                #475569;
+        }
+
+        .builder-check input {
+            accent-color:
+                var(--primary);
+        }
+
+        /* =========================================================
+           QUIZ
+           ========================================================= */
+
+        .quiz-question {
+            background:
+                #f8fafc;
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                15px;
+
+            padding:
+                20px;
+
+            margin-bottom:
+                15px;
+        }
+
+        .quiz-question h4 {
+            margin:
+                0 0 13px;
+
+            font-size:
+                15px;
+        }
+
+        .option {
+            display:
+                block;
+
+            width:
+                100%;
+
+            text-align:
+                left;
+
+            border:
+                1px solid var(--border);
+
+            background:
+                white;
+
+            padding:
+                11px 13px;
+
+            border-radius:
+                10px;
+
+            margin:
+                7px 0;
+
+            cursor:
+                pointer;
+
+            transition:
+                .2s;
+        }
+
+        .option:hover {
+            border-color:
+                #a5b4fc;
+
+            background:
+                #eef2ff;
+        }
+
+        .option.selected {
+            border-color:
+                var(--primary);
+
+            background:
+                #eef2ff;
+        }
+
+        .option.correct {
+            border-color:
+                var(--success);
+
+            background:
+                #dcfce7;
+        }
+
+        .option.wrong {
+            border-color:
+                var(--danger);
+
+            background:
+                #fee2e2;
+        }
+
+        .quiz-result {
+            margin-top:
+                18px;
+
+            padding:
+                16px;
+
+            border-radius:
+                12px;
+
+            background:
+                #eef2ff;
+
+            color:
+                #3730a3;
+
+            display:
+                none;
+
+            font-weight:
+                800;
+        }
+
+        /* =========================================================
+           ACCORDION
+           ========================================================= */
+
+        .accordion {
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                13px;
+
+            overflow:
+                hidden;
+
+            margin-bottom:
+                10px;
+        }
+
+        .accordion button {
+            width:
+                100%;
+
+            background:
+                white;
+
+            border:
+                0;
+
+            padding:
+                16px 18px;
+
+            text-align:
+                left;
+
+            font-weight:
+                800;
+
+            cursor:
+                pointer;
+
+            display:
+                flex;
+
+            justify-content:
+                space-between;
+
+            gap:
+                15px;
+        }
+
+        .accordion-content {
+            display:
+                none;
+
+            padding:
+                0 18px 18px;
+
+            background:
+                white;
+
+            color:
+                var(--muted);
+
+            font-size:
+                14px;
+        }
+
+        .accordion.open .accordion-content {
+            display:
+                block;
+        }
+
+        /* =========================================================
+           CHECKLIST
+           ========================================================= */
+
+        .checklist {
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap:
+                10px;
+        }
+
+        .check-item {
+            display:
+                flex;
+
+            align-items:
+                flex-start;
+
+            gap:
+                10px;
+
+            background:
+                #f8fafc;
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                12px;
+
+            padding:
+                12px;
+
+            cursor:
+                pointer;
+        }
+
+        .check-item input {
+            margin-top:
+                5px;
+
+            accent-color:
+                var(--primary);
+        }
+
+        .check-item.done {
+            background:
+                #f0fdf4;
+
+            border-color:
+                #bbf7d0;
+        }
+
+        /* =========================================================
+           NEXT LESSON
+           ========================================================= */
+
+        .next-lesson {
+            background:
+                linear-gradient(
+                    135deg,
+                    #eef2ff,
+                    #f5f3ff
+                );
+
+            border:
+                1px solid #c7d2fe;
+
+            border-radius:
+                22px;
+
+            padding:
+                28px;
+
+            display:
+                flex;
+
+            justify-content:
+                space-between;
+
+            gap:
+                20px;
+
+            align-items:
+                center;
+
+            margin:
+                30px 0 70px;
+        }
+
+        .next-lesson h3 {
+            margin-bottom:
+                5px;
+        }
+
+        .next-lesson p {
+            color:
+                var(--muted);
+        }
+
+        .next-btn {
+            flex-shrink:
+                0;
+
+            background:
+                var(--primary);
+
+            color:
+                white;
+
+            padding:
+                12px 18px;
+
+            border-radius:
+                11px;
+
+            font-weight:
+                850;
+        }
+
+        /* =========================================================
+           FOOTER
+           ========================================================= */
+
+        footer {
+            border-top:
+                1px solid var(--border);
+
+            padding:
+                28px 0 40px;
+
+            color:
+                #94a3b8;
+
+            font-size:
+                13px;
+
+            text-align:
+                center;
+        }
+
+        /* =========================================================
+           REVEAL
+           SAFE DEFAULT
+           ========================================================= */
+
+        .reveal {
+            opacity:
+                1;
+
+            transform:
+                none;
+        }
+
+        .js-animation .reveal {
+            opacity:
+                0;
+
+            transform:
+                translateY(18px);
+
+            transition:
+                opacity .65s ease,
+                transform .65s ease;
+        }
+
+        .js-animation .reveal.show {
+            opacity:
+                1;
+
+            transform:
+                translateY(0);
+        }
+
+        /* =========================================================
+           RESPONSIVE
+           ========================================================= */
+
+        @media (max-width: 1050px) {
+
+            .hero-grid {
+                grid-template-columns:
+                    1fr;
+            }
+
+            .objectives {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 850px) {
+
+            .sidebar {
+                transform:
+                    translateX(-100%);
+
+                transition:
+                    transform .25s ease;
+            }
+
+            .sidebar.open {
+                transform:
+                    translateX(0);
+
+                box-shadow:
+                    20px 0 50px
+                    rgba(15, 23, 42, .15);
+            }
+
+            .mobile-topbar {
+                display:
+                    flex;
+            }
+
+            .main {
+                margin-left:
+                    0;
+
+                padding-top:
+                    64px;
+            }
+
+            .hero {
+                padding-top:
+                    35px;
+            }
+
+            .sim-grid,
+            .query-builder,
+            .info-grid,
+            .comparison,
+            .checklist {
+                grid-template-columns:
+                    1fr;
+            }
+
+        }
+
+        @media (max-width: 600px) {
+
+            .container {
+                width:
+                    min(
+                        100% - 26px,
+                        1120px
+                    );
+            }
+
+            .hero-card {
+                padding:
+                    28px 22px;
+            }
+
+            .hero-code {
+                padding:
+                    20px;
+            }
+
+            .objectives {
+                grid-template-columns:
+                    1fr;
+            }
+
+            section {
+                padding:
+                    28px 0;
+            }
+
+            .card {
+                padding:
+                    21px 17px;
+            }
+
+            .next-lesson {
+                flex-direction:
+                    column;
+
+                align-items:
+                    flex-start;
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================================================
+         SCROLL PROGRESS
+         ========================================================= -->
+
+    <div
+        class="scroll-progress"
+        id="scrollProgress">
+    </div>
+
+    <!-- =========================================================
+         MOBILE TOPBAR
+         ========================================================= -->
+
+    <div class="mobile-topbar">
+
+        <div class="mobile-brand">
+            ZEN<span>SUS</span>
+        </div>
+
+        <button
+            class="menu-btn"
+            id="menuBtn">
+            ☰
+        </button>
+
+    </div>
+
+    <!-- =========================================================
+         SIDEBAR
+         ========================================================= -->
+
+    <aside
+        class="sidebar"
+        id="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                Z
+            </div>
+
+            <div class="brand-text">
+                ZEN<span>SUS</span>
+            </div>
+
+        </div>
+
+        <div class="course-label">
+            SQL Mastery
+        </div>
+
+        <nav class="lesson-nav">
+
+            <a href="lesson1.html">
+                <span class="lesson-number">01</span>
+                Introduction to SQL
+            </a>
+
+            <a href="lesson2.html">
+                <span class="lesson-number">02</span>
+                Database Fundamentals
+            </a>
+
+            <a href="lesson3.html">
+                <span class="lesson-number">03</span>
+                CREATE
+            </a>
+
+            <a href="lesson4.html">
+                <span class="lesson-number">04</span>
+                INSERT
+            </a>
+
+            <a
+                href="#top"
+                class="active">
+                <span class="lesson-number">05</span>
+                SELECT
+            </a>
+
+            <a href="lesson6.html">
+                <span class="lesson-number">06</span>
+                WHERE
+            </a>
+
+            <a href="lesson7.html">
+                <span class="lesson-number">07</span>
+                UPDATE
+            </a>
+
+            <a href="lesson8.html">
+                <span class="lesson-number">08</span>
+                DELETE
+            </a>
+
+            <a href="lesson9.html">
+                <span class="lesson-number">09</span>
+                Constraints
+            </a>
+
+            <a href="lesson10.html">
+                <span class="lesson-number">10</span>
+                SQL Functions
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <div class="progress-label">
+                <span>Course progress</span>
+                <strong>40%</strong>
+            </div>
+
+            <div class="progress-track">
+
+                <div class="progress-fill"></div>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+    <!-- =========================================================
+         MAIN
+         ========================================================= -->
+
+    <main
+        class="main"
+        id="top">
+
+        <!-- =====================================================
+             HERO
+             ===================================================== -->
+
+        <section class="hero">
+
+            <div class="container">
+
+                <div class="hero-grid">
+
+                    <div class="hero-card reveal">
+
+                        <div class="eyebrow">
+                            SQL MASTERY · LESSON 05
+                        </div>
+
+                        <h1>
+                            SQL <span>SELECT</span>
+                        </h1>
+
+                        <p class="hero-description">
+
+                            Learn how to retrieve data from a database using
+                            SELECT — from selecting every column to selecting
+                            specific columns, expressions, aliases, DISTINCT,
+                            calculated values and professional query thinking.
+
+                        </p>
+
+                        <div class="hero-meta">
+
+                            <span class="meta-pill">
+                                Beginner → Advanced
+                            </span>
+
+                            <span class="meta-pill">
+                                DQL / Querying
+                            </span>
+
+                            <span class="meta-pill">
+                                Interactive
+                            </span>
+
+                            <span class="meta-pill">
+                                Interview Ready
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="hero-code">
+
+                        <div class="code-title">
+
+                            <span>
+                                select.sql
+                            </span>
+
+                            <div class="dots">
+
+                                <span class="dot"></span>
+                                <span class="dot"></span>
+                                <span class="dot"></span>
+
+                            </div>
+
+                        </div>
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    name,
+    department,
+    age
+<span class="sql-keyword">FROM</span> students;
+
+<span class="sql-comment">-- Retrieve selected columns</span></code></pre>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             OBJECTIVES
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        Learning objectives
+                    </div>
+
+                    <h2>
+                        What you will master
+                    </h2>
+
+                    <p>
+                        SELECT is the foundation of SQL data retrieval.
+                        After this lesson, you should be able to read,
+                        write and understand basic SELECT queries confidently.
+                    </p>
+
+                </div>
+
+                <div class="objectives">
+
+                    <div class="objective reveal">
+
+                        <div class="objective-icon">
+                            01
+                        </div>
+
+                        <h3>
+                            SELECT Basics
+                        </h3>
+
+                        <p>
+                            Retrieve complete rows or specific columns.
+                        </p>
+
+                    </div>
+
+                    <div class="objective reveal">
+
+                        <div class="objective-icon">
+                            02
+                        </div>
+
+                        <h3>
+                            Expressions
+                        </h3>
+
+                        <p>
+                            Perform calculations directly inside SELECT.
+                        </p>
+
+                    </div>
+
+                    <div class="objective reveal">
+
+                        <div class="objective-icon">
+                            03
+                        </div>
+
+                        <h3>
+                            Aliases
+                        </h3>
+
+                        <p>
+                            Give meaningful names to output columns.
+                        </p>
+
+                    </div>
+
+                    <div class="objective reveal">
+
+                        <div class="objective-icon">
+                            04
+                        </div>
+
+                        <h3>
+                            DISTINCT
+                        </h3>
+
+                        <p>
+                            Remove duplicate combinations from the result.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             WHAT IS SELECT
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        01 · Foundation
+                    </div>
+
+                    <h2>
+                        What is SELECT?
+                    </h2>
+
+                    <p>
+                        SELECT is used to retrieve data from one or more
+                        database objects such as tables and views.
+                    </p>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <h3>
+                        Think of SELECT as asking the database a question
+                    </h3>
+
+                    <p>
+                        Suppose your database contains thousands of students.
+                        You may want to ask:
+                    </p>
+
+                    <ul>
+
+                        <li>
+                            What are all the students?
+                        </li>
+
+                        <li>
+                            What are their names?
+                        </li>
+
+                        <li>
+                            Which departments exist?
+                        </li>
+
+                        <li>
+                            What are their ages?
+                        </li>
+
+                    </ul>
+
+                    <div class="tip">
+
+                        <strong>
+                            SELECT = retrieve information.
+                        </strong>
+
+                        It does not normally change the stored rows.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             TABLE VISUALIZATION
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        02 · Visualization
+                    </div>
+
+                    <h2>
+                        Imagine this database table
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="table-demo">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+                                    <th>student_id</th>
+                                    <th>name</th>
+                                    <th>age</th>
+                                    <th>department</th>
+                                    <th>cgpa</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                <tr>
+                                    <td>101</td>
+                                    <td>Anil</td>
+                                    <td>20</td>
+                                    <td>CSE</td>
+                                    <td>8.4</td>
+                                </tr>
+
+                                <tr>
+                                    <td>102</td>
+                                    <td>Sneha</td>
+                                    <td>19</td>
+                                    <td>ECE</td>
+                                    <td>9.1</td>
+                                </tr>
+
+                                <tr>
+                                    <td>103</td>
+                                    <td>Ravi</td>
+                                    <td>21</td>
+                                    <td>IT</td>
+                                    <td>8.7</td>
+                                </tr>
+
+                                <tr>
+                                    <td>104</td>
+                                    <td>Meena</td>
+                                    <td>20</td>
+                                    <td>CSE</td>
+                                    <td>9.3</td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                    <p style="margin-top:18px;">
+                        Now let's ask the database different questions using
+                        SELECT.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             BASIC SYNTAX
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        03 · Syntax
+                    </div>
+
+                    <h2>
+                        Basic SELECT syntax
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="code-box">
+
+                        <button class="copy-code">
+                            Copy
+                        </button>
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    column1,
+    column2
+<span class="sql-keyword">FROM</span>
+    table_name;</code></pre>
+
+                    </div>
+
+                    <div class="info-grid">
+
+                        <div class="info-box">
+
+                            <strong>
+                                SELECT
+                            </strong>
+
+                            <p>
+                                Specifies what data you want in the result.
+                            </p>
+
+                        </div>
+
+                        <div class="info-box">
+
+                            <strong>
+                                FROM
+                            </strong>
+
+                            <p>
+                                Specifies where the data should come from.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             SELECT *
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        04 · First query
+                    </div>
+
+                    <h2>
+                        SELECT * — retrieve all columns
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="code-box">
+
+                        <button class="copy-code">
+                            Copy
+                        </button>
+
+<pre><code><span class="sql-keyword">SELECT</span> *
+<span class="sql-keyword">FROM</span> students;</code></pre>
+
+                    </div>
+
+                    <p>
+                        The <strong>*</strong> means:
+                    </p>
+
+                    <div class="tip">
+                        Return all columns from the selected source.
+                    </div>
+
+                    <h4>
+                        Result
+                    </h4>
+
+                    <div class="table-demo">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+                                    <th>student_id</th>
+                                    <th>name</th>
+                                    <th>age</th>
+                                    <th>department</th>
+                                    <th>cgpa</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                <tr>
+                                    <td>101</td>
+                                    <td>Anil</td>
+                                    <td>20</td>
+                                    <td>CSE</td>
+                                    <td>8.4</td>
+                                </tr>
+
+                                <tr>
+                                    <td>102</td>
+                                    <td>Sneha</td>
+                                    <td>19</td>
+                                    <td>ECE</td>
+                                    <td>9.1</td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                    <div class="warning">
+
+                        <strong>
+                            Production tip:
+                        </strong>
+
+                        SELECT * is convenient while learning and exploring,
+                        but production queries often explicitly request only
+                        the columns they need.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             SPECIFIC COLUMNS
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        05 · Precision
+                    </div>
+
+                    <h2>
+                        Selecting specific columns
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <p>
+                        Instead of retrieving every column, specify only
+                        the columns required.
+                    </p>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    name,
+    department
+<span class="sql-keyword">FROM</span> students;</code></pre>
+
+                    </div>
+
+                    <div class="table-demo">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+                                    <th>name</th>
+                                    <th>department</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                <tr>
+                                    <td>Anil</td>
+                                    <td>CSE</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Sneha</td>
+                                    <td>ECE</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Ravi</td>
+                                    <td>IT</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Meena</td>
+                                    <td>CSE</td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             SELECT FLOW
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        06 · Query thinking
+                    </div>
+
+                    <h2>
+                        How a SELECT query flows
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="select-flow">
+
+                        <div class="flow-box">
+                            SQL Query
+                        </div>
+
+                        <div class="flow-arrow">
+                            →
+                        </div>
+
+                        <div class="flow-box">
+                            FROM Source
+                        </div>
+
+                        <div class="flow-arrow">
+                            →
+                        </div>
+
+                        <div class="flow-box">
+                            Select Columns
+                        </div>
+
+                        <div class="flow-arrow">
+                            →
+                        </div>
+
+                        <div class="flow-box">
+                            Build Result
+                        </div>
+
+                        <div class="flow-arrow">
+                            →
+                        </div>
+
+                        <div class="flow-box">
+                            Result Set
+                        </div>
+
+                    </div>
+
+                    <div class="tip">
+
+                        This is a simplified conceptual model.
+                        Actual database query processing and optimization
+                        can be much more sophisticated.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             COLUMN ORDER
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        07 · Important
+                    </div>
+
+                    <h2>
+                        The order of columns matters
+                    </h2>
+
+                </div>
+
+                <div class="comparison reveal">
+
+                    <div class="compare-card good">
+
+                        <h4>
+                            Query A
+                        </h4>
+
+                        <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    name,
+    age
+<span class="sql-keyword">FROM</span> students;</code></pre>
+
+                        </div>
+
+                        <p>
+                            Result columns appear as:
+                            <strong>name → age</strong>
+                        </p>
+
+                    </div>
+
+                    <div class="compare-card good">
+
+                        <h4>
+                            Query B
+                        </h4>
+
+                        <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    age,
+    name
+<span class="sql-keyword">FROM</span> students;</code></pre>
+
+                        </div>
+
+                        <p>
+                            Result columns appear as:
+                            <strong>age → name</strong>
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             DUPLICATES
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        08 · DISTINCT
+                    </div>
+
+                    <h2>
+                        Removing duplicates with DISTINCT
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <p>
+                        Suppose many students belong to the same department.
+                    </p>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span> department
+<span class="sql-keyword">FROM</span> students;</code></pre>
+
+                    </div>
+
+                    <p>
+                        The result may contain:
+                    </p>
+
+                    <div class="table-demo">
+
+                        <table>
+
+                            <thead>
+                                <tr>
+                                    <th>department</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                <tr>
+                                    <td>CSE</td>
+                                </tr>
+
+                                <tr>
+                                    <td>ECE</td>
+                                </tr>
+
+                                <tr>
+                                    <td>IT</td>
+                                </tr>
+
+                                <tr>
+                                    <td>CSE</td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                    <p>
+                        Use DISTINCT:
+                    </p>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT DISTINCT</span> department
+<span class="sql-keyword">FROM</span> students;</code></pre>
+
+                    </div>
+
+                    <p>
+                        Now each distinct department value appears once in
+                        the result.
+                    </p>
+
+                    <div class="success">
+                        DISTINCT removes duplicate result rows based on the
+                        selected expressions/columns.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             DISTINCT MULTIPLE COLUMNS
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        09 · Interview concept
+                    </div>
+
+                    <h2>
+                        DISTINCT with multiple columns
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT DISTINCT</span>
+    department,
+    age
+<span class="sql-keyword">FROM</span> students;</code></pre>
+
+                    </div>
+
+                    <p>
+                        Here DISTINCT considers the combination of
+                        <strong>department + age</strong>.
+                    </p>
+
+                    <div class="warning">
+                        DISTINCT does not mean "make every column independently
+                        unique." It removes duplicate result rows based on
+                        the complete selected combination.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             ALIAS
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        10 · Readability
+                    </div>
+
+                    <h2>
+                        Column aliases with AS
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <p>
+                        An alias gives a temporary name to a column or
+                        expression in the result.
+                    </p>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    name <span class="sql-keyword">AS</span> student_name,
+    department <span class="sql-keyword">AS</span> branch
+<span class="sql-keyword">FROM</span> students;</code></pre>
+
+                    </div>
+
+                    <p>
+                        The underlying table structure is not changed.
+                    </p>
+
+                    <div class="info-grid">
+
+                        <div class="info-box">
+
+                            <strong>
+                                Original column
+                            </strong>
+
+                            <p>
+                                name
+                            </p>
+
+                        </div>
+
+                        <div class="info-box">
+
+                            <strong>
+                                Result heading
+                            </strong>
+
+                            <p>
+                                student_name
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <h4>
+                        AS can often be omitted
+                    </h4>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    name student_name
+<span class="sql-keyword">FROM</span> students;</code></pre>
+
+                    </div>
+
+                    <div class="tip">
+                        Using AS is usually clearer, especially for beginners
+                        and complex expressions.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             EXPRESSIONS
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        11 · Calculations
+                    </div>
+
+                    <h2>
+                        Calculations inside SELECT
+                    </h2>
+
+                    <p>
+                        SELECT can calculate values while producing the result.
+                    </p>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <h3>
+                        Example: increase a salary by 10%
+                    </h3>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    name,
+    salary,
+    salary * <span class="sql-number">1.10</span> <span class="sql-keyword">AS</span> increased_salary
+<span class="sql-keyword">FROM</span> employees;</code></pre>
+
+                    </div>
+
+                    <p>
+                        The calculation changes the displayed result, not
+                        necessarily the stored salary.
+                    </p>
+
+                    <div class="success">
+                        SELECT expressions are excellent for reports,
+                        calculations and derived output.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             ARITHMETIC EXPRESSIONS
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        12 · Expressions
+                    </div>
+
+                    <h2>
+                        Arithmetic expressions in SELECT
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    price,
+    quantity,
+    price * quantity <span class="sql-keyword">AS</span> total
+<span class="sql-keyword">FROM</span> orders;</code></pre>
+
+                    </div>
+
+                    <div class="info-grid">
+
+                        <div class="info-box">
+                            <strong>+</strong>
+                            <p>Addition</p>
+                        </div>
+
+                        <div class="info-box">
+                            <strong>-</strong>
+                            <p>Subtraction</p>
+                        </div>
+
+                        <div class="info-box">
+                            <strong>*</strong>
+                            <p>Multiplication</p>
+                        </div>
+
+                        <div class="info-box">
+                            <strong>/</strong>
+                            <p>Division</p>
+                        </div>
+
+                    </div>
+
+                    <div class="warning">
+                        Numeric behavior, especially division and data-type
+                        conversion, can vary between SQL database systems.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             LITERALS
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        13 · SELECT expressions
+                    </div>
+
+                    <h2>
+                        SELECT can also return constants
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    <span class="sql-string">'ZENSUS'</span> <span class="sql-keyword">AS</span> platform,
+    <span class="sql-number">2026</span> <span class="sql-keyword">AS</span> year;</code></pre>
+
+                    </div>
+
+                    <p>
+                        A SELECT statement does not always have to retrieve
+                        a table column.
+                    </p>
+
+                    <p>
+                        It can return expressions and constants supported
+                        by the database.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             SELECT WITHOUT FROM
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        14 · Database differences
+                    </div>
+
+                    <h2>
+                        SELECT without FROM
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <p>
+                        Some database systems allow expressions to be selected
+                        without referencing a table.
+                    </p>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    <span class="sql-number">10</span> + <span class="sql-number">20</span> <span class="sql-keyword">AS</span> result;</code></pre>
+
+                    </div>
+
+                    <p>
+                        A database may return:
+                    </p>
+
+                    <div class="table-demo">
+
+                        <table>
+
+                            <thead>
+                                <tr>
+                                    <th>result</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr>
+                                    <td>30</td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                    <div class="warning">
+                        Exact syntax and behavior can differ by SQL dialect.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             COMMENTS
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        15 · Professional SQL
+                    </div>
+
+                    <h2>
+                        Comments in SELECT queries
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <h4>
+                        Single-line comment
+                    </h4>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-comment">-- Get all students</span>
+<span class="sql-keyword">SELECT</span> *
+<span class="sql-keyword">FROM</span> students;</code></pre>
+
+                    </div>
+
+                    <h4>
+                        Multi-line comment
+                    </h4>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-comment">/*
+   Retrieve student names
+   and departments
+*/</span>
+
+<span class="sql-keyword">SELECT</span>
+    name,
+    department
+<span class="sql-keyword">FROM</span> students;</code></pre>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             QUERY BUILDER
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        16 · Interactive lab
+                    </div>
+
+                    <h2>
+                        Build your SELECT query
+                    </h2>
+
+                    <p>
+                        Choose the columns and let ZENSUS generate a SELECT
+                        query for you.
+                    </p>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="query-builder">
+
+                        <div class="builder-panel">
+
+                            <h4>
+                                Select columns
+                            </h4>
+
+                            <label class="builder-check">
+
+                                <input
+                                    type="checkbox"
+                                    class="column-check"
+                                    value="student_id"
+                                >
+
+                                student_id
+
+                            </label>
+
+                            <label class="builder-check">
+
+                                <input
+                                    type="checkbox"
+                                    class="column-check"
+                                    value="name"
+                                >
+
+                                name
+
+                            </label>
+
+                            <label class="builder-check">
+
+                                <input
+                                    type="checkbox"
+                                    class="column-check"
+                                    value="age"
+                                >
+
+                                age
+
+                            </label>
+
+                            <label class="builder-check">
+
+                                <input
+                                    type="checkbox"
+                                    class="column-check"
+                                    value="department"
+                                >
+
+                                department
+
+                            </label>
+
+                            <label class="builder-check">
+
+                                <input
+                                    type="checkbox"
+                                    class="column-check"
+                                    value="cgpa"
+                                >
+
+                                cgpa
+
+                            </label>
+
+                            <label class="builder-check">
+
+                                <input
+                                    type="checkbox"
+                                    id="distinctCheck"
+                                >
+
+                                DISTINCT
+
+                            </label>
+
+                            <button
+                                class="sim-btn"
+                                id="buildQuery"
+                                style="margin-top:12px;"
+                            >
+                                Generate Query
+                            </button>
+
+                        </div>
+
+                        <div class="builder-panel">
+
+                            <h4>
+                                Generated SQL
+                            </h4>
+
+                            <div
+                                class="sim-output"
+                                id="queryOutput"
+                            >SELECT *
+FROM students;</div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             SELECT SIMULATOR
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        17 · Interactive
+                    </div>
+
+                    <h2>
+                        SELECT simulator
+                    </h2>
+
+                    <p>
+                        Select different query types and visualize the result.
+                    </p>
+
+                </div>
+
+                <div class="simulator reveal">
+
+                    <div class="simulator-header">
+
+                        <div class="simulator-title">
+                            SELECT Lab
+                        </div>
+
+                        <div class="sim-status">
+                            Browser simulation — not a real database
+                        </div>
+
+                    </div>
+
+                    <div class="sim-grid">
+
+                        <div class="sim-panel">
+
+                            <h4>
+                                Choose a query
+                            </h4>
+
+                            <select
+                                class="sim-select"
+                                id="selectDemo"
+                            >
+
+                                <option value="all">
+                                    SELECT *
+                                </option>
+
+                                <option value="name">
+                                    SELECT name
+                                </option>
+
+                                <option value="nameDept">
+                                    SELECT name, department
+                                </option>
+
+                                <option value="distinct">
+                                    SELECT DISTINCT department
+                                </option>
+
+                                <option value="calc">
+                                    SELECT name, cgpa + 0.2
+                                </option>
+
+                            </select>
+
+                            <button
+                                class="sim-btn"
+                                id="runSelect"
+                            >
+                                ▶ Run SELECT
+                            </button>
+
+                        </div>
+
+                        <div class="sim-panel">
+
+                            <h4>
+                                SQL
+                            </h4>
+
+                            <div
+                                class="sim-output"
+                                id="selectSql"
+                            >SELECT *
+FROM students;</div>
+
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="sim-panel"
+                        style="margin-top:18px;"
+                    >
+
+                        <h4>
+                            Result
+                        </h4>
+
+                        <div
+                            class="table-demo"
+                            id="selectResult"
+                        >
+
+                            <table>
+
+                                <thead>
+
+                                    <tr>
+                                        <th>student_id</th>
+                                        <th>name</th>
+                                        <th>age</th>
+                                        <th>department</th>
+                                        <th>cgpa</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    <tr>
+                                        <td>101</td>
+                                        <td>Anil</td>
+                                        <td>20</td>
+                                        <td>CSE</td>
+                                        <td>8.4</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>102</td>
+                                        <td>Sneha</td>
+                                        <td>19</td>
+                                        <td>ECE</td>
+                                        <td>9.1</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>103</td>
+                                        <td>Ravi</td>
+                                        <td>21</td>
+                                        <td>IT</td>
+                                        <td>8.7</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>104</td>
+                                        <td>Meena</td>
+                                        <td>20</td>
+                                        <td>CSE</td>
+                                        <td>9.3</td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             WHERE PREVIEW
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        18 · Preview
+                    </div>
+
+                    <h2>
+                        SELECT + WHERE
+                    </h2>
+
+                    <p>
+                        WHERE will be covered deeply in the next lesson,
+                        but you should understand the relationship now.
+                    </p>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    name,
+    department
+<span class="sql-keyword">FROM</span> students
+<span class="sql-keyword">WHERE</span> department = <span class="sql-string">'CSE'</span>;</code></pre>
+
+                    </div>
+
+                    <div class="select-flow">
+
+                        <div class="flow-box">
+                            students
+                        </div>
+
+                        <div class="flow-arrow">
+                            →
+                        </div>
+
+                        <div class="flow-box">
+                            WHERE
+                        </div>
+
+                        <div class="flow-arrow">
+                            →
+                        </div>
+
+                        <div class="flow-box">
+                            Keep CSE
+                        </div>
+
+                        <div class="flow-arrow">
+                            →
+                        </div>
+
+                        <div class="flow-box">
+                            SELECT name
+                        </div>
+
+                    </div>
+
+                    <div class="tip">
+                        Think of SELECT as deciding
+                        <strong>what columns you want</strong>,
+                        while WHERE decides
+                        <strong>which rows you want</strong>.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             SQL QUERY ORDER
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        19 · Core SQL
+                    </div>
+
+                    <h2>
+                        The bigger SELECT query structure
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span> columns
+<span class="sql-keyword">FROM</span> table
+<span class="sql-keyword">WHERE</span> condition
+<span class="sql-keyword">GROUP BY</span> columns
+<span class="sql-keyword">HAVING</span> condition
+<span class="sql-keyword">ORDER BY</span> columns
+<span class="sql-keyword">LIMIT</span> number;</code></pre>
+
+                    </div>
+
+                    <p>
+                        You do not need every clause in every query.
+                    </p>
+
+                    <p>
+                        We will study these clauses individually throughout
+                        the upcoming SQL lessons.
+                    </p>
+
+                    <div class="warning">
+                        The exact availability and syntax of LIMIT, TOP,
+                        FETCH and similar row-limiting features varies
+                        between database systems.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             COMMON MISTAKES
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        20 · Debugging
+                    </div>
+
+                    <h2>
+                        Common SELECT mistakes
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="accordion">
+
+                        <button>
+                            01. Forgetting FROM
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+
+                            <div class="code-box">
+
+<pre><code><span class="sql-comment">-- Wrong for retrieving table data</span>
+
+<span class="sql-keyword">SELECT</span> name;</code></pre>
+
+                            </div>
+
+                            <p>
+                                If you intend to retrieve a table column,
+                                you normally need to specify its source
+                                using FROM.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            02. Misspelling column names
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+
+                            <p>
+                                If the column does not exist, the database
+                                normally reports an error.
+                            </p>
+
+                            <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span> student_nam
+<span class="sql-keyword">FROM</span> students;</code></pre>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            03. Using SELECT * everywhere
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+
+                            <p>
+                                SELECT * is useful for exploration, but
+                                explicit columns are often better for
+                                production code.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            04. Confusing DISTINCT
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+
+                            <p>
+                                DISTINCT applies to the entire selected
+                                result row, not independently to each column.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            05. Forgetting commas
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+
+                            <div class="code-box">
+
+<pre><code><span class="sql-comment">-- Wrong</span>
+
+<span class="sql-keyword">SELECT</span>
+    name
+    age
+<span class="sql-keyword">FROM</span> students;</code></pre>
+
+                            </div>
+
+                            <p>
+                                Use commas between selected expressions.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             PERFORMANCE
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        21 · Professional practice
+                    </div>
+
+                    <h2>
+                        SELECT and performance
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <h3>
+                        Why avoid unnecessary columns?
+                    </h3>
+
+                    <p>
+                        Imagine a table containing 50 columns but your
+                        application only needs 3.
+                    </p>
+
+                    <div class="comparison">
+
+                        <div class="compare-card bad">
+
+                            <h4>
+                                Less precise
+                            </h4>
+
+                            <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span> *
+<span class="sql-keyword">FROM</span> students;</code></pre>
+
+                            </div>
+
+                        </div>
+
+                        <div class="compare-card good">
+
+                            <h4>
+                                More precise
+                            </h4>
+
+                            <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    name,
+    department,
+    cgpa
+<span class="sql-keyword">FROM</span> students;</code></pre>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <p style="margin-top:18px;">
+                        Selecting only the required data can improve
+                        readability and may reduce unnecessary data transfer.
+                        Actual performance depends on the database, schema,
+                        indexes, query plan and workload.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             REAL WORLD
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        22 · Real world
+                    </div>
+
+                    <h2>
+                        SELECT in real applications
+                    </h2>
+
+                </div>
+
+                <div class="info-grid">
+
+                    <div class="card reveal">
+
+                        <h3>
+                            🎓 Education
+                        </h3>
+
+                        <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    name,
+    cgpa
+<span class="sql-keyword">FROM</span> students;</code></pre>
+
+                        </div>
+
+                    </div>
+
+                    <div class="card reveal">
+
+                        <h3>
+                            🛒 E-commerce
+                        </h3>
+
+                        <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    product_name,
+    price
+<span class="sql-keyword">FROM</span> products;</code></pre>
+
+                        </div>
+
+                    </div>
+
+                    <div class="card reveal">
+
+                        <h3>
+                            🏦 Banking
+                        </h3>
+
+                        <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    account_number,
+    balance
+<span class="sql-keyword">FROM</span> accounts;</code></pre>
+
+                        </div>
+
+                    </div>
+
+                    <div class="card reveal">
+
+                        <h3>
+                            💼 HR
+                        </h3>
+
+                        <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    name,
+    department,
+    salary
+<span class="sql-keyword">FROM</span> employees;</code></pre>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             EXAM 5 MARK
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        23 · Exam preparation
+                    </div>
+
+                    <h2>
+                        5-mark answer: SELECT
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <h3>
+                        Definition
+                    </h3>
+
+                    <p>
+                        SELECT is an SQL statement used to retrieve data
+                        from one or more database objects such as tables
+                        and views.
+                    </p>
+
+                    <h4>
+                        Syntax
+                    </h4>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    column1,
+    column2
+<span class="sql-keyword">FROM</span> table_name;</code></pre>
+
+                    </div>
+
+                    <h4>
+                        Example
+                    </h4>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    name,
+    department
+<span class="sql-keyword">FROM</span> students;</code></pre>
+
+                    </div>
+
+                    <h4>
+                        Important features
+                    </h4>
+
+                    <ul>
+
+                        <li>
+                            Select all columns using *
+                        </li>
+
+                        <li>
+                            Select specific columns
+                        </li>
+
+                        <li>
+                            Use DISTINCT to remove duplicate result rows
+                        </li>
+
+                        <li>
+                            Use aliases with AS
+                        </li>
+
+                        <li>
+                            Perform calculations using expressions
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             10 MARK
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        24 · Long answer
+                    </div>
+
+                    <h2>
+                        10-mark answer structure
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <ol>
+
+                        <li>
+                            Define SELECT.
+                        </li>
+
+                        <li>
+                            Explain the purpose of data retrieval.
+                        </li>
+
+                        <li>
+                            Explain SELECT and FROM syntax.
+                        </li>
+
+                        <li>
+                            Demonstrate SELECT *.
+                        </li>
+
+                        <li>
+                            Demonstrate selecting specific columns.
+                        </li>
+
+                        <li>
+                            Explain DISTINCT.
+                        </li>
+
+                        <li>
+                            Explain column aliases.
+                        </li>
+
+                        <li>
+                            Explain arithmetic expressions.
+                        </li>
+
+                        <li>
+                            Explain SELECT with WHERE at a conceptual level.
+                        </li>
+
+                        <li>
+                            Discuss common mistakes and real-world applications.
+                        </li>
+
+                    </ol>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             INTERVIEW QUESTIONS
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        25 · Interview preparation
+                    </div>
+
+                    <h2>
+                        SELECT interview questions
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="accordion">
+
+                        <button>
+                            What is SELECT in SQL?
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+                            SELECT retrieves data from one or more database
+                            sources and produces a result set.
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            What does SELECT * mean?
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+                            It requests all columns from the selected source.
+                            It is convenient for exploration but explicit
+                            columns are often preferable in production.
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            What is DISTINCT?
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+                            DISTINCT removes duplicate result rows based on
+                            the complete selected set of expressions.
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            What is an alias?
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+                            An alias is a temporary name assigned to a result
+                            column or expression.
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            Does SELECT modify data?
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+                            A normal SELECT is used to retrieve data and does
+                            not itself modify table rows.
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            What is the difference between SELECT and INSERT?
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+                            SELECT retrieves data, while INSERT adds new rows.
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            Can SELECT perform calculations?
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+                            Yes. SELECT can evaluate expressions and return
+                            calculated values.
+                        </div>
+
+                    </div>
+
+                    <div class="accordion">
+
+                        <button>
+                            Why should SELECT * sometimes be avoided?
+                            <span>+</span>
+                        </button>
+
+                        <div class="accordion-content">
+                            Explicit columns make queries clearer and can
+                            prevent unnecessary data from being transferred.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             QUIZ
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        26 · Knowledge check
+                    </div>
+
+                    <h2>
+                        SELECT mastery quiz
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <!-- Q1 -->
+
+                    <div class="quiz-question">
+
+                        <h4>
+                            1. Which command retrieves data from a table?
+                        </h4>
+
+                        <button
+                            class="option"
+                            data-q="1"
+                            data-answer="false">
+                            INSERT
+                        </button>
+
+                        <button
+                            class="option"
+                            data-q="1"
+                            data-answer="true">
+                            SELECT
+                        </button>
+
+                        <button
+                            class="option"
+                            data-q="1"
+                            data-answer="false">
+                            DELETE
+                        </button>
+
+                        <button
+                            class="option"
+                            data-q="1"
+                            data-answer="false">
+                            UPDATE
+                        </button>
+
+                    </div>
+
+                    <!-- Q2 -->
+
+                    <div class="quiz-question">
+
+                        <h4>
+                            2. What does * mean in SELECT *?
+                        </h4>
+
+                        <button
+                            class="option"
+                            data-q="2"
+                            data-answer="false">
+                            All rows only
+                        </button>
+
+                        <button
+                            class="option"
+                            data-q="2"
+                            data-answer="true">
+                            All columns from the selected source
+                        </button>
+
+                        <button
+                            class="option"
+                            data-q="2"
+                            data-answer="false">
+                            Delete everything
+                        </button>
+
+                        <button
+                            class="option"
+                            data-q="2"
+                            data-answer="false">
+                            Unique values only
+                        </button>
+
+                    </div>
+
+                    <!-- Q3 -->
+
+                    <div class="quiz-question">
+
+                        <h4>
+                            3. Which keyword removes duplicate result rows?
+                        </h4>
+
+                        <button
+                            class="option"
+                            data-q="3"
+                            data-answer="true">
+                            DISTINCT
+                        </button>
+
+                        <button
+                            class="option"
+                            data-q="3"
+                            data-answer="false">
+                            UNIQUE
+                        </button>
+
+                        <button
+                            class="option"
+                            data-q="3"
+                            data-answer="false">
+                            REMOVE
+                        </button>
+
+                        <button
+                            class="option"
+                            data-q="3"
+                            data-answer="false">
+                            DIFFERENT
+                        </button>
+
+                    </div>
+
+                    <!-- Q4 -->
+
+                    <div class="quiz-question">
+
+                        <h4>
+                            4. What is an alias used for?
+                        </h4>
+
+                        <button
+                            class="option"
+                            data-q="4"
+                            data-answer="false">
+                            Delete a column
+                        </button>
+
+                        <button
+                            class="option"
+                            data-q="4"
+                            data-answer="true">
+                            Give a temporary name to a result expression
+                        </button>
+
+                        <button
+                            class="option"
+                            data-q="4"
+                            data-answer="false">
+                            Create a new table
+                        </button>
+
+                        <button
+                            class="option"
+                            data-q="4"
+                            data-answer="false">
+                            Insert a row
+                        </button>
+
+                    </div>
+
+                    <!-- Q5 -->
+
+                    <div class="quiz-question">
+
+                        <h4>
+                            5. Which clause specifies the data source?
+                        </h4>
+
+                        <button
+                            class="option"
+                            data-q="5"
+                            data-answer="true">
+                            FROM
+                        </button>
+
+                        <button
+                            class="option"
+                            data-q="5"
+                            data-answer="false">
+                            WHERE
+                        </button>
+
+                        <button
+                            class="option"
+                            data-q="5"
+                            data-answer="false">
+                            VALUES
+                        </button>
+
+                        <button
+                            class="option"
+                            data-q="5"
+                            data-answer="false">
+                            INTO
+                        </button>
+
+                    </div>
+
+                    <button
+                        class="sim-btn"
+                        id="submitQuiz"
+                        style="margin-top:5px;"
+                    >
+                        Check Score
+                    </button>
+
+                    <div
+                        class="quiz-result"
+                        id="quizResult">
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             PRACTICE
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        27 · Practice
+                    </div>
+
+                    <h2>
+                        SELECT coding challenges
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <h3>
+                        Challenge 1 — Beginner
+                    </h3>
+
+                    <p>
+                        Given a table called students, retrieve all columns.
+                    </p>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-comment">-- Your answer</span>
+
+<span class="sql-keyword">SELECT</span> ...
+<span class="sql-keyword">FROM</span> ...;</code></pre>
+
+                    </div>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <h3>
+                        Challenge 2 — Beginner
+                    </h3>
+
+                    <p>
+                        Retrieve only student names and departments.
+                    </p>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <h3>
+                        Challenge 3 — Intermediate
+                    </h3>
+
+                    <p>
+                        Display each unique department.
+                    </p>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT DISTINCT</span> ...</code></pre>
+
+                    </div>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <h3>
+                        Challenge 4 — Intermediate
+                    </h3>
+
+                    <p>
+                        Display student name as
+                        <code>student_name</code>
+                        and department as
+                        <code>branch</code>.
+                    </p>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <h3>
+                        Challenge 5 — Interview level
+                    </h3>
+
+                    <p>
+                        Given an employees table containing
+                        <code>salary</code>, display:
+                    </p>
+
+                    <ul>
+
+                        <li>
+                            Employee name
+                        </li>
+
+                        <li>
+                            Current salary
+                        </li>
+
+                        <li>
+                            Salary after a 15% increase
+                        </li>
+
+                    </ul>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    name,
+    salary,
+    salary * <span class="sql-number">1.15</span> <span class="sql-keyword">AS</span> new_salary
+<span class="sql-keyword">FROM</span> employees;</code></pre>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             MINI PROJECT
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        28 · Mini project
+                    </div>
+
+                    <h2>
+                        Mini project: Student Report Query
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <p>
+                        Imagine ZENSUS has a student database.
+                        Build queries that create a useful student report.
+                    </p>
+
+                    <h4>
+                        Query 1 — Basic student list
+                    </h4>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    name,
+    department
+<span class="sql-keyword">FROM</span> students;</code></pre>
+
+                    </div>
+
+                    <h4>
+                        Query 2 — Unique departments
+                    </h4>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT DISTINCT</span>
+    department
+<span class="sql-keyword">FROM</span> students;</code></pre>
+
+                    </div>
+
+                    <h4>
+                        Query 3 — Student CGPA report
+                    </h4>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    name <span class="sql-keyword">AS</span> student_name,
+    cgpa <span class="sql-keyword">AS</span> score
+<span class="sql-keyword">FROM</span> students;</code></pre>
+
+                    </div>
+
+                    <h4>
+                        Query 4 — Future lesson preview
+                    </h4>
+
+                    <div class="code-box">
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    name,
+    department
+<span class="sql-keyword">FROM</span> students
+<span class="sql-keyword">WHERE</span> cgpa &gt;= <span class="sql-number">9.0</span>;</code></pre>
+
+                    </div>
+
+                    <div class="success">
+                        You now have the foundation needed to start filtering
+                        results with WHERE.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             RAPID REVISION
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        29 · Rapid revision
+                    </div>
+
+                    <h2>
+                        SELECT in 60 seconds
+                    </h2>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <ul>
+
+                        <li>
+                            <strong>SELECT</strong> retrieves data.
+                        </li>
+
+                        <li>
+                            <strong>FROM</strong> identifies the source.
+                        </li>
+
+                        <li>
+                            <strong>*</strong> requests all columns.
+                        </li>
+
+                        <li>
+                            Explicit columns make queries more precise.
+                        </li>
+
+                        <li>
+                            <strong>DISTINCT</strong> removes duplicate
+                            result rows.
+                        </li>
+
+                        <li>
+                            <strong>AS</strong> creates a result alias.
+                        </li>
+
+                        <li>
+                            SELECT can calculate expressions.
+                        </li>
+
+                        <li>
+                            SELECT normally does not modify stored rows.
+                        </li>
+
+                        <li>
+                            WHERE filters rows and will be studied next.
+                        </li>
+
+                        <li>
+                            SELECT is the foundation for advanced SQL queries.
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             CHECKLIST
+             ===================================================== -->
+
+        <section>
+
+            <div class="container">
+
+                <div class="section-heading reveal">
+
+                    <div class="section-kicker">
+                        30 · Completion
+                    </div>
+
+                    <h2>
+                        Lesson completion checklist
+                    </h2>
+
+                    <p>
+                        Tick a skill only after you can write it without
+                        looking at the lesson.
+                    </p>
+
+                </div>
+
+                <div class="card reveal">
+
+                    <div class="checklist">
+
+                        <label class="check-item">
+
+                            <input
+                                type="checkbox"
+                                data-check="1"
+                            >
+
+                            <span>
+                                I understand what SELECT does.
+                            </span>
+
+                        </label>
+
+                        <label class="check-item">
+
+                            <input
+                                type="checkbox"
+                                data-check="2"
+                            >
+
+                            <span>
+                                I can use SELECT *.
+                            </span>
+
+                        </label>
+
+                        <label class="check-item">
+
+                            <input
+                                type="checkbox"
+                                data-check="3"
+                            >
+
+                            <span>
+                                I can select specific columns.
+                            </span>
+
+                        </label>
+
+                        <label class="check-item">
+
+                            <input
+                                type="checkbox"
+                                data-check="4"
+                            >
+
+                            <span>
+                                I understand FROM.
+                            </span>
+
+                        </label>
+
+                        <label class="check-item">
+
+                            <input
+                                type="checkbox"
+                                data-check="5"
+                            >
+
+                            <span>
+                                I understand DISTINCT.
+                            </span>
+
+                        </label>
+
+                        <label class="check-item">
+
+                            <input
+                                type="checkbox"
+                                data-check="6"
+                            >
+
+                            <span>
+                                I can use column aliases.
+                            </span>
+
+                        </label>
+
+                        <label class="check-item">
+
+                            <input
+                                type="checkbox"
+                                data-check="7"
+                            >
+
+                            <span>
+                                I can perform calculations in SELECT.
+                            </span>
+
+                        </label>
+
+                        <label class="check-item">
+
+                            <input
+                                type="checkbox"
+                                data-check="8"
+                            >
+
+                            <span>
+                                I understand SELECT + WHERE conceptually.
+                            </span>
+
+                        </label>
+
+                        <label class="check-item">
+
+                            <input
+                                type="checkbox"
+                                data-check="9"
+                            >
+
+                            <span>
+                                I can explain SELECT in an interview.
+                            </span>
+
+                        </label>
+
+                        <label class="check-item">
+
+                            <input
+                                type="checkbox"
+                                data-check="10"
+                            >
+
+                            <span>
+                                I can write SELECT queries independently.
+                            </span>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             NEXT LESSON
+             ===================================================== -->
+
+        <div class="container">
+
+            <div class="next-lesson reveal">
+
+                <div>
+
+                    <div class="section-kicker">
+                        NEXT LESSON
+                    </div>
+
+                    <h3>
+                        Lesson 6 — WHERE
+                    </h3>
+
+                    <p>
+                        Learn how to filter rows using comparison,
+                        logical operators, BETWEEN, IN, LIKE, NULL
+                        conditions and more.
+                    </p>
+
+                </div>
+
+                <a
+                    href="lesson6.html"
+                    class="next-btn">
+                    Continue →
+                </a>
+
+            </div>
+
+        </div>
+
+        <!-- =====================================================
+             FOOTER
+             ===================================================== -->
+
+        <footer>
+
+            <div class="container">
+
+                <p>
+                    © 2026 ZENSUS · Learn. Build. Grow.
+                </p>
+
+                <p style="margin-top:5px;">
+                    SQL Mastery · Lesson 05 — SELECT
+                </p>
+
+            </div>
+
+        </footer>
+
+    </main>
+
+    <!-- =========================================================
+         JAVASCRIPT
+         ========================================================= -->
+
+    <script>
+
+        /* =========================================================
+           ENABLE ANIMATION
+           ========================================================= */
+
+        document.documentElement.classList.add(
+            "js-animation"
+        );
+
+        /* =========================================================
+           SCROLL PROGRESS
+           ========================================================= */
+
+        const scrollProgress =
+            document.getElementById(
+                "scrollProgress"
+            );
+
+        function updateScrollProgress() {
+
+            const scrollTop =
+                window.scrollY;
+
+            const documentHeight =
+                document.documentElement.scrollHeight -
+                window.innerHeight;
+
+            const percentage =
+                documentHeight > 0
+                    ? (scrollTop / documentHeight) * 100
+                    : 0;
+
+            scrollProgress.style.width =
+                percentage + "%";
+        }
+
+        window.addEventListener(
+            "scroll",
+            updateScrollProgress,
+            { passive: true }
+        );
+
+        updateScrollProgress();
+
+        /* =========================================================
+           MOBILE MENU
+           ========================================================= */
+
+        const menuBtn =
+            document.getElementById(
+                "menuBtn"
+            );
+
+        const sidebar =
+            document.getElementById(
+                "sidebar"
+            );
+
+        if (menuBtn && sidebar) {
+
+            menuBtn.addEventListener(
+                "click",
+                function () {
+
+                    sidebar.classList.toggle(
+                        "open"
+                    );
+
+                }
+            );
+
+            document
+                .querySelectorAll(
+                    ".lesson-nav a"
+                )
+                .forEach(function (link) {
+
+                    link.addEventListener(
+                        "click",
+                        function () {
+
+                            sidebar.classList.remove(
+                                "open"
+                            );
+
+                        }
+                    );
+
+                });
+
+        }
+
+        /* =========================================================
+           REVEAL ANIMATION
+           SAFE FALLBACK
+           ========================================================= */
+
+        const revealElements =
+            document.querySelectorAll(
+                ".reveal"
+            );
+
+        if (
+            "IntersectionObserver"
+            in window
+        ) {
+
+            const observer =
+                new IntersectionObserver(
+                    function (entries) {
+
+                        entries.forEach(
+                            function (entry) {
+
+                                if (
+                                    entry.isIntersecting
+                                ) {
+
+                                    entry.target.classList.add(
+                                        "show"
+                                    );
+
+                                    observer.unobserve(
+                                        entry.target
+                                    );
+
+                                }
+
+                            }
+                        );
+
+                    },
+                    {
+                        threshold: 0.08
+                    }
+                );
+
+            revealElements.forEach(
+                function (element) {
+
+                    observer.observe(
+                        element
+                    );
+
+                }
+            );
+
+            setTimeout(
+                function () {
+
+                    revealElements.forEach(
+                        function (element) {
+
+                            element.classList.add(
+                                "show"
+                            );
+
+                        }
+                    );
+
+                },
+                2500
+            );
+
+        } else {
+
+            revealElements.forEach(
+                function (element) {
+
+                    element.classList.add(
+                        "show"
+                    );
+
+                }
+            );
+
+        }
+
+        /* =========================================================
+           COPY CODE
+           ========================================================= */
+
+        document
+            .querySelectorAll(
+                ".copy-code"
+            )
+            .forEach(
+                function (button) {
+
+                    button.addEventListener(
+                        "click",
+                        async function () {
+
+                            const codeBox =
+                                button.parentElement;
+
+                            const code =
+                                codeBox.querySelector(
+                                    "code"
+                                );
+
+                            if (!code) {
+                                return;
+                            }
+
+                            const text =
+                                code.innerText;
+
+                            try {
+
+                                await navigator
+                                    .clipboard
+                                    .writeText(
+                                        text
+                                    );
+
+                                const original =
+                                    button.textContent;
+
+                                button.textContent =
+                                    "Copied!";
+
+                                setTimeout(
+                                    function () {
+
+                                        button.textContent =
+                                            original;
+
+                                    },
+                                    1200
+                                );
+
+                            } catch (error) {
+
+                                button.textContent =
+                                    "Copy failed";
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
+
+        /* =========================================================
+           ACCORDION
+           ========================================================= */
+
+        document
+            .querySelectorAll(
+                ".accordion button"
+            )
+            .forEach(
+                function (button) {
+
+                    button.addEventListener(
+                        "click",
+                        function () {
+
+                            const accordion =
+                                button.parentElement;
+
+                            accordion.classList.toggle(
+                                "open"
+                            );
+
+                            const symbol =
+                                button.querySelector(
+                                    "span"
+                                );
+
+                            if (
+                                accordion.classList.contains(
+                                    "open"
+                                )
+                            ) {
+
+                                symbol.textContent =
+                                    "−";
+
+                            } else {
+
+                                symbol.textContent =
+                                    "+";
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
+
+        /* =========================================================
+           QUERY BUILDER
+           ========================================================= */
+
+        const buildQuery =
+            document.getElementById(
+                "buildQuery"
+            );
+
+        const queryOutput =
+            document.getElementById(
+                "queryOutput"
+            );
+
+        if (buildQuery) {
+
+            buildQuery.addEventListener(
+                "click",
+                function () {
+
+                    const selected =
+                        Array.from(
+                            document.querySelectorAll(
+                                ".column-check:checked"
+                            )
+                        ).map(
+                            checkbox =>
+                                checkbox.value
+                        );
+
+                    const distinct =
+                        document.getElementById(
+                            "distinctCheck"
+                        ).checked;
+
+                    let query;
+
+                    if (
+                        selected.length === 0
+                    ) {
+
+                        query =
+`SELECT *
+FROM students;`;
+
+                    } else {
+
+                        query =
+`SELECT ${distinct ? "DISTINCT " : ""}
+    ${selected.join(",\n    ")}
+FROM students;`;
+
+                    }
+
+                    queryOutput.textContent =
+                        query;
+
+                }
+            );
+
+        }
+
+        /* =========================================================
+           SELECT SIMULATOR
+           ========================================================= */
+
+        const selectDemo =
+            document.getElementById(
+                "selectDemo"
+            );
+
+        const runSelect =
+            document.getElementById(
+                "runSelect"
+            );
+
+        const selectSql =
+            document.getElementById(
+                "selectSql"
+            );
+
+        const selectResult =
+            document.getElementById(
+                "selectResult"
+            );
+
+        const studentData = [
+
+            {
+                student_id: 101,
+                name: "Anil",
+                age: 20,
+                department: "CSE",
+                cgpa: 8.4
+            },
+
+            {
+                student_id: 102,
+                name: "Sneha",
+                age: 19,
+                department: "ECE",
+                cgpa: 9.1
+            },
+
+            {
+                student_id: 103,
+                name: "Ravi",
+                age: 21,
+                department: "IT",
+                cgpa: 8.7
+            },
+
+            {
+                student_id: 104,
+                name: "Meena",
+                age: 20,
+                department: "CSE",
+                cgpa: 9.3
+            }
+
+        ];
+
+        function renderTable(
+            columns,
+            rows
+        ) {
+
+            let html =
+                "<table><thead><tr>";
+
+            columns.forEach(
+                function (column) {
+
+                    html +=
+                        `<th>${column}</th>`;
+
+                }
+            );
+
+            html +=
+                "</tr></thead><tbody>";
+
+            rows.forEach(
+                function (row) {
+
+                    html +=
+                        "<tr>";
+
+                    columns.forEach(
+                        function (column) {
+
+                            html +=
+                                `<td>${row[column]}</td>`;
+
+                        }
+                    );
+
+                    html +=
+                        "</tr>";
+
+                }
+            );
+
+            html +=
+                "</tbody></table>";
+
+            selectResult.innerHTML =
+                html;
+        }
+
+        function runSelectDemo() {
+
+            const choice =
+                selectDemo.value;
+
+            let columns;
+            let rows;
+            let sql;
+
+            if (choice === "all") {
+
+                columns = [
+                    "student_id",
+                    "name",
+                    "age",
+                    "department",
+                    "cgpa"
+                ];
+
+                rows =
+                    studentData;
+
+                sql =
+`SELECT *
+FROM students;`;
+
+            }
+
+            else if (choice === "name") {
+
+                columns = [
+                    "name"
+                ];
+
+                rows =
+                    studentData;
+
+                sql =
+`SELECT name
+FROM students;`;
+
+            }
+
+            else if (choice === "nameDept") {
+
+                columns = [
+                    "name",
+                    "department"
+                ];
+
+                rows =
+                    studentData;
+
+                sql =
+`SELECT
+    name,
+    department
+FROM students;`;
+
+            }
+
+            else if (choice === "distinct") {
+
+                columns = [
+                    "department"
+                ];
+
+                const departments = [];
+
+                studentData.forEach(
+                    function (student) {
+
+                        if (
+                            !departments.includes(
+                                student.department
+                            )
+                        ) {
+
+                            departments.push(
+                                student.department
+                            );
+
+                        }
+
+                    }
+                );
+
+                rows =
+                    departments.map(
+                        function (department) {
+
+                            return {
+                                department:
+                                    department
+                            };
+
+                        }
+                    );
+
+                sql =
+`SELECT DISTINCT department
+FROM students;`;
+
+            }
+
+            else if (choice === "calc") {
+
+                columns = [
+                    "name",
+                    "new_cgpa"
+                ];
+
+                rows =
+                    studentData.map(
+                        function (student) {
+
+                            return {
+
+                                name:
+                                    student.name,
+
+                                new_cgpa:
+                                    (
+                                        student.cgpa +
+                                        0.2
+                                    ).toFixed(2)
+
+                            };
+
+                        }
+                    );
+
+                sql =
+`SELECT
+    name,
+    cgpa + 0.2 AS new_cgpa
+FROM students;`;
+
+            }
+
+            selectSql.textContent =
+                sql;
+
+            renderTable(
+                columns,
+                rows
+            );
+
+        }
+
+        if (runSelect) {
+
+            runSelect.addEventListener(
+                "click",
+                runSelectDemo
+            );
+
+        }
+
+        /* =========================================================
+           QUIZ
+           ========================================================= */
+
+        const selectedAnswers = {};
+
+        document
+            .querySelectorAll(
+                ".option"
+            )
+            .forEach(
+                function (option) {
+
+                    option.addEventListener(
+                        "click",
+                        function () {
+
+                            const question =
+                                option.dataset.q;
+
+                            document
+                                .querySelectorAll(
+                                    `.option[data-q="${question}"]`
+                                )
+                                .forEach(
+                                    function (item) {
+
+                                        item.classList.remove(
+                                            "selected"
+                                        );
+
+                                    }
+                                );
+
+                            option.classList.add(
+                                "selected"
+                            );
+
+                            selectedAnswers[
+                                question
+                            ] =
+                                option.dataset.answer ===
+                                "true";
+
+                        }
+                    );
+
+                }
+            );
+
+        const submitQuiz =
+            document.getElementById(
+                "submitQuiz"
+            );
+
+        const quizResult =
+            document.getElementById(
+                "quizResult"
+            );
+
+        if (submitQuiz) {
+
+            submitQuiz.addEventListener(
+                "click",
+                function () {
+
+                    let score = 0;
+
+                    const total = 5;
+
+                    for (
+                        let i = 1;
+                        i <= total;
+                        i++
+                    ) {
+
+                        if (
+                            selectedAnswers[i]
+                        ) {
+
+                            score++;
+
+                        }
+
+                    }
+
+                    document
+                        .querySelectorAll(
+                            ".option"
+                        )
+                        .forEach(
+                            function (option) {
+
+                                const q =
+                                    option.dataset.q;
+
+                                if (
+                                    selectedAnswers[q] !==
+                                    undefined
+                                ) {
+
+                                    if (
+                                        option.dataset.answer ===
+                                        "true"
+                                    ) {
+
+                                        option.classList.add(
+                                            "correct"
+                                        );
+
+                                    }
+                                    else if (
+                                        option.classList.contains(
+                                            "selected"
+                                        )
+                                    ) {
+
+                                        option.classList.add(
+                                            "wrong"
+                                        );
+
+                                    }
+
+                                }
+
+                            }
+                        );
+
+                    let message;
+
+                    if (score === 5) {
+
+                        message =
+                            "🔥 Perfect! 5/5 — SELECT mastered.";
+
+                    }
+                    else if (score >= 4) {
+
+                        message =
+                            "Excellent! " +
+                            score +
+                            "/5 — You have a strong SELECT foundation.";
+
+                    }
+                    else if (score >= 3) {
+
+                        message =
+                            "Good progress! " +
+                            score +
+                            "/5 — Review DISTINCT, aliases and syntax.";
+
+                    }
+                    else {
+
+                        message =
+                            "Keep practicing. " +
+                            score +
+                            "/5 — Revisit the SELECT fundamentals.";
+
+                    }
+
+                    quizResult.style.display =
+                        "block";
+
+                    quizResult.textContent =
+                        message;
+
+                }
+            );
+
+        }
+
+        /* =========================================================
+           CHECKLIST + LOCAL STORAGE
+           ========================================================= */
+
+        const checklistItems =
+            document.querySelectorAll(
+                ".check-item input"
+            );
+
+        checklistItems.forEach(
+            function (checkbox) {
+
+                const key =
+                    "zensus_sql_lesson5_check_" +
+                    checkbox.dataset.check;
+
+                const saved =
+                    localStorage.getItem(
+                        key
+                    );
+
+                if (
+                    saved === "true"
+                ) {
+
+                    checkbox.checked =
+                        true;
+
+                    checkbox
+                        .parentElement
+                        .classList.add(
+                            "done"
+                        );
+
+                }
+
+                checkbox.addEventListener(
+                    "change",
+                    function () {
+
+                        localStorage.setItem(
+                            key,
+                            checkbox.checked
+                        );
+
+                        checkbox
+                            .parentElement
+                            .classList.toggle(
+                                "done",
+                                checkbox.checked
+                            );
+
+                    }
+                );
+
+            }
+        );
+
+        /* =========================================================
+           HASH SCROLL
+           ========================================================= */
+
+        window.addEventListener(
+            "load",
+            function () {
+
+                if (
+                    window.location.hash
+                ) {
+
+                    setTimeout(
+                        function () {
+
+                            const target =
+                                document.querySelector(
+                                    window.location.hash
+                                );
+
+                            if (target) {
+
+                                target.scrollIntoView({
+                                    behavior:
+                                        "smooth"
+                                });
+
+                            }
+
+                        },
+                        300
+                    );
+
+                }
+
+            }
+        );
+
+    </script>
+
+</body>
+</html>

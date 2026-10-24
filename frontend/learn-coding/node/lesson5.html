@@ -1,0 +1,3318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENSUS Node.js — Lesson 05 | Asynchronous JavaScript</title>
+
+<style>
+:root{
+    --bg:#101214;
+    --bg2:#15181c;
+    --panel:#1c2025;
+    --panel2:#23282e;
+    --panel3:#292f35;
+
+    --gold:#d4af37;
+    --gold2:#b99028;
+    --gold-soft:#ead28a;
+
+    --ivory:#f5f0e5;
+    --cream:#e9dfcc;
+    --text:#d8d2c6;
+    --muted:#a6a095;
+
+    --green:#6fa77d;
+    --green-dark:#294d34;
+
+    --blue:#718ba8;
+    --blue-dark:#293c50;
+
+    --red:#b56b6b;
+    --red-dark:#553334;
+
+    --line:rgba(212,175,55,.20);
+
+    --shadow:
+        0 20px 50px rgba(0,0,0,.35),
+        inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:"Segoe UI",Arial,sans-serif;
+    background:
+        radial-gradient(
+            circle at 15% 0%,
+            rgba(212,175,55,.07),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 90% 30%,
+            rgba(113,139,168,.05),
+            transparent 25%
+        ),
+        var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+/* ================= NAVIGATION ================= */
+
+nav{
+    position:sticky;
+    top:0;
+    z-index:1000;
+
+    height:70px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:0 6%;
+
+    background:rgba(16,18,20,.95);
+    backdrop-filter:blur(15px);
+
+    border-bottom:1px solid var(--line);
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    color:var(--ivory);
+
+    font-family:Georgia,serif;
+    font-size:21px;
+    font-weight:bold;
+    letter-spacing:2px;
+}
+
+.logo{
+    width:36px;
+    height:36px;
+
+    display:grid;
+    place-items:center;
+
+    border:1px solid var(--gold);
+    border-radius:8px;
+
+    color:var(--gold);
+}
+
+.nav-topic{
+    color:var(--gold);
+    font-size:13px;
+    letter-spacing:2px;
+}
+
+/* ================= LAYOUT ================= */
+
+.layout{
+    display:grid;
+    grid-template-columns:250px 1fr;
+    max-width:1500px;
+    margin:auto;
+}
+
+.sidebar{
+    position:sticky;
+    top:70px;
+    height:calc(100vh - 70px);
+
+    padding:30px 20px;
+
+    border-right:1px solid rgba(212,175,55,.12);
+
+    background:rgba(14,16,18,.45);
+}
+
+.sidebar-title{
+    color:var(--gold);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:2px;
+    margin-bottom:15px;
+}
+
+.sidebar a{
+    display:block;
+
+    padding:9px 12px;
+    margin:3px 0;
+
+    color:var(--muted);
+    text-decoration:none;
+
+    border-radius:6px;
+
+    font-size:13px;
+
+    transition:.25s;
+}
+
+.sidebar a:hover{
+    color:var(--gold);
+    background:rgba(212,175,55,.05);
+}
+
+.main{
+    min-width:0;
+}
+
+/* ================= HERO ================= */
+
+.hero{
+    min-height:600px;
+
+    padding:100px 8%;
+
+    display:flex;
+    align-items:center;
+
+    position:relative;
+    overflow:hidden;
+
+    border-bottom:1px solid rgba(212,175,55,.1);
+}
+
+.hero::before{
+    content:"";
+
+    position:absolute;
+
+    width:500px;
+    height:500px;
+
+    border-radius:50%;
+
+    border:1px solid rgba(212,175,55,.07);
+
+    right:-150px;
+    top:70px;
+}
+
+.hero::after{
+    content:"";
+
+    position:absolute;
+
+    width:330px;
+    height:330px;
+
+    border-radius:50%;
+
+    border:1px solid rgba(212,175,55,.05);
+
+    right:-60px;
+    top:150px;
+}
+
+.hero-content{
+    position:relative;
+    z-index:2;
+
+    max-width:850px;
+}
+
+.eyebrow{
+    color:var(--gold);
+    text-transform:uppercase;
+    letter-spacing:4px;
+    font-size:12px;
+    font-weight:bold;
+    margin-bottom:15px;
+}
+
+.hero h1{
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:clamp(45px,6vw,78px);
+    line-height:1.05;
+    font-weight:500;
+    color:var(--ivory);
+}
+
+.hero h1 span{
+    color:var(--gold);
+}
+
+.ornament{
+    color:var(--gold);
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin:27px 0;
+}
+
+.ornament::before,
+.ornament::after{
+    content:"";
+    height:1px;
+    width:75px;
+    background:linear-gradient(
+        90deg,
+        transparent,
+        var(--gold-dark,#8f6b2e)
+    );
+}
+
+.ornament::after{
+    background:linear-gradient(
+        90deg,
+        var(--gold-dark,#8f6b2e),
+        transparent
+    );
+}
+
+.hero p{
+    max-width:750px;
+    color:var(--muted);
+    font-size:18px;
+}
+
+.hero-buttons{
+    display:flex;
+    gap:12px;
+    margin-top:30px;
+    flex-wrap:wrap;
+}
+
+/* ================= BUTTON ================= */
+
+.btn{
+    border:0;
+    padding:12px 20px;
+
+    border-radius:7px;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+    transition:.25s;
+}
+
+.gold-btn{
+    background:linear-gradient(
+        135deg,
+        #d9b94c,
+        #b98e27
+    );
+
+    color:#15120a;
+
+    box-shadow:0 8px 25px rgba(212,175,55,.12);
+}
+
+.gold-btn:hover{
+    transform:translateY(-2px);
+}
+
+.outline-btn{
+    background:transparent;
+    color:var(--gold);
+    border:1px solid var(--gold-dark,#8f6b2e);
+}
+
+.outline-btn:hover{
+    background:rgba(212,175,55,.06);
+}
+
+/* ================= SECTION ================= */
+
+section{
+    padding:80px 8%;
+    max-width:1200px;
+    margin:auto;
+}
+
+.section-label{
+    color:var(--gold);
+    text-transform:uppercase;
+    letter-spacing:3px;
+    font-size:11px;
+    font-weight:bold;
+    margin-bottom:7px;
+}
+
+.section-title{
+    font-family:Georgia,serif;
+    color:var(--ivory);
+    font-size:42px;
+    font-weight:500;
+    margin-bottom:12px;
+}
+
+.section-intro{
+    color:var(--muted);
+    max-width:800px;
+    margin-bottom:40px;
+}
+
+/* ================= INFO CARDS ================= */
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+}
+
+.card{
+    background:linear-gradient(
+        145deg,
+        var(--panel),
+        #171a1e
+    );
+
+    border:1px solid var(--line);
+    border-radius:13px;
+
+    padding:28px;
+
+    box-shadow:var(--shadow);
+
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+    border-color:rgba(212,175,55,.45);
+}
+
+.card-number{
+    color:var(--gold);
+    font-family:Georgia,serif;
+    font-size:25px;
+    margin-bottom:10px;
+}
+
+.card h3{
+    color:var(--ivory);
+    font-family:Georgia,serif;
+    font-size:22px;
+    margin-bottom:10px;
+}
+
+.card p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+/* ================= DEFINITION ================= */
+
+.definition{
+    padding:24px 28px;
+
+    background:rgba(212,175,55,.045);
+
+    border-left:3px solid var(--gold);
+
+    border-radius:0 9px 9px 0;
+
+    color:var(--muted);
+
+    margin:30px 0;
+}
+
+.definition strong{
+    color:var(--gold);
+}
+
+/* ================= CODE ================= */
+
+.code{
+    background:#0b0d0f;
+
+    border:1px solid #403722;
+
+    border-radius:10px;
+
+    overflow:hidden;
+
+    margin:22px 0;
+
+    box-shadow:0 18px 40px rgba(0,0,0,.3);
+}
+
+.code-head{
+    background:#181b1e;
+
+    border-bottom:1px solid #332d20;
+
+    padding:11px 17px;
+
+    color:var(--gold);
+
+    font-family:Consolas,monospace;
+    font-size:12px;
+}
+
+pre{
+    padding:23px;
+
+    overflow-x:auto;
+
+    font-family:Consolas,monospace;
+    font-size:13px;
+
+    color:#ddd7ca;
+
+    line-height:1.8;
+}
+
+.kw{color:#d4af37;}
+.str{color:#b7c6a9;}
+.num{color:#c9a45c;}
+.comment{color:#706b62;}
+.func{color:#9eb1c5;}
+
+/* ================= SYNC ASYNC ================= */
+
+.compare{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:22px;
+}
+
+.compare-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:13px;
+    padding:28px;
+}
+
+.compare-card h3{
+    font-family:Georgia,serif;
+    font-size:25px;
+    color:var(--gold);
+    margin-bottom:10px;
+}
+
+.compare-card p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+/* ================= EVENT LOOP ================= */
+
+.event-loop{
+    background:#111417;
+    border:1px solid var(--line);
+    border-radius:15px;
+    padding:30px;
+
+    overflow:hidden;
+
+    box-shadow:var(--shadow);
+}
+
+.loop-layout{
+    display:grid;
+    grid-template-columns:1fr 1.3fr 1fr;
+    gap:18px;
+    align-items:center;
+}
+
+.loop-column{
+    min-height:300px;
+
+    background:#171b1f;
+    border:1px solid rgba(212,175,55,.15);
+
+    border-radius:11px;
+
+    padding:18px;
+}
+
+.loop-title{
+    color:var(--gold);
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:2px;
+    margin-bottom:15px;
+}
+
+.loop-box{
+    padding:15px;
+
+    background:#22272c;
+    border:1px solid #353b41;
+
+    border-radius:8px;
+
+    margin-bottom:10px;
+
+    color:var(--text);
+    font-family:Consolas,monospace;
+    font-size:12px;
+}
+
+.loop-box.running{
+    border-color:var(--gold);
+    box-shadow:0 0 20px rgba(212,175,55,.12);
+}
+
+.loop-center{
+    min-height:360px;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    position:relative;
+}
+
+.node-engine{
+    width:180px;
+    height:180px;
+
+    border-radius:50%;
+
+    display:grid;
+    place-items:center;
+
+    text-align:center;
+
+    border:2px solid var(--gold);
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(212,175,55,.12),
+            transparent 70%
+        );
+
+    color:var(--gold);
+
+    font-family:Georgia,serif;
+    font-size:20px;
+
+    box-shadow:
+        0 0 45px rgba(212,175,55,.08),
+        inset 0 0 30px rgba(212,175,55,.05);
+}
+
+.packet{
+    position:absolute;
+
+    width:30px;
+    height:30px;
+
+    border-radius:50%;
+
+    display:grid;
+    place-items:center;
+
+    background:var(--gold);
+
+    color:#16130b;
+
+    font-weight:bold;
+
+    opacity:0;
+}
+
+.packet.animate{
+    animation:travel 1.7s ease-in-out;
+}
+
+@keyframes travel{
+    0%{
+        opacity:0;
+        transform:translateX(-150px);
+    }
+
+    20%{
+        opacity:1;
+    }
+
+    70%{
+        opacity:1;
+    }
+
+    100%{
+        opacity:0;
+        transform:translateX(150px);
+    }
+}
+
+.loop-description{
+    margin-top:25px;
+
+    padding:18px;
+
+    background:rgba(113,139,168,.05);
+
+    border:1px solid rgba(113,139,168,.18);
+
+    border-radius:9px;
+
+    color:var(--muted);
+
+    text-align:center;
+}
+
+/* ================= QUEUE VISUAL ================= */
+
+.queue-demo{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:25px;
+}
+
+.queue-panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:13px;
+    padding:25px;
+}
+
+.queue-title{
+    color:var(--gold);
+    font-family:Georgia,serif;
+    font-size:20px;
+    margin-bottom:18px;
+}
+
+.queue{
+    min-height:160px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+
+    flex-wrap:wrap;
+
+    padding:20px;
+
+    background:#111417;
+
+    border:1px dashed #51462e;
+
+    border-radius:9px;
+}
+
+.queue-item{
+    padding:12px 15px;
+
+    background:#252a2f;
+
+    border:1px solid #454b51;
+
+    border-radius:7px;
+
+    color:var(--cream);
+
+    font-family:Consolas,monospace;
+    font-size:12px;
+
+    animation:appear .4s ease;
+}
+
+.queue-item.callback{
+    border-color:var(--gold-dark,#8f6b2e);
+}
+
+.queue-item.micro{
+    border-color:var(--blue);
+}
+
+@keyframes appear{
+    from{
+        opacity:0;
+        transform:translateY(10px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+/* ================= CALLBACK PROMISE ASYNC ================= */
+
+.timeline{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
+
+.timeline-step{
+    display:grid;
+    grid-template-columns:65px 1fr;
+    gap:18px;
+    align-items:start;
+}
+
+.timeline-number{
+    width:52px;
+    height:52px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:50%;
+
+    border:1px solid var(--gold-dark,#8f6b2e);
+
+    color:var(--gold);
+
+    font-family:Georgia,serif;
+}
+
+.timeline-content{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:11px;
+    padding:20px;
+}
+
+.timeline-content h3{
+    color:var(--ivory);
+    margin-bottom:5px;
+}
+
+.timeline-content p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+/* ================= ASYNC DEMO ================= */
+
+.async-demo{
+    background:#101315;
+    border:1px solid var(--line);
+    border-radius:15px;
+    padding:30px;
+}
+
+.async-screen{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.execution-column{
+    background:#171a1d;
+    border-radius:10px;
+    border:1px solid rgba(212,175,55,.12);
+    padding:20px;
+}
+
+.execution-title{
+    color:var(--gold);
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:2px;
+    margin-bottom:15px;
+}
+
+.execution-step{
+    padding:13px;
+
+    border-radius:7px;
+
+    background:#22272b;
+
+    border:1px solid #343a40;
+
+    margin:8px 0;
+
+    color:var(--muted);
+
+    font-family:Consolas,monospace;
+    font-size:12px;
+
+    transition:.3s;
+}
+
+.execution-step.active{
+    color:var(--ivory);
+    border-color:var(--gold);
+    background:#2b2b25;
+    transform:translateX(5px);
+}
+
+.execution-step.done{
+    border-color:var(--green);
+    color:#a6c8ad;
+}
+
+.execution-controls{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:20px;
+}
+
+/* ================= TIMERS ================= */
+
+.timer-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.timer-card{
+    padding:25px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+}
+
+.timer-card h3{
+    color:var(--gold);
+    font-family:Georgia,serif;
+    margin-bottom:7px;
+}
+
+.timer-card p{
+    color:var(--muted);
+    font-size:13px;
+    margin-bottom:15px;
+}
+
+/* ================= ERROR HANDLING ================= */
+
+.error-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.error-card{
+    padding:27px;
+    border-radius:12px;
+    border:1px solid var(--line);
+    background:var(--panel);
+}
+
+.error-card.good{
+    border-color:rgba(111,167,125,.3);
+}
+
+.error-card.bad{
+    border-color:rgba(181,107,107,.25);
+}
+
+.error-card h3{
+    color:var(--ivory);
+    margin-bottom:10px;
+}
+
+.error-card p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+/* ================= INTERVIEW ================= */
+
+.accordion{
+    max-width:950px;
+    margin:auto;
+}
+
+.accordion-item{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:9px;
+    margin-bottom:9px;
+    overflow:hidden;
+}
+
+.question{
+    padding:17px 20px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    cursor:pointer;
+
+    color:var(--ivory);
+    font-weight:600;
+}
+
+.question:hover{
+    color:var(--gold);
+}
+
+.answer{
+    max-height:0;
+    overflow:hidden;
+
+    padding:0 20px;
+
+    color:var(--muted);
+    font-size:14px;
+
+    transition:.35s ease;
+}
+
+.accordion-item.open .answer{
+    max-height:300px;
+    padding:0 20px 20px;
+}
+
+.plus{
+    color:var(--gold);
+    font-size:20px;
+}
+
+/* ================= QUIZ ================= */
+
+.quiz{
+    max-width:900px;
+    margin:auto;
+}
+
+.quiz-card{
+    padding:25px;
+
+    background:var(--panel);
+
+    border:1px solid var(--line);
+
+    border-radius:11px;
+
+    margin-bottom:15px;
+}
+
+.quiz-card h3{
+    color:var(--ivory);
+    font-size:16px;
+    margin-bottom:15px;
+}
+
+.option{
+    display:block;
+
+    padding:11px 14px;
+
+    margin:7px 0;
+
+    background:#181c20;
+
+    border:1px solid rgba(212,175,55,.12);
+
+    border-radius:7px;
+
+    color:var(--muted);
+
+    cursor:pointer;
+}
+
+.option:hover{
+    border-color:var(--gold-dark,#8f6b2e);
+}
+
+.option input{
+    accent-color:var(--gold);
+    margin-right:8px;
+}
+
+#quizResult{
+    display:none;
+
+    padding:18px;
+
+    margin-top:18px;
+
+    text-align:center;
+
+    border:1px solid var(--line);
+
+    border-radius:9px;
+
+    color:var(--gold);
+}
+
+/* ================= CHALLENGE ================= */
+
+.challenge{
+    background:
+        linear-gradient(
+            145deg,
+            #1c251f,
+            #171b1a
+        );
+
+    border:1px solid rgba(111,167,125,.25);
+
+    border-radius:15px;
+
+    padding:35px;
+}
+
+.challenge h3{
+    color:var(--green);
+    font-family:Georgia,serif;
+    font-size:28px;
+    margin-bottom:10px;
+}
+
+.challenge p,
+.challenge li{
+    color:var(--muted);
+}
+
+.solution{
+    display:none;
+    margin-top:20px;
+}
+
+.solution.show{
+    display:block;
+}
+
+/* ================= PROGRESS ================= */
+
+.progress{
+    text-align:center;
+    max-width:800px;
+    margin:auto;
+}
+
+.progress-bar{
+    height:9px;
+
+    background:#292d31;
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+    margin:20px 0;
+}
+
+.progress-fill{
+    width:0%;
+    height:100%;
+
+    background:linear-gradient(
+        90deg,
+        var(--gold-dark,#8f6b2e),
+        var(--gold)
+    );
+
+    transition:1s;
+}
+
+#progressText{
+    color:var(--gold);
+}
+
+/* ================= FOOTER ================= */
+
+footer{
+    text-align:center;
+
+    padding:45px;
+
+    background:#0d0f11;
+
+    border-top:1px solid var(--line);
+}
+
+footer h3{
+    color:var(--gold);
+    font-family:Georgia,serif;
+}
+
+footer p{
+    color:var(--muted);
+    font-size:13px;
+}
+
+/* ================= REVEAL ================= */
+
+.reveal{
+    opacity:0;
+    transform:translateY(25px);
+    transition:.7s ease;
+}
+
+.reveal.visible{
+    opacity:1;
+    transform:translateY(0);
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:1050px){
+
+    .layout{
+        grid-template-columns:1fr;
+    }
+
+    .sidebar{
+        display:none;
+    }
+
+    .grid,
+    .timer-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+@media(max-width:750px){
+
+    section{
+        padding:60px 6%;
+    }
+
+    .hero{
+        padding:70px 6%;
+    }
+
+    .grid,
+    .compare,
+    .queue-demo,
+    .async-screen,
+    .error-grid,
+    .timer-grid{
+        grid-template-columns:1fr;
+    }
+
+    .loop-layout{
+        grid-template-columns:1fr;
+    }
+
+    .section-title{
+        font-size:34px;
+    }
+
+    .hero h1{
+        font-size:48px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- =========================================================
+     NAVIGATION
+========================================================= -->
+
+<nav>
+
+    <div class="brand">
+        <div class="logo">Z</div>
+        ZENSUS
+    </div>
+
+    <div class="nav-topic">
+        NODE.JS / LESSON 05
+    </div>
+
+</nav>
+
+
+<div class="layout">
+
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
+
+<aside class="sidebar">
+
+    <div class="sidebar-title">
+        Lesson Contents
+    </div>
+
+    <a href="#intro">Introduction</a>
+    <a href="#sync">Sync vs Async</a>
+    <a href="#blocking">Blocking vs Non-Blocking</a>
+    <a href="#eventloop">Event Loop</a>
+    <a href="#queues">Queues</a>
+    <a href="#callbacks">Callbacks</a>
+    <a href="#promises">Promises</a>
+    <a href="#asyncawait">Async / Await</a>
+    <a href="#timers">Timers</a>
+    <a href="#errors">Error Handling</a>
+    <a href="#practice">Practice</a>
+    <a href="#interview">Interview</a>
+    <a href="#quiz">Quiz</a>
+    <a href="#challenge">Challenge</a>
+
+</aside>
+
+
+<main class="main">
+
+<!-- =========================================================
+     HERO
+========================================================= -->
+
+<header class="hero">
+
+    <div class="hero-content reveal">
+
+        <div class="eyebrow">
+            Node.js Learning Series · Lesson 05
+        </div>
+
+        <h1>
+            Asynchronous<br>
+            <span>JavaScript</span>
+        </h1>
+
+        <div class="ornament">✦</div>
+
+        <p>
+            Understand how Node.js handles multiple operations
+            without blocking the main JavaScript execution flow.
+            From callbacks to Promises and async/await, learn what
+            actually happens behind the scenes.
+        </p>
+
+        <div class="hero-buttons">
+
+            <button
+                class="btn gold-btn"
+                onclick="document.getElementById('eventloop').scrollIntoView()">
+                Explore Event Loop
+            </button>
+
+            <button
+                class="btn outline-btn"
+                onclick="document.getElementById('quiz').scrollIntoView()">
+                Test Knowledge
+            </button>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- =========================================================
+     INTRO
+========================================================= -->
+
+<section id="intro">
+
+    <div class="section-label">
+        01 · Foundation
+    </div>
+
+    <h2 class="section-title">
+        Why Asynchronous JavaScript?
+    </h2>
+
+    <p class="section-intro">
+
+        A Node.js application often performs operations that take
+        time: reading files, querying databases, communicating with
+        APIs, waiting for timers or receiving network requests.
+
+        Instead of making JavaScript wait for every operation,
+        Node.js uses an asynchronous programming model.
+
+    </p>
+
+    <div class="grid">
+
+        <div class="card reveal">
+
+            <div class="card-number">01</div>
+
+            <h3>Responsive Execution</h3>
+
+            <p>
+                Long-running operations can be handled without
+                unnecessarily stopping the JavaScript execution flow.
+            </p>
+
+        </div>
+
+        <div class="card reveal">
+
+            <div class="card-number">02</div>
+
+            <h3>I/O Operations</h3>
+
+            <p>
+                File systems, databases, networks and other
+                input/output operations are common places where
+                asynchronous behavior becomes important.
+            </p>
+
+        </div>
+
+        <div class="card reveal">
+
+            <div class="card-number">03</div>
+
+            <h3>Event-Driven Architecture</h3>
+
+            <p>
+                Node.js uses an event-driven model in which
+                operations can complete later and trigger
+                callbacks or other continuation mechanisms.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="definition">
+
+        <strong>Core idea:</strong>
+
+        Start an operation → allow other JavaScript work to continue
+        → receive the result later → continue processing it.
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     SYNC VS ASYNC
+========================================================= -->
+
+<section id="sync">
+
+    <div class="section-label">
+        02 · Core Concept
+    </div>
+
+    <h2 class="section-title">
+        Synchronous vs Asynchronous
+    </h2>
+
+    <p class="section-intro">
+        The difference is mainly about when JavaScript can continue
+        to the next piece of work.
+    </p>
+
+    <div class="compare">
+
+        <div class="compare-card reveal">
+
+            <h3>Synchronous</h3>
+
+            <p>
+                Operations are executed in sequence. If one operation
+                blocks execution, later JavaScript statements wait.
+            </p>
+
+<pre>
+console.log("A");
+
+const result =
+    readFileSynchronously();
+
+console.log("B");
+</pre>
+
+            <p>
+                Conceptually:
+                <strong>A → wait → operation → B</strong>
+            </p>
+
+        </div>
+
+
+        <div class="compare-card reveal">
+
+            <h3>Asynchronous</h3>
+
+            <p>
+                An operation can begin and complete later.
+                JavaScript can continue with other work.
+            </p>
+
+<pre>
+console.log("A");
+
+readFileAsync(() => {
+    console.log("File ready");
+});
+
+console.log("B");
+</pre>
+
+            <p>
+                Typical output:
+                <strong>A → B → File ready</strong>
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     BLOCKING
+========================================================= -->
+
+<section id="blocking">
+
+    <div class="section-label">
+        03 · Node.js Behavior
+    </div>
+
+    <h2 class="section-title">
+        Blocking vs Non-Blocking
+    </h2>
+
+    <p class="section-intro">
+
+        In Node.js, non-blocking I/O allows the JavaScript thread
+        to continue processing while an I/O operation is being handled.
+
+    </p>
+
+    <div class="grid">
+
+        <div class="card reveal">
+
+            <div class="card-number">B</div>
+
+            <h3>Blocking</h3>
+
+            <p>
+                JavaScript execution cannot continue past a
+                blocking operation until that operation finishes.
+            </p>
+
+        </div>
+
+        <div class="card reveal">
+
+            <div class="card-number">NB</div>
+
+            <h3>Non-Blocking</h3>
+
+            <p>
+                JavaScript can continue processing while the
+                asynchronous operation is handled elsewhere.
+            </p>
+
+        </div>
+
+        <div class="card reveal">
+
+            <div class="card-number">I/O</div>
+
+            <h3>Typical Example</h3>
+
+            <p>
+                Reading a file asynchronously lets your application
+                continue with other JavaScript work while waiting
+                for the file operation.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="code">
+
+        <div class="code-head">
+            Node.js — asynchronous file example
+        </div>
+
+<pre>
+<span class="kw">const</span> fs = require(<span class="str">"fs"</span>);
+
+console.log(<span class="str">"1. Start"</span>);
+
+fs.readFile(
+    <span class="str">"data.txt"</span>,
+    <span class="str">"utf8"</span>,
+    (err, data) => {
+
+        <span class="kw">if</span> (err) {
+            console.log(err);
+            <span class="kw">return</span>;
+        }
+
+        console.log(data);
+    }
+);
+
+console.log(<span class="str">"2. Continue"</span>);
+</pre>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     EVENT LOOP
+========================================================= -->
+
+<section id="eventloop">
+
+    <div class="section-label">
+        04 · The Heart of Node.js
+    </div>
+
+    <h2 class="section-title">
+        The Event Loop
+    </h2>
+
+    <p class="section-intro">
+
+        The event loop is the mechanism that coordinates JavaScript
+        execution with asynchronous callbacks and other work.
+        Understanding it is one of the most important Node.js concepts.
+
+    </p>
+
+    <div class="event-loop reveal">
+
+        <div class="loop-layout">
+
+            <div class="loop-column">
+
+                <div class="loop-title">
+                    Call Stack
+                </div>
+
+                <div class="loop-box" id="stack1">
+                    console.log()
+                </div>
+
+                <div class="loop-box" id="stack2">
+                    callback()
+                </div>
+
+                <div class="loop-box">
+                    function()
+                </div>
+
+            </div>
+
+
+            <div class="loop-center">
+
+                <div class="node-engine">
+                    NODE.JS<br>
+                    EVENT<br>
+                    LOOP
+                </div>
+
+                <div class="packet" id="packet">
+                    →
+                </div>
+
+            </div>
+
+
+            <div class="loop-column">
+
+                <div class="loop-title">
+                    Callback Queue
+                </div>
+
+                <div class="loop-box">
+                    file callback
+                </div>
+
+                <div class="loop-box">
+                    timer callback
+                </div>
+
+                <div class="loop-box">
+                    network callback
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="loop-description" id="loopDescription">
+
+            Click the button to visualize how work moves through
+            the asynchronous system.
+
+        </div>
+
+        <div style="text-align:center;margin-top:22px;">
+
+            <button
+                class="btn gold-btn"
+                onclick="animateEventLoop()">
+                ▶ Run Event Loop Animation
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     QUEUES
+========================================================= -->
+
+<section id="queues">
+
+    <div class="section-label">
+        05 · Execution Order
+    </div>
+
+    <h2 class="section-title">
+        Microtasks and Callback Queues
+    </h2>
+
+    <p class="section-intro">
+
+        Asynchronous JavaScript has multiple scheduling mechanisms.
+        Understanding their ordering helps explain surprising output.
+
+    </p>
+
+    <div class="queue-demo">
+
+        <div class="queue-panel reveal">
+
+            <div class="queue-title">
+                Microtask Queue
+            </div>
+
+            <div class="queue" id="microQueue">
+
+                <div class="queue-item micro">
+                    Promise.then()
+                </div>
+
+                <div class="queue-item micro">
+                    queueMicrotask()
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="queue-panel reveal">
+
+            <div class="queue-title">
+                Callback / Task Work
+            </div>
+
+            <div class="queue" id="taskQueue">
+
+                <div class="queue-item callback">
+                    setTimeout()
+                </div>
+
+                <div class="queue-item callback">
+                    I/O callback
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="definition">
+
+        <strong>Important:</strong>
+
+        Promise reactions are microtasks. Node.js also has
+        <code>process.nextTick()</code>, which has its own
+        scheduling behavior and can run before normal Promise
+        microtasks in Node.js.
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     CALLBACKS
+========================================================= -->
+
+<section id="callbacks">
+
+    <div class="section-label">
+        06 · The Original Pattern
+    </div>
+
+    <h2 class="section-title">
+        Callbacks
+    </h2>
+
+    <p class="section-intro">
+
+        A callback is a function passed to another function so that
+        it can be called later, often after an asynchronous operation
+        completes.
+
+    </p>
+
+    <div class="code">
+
+        <div class="code-head">
+            callback-example.js
+        </div>
+
+<pre>
+<span class="kw">function</span> <span class="func">getData</span>(callback) {
+
+    setTimeout(() => {
+
+        <span class="kw">const</span> data =
+            { name: <span class="str">"ZENSUS"</span> };
+
+        callback(data);
+
+    }, <span class="num">1000</span>);
+}
+
+
+getData((data) => {
+
+    console.log(data);
+
+});
+</pre>
+
+    </div>
+
+    <div class="grid">
+
+        <div class="card reveal">
+
+            <div class="card-number">+</div>
+
+            <h3>Simple Idea</h3>
+
+            <p>
+                The callback executes after the asynchronous
+                operation has completed.
+            </p>
+
+        </div>
+
+        <div class="card reveal">
+
+            <div class="card-number">−</div>
+
+            <h3>Nested Callbacks</h3>
+
+            <p>
+                Multiple dependent callbacks can become deeply
+                nested and difficult to maintain.
+            </p>
+
+        </div>
+
+        <div class="card reveal">
+
+            <div class="card-number">!</div>
+
+            <h3>Error Handling</h3>
+
+            <p>
+                Node.js commonly uses the error-first callback
+                convention: callback(error, result).
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="code">
+
+        <div class="code-head">
+            Error-first callback pattern
+        </div>
+
+<pre>
+fs.readFile(<span class="str">"data.txt"</span>, <span class="str">"utf8"</span>,
+    (err, data) => {
+
+        <span class="kw">if</span> (err) {
+            console.error(err);
+            <span class="kw">return</span>;
+        }
+
+        console.log(data);
+    }
+);
+</pre>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     PROMISES
+========================================================= -->
+
+<section id="promises">
+
+    <div class="section-label">
+        07 · Modern Asynchronous Control
+    </div>
+
+    <h2 class="section-title">
+        Promises
+    </h2>
+
+    <p class="section-intro">
+
+        A Promise represents the eventual completion or failure
+        of an asynchronous operation.
+
+    </p>
+
+    <div class="timeline">
+
+        <div class="timeline-step reveal">
+
+            <div class="timeline-number">
+                01
+            </div>
+
+            <div class="timeline-content">
+
+                <h3>Pending</h3>
+
+                <p>
+                    The asynchronous operation has started,
+                    but the result is not available yet.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="timeline-step reveal">
+
+            <div class="timeline-number">
+                02
+            </div>
+
+            <div class="timeline-content">
+
+                <h3>Fulfilled</h3>
+
+                <p>
+                    The operation completed successfully.
+                    The Promise now contains a successful result.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="timeline-step reveal">
+
+            <div class="timeline-number">
+                03
+            </div>
+
+            <div class="timeline-content">
+
+                <h3>Rejected</h3>
+
+                <p>
+                    The operation failed. The Promise contains
+                    a reason for the failure.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="code">
+
+        <div class="code-head">
+            Promise example
+        </div>
+
+<pre>
+<span class="kw">const</span> promise = <span class="kw">new</span> Promise(
+    (resolve, reject) => {
+
+        setTimeout(() => {
+
+            <span class="kw">const</span> success = <span class="kw">true</span>;
+
+            <span class="kw">if</span> (success) {
+                resolve(<span class="str">"Data received"</span>);
+            } <span class="kw">else</span> {
+                reject(<span class="str">"Request failed"</span>);
+            }
+
+        }, <span class="num">1000</span>);
+    }
+);
+
+
+promise
+    .then(result => {
+        console.log(result);
+    })
+    .catch(error => {
+        console.log(error);
+    });
+</pre>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     ASYNC AWAIT
+========================================================= -->
+
+<section id="asyncawait">
+
+    <div class="section-label">
+        08 · Modern Syntax
+    </div>
+
+    <h2 class="section-title">
+        async / await
+    </h2>
+
+    <p class="section-intro">
+
+        async/await provides a cleaner way to write Promise-based
+        asynchronous code. An async function always returns a Promise.
+
+    </p>
+
+    <div class="async-demo">
+
+        <div class="async-screen">
+
+            <div class="execution-column">
+
+                <div class="execution-title">
+                    Source Code
+                </div>
+
+                <div class="execution-step"
+                     id="async1">
+                    console.log("Start")
+                </div>
+
+                <div class="execution-step"
+                     id="async2">
+                    await getData()
+                </div>
+
+                <div class="execution-step"
+                     id="async3">
+                    console.log(data)
+                </div>
+
+                <div class="execution-step"
+                     id="async4">
+                    console.log("End")
+                </div>
+
+            </div>
+
+
+            <div class="execution-column">
+
+                <div class="execution-title">
+                    Execution Timeline
+                </div>
+
+                <div class="execution-step"
+                     id="result1">
+                    Waiting...
+                </div>
+
+                <div class="execution-step"
+                     id="result2">
+                    Waiting...
+                </div>
+
+                <div class="execution-step"
+                     id="result3">
+                    Waiting...
+                </div>
+
+                <div class="execution-step"
+                     id="result4">
+                    Waiting...
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="execution-controls">
+
+            <button
+                class="btn gold-btn"
+                onclick="runAsyncAnimation()">
+                ▶ Visualize async/await
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="code">
+
+        <div class="code-head">
+            async-await-example.js
+        </div>
+
+<pre>
+<span class="kw">function</span> <span class="func">getData</span>() {
+
+    <span class="kw">return</span> Promise.resolve(
+        <span class="str">"Student data"</span>
+    );
+}
+
+
+<span class="kw">async function</span> <span class="func">loadData</span>() {
+
+    <span class="kw">try</span> {
+
+        <span class="kw">const</span> data =
+            <span class="kw">await</span> getData();
+
+        console.log(data);
+
+    } <span class="kw">catch</span> (error) {
+
+        console.error(error);
+
+    }
+}
+
+
+loadData();
+</pre>
+
+    </div>
+
+    <div class="definition">
+
+        <strong>Remember:</strong>
+
+        <code>await</code> pauses the execution of the surrounding
+        async function until the Promise settles. It does not freeze
+        the entire Node.js process.
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     CALLBACK → PROMISE → ASYNC
+========================================================= -->
+
+<section>
+
+    <div class="section-label">
+        09 · Evolution
+    </div>
+
+    <h2 class="section-title">
+        Callback → Promise → async/await
+    </h2>
+
+    <p class="section-intro">
+        These are different approaches for structuring asynchronous
+        operations. Modern Node.js code commonly uses Promises
+        and async/await.
+    </p>
+
+    <div class="grid">
+
+        <div class="card reveal">
+
+            <div class="card-number">01</div>
+
+            <h3>Callbacks</h3>
+
+            <p>
+                Functions are passed as callbacks and invoked
+                when an operation completes.
+            </p>
+
+        </div>
+
+        <div class="card reveal">
+
+            <div class="card-number">02</div>
+
+            <h3>Promises</h3>
+
+            <p>
+                Represent future success or failure and can be
+                composed using then(), catch() and finally().
+            </p>
+
+        </div>
+
+        <div class="card reveal">
+
+            <div class="card-number">03</div>
+
+            <h3>async / await</h3>
+
+            <p>
+                Provides a more sequential-looking syntax over
+                Promise-based asynchronous operations.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     TIMERS
+========================================================= -->
+
+<section id="timers">
+
+    <div class="section-label">
+        10 · Timers
+    </div>
+
+    <h2 class="section-title">
+        Timers in Node.js
+    </h2>
+
+    <p class="section-intro">
+        Timers schedule callbacks. They do not guarantee that the
+        callback executes at an exact wall-clock moment.
+    </p>
+
+    <div class="timer-grid">
+
+        <div class="timer-card reveal">
+
+            <h3>setTimeout()</h3>
+
+            <p>
+                Schedules a callback after at least the specified
+                delay, subject to event-loop scheduling.
+            </p>
+
+            <div class="code">
+
+<pre>
+setTimeout(() => {
+    console.log("Done");
+}, 1000);
+</pre>
+
+            </div>
+
+        </div>
+
+
+        <div class="timer-card reveal">
+
+            <h3>setInterval()</h3>
+
+            <p>
+                Repeatedly schedules a callback at approximately
+                the requested interval until cleared.
+            </p>
+
+            <div class="code">
+
+<pre>
+setInterval(() => {
+    console.log("Tick");
+}, 1000);
+</pre>
+
+            </div>
+
+        </div>
+
+
+        <div class="timer-card reveal">
+
+            <h3>setImmediate()</h3>
+
+            <p>
+                Schedules a callback for a later phase of the
+                Node.js event loop.
+            </p>
+
+            <div class="code">
+
+<pre>
+setImmediate(() => {
+    console.log("Immediate");
+});
+</pre>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="definition">
+
+        <strong>Interview point:</strong>
+
+        A timer delay is not a promise of exact execution time.
+        The callback runs when the event loop reaches the appropriate
+        scheduling point and the call stack is available.
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     PROCESS NEXTTICK
+========================================================= -->
+
+<section>
+
+    <div class="section-label">
+        11 · Node-Specific Scheduling
+    </div>
+
+    <h2 class="section-title">
+        process.nextTick()
+    </h2>
+
+    <p class="section-intro">
+
+        Node.js provides <code>process.nextTick()</code> for scheduling
+        a callback to run after the current operation completes but
+        before the event loop continues to later phases.
+
+    </p>
+
+    <div class="code">
+
+        <div class="code-head">
+            nexttick-example.js
+        </div>
+
+<pre>
+console.log(<span class="str">"Start"</span>);
+
+process.nextTick(() => {
+    console.log(<span class="str">"nextTick"</span>);
+});
+
+console.log(<span class="str">"End"</span>);
+</pre>
+
+    </div>
+
+    <div class="definition">
+
+        <strong>Typical output:</strong>
+
+        Start → End → nextTick
+
+        <br><br>
+
+        Excessive recursive use of nextTick can prevent the event
+        loop from reaching other scheduled work, so it should be used
+        carefully.
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     ERROR HANDLING
+========================================================= -->
+
+<section id="errors">
+
+    <div class="section-label">
+        12 · Reliability
+    </div>
+
+    <h2 class="section-title">
+        Error Handling in Async Code
+    </h2>
+
+    <p class="section-intro">
+        Correct asynchronous error handling is essential in
+        production Node.js applications.
+    </p>
+
+    <div class="error-grid">
+
+        <div class="error-card good reveal">
+
+            <h3>✓ try / catch with await</h3>
+
+<pre>
+<span class="kw">try</span> {
+
+    <span class="kw">const</span> data =
+        <span class="kw">await</span> getData();
+
+} <span class="kw">catch</span> (error) {
+
+    console.error(error);
+
+}
+</pre>
+
+        </div>
+
+
+        <div class="error-card good reveal">
+
+            <h3>✓ Promise catch()</h3>
+
+<pre>
+getData()
+    .then(data => {
+        console.log(data);
+    })
+    .catch(error => {
+        console.error(error);
+    });
+</pre>
+
+        </div>
+
+    </div>
+
+    <div class="definition">
+
+        <strong>Common mistake:</strong>
+
+        Forgetting to handle a rejected Promise can lead to
+        unhandled rejection problems. Always decide how failures
+        should be handled at the appropriate application boundary.
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     PRACTICAL EXAMPLE
+========================================================= -->
+
+<section id="practice">
+
+    <div class="section-label">
+        13 · Practical Node.js
+    </div>
+
+    <h2 class="section-title">
+        Real-World Example
+    </h2>
+
+    <p class="section-intro">
+
+        Imagine an API endpoint that needs to retrieve information
+        from a database before sending a response.
+
+    </p>
+
+    <div class="code">
+
+        <div class="code-head">
+            Express-style example
+        </div>
+
+<pre>
+app.get(<span class="str">"/students"</span>, <span class="kw">async</span> (req, res) => {
+
+    <span class="kw">try</span> {
+
+        <span class="kw">const</span> students =
+            <span class="kw">await</span> database.getStudents();
+
+        res.json(students);
+
+    } <span class="kw">catch</span> (error) {
+
+        console.error(error);
+
+        res.status(<span class="num">500</span>).json({
+            message: <span class="str">"Unable to fetch students"</span>
+        });
+
+    }
+
+});
+</pre>
+
+    </div>
+
+    <div class="grid">
+
+        <div class="card reveal">
+
+            <div class="card-number">①</div>
+
+            <h3>Request Arrives</h3>
+
+            <p>
+                A client requests /students.
+            </p>
+
+        </div>
+
+        <div class="card reveal">
+
+            <div class="card-number">②</div>
+
+            <h3>Database Query</h3>
+
+            <p>
+                The asynchronous database operation begins.
+            </p>
+
+        </div>
+
+        <div class="card reveal">
+
+            <div class="card-number">③</div>
+
+            <h3>Response</h3>
+
+            <p>
+                When the Promise settles, the route continues
+                and sends the response.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     INTERVIEW QUESTIONS
+========================================================= -->
+
+<section id="interview">
+
+    <div class="section-label">
+        14 · Interview Preparation
+    </div>
+
+    <h2 class="section-title">
+        Node.js Async Interview Questions
+    </h2>
+
+    <div class="accordion">
+
+        <div class="accordion-item">
+
+            <div class="question" onclick="toggleAccordion(this)">
+                What is asynchronous programming?
+                <span class="plus">+</span>
+            </div>
+
+            <div class="answer">
+                It is a programming model where an operation can
+                begin and complete later, allowing other work to
+                proceed instead of waiting synchronously for the
+                operation to finish.
+            </div>
+
+        </div>
+
+
+        <div class="accordion-item">
+
+            <div class="question" onclick="toggleAccordion(this)">
+                What is the event loop?
+                <span class="plus">+</span>
+            </div>
+
+            <div class="answer">
+                The event loop coordinates JavaScript execution
+                with asynchronous callbacks and other scheduled work,
+                allowing Node.js to handle many I/O operations without
+                blocking the JavaScript execution thread for each one.
+            </div>
+
+        </div>
+
+
+        <div class="accordion-item">
+
+            <div class="question" onclick="toggleAccordion(this)">
+                What is a callback?
+                <span class="plus">+</span>
+            </div>
+
+            <div class="answer">
+                A callback is a function passed to another function
+                so it can be invoked later, often after an asynchronous
+                operation completes.
+            </div>
+
+        </div>
+
+
+        <div class="accordion-item">
+
+            <div class="question" onclick="toggleAccordion(this)">
+                What is a Promise?
+                <span class="plus">+</span>
+            </div>
+
+            <div class="answer">
+                A Promise represents the eventual completion or
+                failure of an asynchronous operation.
+            </div>
+
+        </div>
+
+
+        <div class="accordion-item">
+
+            <div class="question" onclick="toggleAccordion(this)">
+                What does async mean?
+                <span class="plus">+</span>
+            </div>
+
+            <div class="answer">
+                An async function always returns a Promise and allows
+                await to be used inside the function body.
+            </div>
+
+        </div>
+
+
+        <div class="accordion-item">
+
+            <div class="question" onclick="toggleAccordion(this)">
+                What does await do?
+                <span class="plus">+</span>
+            </div>
+
+            <div class="answer">
+                await waits for a Promise to settle within an async
+                function. It suspends that async function's continuation
+                while allowing the Node.js process to handle other work.
+            </div>
+
+        </div>
+
+
+        <div class="accordion-item">
+
+            <div class="question" onclick="toggleAccordion(this)">
+                Does await block Node.js?
+                <span class="plus">+</span>
+            </div>
+
+            <div class="answer">
+                No. await suspends the async function's continuation;
+                it does not freeze the entire Node.js process.
+            </div>
+
+        </div>
+
+
+        <div class="accordion-item">
+
+            <div class="question" onclick="toggleAccordion(this)">
+                Why is asynchronous programming important in Node.js?
+                <span class="plus">+</span>
+            </div>
+
+            <div class="answer">
+                Node.js applications frequently perform I/O operations.
+                Asynchronous APIs allow the application to continue
+                handling other work instead of waiting synchronously
+                for every I/O operation.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     QUIZ
+========================================================= -->
+
+<section id="quiz">
+
+    <div class="section-label">
+        15 · Knowledge Check
+    </div>
+
+    <h2 class="section-title">
+        Test Yourself
+    </h2>
+
+    <div class="quiz">
+
+        <div class="quiz-card">
+
+            <h3>
+                1. Which keyword is normally used with Promises
+                to make asynchronous code easier to read?
+            </h3>
+
+            <label class="option">
+                <input type="radio" name="q1" value="wrong">
+                package
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q1" value="correct">
+                await
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q1" value="wrong">
+                module
+            </label>
+
+        </div>
+
+
+        <div class="quiz-card">
+
+            <h3>
+                2. Which object represents the future result
+                of an asynchronous operation?
+            </h3>
+
+            <label class="option">
+                <input type="radio" name="q2" value="wrong">
+                Callback
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q2" value="correct">
+                Promise
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q2" value="wrong">
+                Event
+            </label>
+
+        </div>
+
+
+        <div class="quiz-card">
+
+            <h3>
+                3. What is a common characteristic of
+                non-blocking I/O?
+            </h3>
+
+            <label class="option">
+                <input type="radio" name="q3" value="correct">
+                Other JavaScript work can continue while I/O is handled.
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q3" value="wrong">
+                The whole process is frozen.
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q3" value="wrong">
+                All code becomes synchronous.
+            </label>
+
+        </div>
+
+
+        <div class="quiz-card">
+
+            <h3>
+                4. What does an async function return?
+            </h3>
+
+            <label class="option">
+                <input type="radio" name="q4" value="wrong">
+                Always a string
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q4" value="correct">
+                A Promise
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q4" value="wrong">
+                Always undefined
+            </label>
+
+        </div>
+
+
+        <div class="quiz-card">
+
+            <h3>
+                5. Which mechanism is specifically provided
+                by Node.js for scheduling high-priority callbacks?
+            </h3>
+
+            <label class="option">
+                <input type="radio" name="q5" value="wrong">
+                npm.next()
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q5" value="correct">
+                process.nextTick()
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q5" value="wrong">
+                node.priority()
+            </label>
+
+        </div>
+
+
+        <button
+            class="btn gold-btn"
+            onclick="checkQuiz()">
+            Submit Quiz
+        </button>
+
+        <div id="quizResult"></div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     CHALLENGE
+========================================================= -->
+
+<section id="challenge">
+
+    <div class="challenge">
+
+        <h3>
+            ◆ Professional Coding Challenge
+        </h3>
+
+        <p>
+            Create an asynchronous function called
+            <strong>getStudent()</strong>.
+        </p>
+
+        <ol style="padding-left:22px;margin-bottom:20px;">
+
+            <li>Return a Promise.</li>
+
+            <li>Wait for 1 second using setTimeout.</li>
+
+            <li>Resolve the Promise with a student object.</li>
+
+            <li>Use async/await to retrieve the object.</li>
+
+            <li>Handle possible errors using try/catch.</li>
+
+        </ol>
+
+        <button
+            class="btn gold-btn"
+            onclick="document.getElementById('solution').classList.toggle('show')">
+            Reveal Solution
+        </button>
+
+        <div id="solution" class="solution">
+
+            <div class="code">
+
+<pre>
+<span class="kw">function</span> <span class="func">getStudent</span>() {
+
+    <span class="kw">return new</span> Promise((resolve, reject) => {
+
+        setTimeout(() => {
+
+            resolve({
+                name: <span class="str">"Pradeep"</span>,
+                course: <span class="str">"Artificial Intelligence"</span>
+            });
+
+        }, <span class="num">1000</span>);
+
+    });
+}
+
+
+<span class="kw">async function</span> <span class="func">showStudent</span>() {
+
+    <span class="kw">try</span> {
+
+        <span class="kw">const</span> student =
+            <span class="kw">await</span> getStudent();
+
+        console.log(student);
+
+    } <span class="kw">catch</span> (error) {
+
+        console.error(error);
+
+    }
+
+}
+
+
+showStudent();
+</pre>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     PROGRESS
+========================================================= -->
+
+<section>
+
+    <div class="progress">
+
+        <div class="section-label">
+            Lesson Completion
+        </div>
+
+        <h2 class="section-title">
+            Master Asynchronous JavaScript
+        </h2>
+
+        <div class="progress-bar">
+
+            <div
+                class="progress-fill"
+                id="progressFill">
+            </div>
+
+        </div>
+
+        <div id="progressText">
+            0% Complete
+        </div>
+
+        <br>
+
+        <button
+            class="btn gold-btn"
+            onclick="completeLesson()">
+            Mark Lesson Complete
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     NAVIGATION
+========================================================= -->
+
+<section>
+
+    <div style="
+        display:flex;
+        justify-content:space-between;
+        gap:15px;
+        flex-wrap:wrap;
+    ">
+
+        <button
+            class="btn outline-btn"
+            onclick="window.location.href='lesson4.html'">
+            ← Lesson 04
+        </button>
+
+        <button
+            class="btn gold-btn"
+            onclick="window.location.href='lesson6.html'">
+            Lesson 06 →
+        </button>
+
+    </div>
+
+</section>
+
+
+</main>
+</div>
+
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<footer>
+
+    <h3>ZENSUS NODE.JS</h3>
+
+    <div class="ornament" style="justify-content:center;">
+        ✦
+    </div>
+
+    <p>
+        Lesson 05 · Asynchronous JavaScript in Node.js
+    </p>
+
+    <p>
+        Learn the concept. Visualize the flow. Write the code.
+    </p>
+
+</footer>
+
+
+<script>
+
+/* =========================================================
+   REVEAL ANIMATIONS
+========================================================= */
+
+const observer =
+new IntersectionObserver(
+    entries => {
+
+        entries.forEach(entry => {
+
+            if(entry.isIntersecting){
+
+                entry.target.classList.add("visible");
+
+            }
+
+        });
+
+    },
+    {
+        threshold:.12
+    }
+);
+
+document
+.querySelectorAll(".reveal")
+.forEach(el => observer.observe(el));
+
+
+/* =========================================================
+   EVENT LOOP VISUALIZATION
+========================================================= */
+
+function animateEventLoop(){
+
+    const packet =
+        document.getElementById("packet");
+
+    const description =
+        document.getElementById("loopDescription");
+
+    packet.classList.remove("animate");
+
+    void packet.offsetWidth;
+
+    packet.classList.add("animate");
+
+    description.innerHTML =
+        "① JavaScript executes on the call stack → " +
+        "② an asynchronous operation is handled → " +
+        "③ its callback becomes eligible for execution → " +
+        "④ the event loop moves the callback back when the stack is available.";
+
+    document
+        .getElementById("stack1")
+        .classList.add("running");
+
+    setTimeout(() => {
+
+        document
+            .getElementById("stack1")
+            .classList.remove("running");
+
+        document
+            .getElementById("stack2")
+            .classList.add("running");
+
+    },1700);
+
+}
+
+
+/* =========================================================
+   ASYNC / AWAIT VISUALIZATION
+========================================================= */
+
+function runAsyncAnimation(){
+
+    const steps = [
+        "async1",
+        "async2",
+        "async3",
+        "async4"
+    ];
+
+    const results = [
+        "result1",
+        "result2",
+        "result3",
+        "result4"
+    ];
+
+    document
+        .querySelectorAll(".execution-step")
+        .forEach(el => {
+            el.classList.remove("active");
+            el.classList.remove("done");
+        });
+
+    document.getElementById("result1").innerText =
+        "Starting function...";
+
+    document.getElementById("result2").innerText =
+        "Waiting for Promise...";
+
+    document.getElementById("result3").innerText =
+        "Waiting...";
+
+    document.getElementById("result4").innerText =
+        "Waiting...";
+
+    steps.forEach((id,index) => {
+
+        setTimeout(() => {
+
+            const source =
+                document.getElementById(id);
+
+            const result =
+                document.getElementById(results[index]);
+
+            source.classList.add("active");
+
+            result.classList.add("active");
+
+            if(index === 0){
+
+                result.innerText =
+                    "Start";
+
+            }
+
+            if(index === 1){
+
+                result.innerText =
+                    "Promise pending...";
+
+            }
+
+            if(index === 2){
+
+                result.innerText =
+                    "Data received";
+
+            }
+
+            if(index === 3){
+
+                result.innerText =
+                    "End";
+
+            }
+
+            setTimeout(() => {
+
+                source.classList.remove("active");
+                source.classList.add("done");
+
+                result.classList.remove("active");
+                result.classList.add("done");
+
+            },500);
+
+        },index * 900);
+
+    });
+
+}
+
+
+/* =========================================================
+   ACCORDION
+========================================================= */
+
+function toggleAccordion(element){
+
+    const item =
+        element.parentElement;
+
+    document
+        .querySelectorAll(".accordion-item")
+        .forEach(other => {
+
+            if(other !== item){
+                other.classList.remove("open");
+            }
+
+        });
+
+    item.classList.toggle("open");
+
+}
+
+
+/* =========================================================
+   QUIZ
+========================================================= */
+
+function checkQuiz(){
+
+    const answers = {
+        q1:"correct",
+        q2:"correct",
+        q3:"correct",
+        q4:"correct",
+        q5:"correct"
+    };
+
+    let score = 0;
+
+    for(const question in answers){
+
+        const selected =
+            document.querySelector(
+                `input[name="${question}"]:checked`
+            );
+
+        if(
+            selected &&
+            selected.value === answers[question]
+        ){
+            score++;
+        }
+
+    }
+
+    const result =
+        document.getElementById("quizResult");
+
+    result.style.display = "block";
+
+    if(score === 5){
+
+        result.innerHTML =
+            "Excellent — 5 / 5. You understand the core asynchronous concepts.";
+
+    }
+    else if(score >= 3){
+
+        result.innerHTML =
+            `Good work — ${score} / 5. Review the event loop and Promise concepts once more.`;
+
+    }
+    else{
+
+        result.innerHTML =
+            `${score} / 5. Revisit the lesson and try the quiz again.`;
+
+    }
+
+}
+
+
+/* =========================================================
+   PROGRESS
+========================================================= */
+
+function completeLesson(){
+
+    document
+        .getElementById("progressFill")
+        .style.width = "100%";
+
+    document
+        .getElementById("progressText")
+        .innerHTML =
+        "100% Complete — Lesson Mastered ✦";
+
+    localStorage.setItem(
+        "zensusLesson5Complete",
+        "true"
+    );
+
+}
+
+
+window.addEventListener("load",() => {
+
+    if(
+        localStorage.getItem(
+            "zensusLesson5Complete"
+        ) === "true"
+    ){
+
+        document
+            .getElementById("progressFill")
+            .style.width = "100%";
+
+        document
+            .getElementById("progressText")
+            .innerHTML =
+            "100% Complete — Lesson Mastered ✦";
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>

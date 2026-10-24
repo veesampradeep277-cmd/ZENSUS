@@ -1,0 +1,5098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS — Django Views | Lesson 04</title>
+
+<style>
+
+:root{
+    --blue:#2563eb;
+    --blue-dark:#1d4ed8;
+    --blue-light:#eff6ff;
+    --blue-soft:#dbeafe;
+    --blue-border:#bfdbfe;
+
+    --text:#10213f;
+    --text-light:#5f6f86;
+    --muted:#8b9ab0;
+
+    --bg:#f7faff;
+    --white:#ffffff;
+    --border:#dce6f2;
+
+    --green:#16a34a;
+    --green-light:#f0fdf4;
+
+    --red:#dc2626;
+    --red-light:#fef2f2;
+
+    --orange:#f59e0b;
+
+    --shadow:0 10px 30px rgba(30,64,175,.08);
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    width:280px;
+    height:100vh;
+
+    background:#fff;
+    border-right:1px solid var(--border);
+
+    z-index:100;
+    overflow-y:auto;
+}
+
+.brand{
+    padding:26px 24px 18px;
+    border-bottom:1px solid var(--border);
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    font-size:24px;
+    font-weight:800;
+    color:var(--blue);
+}
+
+.logo-box{
+    width:38px;
+    height:38px;
+
+    border-radius:10px;
+
+    background:linear-gradient(
+        135deg,
+        #2563eb,
+        #60a5fa
+    );
+
+    color:white;
+
+    display:grid;
+    place-items:center;
+
+    font-size:16px;
+    font-weight:800;
+}
+
+.lesson-label{
+    margin-top:12px;
+
+    font-size:11px;
+    letter-spacing:1.5px;
+
+    color:var(--muted);
+    font-weight:700;
+}
+
+.lesson-title-small{
+    margin-top:4px;
+
+    font-size:14px;
+    color:var(--text);
+
+    font-weight:600;
+}
+
+.side-nav{
+    padding:18px 14px 30px;
+}
+
+.nav-heading{
+    font-size:10px;
+    color:var(--muted);
+
+    font-weight:800;
+    letter-spacing:1.4px;
+
+    margin:12px 10px 8px;
+}
+
+.side-nav a{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    text-decoration:none;
+
+    color:var(--text-light);
+
+    padding:9px 11px;
+
+    border-radius:9px;
+
+    margin:3px 0;
+
+    font-size:13px;
+
+    transition:.2s;
+}
+
+.side-nav a:hover{
+    background:var(--blue-light);
+    color:var(--blue);
+}
+
+.side-nav a.active{
+    background:var(--blue-light);
+    color:var(--blue);
+
+    font-weight:700;
+
+    border-left:3px solid var(--blue);
+}
+
+.nav-dot{
+    width:7px;
+    height:7px;
+
+    border-radius:50%;
+
+    background:#cbd5e1;
+
+    flex-shrink:0;
+}
+
+.side-nav a.active .nav-dot{
+    background:var(--blue);
+}
+
+
+/* ================= MAIN ================= */
+
+.main{
+    margin-left:280px;
+    min-height:100vh;
+}
+
+.progress-track{
+    position:fixed;
+
+    top:0;
+    left:280px;
+    right:0;
+
+    height:4px;
+
+    background:#eaf0f8;
+
+    z-index:200;
+}
+
+.progress-bar{
+    height:100%;
+    width:0%;
+
+    background:
+        linear-gradient(
+            90deg,
+            #2563eb,
+            #60a5fa
+        );
+
+    transition:.1s;
+}
+
+.container{
+    max-width:1120px;
+
+    margin:auto;
+
+    padding:55px 34px 80px;
+}
+
+
+/* ================= HERO ================= */
+
+.hero{
+    position:relative;
+
+    overflow:hidden;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff 0%,
+            #f1f7ff 100%
+        );
+
+    border:1px solid var(--border);
+
+    border-radius:24px;
+
+    padding:44px;
+
+    box-shadow:var(--shadow);
+}
+
+.hero::before{
+    content:"";
+
+    position:absolute;
+
+    width:280px;
+    height:280px;
+
+    border-radius:50%;
+
+    background:#dbeafe;
+
+    opacity:.45;
+
+    right:-90px;
+    top:-100px;
+}
+
+.hero::after{
+    content:"";
+
+    position:absolute;
+
+    width:190px;
+    height:190px;
+
+    border-radius:50%;
+
+    background:#bfdbfe;
+
+    opacity:.25;
+
+    left:-100px;
+    bottom:-110px;
+}
+
+.hero-content{
+    position:relative;
+    z-index:2;
+}
+
+.eyebrow{
+    display:inline-flex;
+
+    align-items:center;
+    gap:7px;
+
+    background:var(--blue-light);
+
+    color:var(--blue);
+
+    border:1px solid var(--blue-border);
+
+    padding:6px 12px;
+
+    border-radius:999px;
+
+    font-size:12px;
+
+    font-weight:800;
+
+    margin-bottom:15px;
+}
+
+.hero h1{
+    font-size:43px;
+
+    line-height:1.15;
+
+    letter-spacing:-1px;
+
+    margin-bottom:14px;
+}
+
+.hero p{
+    max-width:800px;
+
+    color:var(--text-light);
+
+    font-size:17px;
+}
+
+.meta{
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:8px;
+
+    margin-top:22px;
+}
+
+.meta span{
+    padding:7px 12px;
+
+    border:1px solid var(--border);
+
+    background:white;
+
+    border-radius:8px;
+
+    color:var(--text-light);
+
+    font-size:12px;
+
+    font-weight:700;
+}
+
+
+/* ================= SEARCH ================= */
+
+.search-box{
+    margin:25px 0;
+
+    position:relative;
+}
+
+.search-box input{
+    width:100%;
+
+    border:1px solid var(--border);
+
+    background:#fff;
+
+    border-radius:13px;
+
+    padding:14px 18px 14px 44px;
+
+    outline:none;
+
+    font-size:14px;
+
+    color:var(--text);
+
+    transition:.2s;
+}
+
+.search-box input:focus{
+    border-color:var(--blue);
+
+    box-shadow:
+        0 0 0 4px
+        var(--blue-light);
+}
+
+.search-icon{
+    position:absolute;
+
+    left:16px;
+    top:12px;
+
+    font-size:18px;
+}
+
+
+/* ================= SECTIONS ================= */
+
+.section{
+    margin-top:28px;
+
+    background:#fff;
+
+    border:1px solid var(--border);
+
+    border-radius:18px;
+
+    padding:30px;
+
+    box-shadow:
+        0 5px 20px
+        rgba(30,64,175,.04);
+
+    scroll-margin-top:30px;
+}
+
+.section h2{
+    font-size:25px;
+
+    margin-bottom:9px;
+}
+
+.section h3{
+    font-size:18px;
+
+    margin:24px 0 10px;
+}
+
+.section p{
+    color:var(--text-light);
+
+    margin-bottom:13px;
+}
+
+.section ul{
+    margin:10px 0 15px 20px;
+
+    color:var(--text-light);
+}
+
+.section li{
+    margin:5px 0;
+}
+
+.badge{
+    display:inline-block;
+
+    background:var(--blue-light);
+
+    color:var(--blue);
+
+    border-radius:7px;
+
+    padding:3px 8px;
+
+    font-size:11px;
+
+    font-weight:800;
+}
+
+.highlight{
+    background:#f8fbff;
+
+    border-left:4px solid var(--blue);
+
+    padding:15px 18px;
+
+    border-radius:8px;
+
+    margin:18px 0;
+}
+
+.highlight strong{
+    color:var(--blue-dark);
+}
+
+
+/* ================= CARDS ================= */
+
+.cards{
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:15px;
+
+    margin-top:20px;
+}
+
+.card{
+    border:1px solid var(--border);
+
+    border-radius:13px;
+
+    padding:20px;
+
+    background:#fff;
+
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+
+    border-color:var(--blue-border);
+
+    box-shadow:
+        0 12px 28px
+        rgba(37,99,235,.09);
+}
+
+.card-icon{
+    width:42px;
+    height:42px;
+
+    border-radius:10px;
+
+    display:grid;
+    place-items:center;
+
+    background:var(--blue-light);
+
+    color:var(--blue);
+
+    font-weight:800;
+
+    margin-bottom:13px;
+}
+
+.card h3{
+    margin:0 0 7px;
+
+    font-size:16px;
+}
+
+.card p{
+    font-size:13px;
+
+    margin:0;
+}
+
+
+/* ================= CODE ================= */
+
+.code-wrap{
+    margin:17px 0;
+
+    background:#0f172a;
+
+    border-radius:12px;
+
+    overflow:hidden;
+
+    border:1px solid #1e293b;
+}
+
+.code-head{
+    height:42px;
+
+    padding:0 14px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    color:#cbd5e1;
+
+    font-size:12px;
+
+    background:#111c30;
+}
+
+.copy-btn{
+    border:1px solid #334155;
+
+    background:#1e293b;
+
+    color:#e2e8f0;
+
+    padding:5px 10px;
+
+    border-radius:6px;
+
+    cursor:pointer;
+
+    font-size:11px;
+}
+
+.copy-btn:hover{
+    background:#334155;
+}
+
+pre{
+    padding:18px;
+
+    overflow-x:auto;
+
+    color:#dbeafe;
+
+    font-size:13px;
+
+    line-height:1.65;
+}
+
+code{
+    font-family:
+        Consolas,
+        Monaco,
+        monospace;
+}
+
+
+/* ================= FLOW ================= */
+
+.flow{
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex-wrap:wrap;
+
+    gap:8px;
+
+    margin:28px 0;
+}
+
+.flow-node{
+    min-width:140px;
+
+    padding:16px 13px;
+
+    background:#fff;
+
+    border:1px solid var(--blue-border);
+
+    border-radius:12px;
+
+    text-align:center;
+
+    box-shadow:
+        0 6px 18px
+        rgba(37,99,235,.06);
+
+    transition:.3s;
+}
+
+.flow-node:hover{
+    transform:translateY(-5px);
+
+    background:var(--blue-light);
+}
+
+.flow-icon{
+    font-size:23px;
+
+    margin-bottom:5px;
+}
+
+.flow-node strong{
+    display:block;
+
+    font-size:13px;
+}
+
+.flow-node small{
+    display:block;
+
+    color:var(--muted);
+
+    font-size:10px;
+
+    margin-top:2px;
+}
+
+.arrow{
+    color:var(--blue);
+
+    font-size:22px;
+
+    font-weight:bold;
+
+    animation:pulseArrow 1.5s infinite;
+}
+
+@keyframes pulseArrow{
+
+    0%,100%{
+        opacity:.35;
+        transform:translateX(0);
+    }
+
+    50%{
+        opacity:1;
+        transform:translateX(5px);
+    }
+
+}
+
+
+/* ================= REQUEST VISUAL ================= */
+
+.request-visual{
+    margin-top:25px;
+
+    padding:24px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f8fbff,
+            #eff6ff
+        );
+
+    border:1px solid var(--blue-border);
+
+    border-radius:17px;
+
+    overflow:hidden;
+}
+
+.request-title{
+    text-align:center;
+
+    font-size:13px;
+
+    font-weight:800;
+
+    color:var(--blue-dark);
+
+    margin-bottom:22px;
+}
+
+.request-line{
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:10px;
+
+    flex-wrap:wrap;
+}
+
+.request-box{
+    background:#fff;
+
+    border:1px solid var(--border);
+
+    border-radius:12px;
+
+    min-width:125px;
+
+    padding:15px 10px;
+
+    text-align:center;
+
+    box-shadow:
+        0 8px 18px
+        rgba(37,99,235,.06);
+
+    animation:requestFloat 3s ease-in-out infinite;
+}
+
+.request-box:nth-child(2){
+    animation-delay:.3s;
+}
+
+.request-box:nth-child(3){
+    animation-delay:.6s;
+}
+
+.request-box:nth-child(4){
+    animation-delay:.9s;
+}
+
+.request-box:nth-child(5){
+    animation-delay:1.2s;
+}
+
+@keyframes requestFloat{
+
+    0%,100%{
+        transform:translateY(0);
+    }
+
+    50%{
+        transform:translateY(-6px);
+    }
+
+}
+
+.request-box .icon{
+    font-size:24px;
+
+    margin-bottom:4px;
+}
+
+.request-box strong{
+    display:block;
+
+    font-size:12px;
+}
+
+.request-box small{
+    color:var(--muted);
+
+    font-size:9px;
+}
+
+.request-arrow{
+    color:var(--blue);
+
+    font-size:20px;
+
+    font-weight:900;
+}
+
+
+/* ================= HTTP METHOD DEMO ================= */
+
+.method-demo{
+    display:grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:18px;
+
+    margin-top:22px;
+}
+
+.method-card{
+    padding:22px;
+
+    border:1px solid var(--border);
+
+    border-radius:14px;
+
+    background:#fff;
+}
+
+.method-label{
+    display:inline-block;
+
+    padding:5px 10px;
+
+    border-radius:6px;
+
+    font-size:11px;
+
+    font-weight:800;
+
+    margin-bottom:10px;
+}
+
+.get{
+    background:#eff6ff;
+    color:#2563eb;
+}
+
+.post{
+    background:#f0fdf4;
+    color:#16a34a;
+}
+
+
+/* ================= INTERACTIVE REQUEST ================= */
+
+.interactive{
+    border:1px solid var(--blue-border);
+
+    background:
+        linear-gradient(
+            135deg,
+            #f8fbff,
+            #eff6ff
+        );
+
+    border-radius:16px;
+
+    padding:23px;
+
+    margin-top:20px;
+}
+
+.request-buttons{
+    display:flex;
+
+    gap:9px;
+
+    flex-wrap:wrap;
+
+    margin:16px 0;
+}
+
+.method-btn{
+    border:1px solid var(--blue-border);
+
+    background:#fff;
+
+    color:var(--blue-dark);
+
+    padding:9px 14px;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    font-size:12px;
+
+    font-weight:800;
+
+    transition:.2s;
+}
+
+.method-btn:hover,
+.method-btn.active{
+    background:var(--blue);
+
+    color:white;
+
+    border-color:var(--blue);
+}
+
+.interactive-screen{
+    min-height:190px;
+
+    background:#fff;
+
+    border:1px solid var(--border);
+
+    border-radius:12px;
+
+    padding:20px;
+
+    position:relative;
+
+    overflow:hidden;
+}
+
+.packet{
+    width:max-content;
+
+    padding:10px 14px;
+
+    background:var(--blue);
+
+    color:white;
+
+    border-radius:9px;
+
+    font-size:12px;
+
+    font-weight:800;
+
+    position:relative;
+
+    transition:
+        transform .8s
+        cubic-bezier(.2,.8,.2,1);
+}
+
+.interactive-result{
+    margin-top:20px;
+
+    padding:12px;
+
+    border-radius:9px;
+
+    background:#f8fafc;
+
+    color:var(--text-light);
+
+    font-size:13px;
+}
+
+
+/* ================= CONTEXT VISUAL ================= */
+
+.context-visual{
+    display:grid;
+
+    grid-template-columns:
+        1fr 80px 1fr;
+
+    align-items:center;
+
+    gap:15px;
+
+    margin-top:22px;
+}
+
+.context-box{
+    padding:22px;
+
+    border:1px solid var(--border);
+
+    background:#fff;
+
+    border-radius:13px;
+
+    text-align:center;
+}
+
+.context-box h4{
+    color:var(--blue-dark);
+
+    margin-bottom:10px;
+}
+
+.context-data{
+    display:inline-block;
+
+    padding:10px 13px;
+
+    border-radius:8px;
+
+    background:var(--blue-light);
+
+    color:var(--blue-dark);
+
+    font-family:monospace;
+
+    font-size:12px;
+}
+
+.context-arrow{
+    text-align:center;
+
+    color:var(--blue);
+
+    font-size:30px;
+
+    animation:moveArrow 1.5s infinite;
+}
+
+@keyframes moveArrow{
+
+    0%,100%{
+        transform:translateX(0);
+    }
+
+    50%{
+        transform:translateX(8px);
+    }
+
+}
+
+
+/* ================= DATABASE FLOW ================= */
+
+.database-flow{
+    padding:25px;
+
+    background:#f8fbff;
+
+    border:1px solid var(--border);
+
+    border-radius:15px;
+
+    margin-top:20px;
+}
+
+.db-row{
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex-wrap:wrap;
+
+    gap:10px;
+}
+
+.db-box{
+    min-width:135px;
+
+    padding:15px;
+
+    border:1px solid var(--blue-border);
+
+    background:#fff;
+
+    border-radius:11px;
+
+    text-align:center;
+}
+
+.db-box strong{
+    display:block;
+
+    font-size:12px;
+}
+
+.db-box small{
+    color:var(--muted);
+
+    font-size:10px;
+}
+
+
+/* ================= DYNAMIC URL ================= */
+
+.dynamic-demo{
+    display:grid;
+
+    grid-template-columns:
+        1fr 1fr 1fr;
+
+    gap:12px;
+
+    margin-top:20px;
+}
+
+.dynamic-card{
+    padding:18px;
+
+    border:1px solid var(--border);
+
+    border-radius:12px;
+
+    background:#fff;
+
+    text-align:center;
+
+    transition:.3s;
+}
+
+.dynamic-card:hover{
+    transform:translateY(-4px);
+
+    border-color:var(--blue-border);
+}
+
+.dynamic-url{
+    background:#f1f5f9;
+
+    border-radius:7px;
+
+    padding:9px;
+
+    margin:9px 0;
+
+    font-family:monospace;
+
+    font-size:12px;
+
+    color:var(--blue-dark);
+}
+
+
+/* ================= RESPONSE CARDS ================= */
+
+.response-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:12px;
+
+    margin-top:20px;
+}
+
+.response-card{
+    border:1px solid var(--border);
+
+    border-radius:12px;
+
+    padding:18px;
+
+    background:#fff;
+
+    text-align:center;
+
+    transition:.3s;
+}
+
+.response-card:hover{
+    transform:translateY(-5px);
+
+    border-color:var(--blue-border);
+}
+
+.response-icon{
+    font-size:26px;
+
+    margin-bottom:7px;
+}
+
+.response-card strong{
+    display:block;
+
+    font-size:13px;
+}
+
+.response-card small{
+    color:var(--muted);
+
+    font-size:10px;
+}
+
+
+/* ================= FBV VS CBV ================= */
+
+.compare{
+    display:grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:18px;
+
+    margin-top:20px;
+}
+
+.compare-card{
+    border:1px solid var(--border);
+
+    border-radius:14px;
+
+    overflow:hidden;
+
+    background:#fff;
+}
+
+.compare-title{
+    padding:13px 17px;
+
+    background:var(--blue-light);
+
+    color:var(--blue-dark);
+
+    font-weight:800;
+
+    font-size:13px;
+}
+
+
+/* ================= MISTAKES ================= */
+
+.mistake{
+    display:flex;
+
+    gap:13px;
+
+    padding:14px;
+
+    border:1px solid #fee2e2;
+
+    background:#fffafa;
+
+    border-radius:10px;
+
+    margin:9px 0;
+}
+
+.mistake-icon{
+    color:var(--red);
+
+    font-weight:900;
+}
+
+.mistake strong{
+    display:block;
+
+    margin-bottom:3px;
+}
+
+.mistake p{
+    margin:0;
+
+    font-size:13px;
+}
+
+
+/* ================= PRACTICE ================= */
+
+.practice{
+    border:1px solid var(--blue-border);
+
+    background:
+        linear-gradient(
+            135deg,
+            #eff6ff,
+            #fff
+        );
+
+    border-radius:15px;
+
+    padding:23px;
+}
+
+.steps{
+    counter-reset:step;
+
+    list-style:none !important;
+
+    margin-left:0 !important;
+}
+
+.steps li{
+    counter-increment:step;
+
+    display:flex;
+
+    gap:12px;
+
+    align-items:flex-start;
+}
+
+.steps li::before{
+    content:counter(step);
+
+    width:27px;
+    height:27px;
+
+    flex-shrink:0;
+
+    border-radius:50%;
+
+    background:var(--blue);
+
+    color:white;
+
+    display:grid;
+
+    place-items:center;
+
+    font-size:11px;
+
+    font-weight:800;
+}
+
+
+/* ================= QUIZ ================= */
+
+.quiz-question{
+    border:1px solid var(--border);
+
+    border-radius:12px;
+
+    padding:19px;
+
+    margin:13px 0;
+}
+
+.quiz-question h3{
+    margin:0 0 12px;
+
+    font-size:15px;
+}
+
+.option{
+    display:block;
+
+    margin:7px 0;
+
+    padding:10px 12px;
+
+    border:1px solid var(--border);
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    color:var(--text-light);
+
+    transition:.2s;
+}
+
+.option:hover{
+    background:var(--blue-light);
+
+    border-color:var(--blue-border);
+}
+
+.option.correct{
+    border-color:#86efac;
+
+    background:#f0fdf4;
+
+    color:#166534;
+}
+
+.option.wrong{
+    border-color:#fecaca;
+
+    background:#fef2f2;
+
+    color:#991b1b;
+}
+
+.quiz-result{
+    display:none;
+
+    margin-top:16px;
+
+    padding:13px;
+
+    border-radius:9px;
+
+    background:var(--blue-light);
+
+    color:var(--blue-dark);
+
+    font-weight:700;
+}
+
+
+/* ================= TAKEAWAY ================= */
+
+.takeaway{
+    background:#10213f;
+
+    color:#fff;
+
+    border-radius:18px;
+
+    padding:30px;
+
+    margin-top:28px;
+}
+
+.takeaway h2{
+    color:#fff;
+}
+
+.takeaway p{
+    color:#cbd5e1;
+}
+
+.takeaway-quote{
+    border-left:3px solid #60a5fa;
+
+    padding-left:17px;
+
+    margin-top:17px;
+
+    color:#e2e8f0;
+}
+
+
+/* ================= FOOTER ================= */
+
+.lesson-footer{
+    display:flex;
+
+    justify-content:space-between;
+
+    gap:15px;
+
+    margin-top:30px;
+}
+
+.footer-btn{
+    text-decoration:none;
+
+    background:#fff;
+
+    border:1px solid var(--border);
+
+    border-radius:10px;
+
+    padding:12px 17px;
+
+    color:var(--text-light);
+
+    font-size:13px;
+
+    font-weight:700;
+}
+
+.footer-btn.next{
+    background:var(--blue);
+
+    border-color:var(--blue);
+
+    color:white;
+}
+
+
+/* ================= REVEAL ================= */
+
+.reveal{
+    opacity:0;
+
+    transform:translateY(20px);
+
+    transition:.6s ease;
+}
+
+.reveal.visible{
+    opacity:1;
+
+    transform:translateY(0);
+}
+
+
+/* ================= MOBILE ================= */
+
+@media(max-width:1000px){
+
+    .sidebar{
+        width:220px;
+    }
+
+    .main{
+        margin-left:220px;
+    }
+
+    .progress-track{
+        left:220px;
+    }
+
+    .cards{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .response-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+}
+
+@media(max-width:720px){
+
+    .sidebar{
+        position:relative;
+
+        width:100%;
+
+        height:auto;
+
+        border-right:0;
+
+        border-bottom:1px solid var(--border);
+    }
+
+    .side-nav{
+        max-height:300px;
+
+        overflow-y:auto;
+    }
+
+    .main{
+        margin-left:0;
+    }
+
+    .progress-track{
+        left:0;
+    }
+
+    .container{
+        padding:25px 15px 60px;
+    }
+
+    .hero{
+        padding:27px 20px;
+    }
+
+    .hero h1{
+        font-size:30px;
+    }
+
+    .section{
+        padding:22px 18px;
+    }
+
+    .cards{
+        grid-template-columns:1fr;
+    }
+
+    .method-demo,
+    .compare{
+        grid-template-columns:1fr;
+    }
+
+    .context-visual{
+        grid-template-columns:1fr;
+    }
+
+    .context-arrow{
+        transform:rotate(90deg);
+    }
+
+    .dynamic-demo{
+        grid-template-columns:1fr;
+    }
+
+    .response-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .request-line{
+        flex-direction:column;
+    }
+
+    .request-arrow{
+        transform:rotate(90deg);
+    }
+
+    .flow{
+        flex-direction:column;
+    }
+
+    .arrow{
+        transform:rotate(90deg);
+    }
+
+    .lesson-footer{
+        flex-direction:column;
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     SIDEBAR
+===================================================== -->
+
+<aside class="sidebar">
+
+    <div class="brand">
+
+        <div class="logo">
+
+            <div class="logo-box">
+                Z
+            </div>
+
+            ZENSUS
+
+        </div>
+
+        <div class="lesson-label">
+            LESSON 04
+        </div>
+
+        <div class="lesson-title-small">
+            Django Views
+        </div>
+
+    </div>
+
+
+    <nav class="side-nav">
+
+        <div class="nav-heading">
+            LESSON CONTENT
+        </div>
+
+        <a href="#overview" class="active">
+            <span class="nav-dot"></span>
+            Overview
+        </a>
+
+        <a href="#what-view">
+            <span class="nav-dot"></span>
+            What is a View?
+        </a>
+
+        <a href="#need-view">
+            <span class="nav-dot"></span>
+            Why Views?
+        </a>
+
+        <a href="#request">
+            <span class="nav-dot"></span>
+            Request Object
+        </a>
+
+        <a href="#methods">
+            <span class="nav-dot"></span>
+            GET & POST
+        </a>
+
+        <a href="#fbv">
+            <span class="nav-dot"></span>
+            Function Views
+        </a>
+
+        <a href="#connect">
+            <span class="nav-dot"></span>
+            URL → View
+        </a>
+
+        <a href="#response">
+            <span class="nav-dot"></span>
+            HttpResponse
+        </a>
+
+        <a href="#render">
+            <span class="nav-dot"></span>
+            render()
+        </a>
+
+        <a href="#context">
+            <span class="nav-dot"></span>
+            Context Data
+        </a>
+
+        <a href="#database">
+            <span class="nav-dot"></span>
+            Views + Database
+        </a>
+
+        <a href="#input">
+            <span class="nav-dot"></span>
+            User Input
+        </a>
+
+        <a href="#dynamic">
+            <span class="nav-dot"></span>
+            Dynamic Views
+        </a>
+
+        <a href="#json">
+            <span class="nav-dot"></span>
+            JSON Response
+        </a>
+
+        <a href="#redirect">
+            <span class="nav-dot"></span>
+            Redirect
+        </a>
+
+        <a href="#404">
+            <span class="nav-dot"></span>
+            404 Handling
+        </a>
+
+        <a href="#mvt">
+            <span class="nav-dot"></span>
+            Views & MVT
+        </a>
+
+        <a href="#fbv-cbv">
+            <span class="nav-dot"></span>
+            FBV vs CBV
+        </a>
+
+        <a href="#mistakes">
+            <span class="nav-dot"></span>
+            Mistakes
+        </a>
+
+        <a href="#practice">
+            <span class="nav-dot"></span>
+            Practice
+        </a>
+
+        <a href="#quiz">
+            <span class="nav-dot"></span>
+            Quiz
+        </a>
+
+    </nav>
+
+</aside>
+
+
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<main class="main">
+
+
+<div class="progress-track">
+
+    <div
+        class="progress-bar"
+        id="progressBar">
+    </div>
+
+</div>
+
+
+<div class="container">
+
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<section
+    class="hero reveal"
+    id="overview">
+
+    <div class="hero-content">
+
+        <div class="eyebrow">
+            ● DJANGO • LESSON 04
+        </div>
+
+        <h1>
+            Django Views
+        </h1>
+
+        <p>
+            Learn the heart of Django request handling:
+            how a browser request reaches a view, how Python logic
+            processes it, how databases and templates work with views,
+            and how the final response reaches the browser.
+        </p>
+
+        <div class="meta">
+
+            <span>
+                Lesson 04 / 15
+            </span>
+
+            <span>
+                Core Concept
+            </span>
+
+            <span>
+                Beginner
+            </span>
+
+            <span>
+                Python
+            </span>
+
+            <span>
+                HTTP
+            </span>
+
+            <span>
+                MVT
+            </span>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- SEARCH -->
+
+<div class="search-box">
+
+    <span class="search-icon">
+        ⌕
+    </span>
+
+    <input
+        type="text"
+        id="searchInput"
+        placeholder="Search this lesson..."
+    >
+
+</div>
+
+
+
+<!-- =====================================================
+     WHAT IS VIEW
+===================================================== -->
+
+<section
+    class="section reveal"
+    id="what-view">
+
+    <span class="badge">
+        01 • CORE CONCEPT
+    </span>
+
+    <h2>
+        What is a Django View?
+    </h2>
+
+    <p>
+        A Django View is Python code that receives an HTTP request,
+        performs the required application logic, and returns an HTTP
+        response.
+    </p>
+
+    <div class="highlight">
+
+        <strong>
+            Simple definition:
+        </strong>
+
+        A View is the part of Django that decides
+        <strong>what should happen when a user visits a URL.</strong>
+
+    </div>
+
+
+    <div class="request-visual">
+
+        <div class="request-title">
+            REQUEST → VIEW → RESPONSE
+        </div>
+
+        <div class="request-line">
+
+            <div class="request-box">
+
+                <div class="icon">
+                    🌐
+                </div>
+
+                <strong>
+                    Browser
+                </strong>
+
+                <small>
+                    User request
+                </small>
+
+            </div>
+
+
+            <div class="request-arrow">
+                →
+            </div>
+
+
+            <div class="request-box">
+
+                <div class="icon">
+                    🧭
+                </div>
+
+                <strong>
+                    URL
+                </strong>
+
+                <small>
+                    Route matching
+                </small>
+
+            </div>
+
+
+            <div class="request-arrow">
+                →
+            </div>
+
+
+            <div class="request-box">
+
+                <div class="icon">
+                    ⚙️
+                </div>
+
+                <strong>
+                    View
+                </strong>
+
+                <small>
+                    Python logic
+                </small>
+
+            </div>
+
+
+            <div class="request-arrow">
+                →
+            </div>
+
+
+            <div class="request-box">
+
+                <div class="icon">
+                    📄
+                </div>
+
+                <strong>
+                    Response
+                </strong>
+
+                <small>
+                    Browser
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     WHY VIEW
+===================================================== -->
+
+<section
+    class="section reveal"
+    id="need-view">
+
+    <span class="badge">
+        02 • WHY IT MATTERS
+    </span>
+
+    <h2>
+        Why Do We Need Views?
+    </h2>
+
+    <p>
+        When a user visits a website, something needs to decide what
+        information should be displayed or what action should be performed.
+    </p>
+
+    <div class="cards">
+
+        <div class="card">
+
+            <div class="card-icon">
+                01
+            </div>
+
+            <h3>
+                Display Data
+            </h3>
+
+            <p>
+                A view can retrieve information and display it to the user.
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-icon">
+                02
+            </div>
+
+            <h3>
+                Process Logic
+            </h3>
+
+            <p>
+                A view can perform calculations and application logic.
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-icon">
+                03
+            </div>
+
+            <h3>
+                Process Forms
+            </h3>
+
+            <p>
+                A view can receive and validate information submitted by users.
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-icon">
+                04
+            </div>
+
+            <h3>
+                Access Database
+            </h3>
+
+            <p>
+                Views can communicate with Django models and databases.
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-icon">
+                05
+            </div>
+
+            <h3>
+                Return JSON
+            </h3>
+
+            <p>
+                Views can provide JSON responses for APIs and frontend apps.
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-icon">
+                06
+            </div>
+
+            <h3>
+                Redirect Users
+            </h3>
+
+            <p>
+                A view can redirect users from one URL to another.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     REQUEST
+===================================================== -->
+
+<section
+    class="section reveal"
+    id="request">
+
+    <span class="badge">
+        03 • REQUEST OBJECT
+    </span>
+
+    <h2>
+        Understanding the Request Object
+    </h2>
+
+    <p>
+        Every normal Django view receives a request object.
+    </p>
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>
+                views.py
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>def home(request):
+
+    return HttpResponse(
+        "Welcome to ZENSUS"
+    )</code></pre>
+
+    </div>
+
+
+    <p>
+        The <code>request</code> object contains information about
+        the incoming HTTP request.
+    </p>
+
+
+    <div class="cards">
+
+        <div class="card">
+
+            <div class="card-icon">
+                GET
+            </div>
+
+            <h3>
+                request.GET
+            </h3>
+
+            <p>
+                Access query-string parameters.
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-icon">
+                POST
+            </div>
+
+            <h3>
+                request.POST
+            </h3>
+
+            <p>
+                Access submitted form data.
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-icon">
+                👤
+            </div>
+
+            <h3>
+                request.user
+            </h3>
+
+            <p>
+                Access the current authenticated user.
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-icon">
+                📁
+            </div>
+
+            <h3>
+                request.FILES
+            </h3>
+
+            <p>
+                Access uploaded files.
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-icon">
+                🔗
+            </div>
+
+            <h3>
+                request.path
+            </h3>
+
+            <p>
+                Get the requested URL path.
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-icon">
+                #
+            </div>
+
+            <h3>
+                request.method
+            </h3>
+
+            <p>
+                Identify GET, POST and other HTTP methods.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     GET POST
+===================================================== -->
+
+<section
+    class="section reveal"
+    id="methods">
+
+    <span class="badge">
+        04 • HTTP METHODS
+    </span>
+
+    <h2>
+        GET vs POST
+    </h2>
+
+    <p>
+        Views commonly handle GET and POST requests differently.
+    </p>
+
+
+    <div class="method-demo">
+
+        <div class="method-card">
+
+            <span class="method-label get">
+                GET
+            </span>
+
+            <h3>
+                Retrieve Information
+            </h3>
+
+            <p>
+                GET is commonly used when the browser wants to
+                retrieve or display information.
+            </p>
+
+            <div class="code-wrap">
+
+                <div class="code-head">
+                    GET
+                </div>
+
+<pre><code>def products(request):
+
+    if request.method == "GET":
+
+        return HttpResponse(
+            "Product List"
+        )</code></pre>
+
+            </div>
+
+        </div>
+
+
+        <div class="method-card">
+
+            <span class="method-label post">
+                POST
+            </span>
+
+            <h3>
+                Submit Information
+            </h3>
+
+            <p>
+                POST is commonly used when the user submits information
+                to the server.
+            </p>
+
+            <div class="code-wrap">
+
+                <div class="code-head">
+                    POST
+                </div>
+
+<pre><code>def register(request):
+
+    if request.method == "POST":
+
+        return HttpResponse(
+            "Processing Registration"
+        )</code></pre>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- INTERACTIVE -->
+
+    <div class="interactive">
+
+        <strong>
+            Interactive Request Simulator
+        </strong>
+
+        <p>
+            Select a request method.
+        </p>
+
+        <div class="request-buttons">
+
+            <button
+                class="method-btn active"
+                data-method="GET">
+
+                GET Request
+
+            </button>
+
+
+            <button
+                class="method-btn"
+                data-method="POST">
+
+                POST Request
+
+            </button>
+
+        </div>
+
+
+        <div class="interactive-screen">
+
+            <div
+                class="packet"
+                id="methodPacket">
+
+                GET /products/
+
+            </div>
+
+
+            <div
+                class="interactive-result"
+                id="methodResult">
+
+                View receives a GET request and
+                can return the product page.
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     FUNCTION BASED VIEW
+===================================================== -->
+
+<section
+    class="section reveal"
+    id="fbv">
+
+    <span class="badge">
+        05 • FUNCTION-BASED VIEW
+    </span>
+
+    <h2>
+        Function-Based Views
+    </h2>
+
+    <p>
+        The simplest type of Django View is a Function-Based View,
+        commonly called an FBV.
+    </p>
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>
+                views.py
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>from django.http import HttpResponse
+
+
+def home(request):
+
+    return HttpResponse(
+        "Welcome to ZENSUS!"
+    )</code></pre>
+
+    </div>
+
+
+    <div class="highlight">
+
+        <strong>
+            Remember:
+        </strong>
+
+        A Django Function-Based View is simply a Python function
+        that accepts a request and returns a response.
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     URL VIEW
+===================================================== -->
+
+<section
+    class="section reveal"
+    id="connect">
+
+    <span class="badge">
+        06 • URL CONNECTION
+    </span>
+
+    <h2>
+        Connecting a URL to a View
+    </h2>
+
+    <p>
+        A view must be connected to a URL before the browser can access it.
+    </p>
+
+
+    <h3>
+        Step 1 — Create the View
+    </h3>
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>
+                views.py
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>from django.http import HttpResponse
+
+
+def home(request):
+
+    return HttpResponse(
+        "Welcome to ZENSUS!"
+    )</code></pre>
+
+    </div>
+
+
+    <h3>
+        Step 2 — Connect the URL
+    </h3>
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>
+                urls.py
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>from django.urls import path
+from . import views
+
+
+urlpatterns = [
+
+    path(
+        "home/",
+        views.home,
+        name="home"
+    ),
+
+]</code></pre>
+
+    </div>
+
+
+    <div class="flow">
+
+        <div class="flow-node">
+
+            <div class="flow-icon">
+                🌐
+            </div>
+
+            <strong>
+                /home/
+            </strong>
+
+            <small>
+                Browser
+            </small>
+
+        </div>
+
+
+        <div class="arrow">
+            →
+        </div>
+
+
+        <div class="flow-node">
+
+            <div class="flow-icon">
+                🧭
+            </div>
+
+            <strong>
+                urls.py
+            </strong>
+
+            <small>
+                Match URL
+            </small>
+
+        </div>
+
+
+        <div class="arrow">
+            →
+        </div>
+
+
+        <div class="flow-node">
+
+            <div class="flow-icon">
+                ⚙️
+            </div>
+
+            <strong>
+                home()
+            </strong>
+
+            <small>
+                View
+            </small>
+
+        </div>
+
+
+        <div class="arrow">
+            →
+        </div>
+
+
+        <div class="flow-node">
+
+            <div class="flow-icon">
+                📄
+            </div>
+
+            <strong>
+                Response
+            </strong>
+
+            <small>
+                Browser
+            </small>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     HTTP RESPONSE
+===================================================== -->
+
+<section
+    class="section reveal"
+    id="response">
+
+    <span class="badge">
+        07 • RESPONSE
+    </span>
+
+    <h2>
+        HttpResponse()
+    </h2>
+
+    <p>
+        <code>HttpResponse()</code> can return simple content directly
+        from a Django view.
+    </p>
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>
+                Basic response
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>from django.http import HttpResponse
+
+
+def about(request):
+
+    return HttpResponse(
+        "About ZENSUS"
+    )</code></pre>
+
+    </div>
+
+
+    <div class="response-grid">
+
+        <div class="response-card">
+
+            <div class="response-icon">
+                📄
+            </div>
+
+            <strong>
+                Text
+            </strong>
+
+            <small>
+                Plain response
+            </small>
+
+        </div>
+
+
+        <div class="response-card">
+
+            <div class="response-icon">
+                🌐
+            </div>
+
+            <strong>
+                HTML
+            </strong>
+
+            <small>
+                Simple HTML
+            </small>
+
+        </div>
+
+
+        <div class="response-card">
+
+            <div class="response-icon">
+                🔗
+            </div>
+
+            <strong>
+                Redirect
+            </strong>
+
+            <small>
+                Another URL
+            </small>
+
+        </div>
+
+
+        <div class="response-card">
+
+            <div class="response-icon">
+                { }
+            </div>
+
+            <strong>
+                JSON
+            </strong>
+
+            <small>
+                API data
+            </small>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     RENDER
+===================================================== -->
+
+<section
+    class="section reveal"
+    id="render">
+
+    <span class="badge">
+        08 • TEMPLATES
+    </span>
+
+    <h2>
+        Using render()
+    </h2>
+
+    <p>
+        Writing complete HTML inside Python is difficult to maintain.
+        Django provides <code>render()</code> to connect views with templates.
+    </p>
+
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>
+                views.py
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>from django.shortcuts import render
+
+
+def home(request):
+
+    return render(
+        request,
+        "home.html"
+    )</code></pre>
+
+    </div>
+
+
+    <div class="flow">
+
+        <div class="flow-node">
+
+            <div class="flow-icon">
+                🌐
+            </div>
+
+            <strong>
+                Browser
+            </strong>
+
+        </div>
+
+        <div class="arrow">
+            →
+        </div>
+
+        <div class="flow-node">
+
+            <div class="flow-icon">
+                ⚙️
+            </div>
+
+            <strong>
+                View
+            </strong>
+
+        </div>
+
+        <div class="arrow">
+            →
+        </div>
+
+        <div class="flow-node">
+
+            <div class="flow-icon">
+                🎨
+            </div>
+
+            <strong>
+                Template
+            </strong>
+
+        </div>
+
+        <div class="arrow">
+            →
+        </div>
+
+        <div class="flow-node">
+
+            <div class="flow-icon">
+                📄
+            </div>
+
+            <strong>
+                HTML
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <div class="highlight">
+
+        <strong>
+            Best mental model:
+        </strong>
+
+        The View controls the logic.
+        The Template controls the presentation.
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     CONTEXT
+===================================================== -->
+
+<section
+    class="section reveal"
+    id="context">
+
+    <span class="badge">
+        09 • DATA FLOW
+    </span>
+
+    <h2>
+        Passing Data from View to Template
+    </h2>
+
+    <p>
+        A view can send data to a template using a context dictionary.
+    </p>
+
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>
+                views.py
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>from django.shortcuts import render
+
+
+def student(request):
+
+    name = "Pradeep"
+
+    return render(
+        request,
+        "student.html",
+        {
+            "name": name
+        }
+    )</code></pre>
+
+    </div>
+
+
+    <div class="context-visual">
+
+        <div class="context-box">
+
+            <h4>
+                VIEW
+            </h4>
+
+            <div class="context-data">
+                name = "Pradeep"
+            </div>
+
+        </div>
+
+
+        <div class="context-arrow">
+            →
+        </div>
+
+
+        <div class="context-box">
+
+            <h4>
+                TEMPLATE
+            </h4>
+
+            <div class="context-data">
+                {{ name }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <h3>
+        Template
+    </h3>
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>
+                student.html
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>&lt;h1&gt;
+    Hello {{ name }}
+&lt;/h1&gt;</code></pre>
+
+    </div>
+
+
+    <div class="highlight">
+
+        <strong>
+            Result:
+        </strong>
+
+        Hello Pradeep
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     CALCULATIONS
+===================================================== -->
+
+<section
+    class="section reveal">
+
+    <span class="badge">
+        10 • PYTHON LOGIC
+    </span>
+
+    <h2>
+        Views Can Perform Calculations
+    </h2>
+
+    <p>
+        Views can execute normal Python logic before creating a response.
+    </p>
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>
+                marks view
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>def marks(request):
+
+    maths = 90
+    python = 95
+    dbms = 85
+
+    total = maths + python + dbms
+
+    return HttpResponse(
+        f"Total Marks: {total}"
+    )</code></pre>
+
+    </div>
+
+    <div class="highlight">
+
+        <strong>
+            View result:
+        </strong>
+
+        Total Marks: 270
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     DATABASE
+===================================================== -->
+
+<section
+    class="section reveal"
+    id="database">
+
+    <span class="badge">
+        11 • DATABASE
+    </span>
+
+    <h2>
+        Views + Database
+    </h2>
+
+    <p>
+        One of the most important jobs of a view is communicating
+        with Django models to retrieve or manipulate data.
+    </p>
+
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>
+                views.py
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>from django.shortcuts import render
+from .models import Product
+
+
+def products(request):
+
+    data = Product.objects.all()
+
+    return render(
+        request,
+        "products.html",
+        {
+            "products": data
+        }
+    )</code></pre>
+
+    </div>
+
+
+    <div class="database-flow">
+
+        <div class="db-row">
+
+            <div class="db-box">
+
+                <strong>
+                    🌐 Browser
+                </strong>
+
+                <small>
+                    Request
+                </small>
+
+            </div>
+
+            <div class="arrow">
+                →
+            </div>
+
+            <div class="db-box">
+
+                <strong>
+                    ⚙️ View
+                </strong>
+
+                <small>
+                    Logic
+                </small>
+
+            </div>
+
+            <div class="arrow">
+                →
+            </div>
+
+            <div class="db-box">
+
+                <strong>
+                    🧩 Model
+                </strong>
+
+                <small>
+                    ORM
+                </small>
+
+            </div>
+
+            <div class="arrow">
+                →
+            </div>
+
+            <div class="db-box">
+
+                <strong>
+                    🗄️ Database
+                </strong>
+
+                <small>
+                    Data
+                </small>
+
+            </div>
+
+            <div class="arrow">
+                →
+            </div>
+
+            <div class="db-box">
+
+                <strong>
+                    🎨 Template
+                </strong>
+
+                <small>
+                    HTML
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     USER INPUT
+===================================================== -->
+
+<section
+    class="section reveal"
+    id="input">
+
+    <span class="badge">
+        12 • FORMS
+    </span>
+
+    <h2>
+        Handling User Input
+    </h2>
+
+    <p>
+        Views can process information submitted by users through forms.
+    </p>
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>
+                views.py
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>def register(request):
+
+    if request.method == "POST":
+
+        name = request.POST.get("name")
+
+        return HttpResponse(
+            f"Welcome {name}"
+        )
+
+    return render(
+        request,
+        "register.html"
+    )</code></pre>
+
+    </div>
+
+
+    <div class="flow">
+
+        <div class="flow-node">
+
+            <div class="flow-icon">
+                📝
+            </div>
+
+            <strong>
+                Form
+            </strong>
+
+            <small>
+                User enters data
+            </small>
+
+        </div>
+
+        <div class="arrow">
+            →
+        </div>
+
+        <div class="flow-node">
+
+            <div class="flow-icon">
+                📤
+            </div>
+
+            <strong>
+                POST
+            </strong>
+
+            <small>
+                Submit
+            </small>
+
+        </div>
+
+        <div class="arrow">
+            →
+        </div>
+
+        <div class="flow-node">
+
+            <div class="flow-icon">
+                ⚙️
+            </div>
+
+            <strong>
+                View
+            </strong>
+
+            <small>
+                Process
+            </small>
+
+        </div>
+
+        <div class="arrow">
+            →
+        </div>
+
+        <div class="flow-node">
+
+            <div class="flow-icon">
+                ✅
+            </div>
+
+            <strong>
+                Response
+            </strong>
+
+            <small>
+                Result
+            </small>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     GET PARAMETERS
+===================================================== -->
+
+<section
+    class="section reveal">
+
+    <span class="badge">
+        13 • QUERY PARAMETERS
+    </span>
+
+    <h2>
+        request.GET
+    </h2>
+
+    <p>
+        Query parameters are values placed after the <code>?</code>
+        in a URL.
+    </p>
+
+    <div class="url"
+         style="
+         background:#f1f5f9;
+         padding:12px;
+         border-radius:8px;
+         font-family:monospace;
+         color:#1d4ed8;
+         ">
+
+        /search/?q=django
+
+    </div>
+
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>
+                views.py
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>def search(request):
+
+    query = request.GET.get("q")
+
+    return HttpResponse(
+        f"Searching for: {query}"
+    )</code></pre>
+
+    </div>
+
+
+    <div class="highlight">
+
+        <strong>
+            Result:
+        </strong>
+
+        Searching for: django
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     DYNAMIC
+===================================================== -->
+
+<section
+    class="section reveal"
+    id="dynamic">
+
+    <span class="badge">
+        14 • DYNAMIC VIEWS
+    </span>
+
+    <h2>
+        Dynamic Views
+    </h2>
+
+    <p>
+        A view can receive parameters captured from the URL.
+    </p>
+
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>
+                urls.py
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>path(
+    "student/&lt;int:id&gt;/",
+    views.student_detail,
+    name="student-detail"
+)</code></pre>
+
+    </div>
+
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>
+                views.py
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>def student_detail(request, id):
+
+    return HttpResponse(
+        f"Student ID: {id}"
+    )</code></pre>
+
+    </div>
+
+
+    <div class="dynamic-demo">
+
+        <div class="dynamic-card">
+
+            <strong>
+                Request
+            </strong>
+
+            <div class="dynamic-url">
+                /student/10/
+            </div>
+
+            <small>
+                id = 10
+            </small>
+
+        </div>
+
+
+        <div class="dynamic-card">
+
+            <strong>
+                Request
+            </strong>
+
+            <div class="dynamic-url">
+                /student/25/
+            </div>
+
+            <small>
+                id = 25
+            </small>
+
+        </div>
+
+
+        <div class="dynamic-card">
+
+            <strong>
+                Request
+            </strong>
+
+            <div class="dynamic-url">
+                /student/101/
+            </div>
+
+            <small>
+                id = 101
+            </small>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     JSON
+===================================================== -->
+
+<section
+    class="section reveal"
+    id="json">
+
+    <span class="badge">
+        15 • API RESPONSE
+    </span>
+
+    <h2>
+        Returning JSON
+    </h2>
+
+    <p>
+        Views can return JSON responses, which becomes important when
+        Django is used as a backend API.
+    </p>
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>
+                JSON View
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>from django.http import JsonResponse
+
+
+def api_data(request):
+
+    data = {
+
+        "name": "ZENSUS",
+        "course": "Django",
+        "lesson": 4
+
+    }
+
+    return JsonResponse(data)</code></pre>
+
+    </div>
+
+
+    <div class="highlight">
+
+        <strong>
+            Response:
+        </strong>
+
+<pre style="
+background:#f1f5f9;
+color:#10213f;
+border-radius:8px;
+margin-top:10px;
+"><code>{
+    "name": "ZENSUS",
+    "course": "Django",
+    "lesson": 4
+}</code></pre>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     REDIRECT
+===================================================== -->
+
+<section
+    class="section reveal"
+    id="redirect">
+
+    <span class="badge">
+        16 • NAVIGATION
+    </span>
+
+    <h2>
+        Redirecting Users
+    </h2>
+
+    <p>
+        A view can redirect the user from one URL to another.
+    </p>
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>
+                views.py
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>from django.shortcuts import redirect
+
+
+def old_page(request):
+
+    return redirect("home")</code></pre>
+
+    </div>
+
+
+    <div class="flow">
+
+        <div class="flow-node">
+
+            <div class="flow-icon">
+                🌐
+            </div>
+
+            <strong>
+                /old-page/
+            </strong>
+
+        </div>
+
+        <div class="arrow">
+            →
+        </div>
+
+        <div class="flow-node">
+
+            <div class="flow-icon">
+                🔄
+            </div>
+
+            <strong>
+                redirect()
+            </strong>
+
+        </div>
+
+        <div class="arrow">
+            →
+        </div>
+
+        <div class="flow-node">
+
+            <div class="flow-icon">
+                🏠
+            </div>
+
+            <strong>
+                /home/
+            </strong>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     404
+===================================================== -->
+
+<section
+    class="section reveal"
+    id="404">
+
+    <span class="badge">
+        17 • ERROR HANDLING
+    </span>
+
+    <h2>
+        get_object_or_404()
+    </h2>
+
+    <p>
+        When retrieving a database object, you often need to handle the
+        situation where the requested object does not exist.
+    </p>
+
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>
+                views.py
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>from django.shortcuts import get_object_or_404
+from .models import Product
+
+
+def product_detail(request, id):
+
+    product = get_object_or_404(
+        Product,
+        id=id
+    )
+
+    return render(
+        request,
+        "product.html",
+        {
+            "product": product
+        }
+    )</code></pre>
+
+    </div>
+
+
+    <div class="method-demo">
+
+        <div class="method-card">
+
+            <span class="method-label get">
+                OBJECT EXISTS
+            </span>
+
+            <h3>
+                Product Found
+            </h3>
+
+            <p>
+                Django retrieves the product and sends it to the template.
+            </p>
+
+        </div>
+
+
+        <div class="method-card">
+
+            <span class="method-label"
+                  style="
+                  background:#fef2f2;
+                  color:#dc2626;
+                  ">
+                OBJECT MISSING
+            </span>
+
+            <h3>
+                404 Response
+            </h3>
+
+            <p>
+                Django returns a 404 Not Found response.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     MVT
+===================================================== -->
+
+<section
+    class="section reveal"
+    id="mvt">
+
+    <span class="badge">
+        18 • ARCHITECTURE
+    </span>
+
+    <h2>
+        Views and Django MVT
+    </h2>
+
+    <p>
+        Django uses the Model-View-Template architecture.
+        The View acts as the main processing layer between requests,
+        models and templates.
+    </p>
+
+
+    <div class="request-visual">
+
+        <div class="request-title">
+            DJANGO MVT REQUEST PIPELINE
+        </div>
+
+        <div class="request-line">
+
+            <div class="request-box">
+
+                <div class="icon">
+                    🌐
+                </div>
+
+                <strong>
+                    Browser
+                </strong>
+
+                <small>
+                    Request
+                </small>
+
+            </div>
+
+            <div class="request-arrow">
+                →
+            </div>
+
+            <div class="request-box">
+
+                <div class="icon">
+                    🧭
+                </div>
+
+                <strong>
+                    URL
+                </strong>
+
+                <small>
+                    Routing
+                </small>
+
+            </div>
+
+            <div class="request-arrow">
+                →
+            </div>
+
+            <div class="request-box">
+
+                <div class="icon">
+                    ⚙️
+                </div>
+
+                <strong>
+                    View
+                </strong>
+
+                <small>
+                    Logic
+                </small>
+
+            </div>
+
+            <div class="request-arrow">
+                →
+            </div>
+
+            <div class="request-box">
+
+                <div class="icon">
+                    🗄️
+                </div>
+
+                <strong>
+                    Model
+                </strong>
+
+                <small>
+                    Database
+                </small>
+
+            </div>
+
+            <div class="request-arrow">
+                →
+            </div>
+
+            <div class="request-box">
+
+                <div class="icon">
+                    🎨
+                </div>
+
+                <strong>
+                    Template
+                </strong>
+
+                <small>
+                    HTML
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="highlight">
+
+        <strong>
+            Important:
+        </strong>
+
+        The View does not mean the HTML page.
+        In Django, the View is the Python processing layer.
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     FBV VS CBV
+===================================================== -->
+
+<section
+    class="section reveal"
+    id="fbv-cbv">
+
+    <span class="badge">
+        19 • VIEW TYPES
+    </span>
+
+    <h2>
+        Function-Based Views vs Class-Based Views
+    </h2>
+
+    <p>
+        Django supports two major styles of implementing views.
+    </p>
+
+
+    <div class="compare">
+
+        <div class="compare-card">
+
+            <div class="compare-title">
+                FUNCTION-BASED VIEW
+            </div>
+
+            <div class="code-wrap"
+                 style="margin:0;border-radius:0;">
+
+<pre><code>def home(request):
+
+    return render(
+        request,
+        "home.html"
+    )</code></pre>
+
+            </div>
+
+        </div>
+
+
+        <div class="compare-card">
+
+            <div class="compare-title">
+                CLASS-BASED VIEW
+            </div>
+
+            <div class="code-wrap"
+                 style="margin:0;border-radius:0;">
+
+<pre><code>from django.views import View
+
+
+class HomeView(View):
+
+    def get(self, request):
+
+        return render(
+            request,
+            "home.html"
+        )</code></pre>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="highlight">
+
+        <strong>
+            Beginner tip:
+        </strong>
+
+        Start by understanding Function-Based Views clearly.
+        Class-Based Views become easier once the request-response cycle
+        is understood.
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     COMMON MISTAKES
+===================================================== -->
+
+<section
+    class="section reveal"
+    id="mistakes">
+
+    <span class="badge">
+        20 • DEBUGGING
+    </span>
+
+    <h2>
+        Common View Mistakes
+    </h2>
+
+
+    <div class="mistake">
+
+        <div class="mistake-icon">
+            ✕
+        </div>
+
+        <div>
+
+            <strong>
+                Forgetting request
+            </strong>
+
+            <p>
+                A normal Django view should accept the request object.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="mistake">
+
+        <div class="mistake-icon">
+            ✕
+        </div>
+
+        <div>
+
+            <strong>
+                Forgetting return
+            </strong>
+
+            <p>
+                A view must return a valid response.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="mistake">
+
+        <div class="mistake-icon">
+            ✕
+        </div>
+
+        <div>
+
+            <strong>
+                Wrong view name in urls.py
+            </strong>
+
+            <p>
+                The URL configuration must point to an existing view.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="mistake">
+
+        <div class="mistake-icon">
+            ✕
+        </div>
+
+        <div>
+
+            <strong>
+                Missing context
+            </strong>
+
+            <p>
+                Template variables require corresponding data from the view.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="mistake">
+
+        <div class="mistake-icon">
+            ✕
+        </div>
+
+        <div>
+
+            <strong>
+                Mixing too much logic
+            </strong>
+
+            <p>
+                Keep database, application logic and presentation responsibilities
+                organized.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     PRACTICE
+===================================================== -->
+
+<section
+    class="section reveal"
+    id="practice">
+
+    <span class="badge">
+        21 • HANDS-ON
+    </span>
+
+    <h2>
+        Practice Project — Student Portal
+    </h2>
+
+    <div class="practice">
+
+        <p>
+            Build a small Django Student Portal using views.
+        </p>
+
+        <ul class="steps">
+
+            <li>
+                Create a <strong>students</strong> Django app.
+            </li>
+
+            <li>
+                Create a <strong>home()</strong> view.
+            </li>
+
+            <li>
+                Create a <strong>student()</strong> view.
+            </li>
+
+            <li>
+                Connect both views to URLs.
+            </li>
+
+            <li>
+                Create a student template.
+            </li>
+
+            <li>
+                Pass student information from the view to the template.
+            </li>
+
+            <li>
+                Add a dynamic student ID URL.
+            </li>
+
+            <li>
+                Test both GET and POST requests.
+            </li>
+
+        </ul>
+
+    </div>
+
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>
+                Suggested views.py
+            </span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>from django.shortcuts import render
+from django.http import HttpResponse
+
+
+def home(request):
+
+    return HttpResponse(
+        "Welcome to Student Portal"
+    )
+
+
+def student(request):
+
+    data = {
+
+        "name": "Rahul",
+        "course": "Artificial Intelligence",
+        "year": 4
+
+    }
+
+    return render(
+        request,
+        "student.html",
+        data
+    )
+
+
+def student_detail(request, id):
+
+    return HttpResponse(
+        f"Student ID: {id}"
+    )</code></pre>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     QUIZ
+===================================================== -->
+
+<section
+    class="section reveal"
+    id="quiz">
+
+    <span class="badge">
+        22 • KNOWLEDGE CHECK
+    </span>
+
+    <h2>
+        Lesson 04 Quiz
+    </h2>
+
+
+    <div class="quiz-question">
+
+        <h3>
+            1. What is the main responsibility of a Django View?
+        </h3>
+
+        <div class="option"
+             data-correct="true">
+
+            Receive a request, process logic and return a response
+
+        </div>
+
+        <div class="option">
+
+            Only create database tables
+
+        </div>
+
+        <div class="option">
+
+            Only write HTML
+
+        </div>
+
+    </div>
+
+
+    <div class="quiz-question">
+
+        <h3>
+            2. Which object contains information about the incoming request?
+        </h3>
+
+        <div class="option">
+
+            response
+
+        </div>
+
+        <div class="option"
+             data-correct="true">
+
+            request
+
+        </div>
+
+        <div class="option">
+
+            model
+
+        </div>
+
+    </div>
+
+
+    <div class="quiz-question">
+
+        <h3>
+            3. Which shortcut renders a template?
+        </h3>
+
+        <div class="option">
+
+            redirect()
+
+        </div>
+
+        <div class="option">
+
+            HttpResponse()
+
+        </div>
+
+        <div class="option"
+             data-correct="true">
+
+            render()
+
+        </div>
+
+    </div>
+
+
+    <div class="quiz-question">
+
+        <h3>
+            4. Which is commonly used to read submitted POST data?
+        </h3>
+
+        <div class="option">
+
+            request.GET
+
+        </div>
+
+        <div class="option"
+             data-correct="true">
+
+            request.POST
+
+        </div>
+
+        <div class="option">
+
+            request.URL
+
+        </div>
+
+    </div>
+
+
+    <div class="quiz-question">
+
+        <h3>
+            5. Which Django object can return JSON data?
+        </h3>
+
+        <div class="option">
+
+            HttpResponseOnly
+
+        </div>
+
+        <div class="option"
+             data-correct="true">
+
+            JsonResponse
+
+        </div>
+
+        <div class="option">
+
+            TemplateResponseOnly
+
+        </div>
+
+    </div>
+
+
+    <button
+        id="checkQuiz"
+        style="
+        margin-top:10px;
+        border:0;
+        background:#2563eb;
+        color:white;
+        padding:11px 18px;
+        border-radius:8px;
+        cursor:pointer;
+        font-weight:700;
+        ">
+
+        Check Answers
+
+    </button>
+
+
+    <div
+        class="quiz-result"
+        id="quizResult">
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     TAKEAWAY
+===================================================== -->
+
+<section
+    class="takeaway reveal">
+
+    <h2>
+        Lesson 04 — Final Takeaway
+    </h2>
+
+    <p>
+        A Django View is the core Python processing layer that receives
+        a request, performs application logic, communicates with models
+        when required, and returns a response such as HTML, JSON,
+        a redirect, or plain text.
+    </p>
+
+    <div class="takeaway-quote">
+
+        Browser → URL → View → Logic / Model → Template → Response → Browser
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<div class="lesson-footer">
+
+    <a
+        href="#"
+        class="footer-btn">
+
+        ← Lesson 03
+
+    </a>
+
+
+    <a
+        href="#"
+        class="footer-btn next"
+        id="nextLesson">
+
+        Lesson 05 →
+    
+    </a>
+
+</div>
+
+
+</div>
+
+</main>
+
+
+
+<script>
+
+/* =====================================================
+   PROGRESS BAR
+===================================================== */
+
+const progressBar =
+document.getElementById("progressBar");
+
+
+window.addEventListener("scroll", () => {
+
+    const scrollTop =
+        window.scrollY;
+
+    const documentHeight =
+        document.documentElement.scrollHeight -
+        window.innerHeight;
+
+    const progress =
+        documentHeight > 0
+        ? (scrollTop / documentHeight) * 100
+        : 0;
+
+    progressBar.style.width =
+        progress + "%";
+
+});
+
+
+
+/* =====================================================
+   COPY BUTTONS
+===================================================== */
+
+document
+.querySelectorAll(".copy-btn")
+.forEach(button => {
+
+    button.addEventListener(
+        "click",
+        async () => {
+
+            const code =
+                button
+                .closest(".code-wrap")
+                .querySelector("code")
+                .innerText;
+
+            try{
+
+                await navigator
+                    .clipboard
+                    .writeText(code);
+
+            }catch(error){
+
+                const textarea =
+                    document.createElement("textarea");
+
+                textarea.value = code;
+
+                document.body
+                    .appendChild(textarea);
+
+                textarea.select();
+
+                document.execCommand("copy");
+
+                textarea.remove();
+
+            }
+
+            const original =
+                button.innerText;
+
+            button.innerText =
+                "Copied!";
+
+            setTimeout(() => {
+
+                button.innerText =
+                    original;
+
+            },1200);
+
+        }
+    );
+
+});
+
+
+
+/* =====================================================
+   REVEAL ANIMATION
+===================================================== */
+
+const revealObserver =
+new IntersectionObserver(
+
+    entries => {
+
+        entries.forEach(entry => {
+
+            if(entry.isIntersecting){
+
+                entry.target
+                    .classList
+                    .add("visible");
+
+            }
+
+        });
+
+    },
+
+    {
+        threshold:.08
+    }
+
+);
+
+
+document
+.querySelectorAll(".reveal")
+.forEach(element => {
+
+    revealObserver.observe(element);
+
+});
+
+
+
+/* =====================================================
+   ACTIVE SIDEBAR
+===================================================== */
+
+const sections =
+document.querySelectorAll(
+    ".section, #overview"
+);
+
+const navLinks =
+document.querySelectorAll(
+    ".side-nav a"
+);
+
+
+const sectionObserver =
+new IntersectionObserver(
+
+    entries => {
+
+        entries.forEach(entry => {
+
+            if(entry.isIntersecting){
+
+                navLinks.forEach(link => {
+
+                    link.classList
+                        .remove("active");
+
+                    if(
+                        link.getAttribute(
+                            "href"
+                        ) ===
+                        "#" +
+                        entry.target.id
+                    ){
+
+                        link.classList
+                            .add("active");
+
+                    }
+
+                });
+
+            }
+
+        });
+
+    },
+
+    {
+        rootMargin:
+            "-20% 0px -65% 0px",
+
+        threshold:0
+    }
+
+);
+
+
+sections.forEach(section => {
+
+    sectionObserver.observe(section);
+
+});
+
+
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+const searchInput =
+document.getElementById(
+    "searchInput"
+);
+
+const searchableSections =
+document.querySelectorAll(
+    ".section"
+);
+
+
+searchInput.addEventListener(
+    "input",
+    () => {
+
+        const query =
+            searchInput.value
+                .toLowerCase()
+                .trim();
+
+        searchableSections
+        .forEach(section => {
+
+            const text =
+                section.innerText
+                    .toLowerCase();
+
+            if(
+                !query ||
+                text.includes(query)
+            ){
+
+                section.style.display =
+                    "";
+
+            }else{
+
+                section.style.display =
+                    "none";
+
+            }
+
+        });
+
+    }
+);
+
+
+
+/* =====================================================
+   GET / POST SIMULATOR
+===================================================== */
+
+const methodButtons =
+document.querySelectorAll(
+    ".method-btn"
+);
+
+const methodPacket =
+document.getElementById(
+    "methodPacket"
+);
+
+const methodResult =
+document.getElementById(
+    "methodResult"
+);
+
+
+methodButtons.forEach(button => {
+
+    button.addEventListener(
+        "click",
+        () => {
+
+            methodButtons.forEach(btn => {
+
+                btn.classList
+                    .remove("active");
+
+            });
+
+            button.classList
+                .add("active");
+
+            const method =
+                button.dataset.method;
+
+
+            methodPacket.innerText =
+                method +
+                " /products/";
+
+
+            methodPacket.style.transform =
+                "translateX(0)";
+
+
+            setTimeout(() => {
+
+                methodPacket.style.transform =
+                    "translateX(160px)";
+
+            },150);
+
+
+            if(method === "GET"){
+
+                methodResult.innerHTML =
+                    "GET request → the view can retrieve data and display the product page.";
+
+            }else{
+
+                methodResult.innerHTML =
+                    "POST request → the view can receive submitted data and process it.";
+
+            }
+
+        }
+    );
+
+});
+
+
+
+/* =====================================================
+   QUIZ
+===================================================== */
+
+const options =
+document.querySelectorAll(
+    ".option"
+);
+
+
+options.forEach(option => {
+
+    option.addEventListener(
+        "click",
+        () => {
+
+            const question =
+                option.closest(
+                    ".quiz-question"
+                );
+
+
+            question
+            .querySelectorAll(".option")
+            .forEach(item => {
+
+                item.classList
+                    .remove("correct");
+
+                item.classList
+                    .remove("wrong");
+
+            });
+
+
+            if(
+                option.dataset.correct
+                === "true"
+            ){
+
+                option.classList
+                    .add("correct");
+
+            }else{
+
+                option.classList
+                    .add("wrong");
+
+            }
+
+        }
+    );
+
+});
+
+
+const checkQuiz =
+document.getElementById(
+    "checkQuiz"
+);
+
+const quizResult =
+document.getElementById(
+    "quizResult"
+);
+
+
+checkQuiz.addEventListener(
+    "click",
+    () => {
+
+        const questions =
+            document.querySelectorAll(
+                ".quiz-question"
+            );
+
+        let score = 0;
+
+        let answered = 0;
+
+
+        questions.forEach(question => {
+
+            const selected =
+                question.querySelector(
+                    ".option.correct, .option.wrong"
+                );
+
+
+            if(selected){
+
+                answered++;
+
+
+                if(
+                    selected.dataset.correct
+                    === "true"
+                ){
+
+                    score++;
+
+                }
+
+            }
+
+        });
+
+
+        quizResult.style.display =
+            "block";
+
+
+        if(
+            answered <
+            questions.length
+        ){
+
+            quizResult.innerHTML =
+                `Please answer all questions first. ${answered}/${questions.length} answered.`;
+
+            return;
+
+        }
+
+
+        quizResult.innerHTML =
+            `Your score: ${score}/${questions.length} 🎯`;
+
+    }
+);
+
+
+
+/* =====================================================
+   NEXT LESSON
+===================================================== */
+
+document
+.getElementById("nextLesson")
+.addEventListener(
+    "click",
+    event => {
+
+        event.preventDefault();
+
+        alert(
+            "Excellent! Lesson 04 completed. Next: Django Templates & Static Files."
+        );
+
+    }
+);
+
+</script>
+
+</body>
+</html>

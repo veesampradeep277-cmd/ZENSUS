@@ -1,0 +1,2049 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENSUS React — Lesson 19: Lifting State Up</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+    --bg:#f5f7fb;
+    --surface:#fff;
+    --surface-soft:#f8fafc;
+    --text:#172033;
+    --muted:#667085;
+    --border:#e4e7ec;
+    --primary:#4f46e5;
+    --primary-dark:#3730a3;
+    --green:#059669;
+    --orange:#ea580c;
+    --red:#dc2626;
+    --cyan:#0891b2;
+    --dark:#0b1020;
+    --dark2:#172033;
+    --shadow:0 10px 30px rgba(15,23,42,.07);
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+button,input{
+    font-family:inherit;
+}
+
+.topbar{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    height:68px;
+    z-index:1000;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 28px;
+    background:#fff;
+    border-bottom:1px solid var(--border);
+}
+
+.logo{
+    color:var(--primary);
+    font-size:25px;
+    font-weight:900;
+    letter-spacing:-1px;
+}
+
+.logo span{
+    color:#111827;
+}
+
+.lesson-badge{
+    padding:8px 15px;
+    border-radius:999px;
+    background:#eef2ff;
+    color:var(--primary-dark);
+    font-size:13px;
+    font-weight:800;
+}
+
+.layout{
+    display:flex;
+    padding-top:68px;
+}
+
+.sidebar{
+    position:fixed;
+    left:0;
+    top:68px;
+    width:270px;
+    height:calc(100vh - 68px);
+    overflow-y:auto;
+    background:#fff;
+    border-right:1px solid var(--border);
+    padding:22px 15px;
+}
+
+.sidebar-label{
+    color:#98a2b3;
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:1.2px;
+    text-transform:uppercase;
+    margin:8px 12px 14px;
+}
+
+.nav-item{
+    cursor:pointer;
+    padding:10px 13px;
+    border-radius:9px;
+    margin-bottom:4px;
+    font-size:14px;
+    color:#475467;
+    transition:.2s;
+}
+
+.nav-item:hover{
+    background:#f2f4f7;
+    color:var(--primary);
+}
+
+.nav-item.active{
+    color:var(--primary-dark);
+    background:#eef2ff;
+    font-weight:800;
+    border-left:3px solid var(--primary);
+}
+
+.main{
+    width:calc(100% - 270px);
+    margin-left:270px;
+}
+
+.hero{
+    min-height:520px;
+    padding:85px 8%;
+    display:flex;
+    align-items:center;
+    color:#fff;
+    background:
+        radial-gradient(circle at 80% 25%,rgba(99,102,241,.28),transparent 30%),
+        radial-gradient(circle at 20% 80%,rgba(8,145,178,.18),transparent 28%),
+        linear-gradient(135deg,#0b1020,#172033);
+}
+
+.hero-content{
+    max-width:1100px;
+}
+
+.eyebrow{
+    color:#a5b4fc;
+    font-size:12px;
+    letter-spacing:2px;
+    font-weight:900;
+    text-transform:uppercase;
+    margin-bottom:18px;
+}
+
+.hero h1{
+    font-size:clamp(44px,5vw,70px);
+    line-height:1.04;
+    letter-spacing:-3px;
+    margin-bottom:23px;
+}
+
+.hero h1 span{
+    color:#a5b4fc;
+}
+
+.hero p{
+    max-width:850px;
+    color:#cbd5e1;
+    font-size:18px;
+}
+
+.flow{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px;
+    margin-top:40px;
+}
+
+.flow-box{
+    padding:13px 17px;
+    border-radius:12px;
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.14);
+    font-size:13px;
+    font-weight:700;
+}
+
+.flow-arrow{
+    color:#818cf8;
+    font-size:22px;
+}
+
+.content{
+    max-width:1180px;
+    margin:auto;
+    padding:65px 35px 100px;
+}
+
+.section{
+    margin-bottom:82px;
+    scroll-margin-top:90px;
+}
+
+.section h2{
+    font-size:34px;
+    line-height:1.2;
+    letter-spacing:-1px;
+    margin-bottom:13px;
+}
+
+.section h3{
+    font-size:23px;
+    margin:28px 0 12px;
+}
+
+.intro{
+    max-width:900px;
+    color:var(--muted);
+    margin-bottom:25px;
+}
+
+.card{
+    padding:27px;
+    margin:22px 0;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:18px;
+    box-shadow:var(--shadow);
+}
+
+.highlight{
+    padding:18px 20px;
+    margin:21px 0;
+    border-left:4px solid var(--primary);
+    border-radius:0 12px 12px 0;
+    background:#eef2ff;
+}
+
+.success{
+    padding:18px 20px;
+    margin:21px 0;
+    border-left:4px solid var(--green);
+    border-radius:0 12px 12px 0;
+    background:#ecfdf5;
+}
+
+.warning{
+    padding:18px 20px;
+    margin:21px 0;
+    border-left:4px solid var(--orange);
+    border-radius:0 12px 12px 0;
+    background:#fff7ed;
+}
+
+.danger{
+    padding:18px 20px;
+    margin:21px 0;
+    border-left:4px solid var(--red);
+    border-radius:0 12px 12px 0;
+    background:#fef2f2;
+}
+
+.code{
+    padding:24px;
+    margin:18px 0;
+    overflow:auto;
+    border-radius:15px;
+    border:1px solid #1e293b;
+    background:#0b1020;
+    color:#dbeafe;
+    font-family:Consolas,Monaco,monospace;
+    font-size:14px;
+    line-height:1.75;
+}
+
+.keyword{color:#c4b5fd}
+.function{color:#67e8f9}
+.string{color:#86efac}
+.number{color:#fbbf24}
+.comment{color:#94a3b8}
+
+.visual-flow{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+    margin:30px 0;
+}
+
+.node{
+    min-width:145px;
+    padding:17px 15px;
+    text-align:center;
+    border:2px solid #c7d2fe;
+    border-radius:14px;
+    background:#fff;
+    font-weight:800;
+    box-shadow:0 8px 22px rgba(15,23,42,.06);
+    animation:float 3s ease-in-out infinite;
+}
+
+.node:nth-child(2){animation-delay:.15s}
+.node:nth-child(3){animation-delay:.3s}
+.node:nth-child(4){animation-delay:.45s}
+.node:nth-child(5){animation-delay:.6s}
+
+@keyframes float{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-6px)}
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.info-card{
+    padding:23px;
+    border:1px solid var(--border);
+    border-radius:16px;
+    background:#fff;
+    box-shadow:var(--shadow);
+}
+
+.info-card h4{
+    margin-bottom:8px;
+}
+
+.info-card p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+.table{
+    width:100%;
+    margin:25px 0;
+    border-collapse:collapse;
+    overflow:hidden;
+    border:1px solid var(--border);
+    background:#fff;
+    border-radius:14px;
+}
+
+.table th,
+.table td{
+    padding:15px;
+    text-align:left;
+    border-bottom:1px solid var(--border);
+    font-size:14px;
+}
+
+.table th{
+    background:#f8fafc;
+    font-weight:800;
+}
+
+.interactive{
+    padding:28px;
+    margin:25px 0;
+    border:1px solid var(--border);
+    border-radius:18px;
+    background:#fff;
+    box-shadow:var(--shadow);
+}
+
+.interactive-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:15px;
+    margin-bottom:22px;
+}
+
+.interactive-title{
+    font-size:19px;
+    font-weight:900;
+}
+
+.btn{
+    border:0;
+    border-radius:10px;
+    padding:10px 17px;
+    background:var(--primary);
+    color:#fff;
+    cursor:pointer;
+    font-weight:800;
+    transition:.2s;
+}
+
+.btn:hover{
+    background:var(--primary-dark);
+    transform:translateY(-2px);
+}
+
+.btn.secondary{
+    background:#eef2ff;
+    color:var(--primary-dark);
+}
+
+.state-display{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+}
+
+.panel{
+    padding:22px;
+    border:2px dashed #cbd5e1;
+    border-radius:14px;
+    min-height:160px;
+}
+
+.panel-title{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    color:#98a2b3;
+    font-weight:900;
+    margin-bottom:13px;
+}
+
+.big-value{
+    font-size:38px;
+    font-weight:900;
+    color:var(--primary);
+}
+
+.student-demo{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.student-card{
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:22px;
+    background:#fff;
+}
+
+.score{
+    font-size:34px;
+    font-weight:900;
+    color:var(--primary);
+    margin:12px 0;
+}
+
+button.choice{
+    width:100%;
+    text-align:left;
+    padding:11px 14px;
+    margin-top:8px;
+    border:1px solid var(--border);
+    border-radius:9px;
+    background:#f8fafc;
+    cursor:pointer;
+}
+
+button.choice:hover{
+    background:#eef2ff;
+    border-color:#a5b4fc;
+}
+
+.quiz{
+    margin-top:20px;
+}
+
+.question{
+    padding:23px;
+    margin:15px 0;
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:#fff;
+}
+
+.answer{
+    display:none;
+    margin-top:12px;
+    padding:13px;
+    border-radius:10px;
+    background:#ecfdf5;
+    color:#065f46;
+    font-size:14px;
+}
+
+.architecture{
+    display:grid;
+    grid-template-columns:1fr 80px 1fr 80px 1fr;
+    align-items:center;
+    gap:12px;
+}
+
+.arch-box{
+    padding:23px;
+    text-align:center;
+    border:1px solid var(--border);
+    border-radius:16px;
+    background:#fff;
+    box-shadow:var(--shadow);
+}
+
+.arch-box strong{
+    display:block;
+    font-size:18px;
+    margin-bottom:6px;
+}
+
+.muted{
+    color:var(--muted);
+    font-size:13px;
+}
+
+.footer{
+    padding:30px;
+    text-align:center;
+    color:#98a2b3;
+    border-top:1px solid var(--border);
+}
+
+@media(max-width:950px){
+
+    .sidebar{
+        display:none;
+    }
+
+    .main{
+        margin-left:0;
+        width:100%;
+    }
+
+    .grid,
+    .state-display,
+    .student-demo,
+    .architecture{
+        grid-template-columns:1fr;
+    }
+
+    .hero{
+        padding:60px 25px;
+    }
+
+    .content{
+        padding:45px 18px;
+    }
+
+    .hero h1{
+        font-size:46px;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<header class="topbar">
+
+```
+<div class="logo">
+    ZENSUS<span>.</span>
+</div>
+
+<div class="lesson-badge">
+    React • Phase 3 • Lesson 19
+</div>
+```
+
+</header>
+
+<div class="layout">
+
+<aside class="sidebar">
+
+<div class="sidebar-label">Lesson Navigation</div>
+
+<div class="nav-item active" data-target="intro">Introduction</div>
+<div class="nav-item" data-target="shared">Shared State</div>
+<div class="nav-item" data-target="ownership">State Ownership</div>
+<div class="nav-item" data-target="lifting">Lifting State</div>
+<div class="nav-item" data-target="parent">Parent State</div>
+<div class="nav-item" data-target="props">Passing State</div>
+<div class="nav-item" data-target="setter">Setter Functions</div>
+<div class="nav-item" data-target="siblings">Sibling Communication</div>
+<div class="nav-item" data-target="controlled">Controlled Components</div>
+<div class="nav-item" data-target="sync">State Synchronization</div>
+<div class="nav-item" data-target="example">Practical Example</div>
+<div class="nav-item" data-target="mistakes">Common Mistakes</div>
+<div class="nav-item" data-target="quiz">Quick Quiz</div>
+
+</aside>
+
+<main class="main">
+
+<!-- HERO -->
+
+<section class="hero" id="intro">
+
+<div class="hero-content">
+
+<div class="eyebrow">
+Phase 3 • State & Component Architecture
+</div>
+
+<h1>
+<span>Lifting State Up</span><br>
+One Source of Truth
+</h1>
+
+<p>
+Learn how React components share information by moving state to their
+nearest common parent, passing values through props, passing event
+handlers downward, and allowing sibling components to communicate
+without directly talking to each other.
+</p>
+
+<div class="flow">
+
+<div class="flow-box">Sibling A</div>
+<div class="flow-arrow">↘</div>
+
+<div class="flow-box">Common Parent State</div>
+
+<div class="flow-arrow">↙</div>
+<div class="flow-box">Sibling B</div>
+
+</div>
+
+</div>
+
+</section>
+
+<div class="content">
+
+<!-- SHARED STATE -->
+
+<section class="section" id="shared">
+
+<h2>1. Shared State</h2>
+
+<p class="intro">
+Sometimes two or more components need to work with the same piece of
+information. When that happens, keeping separate copies of the state can
+cause the UI to become inconsistent.
+</p>
+
+<h3>Example problem</h3>
+
+<p>
+Imagine a temperature converter with two components:
+</p>
+
+<div class="grid">
+
+<div class="info-card">
+<h4>Temperature Input A</h4>
+<p>Stores Celsius.</p>
+</div>
+
+<div class="info-card">
+<h4>Temperature Input B</h4>
+<p>Stores Fahrenheit.</p>
+</div>
+
+<div class="info-card">
+<h4>Problem</h4>
+<p>Both need to stay synchronized.</p>
+</div>
+
+</div>
+
+<div class="highlight">
+If multiple components need to coordinate around the same state, ask:
+<strong>Which component should own that state?</strong>
+</div>
+
+<h3>Shared state means</h3>
+
+<p>
+A value is needed by more than one part of the component tree and those
+parts must stay consistent when the value changes.
+</p>
+
+</section>
+
+<!-- OWNERSHIP -->
+
+<section class="section" id="ownership">
+
+<h2>2. The State Ownership Problem</h2>
+
+<p class="intro">
+React state belongs to the component where the Hook is called. A child
+cannot directly reach into a sibling's local state.
+</p>
+
+<div class="visual-flow">
+
+<div class="node">Parent</div>
+<div class="flow-arrow">↓</div>
+<div class="node">Child A</div>
+<div class="flow-arrow">↔</div>
+<div class="node">Child B</div>
+
+</div>
+
+<p>
+Suppose Child A owns:
+</p>
+
+<div class="code">
+<span class="keyword">const</span> [count, setCount] =
+    <span class="function">useState</span>(<span class="number">0</span>);
+</div>
+
+<p>
+Child B cannot simply do:
+</p>
+
+<div class="code">
+<span class="comment">// ❌ Child B cannot directly access Child A's local state</span>
+
+count
+
+</div>
+
+<div class="danger">
+Sibling components do not directly access each other's local state.
+React's data flow is primarily from parent to child through props.
+</div>
+
+<h3>The architectural question</h3>
+
+<div class="highlight">
+<strong>Who needs the state?</strong><br>
+If multiple siblings need it, their nearest common parent is often the
+appropriate place to own it.
+</div>
+
+</section>
+
+<!-- LIFTING -->
+
+<section class="section" id="lifting">
+
+<h2>3. What Is Lifting State Up?</h2>
+
+<p class="intro">
+Lifting state up means moving state from a child component into their
+closest common parent so that the parent can coordinate the shared value.
+</p>
+
+<div class="visual-flow">
+
+<div class="node">
+Child A<br>
+<span class="muted">Owns state</span>
+</div>
+
+<div class="flow-arrow">↑</div>
+
+<div class="node">
+Common Parent<br>
+<span class="muted">Owns state</span>
+</div>
+
+<div class="flow-arrow">↓</div>
+
+<div class="node">
+Child B<br>
+<span class="muted">Receives state</span>
+</div>
+
+</div>
+
+<h3>Before lifting</h3>
+
+<div class="code">
+Parent
+│
+├── Child A
+│   └── count state
+│
+└── Child B
+    └── needs count
+</div>
+
+<h3>After lifting</h3>
+
+<div class="code">
+Parent
+│
+├── count state
+│
+├── Child A
+│   └── receives count + setter
+│
+└── Child B
+    └── receives count + setter
+</div>
+
+<div class="success">
+<strong>Core principle:</strong>
+Move state upward until it is owned by the lowest common ancestor that
+needs to coordinate that state.
+</div>
+
+</section>
+
+<!-- PARENT -->
+
+<section class="section" id="parent">
+
+<h2>4. Parent State</h2>
+
+<p class="intro">
+Once state is lifted, the parent becomes the owner of the shared value.
+</p>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">Parent</span>() {
+
+```
+<span class="keyword">const</span> [count, setCount] =
+    <span class="function">useState</span>(<span class="number">0</span>);
+
+<span class="keyword">return</span> (
+    &lt;&gt;
+
+        &lt;ChildA count={count} /&gt;
+
+        &lt;ChildB
+            count={count}
+            setCount={setCount}
+        /&gt;
+
+    &lt;/&gt;
+);
+```
+
+}
+
+</div>
+
+<p>
+The parent owns the state because both children need to participate in
+the same state.
+</p>
+
+<div class="visual-flow">
+
+<div class="node">Parent State<br>count = 0</div>
+<div class="flow-arrow">↓</div>
+<div class="node">Child A<br>value={count}</div>
+<div class="flow-arrow">+</div>
+<div class="node">Child B<br>value={count}</div>
+
+</div>
+
+</section>
+
+<!-- PROPS -->
+
+<section class="section" id="props">
+
+<h2>5. Passing State Through Props</h2>
+
+<p class="intro">
+Once state lives in the parent, the parent can pass the current value to
+children through props.
+</p>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">Parent</span>() {
+
+```
+<span class="keyword">const</span> [name, setName] =
+    <span class="function">useState</span>(<span class="string">"Pradeep"</span>);
+
+<span class="keyword">return</span> (
+    &lt;Profile name={name} /&gt;
+);
+```
+
+}
+
+</div>
+
+<p>
+The child receives:
+</p>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">Profile</span>({ name }) {
+
+```
+<span class="keyword">return</span> (
+    &lt;h2&gt;Hello {name}&lt;/h2&gt;
+);
+```
+
+}
+
+</div>
+
+<div class="highlight">
+<strong>Data flow:</strong>
+Parent State → Props → Child
+</div>
+
+<p>
+Props are read-only from the receiving component's perspective. The child
+should not mutate the prop directly.
+</p>
+
+</section>
+
+<!-- SETTER -->
+
+<section class="section" id="setter">
+
+<h2>6. Passing Setter Functions</h2>
+
+<p class="intro">
+A child sometimes needs to request a change to state owned by its parent.
+The parent can pass a state setter or, often preferably, a purpose-specific
+callback function.
+</p>
+
+<h3>Passing the setter</h3>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">Parent</span>() {
+
+```
+<span class="keyword">const</span> [count, setCount] =
+    <span class="function">useState</span>(<span class="number">0</span>);
+
+<span class="keyword">return</span> (
+    &lt;Child
+        count={count}
+        setCount={setCount}
+    /&gt;
+);
+```
+
+}
+
+</div>
+
+<h3>Child calls it</h3>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">Child</span>({
+    count,
+    setCount
+}) {
+
+```
+<span class="keyword">return</span> (
+    &lt;button
+        onClick={() =&gt;
+            setCount(value =&gt; value + <span class="number">1</span>)
+        }
+    &gt;
+        {count}
+    &lt;/button&gt;
+);
+```
+
+}
+
+</div>
+
+<h3>Often better — pass a purpose-specific callback</h3>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">Parent</span>() {
+
+```
+<span class="keyword">const</span> [count, setCount] =
+    <span class="function">useState</span>(<span class="number">0</span>);
+
+<span class="keyword">const</span> increment =
+    () =&gt; setCount(value =&gt; value + <span class="number">1</span>);
+
+<span class="keyword">return</span> (
+    &lt;Child
+        count={count}
+        onIncrement={increment}
+    /&gt;
+);
+```
+
+}
+
+</div>
+
+<div class="success">
+A semantic callback such as <code>onIncrement</code> can make the child's
+responsibility clearer and prevent the child from knowing unnecessary
+details about how the parent stores its state.
+</div>
+
+</section>
+
+<!-- SIBLINGS -->
+
+<section class="section" id="siblings">
+
+<h2>7. Sibling Communication</h2>
+
+<p class="intro">
+Sibling communication is one of the most important reasons for lifting
+state.
+</p>
+
+<div class="visual-flow">
+
+<div class="node">Sibling A</div>
+<div class="flow-arrow">↓</div>
+
+<div class="node">
+Common Parent<br>
+State + Handler
+</div>
+
+<div class="flow-arrow">↓</div>
+
+<div class="node">Sibling B</div>
+
+</div>
+
+<p>
+Notice that A and B are not directly communicating.
+The parent coordinates the communication.
+</p>
+
+<h3>Example</h3>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">Parent</span>() {
+
+```
+<span class="keyword">const</span> [message, setMessage] =
+    <span class="function">useState</span>(<span class="string">""</span>);
+
+<span class="keyword">return</span> (
+    &lt;&gt;
+
+        &lt;Sender onSend={setMessage} /&gt;
+
+        &lt;Receiver message={message} /&gt;
+
+    &lt;/&gt;
+);
+```
+
+}
+
+</div>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">Sender</span>({ onSend }) {
+
+```
+<span class="keyword">return</span> (
+    &lt;button
+        onClick={() =&gt;
+            onSend(<span class="string">"Hello from Sender"</span>)
+        }
+    &gt;
+        Send Message
+    &lt;/button&gt;
+);
+```
+
+}
+
+</div>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">Receiver</span>({ message }) {
+
+```
+<span class="keyword">return</span> (
+    &lt;p&gt;{message}&lt;/p&gt;
+);
+```
+
+}
+
+</div>
+
+<div class="highlight">
+<strong>Sibling communication pattern:</strong><br><br>
+Sibling A → Callback → Parent State → Props → Sibling B
+</div>
+
+<div class="interactive">
+
+<div class="interactive-header">
+
+<div class="interactive-title">
+Sibling Communication Simulator
+</div>
+
+<button class="btn" onclick="sendSiblingMessage()">
+Sibling A → Send
+</button>
+
+</div>
+
+<div class="state-display">
+
+<div class="panel">
+
+<div class="panel-title">
+Parent State
+</div>
+
+<div id="parentMessage">
+""
+</div>
+
+</div>
+
+<div class="panel">
+
+<div class="panel-title">
+Sibling B receives prop
+</div>
+
+<div id="siblingMessage">
+Waiting...
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- CONTROLLED -->
+
+<section class="section" id="controlled">
+
+<h2>8. Controlled Components</h2>
+
+<p class="intro">
+A controlled component is a component whose important input value is
+controlled by React state.
+</p>
+
+<h3>Controlled input</h3>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+```
+<span class="keyword">const</span> [name, setName] =
+    <span class="function">useState</span>(<span class="string">""</span>);
+
+<span class="keyword">return</span> (
+    &lt;input
+        value={name}
+        onChange={event =&gt;
+            setName(event.target.value)
+        }
+    /&gt;
+);
+```
+
+}
+
+</div>
+
+<div class="visual-flow">
+
+<div class="node">User Types</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">onChange</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">Parent State</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">value Prop</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">Input</div>
+
+</div>
+
+<div class="highlight">
+The React state becomes the source of truth for the controlled value.
+</div>
+
+</section>
+
+<!-- SYNCHRONIZATION -->
+
+<section class="section" id="sync">
+
+<h2>9. State Synchronization</h2>
+
+<p class="intro">
+Lifting state helps prevent multiple independent copies of the same
+concept from drifting apart.
+</p>
+
+<h3>Problem — duplicated state</h3>
+
+<div class="code">
+<span class="comment">// ❌ Two components independently track the same concept</span>
+
+ChildA: <span class="keyword">const</span> [selected, setSelected] = <span class="function">useState</span>(<span class="keyword">false</span>);
+
+ChildB: <span class="keyword">const</span> [selected, setSelected] = <span class="function">useState</span>(<span class="keyword">false</span>);
+
+</div>
+
+<p>
+Now one component can change while the other remains unchanged.
+</p>
+
+<h3>Better architecture</h3>
+
+<div class="code">
+<span class="comment">// Parent owns one source of truth</span>
+
+<span class="keyword">const</span> [selected, setSelected] = <span class="function">useState</span>(<span class="keyword">false</span>);
+
+<ChildA
+selected={selected}
+onSelect={setSelected}
+/>
+
+<ChildB
+selected={selected}
+onSelect={setSelected}
+/>
+
+</div>
+
+<div class="success">
+One state value → multiple consumers → synchronized UI.
+</div>
+
+<h3>Single source of truth</h3>
+
+<div class="visual-flow">
+
+<div class="node">One State Value</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">Child A</div>
+
+<div class="flow-arrow">+</div>
+
+<div class="node">Child B</div>
+
+<div class="flow-arrow">+</div>
+
+<div class="node">Child C</div>
+
+</div>
+
+</section>
+
+<!-- PRACTICAL -->
+
+<section class="section" id="example">
+
+<h2>10. Practical Example — Temperature Converter</h2>
+
+<p class="intro">
+Let's build a classic example where two inputs must stay synchronized.
+</p>
+
+<h3>Parent component</h3>
+
+<div class="code">
+<span class="keyword">function</span> <span class="function">Calculator</span>() {
+
+```
+<span class="keyword">const</span> [temperature, setTemperature] =
+    <span class="function">useState</span>(<span class="string">""</span>);
+
+<span class="keyword">const</span> [scale, setScale] =
+    <span class="function">useState</span>(<span class="string">"c"</span>);
+
+<span class="keyword">const</span> handleCelsiusChange =
+    value =&gt; {
+        setTemperature(value);
+        setScale(<span class="string">"c"</span>);
+    };
+
+<span class="keyword">const</span> handleFahrenheitChange =
+    value =&gt; {
+        setTemperature(value);
+        setScale(<span class="string">"f"</span>);
+    };
+
+<span class="keyword">return</span> (
+    &lt;&gt;
+
+        &lt;TemperatureInput
+            scale=<span class="string">"c"</span>
+            temperature={
+                scale === <span class="string">"c"</span>
+                    ? temperature
+                    : toCelsius(temperature)
+            }
+            onTemperatureChange={
+                handleCelsiusChange
+            }
+        /&gt;
+
+        &lt;TemperatureInput
+            scale=<span class="string">"f"</span>
+            temperature={
+                scale === <span class="string">"f"</span>
+                    ? temperature
+                    : toFahrenheit(temperature)
+            }
+            onTemperatureChange={
+                handleFahrenheitChange
+            }
+        /&gt;
+
+    &lt;/&gt;
+);
+```
+
+}
+
+</div>
+
+<h3>Why does this work?</h3>
+
+<div class="visual-flow">
+
+<div class="node">Celsius Input</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">Parent State</div>
+<div class="flow-arrow">→</div>
+
+<div class="node">Fahrenheit Input</div>
+
+</div>
+
+<p>
+The parent owns the state and calculates the value needed by each child.
+There is no need for the two inputs to directly modify each other.
+</p>
+
+<h3>Interactive Temperature Architecture</h3>
+
+<div class="interactive">
+
+<div class="interactive-header">
+
+<div class="interactive-title">
+One State → Two Views
+</div>
+
+<button class="btn secondary" onclick="resetTemperature()">
+Reset
+</button>
+
+</div>
+
+<div class="student-demo">
+
+<div class="student-card">
+
+<strong>Celsius Component</strong>
+
+<input
+id="celsiusInput"
+type="number"
+placeholder="Enter Celsius"
+oninput="fromCelsius()"
+style="width:100%;padding:12px;border:1px solid #e4e7ec;border-radius:9px;margin-top:14px;"
+
+>
+
+<div class="score">
+<span id="celsiusDisplay">0</span> °C
+</div>
+
+</div>
+
+<div class="student-card">
+
+<strong>Fahrenheit Component</strong>
+
+<div class="score">
+<span id="fahrenheitDisplay">32</span> °F
+</div>
+
+<p class="muted">
+Both views are derived from the parent's shared temperature state.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+<h3>Real-world examples</h3>
+
+<div class="grid">
+
+<div class="info-card">
+<h4>Shopping Cart</h4>
+<p>
+Cart state can be owned by a common parent and displayed by product,
+summary, and checkout components.
+</p>
+</div>
+
+<div class="info-card">
+<h4>Search + Results</h4>
+<p>
+Search input updates parent state, while results receive that value.
+</p>
+</div>
+
+<div class="info-card">
+<h4>Dashboard Filters</h4>
+<p>
+A filter component changes shared state while charts and tables consume it.
+</p>
+</div>
+
+</div>
+
+</section>
+
+<!-- DATA FLOW -->
+
+<section class="section">
+
+<h2>11. The React Data Flow Pattern</h2>
+
+<div class="card">
+
+<div class="visual-flow">
+
+<div class="node">Parent State</div>
+<div class="flow-arrow">↓</div>
+
+<div class="node">Props</div>
+<div class="flow-arrow">↓</div>
+
+<div class="node">Child UI</div>
+
+<div class="flow-arrow">↑</div>
+
+<div class="node">Callback</div>
+<div class="flow-arrow">↑</div>
+
+<div class="node">User Action</div>
+
+</div>
+
+</div>
+
+<p>
+This creates a predictable cycle:
+</p>
+
+<div class="highlight">
+<strong>
+State → Props → UI → User Event → Callback → State Update → Re-render
+</strong>
+</div>
+
+<p>
+Understanding this cycle is one of the most important steps toward
+understanding React architecture.
+</p>
+
+</section>
+
+<!-- WHEN TO LIFT -->
+
+<section class="section">
+
+<h2>12. When Should You Lift State?</h2>
+
+<table class="table">
+
+<tr>
+<th>Situation</th>
+<th>Recommended Approach</th>
+</tr>
+
+<tr>
+<td>Only one component needs the state</td>
+<td>Keep it local</td>
+</tr>
+
+<tr>
+<td>Parent and child need the state</td>
+<td>Consider putting it in the parent</td>
+</tr>
+
+<tr>
+<td>Two siblings need the same state</td>
+<td>Lift it to their common parent</td>
+</tr>
+
+<tr>
+<td>Many distant components need it</td>
+<td>Consider Context or a state-management solution</td>
+</tr>
+
+<tr>
+<td>State belongs to a server/cache layer</td>
+<td>Consider an appropriate server-state/data-fetching architecture</td>
+</tr>
+
+</table>
+
+<div class="warning">
+Do not automatically move every piece of state to the top of the application.
+Keeping state as local as practical usually makes components easier to
+understand and maintain.
+</div>
+
+</section>
+
+<!-- COMMON MISTAKES -->
+
+<section class="section" id="mistakes">
+
+<h2>13. Common Mistakes</h2>
+
+<h3>Mistake 1 — Keeping duplicate state</h3>
+
+<div class="code">
+<span class="comment">// ❌ Same concept stored independently</span>
+
+ChildA: <span class="keyword">const</span> [value, setValue] = <span class="function">useState</span>(<span class="number">0</span>);
+
+ChildB: <span class="keyword">const</span> [value, setValue] = <span class="function">useState</span>(<span class="number">0</span>);
+
+</div>
+
+<p>
+If both must always represent the same concept, this can create
+synchronization problems.
+</p>
+
+<h3>Mistake 2 — Trying to access sibling state directly</h3>
+
+<div class="code">
+<span class="comment">// ❌ Sibling A's state is not directly available in Sibling B</span>
+
+SiblingB:
+console.log(siblingAState);
+
+</div>
+
+<p>
+Move the shared state into their common parent instead.
+</p>
+
+<h3>Mistake 3 — Mutating props</h3>
+
+<div class="code">
+<span class="comment">// ❌ Props should not be mutated</span>
+
+props.count = <span class="number">10</span>;
+
+</div>
+
+<h3>Mistake 4 — Passing the setter unnecessarily</h3>
+
+<p>
+A child should receive only the capabilities it actually needs. A
+purpose-specific callback can provide a clearer component interface.
+</p>
+
+<div class="code">
+<span class="comment">// Often clearer</span>
+
+<Child onAddItem={handleAddItem} />
+
+</div>
+
+<h3>Mistake 5 — Lifting too far</h3>
+
+<div class="danger">
+If state is used by only one small component, moving it all the way to
+App-level state can create unnecessary complexity and prop passing.
+</div>
+
+<h3>Mistake 6 — Confusing state sharing with prop drilling</h3>
+
+<p>
+Lifting state and prop drilling are related but not identical.
+Lifting determines <strong>where state lives</strong>. Prop drilling describes
+passing props through intermediate components that may not need the data
+themselves.
+</p>
+
+</section>
+
+<!-- ARCHITECTURE -->
+
+<section class="section">
+
+<h2>14. State Ownership Decision Guide</h2>
+
+<div class="architecture">
+
+<div class="arch-box">
+<strong>One Component</strong>
+<span class="muted">
+Keep state local
+</span>
+</div>
+
+<div>→</div>
+
+<div class="arch-box">
+<strong>Sibling Components</strong>
+<span class="muted">
+Lift to common parent
+</span>
+</div>
+
+<div>→</div>
+
+<div class="arch-box">
+<strong>Many Distant Components</strong>
+<span class="muted">
+Consider Context / state architecture
+</span>
+</div>
+
+</div>
+
+<div class="highlight">
+<strong>Golden rule:</strong><br>
+Keep state at the lowest level that can reasonably coordinate every component
+that needs it.
+</div>
+
+</section>
+
+<!-- CHEAT SHEET -->
+
+<section class="section">
+
+<h2>15. Cheat Sheet</h2>
+
+<div class="grid">
+
+<div class="info-card">
+<h4>Shared State</h4>
+<p>
+State needed by multiple components.
+</p>
+</div>
+
+<div class="info-card">
+<h4>State Owner</h4>
+<p>
+Component responsible for storing and updating the state.
+</p>
+</div>
+
+<div class="info-card">
+<h4>Lifting State</h4>
+<p>
+Move state to a common parent.
+</p>
+</div>
+
+<div class="info-card">
+<h4>Props Down</h4>
+<p>
+Parent passes state values to children.
+</p>
+</div>
+
+<div class="info-card">
+<h4>Callbacks Up</h4>
+<p>
+Child invokes a parent-provided function to request an update.
+</p>
+</div>
+
+<div class="info-card">
+<h4>Single Source of Truth</h4>
+<p>
+Avoid unnecessary duplicated copies of the same state.
+</p>
+</div>
+
+</div>
+
+</section>
+
+<!-- QUIZ -->
+
+<section class="section" id="quiz">
+
+<h2>16. Quick Quiz</h2>
+
+<div class="quiz">
+
+<div class="question">
+
+<strong>1. What does “lifting state up” mean?</strong>
+
+<button class="choice" onclick="showAnswer(1)">
+A. Moving state from a parent into every child
+</button>
+
+<button class="choice" onclick="showAnswer(1)">
+B. Moving shared state to a common parent
+</button>
+
+<button class="choice" onclick="showAnswer(1)">
+C. Deleting component state
+</button>
+
+<button class="choice" onclick="showAnswer(1)">
+D. Converting state into CSS
+</button>
+
+<div class="answer" id="answer1">
+Answer: B — Lifting state means moving shared state to the closest common parent that needs to coordinate it.
+</div>
+
+</div>
+
+<div class="question">
+
+<strong>2. How does data normally flow from a parent to a child?</strong>
+
+<button class="choice" onclick="showAnswer(2)">
+A. Through props
+</button>
+
+<button class="choice" onclick="showAnswer(2)">
+B. Through sibling variables
+</button>
+
+<button class="choice" onclick="showAnswer(2)">
+C. Through direct DOM access
+</button>
+
+<button class="choice" onclick="showAnswer(2)">
+D. Through CSS
+</button>
+
+<div class="answer" id="answer2">
+Answer: A — Parents pass data to children through props.
+</div>
+
+</div>
+
+<div class="question">
+
+<strong>3. How can a child request a parent state update?</strong>
+
+<button class="choice" onclick="showAnswer(3)">
+A. Mutate the parent's state directly
+</button>
+
+<button class="choice" onclick="showAnswer(3)">
+B. Use a parent-provided callback
+</button>
+
+<button class="choice" onclick="showAnswer(3)">
+C. Access the sibling's state
+</button>
+
+<button class="choice" onclick="showAnswer(3)">
+D. Change the parent's JSX
+</button>
+
+<div class="answer" id="answer3">
+Answer: B — The parent can pass a setter or, often more clearly, a purpose-specific callback.
+</div>
+
+</div>
+
+<div class="question">
+
+<strong>4. How do sibling components usually communicate through lifted state?</strong>
+
+<button class="choice" onclick="showAnswer(4)">
+A. Sibling A directly modifies Sibling B
+</button>
+
+<button class="choice" onclick="showAnswer(4)">
+B. Sibling A → parent callback/state → sibling B
+</button>
+
+<button class="choice" onclick="showAnswer(4)">
+C. Sibling B reads Sibling A's local variables
+</button>
+
+<button class="choice" onclick="showAnswer(4)">
+D. They must use the DOM
+</button>
+
+<div class="answer" id="answer4">
+Answer: B — The common parent coordinates the state and passes the result to both siblings.
+</div>
+
+</div>
+
+<div class="question">
+
+<strong>5. What is the source of truth in a controlled input?</strong>
+
+<button class="choice" onclick="showAnswer(5)">
+A. The browser only
+</button>
+
+<button class="choice" onclick="showAnswer(5)">
+B. React state
+</button>
+
+<button class="choice" onclick="showAnswer(5)">
+C. CSS
+</button>
+
+<button class="choice" onclick="showAnswer(5)">
+D. The DOM tree
+</button>
+
+<div class="answer" id="answer5">
+Answer: B — In a controlled input, React state controls the input value.
+</div>
+
+</div>
+
+<div class="question">
+
+<strong>6. Should every state value be lifted to App?</strong>
+
+<button class="choice" onclick="showAnswer(6)">
+A. Yes
+</button>
+
+<button class="choice" onclick="showAnswer(6)">
+B. No
+</button>
+
+<button class="choice" onclick="showAnswer(6)">
+C. Only for strings
+</button>
+
+<button class="choice" onclick="showAnswer(6)">
+D. Only for numbers
+</button>
+
+<div class="answer" id="answer6">
+Answer: B — Keep state local when only one component needs it. Lift it when multiple components need to coordinate around it.
+</div>
+
+</div>
+
+<div class="question">
+
+<strong>7. Which pattern best describes lifted state?</strong>
+
+<button class="choice" onclick="showAnswer(7)">
+A. Props down, callbacks up
+</button>
+
+<button class="choice" onclick="showAnswer(7)">
+B. CSS down, HTML up
+</button>
+
+<button class="choice" onclick="showAnswer(7)">
+C. State sideways only
+</button>
+
+<button class="choice" onclick="showAnswer(7)">
+D. DOM up, props sideways
+</button>
+
+<div class="answer" id="answer7">
+Answer: A — State values generally flow down through props, while child events can invoke callbacks supplied by the parent.
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+<footer class="footer">
+ZENSUS React Course • Phase 3 • Lesson 19 • Lifting State Up
+</footer>
+
+</main>
+</div>
+
+<script>
+
+/* SIDEBAR NAVIGATION */
+
+document.querySelectorAll(".nav-item").forEach(item => {
+
+    item.addEventListener("click", () => {
+
+        const target =
+            document.getElementById(item.dataset.target);
+
+        if(target){
+
+            target.scrollIntoView({
+                behavior:"smooth",
+                block:"start"
+            });
+
+        }
+
+        document.querySelectorAll(".nav-item")
+            .forEach(nav => nav.classList.remove("active"));
+
+        item.classList.add("active");
+
+    });
+
+});
+
+
+/* SIBLING COMMUNICATION */
+
+let messageNumber = 0;
+
+function sendSiblingMessage(){
+
+    messageNumber++;
+
+    const message =
+        messageNumber % 2 === 1
+        ? "Hello from Sibling A"
+        : "New data sent by Sibling A";
+
+    document.getElementById("parentMessage")
+        .textContent = `"${message}"`;
+
+    document.getElementById("siblingMessage")
+        .textContent = message;
+
+}
+
+
+/* TEMPERATURE */
+
+function fromCelsius(){
+
+    const input =
+        parseFloat(
+            document.getElementById("celsiusInput").value
+        );
+
+    if(Number.isNaN(input)){
+
+        document.getElementById("celsiusDisplay")
+            .textContent = "0";
+
+        document.getElementById("fahrenheitDisplay")
+            .textContent = "32";
+
+        return;
+    }
+
+    const fahrenheit =
+        (input * 9 / 5) + 32;
+
+    document.getElementById("celsiusDisplay")
+        .textContent = input.toFixed(1);
+
+    document.getElementById("fahrenheitDisplay")
+        .textContent = fahrenheit.toFixed(1);
+
+}
+
+
+function resetTemperature(){
+
+    document.getElementById("celsiusInput")
+        .value = "";
+
+    document.getElementById("celsiusDisplay")
+        .textContent = "0";
+
+    document.getElementById("fahrenheitDisplay")
+        .textContent = "32";
+
+}
+
+
+/* QUIZ */
+
+function showAnswer(number){
+
+    const answer =
+        document.getElementById(
+            "answer" + number
+        );
+
+    if(answer){
+
+        answer.style.display =
+            answer.style.display === "block"
+            ? "none"
+            : "block";
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>

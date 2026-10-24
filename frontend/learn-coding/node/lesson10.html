@@ -1,0 +1,3307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZENSUS AI — Lesson 10: Middleware & Error Handling</title>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-soft: #eaf2ff;
+      --navy: #0f172a;
+      --text: #1e293b;
+      --muted: #64748b;
+      --bg: #f7faff;
+      --white: #ffffff;
+      --line: #dbe7f5;
+      --success: #15803d;
+      --success-soft: #ecfdf3;
+      --danger: #dc2626;
+      --danger-soft: #fef2f2;
+      --warning: #d97706;
+      --warning-soft: #fff7ed;
+      --code: #0b1220;
+      --code-text: #e2e8f0;
+      --shadow: 0 12px 35px rgba(37, 99, 235, 0.08);
+      --radius: 18px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    button {
+      font-family: inherit;
+    }
+
+    /* ================= TOPBAR ================= */
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      height: 68px;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: 0.5px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, var(--primary), #60a5fa);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 900;
+      box-shadow: 0 8px 20px rgba(37,99,235,.22);
+    }
+
+    .brand-text span {
+      display: block;
+      font-size: 16px;
+    }
+
+    .brand-text small {
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+    }
+
+    .top-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pill {
+      padding: 7px 13px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid #cfe0ff;
+    }
+
+    /* ================= LAYOUT ================= */
+
+    .layout {
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr);
+      min-height: calc(100vh - 68px);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 68px;
+      height: calc(100vh - 68px);
+      overflow-y: auto;
+      background: white;
+      border-right: 1px solid var(--line);
+      padding: 24px 16px;
+    }
+
+    .sidebar-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      margin: 0 10px 12px;
+    }
+
+    .toc a {
+      display: block;
+      padding: 9px 12px;
+      border-radius: 9px;
+      margin-bottom: 3px;
+      color: var(--muted);
+      font-size: 13px;
+      transition: .2s;
+    }
+
+    .toc a:hover {
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+    }
+
+    .toc a.active {
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+      font-weight: 700;
+      border-left: 3px solid var(--primary);
+    }
+
+    .content {
+      width: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 42px 42px 80px;
+    }
+
+    /* ================= HERO ================= */
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #ffffff, #eef5ff);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: 48px;
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: rgba(37,99,235,.08);
+      right: -90px;
+      top: -100px;
+    }
+
+    .lesson-number {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+      border: 1px solid #cfe0ff;
+      padding: 7px 13px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .hero h1 {
+      margin-top: 18px;
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1.08;
+      color: var(--navy);
+      letter-spacing: -1.5px;
+      max-width: 800px;
+    }
+
+    .hero h1 span {
+      color: var(--primary);
+    }
+
+    .hero p {
+      margin-top: 18px;
+      max-width: 780px;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .meta-box {
+      background: white;
+      border: 1px solid var(--line);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ================= SECTIONS ================= */
+
+    .section {
+      margin-top: 28px;
+      scroll-margin-top: 90px;
+    }
+
+    .section-card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 30px;
+      box-shadow: 0 7px 25px rgba(15,23,42,.035);
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .section-icon {
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+      border-radius: 12px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+    }
+
+    .section-heading h2 {
+      color: var(--navy);
+      font-size: 25px;
+      line-height: 1.25;
+    }
+
+    .section-heading p {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 3px;
+    }
+
+    h3 {
+      color: var(--navy);
+      margin: 25px 0 10px;
+      font-size: 19px;
+    }
+
+    h4 {
+      color: var(--navy);
+      margin: 18px 0 8px;
+    }
+
+    p {
+      margin: 8px 0;
+    }
+
+    ul, ol {
+      padding-left: 22px;
+      margin: 12px 0;
+    }
+
+    li {
+      margin: 6px 0;
+    }
+
+    strong {
+      color: var(--navy);
+    }
+
+    /* ================= OBJECTIVES ================= */
+
+    .objective-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .objective {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+      background: #fbfdff;
+    }
+
+    .objective b {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--primary-dark);
+    }
+
+    .objective p {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* ================= INFO BOX ================= */
+
+    .info {
+      padding: 17px 18px;
+      border-radius: 12px;
+      border-left: 4px solid var(--primary);
+      background: var(--primary-soft);
+      margin: 18px 0;
+    }
+
+    .warning {
+      background: var(--warning-soft);
+      border-left-color: var(--warning);
+    }
+
+    .danger {
+      background: var(--danger-soft);
+      border-left-color: var(--danger);
+    }
+
+    .success {
+      background: var(--success-soft);
+      border-left-color: var(--success);
+    }
+
+    /* ================= CODE ================= */
+
+    .code-wrap {
+      background: var(--code);
+      border-radius: 14px;
+      overflow: hidden;
+      margin: 17px 0;
+      border: 1px solid #1e293b;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: #111827;
+      color: #94a3b8;
+      font-size: 12px;
+    }
+
+    .copy-btn {
+      border: 1px solid #334155;
+      background: transparent;
+      color: #cbd5e1;
+      padding: 5px 9px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .copy-btn:hover {
+      background: #1e293b;
+    }
+
+    pre {
+      padding: 20px;
+      overflow-x: auto;
+      color: var(--code-text);
+      font-family: "Cascadia Code", Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .keyword { color: #93c5fd; }
+    .string { color: #86efac; }
+    .comment { color: #64748b; }
+    .function { color: #fcd34d; }
+
+    /* ================= TABLE ================= */
+
+    .table-wrap {
+      overflow-x: auto;
+      margin: 18px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 620px;
+    }
+
+    th {
+      background: var(--primary-soft);
+      color: var(--navy);
+      text-align: left;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+    }
+
+    td {
+      font-size: 13px;
+    }
+
+    /* ================= FLOW ================= */
+
+    .flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+      margin: 25px 0;
+    }
+
+    .flow-node {
+      position: relative;
+      min-width: 145px;
+      text-align: center;
+      padding: 18px 14px;
+      background: white;
+      border: 2px solid var(--line);
+      border-radius: 14px;
+      transition: .3s;
+    }
+
+    .flow-node.active {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(37,99,235,.12);
+    }
+
+    .flow-node strong {
+      display: block;
+      font-size: 13px;
+    }
+
+    .flow-node small {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .arrow {
+      color: var(--primary);
+      font-size: 22px;
+      padding: 0 8px;
+    }
+
+    /* ================= MIDDLEWARE LAB ================= */
+
+    .lab {
+      background: #f8fbff;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px;
+      margin-top: 20px;
+    }
+
+    .pipeline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 18px 5px 24px;
+    }
+
+    .pipe {
+      min-width: 135px;
+      padding: 17px 12px;
+      text-align: center;
+      border-radius: 12px;
+      background: white;
+      border: 2px solid var(--line);
+      transition: .35s;
+    }
+
+    .pipe.active {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 22px rgba(37,99,235,.14);
+    }
+
+    .pipe.blocked {
+      border-color: var(--danger);
+      background: var(--danger-soft);
+    }
+
+    .pipe-icon {
+      font-size: 22px;
+      margin-bottom: 5px;
+    }
+
+    .pipe-title {
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .pipe small {
+      display: block;
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .pipe-arrow {
+      color: var(--primary);
+      font-size: 20px;
+    }
+
+    .lab-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+
+    .btn {
+      border: none;
+      padding: 10px 16px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 12px;
+      background: var(--primary);
+      color: white;
+      transition: .2s;
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn.secondary {
+      background: white;
+      color: var(--primary-dark);
+      border: 1px solid #cfe0ff;
+    }
+
+    .lab-output {
+      margin-top: 16px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 13px;
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--muted);
+      min-height: 45px;
+    }
+
+    /* ================= CARDS ================= */
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 17px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+
+    .concept-card {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fbfdff;
+    }
+
+    .concept-card h3 {
+      margin-top: 0;
+      font-size: 17px;
+    }
+
+    .concept-card p {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+      margin-bottom: 9px;
+    }
+
+    /* ================= EVENT DEMO ================= */
+
+    .event-console {
+      background: var(--code);
+      color: #cbd5e1;
+      border-radius: 14px;
+      padding: 18px;
+      min-height: 190px;
+      font-family: monospace;
+      font-size: 12px;
+      overflow-y: auto;
+    }
+
+    .event-line {
+      padding: 5px 0;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .event-line span {
+      color: #60a5fa;
+    }
+
+    /* ================= ERROR FLOW ================= */
+
+    .error-flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin: 22px 0;
+    }
+
+    .error-node {
+      padding: 18px 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      text-align: center;
+      background: white;
+      font-size: 12px;
+      transition: .3s;
+    }
+
+    .error-node.active {
+      border-color: var(--danger);
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    /* ================= ACCORDION ================= */
+
+    .accordion {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .accordion button {
+      width: 100%;
+      text-align: left;
+      padding: 15px 17px;
+      border: none;
+      background: white;
+      cursor: pointer;
+      color: var(--navy);
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .3s ease;
+      background: #fbfdff;
+    }
+
+    .accordion-content div {
+      padding: 0 17px 16px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* ================= QUIZ ================= */
+
+    .quiz-question {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      margin-bottom: 13px;
+      background: #fbfdff;
+    }
+
+    .quiz-question h3 {
+      margin-top: 0;
+      font-size: 15px;
+    }
+
+    .option {
+      display: block;
+      padding: 10px 13px;
+      margin: 7px 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      background: white;
+    }
+
+    .option:hover {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .option input {
+      margin-right: 8px;
+    }
+
+    #quizResult {
+      display: none;
+      margin-top: 15px;
+      padding: 15px;
+      border-radius: 10px;
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+      font-weight: 700;
+    }
+
+    /* ================= PROGRESS ================= */
+
+    .progress-box {
+      padding: 25px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #eff6ff, #ffffff);
+      border: 1px solid var(--line);
+    }
+
+    .progress-track {
+      height: 10px;
+      background: #dbe7f5;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 15px 0;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), #60a5fa);
+      border-radius: inherit;
+      transition: width .5s;
+    }
+
+    /* ================= NAVIGATION ================= */
+
+    .lesson-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      margin-top: 35px;
+    }
+
+    .nav-card {
+      flex: 1;
+      padding: 18px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      transition: .2s;
+    }
+
+    .nav-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .nav-card small {
+      color: var(--muted);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .nav-card strong {
+      color: var(--primary-dark);
+    }
+
+    .nav-card.next {
+      text-align: right;
+    }
+
+    footer {
+      margin-top: 50px;
+      padding: 30px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    /* ================= RESPONSIVE ================= */
+
+    @media (max-width: 1000px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .content {
+        padding: 28px 20px 60px;
+      }
+
+      .objective-grid,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .error-flow {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .topbar {
+        padding: 0 15px;
+      }
+
+      .top-meta .pill:first-child {
+        display: none;
+      }
+
+      .hero {
+        padding: 30px 22px;
+      }
+
+      .section-card {
+        padding: 21px;
+      }
+
+      .hero h1 {
+        font-size: 35px;
+      }
+
+      .lesson-nav {
+        flex-direction: column;
+      }
+
+      .nav-card.next {
+        text-align: left;
+      }
+
+      .error-flow {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        scroll-behavior: auto !important;
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ================= TOPBAR ================= -->
+
+  <header class="topbar">
+    <a href="#" class="brand">
+      <div class="brand-mark">Z</div>
+      <div class="brand-text">
+        <span>ZENSUS AI</span>
+        <small>Developer Learning System</small>
+      </div>
+    </a>
+
+    <div class="top-meta">
+      <span class="pill">Node.js</span>
+      <span class="pill">Lesson 10</span>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar">
+      <div class="sidebar-title">Lesson Contents</div>
+
+      <nav class="toc">
+        <a href="#intro">Introduction</a>
+        <a href="#objectives">Learning Objectives</a>
+        <a href="#middleware">What is Middleware?</a>
+        <a href="#flow">Middleware Flow</a>
+        <a href="#app-use">app.use()</a>
+        <a href="#types">Types of Middleware</a>
+        <a href="#route-middleware">Route Middleware</a>
+        <a href="#params">Middleware Parameters</a>
+        <a href="#multiple">Multiple Middleware</a>
+        <a href="#built-in">Built-in Middleware</a>
+        <a href="#custom">Custom Middleware</a>
+        <a href="#error">Error Handling</a>
+        <a href="#error-middleware">Error Middleware</a>
+        <a href="#async-errors">Async Errors</a>
+        <a href="#status">HTTP Status Codes</a>
+        <a href="#best">Best Practices</a>
+        <a href="#lab">Interactive Lab</a>
+        <a href="#project">Mini Project</a>
+        <a href="#interview">Interview Questions</a>
+        <a href="#quiz">Quiz</a>
+        <a href="#challenge">Challenge</a>
+        <a href="#complete">Complete Lesson</a>
+      </nav>
+    </aside>
+
+    <!-- ================= MAIN ================= -->
+
+    <main class="content">
+
+      <!-- HERO -->
+
+      <section class="hero" id="intro">
+        <span class="lesson-number">Lesson 10 • Express.js</span>
+
+        <h1>
+          Middleware &
+          <span>Error Handling</span>
+        </h1>
+
+        <p>
+          Learn how Express.js processes requests through middleware,
+          controls application flow, handles authentication and logging,
+          validates data, and manages errors in a clean and scalable way.
+        </p>
+
+        <div class="hero-meta">
+          <div class="meta-box">⏱ 45–60 min</div>
+          <div class="meta-box">📚 In-depth Concept</div>
+          <div class="meta-box">⚙ Express.js</div>
+          <div class="meta-box">🧪 Interactive Labs</div>
+        </div>
+      </section>
+
+      <!-- OBJECTIVES -->
+
+      <section class="section" id="objectives">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">01</div>
+            <div>
+              <h2>Learning Objectives</h2>
+              <p>What you should understand after this lesson</p>
+            </div>
+          </div>
+
+          <div class="objective-grid">
+
+            <div class="objective">
+              <b>Understand Middleware</b>
+              <p>Know what middleware is and why Express applications depend heavily on it.</p>
+            </div>
+
+            <div class="objective">
+              <b>Control Request Flow</b>
+              <p>Understand how next() moves a request from one middleware function to another.</p>
+            </div>
+
+            <div class="objective">
+              <b>Build Custom Middleware</b>
+              <p>Create logging, authentication, validation and other reusable middleware.</p>
+            </div>
+
+            <div class="objective">
+              <b>Understand Error Middleware</b>
+              <p>Learn the special four-parameter Express error-handling function.</p>
+            </div>
+
+            <div class="objective">
+              <b>Handle Async Errors</b>
+              <p>Understand why asynchronous failures need special handling.</p>
+            </div>
+
+            <div class="objective">
+              <b>Build Robust APIs</b>
+              <p>Apply middleware and error handling in a realistic Express application.</p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- WHAT IS MIDDLEWARE -->
+
+      <section class="section" id="middleware">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">02</div>
+            <div>
+              <h2>What is Middleware?</h2>
+              <p>The core concept behind Express request processing</p>
+            </div>
+          </div>
+
+          <p>
+            <strong>Middleware</strong> is a function that runs during the
+            request-response cycle of an Express application.
+          </p>
+
+          <p>
+            A middleware function has access to the request object
+            <code>req</code>, the response object <code>res</code>, and a
+            function called <code>next</code>.
+          </p>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>Basic Middleware Structure</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>app.use((req, res, next) => {
+  console.log("Middleware executed");
+
+  next();
+});</code></pre>
+          </div>
+
+          <h3>What does each part mean?</h3>
+
+          <div class="table-wrap">
+            <table>
+              <tr>
+                <th>Part</th>
+                <th>Meaning</th>
+              </tr>
+
+              <tr>
+                <td><code>req</code></td>
+                <td>Contains information about the incoming HTTP request.</td>
+              </tr>
+
+              <tr>
+                <td><code>res</code></td>
+                <td>Used to send a response back to the client.</td>
+              </tr>
+
+              <tr>
+                <td><code>next</code></td>
+                <td>Passes control to the next middleware or route handler.</td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="info">
+            <strong>Important:</strong>
+            A middleware function must either finish the request by sending a
+            response, or pass control onward using <code>next()</code>.
+          </div>
+
+          <div class="danger">
+            <strong>Common mistake:</strong>
+            If middleware neither sends a response nor calls <code>next()</code>,
+            the request can remain pending.
+          </div>
+
+        </div>
+      </section>
+
+      <!-- FLOW -->
+
+      <section class="section" id="flow">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">03</div>
+            <div>
+              <h2>Middleware Request Flow</h2>
+              <p>Understand what happens to a request</p>
+            </div>
+          </div>
+
+          <p>
+            Express processes a request through a sequence of middleware and
+            route handlers.
+          </p>
+
+          <div class="flow">
+
+            <div class="flow-node">
+              <strong>Client</strong>
+              <small>Browser / App</small>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="flow-node">
+              <strong>Middleware 1</strong>
+              <small>Logger</small>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="flow-node">
+              <strong>Middleware 2</strong>
+              <small>Auth</small>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="flow-node">
+              <strong>Route</strong>
+              <small>Controller</small>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="flow-node">
+              <strong>Response</strong>
+              <small>JSON / HTML</small>
+            </div>
+
+          </div>
+
+          <h3>The role of next()</h3>
+
+          <p>
+            <code>next()</code> tells Express:
+            <strong>"I have finished my middleware work. Continue processing this request."</strong>
+          </p>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>next() Example</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>app.use((req, res, next) => {
+
+  console.log("Step 1");
+
+  next();
+
+});
+
+app.use((req, res, next) => {
+
+  console.log("Step 2");
+
+  next();
+
+});
+
+app.get("/", (req, res) => {
+
+  res.send("Final route");
+
+});</code></pre>
+          </div>
+
+          <div class="info">
+            Execution order:
+            <strong>Step 1 → Step 2 → Route → Response</strong>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- APP.USE -->
+
+      <section class="section" id="app-use">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">04</div>
+            <div>
+              <h2>app.use()</h2>
+              <p>The most common way to register middleware</p>
+            </div>
+          </div>
+
+          <p>
+            Express provides <code>app.use()</code> to attach middleware to
+            the application.
+          </p>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>Global Middleware</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>const express = require("express");
+
+const app = express();
+
+app.use((req, res, next) => {
+
+  console.log("Request received");
+
+  next();
+
+});</code></pre>
+          </div>
+
+          <p>
+            Without a path, this middleware can run for incoming requests
+            handled by the application, subject to normal Express routing
+            behavior.
+          </p>
+
+          <h3>Middleware with a path</h3>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>Path-specific Middleware</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>app.use("/admin", (req, res, next) => {
+
+  console.log("Admin middleware");
+
+  next();
+
+});</code></pre>
+          </div>
+
+          <p>
+            This middleware is applied when the request path begins with
+            <code>/admin</code>.
+          </p>
+
+        </div>
+      </section>
+
+      <!-- TYPES -->
+
+      <section class="section" id="types">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">05</div>
+            <div>
+              <h2>Types of Middleware</h2>
+              <p>Different middleware has different responsibilities</p>
+            </div>
+          </div>
+
+          <div class="grid-3">
+
+            <div class="concept-card">
+              <span class="tag">1</span>
+              <h3>Application-level</h3>
+              <p>
+                Attached to the Express application using
+                <code>app.use()</code> or HTTP-method functions.
+              </p>
+            </div>
+
+            <div class="concept-card">
+              <span class="tag">2</span>
+              <h3>Router-level</h3>
+              <p>
+                Attached to an Express Router and normally used to organize
+                route-specific behavior.
+              </p>
+            </div>
+
+            <div class="concept-card">
+              <span class="tag">3</span>
+              <h3>Built-in</h3>
+              <p>
+                Middleware supplied by Express, such as
+                <code>express.json()</code> and <code>express.static()</code>.
+              </p>
+            </div>
+
+            <div class="concept-card">
+              <span class="tag">4</span>
+              <h3>Third-party</h3>
+              <p>
+                Middleware provided by external packages, such as logging or
+                security-related packages.
+              </p>
+            </div>
+
+            <div class="concept-card">
+              <span class="tag">5</span>
+              <h3>Custom</h3>
+              <p>
+                Middleware written by the developer for application-specific
+                requirements.
+              </p>
+            </div>
+
+            <div class="concept-card">
+              <span class="tag">6</span>
+              <h3>Error-handling</h3>
+              <p>
+                Special middleware used to process errors and generate
+                consistent error responses.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ROUTE MIDDLEWARE -->
+
+      <section class="section" id="route-middleware">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">06</div>
+            <div>
+              <h2>Route-Level Middleware</h2>
+              <p>Protect or prepare specific routes</p>
+            </div>
+          </div>
+
+          <p>
+            Not every middleware needs to run for every request.
+            Route-level middleware can be used when only a particular route
+            requires a specific operation.
+          </p>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>Authentication Example</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>function checkAuth(req, res, next) {
+
+  const authenticated = true;
+
+  if (authenticated) {
+    next();
+  } else {
+    res.status(401).json({
+      message: "Authentication required"
+    });
+  }
+
+}
+
+app.get("/dashboard", checkAuth, (req, res) => {
+
+  res.json({
+    message: "Welcome to dashboard"
+  });
+
+});</code></pre>
+          </div>
+
+          <div class="success">
+            The route handler runs only if <code>checkAuth</code> calls
+            <code>next()</code>.
+          </div>
+
+        </div>
+      </section>
+
+      <!-- PARAMETERS -->
+
+      <section class="section" id="params">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">07</div>
+            <div>
+              <h2>Middleware Parameters</h2>
+              <p>Understanding req, res and next</p>
+            </div>
+          </div>
+
+          <h3>1. req — Request</h3>
+
+          <p>
+            The request object contains information sent by the client.
+          </p>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>Request Information</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>app.use((req, res, next) => {
+
+  console.log(req.method);
+  console.log(req.url);
+  console.log(req.headers);
+
+  next();
+
+});</code></pre>
+          </div>
+
+          <h3>2. res — Response</h3>
+
+          <p>
+            The response object is used to send data back to the client.
+          </p>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>Response</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>res.status(200).json({
+  message: "Success"
+});</code></pre>
+          </div>
+
+          <h3>3. next — Continue</h3>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>next()</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>next();</code></pre>
+          </div>
+
+          <p>
+            Calling <code>next()</code> moves processing to the next matching
+            middleware or route handler.
+          </p>
+
+        </div>
+      </section>
+
+      <!-- MULTIPLE -->
+
+      <section class="section" id="multiple">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">08</div>
+            <div>
+              <h2>Multiple Middleware Functions</h2>
+              <p>Building a processing pipeline</p>
+            </div>
+          </div>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>Multiple Middleware</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>function logger(req, res, next) {
+
+  console.log("Logger");
+  next();
+
+}
+
+function authenticate(req, res, next) {
+
+  console.log("Authentication");
+  next();
+
+}
+
+function validate(req, res, next) {
+
+  console.log("Validation");
+  next();
+
+}
+
+app.get(
+  "/profile",
+  logger,
+  authenticate,
+  validate,
+  (req, res) => {
+
+    res.json({
+      message: "Profile loaded"
+    });
+
+  }
+);</code></pre>
+          </div>
+
+          <p>
+            The execution sequence is:
+          </p>
+
+          <div class="flow">
+            <div class="flow-node active">
+              <strong>Logger</strong>
+              <small>Record request</small>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="flow-node">
+              <strong>Authenticate</strong>
+              <small>Check identity</small>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="flow-node">
+              <strong>Validate</strong>
+              <small>Check data</small>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="flow-node">
+              <strong>Controller</strong>
+              <small>Business logic</small>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- BUILT IN -->
+
+      <section class="section" id="built-in">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">09</div>
+            <div>
+              <h2>Built-in Express Middleware</h2>
+              <p>Middleware provided directly by Express</p>
+            </div>
+          </div>
+
+          <h3>express.json()</h3>
+
+          <p>
+            This middleware parses incoming requests containing JSON payloads
+            and makes the parsed data available through <code>req.body</code>.
+          </p>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>JSON Parser</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>const express = require("express");
+
+const app = express();
+
+app.use(express.json());
+
+app.post("/users", (req, res) => {
+
+  console.log(req.body);
+
+  res.json({
+    received: req.body
+  });
+
+});</code></pre>
+          </div>
+
+          <h3>express.urlencoded()</h3>
+
+          <p>
+            Parses URL-encoded form data.
+          </p>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>URL Encoded Data</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>app.use(express.urlencoded({
+  extended: true
+}));</code></pre>
+          </div>
+
+          <h3>express.static()</h3>
+
+          <p>
+            Serves static files such as HTML, CSS, JavaScript and images.
+          </p>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>Static Files</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>app.use(express.static("public"));</code></pre>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- CUSTOM -->
+
+      <section class="section" id="custom">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">10</div>
+            <div>
+              <h2>Creating Custom Middleware</h2>
+              <p>Build reusable application logic</p>
+            </div>
+          </div>
+
+          <h3>Example: Request Logger</h3>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>logger.js</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>function logger(req, res, next) {
+
+  const time = new Date().toISOString();
+
+  console.log(
+    `${time} ${req.method} ${req.url}`
+  );
+
+  next();
+}
+
+module.exports = logger;</code></pre>
+          </div>
+
+          <p>Then use it in the main application:</p>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>app.js</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>const express = require("express");
+const logger = require("./logger");
+
+const app = express();
+
+app.use(logger);
+
+app.get("/", (req, res) => {
+  res.send("Home");
+});
+
+app.listen(3000);</code></pre>
+          </div>
+
+          <div class="info">
+            Custom middleware is useful for logging, authentication,
+            authorization, validation, rate limiting, request transformation,
+            and many other application concerns.
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ERROR HANDLING -->
+
+      <section class="section" id="error">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">11</div>
+            <div>
+              <h2>Error Handling in Express</h2>
+              <p>What happens when something goes wrong?</p>
+            </div>
+          </div>
+
+          <p>
+            An error can occur because of invalid input, missing resources,
+            authentication problems, database failures, programming bugs,
+            external service failures, or unexpected conditions.
+          </p>
+
+          <p>
+            A production application should not expose raw internal errors to
+            users. Instead, errors should be handled centrally and converted
+            into appropriate HTTP responses.
+          </p>
+
+          <h3>Basic error response</h3>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>Simple Error</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>app.get("/profile", (req, res) => {
+
+  const user = null;
+
+  if (!user) {
+    return res.status(404).json({
+      error: "User not found"
+    });
+  }
+
+  res.json(user);
+
+});</code></pre>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ERROR MIDDLEWARE -->
+
+      <section class="section" id="error-middleware">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">12</div>
+            <div>
+              <h2>Error-Handling Middleware</h2>
+              <p>The special four-parameter middleware function</p>
+            </div>
+          </div>
+
+          <p>
+            Express recognizes error-handling middleware by its four parameters:
+          </p>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>Error Middleware Structure</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>app.use((err, req, res, next) => {
+
+  console.error(err);
+
+  res.status(500).json({
+    error: "Something went wrong"
+  });
+
+});</code></pre>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <tr>
+                <th>Parameter</th>
+                <th>Purpose</th>
+              </tr>
+
+              <tr>
+                <td><code>err</code></td>
+                <td>The error object.</td>
+              </tr>
+
+              <tr>
+                <td><code>req</code></td>
+                <td>The incoming request.</td>
+              </tr>
+
+              <tr>
+                <td><code>res</code></td>
+                <td>The response that will be sent to the client.</td>
+              </tr>
+
+              <tr>
+                <td><code>next</code></td>
+                <td>Passes the error to another error handler.</td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="warning">
+            <strong>Important:</strong>
+            Error-handling middleware should normally be registered after your
+            routes and other middleware so it can receive errors passed through
+            the middleware chain.
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ERROR FLOW -->
+
+      <section class="section" id="async-errors">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">13</div>
+            <div>
+              <h2>Error Propagation</h2>
+              <p>How Express moves an error through the pipeline</p>
+            </div>
+          </div>
+
+          <div class="error-flow">
+
+            <div class="error-node" id="err1">
+              Request
+            </div>
+
+            <div class="error-node" id="err2">
+              Middleware
+            </div>
+
+            <div class="error-node" id="err3">
+              Route
+            </div>
+
+            <div class="error-node" id="err4">
+              Error Handler
+            </div>
+
+            <div class="error-node" id="err5">
+              Response
+            </div>
+
+          </div>
+
+          <button class="btn" onclick="animateErrorFlow()">
+            ▶ Simulate Error
+          </button>
+
+          <div class="lab-output" id="errorOutput">
+            Click the button to visualize error propagation.
+          </div>
+
+          <h3>Using next(error)</h3>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>Passing an Error</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>app.get("/data", (req, res, next) => {
+
+  const error = new Error(
+    "Database connection failed"
+  );
+
+  next(error);
+
+});</code></pre>
+          </div>
+
+          <p>
+            When <code>next(error)</code> is called, Express skips regular
+            middleware and moves toward error-handling middleware.
+          </p>
+
+          <div class="info">
+            Conceptually:
+            <strong>next() → continue normally</strong><br>
+            <strong>next(error) → enter error-handling flow</strong>
+          </div>
+
+          <h3>Important distinction</h3>
+
+          <p>
+            Calling <code>next()</code> does not mean "send a response."
+            It only passes control onward.
+          </p>
+
+          <p>
+            Calling <code>res.json()</code>, <code>res.send()</code> or
+            <code>res.end()</code> sends the response and normally finishes
+            request processing.
+          </p>
+
+        </div>
+      </section>
+
+      <!-- ASYNC -->
+
+      <section class="section">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">14</div>
+            <div>
+              <h2>Handling Asynchronous Errors</h2>
+              <p>Promises, async/await and rejected operations</p>
+            </div>
+          </div>
+
+          <p>
+            Modern Express applications frequently perform asynchronous
+            operations such as database queries, API calls and file operations.
+          </p>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>Async Route Example</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>app.get("/users", async (req, res, next) => {
+
+  try {
+
+    const users = await getUsers();
+
+    res.json(users);
+
+  } catch (error) {
+
+    next(error);
+
+  }
+
+});</code></pre>
+          </div>
+
+          <p>
+            The <code>try/catch</code> ensures that a rejected asynchronous
+            operation can be passed to the centralized error handler.
+          </p>
+
+          <div class="warning">
+            Always consider how rejected promises and asynchronous failures
+            reach your application's error-handling path. Do not assume every
+            async failure is automatically handled in every Express version
+            or coding pattern.
+          </div>
+
+        </div>
+      </section>
+
+      <!-- STATUS CODES -->
+
+      <section class="section" id="status">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">15</div>
+            <div>
+              <h2>HTTP Status Codes & Errors</h2>
+              <p>Return meaningful responses to clients</p>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+
+            <table>
+              <tr>
+                <th>Status</th>
+                <th>Name</th>
+                <th>Typical Usage</th>
+              </tr>
+
+              <tr>
+                <td>200</td>
+                <td>OK</td>
+                <td>Successful request.</td>
+              </tr>
+
+              <tr>
+                <td>201</td>
+                <td>Created</td>
+                <td>A new resource was created.</td>
+              </tr>
+
+              <tr>
+                <td>204</td>
+                <td>No Content</td>
+                <td>Successful request with no response body.</td>
+              </tr>
+
+              <tr>
+                <td>400</td>
+                <td>Bad Request</td>
+                <td>Client sent invalid input.</td>
+              </tr>
+
+              <tr>
+                <td>401</td>
+                <td>Unauthorized</td>
+                <td>Authentication is required or invalid.</td>
+              </tr>
+
+              <tr>
+                <td>403</td>
+                <td>Forbidden</td>
+                <td>Request is understood but access is not allowed.</td>
+              </tr>
+
+              <tr>
+                <td>404</td>
+                <td>Not Found</td>
+                <td>Requested resource does not exist.</td>
+              </tr>
+
+              <tr>
+                <td>405</td>
+                <td>Method Not Allowed</td>
+                <td>Method is not supported for the resource.</td>
+              </tr>
+
+              <tr>
+                <td>500</td>
+                <td>Internal Server Error</td>
+                <td>Unexpected server-side failure.</td>
+              </tr>
+            </table>
+
+          </div>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>Example API Error</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>return res.status(400).json({
+  error: "Invalid email address"
+});</code></pre>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- BEST PRACTICES -->
+
+      <section class="section" id="best">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">16</div>
+            <div>
+              <h2>Middleware & Error Handling Best Practices</h2>
+              <p>How professional Express applications are structured</p>
+            </div>
+          </div>
+
+          <div class="grid-2">
+
+            <div class="concept-card">
+              <h3>Keep middleware focused</h3>
+              <p>
+                A middleware function should generally perform one clear
+                responsibility rather than becoming a large collection of
+                unrelated operations.
+              </p>
+            </div>
+
+            <div class="concept-card">
+              <h3>Call next() deliberately</h3>
+              <p>
+                Do not call next() after you have already sent a response
+                unless you have a specific reason and understand the flow.
+              </p>
+            </div>
+
+            <div class="concept-card">
+              <h3>Centralize error handling</h3>
+              <p>
+                A centralized error handler makes API responses more
+                consistent and simplifies logging and maintenance.
+              </p>
+            </div>
+
+            <div class="concept-card">
+              <h3>Do not expose internals</h3>
+              <p>
+                Avoid sending database details, stack traces or secrets to
+                production clients.
+              </p>
+            </div>
+
+            <div class="concept-card">
+              <h3>Validate input</h3>
+              <p>
+                Validate request body, parameters and query values before
+                using them in application logic.
+              </p>
+            </div>
+
+            <div class="concept-card">
+              <h3>Use appropriate status codes</h3>
+              <p>
+                Status codes help clients understand whether a request
+                succeeded, failed due to input, or failed on the server.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- INTERACTIVE LAB -->
+
+      <section class="section" id="lab">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">17</div>
+            <div>
+              <h2>Interactive Middleware Lab</h2>
+              <p>Watch a request move through middleware</p>
+            </div>
+          </div>
+
+          <div class="lab">
+
+            <div class="pipeline">
+
+              <div class="pipe" id="p1">
+                <div class="pipe-icon">🌐</div>
+                <div class="pipe-title">Request</div>
+                <small>GET /dashboard</small>
+              </div>
+
+              <div class="pipe-arrow">→</div>
+
+              <div class="pipe" id="p2">
+                <div class="pipe-icon">📝</div>
+                <div class="pipe-title">Logger</div>
+                <small>Record request</small>
+              </div>
+
+              <div class="pipe-arrow">→</div>
+
+              <div class="pipe" id="p3">
+                <div class="pipe-icon">🔐</div>
+                <div class="pipe-title">Auth</div>
+                <small>Check identity</small>
+              </div>
+
+              <div class="pipe-arrow">→</div>
+
+              <div class="pipe" id="p4">
+                <div class="pipe-icon">✅</div>
+                <div class="pipe-title">Validation</div>
+                <small>Check input</small>
+              </div>
+
+              <div class="pipe-arrow">→</div>
+
+              <div class="pipe" id="p5">
+                <div class="pipe-icon">⚙</div>
+                <div class="pipe-title">Route</div>
+                <small>Business logic</small>
+              </div>
+
+              <div class="pipe-arrow">→</div>
+
+              <div class="pipe" id="p6">
+                <div class="pipe-icon">📤</div>
+                <div class="pipe-title">Response</div>
+                <small>200 OK</small>
+              </div>
+
+            </div>
+
+            <div class="lab-controls">
+              <button class="btn" onclick="runPipeline(false)">
+                ▶ Allow Request
+              </button>
+
+              <button class="btn" onclick="runPipeline(true)">
+                ⚠ Block at Auth
+              </button>
+
+              <button class="btn secondary" onclick="resetPipeline()">
+                Reset
+              </button>
+            </div>
+
+            <div class="lab-output" id="labOutput">
+              Select a scenario to start the request pipeline.
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- EVENT CONNECTION -->
+
+      <section class="section">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">18</div>
+            <div>
+              <h2>Middleware in the Request Lifecycle</h2>
+              <p>Connecting Express concepts together</p>
+            </div>
+          </div>
+
+          <p>
+            A useful mental model is to treat middleware as a processing
+            pipeline.
+          </p>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>Complete Request Pipeline</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>Client
+   ↓
+Express receives request
+   ↓
+Logger middleware
+   ↓
+Authentication middleware
+   ↓
+Validation middleware
+   ↓
+Route handler
+   ↓
+Database / business logic
+   ↓
+Response
+   ↓
+Client</code></pre>
+          </div>
+
+          <p>
+            If a middleware detects a problem, it can stop normal processing
+            and either send an appropriate response or pass an error into the
+            error-handling pipeline.
+          </p>
+
+        </div>
+      </section>
+
+      <!-- MINI PROJECT -->
+
+      <section class="section" id="project">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">19</div>
+            <div>
+              <h2>Mini Project — Production-Style API Flow</h2>
+              <p>Combine logging, authentication, validation and error handling</p>
+            </div>
+          </div>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>server.js</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>const express = require("express");
+
+const app = express();
+
+app.use(express.json());
+
+/* Logger */
+function logger(req, res, next) {
+
+  console.log(
+    `${req.method} ${req.url}`
+  );
+
+  next();
+}
+
+/* Authentication */
+function authenticate(req, res, next) {
+
+  const token = req.headers.authorization;
+
+  if (!token) {
+    return res.status(401).json({
+      error: "Authentication required"
+    });
+  }
+
+  next();
+}
+
+/* Validation */
+function validateUser(req, res, next) {
+
+  const { name, email } = req.body;
+
+  if (!name || !email) {
+    return res.status(400).json({
+      error: "Name and email are required"
+    });
+  }
+
+  next();
+}
+
+app.use(logger);
+
+app.post(
+  "/users",
+  authenticate,
+  validateUser,
+  (req, res) => {
+
+    res.status(201).json({
+      message: "User created",
+      user: req.body
+    });
+
+  }
+);
+
+/* 404 handler */
+app.use((req, res) => {
+
+  res.status(404).json({
+    error: "Route not found"
+  });
+
+});
+
+/* Central error handler */
+app.use((err, req, res, next) => {
+
+  console.error(err);
+
+  res.status(500).json({
+    error: "Internal server error"
+  });
+
+});
+
+app.listen(3000, () => {
+
+  console.log(
+    "Server running on port 3000"
+  );
+
+});</code></pre>
+          </div>
+
+          <h3>What happens here?</h3>
+
+          <ol>
+            <li>Express parses JSON using <code>express.json()</code>.</li>
+            <li>The logger records the request.</li>
+            <li>Authentication checks the request.</li>
+            <li>Validation checks the submitted user data.</li>
+            <li>The route creates the response.</li>
+            <li>Unknown routes reach the 404 handler.</li>
+            <li>Unexpected errors can reach the central error handler.</li>
+          </ol>
+
+          <div class="success">
+            This pattern separates concerns and makes the application easier
+            to maintain as it grows.
+          </div>
+
+        </div>
+      </section>
+
+      <!-- COMMON MISTAKES -->
+
+      <section class="section">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">20</div>
+            <div>
+              <h2>Common Middleware Mistakes</h2>
+              <p>Problems beginners frequently encounter</p>
+            </div>
+          </div>
+
+          <div class="accordion">
+            <button onclick="toggleAccordion(this)">
+              Forgetting next()
+              <span>+</span>
+            </button>
+            <div class="accordion-content">
+              <div>
+                If middleware neither sends a response nor calls
+                <code>next()</code>, processing can stop and the request may
+                remain pending.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion">
+            <button onclick="toggleAccordion(this)">
+              Calling next() after sending a response
+              <span>+</span>
+            </button>
+            <div class="accordion-content">
+              <div>
+                Once you have completed the response, continuing the normal
+                pipeline can lead to unexpected behavior or "headers already
+                sent" errors.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion">
+            <button onclick="toggleAccordion(this)">
+              Wrong error middleware signature
+              <span>+</span>
+            </button>
+            <div class="accordion-content">
+              <div>
+                Error-handling middleware uses four parameters:
+                <code>(err, req, res, next)</code>.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion">
+            <button onclick="toggleAccordion(this)">
+              Registering middleware in the wrong order
+              <span>+</span>
+            </button>
+            <div class="accordion-content">
+              <div>
+                Middleware order matters. A middleware generally only affects
+                requests that reach it in the pipeline.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion">
+            <button onclick="toggleAccordion(this)">
+              Exposing internal error details
+              <span>+</span>
+            </button>
+            <div class="accordion-content">
+              <div>
+                Detailed stack traces are useful during development but should
+                be handled carefully in production responses.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- INTERVIEW -->
+
+      <section class="section" id="interview">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">21</div>
+            <div>
+              <h2>Interview Questions</h2>
+              <p>Important Express.js questions</p>
+            </div>
+          </div>
+
+          <div class="accordion">
+            <button onclick="toggleAccordion(this)">
+              1. What is middleware in Express?
+              <span>+</span>
+            </button>
+            <div class="accordion-content">
+              <div>
+                Middleware is a function that participates in the request-
+                response cycle and can access req, res and next.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion">
+            <button onclick="toggleAccordion(this)">
+              2. What does next() do?
+              <span>+</span>
+            </button>
+            <div class="accordion-content">
+              <div>
+                It passes control to the next matching middleware or route
+                handler.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion">
+            <button onclick="toggleAccordion(this)">
+              3. What happens if next() is not called?
+              <span>+</span>
+            </button>
+            <div class="accordion-content">
+              <div>
+                If the middleware does not send a response either, the request
+                can remain unresolved.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion">
+            <button onclick="toggleAccordion(this)">
+              4. What is error-handling middleware?
+              <span>+</span>
+            </button>
+            <div class="accordion-content">
+              <div>
+                It is middleware with the signature
+                <code>(err, req, res, next)</code> that handles errors passed
+                through the Express pipeline.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion">
+            <button onclick="toggleAccordion(this)">
+              5. Why does middleware order matter?
+              <span>+</span>
+            </button>
+            <div class="accordion-content">
+              <div>
+                Express processes middleware and routes in their registered
+                order, so placing middleware before or after a route changes
+                which requests it can affect.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion">
+            <button onclick="toggleAccordion(this)">
+              6. What is express.json()?
+              <span>+</span>
+            </button>
+            <div class="accordion-content">
+              <div>
+                It is built-in Express middleware that parses JSON request
+                bodies and exposes the parsed data through req.body.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion">
+            <button onclick="toggleAccordion(this)">
+              7. How do you pass an error to Express?
+              <span>+</span>
+            </button>
+            <div class="accordion-content">
+              <div>
+                Call <code>next(error)</code> so Express can enter its
+                error-handling flow.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion">
+            <button onclick="toggleAccordion(this)">
+              8. What is the difference between 401 and 403?
+              <span>+</span>
+            </button>
+            <div class="accordion-content">
+              <div>
+                401 indicates that authentication is required or invalid,
+                while 403 indicates that the server understood the request but
+                access is not allowed.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- QUIZ -->
+
+      <section class="section" id="quiz">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">22</div>
+            <div>
+              <h2>Knowledge Check</h2>
+              <p>Test your understanding</p>
+            </div>
+          </div>
+
+          <div class="quiz-question">
+            <h3>1. Which function passes control to the next middleware?</h3>
+
+            <label class="option">
+              <input type="radio" name="q1" value="a">
+              res.next()
+            </label>
+
+            <label class="option">
+              <input type="radio" name="q1" value="b">
+              next()
+            </label>
+
+            <label class="option">
+              <input type="radio" name="q1" value="c">
+              continue()
+            </label>
+          </div>
+
+          <div class="quiz-question">
+            <h3>2. What is the signature of error middleware?</h3>
+
+            <label class="option">
+              <input type="radio" name="q2" value="a">
+              (req, res)
+            </label>
+
+            <label class="option">
+              <input type="radio" name="q2" value="b">
+              (req, res, next)
+            </label>
+
+            <label class="option">
+              <input type="radio" name="q2" value="c">
+              (err, req, res, next)
+            </label>
+          </div>
+
+          <div class="quiz-question">
+            <h3>3. Which middleware parses JSON request bodies?</h3>
+
+            <label class="option">
+              <input type="radio" name="q3" value="a">
+              express.json()
+            </label>
+
+            <label class="option">
+              <input type="radio" name="q3" value="b">
+              express.body()
+            </label>
+
+            <label class="option">
+              <input type="radio" name="q3" value="c">
+              express.parse()
+            </label>
+          </div>
+
+          <div class="quiz-question">
+            <h3>4. Which status code represents "Not Found"?</h3>
+
+            <label class="option">
+              <input type="radio" name="q4" value="a">
+              200
+            </label>
+
+            <label class="option">
+              <input type="radio" name="q4" value="b">
+              404
+            </label>
+
+            <label class="option">
+              <input type="radio" name="q4" value="c">
+              500
+            </label>
+          </div>
+
+          <div class="quiz-question">
+            <h3>5. How do you normally pass an error to Express?</h3>
+
+            <label class="option">
+              <input type="radio" name="q5" value="a">
+              next(error)
+            </label>
+
+            <label class="option">
+              <input type="radio" name="q5" value="b">
+              error.next()
+            </label>
+
+            <label class="option">
+              <input type="radio" name="q5" value="c">
+              throw.next()
+            </label>
+          </div>
+
+          <button class="btn" onclick="checkQuiz()">
+            Check Answers
+          </button>
+
+          <div id="quizResult"></div>
+
+        </div>
+      </section>
+
+      <!-- CHALLENGE -->
+
+      <section class="section" id="challenge">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">23</div>
+            <div>
+              <h2>Practical Coding Challenge</h2>
+              <p>Build your own middleware pipeline</p>
+            </div>
+          </div>
+
+          <p>
+            Create an Express server with the following requirements:
+          </p>
+
+          <ol>
+            <li>Create a logger middleware.</li>
+            <li>Create an authentication middleware.</li>
+            <li>Create a <code>/dashboard</code> route.</li>
+            <li>Return status 401 when authentication fails.</li>
+            <li>Create a 404 handler.</li>
+            <li>Create a centralized error handler.</li>
+          </ol>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>Starter Code</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+
+            <pre><code>const express = require("express");
+
+const app = express();
+
+function logger(req, res, next) {
+  // Write your code
+}
+
+function authenticate(req, res, next) {
+  // Write your code
+}
+
+app.use(logger);
+
+app.get("/dashboard",
+  authenticate,
+  (req, res) => {
+
+    // Send dashboard response
+
+  }
+);
+
+// 404 middleware
+
+// Error middleware
+
+app.listen(3000);</code></pre>
+          </div>
+
+          <details>
+            <summary style="cursor:pointer;font-weight:800;color:#2563eb;">
+              Show Solution
+            </summary>
+
+            <div class="code-wrap" style="margin-top:15px;">
+              <div class="code-header">
+                <span>Solution</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              </div>
+
+              <pre><code>const express = require("express");
+
+const app = express();
+
+function logger(req, res, next) {
+
+  console.log(req.method, req.url);
+
+  next();
+
+}
+
+function authenticate(req, res, next) {
+
+  const authenticated = true;
+
+  if (!authenticated) {
+    return res.status(401).json({
+      error: "Authentication required"
+    });
+  }
+
+  next();
+
+}
+
+app.use(logger);
+
+app.get(
+  "/dashboard",
+  authenticate,
+  (req, res) => {
+
+    res.json({
+      message: "Dashboard loaded"
+    });
+
+  }
+);
+
+app.use((req, res) => {
+
+  res.status(404).json({
+    error: "Route not found"
+  });
+
+});
+
+app.use((err, req, res, next) => {
+
+  console.error(err);
+
+  res.status(500).json({
+    error: "Internal server error"
+  });
+
+});
+
+app.listen(3000, () => {
+
+  console.log("Server running on port 3000");
+
+});</code></pre>
+            </div>
+          </details>
+
+        </div>
+      </section>
+
+      <!-- COMPLETE -->
+
+      <section class="section" id="complete">
+        <div class="section-card">
+
+          <div class="section-heading">
+            <div class="section-icon">✓</div>
+            <div>
+              <h2>Lesson Completion</h2>
+              <p>Track your progress</p>
+            </div>
+          </div>
+
+          <div class="progress-box">
+
+            <h3 style="margin-top:0;">
+              Middleware & Error Handling
+            </h3>
+
+            <p>
+              Complete the quiz and mark this lesson as completed when you
+              understand the request pipeline.
+            </p>
+
+            <div class="progress-track">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <strong id="progressText">0% Complete</strong>
+
+            <br><br>
+
+            <button class="btn" onclick="completeLesson()">
+              ✓ Mark Lesson Complete
+            </button>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- NAV -->
+
+      <div class="lesson-nav">
+
+        <a href="lesson9.html" class="nav-card">
+          <small>← Previous Lesson</small>
+          <strong>09 — Routing in Express.js</strong>
+        </a>
+
+        <a href="lesson11.html" class="nav-card next">
+          <small>Next Lesson →</small>
+          <strong>11 — REST APIs & CRUD Operations</strong>
+        </a>
+
+      </div>
+
+      <footer>
+        <strong>ZENSUS AI</strong> · Developer Learning System
+        <br>
+        Learn concepts. Build systems. Think like an engineer.
+      </footer>
+
+    </main>
+  </div>
+
+  <!-- ================= JAVASCRIPT ================= -->
+
+  <script>
+
+    /* ================= COPY CODE ================= */
+
+    function copyCode(button) {
+
+      const code =
+        button.closest(".code-wrap")
+        .querySelector("code")
+        .innerText;
+
+      navigator.clipboard.writeText(code);
+
+      const original = button.innerText;
+
+      button.innerText = "Copied!";
+
+      setTimeout(() => {
+        button.innerText = original;
+      }, 1200);
+    }
+
+
+    /* ================= ACCORDION ================= */
+
+    function toggleAccordion(button) {
+
+      const content =
+        button.nextElementSibling;
+
+      const isOpen =
+        content.style.maxHeight;
+
+      document
+        .querySelectorAll(".accordion-content")
+        .forEach(item => {
+          item.style.maxHeight = null;
+        });
+
+      document
+        .querySelectorAll(".accordion button span")
+        .forEach(span => {
+          span.innerText = "+";
+        });
+
+      if (!isOpen) {
+
+        content.style.maxHeight =
+          content.scrollHeight + "px";
+
+        button.querySelector("span").innerText = "−";
+      }
+    }
+
+
+    /* ================= PIPELINE LAB ================= */
+
+    function resetPipeline() {
+
+      for (let i = 1; i <= 6; i++) {
+
+        document
+          .getElementById("p" + i)
+          .classList.remove("active", "blocked");
+
+      }
+
+      document.getElementById("labOutput").innerText =
+        "Pipeline reset. Select a scenario.";
+    }
+
+
+    async function runPipeline(blockAuth) {
+
+      resetPipeline();
+
+      const output =
+        document.getElementById("labOutput");
+
+      const steps = [1, 2, 3, 4, 5, 6];
+
+      const names = [
+        "Request received",
+        "Logger recorded the request",
+        "Authentication checked",
+        "Validation completed",
+        "Route handler executed",
+        "Response sent"
+      ];
+
+      for (let i = 0; i < steps.length; i++) {
+
+        const current = steps[i];
+
+        document
+          .getElementById("p" + current)
+          .classList.add("active");
+
+        output.innerText =
+          names[i];
+
+        await new Promise(resolve =>
+          setTimeout(resolve, 600)
+        );
+
+        if (blockAuth && current === 3) {
+
+          document
+            .getElementById("p3")
+            .classList.remove("active");
+
+          document
+            .getElementById("p3")
+            .classList.add("blocked");
+
+          output.innerText =
+            "❌ Authentication failed → Request stopped with HTTP 401.";
+
+          return;
+        }
+      }
+
+      output.innerText =
+        "✅ Request completed successfully → HTTP 200.";
+    }
+
+
+    /* ================= ERROR FLOW ================= */
+
+    async function animateErrorFlow() {
+
+      const nodes = [
+        "err1",
+        "err2",
+        "err3",
+        "err4",
+        "err5"
+      ];
+
+      nodes.forEach(id => {
+        document
+          .getElementById(id)
+          .classList.remove("active");
+      });
+
+      const output =
+        document.getElementById("errorOutput");
+
+      const messages = [
+        "Request received",
+        "Middleware processing",
+        "Route throws an error",
+        "Central error handler receives error",
+        "Error response sent"
+      ];
+
+      for (let i = 0; i < nodes.length; i++) {
+
+        document
+          .getElementById(nodes[i])
+          .classList.add("active");
+
+        output.innerText =
+          messages[i];
+
+        await new Promise(resolve =>
+          setTimeout(resolve, 700)
+        );
+      }
+
+      output.innerText =
+        "✓ Error handled safely and converted into an HTTP response.";
+    }
+
+
+    /* ================= QUIZ ================= */
+
+    function checkQuiz() {
+
+      const answers = {
+        q1: "b",
+        q2: "c",
+        q3: "a",
+        q4: "b",
+        q5: "a"
+      };
+
+      let score = 0;
+
+      Object.keys(answers).forEach(question => {
+
+        const selected =
+          document.querySelector(
+            `input[name="${question}"]:checked`
+          );
+
+        if (selected &&
+            selected.value === answers[question]) {
+
+          score++;
+        }
+      });
+
+      const result =
+        document.getElementById("quizResult");
+
+      result.style.display = "block";
+
+      result.innerText =
+        `Your Score: ${score}/5`;
+
+      if (score === 5) {
+
+        result.innerText +=
+          " — Excellent! You understand the middleware pipeline.";
+
+      } else if (score >= 3) {
+
+        result.innerText +=
+          " — Good work. Review the error-handling section once more.";
+
+      } else {
+
+        result.innerText +=
+          " — Review the lesson concepts and try again.";
+      }
+
+      updateProgress(score);
+    }
+
+
+    /* ================= PROGRESS ================= */
+
+    function updateProgress(score) {
+
+      let progress = Math.round(
+        (score / 5) * 80
+      );
+
+      const completed =
+        localStorage.getItem("zensus_lesson10_complete");
+
+      if (completed) {
+        progress = 100;
+      }
+
+      document
+        .getElementById("progressFill")
+        .style.width = progress + "%";
+
+      document
+        .getElementById("progressText")
+        .innerText =
+          progress + "% Complete";
+    }
+
+
+    function completeLesson() {
+
+      localStorage.setItem(
+        "zensus_lesson10_complete",
+        "true"
+      );
+
+      document
+        .getElementById("progressFill")
+        .style.width = "100%";
+
+      document
+        .getElementById("progressText")
+        .innerText =
+          "100% Complete ✓";
+
+      alert(
+        "Lesson 10 completed! Great work."
+      );
+    }
+
+
+    /* ================= LOAD PROGRESS ================= */
+
+    window.addEventListener("DOMContentLoaded", () => {
+
+      if (
+        localStorage.getItem(
+          "zensus_lesson10_complete"
+        )
+      ) {
+
+        document
+          .getElementById("progressFill")
+          .style.width = "100%";
+
+        document
+          .getElementById("progressText")
+          .innerText =
+            "100% Complete ✓";
+      }
+
+    });
+
+
+    /* ================= ACTIVE SIDEBAR ================= */
+
+    const sections =
+      document.querySelectorAll(".section[id]");
+
+    const links =
+      document.querySelectorAll(".toc a");
+
+    const observer =
+      new IntersectionObserver(
+        entries => {
+
+          entries.forEach(entry => {
+
+            if (entry.isIntersecting) {
+
+              links.forEach(link =>
+                link.classList.remove("active")
+              );
+
+              const active =
+                document.querySelector(
+                  `.toc a[href="#${entry.target.id}"]`
+                );
+
+              if (active) {
+                active.classList.add("active");
+              }
+
+            }
+
+          });
+
+        },
+        {
+          rootMargin: "-20% 0px -65% 0px"
+        }
+      );
+
+    sections.forEach(section =>
+      observer.observe(section)
+    );
+
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,4668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="ZENSUS C Programming Lesson 13 - File Handling">
+<title>Lesson 13 — File Handling in C | ZENSUS</title>
+
+<style>
+/* =========================================================
+   ZENSUS — LESSON 13
+   C FILE HANDLING
+   Standalone CSS
+========================================================= */
+
+:root{
+    --bg:#f5f7fb;
+    --surface:#ffffff;
+    --surface-2:#f8faff;
+    --text:#172033;
+    --muted:#64748b;
+    --border:#e3e8f1;
+    --primary:#4f46e5;
+    --primary-2:#6366f1;
+    --cyan:#0891b2;
+    --green:#059669;
+    --orange:#ea580c;
+    --red:#dc2626;
+    --yellow:#ca8a04;
+    --purple:#7c3aed;
+    --shadow:0 12px 35px rgba(30,41,59,.08);
+    --radius:18px;
+    --code:#111827;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    scroll-behavior:smooth;
+}
+
+html{
+    scroll-padding-top:80px;
+}
+
+body{
+    font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+button,
+input,
+select{
+    font:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+a{
+    color:inherit;
+    text-decoration:none;
+}
+
+/* ================= TOPBAR ================= */
+
+.topbar{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    height:68px;
+    z-index:1000;
+    background:rgba(255,255,255,.94);
+    backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 24px;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-weight:800;
+}
+
+.logo{
+    width:40px;
+    height:40px;
+    border-radius:12px;
+    display:grid;
+    place-items:center;
+    color:white;
+    background:linear-gradient(135deg,#4f46e5,#7c3aed);
+    box-shadow:0 7px 20px rgba(79,70,229,.25);
+}
+
+.brand-text{
+    display:flex;
+    flex-direction:column;
+    line-height:1.1;
+}
+
+.brand-text strong{
+    font-size:17px;
+    letter-spacing:.5px;
+}
+
+.brand-text span{
+    font-size:11px;
+    color:var(--muted);
+    font-weight:600;
+}
+
+.top-right{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.lesson-badge{
+    padding:7px 12px;
+    border:1px solid #dfe3ff;
+    background:#f3f4ff;
+    color:var(--primary);
+    border-radius:999px;
+    font-size:12px;
+    font-weight:800;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar{
+    position:fixed;
+    top:68px;
+    left:0;
+    bottom:0;
+    width:270px;
+    background:var(--surface);
+    border-right:1px solid var(--border);
+    padding:22px 16px;
+    overflow-y:auto;
+    z-index:900;
+}
+
+.side-title{
+    padding:0 10px 12px;
+    color:var(--muted);
+    font-size:11px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:1.2px;
+}
+
+.side-link{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 12px;
+    margin:3px 0;
+    border-radius:11px;
+    color:#526075;
+    font-size:13px;
+    font-weight:650;
+    transition:.25s ease;
+}
+
+.side-link:hover{
+    background:#f2f4ff;
+    color:var(--primary);
+    transform:translateX(3px);
+}
+
+.side-link.active{
+    background:#eef0ff;
+    color:var(--primary);
+    font-weight:800;
+}
+
+.side-num{
+    min-width:23px;
+    height:23px;
+    border-radius:7px;
+    display:grid;
+    place-items:center;
+    font-size:10px;
+    background:#f0f2f7;
+    color:#667085;
+}
+
+.side-link.active .side-num{
+    background:var(--primary);
+    color:white;
+}
+
+.progress-box{
+    margin:22px 8px 0;
+    padding:14px;
+    border:1px solid var(--border);
+    border-radius:15px;
+    background:#fafbff;
+}
+
+.progress-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    font-weight:800;
+    color:var(--muted);
+    margin-bottom:8px;
+}
+
+.progress-track{
+    height:7px;
+    border-radius:20px;
+    background:#e8ebf2;
+    overflow:hidden;
+}
+
+.progress-fill{
+    width:13%;
+    height:100%;
+    border-radius:20px;
+    background:linear-gradient(90deg,#4f46e5,#8b5cf6);
+    transition:width .3s ease;
+}
+
+/* ================= MAIN ================= */
+
+.main{
+    margin-left:270px;
+    padding:92px 34px 60px;
+    max-width:1500px;
+}
+
+.container{
+    max-width:1180px;
+    margin:auto;
+}
+
+/* ================= HERO ================= */
+
+.hero{
+    position:relative;
+    overflow:hidden;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:28px;
+    padding:48px;
+    box-shadow:var(--shadow);
+}
+
+.hero::before{
+    content:"";
+    position:absolute;
+    width:300px;
+    height:300px;
+    right:-130px;
+    top:-150px;
+    border-radius:50%;
+    background:rgba(99,102,241,.09);
+}
+
+.hero::after{
+    content:"";
+    position:absolute;
+    width:180px;
+    height:180px;
+    left:-100px;
+    bottom:-100px;
+    border-radius:50%;
+    background:rgba(8,145,178,.07);
+}
+
+.hero-content{
+    position:relative;
+    z-index:2;
+}
+
+.eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:7px 12px;
+    border-radius:999px;
+    background:#eef0ff;
+    color:var(--primary);
+    font-size:11px;
+    font-weight:850;
+    letter-spacing:.7px;
+    text-transform:uppercase;
+}
+
+.hero h1{
+    margin-top:17px;
+    font-size:clamp(34px,5vw,60px);
+    line-height:1.08;
+    letter-spacing:-2px;
+}
+
+.hero h1 span{
+    color:var(--primary);
+}
+
+.hero-sub{
+    max-width:800px;
+    color:var(--muted);
+    margin-top:17px;
+    font-size:16px;
+}
+
+.hero-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    margin-top:25px;
+}
+
+.meta{
+    padding:7px 11px;
+    border-radius:9px;
+    background:#f7f8fc;
+    border:1px solid var(--border);
+    color:#596579;
+    font-size:11px;
+    font-weight:800;
+}
+
+/* ================= SECTIONS ================= */
+
+.section{
+    margin-top:30px;
+    scroll-margin-top:85px;
+}
+
+.section-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:30px;
+    box-shadow:0 7px 24px rgba(30,41,59,.045);
+}
+
+.section-head{
+    display:flex;
+    align-items:flex-start;
+    gap:14px;
+    margin-bottom:22px;
+}
+
+.section-icon{
+    width:43px;
+    height:43px;
+    flex-shrink:0;
+    border-radius:12px;
+    display:grid;
+    place-items:center;
+    background:#eef0ff;
+    color:var(--primary);
+    font-size:19px;
+}
+
+.section-head h2{
+    font-size:25px;
+    line-height:1.25;
+    letter-spacing:-.6px;
+}
+
+.section-head p{
+    color:var(--muted);
+    font-size:13px;
+    margin-top:3px;
+}
+
+h3{
+    margin:23px 0 9px;
+    font-size:18px;
+}
+
+h4{
+    margin:16px 0 7px;
+}
+
+p{
+    margin:8px 0;
+}
+
+ul,
+ol{
+    padding-left:22px;
+}
+
+li{
+    margin:5px 0;
+}
+
+strong{
+    color:#263248;
+}
+
+/* ================= OBJECTIVES ================= */
+
+.objectives{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+}
+
+.objective{
+    display:flex;
+    gap:12px;
+    padding:15px;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:13px;
+}
+
+.check{
+    width:27px;
+    height:27px;
+    flex-shrink:0;
+    border-radius:8px;
+    display:grid;
+    place-items:center;
+    background:#e9fbf4;
+    color:var(--green);
+    font-weight:900;
+}
+
+.objective span{
+    font-size:13px;
+    color:#4d5a70;
+}
+
+/* ================= INFO GRID ================= */
+
+.grid-2{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+}
+
+.grid-3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+}
+
+.info-card{
+    padding:19px;
+    background:#fafbfe;
+    border:1px solid var(--border);
+    border-radius:14px;
+}
+
+.info-card .mini-icon{
+    font-size:24px;
+    margin-bottom:7px;
+}
+
+.info-card h3{
+    margin:0 0 5px;
+    font-size:16px;
+}
+
+.info-card p{
+    color:var(--muted);
+    font-size:13px;
+}
+
+/* ================= CALLOUT ================= */
+
+.callout{
+    margin:18px 0;
+    padding:16px 18px;
+    border-radius:13px;
+    border-left:4px solid var(--primary);
+    background:#f5f5ff;
+    color:#49566d;
+    font-size:13px;
+}
+
+.callout.success{
+    border-left-color:var(--green);
+    background:#effcf7;
+}
+
+.callout.warning{
+    border-left-color:var(--orange);
+    background:#fff7ed;
+}
+
+.callout.danger{
+    border-left-color:var(--red);
+    background:#fff1f2;
+}
+
+/* ================= CODE ================= */
+
+.code-wrap{
+    position:relative;
+    margin:15px 0;
+}
+
+pre{
+    background:var(--code);
+    color:#e5e7eb;
+    border-radius:14px;
+    padding:21px;
+    overflow-x:auto;
+    font-family:"Cascadia Code","Consolas","Courier New",monospace;
+    font-size:13px;
+    line-height:1.7;
+    border:1px solid #1f2937;
+}
+
+.copy-btn{
+    position:absolute;
+    right:10px;
+    top:10px;
+    border:1px solid #374151;
+    background:#1f2937;
+    color:#d1d5db;
+    border-radius:8px;
+    padding:5px 9px;
+    font-size:10px;
+    font-weight:800;
+}
+
+.copy-btn:hover{
+    background:#374151;
+    color:white;
+}
+
+code.inline{
+    background:#f0f2f7;
+    padding:2px 6px;
+    border-radius:6px;
+    color:#5b21b6;
+    font-family:Consolas,monospace;
+    font-size:.9em;
+}
+
+/* ================= FLOWCHART ================= */
+
+.flow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:0;
+    margin:24px 0;
+}
+
+.flow-box{
+    position:relative;
+    min-width:135px;
+    padding:15px 18px;
+    text-align:center;
+    border:2px solid #dfe3ff;
+    background:#f7f8ff;
+    border-radius:13px;
+    font-size:12px;
+    font-weight:800;
+    color:#454e64;
+    animation:floatBox 3s ease-in-out infinite;
+}
+
+.flow-box:nth-child(2){animation-delay:.3s}
+.flow-box:nth-child(3){animation-delay:.6s}
+.flow-box:nth-child(4){animation-delay:.9s}
+.flow-box:nth-child(5){animation-delay:1.2s}
+
+.flow-box small{
+    display:block;
+    color:var(--muted);
+    font-weight:500;
+    margin-top:3px;
+}
+
+.flow-arrow{
+    font-size:23px;
+    color:var(--primary);
+    padding:0 9px;
+    animation:arrowPulse 1.5s infinite;
+}
+
+@keyframes floatBox{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-5px)}
+}
+
+@keyframes arrowPulse{
+    0%,100%{opacity:.35;transform:translateX(0)}
+    50%{opacity:1;transform:translateX(4px)}
+}
+
+/* ================= FILE ANIMATION ================= */
+
+.file-animation{
+    margin:25px 0;
+    padding:30px 20px;
+    border-radius:18px;
+    background:#f8faff;
+    border:1px solid var(--border);
+    overflow:hidden;
+}
+
+.file-stage{
+    display:flex;
+    align-items:center;
+    justify-content:space-around;
+    gap:20px;
+    min-height:180px;
+}
+
+.program-box,
+.stream-box,
+.file-box{
+    text-align:center;
+}
+
+.animation-icon{
+    width:80px;
+    height:80px;
+    border-radius:20px;
+    display:grid;
+    place-items:center;
+    margin:auto;
+    font-size:35px;
+    border:2px solid var(--border);
+    background:white;
+    box-shadow:0 8px 22px rgba(30,41,59,.07);
+}
+
+.program-box .animation-icon{
+    border-color:#c7d2fe;
+    background:#eef2ff;
+}
+
+.stream-box .animation-icon{
+    border-color:#bae6fd;
+    background:#ecfeff;
+}
+
+.file-box .animation-icon{
+    border-color:#bbf7d0;
+    background:#ecfdf5;
+}
+
+.animation-label{
+    margin-top:9px;
+    font-size:12px;
+    font-weight:850;
+}
+
+.animation-sub{
+    font-size:10px;
+    color:var(--muted);
+}
+
+.packet-track{
+    position:relative;
+    flex:1;
+    height:70px;
+    max-width:240px;
+}
+
+.packet-line{
+    position:absolute;
+    left:0;
+    right:0;
+    top:50%;
+    height:3px;
+    background:#dce2ef;
+}
+
+.packet{
+    position:absolute;
+    top:calc(50% - 17px);
+    left:0;
+    width:34px;
+    height:34px;
+    border-radius:9px;
+    display:grid;
+    place-items:center;
+    background:var(--primary);
+    color:white;
+    font-size:12px;
+    font-weight:900;
+    box-shadow:0 6px 16px rgba(79,70,229,.3);
+    animation:packetMove 3s linear infinite;
+}
+
+@keyframes packetMove{
+    0%{left:0;opacity:0}
+    12%{opacity:1}
+    88%{opacity:1}
+    100%{left:calc(100% - 34px);opacity:0}
+}
+
+.reverse .packet{
+    animation:packetReverse 3s linear infinite;
+}
+
+@keyframes packetReverse{
+    0%{left:calc(100% - 34px);opacity:0}
+    12%{opacity:1}
+    88%{opacity:1}
+    100%{left:0;opacity:0}
+}
+
+/* ================= FILE MODE TABLE ================= */
+
+.table-wrap{
+    overflow-x:auto;
+    margin:18px 0;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:650px;
+}
+
+th,
+td{
+    padding:12px 13px;
+    border-bottom:1px solid var(--border);
+    text-align:left;
+    font-size:12px;
+}
+
+th{
+    background:#f5f6fb;
+    color:#465168;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+}
+
+td code{
+    font-family:Consolas,monospace;
+    color:var(--primary);
+    font-weight:800;
+}
+
+/* ================= MODE LAB ================= */
+
+.lab{
+    background:#fafbff;
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:21px;
+    margin-top:18px;
+}
+
+.lab-controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:15px 0;
+}
+
+.lab-btn{
+    border:1px solid #dfe3ff;
+    background:white;
+    color:#4f46e5;
+    padding:8px 12px;
+    border-radius:9px;
+    font-size:11px;
+    font-weight:850;
+    transition:.2s;
+}
+
+.lab-btn:hover,
+.lab-btn.active{
+    background:var(--primary);
+    color:white;
+    border-color:var(--primary);
+}
+
+.lab-output{
+    min-height:95px;
+    padding:15px;
+    border-radius:12px;
+    background:#111827;
+    color:#d1d5db;
+    font-family:Consolas,monospace;
+    font-size:12px;
+    white-space:pre-wrap;
+}
+
+/* ================= CURSOR ================= */
+
+.cursor-demo{
+    padding:20px;
+    border:1px solid var(--border);
+    border-radius:15px;
+    background:#fbfcff;
+    margin-top:15px;
+}
+
+.cursor-file{
+    display:flex;
+    justify-content:center;
+    gap:5px;
+    flex-wrap:wrap;
+    margin:20px 0;
+}
+
+.file-cell{
+    width:42px;
+    height:45px;
+    border-radius:8px;
+    display:grid;
+    place-items:center;
+    background:white;
+    border:1px solid #d9dfeb;
+    font-family:Consolas,monospace;
+    font-size:13px;
+    position:relative;
+    transition:.35s;
+}
+
+.file-cell.active{
+    background:#eef0ff;
+    border-color:var(--primary);
+    color:var(--primary);
+    transform:translateY(-7px);
+    box-shadow:0 8px 18px rgba(79,70,229,.15);
+}
+
+.file-cell.active::after{
+    content:"cursor";
+    position:absolute;
+    bottom:-22px;
+    font-family:Inter,sans-serif;
+    font-size:8px;
+    color:var(--primary);
+    font-weight:800;
+}
+
+.cursor-controls{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+}
+
+/* ================= EOF DEMO ================= */
+
+.eof-demo{
+    padding:20px;
+    border-radius:15px;
+    background:#101827;
+    color:#d7dce5;
+    font-family:Consolas,monospace;
+}
+
+.eof-line{
+    margin:8px 0;
+    opacity:.4;
+    transition:.4s;
+}
+
+.eof-line.current{
+    opacity:1;
+    color:#a5b4fc;
+}
+
+.eof-line.success{
+    opacity:1;
+    color:#6ee7b7;
+}
+
+/* ================= BINARY VISUAL ================= */
+
+.binary-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+    margin-top:18px;
+}
+
+.binary-box{
+    padding:18px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:#fafbff;
+}
+
+.binary-bytes{
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+    margin-top:12px;
+}
+
+.byte{
+    padding:6px 8px;
+    border-radius:6px;
+    background:#eef0ff;
+    color:#4338ca;
+    font-family:Consolas,monospace;
+    font-size:10px;
+    font-weight:800;
+    animation:byteAppear 1.5s infinite alternate;
+}
+
+.byte:nth-child(2){animation-delay:.1s}
+.byte:nth-child(3){animation-delay:.2s}
+.byte:nth-child(4){animation-delay:.3s}
+.byte:nth-child(5){animation-delay:.4s}
+.byte:nth-child(6){animation-delay:.5s}
+
+@keyframes byteAppear{
+    from{transform:translateY(3px);opacity:.55}
+    to{transform:translateY(-3px);opacity:1}
+}
+
+/* ================= STEP CARDS ================= */
+
+.steps{
+    display:grid;
+    gap:10px;
+}
+
+.step{
+    display:flex;
+    gap:14px;
+    padding:14px;
+    border:1px solid var(--border);
+    border-radius:13px;
+    background:#fbfcff;
+}
+
+.step-number{
+    width:32px;
+    height:32px;
+    border-radius:10px;
+    background:#eef0ff;
+    color:var(--primary);
+    display:grid;
+    place-items:center;
+    font-size:12px;
+    font-weight:900;
+    flex-shrink:0;
+}
+
+/* ================= MISTAKES ================= */
+
+.mistakes{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+}
+
+.mistake{
+    padding:15px;
+    border:1px solid #fee2e2;
+    background:#fffafa;
+    border-radius:13px;
+}
+
+.mistake-title{
+    color:var(--red);
+    font-weight:850;
+    font-size:13px;
+}
+
+.mistake p{
+    color:#657186;
+    font-size:12px;
+}
+
+/* ================= QUIZ ================= */
+
+.quiz-question{
+    padding:18px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    margin:12px 0;
+    background:#fbfcff;
+}
+
+.question{
+    font-weight:800;
+    font-size:14px;
+}
+
+.options{
+    margin-top:11px;
+    display:grid;
+    gap:7px;
+}
+
+.option{
+    padding:10px 12px;
+    border:1px solid var(--border);
+    background:white;
+    border-radius:9px;
+    text-align:left;
+    font-size:12px;
+    color:#536076;
+    transition:.2s;
+}
+
+.option:hover{
+    border-color:#c7d2fe;
+    background:#f7f7ff;
+}
+
+.option.correct{
+    background:#ecfdf5;
+    border-color:#86efac;
+    color:#047857;
+}
+
+.option.wrong{
+    background:#fff1f2;
+    border-color:#fca5a5;
+    color:#b91c1c;
+}
+
+.quiz-result{
+    display:none;
+    margin-top:18px;
+    padding:15px;
+    border-radius:12px;
+    background:#eef0ff;
+    color:#4338ca;
+    font-weight:800;
+}
+
+.quiz-submit{
+    margin-top:15px;
+    border:0;
+    background:var(--primary);
+    color:white;
+    padding:10px 17px;
+    border-radius:10px;
+    font-size:12px;
+    font-weight:850;
+}
+
+/* ================= ACCORDION ================= */
+
+.accordion{
+    border:1px solid var(--border);
+    border-radius:13px;
+    overflow:hidden;
+    margin:10px 0;
+}
+
+.accordion-header{
+    width:100%;
+    border:0;
+    background:white;
+    padding:15px;
+    display:flex;
+    justify-content:space-between;
+    text-align:left;
+    color:#334056;
+    font-weight:800;
+    font-size:13px;
+}
+
+.accordion-header span:last-child{
+    color:var(--primary);
+}
+
+.accordion-body{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .35s ease;
+    background:#fafbff;
+}
+
+.accordion-body div{
+    padding:0 15px 15px;
+    color:#667389;
+    font-size:12px;
+}
+
+/* ================= PROJECT ================= */
+
+.project-header{
+    padding:22px;
+    border-radius:16px;
+    background:#111827;
+    color:white;
+    margin-bottom:18px;
+}
+
+.project-header h3{
+    margin:0;
+    color:white;
+}
+
+.project-header p{
+    color:#aeb7c7;
+}
+
+.menu-demo{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:8px;
+    margin:15px 0;
+}
+
+.menu-item{
+    padding:12px 7px;
+    text-align:center;
+    background:#f5f6fb;
+    border:1px solid var(--border);
+    border-radius:9px;
+    font-size:10px;
+    font-weight:800;
+}
+
+.menu-item.active{
+    background:#eef0ff;
+    color:var(--primary);
+    border-color:#c7d2fe;
+}
+
+/* ================= EXAM ================= */
+
+.exam-box{
+    border:1px solid var(--border);
+    border-radius:14px;
+    overflow:hidden;
+}
+
+.exam-row{
+    padding:16px;
+    border-bottom:1px solid var(--border);
+}
+
+.exam-row:last-child{
+    border-bottom:0;
+}
+
+.exam-label{
+    display:inline-block;
+    margin-bottom:5px;
+    padding:4px 8px;
+    border-radius:6px;
+    background:#eef0ff;
+    color:var(--primary);
+    font-size:10px;
+    font-weight:900;
+}
+
+/* ================= BUTTON ================= */
+
+.primary-btn{
+    border:0;
+    background:var(--primary);
+    color:white;
+    padding:10px 16px;
+    border-radius:10px;
+    font-size:12px;
+    font-weight:850;
+    box-shadow:0 7px 18px rgba(79,70,229,.18);
+    transition:.2s;
+}
+
+.primary-btn:hover{
+    transform:translateY(-2px);
+}
+
+.secondary-btn{
+    border:1px solid var(--border);
+    background:white;
+    color:#4b5870;
+    padding:10px 16px;
+    border-radius:10px;
+    font-size:12px;
+    font-weight:800;
+}
+
+/* ================= REVEAL ================= */
+
+.reveal{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .4s ease;
+}
+
+.reveal.open{
+    max-height:1000px;
+}
+
+.reveal-btn{
+    margin-top:9px;
+    border:1px solid #dfe3ff;
+    background:#f5f6ff;
+    color:var(--primary);
+    border-radius:8px;
+    padding:7px 11px;
+    font-size:11px;
+    font-weight:850;
+}
+
+/* ================= FOOTER ================= */
+
+.footer{
+    text-align:center;
+    padding:35px 10px 10px;
+    color:#8791a4;
+    font-size:11px;
+}
+
+.next-lesson{
+    display:inline-flex;
+    margin-top:13px;
+    padding:10px 15px;
+    border-radius:10px;
+    background:#eef0ff;
+    color:var(--primary);
+    font-weight:850;
+}
+
+/* ================= BACK TO TOP ================= */
+
+#topBtn{
+    position:fixed;
+    right:22px;
+    bottom:22px;
+    width:42px;
+    height:42px;
+    border:0;
+    border-radius:13px;
+    background:var(--primary);
+    color:white;
+    display:none;
+    place-items:center;
+    box-shadow:0 8px 25px rgba(79,70,229,.25);
+    z-index:1100;
+}
+
+/* ================= REVEAL ANIMATION ================= */
+
+.animate-on-scroll{
+    opacity:0;
+    transform:translateY(18px);
+    transition:.65s ease;
+}
+
+.animate-on-scroll.visible{
+    opacity:1;
+    transform:translateY(0);
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:1050px){
+    .sidebar{
+        width:220px;
+    }
+
+    .main{
+        margin-left:220px;
+    }
+
+    .grid-3{
+        grid-template-columns:1fr 1fr;
+    }
+}
+
+@media(max-width:800px){
+    .topbar{
+        padding:0 15px;
+    }
+
+    .sidebar{
+        position:static;
+        width:100%;
+        height:auto;
+        max-height:260px;
+        border-right:0;
+        border-bottom:1px solid var(--border);
+        margin-top:68px;
+    }
+
+    .main{
+        margin-left:0;
+        padding:25px 15px 45px;
+    }
+
+    .hero{
+        padding:30px 22px;
+    }
+
+    .objectives,
+    .grid-2,
+    .binary-grid,
+    .mistakes{
+        grid-template-columns:1fr;
+    }
+
+    .grid-3{
+        grid-template-columns:1fr;
+    }
+
+    .file-stage{
+        flex-direction:column;
+    }
+
+    .packet-track{
+        width:80%;
+        min-height:55px;
+    }
+
+    .menu-demo{
+        grid-template-columns:1fr 1fr;
+    }
+}
+
+@media(max-width:520px){
+    .brand-text span{
+        display:none;
+    }
+
+    .lesson-badge{
+        display:none;
+    }
+
+    .hero h1{
+        letter-spacing:-1px;
+    }
+
+    .section-card{
+        padding:21px 17px;
+    }
+
+    .flow{
+        flex-direction:column;
+    }
+
+    .flow-arrow{
+        transform:rotate(90deg);
+    }
+
+    .flow-box{
+        width:80%;
+    }
+
+    pre{
+        font-size:11px;
+        padding:16px;
+    }
+
+    .topbar{
+        height:60px;
+    }
+
+    .sidebar{
+        margin-top:60px;
+        top:60px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =========================================================
+     TOP BAR
+========================================================= -->
+
+<header class="topbar">
+    <div class="brand">
+        <div class="logo">Z</div>
+        <div class="brand-text">
+            <strong>ZENSUS</strong>
+            <span>C Programming • Learn by Building</span>
+        </div>
+    </div>
+
+    <div class="top-right">
+        <div class="lesson-badge">LESSON 13 / 15</div>
+    </div>
+</header>
+
+
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
+
+<aside class="sidebar">
+
+    <div class="side-title">Lesson navigation</div>
+
+    <a class="side-link active" href="#intro">
+        <span class="side-num">01</span>
+        Introduction
+    </a>
+
+    <a class="side-link" href="#model">
+        <span class="side-num">02</span>
+        File Model
+    </a>
+
+    <a class="side-link" href="#open">
+        <span class="side-num">03</span>
+        fopen / fclose
+    </a>
+
+    <a class="side-link" href="#modes">
+        <span class="side-num">04</span>
+        File Modes
+    </a>
+
+    <a class="side-link" href="#character">
+        <span class="side-num">05</span>
+        Character I/O
+    </a>
+
+    <a class="side-link" href="#strings">
+        <span class="side-num">06</span>
+        String I/O
+    </a>
+
+    <a class="side-link" href="#formatted">
+        <span class="side-num">07</span>
+        Formatted I/O
+    </a>
+
+    <a class="side-link" href="#eof">
+        <span class="side-num">08</span>
+        EOF & Errors
+    </a>
+
+    <a class="side-link" href="#random">
+        <span class="side-num">09</span>
+        Random Access
+    </a>
+
+    <a class="side-link" href="#binary">
+        <span class="side-num">10</span>
+        Binary Files
+    </a>
+
+    <a class="side-link" href="#records">
+        <span class="side-num">11</span>
+        Student Records
+    </a>
+
+    <a class="side-link" href="#mistakes">
+        <span class="side-num">12</span>
+        Mistakes
+    </a>
+
+    <a class="side-link" href="#interview">
+        <span class="side-num">13</span>
+        Interview
+    </a>
+
+    <a class="side-link" href="#quiz">
+        <span class="side-num">14</span>
+        Quiz
+    </a>
+
+    <a class="side-link" href="#project">
+        <span class="side-num">15</span>
+        Mini Project
+    </a>
+
+    <div class="progress-box">
+        <div class="progress-row">
+            <span>Lesson progress</span>
+            <span id="progressText">13%</span>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </div>
+
+</aside>
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<main class="main">
+<div class="container">
+
+<!-- ================= HERO ================= -->
+
+<section class="hero animate-on-scroll" id="intro">
+
+    <div class="hero-content">
+
+        <div class="eyebrow">
+            📁 C PROGRAMMING • LESSON 13
+        </div>
+
+        <h1>
+            File <span>Handling</span> in C
+        </h1>
+
+        <p class="hero-sub">
+            Store, retrieve and manage data beyond program execution.
+            Master text files, binary files, file modes, streams,
+            sequential access, random access and real-world record systems.
+        </p>
+
+        <div class="hero-meta">
+            <span class="meta">Beginner → Advanced</span>
+            <span class="meta">Interview Ready</span>
+            <span class="meta">JNTUK Exam Ready</span>
+            <span class="meta">Interactive</span>
+            <span class="meta">Animated</span>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= OBJECTIVES ================= -->
+
+<section class="section animate-on-scroll">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">🎯</div>
+        <div>
+            <h2>What you will master</h2>
+            <p>By the end of this lesson, you should be able to work with persistent data confidently.</p>
+        </div>
+    </div>
+
+    <div class="objectives">
+
+        <div class="objective">
+            <div class="check">✓</div>
+            <span>Understand why files are needed and how C uses streams.</span>
+        </div>
+
+        <div class="objective">
+            <div class="check">✓</div>
+            <span>Open, read, write, append and close files safely.</span>
+        </div>
+
+        <div class="objective">
+            <div class="check">✓</div>
+            <span>Choose correctly between r, w, a, r+, w+ and a+.</span>
+        </div>
+
+        <div class="objective">
+            <div class="check">✓</div>
+            <span>Use fgetc, fputc, fgets, fputs, fprintf and fscanf.</span>
+        </div>
+
+        <div class="objective">
+            <div class="check">✓</div>
+            <span>Understand EOF, feof, ferror and perror.</span>
+        </div>
+
+        <div class="objective">
+            <div class="check">✓</div>
+            <span>Use fseek, ftell and rewind for file positioning.</span>
+        </div>
+
+        <div class="objective">
+            <div class="check">✓</div>
+            <span>Understand text files versus binary files.</span>
+        </div>
+
+        <div class="objective">
+            <div class="check">✓</div>
+            <span>Build a practical student file-management system.</span>
+        </div>
+
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= WHY FILES ================= -->
+
+<section class="section animate-on-scroll">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">💾</div>
+        <div>
+            <h2>Why do we need file handling?</h2>
+            <p>Variables and arrays live in memory. Files allow information to survive the program.</p>
+        </div>
+    </div>
+
+    <div class="grid-2">
+
+        <div class="info-card">
+            <div class="mini-icon">🧠</div>
+            <h3>Without files</h3>
+            <p>
+                Data stored in normal variables exists during program execution.
+                When the program terminates, that in-memory data is normally lost.
+            </p>
+        </div>
+
+        <div class="info-card">
+            <div class="mini-icon">📁</div>
+            <h3>With files</h3>
+            <p>
+                Data can be stored in persistent storage and loaded again
+                when the program runs in the future.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="callout success">
+        <strong>Core idea:</strong>
+        RAM is temporary working space. A file provides persistent storage
+        that your program can access through C's standard I/O library.
+    </div>
+
+    <h3>Real-world examples</h3>
+
+    <div class="grid-3">
+
+        <div class="info-card">
+            <div class="mini-icon">👨‍🎓</div>
+            <h3>Student records</h3>
+            <p>Roll number, name and marks can be stored permanently.</p>
+        </div>
+
+        <div class="info-card">
+            <div class="mini-icon">🧾</div>
+            <h3>Transaction logs</h3>
+            <p>Applications can keep records of operations and events.</p>
+        </div>
+
+        <div class="info-card">
+            <div class="mini-icon">⚙️</div>
+            <h3>Configuration</h3>
+            <p>Programs can read settings from configuration files.</p>
+        </div>
+
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= FILE MODEL ================= -->
+
+<section class="section animate-on-scroll" id="model">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">🔗</div>
+        <div>
+            <h2>The C File Handling Model</h2>
+            <p>Program → stream → file</p>
+        </div>
+    </div>
+
+    <p>
+        C does not normally manipulate a file by directly treating it as a
+        simple memory array. The standard I/O library provides a
+        <strong>stream abstraction</strong>.
+    </p>
+
+    <div class="file-animation">
+
+        <div class="file-stage">
+
+            <div class="program-box">
+                <div class="animation-icon">💻</div>
+                <div class="animation-label">C Program</div>
+                <div class="animation-sub">your code</div>
+            </div>
+
+            <div class="packet-track">
+                <div class="packet-line"></div>
+                <div class="packet">IO</div>
+            </div>
+
+            <div class="stream-box">
+                <div class="animation-icon">🌊</div>
+                <div class="animation-label">FILE *</div>
+                <div class="animation-sub">C stream</div>
+            </div>
+
+            <div class="packet-track reverse">
+                <div class="packet-line"></div>
+                <div class="packet">IO</div>
+            </div>
+
+            <div class="file-box">
+                <div class="animation-icon">📄</div>
+                <div class="animation-label">File</div>
+                <div class="animation-sub">persistent storage</div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="callout">
+        <strong>Important:</strong>
+        <code class="inline">FILE *</code> is a pointer to a C library-managed
+        stream object. It should not be thought of simply as the raw operating-system
+        file descriptor.
+    </div>
+
+    <h3>The basic lifecycle</h3>
+
+    <div class="flow">
+
+        <div class="flow-box">
+            OPEN
+            <small>fopen()</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-box">
+            CHECK
+            <small>NULL?</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-box">
+            OPERATE
+            <small>read/write</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-box">
+            CLOSE
+            <small>fclose()</small>
+        </div>
+
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= FOPEN FCLOSE ================= -->
+
+<section class="section animate-on-scroll" id="open">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">🔓</div>
+        <div>
+            <h2>fopen() and fclose()</h2>
+            <p>The two operations you must understand first.</p>
+        </div>
+    </div>
+
+    <h3>Opening a file</h3>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    FILE *fp = fopen("data.txt", "r");
+
+    if (fp == NULL)
+    {
+        perror("fopen");
+        return 1;
+    }
+
+    printf("File opened successfully.\n");
+
+    fclose(fp);
+
+    return 0;
+}</code></pre>
+    </div>
+
+    <h3>Understanding the statement</h3>
+
+    <div class="steps">
+
+        <div class="step">
+            <div class="step-number">1</div>
+            <div>
+                <strong>FILE *fp</strong>
+                <p>
+                    Declares a pointer that will refer to the C library's
+                    stream object associated with the opened file.
+                </p>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">2</div>
+            <div>
+                <strong>fopen("data.txt", "r")</strong>
+                <p>
+                    Requests the C library to open <code class="inline">data.txt</code>
+                    in read mode.
+                </p>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">3</div>
+            <div>
+                <strong>if (fp == NULL)</strong>
+                <p>
+                    Opening may fail because the file does not exist,
+                    permission is denied, the path is invalid, or another
+                    system error occurs.
+                </p>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">4</div>
+            <div>
+                <strong>fclose(fp)</strong>
+                <p>
+                    Closes the stream and releases associated resources.
+                    Check its return value when close errors matter.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="callout warning">
+        <strong>Golden rule:</strong>
+        Never assume <code class="inline">fopen()</code> succeeded.
+        Always check for <code class="inline">NULL</code>.
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= MODES ================= -->
+
+<section class="section animate-on-scroll" id="modes">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">🎛️</div>
+        <div>
+            <h2>File Opening Modes</h2>
+            <p>Choosing the correct mode is one of the most important file-handling skills.</p>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+    <table>
+
+        <thead>
+            <tr>
+                <th>Mode</th>
+                <th>Purpose</th>
+                <th>Must exist?</th>
+                <th>Truncates?</th>
+                <th>Write position</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <tr>
+                <td><code>r</code></td>
+                <td>Read</td>
+                <td>Yes</td>
+                <td>No</td>
+                <td>Beginning</td>
+            </tr>
+
+            <tr>
+                <td><code>w</code></td>
+                <td>Write</td>
+                <td>No</td>
+                <td>Yes</td>
+                <td>Beginning</td>
+            </tr>
+
+            <tr>
+                <td><code>a</code></td>
+                <td>Append</td>
+                <td>No</td>
+                <td>No</td>
+                <td>End</td>
+            </tr>
+
+            <tr>
+                <td><code>r+</code></td>
+                <td>Read + Write</td>
+                <td>Yes</td>
+                <td>No</td>
+                <td>Beginning initially</td>
+            </tr>
+
+            <tr>
+                <td><code>w+</code></td>
+                <td>Read + Write</td>
+                <td>No</td>
+                <td>Yes</td>
+                <td>Beginning</td>
+            </tr>
+
+            <tr>
+                <td><code>a+</code></td>
+                <td>Read + Append</td>
+                <td>No</td>
+                <td>No</td>
+                <td>Writes at end</td>
+            </tr>
+
+        </tbody>
+
+    </table>
+    </div>
+
+    <div class="callout danger">
+        <strong>Danger:</strong>
+        Opening an existing file with <code class="inline">"w"</code>
+        truncates its previous contents.
+    </div>
+
+    <h3>Binary variants</h3>
+
+    <p>
+        Add <code class="inline">b</code> when binary mode is desired:
+    </p>
+
+    <div class="grid-3">
+
+        <div class="info-card">
+            <h3><code>rb</code></h3>
+            <p>Read binary data.</p>
+        </div>
+
+        <div class="info-card">
+            <h3><code>wb</code></h3>
+            <p>Write binary data.</p>
+        </div>
+
+        <div class="info-card">
+            <h3><code>ab</code></h3>
+            <p>Append binary data.</p>
+        </div>
+
+    </div>
+
+    <p>
+        Similarly, <code class="inline">rb+</code>, <code class="inline">wb+</code>
+        and <code class="inline">ab+</code> provide update modes.
+    </p>
+
+    <h3>🎮 Interactive File Mode Simulator</h3>
+
+    <div class="lab">
+
+        <p>
+            Click a mode to see what would happen to an existing
+            <strong>students.txt</strong>.
+        </p>
+
+        <div class="lab-controls">
+
+            <button class="lab-btn mode-btn active" data-mode="r">r</button>
+            <button class="lab-btn mode-btn" data-mode="w">w</button>
+            <button class="lab-btn mode-btn" data-mode="a">a</button>
+            <button class="lab-btn mode-btn" data-mode="r+">r+</button>
+            <button class="lab-btn mode-btn" data-mode="w+">w+</button>
+            <button class="lab-btn mode-btn" data-mode="a+">a+</button>
+
+        </div>
+
+        <div class="lab-output" id="modeOutput"></div>
+
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= CHARACTER IO ================= -->
+
+<section class="section animate-on-scroll" id="character">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">🔤</div>
+        <div>
+            <h2>Character I/O — fputc() and fgetc()</h2>
+            <p>Read and write one character at a time.</p>
+        </div>
+    </div>
+
+    <h3>fputc()</h3>
+
+    <p>
+        <code class="inline">fputc()</code> writes one character to a stream.
+    </p>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>FILE *fp = fopen("message.txt", "w");
+
+if (fp == NULL)
+{
+    perror("fopen");
+    return 1;
+}
+
+fputc('H', fp);
+fputc('i', fp);
+fputc('\n', fp);
+
+fclose(fp);</code></pre>
+    </div>
+
+    <h3>fgetc()</h3>
+
+    <p>
+        <code class="inline">fgetc()</code> reads one character from a stream.
+        Its return type is <strong>int</strong>, not char.
+    </p>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>FILE *fp = fopen("message.txt", "r");
+
+if (fp == NULL)
+{
+    perror("fopen");
+    return 1;
+}
+
+int ch;
+
+while ((ch = fgetc(fp)) != EOF)
+{
+    putchar(ch);
+}
+
+fclose(fp);</code></pre>
+    </div>
+
+    <div class="callout success">
+        <strong>Why int?</strong>
+        <code class="inline">fgetc()</code> must be able to represent every
+        possible unsigned-char value plus the special <code class="inline">EOF</code>
+        value. A plain <code class="inline">char</code> may not be able to represent
+        EOF distinctly.
+    </div>
+
+    <h3>Animated character stream</h3>
+
+    <div class="file-animation">
+
+        <div class="file-stage">
+
+            <div class="file-box">
+                <div class="animation-icon">📄</div>
+                <div class="animation-label">message.txt</div>
+                <div class="animation-sub">H i !</div>
+            </div>
+
+            <div class="packet-track reverse">
+                <div class="packet-line"></div>
+                <div class="packet">H</div>
+            </div>
+
+            <div class="stream-box">
+                <div class="animation-icon">🌊</div>
+                <div class="animation-label">fgetc()</div>
+                <div class="animation-sub">one character</div>
+            </div>
+
+            <div class="packet-track">
+                <div class="packet-line"></div>
+                <div class="packet">H</div>
+            </div>
+
+            <div class="program-box">
+                <div class="animation-icon">💻</div>
+                <div class="animation-label">Program</div>
+                <div class="animation-sub">process it</div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= STRING IO ================= -->
+
+<section class="section animate-on-scroll" id="strings">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">📄</div>
+        <div>
+            <h2>Line and String I/O</h2>
+            <p>Use fgets() and fputs() when working with text lines.</p>
+        </div>
+    </div>
+
+    <h3>fgets()</h3>
+
+    <p>
+        <code class="inline">fgets(buffer, size, fp)</code> reads at most
+        <strong>size - 1</strong> characters and adds a null terminator
+        when successful. If a newline is encountered within the limit,
+        the newline is retained.
+    </p>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>char line[100];
+
+if (fgets(line, sizeof line, fp) != NULL)
+{
+    printf("%s", line);
+}</code></pre>
+    </div>
+
+    <h3>fputs()</h3>
+
+    <p>
+        <code class="inline">fputs()</code> writes a string to a stream.
+        It does <strong>not</strong> automatically add a newline.
+    </p>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>fputs("Welcome to ZENSUS\n", fp);</code></pre>
+    </div>
+
+    <div class="callout warning">
+        <strong>Remember:</strong>
+        <code class="inline">fgets()</code> can keep the newline,
+        while <code class="inline">fputs()</code> does not create one for you.
+    </div>
+
+    <h3>Safe line-reading pattern</h3>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>char name[50];
+
+printf("Enter name: ");
+
+if (fgets(name, sizeof name, stdin) != NULL)
+{
+    /* name may contain '\n' */
+}</code></pre>
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= FORMATTED IO ================= -->
+
+<section class="section animate-on-scroll" id="formatted">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">🧾</div>
+        <div>
+            <h2>Formatted File I/O</h2>
+            <p>fprintf() writes formatted output and fscanf() reads formatted input.</p>
+        </div>
+    </div>
+
+    <h3>fprintf()</h3>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>FILE *fp = fopen("student.txt", "w");
+
+if (fp == NULL)
+{
+    perror("fopen");
+    return 1;
+}
+
+int roll = 101;
+char name[] = "Pradeep";
+float cgpa = 8.63f;
+
+fprintf(fp, "%d %s %.2f\n", roll, name, cgpa);
+
+fclose(fp);</code></pre>
+    </div>
+
+    <h3>fscanf()</h3>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>FILE *fp = fopen("student.txt", "r");
+
+if (fp == NULL)
+{
+    perror("fopen");
+    return 1;
+}
+
+int roll;
+char name[50];
+float cgpa;
+
+if (fscanf(fp, "%d %49s %f", &roll, name, &cgpa) == 3)
+{
+    printf("Roll : %d\n", roll);
+    printf("Name : %s\n", name);
+    printf("CGPA : %.2f\n", cgpa);
+}
+
+fclose(fp);</code></pre>
+    </div>
+
+    <div class="callout">
+        <strong>Important:</strong>
+        <code class="inline">fscanf()</code> is convenient for simple structured
+        text, but whitespace and spaces inside strings can make it tricky.
+        For full lines, <code class="inline">fgets()</code> is often easier to control.
+    </div>
+
+    <h3>fprintf vs fputs vs fputc</h3>
+
+    <div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Function</th>
+                <th>Works with</th>
+                <th>Typical use</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>fputc()</code></td>
+                <td>One character</td>
+                <td>Character-by-character output</td>
+            </tr>
+            <tr>
+                <td><code>fputs()</code></td>
+                <td>String</td>
+                <td>Write a line/string</td>
+            </tr>
+            <tr>
+                <td><code>fprintf()</code></td>
+                <td>Formatted data</td>
+                <td>Records and reports</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= EOF ================= -->
+
+<section class="section animate-on-scroll" id="eof">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">🏁</div>
+        <div>
+            <h2>EOF — End of File</h2>
+            <p>One of the most common interview and beginner traps.</p>
+        </div>
+    </div>
+
+    <p>
+        <strong>EOF</strong> is a special integer value returned by input
+        functions such as <code class="inline">fgetc()</code> when the end of
+        input is reached or an input failure occurs.
+    </p>
+
+    <div class="callout danger">
+        <strong>EOF is not a character stored inside your file.</strong>
+        It is an indicator returned by an input operation.
+    </div>
+
+    <h3>Correct reading loop</h3>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>int ch;
+
+while ((ch = fgetc(fp)) != EOF)
+{
+    putchar(ch);
+}</code></pre>
+    </div>
+
+    <h3>❌ The common wrong pattern</h3>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>while (!feof(fp))
+{
+    ch = fgetc(fp);
+    putchar(ch);
+}</code></pre>
+    </div>
+
+    <p>
+        Why is this wrong? The EOF indicator generally becomes set
+        <strong>after an input operation attempts to read past the available input</strong>.
+        Therefore, testing <code class="inline">feof()</code> before performing
+        the read does not tell you that the next read will succeed.
+    </p>
+
+    <h3>Animated EOF sequence</h3>
+
+    <div class="eof-demo">
+
+        <div class="eof-line current">
+            1. fgetc() → 'A'
+        </div>
+
+        <div class="eof-line">
+            2. fgetc() → 'B'
+        </div>
+
+        <div class="eof-line">
+            3. fgetc() → 'C'
+        </div>
+
+        <div class="eof-line">
+            4. fgetc() → EOF
+        </div>
+
+        <div class="eof-line success">
+            ✓ Loop condition fails → stop safely
+        </div>
+
+    </div>
+
+    <h3>feof(), ferror(), clearerr()</h3>
+
+    <div class="grid-3">
+
+        <div class="info-card">
+            <h3>feof()</h3>
+            <p>Tests whether the stream's EOF indicator is set.</p>
+        </div>
+
+        <div class="info-card">
+            <h3>ferror()</h3>
+            <p>Tests whether the stream's error indicator is set.</p>
+        </div>
+
+        <div class="info-card">
+            <h3>clearerr()</h3>
+            <p>Clears the EOF and error indicators for the stream.</p>
+        </div>
+
+    </div>
+
+    <h3>perror()</h3>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>FILE *fp = fopen("missing.txt", "r");
+
+if (fp == NULL)
+{
+    perror("Unable to open file");
+    return 1;
+}</code></pre>
+    </div>
+
+    <p>
+        <code class="inline">perror()</code> prints the supplied message
+        followed by a description corresponding to the current
+        <code class="inline">errno</code>.
+    </p>
+
+</div>
+</section>
+
+
+<!-- ================= RANDOM ACCESS ================= -->
+
+<section class="section animate-on-scroll" id="random">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">🎯</div>
+        <div>
+            <h2>Random Access — fseek(), ftell(), rewind()</h2>
+            <p>Move the stream position instead of always reading from the beginning.</p>
+        </div>
+    </div>
+
+    <h3>File position indicator</h3>
+
+    <p>
+        A stream has a current file position. As data is read or written,
+        this position changes.
+    </p>
+
+    <div class="cursor-demo">
+
+        <strong>Interactive file cursor</strong>
+
+        <div class="cursor-file" id="cursorFile"></div>
+
+        <div class="cursor-controls">
+            <button class="secondary-btn" onclick="moveCursor(-1)">← Previous</button>
+            <button class="primary-btn" onclick="moveCursor(1)">Next →</button>
+            <button class="secondary-btn" onclick="resetCursor()">rewind()</button>
+        </div>
+
+        <p style="text-align:center;font-size:11px;color:#69758a;">
+            Current position:
+            <strong id="cursorPosition">0</strong>
+        </p>
+
+    </div>
+
+    <h3>fseek()</h3>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>fseek(fp, 0, SEEK_SET);  /* beginning */
+
+fseek(fp, 5, SEEK_SET);  /* 5 positions from beginning */
+
+fseek(fp, 2, SEEK_CUR);  /* move relative to current position */
+
+fseek(fp, 0, SEEK_END);  /* move toward end */</code></pre>
+    </div>
+
+    <h3>ftell()</h3>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>long position = ftell(fp);
+
+if (position == -1L)
+{
+    perror("ftell");
+}</code></pre>
+    </div>
+
+    <h3>rewind()</h3>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>rewind(fp);</code></pre>
+    </div>
+
+    <div class="callout">
+        <strong>Remember:</strong>
+        <code class="inline">rewind()</code> moves the stream back to the
+        beginning and clears its EOF and error indicators.
+    </div>
+
+    <h3>Random access flow</h3>
+
+    <div class="flow">
+
+        <div class="flow-box">
+            OPEN
+            <small>fopen()</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-box">
+            POSITION
+            <small>fseek()</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-box">
+            CHECK
+            <small>ftell()</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-box">
+            READ / WRITE
+            <small>operation</small>
+        </div>
+
+    </div>
+
+    <div class="callout warning">
+        <strong>Portability note:</strong>
+        File-position operations have special rules for text streams.
+        Do not assume every value returned by <code class="inline">ftell()</code>
+        is a universally meaningful byte offset for arbitrary text files.
+        Binary streams are generally the clearer setting for byte-oriented positioning.
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= BINARY ================= -->
+
+<section class="section animate-on-scroll" id="binary">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">🧱</div>
+        <div>
+            <h2>Text Files vs Binary Files</h2>
+            <p>Two important ways to represent persistent data.</p>
+        </div>
+    </div>
+
+    <div class="binary-grid">
+
+        <div class="binary-box">
+            <h3>📄 Text File</h3>
+            <p>
+                Data is represented as characters according to a textual format.
+                Humans can usually inspect it with a text editor.
+            </p>
+
+            <div class="binary-bytes">
+                <span class="byte">1</span>
+                <span class="byte">0</span>
+                <span class="byte">1</span>
+                <span class="byte">,</span>
+                <span class="byte">P</span>
+                <span class="byte">r</span>
+                <span class="byte">a</span>
+            </div>
+        </div>
+
+        <div class="binary-box">
+            <h3>💾 Binary File</h3>
+            <p>
+                Data is handled as bytes. It can be compact and efficient,
+                but its representation may not be human-readable.
+            </p>
+
+            <div class="binary-bytes">
+                <span class="byte">0x65</span>
+                <span class="byte">0x00</span>
+                <span class="byte">0x2A</span>
+                <span class="byte">0x7F</span>
+                <span class="byte">0x19</span>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="table-wrap">
+    <table>
+
+        <thead>
+            <tr>
+                <th>Feature</th>
+                <th>Text</th>
+                <th>Binary</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+                <td>Human-readable</td>
+                <td>Usually yes</td>
+                <td>Usually no</td>
+            </tr>
+
+            <tr>
+                <td>Typical functions</td>
+                <td><code>fprintf</code>, <code>fgets</code>, <code>fputs</code></td>
+                <td><code>fread</code>, <code>fwrite</code></td>
+            </tr>
+
+            <tr>
+                <td>Easy manual editing</td>
+                <td>Yes</td>
+                <td>No</td>
+            </tr>
+
+            <tr>
+                <td>Portability</td>
+                <td>Often easier when format is well-defined</td>
+                <td>Depends heavily on defined binary format</td>
+            </tr>
+        </tbody>
+
+    </table>
+    </div>
+
+    <h3>fwrite()</h3>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>struct Student
+{
+    int roll;
+    char name[50];
+    float cgpa;
+};
+
+struct Student s = {101, "Pradeep", 8.63f};
+
+FILE *fp = fopen("students.dat", "wb");
+
+if (fp == NULL)
+{
+    perror("fopen");
+    return 1;
+}
+
+if (fwrite(&s, sizeof s, 1, fp) != 1)
+{
+    perror("fwrite");
+}
+
+fclose(fp);</code></pre>
+    </div>
+
+    <h3>fread()</h3>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>struct Student s;
+
+FILE *fp = fopen("students.dat", "rb");
+
+if (fp == NULL)
+{
+    perror("fopen");
+    return 1;
+}
+
+if (fread(&s, sizeof s, 1, fp) == 1)
+{
+    printf("%d %s %.2f\n",
+           s.roll,
+           s.name,
+           s.cgpa);
+}
+
+fclose(fp);</code></pre>
+    </div>
+
+    <div class="callout warning">
+        <strong>Important binary-file warning:</strong>
+        Writing a raw C structure with <code class="inline">fwrite()</code>
+        is convenient, but it does not automatically create a portable
+        file format. Structure padding, alignment, integer/float representation,
+        byte order and pointer members can differ between systems.
+    </div>
+
+    <h3>Return value of fread / fwrite</h3>
+
+    <p>
+        Both functions return the <strong>number of elements</strong>
+        successfully transferred — not simply the number of bytes.
+    </p>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>size_t count = fread(array,
+                     sizeof array[0],
+                     10,
+                     fp);
+
+if (count != 10)
+{
+    /* inspect feof() or ferror() */
+}</code></pre>
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= OTHER FUNCTIONS ================= -->
+
+<section class="section animate-on-scroll">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">🧰</div>
+        <div>
+            <h2>Useful File Functions</h2>
+            <p>Know these for practical programming and interviews.</p>
+        </div>
+    </div>
+
+    <div class="grid-3">
+
+        <div class="info-card">
+            <h3>rewind()</h3>
+            <p>Move to the beginning and clear stream indicators.</p>
+        </div>
+
+        <div class="info-card">
+            <h3>remove()</h3>
+            <p>Requests removal of a file. Returns zero on success.</p>
+        </div>
+
+        <div class="info-card">
+            <h3>rename()</h3>
+            <p>Changes a file name/path as supported by the system.</p>
+        </div>
+
+        <div class="info-card">
+            <h3>fflush()</h3>
+            <p>Flushes buffered output for an output/update stream.</p>
+        </div>
+
+        <div class="info-card">
+            <h3>ferror()</h3>
+            <p>Checks the stream error indicator.</p>
+        </div>
+
+        <div class="info-card">
+            <h3>clearerr()</h3>
+            <p>Clears EOF and error indicators.</p>
+        </div>
+
+    </div>
+
+    <div class="callout danger">
+        <strong>Do not use:</strong>
+        <code class="inline">fflush(stdin)</code> as a standard C technique
+        for clearing keyboard input. Its behavior for an input stream is
+        not defined by the C standard.
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= TEXT FILE EXAMPLE ================= -->
+
+<section class="section animate-on-scroll">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">📝</div>
+        <div>
+            <h2>Complete Text File Example</h2>
+            <p>Create → write → close → reopen → read → close.</p>
+        </div>
+    </div>
+
+    <div class="flow">
+
+        <div class="flow-box">
+            CREATE
+            <small>w</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-box">
+            WRITE
+            <small>fprintf()</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-box">
+            CLOSE
+            <small>fclose()</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-box">
+            READ
+            <small>fgets()</small>
+        </div>
+
+    </div>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    FILE *fp;
+    char line[100];
+
+    /* Write */
+    fp = fopen("notes.txt", "w");
+
+    if (fp == NULL)
+    {
+        perror("notes.txt");
+        return 1;
+    }
+
+    fprintf(fp, "C File Handling\n");
+    fprintf(fp, "ZENSUS Learning Platform\n");
+    fprintf(fp, "Lesson 13\n");
+
+    if (fclose(fp) != 0)
+    {
+        perror("fclose");
+        return 1;
+    }
+
+    /* Read */
+    fp = fopen("notes.txt", "r");
+
+    if (fp == NULL)
+    {
+        perror("notes.txt");
+        return 1;
+    }
+
+    while (fgets(line, sizeof line, fp) != NULL)
+    {
+        printf("%s", line);
+    }
+
+    if (ferror(fp))
+    {
+        perror("Reading failed");
+    }
+
+    fclose(fp);
+
+    return 0;
+}</code></pre>
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= APPEND ================= -->
+
+<section class="section animate-on-scroll">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">➕</div>
+        <div>
+            <h2>Appending Data</h2>
+            <p>Add new information without deleting existing content.</p>
+        </div>
+    </div>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    FILE *fp = fopen("log.txt", "a");
+
+    if (fp == NULL)
+    {
+        perror("log.txt");
+        return 1;
+    }
+
+    fprintf(fp, "New event recorded.\n");
+
+    fclose(fp);
+
+    return 0;
+}</code></pre>
+    </div>
+
+    <div class="callout success">
+        <strong>Use <code class="inline">a</code> when:</strong>
+        existing content must remain intact and new output should be appended.
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= STUDENT RECORDS ================= -->
+
+<section class="section animate-on-scroll" id="records">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">👨‍🎓</div>
+        <div>
+            <h2>Student Records with Files</h2>
+            <p>A realistic application of file handling.</p>
+        </div>
+    </div>
+
+    <div class="project-header">
+        <h3>Student Record Architecture</h3>
+        <p>
+            Program → Student structure → text file → persistent records
+        </p>
+    </div>
+
+    <div class="flow">
+
+        <div class="flow-box">
+            INPUT
+            <small>roll/name/CGPA</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-box">
+            STRUCT
+            <small>Student</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-box">
+            fprintf()
+            <small>format</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-box">
+            FILE
+            <small>students.txt</small>
+        </div>
+
+    </div>
+
+    <h3>Writing one student</h3>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>#include &lt;stdio.h&gt;
+
+struct Student
+{
+    int roll;
+    char name[50];
+    float cgpa;
+};
+
+int main(void)
+{
+    struct Student s;
+
+    printf("Enter roll: ");
+    scanf("%d", &s.roll);
+
+    printf("Enter name: ");
+    scanf("%49s", s.name);
+
+    printf("Enter CGPA: ");
+    scanf("%f", &s.cgpa);
+
+    FILE *fp = fopen("students.txt", "a");
+
+    if (fp == NULL)
+    {
+        perror("students.txt");
+        return 1;
+    }
+
+    fprintf(fp, "%d %s %.2f\n",
+            s.roll,
+            s.name,
+            s.cgpa);
+
+    fclose(fp);
+
+    return 0;
+}</code></pre>
+    </div>
+
+    <h3>Reading multiple records</h3>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    FILE *fp = fopen("students.txt", "r");
+
+    if (fp == NULL)
+    {
+        perror("students.txt");
+        return 1;
+    }
+
+    int roll;
+    char name[50];
+    float cgpa;
+
+    while (fscanf(fp, "%d %49s %f",
+                  &roll,
+                  name,
+                  &cgpa) == 3)
+    {
+        printf("Roll: %d | Name: %s | CGPA: %.2f\n",
+               roll, name, cgpa);
+    }
+
+    if (ferror(fp))
+    {
+        perror("Read error");
+    }
+
+    fclose(fp);
+
+    return 0;
+}</code></pre>
+    </div>
+
+    <h3>Searching a student</h3>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>int target;
+int found = 0;
+
+printf("Enter roll to search: ");
+scanf("%d", &target);
+
+while (fscanf(fp, "%d %49s %f",
+              &roll,
+              name,
+              &cgpa) == 3)
+{
+    if (roll == target)
+    {
+        printf("Found: %d %s %.2f\n",
+               roll, name, cgpa);
+
+        found = 1;
+        break;
+    }
+}
+
+if (!found)
+{
+    printf("Student not found.\n");
+}</code></pre>
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= UPDATE DELETE ================= -->
+
+<section class="section animate-on-scroll">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">🔄</div>
+        <div>
+            <h2>Updating and Deleting Text Records</h2>
+            <p>Why temporary files are commonly used.</p>
+        </div>
+    </div>
+
+    <p>
+        Text records may have variable lengths. Directly replacing one record
+        can be difficult if the replacement changes the record's size.
+        A common approach is:
+    </p>
+
+    <div class="steps">
+
+        <div class="step">
+            <div class="step-number">1</div>
+            <div>
+                Open the original file for reading.</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">2</div>
+            <div>
+                Open a temporary file for writing.</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">3</div>
+            <div>
+                Read records from the original file one by one.</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">4</div>
+            <div>
+                Write unchanged or modified records into the temporary file.</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">5</div>
+            <div>
+                Close both streams.</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">6</div>
+            <div>
+                Replace the original using <code class="inline">remove()</code>
+                and <code class="inline">rename()</code>, checking every operation.</div>
+        </div>
+
+    </div>
+
+    <div class="callout warning">
+        This rewrite strategy is especially common for simple educational
+        record systems. Production databases normally provide much stronger
+        indexing, transactions and concurrency mechanisms.
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= COMMAND LINE ================= -->
+
+<section class="section animate-on-scroll">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">⌨️</div>
+        <div>
+            <h2>Opening a File from Command-Line Arguments</h2>
+            <p>Useful when the filename should be supplied by the user.</p>
+        </div>
+    </div>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>#include &lt;stdio.h&gt;
+
+int main(int argc, char *argv[])
+{
+    if (argc != 2)
+    {
+        printf("Usage: %s filename\n", argv[0]);
+        return 1;
+    }
+
+    FILE *fp = fopen(argv[1], "r");
+
+    if (fp == NULL)
+    {
+        perror(argv[1]);
+        return 1;
+    }
+
+    int ch;
+
+    while ((ch = fgetc(fp)) != EOF)
+    {
+        putchar(ch);
+    }
+
+    fclose(fp);
+
+    return 0;
+}</code></pre>
+    </div>
+
+    <p>
+        Example concept:
+        <code class="inline">program.exe notes.txt</code>
+    </p>
+
+</div>
+</section>
+
+
+<!-- ================= COMMON MISTAKES ================= -->
+
+<section class="section animate-on-scroll" id="mistakes">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">⚠️</div>
+        <div>
+            <h2>Common Mistakes</h2>
+            <p>These mistakes appear frequently in exams, interviews and projects.</p>
+        </div>
+    </div>
+
+    <div class="mistakes">
+
+        <div class="mistake">
+            <div class="mistake-title">❌ Forgetting NULL check</div>
+            <p>
+                Calling file functions after fopen() failed can lead to undefined
+                behavior. Always check the returned pointer.
+            </p>
+        </div>
+
+        <div class="mistake">
+            <div class="mistake-title">❌ Using "w" accidentally</div>
+            <p>
+                w can truncate an existing file. Use a mode that matches your intention.
+            </p>
+        </div>
+
+        <div class="mistake">
+            <div class="mistake-title">❌ Storing fgetc() in char</div>
+            <p>
+                Use int so that every unsigned-char value and EOF can be represented.
+            </p>
+        </div>
+
+        <div class="mistake">
+            <div class="mistake-title">❌ while(!feof(fp))</div>
+            <p>
+                EOF is detected through the attempted read. Put the input operation
+                directly in the loop condition.
+            </p>
+        </div>
+
+        <div class="mistake">
+            <div class="mistake-title">❌ Forgetting fclose()</div>
+            <p>
+                Properly close streams and check close errors where appropriate.
+            </p>
+        </div>
+
+        <div class="mistake">
+            <div class="mistake-title">❌ Ignoring return values</div>
+            <p>
+                File operations can fail. Check return values for important operations.
+            </p>
+        </div>
+
+        <div class="mistake">
+            <div class="mistake-title">❌ scanf("%s") for names with spaces</div>
+            <p>
+                %s stops at whitespace. Use fgets() when spaces should be accepted.
+            </p>
+        </div>
+
+        <div class="mistake">
+            <div class="mistake-title">❌ Raw struct portability assumption</div>
+            <p>
+                fwrite() of a struct does not automatically create a portable binary format.
+            </p>
+        </div>
+
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= BEST PRACTICES ================= -->
+
+<section class="section animate-on-scroll">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">🛡️</div>
+        <div>
+            <h2>Professional File-Handling Practices</h2>
+            <p>Write code that survives real inputs and real failures.</p>
+        </div>
+    </div>
+
+    <div class="grid-2">
+
+        <div class="info-card">
+            <h3>1. Check every important operation</h3>
+            <p>Check fopen(), fread(), fwrite(), fseek(), fclose() and other relevant return values.</p>
+        </div>
+
+        <div class="info-card">
+            <h3>2. Bound your input</h3>
+            <p>Use fixed buffer sizes carefully and avoid overflowing arrays.</p>
+        </div>
+
+        <div class="info-card">
+            <h3>3. Validate file contents</h3>
+            <p>Never assume a file contains valid data just because it exists.</p>
+        </div>
+
+        <div class="info-card">
+            <h3>4. Choose a clear format</h3>
+            <p>For interoperable data, define the text or binary format explicitly.</p>
+        </div>
+
+        <div class="info-card">
+            <h3>5. Handle errors separately</h3>
+            <p>Distinguish EOF from actual stream errors using feof() and ferror().</p>
+        </div>
+
+        <div class="info-card">
+            <h3>6. Close resources</h3>
+            <p>Close streams when finished, especially in long-running programs.</p>
+        </div>
+
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= INTERVIEW ================= -->
+
+<section class="section animate-on-scroll" id="interview">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">🎤</div>
+        <div>
+            <h2>Interview Questions</h2>
+            <p>Click a question to reveal the answer.</p>
+        </div>
+    </div>
+
+    <div class="accordion">
+        <button class="accordion-header">
+            <span>1. What is FILE * in C?</span>
+            <span>+</span>
+        </button>
+        <div class="accordion-body">
+            <div>
+                FILE * is a pointer to a C standard-library stream object.
+                The object stores information needed by the library to manage
+                the associated stream.
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion">
+        <button class="accordion-header">
+            <span>2. Difference between r and w?</span>
+            <span>+</span>
+        </button>
+        <div class="accordion-body">
+            <div>
+                r opens an existing file for reading and fails if it does not exist.
+                w opens for writing, creates the file if necessary, and truncates an
+                existing file.
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion">
+        <button class="accordion-header">
+            <span>3. Difference between w and a?</span>
+            <span>+</span>
+        </button>
+        <div class="accordion-body">
+            <div>
+                w writes from a newly created or truncated file, while a preserves
+                existing content and writes new data at the end.
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion">
+        <button class="accordion-header">
+            <span>4. Why does fgetc() return int?</span>
+            <span>+</span>
+        </button>
+        <div class="accordion-body">
+            <div>
+                It needs to represent all possible unsigned-char values plus the
+                special EOF value.
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion">
+        <button class="accordion-header">
+            <span>5. Why is while(!feof(fp)) considered a bad read loop?</span>
+            <span>+</span>
+        </button>
+        <div class="accordion-body">
+            <div>
+                The EOF indicator becomes set as a consequence of an attempted
+                read that reaches the end. The read operation itself should control
+                whether another value was obtained.
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion">
+        <button class="accordion-header">
+            <span>6. Difference between fseek() and rewind()?</span>
+            <span>+</span>
+        </button>
+        <div class="accordion-body">
+            <div>
+                fseek() moves the position according to an offset and origin.
+                rewind() moves to the beginning and clears EOF/error indicators.
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion">
+        <button class="accordion-header">
+            <span>7. What does ftell() return?</span>
+            <span>+</span>
+        </button>
+        <div class="accordion-body">
+            <div>
+                ftell() returns the current stream position as a long value,
+                or -1L if the position cannot be determined.
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion">
+        <button class="accordion-header">
+            <span>8. Difference between fread() and fgets()?</span>
+            <span>+</span>
+        </button>
+        <div class="accordion-body">
+            <div>
+                fread() transfers binary blocks/elements, while fgets() reads
+                a line/string from a text stream up to a specified limit.
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion">
+        <button class="accordion-header">
+            <span>9. What is perror()?</span>
+            <span>+</span>
+        </button>
+        <div class="accordion-body">
+            <div>
+                perror() prints a supplied message followed by a description
+                corresponding to the current errno value.
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion">
+        <button class="accordion-header">
+            <span>10. Is writing a struct with fwrite() portable?</span>
+            <span>+</span>
+        </button>
+        <div class="accordion-body">
+            <div>
+                Not necessarily. Padding, alignment, byte order and representation
+                can vary. Pointer members are particularly unsuitable for persistence.
+                A defined binary format is safer for portable applications.
+            </div>
+        </div>
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= EXAM PREP ================= -->
+
+<section class="section animate-on-scroll">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">📝</div>
+        <div>
+            <h2>JNTUK / Semester Exam Preparation</h2>
+            <p>Use this structure to write clear answers.</p>
+        </div>
+    </div>
+
+    <div class="exam-box">
+
+        <div class="exam-row">
+            <span class="exam-label">2 MARKS</span>
+            <p>
+                Define file. What is FILE *? What is fopen()? What is EOF?
+                Mention any four file modes.
+            </p>
+        </div>
+
+        <div class="exam-row">
+            <span class="exam-label">5 MARKS</span>
+            <p>
+                Explain different file opening modes in C with examples.
+                OR explain fgetc(), fputc(), fgets() and fputs().
+            </p>
+        </div>
+
+        <div class="exam-row">
+            <span class="exam-label">10 MARKS</span>
+            <p>
+                Explain file handling in C in detail. Discuss fopen(), fclose(),
+                file modes, character I/O, string I/O, formatted I/O,
+                EOF handling and random file access with suitable programs.
+            </p>
+        </div>
+
+    </div>
+
+    <h3>10-mark answer structure</h3>
+
+    <ol>
+        <li>Definition of file handling</li>
+        <li>Need for persistent storage</li>
+        <li>FILE pointer</li>
+        <li>fopen() and fclose()</li>
+        <li>File modes</li>
+        <li>Character functions</li>
+        <li>String functions</li>
+        <li>Formatted functions</li>
+        <li>EOF and error handling</li>
+        <li>fseek(), ftell(), rewind()</li>
+        <li>Text vs binary files</li>
+        <li>Complete example and conclusion</li>
+    </ol>
+
+</div>
+</section>
+
+
+<!-- ================= QUIZ ================= -->
+
+<section class="section animate-on-scroll" id="quiz">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">🧠</div>
+        <div>
+            <h2>File Handling Quiz</h2>
+            <p>Test your understanding.</p>
+        </div>
+    </div>
+
+    <div class="quiz-question" data-answer="b">
+        <div class="question">
+            1. Which mode opens a file for reading and requires the file to already exist?
+        </div>
+
+        <div class="options">
+            <button class="option" data-value="a">a) w</button>
+            <button class="option" data-value="b">b) r</button>
+            <button class="option" data-value="c">c) a</button>
+            <button class="option" data-value="d">d) w+</button>
+        </div>
+    </div>
+
+    <div class="quiz-question" data-answer="c">
+        <div class="question">
+            2. What does "w" do to an existing file?
+        </div>
+
+        <div class="options">
+            <button class="option" data-value="a">a) Appends</button>
+            <button class="option" data-value="b">b) Reads only</button>
+            <button class="option" data-value="c">c) Truncates it</button>
+            <button class="option" data-value="d">d) Renames it</button>
+        </div>
+    </div>
+
+    <div class="quiz-question" data-answer="a">
+        <div class="question">
+            3. What type should normally store fgetc()'s return value?
+        </div>
+
+        <div class="options">
+            <button class="option" data-value="a">a) int</button>
+            <button class="option" data-value="b">b) char</button>
+            <button class="option" data-value="c">c) float</button>
+            <button class="option" data-value="d">d) double</button>
+        </div>
+    </div>
+
+    <div class="quiz-question" data-answer="d">
+        <div class="question">
+            4. Which function moves a stream to the beginning and clears EOF/error indicators?
+        </div>
+
+        <div class="options">
+            <button class="option" data-value="a">a) fseek()</button>
+            <button class="option" data-value="b">b) ftell()</button>
+            <button class="option" data-value="c">c) fgetc()</button>
+            <button class="option" data-value="d">d) rewind()</button>
+        </div>
+    </div>
+
+    <div class="quiz-question" data-answer="c">
+        <div class="question">
+            5. Which pair is commonly used for binary block I/O?
+        </div>
+
+        <div class="options">
+            <button class="option" data-value="a">a) fgets / fputs</button>
+            <button class="option" data-value="b">b) fprintf / fscanf</button>
+            <button class="option" data-value="c">c) fread / fwrite</button>
+            <button class="option" data-value="d">d) getchar / putchar</button>
+        </div>
+    </div>
+
+    <button class="quiz-submit" onclick="checkQuiz()">
+        Check Answers
+    </button>
+
+    <div class="quiz-result" id="quizResult"></div>
+
+</div>
+</section>
+
+
+<!-- ================= CODING PRACTICE ================= -->
+
+<section class="section animate-on-scroll">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">💻</div>
+        <div>
+            <h2>Coding Practice</h2>
+            <p>Move from syntax to problem-solving.</p>
+        </div>
+    </div>
+
+    <div class="grid-2">
+
+        <div class="info-card">
+            <h3>Level 1 — Basic</h3>
+            <ol>
+                <li>Create a text file.</li>
+                <li>Write five lines into it.</li>
+                <li>Read and display the file.</li>
+            </ol>
+        </div>
+
+        <div class="info-card">
+            <h3>Level 2 — Intermediate</h3>
+            <ol>
+                <li>Count characters.</li>
+                <li>Count words.</li>
+                <li>Count lines.</li>
+            </ol>
+        </div>
+
+        <div class="info-card">
+            <h3>Level 3 — Practical</h3>
+            <ol>
+                <li>Build a student record system.</li>
+                <li>Add records.</li>
+                <li>Search records.</li>
+            </ol>
+        </div>
+
+        <div class="info-card">
+            <h3>Level 4 — Advanced</h3>
+            <ol>
+                <li>Implement update/delete.</li>
+                <li>Use a temporary file.</li>
+                <li>Create a binary record version.</li>
+            </ol>
+        </div>
+
+    </div>
+
+    <h3>Challenge: Count lines, words and characters</h3>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;ctype.h&gt;
+
+int main(void)
+{
+    FILE *fp = fopen("input.txt", "r");
+
+    if (fp == NULL)
+    {
+        perror("input.txt");
+        return 1;
+    }
+
+    int ch;
+    long characters = 0;
+    long lines = 0;
+    long words = 0;
+    int in_word = 0;
+
+    while ((ch = fgetc(fp)) != EOF)
+    {
+        characters++;
+
+        if (ch == '\n')
+            lines++;
+
+        if (isspace((unsigned char)ch))
+        {
+            in_word = 0;
+        }
+        else if (!in_word)
+        {
+            in_word = 1;
+            words++;
+        }
+    }
+
+    if (ferror(fp))
+    {
+        perror("Read error");
+        fclose(fp);
+        return 1;
+    }
+
+    printf("Characters: %ld\n", characters);
+    printf("Words:      %ld\n", words);
+    printf("Lines:      %ld\n", lines);
+
+    fclose(fp);
+
+    return 0;
+}</code></pre>
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= MINI PROJECT ================= -->
+
+<section class="section animate-on-scroll" id="project">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">🚀</div>
+        <div>
+            <h2>Mini Project — Student File Management System</h2>
+            <p>A complete beginner-friendly project using text-file persistence.</p>
+        </div>
+    </div>
+
+    <div class="project-header">
+        <h3>Student Record Manager</h3>
+        <p>
+            Add • View • Search • Persistent storage
+        </p>
+    </div>
+
+    <div class="menu-demo">
+
+        <div class="menu-item active">1<br>Add</div>
+        <div class="menu-item">2<br>View</div>
+        <div class="menu-item">3<br>Search</div>
+        <div class="menu-item">4<br>Append</div>
+        <div class="menu-item">5<br>Exit</div>
+
+    </div>
+
+    <h3>Complete C Program</h3>
+
+    <div class="code-wrap">
+        <button class="copy-btn">Copy</button>
+<pre><code>#include &lt;stdio.h&gt;
+
+#define FILE_NAME "students.txt"
+
+struct Student
+{
+    int roll;
+    char name[50];
+    float cgpa;
+};
+
+void addStudent(void)
+{
+    struct Student s;
+
+    FILE *fp = fopen(FILE_NAME, "a");
+
+    if (fp == NULL)
+    {
+        perror(FILE_NAME);
+        return;
+    }
+
+    printf("\nEnter roll number: ");
+    scanf("%d", &s.roll);
+
+    printf("Enter name: ");
+    scanf(" %49[^\n]", s.name);
+
+    printf("Enter CGPA: ");
+    scanf("%f", &s.cgpa);
+
+    if (fprintf(fp, "%d|%s|%.2f\n",
+                s.roll,
+                s.name,
+                s.cgpa) < 0)
+    {
+        perror("Write error");
+    }
+    else
+    {
+        printf("Student saved successfully.\n");
+    }
+
+    if (fclose(fp) != 0)
+    {
+        perror("Close error");
+    }
+}
+
+void viewStudents(void)
+{
+    FILE *fp = fopen(FILE_NAME, "r");
+
+    if (fp == NULL)
+    {
+        perror(FILE_NAME);
+        return;
+    }
+
+    int roll;
+    char name[50];
+    float cgpa;
+
+    printf("\n---------------------------------------\n");
+    printf("%-8s %-20s %-8s\n",
+           "Roll", "Name", "CGPA");
+    printf("---------------------------------------\n");
+
+    while (fscanf(fp, "%d|%49[^|]|%f",
+                  &roll,
+                  name,
+                  &cgpa) == 3)
+    {
+        printf("%-8d %-20s %-8.2f\n",
+               roll, name, cgpa);
+    }
+
+    if (ferror(fp))
+    {
+        perror("Read error");
+    }
+
+    fclose(fp);
+}
+
+void searchStudent(void)
+{
+    FILE *fp = fopen(FILE_NAME, "r");
+
+    if (fp == NULL)
+    {
+        perror(FILE_NAME);
+        return;
+    }
+
+    int target;
+    int roll;
+    char name[50];
+    float cgpa;
+    int found = 0;
+
+    printf("\nEnter roll number: ");
+    scanf("%d", &target);
+
+    while (fscanf(fp, "%d|%49[^|]|%f",
+                  &roll,
+                  name,
+                  &cgpa) == 3)
+    {
+        if (roll == target)
+        {
+            printf("\nStudent Found!\n");
+            printf("Roll : %d\n", roll);
+            printf("Name : %s\n", name);
+            printf("CGPA : %.2f\n", cgpa);
+
+            found = 1;
+            break;
+        }
+    }
+
+    if (!found)
+    {
+        printf("\nStudent not found.\n");
+    }
+
+    fclose(fp);
+}
+
+int main(void)
+{
+    int choice;
+
+    do
+    {
+        printf("\n====================================\n");
+        printf("     STUDENT FILE MANAGEMENT\n");
+        printf("====================================\n");
+
+        printf("1. Add Student\n");
+        printf("2. View Students\n");
+        printf("3. Search Student\n");
+        printf("4. Add Another Student\n");
+        printf("5. Exit\n");
+
+        printf("\nEnter choice: ");
+        scanf("%d", &choice);
+
+        switch (choice)
+        {
+            case 1:
+                addStudent();
+                break;
+
+            case 2:
+                viewStudents();
+                break;
+
+            case 3:
+                searchStudent();
+                break;
+
+            case 4:
+                addStudent();
+                break;
+
+            case 5:
+                printf("Goodbye!\n");
+                break;
+
+            default:
+                printf("Invalid choice.\n");
+        }
+
+    } while (choice != 5);
+
+    return 0;
+}</code></pre>
+    </div>
+
+    <div class="callout success">
+        <strong>Project concepts covered:</strong>
+        structures, functions, switch, loops, file modes, fopen(),
+        fclose(), fprintf(), fscanf(), append mode, searching and
+        persistent student records.
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= COMPLEXITY ================= -->
+
+<section class="section animate-on-scroll">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">📈</div>
+        <div>
+            <h2>Time Complexity Perspective</h2>
+            <p>File I/O performance depends on the storage system, but algorithmic patterns still matter.</p>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+    <table>
+
+        <thead>
+            <tr>
+                <th>Operation</th>
+                <th>Typical algorithmic view</th>
+                <th>Important note</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <tr>
+                <td>Sequential read</td>
+                <td>O(n)</td>
+                <td>Must inspect data sequentially when searching without an index.</td>
+            </tr>
+
+            <tr>
+                <td>Search in text records</td>
+                <td>O(n)</td>
+                <td>Each record may need to be examined.</td>
+            </tr>
+
+            <tr>
+                <td>Append</td>
+                <td>Conceptually near end-position access</td>
+                <td>Actual cost depends on buffering and filesystem/storage.</td>
+            </tr>
+
+            <tr>
+                <td>Random access</td>
+                <td>Positioning can be efficient</td>
+                <td>Actual physical cost depends on the underlying storage.</td>
+            </tr>
+
+        </tbody>
+
+    </table>
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= RAPID REVISION ================= -->
+
+<section class="section animate-on-scroll">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">⚡</div>
+        <div>
+            <h2>Rapid Revision</h2>
+            <p>Everything important on one screen.</p>
+        </div>
+    </div>
+
+    <div class="grid-3">
+
+        <div class="info-card">
+            <h3>Open</h3>
+            <p><code>fopen()</code></p>
+        </div>
+
+        <div class="info-card">
+            <h3>Close</h3>
+            <p><code>fclose()</code></p>
+        </div>
+
+        <div class="info-card">
+            <h3>Character</h3>
+            <p><code>fgetc()</code> / <code>fputc()</code></p>
+        </div>
+
+        <div class="info-card">
+            <h3>String</h3>
+            <p><code>fgets()</code> / <code>fputs()</code></p>
+        </div>
+
+        <div class="info-card">
+            <h3>Formatted</h3>
+            <p><code>fprintf()</code> / <code>fscanf()</code></p>
+        </div>
+
+        <div class="info-card">
+            <h3>Binary</h3>
+            <p><code>fread()</code> / <code>fwrite()</code></p>
+        </div>
+
+        <div class="info-card">
+            <h3>Position</h3>
+            <p><code>fseek()</code> / <code>ftell()</code></p>
+        </div>
+
+        <div class="info-card">
+            <h3>Beginning</h3>
+            <p><code>rewind()</code></p>
+        </div>
+
+        <div class="info-card">
+            <h3>Errors</h3>
+            <p><code>perror()</code> / <code>ferror()</code></p>
+        </div>
+
+    </div>
+
+    <div class="callout">
+        <strong>Memory trick:</strong>
+        <br>
+        <strong>Open → Check → Operate → Check → Close</strong>
+    </div>
+
+</div>
+</section>
+
+
+<!-- ================= FINAL SUMMARY ================= -->
+
+<section class="section animate-on-scroll">
+<div class="section-card">
+
+    <div class="section-head">
+        <div class="section-icon">🏆</div>
+        <div>
+            <h2>Lesson 13 Complete</h2>
+            <p>You now have the foundation for persistent data in C.</p>
+        </div>
+    </div>
+
+    <div class="grid-2">
+
+        <div class="info-card">
+            <h3>Core knowledge</h3>
+            <p>
+                FILE *, fopen(), fclose(), modes, text files,
+                binary files, character I/O, string I/O,
+                formatted I/O and error handling.
+            </p>
+        </div>
+
+        <div class="info-card">
+            <h3>Advanced knowledge</h3>
+            <p>
+                EOF, ferror(), fseek(), ftell(), rewind(),
+                fread(), fwrite(), temporary-file strategies
+                and record management.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="callout success">
+        <strong>Interview-ready principle:</strong>
+        A robust file program does not merely “open and read”.
+        It checks every important operation, handles EOF and errors correctly,
+        uses bounded input, chooses the right mode and closes its streams.
+    </div>
+
+    <a class="next-lesson" href="#">
+        Next → Lesson 14: Dynamic Memory Allocation
+    </a>
+
+</div>
+</section>
+
+
+<!-- ================= FOOTER ================= -->
+
+<footer class="footer">
+    <strong>ZENSUS</strong> • C Programming Learning Path
+    <br>
+    Lesson 13 of 15 — File Handling
+    <br><br>
+    Learn • Practice • Build • Master
+</footer>
+
+</div>
+</main>
+
+
+<!-- BACK TO TOP -->
+
+<button id="topBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    ↑
+</button>
+
+
+<script>
+/* =========================================================
+   ZENSUS — LESSON 13 JAVASCRIPT
+========================================================= */
+
+
+/* ================= COPY CODE ================= */
+
+document.querySelectorAll(".copy-btn").forEach(function(button){
+
+    button.addEventListener("click", function(){
+
+        const code = button.parentElement.querySelector("code").innerText;
+
+        navigator.clipboard.writeText(code).then(function(){
+
+            const original = button.innerText;
+
+            button.innerText = "Copied!";
+
+            setTimeout(function(){
+                button.innerText = original;
+            },1500);
+
+        }).catch(function(){
+
+            button.innerText = "Copy failed";
+
+            setTimeout(function(){
+                button.innerText = "Copy";
+            },1500);
+
+        });
+
+    });
+
+});
+
+
+/* ================= MODE SIMULATOR ================= */
+
+const modeDescriptions = {
+
+    "r":
+`MODE: r
+
+✓ Opens an existing file for reading.
+✓ File must already exist.
+✓ Existing contents are preserved.
+✗ Writing is not allowed.
+
+Typical use:
+Read an existing report or configuration file.`,
+
+    "w":
+`MODE: w
+
+✓ Opens for writing.
+✓ Creates the file if necessary.
+⚠ If the file already exists, its previous contents are truncated.
+
+Typical use:
+Create a fresh output file.`,
+
+    "a":
+`MODE: a
+
+✓ Opens for appending.
+✓ Creates the file if it does not exist.
+✓ Existing contents remain.
+✓ New writes go to the end.
+
+Typical use:
+Logs and activity records.`,
+
+    "r+":
+`MODE: r+
+
+✓ Read + write.
+✓ File must already exist.
+✓ Existing contents are preserved.
+⚠ You must respect the rules for switching between reading and writing on an update stream.`,
+
+    "w+":
+`MODE: w+
+
+✓ Read + write.
+✓ Creates the file if needed.
+⚠ Existing file contents are truncated.
+
+Typical use:
+Start a new file that the program will both read and write.`,
+
+    "a+":
+`MODE: a+
+
+✓ Read + write.
+✓ Creates the file if needed.
+✓ Existing contents remain.
+✓ Writes are performed at the end.
+⚠ After writing, use fseek() or rewind() when you need to reposition for reading.`
+};
+
+const modeOutput = document.getElementById("modeOutput");
+
+function updateMode(mode){
+
+    modeOutput.textContent = modeDescriptions[mode];
+
+    document.querySelectorAll(".mode-btn").forEach(function(btn){
+
+        btn.classList.toggle(
+            "active",
+            btn.dataset.mode === mode
+        );
+
+    });
+}
+
+document.querySelectorAll(".mode-btn").forEach(function(btn){
+
+    btn.addEventListener("click", function(){
+
+        updateMode(btn.dataset.mode);
+
+    });
+
+});
+
+updateMode("r");
+
+
+/* ================= CURSOR VISUALIZER ================= */
+
+const cursorFile = document.getElementById("cursorFile");
+const cursorPosition = document.getElementById("cursorPosition");
+
+const fileContent = ["H","e","l","l","o","!","C","1","3"];
+
+let cursorIndex = 0;
+
+function renderCursor(){
+
+    cursorFile.innerHTML = "";
+
+    fileContent.forEach(function(char,index){
+
+        const cell = document.createElement("div");
+
+        cell.className = "file-cell";
+
+        if(index === cursorIndex){
+            cell.classList.add("active");
+        }
+
+        cell.textContent = char;
+
+        cursorFile.appendChild(cell);
+
+    });
+
+    cursorPosition.textContent = cursorIndex;
+
+}
+
+function moveCursor(direction){
+
+    cursorIndex += direction;
+
+    if(cursorIndex < 0){
+        cursorIndex = 0;
+    }
+
+    if(cursorIndex >= fileContent.length){
+        cursorIndex = fileContent.length - 1;
+    }
+
+    renderCursor();
+
+}
+
+function resetCursor(){
+
+    cursorIndex = 0;
+
+    renderCursor();
+
+}
+
+renderCursor();
+
+
+/* ================= EOF ANIMATION ================= */
+
+const eofLines = document.querySelectorAll(".eof-line");
+
+let eofIndex = 0;
+
+function animateEOF(){
+
+    eofLines.forEach(function(line){
+        line.classList.remove("current");
+    });
+
+    if(eofIndex < eofLines.length - 1){
+
+        eofLines[eofIndex].classList.add("current");
+
+        eofIndex++;
+
+    }else{
+
+        eofLines[eofIndex - 1].classList.add("success");
+
+        eofIndex = 0;
+
+    }
+
+}
+
+setInterval(animateEOF,1300);
+
+
+/* ================= ACCORDION ================= */
+
+document.querySelectorAll(".accordion-header").forEach(function(header){
+
+    header.addEventListener("click",function(){
+
+        const body = header.nextElementSibling;
+        const symbol = header.querySelector("span:last-child");
+
+        const isOpen = body.style.maxHeight;
+
+        document.querySelectorAll(".accordion-body").forEach(function(item){
+
+            item.style.maxHeight = null;
+
+        });
+
+        document.querySelectorAll(".accordion-header span:last-child")
+            .forEach(function(item){
+                item.textContent = "+";
+            });
+
+        if(!isOpen){
+
+            body.style.maxHeight = body.scrollHeight + "px";
+
+            symbol.textContent = "−";
+
+        }
+
+    });
+
+});
+
+
+/* ================= QUIZ ================= */
+
+document.querySelectorAll(".quiz-question").forEach(function(question){
+
+    question.querySelectorAll(".option").forEach(function(option){
+
+        option.addEventListener("click",function(){
+
+            question.querySelectorAll(".option").forEach(function(item){
+
+                item.classList.remove("correct","wrong");
+
+            });
+
+            const correct = question.dataset.answer;
+
+            if(option.dataset.value === correct){
+
+                option.classList.add("correct");
+
+            }else{
+
+                option.classList.add("wrong");
+
+            }
+
+        });
+
+    });
+
+});
+
+
+function checkQuiz(){
+
+    let score = 0;
+
+    const questions = document.querySelectorAll(".quiz-question");
+
+    questions.forEach(function(question){
+
+        const correct = question.dataset.answer;
+
+        const selected = question.querySelector(".option.correct");
+
+        if(selected && selected.dataset.value === correct){
+
+            score++;
+
+        }
+
+    });
+
+    const result = document.getElementById("quizResult");
+
+    result.style.display = "block";
+
+    if(score === questions.length){
+
+        result.textContent =
+            "🏆 Perfect! " + score + "/" + questions.length +
+            " — You are file-handling ready!";
+
+    }else if(score >= 3){
+
+        result.textContent =
+            "🔥 Good job! " + score + "/" + questions.length +
+            " — Review the incorrect concepts once.";
+
+    }else{
+
+        result.textContent =
+            "📚 Score: " + score + "/" + questions.length +
+            " — Revisit file modes, EOF and stream functions.";
+
+    }
+
+}
+
+
+/* ================= SCROLL REVEAL ================= */
+
+const revealElements =
+    document.querySelectorAll(".animate-on-scroll");
+
+const observer = new IntersectionObserver(function(entries){
+
+    entries.forEach(function(entry){
+
+        if(entry.isIntersecting){
+
+            entry.target.classList.add("visible");
+
+        }
+
+    });
+
+},{
+    threshold:.08
+});
+
+revealElements.forEach(function(element){
+
+    observer.observe(element);
+
+});
+
+
+/* ================= ACTIVE SIDEBAR ================= */
+
+const sections = document.querySelectorAll("section[id]");
+const sideLinks = document.querySelectorAll(".side-link");
+
+window.addEventListener("scroll",function(){
+
+    let current = "";
+
+    sections.forEach(function(section){
+
+        const top = section.offsetTop - 120;
+
+        if(window.scrollY >= top){
+            current = section.getAttribute("id");
+        }
+
+    });
+
+    sideLinks.forEach(function(link){
+
+        link.classList.remove("active");
+
+        const href = link.getAttribute("href");
+
+        if(href === "#" + current){
+
+            link.classList.add("active");
+
+        }
+
+    });
+
+});
+
+
+/* ================= PROGRESS ================= */
+
+window.addEventListener("scroll",function(){
+
+    const documentHeight =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+
+    const percent =
+        documentHeight > 0
+        ? Math.round((window.scrollY / documentHeight) * 100)
+        : 0;
+
+    const safePercent = Math.min(100,Math.max(13,percent));
+
+    document.getElementById("progressFill").style.width =
+        safePercent + "%";
+
+    document.getElementById("progressText").textContent =
+        safePercent + "%";
+
+});
+
+
+/* ================= BACK TO TOP ================= */
+
+const topBtn = document.getElementById("topBtn");
+
+window.addEventListener("scroll",function(){
+
+    if(window.scrollY > 500){
+
+        topBtn.style.display = "grid";
+
+    }else{
+
+        topBtn.style.display = "none";
+
+    }
+
+});
+
+
+/* ================= SMOOTH SIDEBAR ================= */
+
+document.querySelectorAll(".side-link").forEach(function(link){
+
+    link.addEventListener("click",function(){
+
+        const target =
+            document.querySelector(link.getAttribute("href"));
+
+        if(target){
+
+            target.scrollIntoView({
+                behavior:"smooth",
+                block:"start"
+            });
+
+        }
+
+    });
+
+});
+
+
+/* ================= PAGE LOAD ================= */
+
+window.addEventListener("load",function(){
+
+    document.querySelectorAll(".animate-on-scroll")
+        .forEach(function(element,index){
+
+            if(index < 2){
+
+                setTimeout(function(){
+                    element.classList.add("visible");
+                },index * 150);
+
+            }
+
+        });
+
+});
+</script>
+
+</body>
+</html>

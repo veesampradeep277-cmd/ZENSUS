@@ -1,0 +1,2818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENSUS — Django Apps & URL Routing</title>
+
+<style>
+:root{
+    --blue:#2563eb;
+    --blue-dark:#1d4ed8;
+    --blue-light:#eff6ff;
+    --blue-soft:#dbeafe;
+    --blue-border:#bfdbfe;
+    --text:#10213f;
+    --text-light:#5f6f86;
+    --muted:#8b9ab0;
+    --bg:#f7faff;
+    --white:#ffffff;
+    --border:#dce6f2;
+    --green:#16a34a;
+    --red:#dc2626;
+    --orange:#f59e0b;
+    --shadow:0 10px 30px rgba(30,64,175,.08);
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    width:280px;
+    height:100vh;
+    background:#fff;
+    border-right:1px solid var(--border);
+    z-index:100;
+    overflow-y:auto;
+}
+
+.brand{
+    padding:26px 24px 18px;
+    border-bottom:1px solid var(--border);
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:24px;
+    font-weight:800;
+    color:var(--blue);
+}
+
+.logo-box{
+    width:38px;
+    height:38px;
+    border-radius:10px;
+    background:linear-gradient(135deg,#2563eb,#60a5fa);
+    color:white;
+    display:grid;
+    place-items:center;
+    font-size:16px;
+    font-weight:800;
+}
+
+.lesson-label{
+    margin-top:12px;
+    font-size:11px;
+    letter-spacing:1.5px;
+    color:var(--muted);
+    font-weight:700;
+}
+
+.lesson-title-small{
+    margin-top:4px;
+    font-size:14px;
+    color:var(--text);
+    font-weight:600;
+}
+
+.side-nav{
+    padding:18px 14px 30px;
+}
+
+.nav-heading{
+    font-size:10px;
+    color:var(--muted);
+    font-weight:800;
+    letter-spacing:1.4px;
+    margin:12px 10px 8px;
+}
+
+.side-nav a{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    text-decoration:none;
+    color:var(--text-light);
+    padding:9px 11px;
+    border-radius:9px;
+    margin:3px 0;
+    font-size:13px;
+    transition:.2s;
+}
+
+.side-nav a:hover{
+    background:var(--blue-light);
+    color:var(--blue);
+}
+
+.side-nav a.active{
+    background:var(--blue-light);
+    color:var(--blue);
+    font-weight:700;
+    border-left:3px solid var(--blue);
+}
+
+.nav-dot{
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:#cbd5e1;
+    flex-shrink:0;
+}
+
+.side-nav a.active .nav-dot{
+    background:var(--blue);
+}
+
+/* ================= MAIN ================= */
+
+.main{
+    margin-left:280px;
+    min-height:100vh;
+}
+
+.progress-track{
+    position:fixed;
+    top:0;
+    left:280px;
+    right:0;
+    height:4px;
+    background:#eaf0f8;
+    z-index:200;
+}
+
+.progress-bar{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,#2563eb,#60a5fa);
+    transition:.1s;
+}
+
+.container{
+    max-width:1100px;
+    margin:auto;
+    padding:55px 34px 80px;
+}
+
+/* ================= HERO ================= */
+
+.hero{
+    position:relative;
+    overflow:hidden;
+    background:linear-gradient(135deg,#ffffff 0%,#f1f7ff 100%);
+    border:1px solid var(--border);
+    border-radius:24px;
+    padding:42px;
+    box-shadow:var(--shadow);
+}
+
+.hero::before{
+    content:"";
+    position:absolute;
+    width:260px;
+    height:260px;
+    border-radius:50%;
+    background:#dbeafe;
+    opacity:.45;
+    right:-90px;
+    top:-100px;
+}
+
+.hero::after{
+    content:"";
+    position:absolute;
+    width:180px;
+    height:180px;
+    border-radius:50%;
+    background:#bfdbfe;
+    opacity:.22;
+    left:-100px;
+    bottom:-100px;
+}
+
+.hero-content{
+    position:relative;
+    z-index:2;
+}
+
+.eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    background:var(--blue-light);
+    color:var(--blue);
+    border:1px solid var(--blue-border);
+    padding:6px 12px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:800;
+    margin-bottom:15px;
+}
+
+.hero h1{
+    font-size:42px;
+    line-height:1.15;
+    letter-spacing:-1px;
+    margin-bottom:14px;
+}
+
+.hero p{
+    max-width:760px;
+    color:var(--text-light);
+    font-size:17px;
+}
+
+.meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:22px;
+}
+
+.meta span{
+    padding:7px 12px;
+    border:1px solid var(--border);
+    background:white;
+    border-radius:8px;
+    color:var(--text-light);
+    font-size:12px;
+    font-weight:700;
+}
+
+/* ================= SEARCH ================= */
+
+.search-box{
+    margin:25px 0;
+    position:relative;
+}
+
+.search-box input{
+    width:100%;
+    border:1px solid var(--border);
+    background:#fff;
+    border-radius:13px;
+    padding:14px 18px 14px 44px;
+    outline:none;
+    font-size:14px;
+    color:var(--text);
+    transition:.2s;
+}
+
+.search-box input:focus{
+    border-color:var(--blue);
+    box-shadow:0 0 0 4px var(--blue-light);
+}
+
+.search-icon{
+    position:absolute;
+    left:16px;
+    top:12px;
+    font-size:18px;
+}
+
+/* ================= SECTION ================= */
+
+.section{
+    margin-top:28px;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:30px;
+    box-shadow:0 5px 20px rgba(30,64,175,.04);
+    scroll-margin-top:30px;
+}
+
+.section h2{
+    font-size:25px;
+    margin-bottom:9px;
+}
+
+.section h3{
+    font-size:18px;
+    margin:24px 0 10px;
+}
+
+.section p{
+    color:var(--text-light);
+    margin-bottom:13px;
+}
+
+.section ul{
+    margin:10px 0 15px 20px;
+    color:var(--text-light);
+}
+
+.section li{
+    margin:5px 0;
+}
+
+.badge{
+    display:inline-block;
+    background:var(--blue-light);
+    color:var(--blue);
+    border-radius:7px;
+    padding:3px 8px;
+    font-size:11px;
+    font-weight:800;
+}
+
+.highlight{
+    background:#f8fbff;
+    border-left:4px solid var(--blue);
+    padding:15px 18px;
+    border-radius:8px;
+    margin:18px 0;
+}
+
+.highlight strong{
+    color:var(--blue-dark);
+}
+
+/* ================= CARDS ================= */
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin-top:20px;
+}
+
+.card{
+    border:1px solid var(--border);
+    border-radius:13px;
+    padding:20px;
+    background:#fff;
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+    border-color:var(--blue-border);
+    box-shadow:0 12px 28px rgba(37,99,235,.09);
+}
+
+.card-icon{
+    width:42px;
+    height:42px;
+    border-radius:10px;
+    display:grid;
+    place-items:center;
+    background:var(--blue-light);
+    color:var(--blue);
+    font-weight:800;
+    margin-bottom:13px;
+}
+
+.card h3{
+    margin:0 0 7px;
+    font-size:16px;
+}
+
+.card p{
+    font-size:13px;
+    margin:0;
+}
+
+/* ================= CODE ================= */
+
+.code-wrap{
+    margin:17px 0;
+    background:#0f172a;
+    border-radius:12px;
+    overflow:hidden;
+    border:1px solid #1e293b;
+}
+
+.code-head{
+    height:42px;
+    padding:0 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    color:#cbd5e1;
+    font-size:12px;
+    background:#111c30;
+}
+
+.copy-btn{
+    border:1px solid #334155;
+    background:#1e293b;
+    color:#e2e8f0;
+    padding:5px 10px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:11px;
+}
+
+.copy-btn:hover{
+    background:#334155;
+}
+
+pre{
+    padding:18px;
+    overflow-x:auto;
+    color:#dbeafe;
+    font-size:13px;
+    line-height:1.65;
+}
+
+code{
+    font-family:Consolas,Monaco,monospace;
+}
+
+/* ================= TERMINAL ================= */
+
+.terminal{
+    background:#0b1220;
+    border-radius:14px;
+    overflow:hidden;
+    margin:20px 0;
+    box-shadow:0 15px 35px rgba(15,23,42,.12);
+}
+
+.terminal-top{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:12px 15px;
+    background:#111827;
+}
+
+.term-dot{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:#64748b;
+}
+
+.terminal-body{
+    padding:20px;
+    font-family:Consolas,monospace;
+    color:#cbd5e1;
+    font-size:13px;
+}
+
+.prompt{
+    color:#60a5fa;
+}
+
+.command{
+    color:#f8fafc;
+}
+
+.output{
+    color:#94a3b8;
+}
+
+/* ================= PROJECT VS APPS ================= */
+
+.project-visual{
+    border:1px solid var(--border);
+    background:#f8fbff;
+    border-radius:16px;
+    padding:22px;
+    margin-top:20px;
+}
+
+.project-box{
+    border:2px solid var(--blue-border);
+    background:#fff;
+    border-radius:15px;
+    padding:22px;
+}
+
+.project-label{
+    text-align:center;
+    font-weight:800;
+    color:var(--blue);
+    margin-bottom:20px;
+}
+
+.app-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+}
+
+.app-box{
+    background:var(--blue-light);
+    border:1px solid var(--blue-border);
+    border-radius:12px;
+    padding:17px 10px;
+    text-align:center;
+    font-size:13px;
+    font-weight:700;
+    color:var(--blue-dark);
+    animation:floatApp 3s ease-in-out infinite;
+}
+
+.app-box:nth-child(2){animation-delay:.4s}
+.app-box:nth-child(3){animation-delay:.8s}
+.app-box:nth-child(4){animation-delay:1.2s}
+
+@keyframes floatApp{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-6px)}
+}
+
+/* ================= ROUTING FLOW ================= */
+
+.flow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:28px 0;
+}
+
+.flow-node{
+    min-width:135px;
+    padding:15px 13px;
+    background:#fff;
+    border:1px solid var(--blue-border);
+    border-radius:12px;
+    text-align:center;
+    box-shadow:0 6px 18px rgba(37,99,235,.06);
+}
+
+.flow-icon{
+    font-size:22px;
+    margin-bottom:5px;
+}
+
+.flow-node strong{
+    display:block;
+    font-size:13px;
+}
+
+.flow-node small{
+    display:block;
+    color:var(--muted);
+    font-size:10px;
+    margin-top:2px;
+}
+
+.arrow{
+    color:var(--blue);
+    font-size:22px;
+    font-weight:bold;
+    animation:pulseArrow 1.5s infinite;
+}
+
+@keyframes pulseArrow{
+    0%,100%{opacity:.35;transform:translateX(0)}
+    50%{opacity:1;transform:translateX(4px)}
+}
+
+/* ================= ROUTE TESTER ================= */
+
+.route-tester{
+    margin-top:25px;
+    padding:22px;
+    border:1px solid var(--blue-border);
+    background:linear-gradient(135deg,#f8fbff,#eff6ff);
+    border-radius:16px;
+}
+
+.route-buttons{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    margin:15px 0;
+}
+
+.route-btn{
+    border:1px solid var(--blue-border);
+    background:#fff;
+    color:var(--blue-dark);
+    padding:9px 13px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:12px;
+    font-weight:700;
+    transition:.2s;
+}
+
+.route-btn:hover,
+.route-btn.selected{
+    background:var(--blue);
+    color:#fff;
+    border-color:var(--blue);
+}
+
+.route-stage{
+    min-height:180px;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:20px;
+    position:relative;
+    overflow:hidden;
+}
+
+.route-stage-title{
+    font-size:12px;
+    color:var(--muted);
+    margin-bottom:12px;
+}
+
+.packet{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 14px;
+    background:var(--blue);
+    color:white;
+    width:max-content;
+    border-radius:9px;
+    font-size:12px;
+    font-weight:700;
+    position:relative;
+    left:0;
+    transition:1s cubic-bezier(.2,.8,.2,1);
+}
+
+.route-chain{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:25px;
+}
+
+.chain-node{
+    padding:9px 12px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:#f8fafc;
+    font-size:11px;
+    color:var(--text-light);
+    transition:.4s;
+}
+
+.chain-node.active{
+    background:var(--blue-light);
+    border-color:var(--blue);
+    color:var(--blue-dark);
+    transform:translateY(-3px);
+}
+
+/* ================= URL MATCH ================= */
+
+.url-example{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+    margin-top:20px;
+}
+
+.url-card{
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:18px;
+    background:#fff;
+}
+
+.url{
+    font-family:Consolas,monospace;
+    background:#f1f5f9;
+    padding:10px;
+    border-radius:7px;
+    color:var(--blue-dark);
+    font-size:13px;
+    margin:8px 0;
+}
+
+/* ================= MISTAKES ================= */
+
+.mistake{
+    display:flex;
+    gap:13px;
+    padding:14px;
+    border:1px solid #fee2e2;
+    background:#fffafa;
+    border-radius:10px;
+    margin:9px 0;
+}
+
+.mistake-icon{
+    color:var(--red);
+    font-weight:900;
+}
+
+.mistake strong{
+    display:block;
+    margin-bottom:3px;
+}
+
+.mistake p{
+    margin:0;
+    font-size:13px;
+}
+
+/* ================= PRACTICE ================= */
+
+.practice{
+    border:1px solid var(--blue-border);
+    background:linear-gradient(135deg,#eff6ff,#fff);
+    border-radius:15px;
+    padding:23px;
+}
+
+.steps{
+    counter-reset:step;
+    list-style:none !important;
+    margin-left:0 !important;
+}
+
+.steps li{
+    counter-increment:step;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+}
+
+.steps li::before{
+    content:counter(step);
+    width:27px;
+    height:27px;
+    flex-shrink:0;
+    border-radius:50%;
+    background:var(--blue);
+    color:white;
+    display:grid;
+    place-items:center;
+    font-size:11px;
+    font-weight:800;
+}
+
+/* ================= QUIZ ================= */
+
+.quiz-question{
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:19px;
+    margin:13px 0;
+}
+
+.quiz-question h3{
+    margin:0 0 12px;
+    font-size:15px;
+}
+
+.option{
+    display:block;
+    margin:7px 0;
+    padding:10px 12px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    cursor:pointer;
+    color:var(--text-light);
+    transition:.2s;
+}
+
+.option:hover{
+    background:var(--blue-light);
+    border-color:var(--blue-border);
+}
+
+.option.correct{
+    border-color:#86efac;
+    background:#f0fdf4;
+    color:#166534;
+}
+
+.option.wrong{
+    border-color:#fecaca;
+    background:#fef2f2;
+    color:#991b1b;
+}
+
+.quiz-result{
+    display:none;
+    margin-top:16px;
+    padding:13px;
+    border-radius:9px;
+    background:var(--blue-light);
+    color:var(--blue-dark);
+    font-weight:700;
+}
+
+/* ================= TAKEAWAY ================= */
+
+.takeaway{
+    background:#10213f;
+    color:#fff;
+    border-radius:18px;
+    padding:30px;
+    margin-top:28px;
+}
+
+.takeaway h2{
+    color:#fff;
+}
+
+.takeaway p{
+    color:#cbd5e1;
+}
+
+.takeaway-quote{
+    border-left:3px solid #60a5fa;
+    padding-left:17px;
+    margin-top:17px;
+    color:#e2e8f0;
+}
+
+/* ================= FOOTER ================= */
+
+.lesson-footer{
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    margin-top:30px;
+}
+
+.footer-btn{
+    text-decoration:none;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:12px 17px;
+    color:var(--text-light);
+    font-size:13px;
+    font-weight:700;
+}
+
+.footer-btn.next{
+    background:var(--blue);
+    border-color:var(--blue);
+    color:white;
+}
+
+/* ================= REVEAL ================= */
+
+.reveal{
+    opacity:0;
+    transform:translateY(20px);
+    transition:.6s ease;
+}
+
+.reveal.visible{
+    opacity:1;
+    transform:translateY(0);
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:900px){
+
+    .sidebar{
+        width:220px;
+    }
+
+    .main{
+        margin-left:220px;
+    }
+
+    .progress-track{
+        left:220px;
+    }
+
+    .cards{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .app-grid{
+        grid-template-columns:1fr 1fr;
+    }
+}
+
+@media(max-width:700px){
+
+    .sidebar{
+        position:relative;
+        width:100%;
+        height:auto;
+        border-right:0;
+        border-bottom:1px solid var(--border);
+    }
+
+    .side-nav{
+        max-height:280px;
+        overflow-y:auto;
+    }
+
+    .main{
+        margin-left:0;
+    }
+
+    .progress-track{
+        left:0;
+    }
+
+    .container{
+        padding:25px 15px 60px;
+    }
+
+    .hero{
+        padding:27px 20px;
+    }
+
+    .hero h1{
+        font-size:30px;
+    }
+
+    .section{
+        padding:22px 18px;
+    }
+
+    .cards{
+        grid-template-columns:1fr;
+    }
+
+    .app-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .url-example{
+        grid-template-columns:1fr;
+    }
+
+    .flow{
+        flex-direction:column;
+    }
+
+    .arrow{
+        transform:rotate(90deg);
+    }
+
+    .lesson-footer{
+        flex-direction:column;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= SIDEBAR ================= -->
+
+<aside class="sidebar">
+
+    <div class="brand">
+
+        <div class="logo">
+            <div class="logo-box">Z</div>
+            ZENSUS
+        </div>
+
+        <div class="lesson-label">LESSON 03</div>
+
+        <div class="lesson-title-small">
+            Django Apps & URL Routing
+        </div>
+
+    </div>
+
+    <nav class="side-nav">
+
+        <div class="nav-heading">LESSON CONTENT</div>
+
+        <a href="#overview" class="active">
+            <span class="nav-dot"></span>
+            Overview
+        </a>
+
+        <a href="#app">
+            <span class="nav-dot"></span>
+            What is an App?
+        </a>
+
+        <a href="#create-app">
+            <span class="nav-dot"></span>
+            Create App
+        </a>
+
+        <a href="#structure">
+            <span class="nav-dot"></span>
+            App Structure
+        </a>
+
+        <a href="#register">
+            <span class="nav-dot"></span>
+            Register App
+        </a>
+
+        <a href="#routing">
+            <span class="nav-dot"></span>
+            URL Routing
+        </a>
+
+        <a href="#path">
+            <span class="nav-dot"></span>
+            path()
+        </a>
+
+        <a href="#project-url">
+            <span class="nav-dot"></span>
+            Project URLs
+        </a>
+
+        <a href="#app-url">
+            <span class="nav-dot"></span>
+            App URLs
+        </a>
+
+        <a href="#include">
+            <span class="nav-dot"></span>
+            include()
+        </a>
+
+        <a href="#dynamic">
+            <span class="nav-dot"></span>
+            Dynamic URLs
+        </a>
+
+        <a href="#named">
+            <span class="nav-dot"></span>
+            Named URLs
+        </a>
+
+        <a href="#request-flow">
+            <span class="nav-dot"></span>
+            Request Flow
+        </a>
+
+        <a href="#portal">
+            <span class="nav-dot"></span>
+            Product Portal
+        </a>
+
+        <a href="#mistakes">
+            <span class="nav-dot"></span>
+            Common Mistakes
+        </a>
+
+        <a href="#practice">
+            <span class="nav-dot"></span>
+            Practice
+        </a>
+
+        <a href="#quiz">
+            <span class="nav-dot"></span>
+            Quiz
+        </a>
+
+    </nav>
+
+</aside>
+
+
+<!-- ================= MAIN ================= -->
+
+<main class="main">
+
+<div class="progress-track">
+    <div class="progress-bar" id="progressBar"></div>
+</div>
+
+<div class="container">
+
+<!-- ================= HERO ================= -->
+
+<section class="hero reveal" id="overview">
+
+    <div class="hero-content">
+
+        <div class="eyebrow">
+            ● DJANGO • LESSON 03
+        </div>
+
+        <h1>Django Apps & URL Routing</h1>
+
+        <p>
+            Organize your Django project into reusable apps and learn exactly
+            how a browser request travels through project URLs, app URLs,
+            views, and finally returns a response.
+        </p>
+
+        <div class="meta">
+            <span>Lesson 03</span>
+            <span>Beginner</span>
+            <span>Python</span>
+            <span>URL Routing</span>
+            <span>Hands-on</span>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= SEARCH ================= -->
+
+<div class="search-box">
+    <span class="search-icon">⌕</span>
+    <input
+        type="text"
+        id="searchInput"
+        placeholder="Search this lesson..."
+    >
+</div>
+
+
+<!-- ================= WHAT IS APP ================= -->
+
+<section class="section reveal" id="app">
+
+    <span class="badge">01 • CONCEPT</span>
+
+    <h2>What is a Django App?</h2>
+
+    <p>
+        A Django app is a modular component of a Django project that handles
+        a specific area of functionality.
+    </p>
+
+    <p>
+        For example, an e-commerce website could contain separate apps for
+        users, products, orders, and payments.
+    </p>
+
+    <div class="cards">
+
+        <div class="card">
+            <div class="card-icon">👤</div>
+            <h3>Users App</h3>
+            <p>
+                Handles registration, login, profiles and user-related features.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">📦</div>
+            <h3>Products App</h3>
+            <p>
+                Handles product information, categories and product pages.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">💳</div>
+            <h3>Payments App</h3>
+            <p>
+                Handles payment-related functionality and transactions.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="highlight">
+
+        <strong>Important:</strong>
+
+        A Django project is the complete website/application,
+        while Django apps are modular parts of that project.
+
+    </div>
+
+</section>
+
+
+<!-- ================= PROJECT VS APPS ================= -->
+
+<section class="section reveal">
+
+    <span class="badge">02 • VISUAL</span>
+
+    <h2>One Project Can Contain Multiple Apps</h2>
+
+    <p>
+        Instead of placing everything into one huge application,
+        Django encourages developers to separate functionality into apps.
+    </p>
+
+    <div class="project-visual">
+
+        <div class="project-box">
+
+            <div class="project-label">
+                DJANGO PROJECT
+            </div>
+
+            <div class="app-grid">
+
+                <div class="app-box">
+                    👤<br>
+                    Users
+                </div>
+
+                <div class="app-box">
+                    📦<br>
+                    Products
+                </div>
+
+                <div class="app-box">
+                    🛒<br>
+                    Orders
+                </div>
+
+                <div class="app-box">
+                    💳<br>
+                    Payments
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= CREATE APP ================= -->
+
+<section class="section reveal" id="create-app">
+
+    <span class="badge">03 • COMMAND</span>
+
+    <h2>Creating a Django App</h2>
+
+    <p>
+        Django provides the <code>startapp</code> command for creating a new app.
+    </p>
+
+    <div class="terminal">
+
+        <div class="terminal-top">
+            <span class="term-dot"></span>
+            <span class="term-dot"></span>
+            <span class="term-dot"></span>
+        </div>
+
+        <div class="terminal-body">
+
+            <div>
+                <span class="prompt">$</span>
+                <span class="command">
+                    python manage.py startapp products
+                </span>
+            </div>
+
+            <br>
+
+            <div class="output">
+                Creating app structure...
+            </div>
+
+            <div class="output">
+                products/
+            </div>
+
+            <div class="output">
+                App created successfully.
+            </div>
+
+        </div>
+
+    </div>
+
+    <p>
+        Here <strong>products</strong> is the name of the Django app.
+    </p>
+
+</section>
+
+
+<!-- ================= APP STRUCTURE ================= -->
+
+<section class="section reveal" id="structure">
+
+    <span class="badge">04 • STRUCTURE</span>
+
+    <h2>Django App Folder Structure</h2>
+
+    <p>
+        After running <code>startapp</code>, Django generates several important
+        files.
+    </p>
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>products/</span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>products/
+│
+├── __init__.py
+├── admin.py
+├── apps.py
+├── models.py
+├── tests.py
+├── views.py
+│
+└── migrations/
+    └── __init__.py</code></pre>
+
+    </div>
+
+    <div class="cards">
+
+        <div class="card">
+            <div class="card-icon">M</div>
+            <h3>models.py</h3>
+            <p>
+                Defines database models and application data structures.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">V</div>
+            <h3>views.py</h3>
+            <p>
+                Contains functions or classes that process requests.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">A</div>
+            <h3>admin.py</h3>
+            <p>
+                Registers models with the Django admin interface.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">C</div>
+            <h3>apps.py</h3>
+            <p>
+                Contains configuration information for the app.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">T</div>
+            <h3>tests.py</h3>
+            <p>
+                Used for writing automated tests.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">DB</div>
+            <h3>migrations/</h3>
+            <p>
+                Stores database schema changes.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= REGISTER ================= -->
+
+<section class="section reveal" id="register">
+
+    <span class="badge">05 • CONFIGURATION</span>
+
+    <h2>Registering an App</h2>
+
+    <p>
+        Creating an app is not enough. Django needs to know that the app
+        belongs to the project.
+    </p>
+
+    <p>
+        Open the project's <code>settings.py</code> and add the app to
+        <code>INSTALLED_APPS</code>.
+    </p>
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>settings.py</span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+
+    "products",
+]</code></pre>
+
+    </div>
+
+    <div class="highlight">
+
+        <strong>Why?</strong>
+
+        Registering the app allows Django to discover and use its models,
+        migrations, configuration and other components.
+
+    </div>
+
+</section>
+
+
+<!-- ================= URL ROUTING ================= -->
+
+<section class="section reveal" id="routing">
+
+    <span class="badge">06 • CORE CONCEPT</span>
+
+    <h2>What is URL Routing?</h2>
+
+    <p>
+        URL routing is the process of deciding which piece of Python code
+        should handle a particular URL.
+    </p>
+
+    <p>
+        Suppose a user enters:
+    </p>
+
+    <div class="url">
+        http://127.0.0.1:8000/products/
+    </div>
+
+    <p>
+        Django must determine which view should respond to this request.
+    </p>
+
+    <div class="flow">
+
+        <div class="flow-node">
+            <div class="flow-icon">🌐</div>
+            <strong>Browser</strong>
+            <small>/products/</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-node">
+            <div class="flow-icon">🧭</div>
+            <strong>Project URLs</strong>
+            <small>urls.py</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-node">
+            <div class="flow-icon">🔗</div>
+            <strong>App URLs</strong>
+            <small>products/urls.py</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-node">
+            <div class="flow-icon">⚙️</div>
+            <strong>View</strong>
+            <small>views.py</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-node">
+            <div class="flow-icon">📄</div>
+            <strong>Response</strong>
+            <small>Browser</small>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= PATH ================= -->
+
+<section class="section reveal" id="path">
+
+    <span class="badge">07 • URL PATTERNS</span>
+
+    <h2>Understanding path()</h2>
+
+    <p>
+        Django uses the <code>path()</code> function to define URL patterns.
+    </p>
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>Basic path()</span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>path("products/", views.product_home)</code></pre>
+
+    </div>
+
+    <p>
+        The first argument is the URL pattern and the second argument is
+        the view that should handle that URL.
+    </p>
+
+    <div class="url-example">
+
+        <div class="url-card">
+
+            <strong>URL Pattern</strong>
+
+            <div class="url">
+                "products/"
+            </div>
+
+            <p>
+                The browser path Django should match.
+            </p>
+
+        </div>
+
+        <div class="url-card">
+
+            <strong>View</strong>
+
+            <div class="url">
+                views.product_home
+            </div>
+
+            <p>
+                The Python function that handles the request.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= PROJECT URL ================= -->
+
+<section class="section reveal" id="project-url">
+
+    <span class="badge">08 • PROJECT URLS</span>
+
+    <h2>Project-Level urls.py</h2>
+
+    <p>
+        The project's <code>urls.py</code> acts as the main URL directory
+        for the website.
+    </p>
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>myproject/urls.py</span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>from django.contrib import admin
+from django.urls import include, path
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("products/", include("products.urls")),
+]</code></pre>
+
+    </div>
+
+    <p>
+        Notice the use of <code>include()</code>. It sends requests beginning
+        with <code>products/</code> to the Products app.
+    </p>
+
+</section>
+
+
+<!-- ================= APP URL ================= -->
+
+<section class="section reveal" id="app-url">
+
+    <span class="badge">09 • APP URLS</span>
+
+    <h2>App-Level urls.py</h2>
+
+    <p>
+        It is good practice to keep each app's routes inside that app.
+    </p>
+
+    <p>
+        Create:
+    </p>
+
+    <div class="url">
+        products/urls.py
+    </div>
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>products/urls.py</span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>from django.urls import path
+from . import views
+
+urlpatterns = [
+    path(
+        "",
+        views.product_home,
+        name="product-home"
+    ),
+]</code></pre>
+
+    </div>
+
+</section>
+
+
+<!-- ================= INCLUDE ================= -->
+
+<section class="section reveal" id="include">
+
+    <span class="badge">10 • CONNECTING URLS</span>
+
+    <h2>How include() Works</h2>
+
+    <p>
+        The <code>include()</code> function connects the main project URL
+        configuration to an app's URL configuration.
+    </p>
+
+    <div class="flow">
+
+        <div class="flow-node">
+            <div class="flow-icon">🌐</div>
+            <strong>/products/</strong>
+            <small>Browser</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-node">
+            <div class="flow-icon">🏠</div>
+            <strong>myproject/urls.py</strong>
+            <small>include()</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-node">
+            <div class="flow-icon">📦</div>
+            <strong>products/urls.py</strong>
+            <small>app routes</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-node">
+            <div class="flow-icon">⚙️</div>
+            <strong>views.py</strong>
+            <small>function</small>
+        </div>
+
+    </div>
+
+    <div class="highlight">
+
+        <strong>Think of include() like delegation:</strong>
+
+        The main URL file says, “Anything beginning with
+        <code>products/</code> should be handled by the Products app.”
+
+    </div>
+
+</section>
+
+
+<!-- ================= DYNAMIC URL ================= -->
+
+<section class="section reveal" id="dynamic">
+
+    <span class="badge">11 • DYNAMIC ROUTING</span>
+
+    <h2>Dynamic URL Parameters</h2>
+
+    <p>
+        Sometimes a URL needs to contain a changing value such as a product ID,
+        student ID, username or article ID.
+    </p>
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>products/urls.py</span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>path(
+    "product/&lt;int:id&gt;/",
+    views.product_detail,
+    name="product-detail"
+)</code></pre>
+
+    </div>
+
+    <p>
+        This one URL pattern can handle many different URLs.
+    </p>
+
+    <div class="url-example">
+
+        <div class="url-card">
+
+            <strong>Request 1</strong>
+
+            <div class="url">
+                /product/1/
+            </div>
+
+            <p>id = 1</p>
+
+        </div>
+
+        <div class="url-card">
+
+            <strong>Request 2</strong>
+
+            <div class="url">
+                /product/25/
+            </div>
+
+            <p>id = 25</p>
+
+        </div>
+
+    </div>
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>views.py</span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>from django.http import HttpResponse
+
+def product_detail(request, id):
+
+    return HttpResponse(
+        f"Product ID: {id}"
+    )</code></pre>
+
+    </div>
+
+    <div class="highlight">
+
+        <strong>Important:</strong>
+
+        <code>&lt;int:id&gt;</code> means Django expects an integer value
+        and passes that value to the view as <code>id</code>.
+
+    </div>
+
+</section>
+
+
+<!-- ================= NAMED URL ================= -->
+
+<section class="section reveal" id="named">
+
+    <span class="badge">12 • BEST PRACTICE</span>
+
+    <h2>Named URLs</h2>
+
+    <p>
+        Django allows you to give a name to a URL pattern using
+        <code>name=</code>.
+    </p>
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>Named URL</span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>path(
+    "products/",
+    views.product_home,
+    name="products"
+)</code></pre>
+
+    </div>
+
+    <p>
+        Instead of hard-coding URLs everywhere, Django can use the URL name
+        to generate the correct URL.
+    </p>
+
+    <div class="highlight">
+
+        <strong>Why use names?</strong>
+
+        If the actual URL changes later, your templates and Python code can
+        continue referring to the route by its name.
+
+    </div>
+
+</section>
+
+
+<!-- ================= REQUEST FLOW ================= -->
+
+<section class="section reveal" id="request-flow">
+
+    <span class="badge">13 • INTERACTIVE</span>
+
+    <h2>See the Complete Request Flow</h2>
+
+    <p>
+        Choose a URL below and watch how Django routes the request.
+    </p>
+
+    <div class="route-tester">
+
+        <strong>Route Tester</strong>
+
+        <div class="route-buttons">
+
+            <button class="route-btn selected" data-route="products">
+                /products/
+            </button>
+
+            <button class="route-btn" data-route="product1">
+                /products/1/
+            </button>
+
+            <button class="route-btn" data-route="product2">
+                /products/2/
+            </button>
+
+            <button class="route-btn" data-route="about">
+                /about/
+            </button>
+
+        </div>
+
+        <div class="route-stage">
+
+            <div class="route-stage-title">
+                Request packet
+            </div>
+
+            <div class="packet" id="packet">
+                🌐 /products/
+            </div>
+
+            <div class="route-chain">
+
+                <div class="chain-node active">
+                    Browser
+                </div>
+
+                <div class="chain-node">
+                    project/urls.py
+                </div>
+
+                <div class="chain-node">
+                    app/urls.py
+                </div>
+
+                <div class="chain-node">
+                    views.py
+                </div>
+
+                <div class="chain-node">
+                    Response
+                </div>
+
+            </div>
+
+            <p id="routeMessage"
+               style="margin-top:20px;font-size:13px;">
+                Request reaches
+                <strong>product_home()</strong>.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= PRODUCT PORTAL ================= -->
+
+<section class="section reveal" id="portal">
+
+    <span class="badge">14 • MINI PROJECT</span>
+
+    <h2>ZENSUS Product Portal</h2>
+
+    <p>
+        Let's combine everything we learned into a small multi-page Django
+        application.
+    </p>
+
+    <div class="flow">
+
+        <div class="flow-node">
+            <div class="flow-icon">📦</div>
+            <strong>/products/</strong>
+            <small>Product Home</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-node">
+            <div class="flow-icon">1️⃣</div>
+            <strong>/products/1/</strong>
+            <small>Product 1</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-node">
+            <div class="flow-icon">2️⃣</div>
+            <strong>/products/2/</strong>
+            <small>Product 2</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-node">
+            <div class="flow-icon">ℹ️</div>
+            <strong>/about/</strong>
+            <small>About Page</small>
+        </div>
+
+    </div>
+
+    <h3>View Functions</h3>
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>products/views.py</span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>from django.http import HttpResponse
+
+
+def product_home(request):
+
+    return HttpResponse(
+        "Welcome to Products"
+    )
+
+
+def product_detail(request, id):
+
+    return HttpResponse(
+        f"Product ID: {id}"
+    )
+
+
+def about(request):
+
+    return HttpResponse(
+        "About ZENSUS Product Portal"
+    )</code></pre>
+
+    </div>
+
+    <h3>App URL Configuration</h3>
+
+    <div class="code-wrap">
+
+        <div class="code-head">
+
+            <span>products/urls.py</span>
+
+            <button class="copy-btn">
+                Copy
+            </button>
+
+        </div>
+
+<pre><code>from django.urls import path
+from . import views
+
+urlpatterns = [
+
+    path(
+        "",
+        views.product_home,
+        name="products"
+    ),
+
+    path(
+        "&lt;int:id&gt;/",
+        views.product_detail,
+        name="product-detail"
+    ),
+
+    path(
+        "about/",
+        views.about,
+        name="about"
+    ),
+]</code></pre>
+
+    </div>
+
+</section>
+
+
+<!-- ================= COMMON MISTAKES ================= -->
+
+<section class="section reveal" id="mistakes">
+
+    <span class="badge">15 • DEBUGGING</span>
+
+    <h2>Common URL Routing Mistakes</h2>
+
+    <div class="mistake">
+
+        <div class="mistake-icon">✕</div>
+
+        <div>
+            <strong>Forgetting include()</strong>
+            <p>
+                The project URL configuration must connect to the app URL file.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="mistake">
+
+        <div class="mistake-icon">✕</div>
+
+        <div>
+            <strong>Wrong URL spelling</strong>
+            <p>
+                Check the route carefully. "products/" and "product/" are different.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="mistake">
+
+        <div class="mistake-icon">✕</div>
+
+        <div>
+            <strong>Missing urls.py</strong>
+            <p>
+                If your app uses its own URL configuration, create
+                products/urls.py.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="mistake">
+
+        <div class="mistake-icon">✕</div>
+
+        <div>
+            <strong>Forgetting to import views</strong>
+            <p>
+                Use <code>from . import views</code> inside the app URL file.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="mistake">
+
+        <div class="mistake-icon">✕</div>
+
+        <div>
+            <strong>Incorrect dynamic parameter</strong>
+            <p>
+                Make sure your view accepts the same parameter used in the URL.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="mistake">
+
+        <div class="mistake-icon">✕</div>
+
+        <div>
+            <strong>Wrong view function name</strong>
+            <p>
+                Check that the function name in urls.py actually exists in views.py.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= PRACTICE ================= -->
+
+<section class="section reveal" id="practice">
+
+    <span class="badge">16 • HANDS-ON</span>
+
+    <h2>Practice: Build a Product Portal</h2>
+
+    <div class="practice">
+
+        <p>
+            Create a small Django application with multiple routes.
+        </p>
+
+        <ul class="steps">
+
+            <li>
+                Create a Django project named
+                <strong>product_portal</strong>.
+            </li>
+
+            <li>
+                Create an app named
+                <strong>products</strong>.
+            </li>
+
+            <li>
+                Register <strong>products</strong> in
+                <code>INSTALLED_APPS</code>.
+            </li>
+
+            <li>
+                Create <strong>products/urls.py</strong>.
+            </li>
+
+            <li>
+                Add <code>products/</code> to the project URL configuration.
+            </li>
+
+            <li>
+                Create a <code>product_home()</code> view.
+            </li>
+
+            <li>
+                Create a dynamic product route using
+                <code>&lt;int:id&gt;</code>.
+            </li>
+
+            <li>
+                Run the server and test the routes in your browser.
+            </li>
+
+        </ul>
+
+    </div>
+
+    <div class="terminal">
+
+        <div class="terminal-top">
+            <span class="term-dot"></span>
+            <span class="term-dot"></span>
+            <span class="term-dot"></span>
+        </div>
+
+        <div class="terminal-body">
+
+            <div>
+                <span class="prompt">$</span>
+                <span class="command">
+                    python manage.py runserver
+                </span>
+            </div>
+
+            <br>
+
+            <div class="output">
+                Starting development server...
+            </div>
+
+            <div class="output">
+                http://127.0.0.1:8000/
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= QUIZ ================= -->
+
+<section class="section reveal" id="quiz">
+
+    <span class="badge">17 • KNOWLEDGE CHECK</span>
+
+    <h2>Quick Quiz</h2>
+
+    <div class="quiz-question">
+
+        <h3>
+            1. What does a Django app represent?
+        </h3>
+
+        <div class="option" data-correct="true">
+            A modular part of a Django project
+        </div>
+
+        <div class="option">
+            Only the database
+        </div>
+
+        <div class="option">
+            Only the HTML files
+        </div>
+
+    </div>
+
+
+    <div class="quiz-question">
+
+        <h3>
+            2. Which function connects project URLs to app URLs?
+        </h3>
+
+        <div class="option">
+            render()
+        </div>
+
+        <div class="option" data-correct="true">
+            include()
+        </div>
+
+        <div class="option">
+            redirect()
+        </div>
+
+    </div>
+
+
+    <div class="quiz-question">
+
+        <h3>
+            3. What does &lt;int:id&gt; do?
+        </h3>
+
+        <div class="option">
+            Creates a database
+        </div>
+
+        <div class="option">
+            Creates a static URL
+        </div>
+
+        <div class="option" data-correct="true">
+            Captures an integer from the URL
+        </div>
+
+    </div>
+
+    <div class="quiz-question">
+
+        <h3>
+            4. Where is the main project URL configuration normally stored?
+        </h3>
+
+        <div class="option">
+            models.py
+        </div>
+
+        <div class="option" data-correct="true">
+            project/urls.py
+        </div>
+
+        <div class="option">
+            admin.py
+        </div>
+
+    </div>
+
+    <button
+        id="checkQuiz"
+        style="
+        margin-top:10px;
+        border:0;
+        background:#2563eb;
+        color:white;
+        padding:11px 18px;
+        border-radius:8px;
+        cursor:pointer;
+        font-weight:700;
+        "
+    >
+        Check Answers
+    </button>
+
+    <div class="quiz-result" id="quizResult"></div>
+
+</section>
+
+
+<!-- ================= TAKEAWAY ================= -->
+
+<section class="takeaway reveal">
+
+    <h2>Lesson Takeaway</h2>
+
+    <p>
+        Django URL routing connects a browser request to the correct view.
+        Project-level URLs organize the overall website, while app-level URLs
+        keep each application's routes modular and manageable.
+    </p>
+
+    <div class="takeaway-quote">
+
+        Browser → Project URLs → App URLs → View → Response
+
+    </div>
+
+</section>
+
+
+<!-- ================= FOOTER ================= -->
+
+<div class="lesson-footer">
+
+    <a href="#" class="footer-btn">
+        ← Previous Lesson
+    </a>
+
+    <a href="#" class="footer-btn next" id="nextLesson">
+        Next Lesson →
+    </a>
+
+</div>
+
+</div>
+
+</main>
+
+
+<script>
+
+/* ================= PROGRESS ================= */
+
+const progressBar = document.getElementById("progressBar");
+
+window.addEventListener("scroll", () => {
+
+    const scrollTop = window.scrollY;
+
+    const documentHeight =
+        document.documentElement.scrollHeight -
+        window.innerHeight;
+
+    const progress =
+        documentHeight > 0
+        ? (scrollTop / documentHeight) * 100
+        : 0;
+
+    progressBar.style.width = progress + "%";
+
+});
+
+
+/* ================= COPY BUTTONS ================= */
+
+document.querySelectorAll(".copy-btn").forEach(button => {
+
+    button.addEventListener("click", async () => {
+
+        const code =
+            button.closest(".code-wrap")
+            .querySelector("code")
+            .innerText;
+
+        try{
+
+            await navigator.clipboard.writeText(code);
+
+        }catch(error){
+
+            const textarea = document.createElement("textarea");
+
+            textarea.value = code;
+
+            document.body.appendChild(textarea);
+
+            textarea.select();
+
+            document.execCommand("copy");
+
+            textarea.remove();
+
+        }
+
+        const oldText = button.innerText;
+
+        button.innerText = "Copied!";
+
+        setTimeout(() => {
+
+            button.innerText = oldText;
+
+        }, 1200);
+
+    });
+
+});
+
+
+/* ================= REVEAL ANIMATION ================= */
+
+const revealObserver =
+new IntersectionObserver(
+    entries => {
+
+        entries.forEach(entry => {
+
+            if(entry.isIntersecting){
+
+                entry.target.classList.add("visible");
+
+            }
+
+        });
+
+    },
+    {
+        threshold:.08
+    }
+);
+
+document.querySelectorAll(".reveal")
+.forEach(element => {
+
+    revealObserver.observe(element);
+
+});
+
+
+/* ================= ACTIVE NAV ================= */
+
+const sections =
+document.querySelectorAll(".section, #overview");
+
+const navLinks =
+document.querySelectorAll(".side-nav a");
+
+const sectionObserver =
+new IntersectionObserver(
+    entries => {
+
+        entries.forEach(entry => {
+
+            if(entry.isIntersecting){
+
+                navLinks.forEach(link => {
+
+                    link.classList.remove("active");
+
+                    if(
+                        link.getAttribute("href") ===
+                        "#" + entry.target.id
+                    ){
+
+                        link.classList.add("active");
+
+                    }
+
+                });
+
+            }
+
+        });
+
+    },
+    {
+        rootMargin:"-20% 0px -65% 0px",
+        threshold:0
+    }
+);
+
+sections.forEach(section => {
+
+    sectionObserver.observe(section);
+
+});
+
+
+/* ================= SEARCH ================= */
+
+const searchInput =
+document.getElementById("searchInput");
+
+const searchableSections =
+document.querySelectorAll(".section");
+
+searchInput.addEventListener("input", () => {
+
+    const query =
+        searchInput.value.toLowerCase().trim();
+
+    searchableSections.forEach(section => {
+
+        const text =
+            section.innerText.toLowerCase();
+
+        if(!query || text.includes(query)){
+
+            section.style.display = "";
+
+        }else{
+
+            section.style.display = "none";
+
+        }
+
+    });
+
+});
+
+
+/* ================= ROUTE TESTER ================= */
+
+const routeButtons =
+document.querySelectorAll(".route-btn");
+
+const packet =
+document.getElementById("packet");
+
+const routeMessage =
+document.getElementById("routeMessage");
+
+const chainNodes =
+document.querySelectorAll(".chain-node");
+
+
+const routeData = {
+
+    products:{
+        url:"/products/",
+        message:
+        "Request reaches <strong>product_home()</strong>."
+    },
+
+    product1:{
+        url:"/products/1/",
+        message:
+        "Dynamic parameter <strong>id = 1</strong> reaches <strong>product_detail()</strong>."
+    },
+
+    product2:{
+        url:"/products/2/",
+        message:
+        "Dynamic parameter <strong>id = 2</strong> reaches <strong>product_detail()</strong>."
+    },
+
+    about:{
+        url:"/about/",
+        message:
+        "Request reaches the <strong>about()</strong> view."
+    }
+
+};
+
+
+routeButtons.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        routeButtons.forEach(btn => {
+
+            btn.classList.remove("selected");
+
+        });
+
+        button.classList.add("selected");
+
+        const route =
+            button.dataset.route;
+
+        const data =
+            routeData[route];
+
+        packet.innerHTML =
+            "🌐 " + data.url;
+
+        packet.style.transform =
+            "translateX(0px)";
+
+        chainNodes.forEach(node => {
+
+            node.classList.remove("active");
+
+        });
+
+        routeMessage.innerHTML =
+            data.message;
+
+        setTimeout(() => {
+
+            chainNodes.forEach((node,index) => {
+
+                setTimeout(() => {
+
+                    node.classList.add("active");
+
+                }, index * 350);
+
+            });
+
+        }, 150);
+
+    });
+
+});
+
+
+/* ================= QUIZ ================= */
+
+const options =
+document.querySelectorAll(".option");
+
+options.forEach(option => {
+
+    option.addEventListener("click", () => {
+
+        const question =
+            option.closest(".quiz-question");
+
+        question
+            .querySelectorAll(".option")
+            .forEach(item => {
+
+                item.classList.remove("correct");
+                item.classList.remove("wrong");
+
+            });
+
+        if(option.dataset.correct === "true"){
+
+            option.classList.add("correct");
+
+        }else{
+
+            option.classList.add("wrong");
+
+        }
+
+    });
+
+});
+
+
+const checkQuiz =
+document.getElementById("checkQuiz");
+
+const quizResult =
+document.getElementById("quizResult");
+
+checkQuiz.addEventListener("click", () => {
+
+    const questions =
+        document.querySelectorAll(".quiz-question");
+
+    let score = 0;
+    let answered = 0;
+
+    questions.forEach(question => {
+
+        const selected =
+            question.querySelector(".option.correct, .option.wrong");
+
+        if(selected){
+
+            answered++;
+
+            if(selected.dataset.correct === "true"){
+
+                score++;
+
+            }
+
+        }
+
+    });
+
+    quizResult.style.display = "block";
+
+    if(answered < questions.length){
+
+        quizResult.innerHTML =
+            `Please answer all questions first. ${answered}/${questions.length} answered.`;
+
+        return;
+
+    }
+
+    quizResult.innerHTML =
+        `Your score: ${score}/${questions.length} 🎯`;
+
+});
+
+
+/* ================= NEXT LESSON ================= */
+
+document.getElementById("nextLesson")
+.addEventListener("click", event => {
+
+    event.preventDefault();
+
+    alert(
+        "Great work! Next lesson: Django Views."
+    );
+
+});
+
+</script>
+
+</body>
+</html>

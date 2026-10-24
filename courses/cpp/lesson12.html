@@ -1,0 +1,4345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENSUS | C++ Lesson 12 - Constructors</title>
+
+<style>
+/* =========================================================
+   ZENSUS — C++ LESSON 12
+   CONSTRUCTORS
+========================================================= */
+
+:root{
+    --primary:#2563eb;
+    --primary-dark:#1d4ed8;
+    --secondary:#7c3aed;
+    --success:#16a34a;
+    --warning:#d97706;
+    --danger:#dc2626;
+
+    --bg:#f7f9fc;
+    --surface:#ffffff;
+    --surface-2:#f1f5f9;
+
+    --text:#0f172a;
+    --muted:#64748b;
+    --border:#e2e8f0;
+
+    --code:#0b1220;
+    --code-2:#111827;
+    --code-text:#e2e8f0;
+
+    --sidebar:280px;
+    --header:72px;
+
+    --shadow:0 10px 30px rgba(15,23,42,.07);
+    --shadow-lg:0 20px 50px rgba(15,23,42,.10);
+
+    --radius:18px;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+/* ================= SCROLL BAR ================= */
+
+::-webkit-scrollbar{
+    width:9px;
+}
+
+::-webkit-scrollbar-track{
+    background:#eef2f7;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#cbd5e1;
+    border-radius:20px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+    background:#94a3b8;
+}
+
+/* ================= PROGRESS ================= */
+
+.progress-bar{
+    position:fixed;
+    top:0;
+    left:0;
+    height:4px;
+    width:0%;
+    background:linear-gradient(90deg,var(--primary),var(--secondary));
+    z-index:9999;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    width:var(--sidebar);
+    height:100vh;
+    background:#fff;
+    border-right:1px solid var(--border);
+    z-index:1000;
+    overflow-y:auto;
+}
+
+.brand{
+    height:var(--header);
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:0 24px;
+    border-bottom:1px solid var(--border);
+}
+
+.logo{
+    width:38px;
+    height:38px;
+    border-radius:11px;
+    background:linear-gradient(135deg,var(--primary),var(--secondary));
+    color:#fff;
+    display:grid;
+    place-items:center;
+    font-weight:900;
+    font-size:17px;
+}
+
+.brand-text{
+    font-size:20px;
+    font-weight:900;
+    letter-spacing:.5px;
+}
+
+.brand-text span{
+    color:var(--primary);
+}
+
+.course-label{
+    padding:22px 22px 10px;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1.4px;
+    color:#94a3b8;
+    font-weight:800;
+}
+
+.nav{
+    padding:0 12px 25px;
+}
+
+.nav a{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    padding:11px 13px;
+    margin:4px 0;
+    color:#475569;
+    text-decoration:none;
+    border-radius:11px;
+    font-size:14px;
+    font-weight:650;
+    transition:.2s ease;
+}
+
+.nav a:hover{
+    background:#eff6ff;
+    color:var(--primary);
+    transform:translateX(2px);
+}
+
+.nav a.active{
+    background:#eff6ff;
+    color:var(--primary);
+    font-weight:800;
+}
+
+.nav-num{
+    width:25px;
+    height:25px;
+    border-radius:7px;
+    background:#f1f5f9;
+    display:grid;
+    place-items:center;
+    font-size:11px;
+    flex-shrink:0;
+}
+
+.nav a.active .nav-num{
+    background:var(--primary);
+    color:#fff;
+}
+
+/* ================= HEADER ================= */
+
+.header{
+    position:fixed;
+    left:var(--sidebar);
+    right:0;
+    top:0;
+    height:var(--header);
+    background:rgba(255,255,255,.94);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 30px;
+    z-index:900;
+}
+
+.header-left{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+
+.menu-btn{
+    display:none;
+    border:0;
+    background:#eff6ff;
+    color:var(--primary);
+    width:40px;
+    height:40px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:20px;
+}
+
+.breadcrumb{
+    color:var(--muted);
+    font-size:14px;
+}
+
+.breadcrumb strong{
+    color:var(--text);
+}
+
+.lesson-badge{
+    background:#eff6ff;
+    color:var(--primary);
+    padding:7px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:800;
+}
+
+/* ================= MAIN ================= */
+
+.main{
+    margin-left:var(--sidebar);
+    padding-top:var(--header);
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:40px 34px 90px;
+}
+
+/* ================= HERO ================= */
+
+.hero{
+    position:relative;
+    overflow:hidden;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:28px;
+    padding:48px;
+    box-shadow:var(--shadow);
+    margin-bottom:30px;
+}
+
+.hero::before{
+    content:"";
+    position:absolute;
+    width:320px;
+    height:320px;
+    right:-120px;
+    top:-160px;
+    border-radius:50%;
+    background:#dbeafe;
+    opacity:.65;
+}
+
+.hero-content{
+    position:relative;
+    z-index:2;
+    max-width:760px;
+}
+
+.eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:7px 12px;
+    background:#eff6ff;
+    color:var(--primary);
+    border-radius:30px;
+    font-size:12px;
+    font-weight:850;
+    margin-bottom:18px;
+}
+
+.hero h1{
+    font-size:clamp(36px,5vw,64px);
+    line-height:1.05;
+    letter-spacing:-2px;
+    margin-bottom:18px;
+}
+
+.hero h1 span{
+    color:var(--primary);
+    font-weight:900;
+}
+
+.hero p{
+    font-size:17px;
+    color:var(--muted);
+    max-width:720px;
+}
+
+.hero-tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    margin-top:24px;
+}
+
+.tag{
+    padding:7px 11px;
+    border:1px solid var(--border);
+    background:#fff;
+    border-radius:30px;
+    font-size:12px;
+    font-weight:700;
+    color:#475569;
+}
+
+/* ================= OBJECTIVES ================= */
+
+.objectives{
+    margin-top:28px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+}
+
+.objective{
+    background:#f8fafc;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:16px;
+}
+
+.objective-icon{
+    font-size:23px;
+    margin-bottom:7px;
+}
+
+.objective strong{
+    display:block;
+    font-size:13px;
+}
+
+.objective span{
+    display:block;
+    color:var(--muted);
+    font-size:12px;
+}
+
+/* ================= SECTIONS ================= */
+
+.section{
+    margin-top:42px;
+    scroll-margin-top:95px;
+}
+
+.section-header{
+    margin-bottom:20px;
+}
+
+.section-number{
+    color:var(--primary);
+    font-size:12px;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+}
+
+.section h2{
+    font-size:30px;
+    letter-spacing:-.8px;
+    margin-top:3px;
+}
+
+.section-sub{
+    color:var(--muted);
+    margin-top:4px;
+}
+
+/* ================= CARDS ================= */
+
+.card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:25px;
+    box-shadow:var(--shadow);
+}
+
+.grid-2{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+}
+
+.grid-3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.card h3{
+    font-size:19px;
+    margin-bottom:9px;
+}
+
+.card p{
+    color:#475569;
+}
+
+.card ul{
+    margin:12px 0 0 19px;
+    color:#475569;
+}
+
+.card li{
+    margin:6px 0;
+}
+
+/* ================= INFO BOX ================= */
+
+.info{
+    display:flex;
+    gap:14px;
+    padding:18px;
+    border-radius:14px;
+    border:1px solid #bfdbfe;
+    background:#eff6ff;
+    margin:18px 0;
+}
+
+.info-icon{
+    font-size:22px;
+}
+
+.info strong{
+    display:block;
+    margin-bottom:3px;
+}
+
+.warning{
+    border-color:#fed7aa;
+    background:#fff7ed;
+}
+
+.success{
+    border-color:#bbf7d0;
+    background:#f0fdf4;
+}
+
+.danger{
+    border-color:#fecaca;
+    background:#fef2f2;
+}
+
+/* ================= CODE ================= */
+
+.code-box{
+    background:var(--code);
+    border-radius:16px;
+    overflow:hidden;
+    margin:18px 0;
+    border:1px solid #1e293b;
+    box-shadow:0 12px 30px rgba(2,6,23,.14);
+}
+
+.code-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 14px;
+    background:var(--code-2);
+    border-bottom:1px solid #1e293b;
+}
+
+.code-title{
+    color:#cbd5e1;
+    font-size:12px;
+    font-weight:800;
+}
+
+.copy-btn{
+    border:0;
+    padding:5px 9px;
+    border-radius:7px;
+    background:#1e293b;
+    color:#cbd5e1;
+    cursor:pointer;
+    font-size:11px;
+}
+
+.copy-btn:hover{
+    background:#334155;
+}
+
+.code-box pre{
+    margin:0;
+    padding:20px;
+    overflow:auto;
+    color:var(--code-text);
+    font-family:"Cascadia Code","Fira Code",Consolas,monospace;
+    font-size:14px;
+    line-height:1.75;
+}
+
+.code-box code{
+    color:var(--code-text);
+}
+
+.kw{color:#c084fc;}
+.type{color:#60a5fa;}
+.str{color:#86efac;}
+.num{color:#fbbf24;}
+.comment{color:#94a3b8;}
+.fn{color:#67e8f9;}
+
+/* ================= SYNTAX ================= */
+
+.syntax{
+    padding:20px;
+    background:#f8fafc;
+    border:1px dashed #cbd5e1;
+    border-radius:14px;
+    margin:15px 0;
+}
+
+.syntax code{
+    font-family:Consolas,monospace;
+    font-size:14px;
+}
+
+/* ================= COMPARISON TABLE ================= */
+
+.table-wrap{
+    overflow-x:auto;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:16px;
+    box-shadow:var(--shadow);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:650px;
+}
+
+th,td{
+    padding:14px 16px;
+    text-align:left;
+    border-bottom:1px solid var(--border);
+}
+
+th{
+    background:#f8fafc;
+    font-size:13px;
+}
+
+td{
+    color:#475569;
+    font-size:14px;
+}
+
+tr:last-child td{
+    border-bottom:0;
+}
+
+/* ================= CONSTRUCTOR VISUAL ================= */
+
+.constructor-visual{
+    background:#0f172a;
+    border-radius:22px;
+    padding:28px;
+    min-height:350px;
+    position:relative;
+    overflow:hidden;
+}
+
+.constructor-visual h3{
+    color:#fff;
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.visual-stage{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:35px;
+    flex-wrap:wrap;
+}
+
+.visual-box{
+    width:190px;
+    min-height:130px;
+    border-radius:16px;
+    border:2px solid #334155;
+    background:#111827;
+    padding:20px;
+    text-align:center;
+    color:#fff;
+    transition:.5s;
+}
+
+.visual-box.active{
+    border-color:#60a5fa;
+    transform:translateY(-8px);
+    box-shadow:0 0 30px rgba(96,165,250,.22);
+}
+
+.visual-box .emoji{
+    font-size:35px;
+    margin-bottom:8px;
+}
+
+.arrow{
+    font-size:35px;
+    color:#60a5fa;
+    animation:pulseArrow 1.5s infinite;
+}
+
+@keyframes pulseArrow{
+    0%,100%{transform:translateX(0);opacity:.55;}
+    50%{transform:translateX(8px);opacity:1;}
+}
+
+.object-state{
+    margin:25px auto 0;
+    max-width:600px;
+    padding:14px;
+    background:#020617;
+    border:1px solid #1e293b;
+    border-radius:12px;
+    color:#94a3b8;
+    text-align:center;
+    font-family:Consolas,monospace;
+}
+
+/* ================= ORDER VISUAL ================= */
+
+.order-flow{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin:25px 0;
+}
+
+.order-item{
+    padding:14px 18px;
+    border-radius:12px;
+    background:#eff6ff;
+    border:1px solid #bfdbfe;
+    color:#1d4ed8;
+    font-weight:800;
+    position:relative;
+}
+
+.order-item::after{
+    content:"→";
+    position:absolute;
+    right:-20px;
+    color:#94a3b8;
+}
+
+.order-item:last-child::after{
+    display:none;
+}
+
+/* ================= ACCORDION ================= */
+
+.accordion{
+    border:1px solid var(--border);
+    border-radius:14px;
+    overflow:hidden;
+    background:#fff;
+}
+
+.acc-item + .acc-item{
+    border-top:1px solid var(--border);
+}
+
+.acc-head{
+    width:100%;
+    border:0;
+    background:#fff;
+    padding:17px 18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    text-align:left;
+    cursor:pointer;
+    font-size:14px;
+    font-weight:800;
+    color:var(--text);
+}
+
+.acc-head span:last-child{
+    font-size:20px;
+    color:var(--primary);
+    transition:.25s;
+}
+
+.acc-body{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .35s ease;
+}
+
+.acc-body-inner{
+    padding:0 18px 18px;
+    color:#64748b;
+}
+
+.acc-item.open .acc-head span:last-child{
+    transform:rotate(45deg);
+}
+
+/* ================= LAB ================= */
+
+.lab{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:24px;
+    box-shadow:var(--shadow);
+}
+
+.lab-controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:18px;
+}
+
+.lab-btn{
+    border:1px solid var(--border);
+    background:#fff;
+    color:#334155;
+    padding:9px 14px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:750;
+}
+
+.lab-btn:hover,
+.lab-btn.active{
+    background:var(--primary);
+    border-color:var(--primary);
+    color:#fff;
+}
+
+.lab-output{
+    background:#0f172a;
+    color:#dbeafe;
+    min-height:120px;
+    border-radius:14px;
+    padding:20px;
+    font-family:Consolas,monospace;
+    white-space:pre-wrap;
+}
+
+/* ================= TIMELINE ================= */
+
+.timeline{
+    position:relative;
+    margin:25px 0;
+}
+
+.timeline::before{
+    content:"";
+    position:absolute;
+    left:20px;
+    top:0;
+    bottom:0;
+    width:2px;
+    background:#dbeafe;
+}
+
+.timeline-item{
+    position:relative;
+    padding-left:58px;
+    margin-bottom:25px;
+}
+
+.timeline-dot{
+    position:absolute;
+    left:10px;
+    top:5px;
+    width:22px;
+    height:22px;
+    background:var(--primary);
+    border:5px solid #dbeafe;
+    border-radius:50%;
+}
+
+.timeline-item h4{
+    margin-bottom:4px;
+}
+
+.timeline-item p{
+    color:var(--muted);
+}
+
+/* ================= QUIZ ================= */
+
+.quiz{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:25px;
+    box-shadow:var(--shadow);
+}
+
+.question{
+    margin-bottom:25px;
+}
+
+.question h4{
+    margin-bottom:12px;
+}
+
+.options{
+    display:grid;
+    gap:8px;
+}
+
+.option{
+    border:1px solid var(--border);
+    background:#fff;
+    border-radius:11px;
+    padding:11px 13px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.option:hover{
+    border-color:#93c5fd;
+    background:#eff6ff;
+}
+
+.option.correct{
+    background:#f0fdf4;
+    border-color:#86efac;
+}
+
+.option.wrong{
+    background:#fef2f2;
+    border-color:#fca5a5;
+}
+
+.quiz-result{
+    margin-top:10px;
+    padding:13px;
+    border-radius:11px;
+    display:none;
+    font-weight:750;
+}
+
+/* ================= CHECKLIST ================= */
+
+.checklist{
+    display:grid;
+    gap:10px;
+}
+
+.check-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:13px 15px;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:12px;
+}
+
+.check-item input{
+    width:18px;
+    height:18px;
+    accent-color:var(--primary);
+}
+
+.check-item label{
+    cursor:pointer;
+    color:#475569;
+}
+
+/* ================= MINI PROJECT ================= */
+
+.project{
+    background:linear-gradient(135deg,#eff6ff,#f5f3ff);
+    border:1px solid #dbeafe;
+    border-radius:22px;
+    padding:30px;
+}
+
+.project h3{
+    font-size:25px;
+}
+
+.project-points{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+    margin:18px 0;
+}
+
+.project-point{
+    background:#fff;
+    padding:12px;
+    border-radius:10px;
+    border:1px solid var(--border);
+}
+
+/* ================= FOOTER ================= */
+
+.footer{
+    margin-top:60px;
+    padding:30px;
+    text-align:center;
+    color:#94a3b8;
+    border-top:1px solid var(--border);
+}
+
+.footer strong{
+    color:var(--primary);
+}
+
+/* ================= REVEAL ================= */
+
+.reveal{
+    opacity:0;
+    transform:translateY(25px);
+    transition:.7s ease;
+}
+
+.reveal.show{
+    opacity:1;
+    transform:translateY(0);
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:1000px){
+
+    :root{
+        --sidebar:250px;
+    }
+
+    .objectives{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .grid-3{
+        grid-template-columns:1fr 1fr;
+    }
+}
+
+@media(max-width:760px){
+
+    .sidebar{
+        transform:translateX(-100%);
+        transition:.3s ease;
+        box-shadow:20px 0 50px rgba(15,23,42,.12);
+    }
+
+    .sidebar.open{
+        transform:translateX(0);
+    }
+
+    .header{
+        left:0;
+        padding:0 16px;
+    }
+
+    .menu-btn{
+        display:block;
+    }
+
+    .main{
+        margin-left:0;
+    }
+
+    .container{
+        padding:25px 16px 60px;
+    }
+
+    .hero{
+        padding:30px 22px;
+        border-radius:20px;
+    }
+
+    .hero h1{
+        font-size:42px;
+        letter-spacing:-1.5px;
+    }
+
+    .objectives,
+    .grid-2,
+    .grid-3{
+        grid-template-columns:1fr;
+    }
+
+    .visual-stage{
+        gap:15px;
+    }
+
+    .arrow{
+        transform:rotate(90deg);
+    }
+
+    .order-item::after{
+        display:none;
+    }
+
+    .project-points{
+        grid-template-columns:1fr;
+    }
+
+    .breadcrumb{
+        display:none;
+    }
+}
+
+/* ================= REDUCED MOTION ================= */
+
+@media(prefers-reduced-motion:reduce){
+
+    *,
+    *::before,
+    *::after{
+        animation:none !important;
+        transition:none !important;
+        scroll-behavior:auto !important;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- =====================================================
+     SIDEBAR
+===================================================== -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+        <div class="logo">Z</div>
+        <div class="brand-text">ZEN<span>SUS</span></div>
+    </div>
+
+    <div class="course-label">C++ Mastery</div>
+
+    <nav class="nav">
+
+        <a href="#intro" class="active">
+            <span class="nav-num">01</span>
+            Constructor Basics
+        </a>
+
+        <a href="#rules">
+            <span class="nav-num">02</span>
+            Constructor Rules
+        </a>
+
+        <a href="#default">
+            <span class="nav-num">03</span>
+            Default Constructor
+        </a>
+
+        <a href="#parameterized">
+            <span class="nav-num">04</span>
+            Parameterized
+        </a>
+
+        <a href="#overloading">
+            <span class="nav-num">05</span>
+            Overloading
+        </a>
+
+        <a href="#initializer">
+            <span class="nav-num">06</span>
+            Initializer List
+        </a>
+
+        <a href="#copy">
+            <span class="nav-num">07</span>
+            Copy Constructor
+        </a>
+
+        <a href="#deepcopy">
+            <span class="nav-num">08</span>
+            Deep vs Shallow
+        </a>
+
+        <a href="#move">
+            <span class="nav-num">09</span>
+            Move Constructor
+        </a>
+
+        <a href="#advanced">
+            <span class="nav-num">10</span>
+            Advanced
+        </a>
+
+        <a href="#order">
+            <span class="nav-num">11</span>
+            Construction Order
+        </a>
+
+        <a href="#lifetime">
+            <span class="nav-num">12</span>
+            Object Lifetime
+        </a>
+
+        <a href="#lab">
+            <span class="nav-num">13</span>
+            Constructor Lab
+        </a>
+
+        <a href="#quiz">
+            <span class="nav-num">14</span>
+            Quiz
+        </a>
+
+        <a href="#project">
+            <span class="nav-num">15</span>
+            Mini Project
+        </a>
+
+        <a href="#checklist">
+            <span class="nav-num">16</span>
+            Completion
+        </a>
+
+    </nav>
+</aside>
+
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
+<header class="header">
+
+    <div class="header-left">
+
+        <button class="menu-btn" id="menuBtn">☰</button>
+
+        <div class="breadcrumb">
+            C++ Mastery / <strong>Lesson 12</strong>
+        </div>
+
+    </div>
+
+    <div class="lesson-badge">
+        LESSON 12 • CONSTRUCTORS
+    </div>
+
+</header>
+
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<main class="main">
+
+<div class="container">
+
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<section class="hero reveal" id="intro">
+
+    <div class="hero-content">
+
+        <div class="eyebrow">
+            🧱 C++ OBJECT INITIALIZATION
+        </div>
+
+        <h1>
+            Master <span>Constructors</span>
+        </h1>
+
+        <p>
+            Learn how C++ objects are initialized from beginner fundamentals
+            to copy constructors, move constructors, initializer lists,
+            constructor overloading and object lifetime.
+        </p>
+
+        <div class="hero-tags">
+            <span class="tag">Default</span>
+            <span class="tag">Parameterized</span>
+            <span class="tag">Overloading</span>
+            <span class="tag">Copy</span>
+            <span class="tag">Move</span>
+            <span class="tag">Initializer List</span>
+            <span class="tag">Interview Ready</span>
+        </div>
+
+    </div>
+
+    <div class="objectives">
+
+        <div class="objective">
+            <div class="objective-icon">🏗️</div>
+            <strong>Build Objects</strong>
+            <span>Understand initialization</span>
+        </div>
+
+        <div class="objective">
+            <div class="objective-icon">🔁</div>
+            <strong>Copy Objects</strong>
+            <span>Master copy semantics</span>
+        </div>
+
+        <div class="objective">
+            <div class="objective-icon">⚡</div>
+            <strong>Move Resources</strong>
+            <span>Understand move constructors</span>
+        </div>
+
+        <div class="objective">
+            <div class="objective-icon">🎯</div>
+            <strong>Interview Ready</strong>
+            <span>Answer constructor questions</span>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     1 WHAT IS CONSTRUCTOR
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-number">01 • Foundation</div>
+
+        <h2>What is a Constructor?</h2>
+
+        <p class="section-sub">
+            The function responsible for initializing an object.
+        </p>
+
+    </div>
+
+    <div class="grid-2">
+
+        <div class="card">
+
+            <h3>📌 Definition</h3>
+
+            <p>
+                A <strong>constructor</strong> is a special member function
+                that is automatically called when an object is initialized.
+            </p>
+
+            <div class="info success">
+                <div class="info-icon">💡</div>
+                <div>
+                    <strong>Think of it like a setup machine.</strong>
+                    When an object is created, the constructor prepares
+                    its initial state.
+                </div>
+            </div>
+
+            <p>
+                For example, when a Student object is created, its constructor
+                can initialize the student's name, age and roll number.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>🏠 Real-World Analogy</h3>
+
+            <p>
+                Imagine ordering a new house.
+            </p>
+
+            <ul>
+                <li>The <strong>class</strong> is the house blueprint.</li>
+                <li>The <strong>object</strong> is the actual house.</li>
+                <li>The <strong>constructor</strong> performs the initial setup.</li>
+            </ul>
+
+            <div class="syntax">
+                <code>Student s1("Pradeep", 19);</code>
+            </div>
+
+            <p>
+                The constructor receives the supplied values and initializes
+                <strong>s1</strong>.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CONSTRUCTOR ANIMATION
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-number">02 • Visual Learning</div>
+
+        <h2>How a Constructor Works</h2>
+
+        <p class="section-sub">
+            Follow the object creation process step by step.
+        </p>
+
+    </div>
+
+    <div class="constructor-visual">
+
+        <h3>Object Creation Pipeline</h3>
+
+        <div class="visual-stage">
+
+            <div class="visual-box" id="v1">
+                <div class="emoji">📐</div>
+                <strong>Class</strong>
+                <small>Blueprint</small>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="visual-box" id="v2">
+                <div class="emoji">⚙️</div>
+                <strong>Constructor</strong>
+                <small>Initialization</small>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="visual-box" id="v3">
+                <div class="emoji">📦</div>
+                <strong>Object</strong>
+                <small>Ready to use</small>
+            </div>
+
+        </div>
+
+        <div class="object-state" id="visualText">
+            Waiting for object creation...
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     3 RULES
+===================================================== -->
+
+<section class="section reveal" id="rules">
+
+    <div class="section-header">
+
+        <div class="section-number">03 • Core Rules</div>
+
+        <h2>Constructor Rules</h2>
+
+        <p class="section-sub">
+            Remember these rules for exams and interviews.
+        </p>
+
+    </div>
+
+    <div class="grid-3">
+
+        <div class="card">
+            <h3>1️⃣ Same Name</h3>
+            <p>
+                A constructor normally has the same name as its class.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>2️⃣ No Return Type</h3>
+            <p>
+                Constructors do not have a return type, not even
+                <code>void</code>.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>3️⃣ Automatic Call</h3>
+            <p>
+                It is called automatically as part of object initialization.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>4️⃣ Can Overload</h3>
+            <p>
+                A class can have multiple constructors with different
+                parameter lists.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>5️⃣ Cannot be Virtual</h3>
+            <p>
+                Constructors cannot be virtual because the object is still
+                being initialized.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>6️⃣ Can be Explicit</h3>
+            <p>
+                <code>explicit</code> can prevent unwanted implicit conversions.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="info warning">
+
+        <div class="info-icon">⚠️</div>
+
+        <div>
+            <strong>Important:</strong>
+            A constructor is not a normal function that you call using
+            <code>object.constructor()</code>.
+            It participates in object initialization.
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     4 DEFAULT
+===================================================== -->
+
+<section class="section reveal" id="default">
+
+    <div class="section-header">
+
+        <div class="section-number">04 • Constructor Type</div>
+
+        <h2>Default Constructor</h2>
+
+        <p class="section-sub">
+            A constructor that can be called without arguments.
+        </p>
+
+    </div>
+
+    <div class="card">
+
+        <h3>What is a Default Constructor?</h3>
+
+        <p>
+            A default constructor is a constructor that can be invoked with
+            no arguments.
+        </p>
+
+        <div class="code-box">
+
+            <div class="code-head">
+                <span class="code-title">default_constructor.cpp</span>
+                <button class="copy-btn">Copy</button>
+            </div>
+
+<pre><code><span class="kw">#include</span> &lt;iostream&gt;
+<span class="kw">using namespace</span> std;
+
+<span class="kw">class</span> <span class="type">Student</span> {
+<span class="kw">public</span>:
+    <span class="type">Student</span>() {
+        cout &lt;&lt; <span class="str">"Default constructor called\n"</span>;
+    }
+};
+
+<span class="type">int</span> main() {
+    <span class="type">Student</span> s1;
+}</code></pre>
+
+        </div>
+
+        <div class="info">
+
+            <div class="info-icon">💡</div>
+
+            <div>
+                <strong>Important distinction</strong>
+                If you do not declare a user-declared constructor, C++ may
+                implicitly declare a default constructor. Once you declare
+                constructors that prevent default construction, an object
+                may no longer be constructible without arguments unless
+                you provide a suitable default constructor.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     5 USER DEFINED DEFAULT
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="card">
+
+        <h3>User-Defined Default Constructor</h3>
+
+        <p>
+            You can explicitly define a constructor that initializes an
+            object's members with your chosen default values.
+        </p>
+
+        <div class="code-box">
+
+            <div class="code-head">
+                <span class="code-title">Student.cpp</span>
+                <button class="copy-btn">Copy</button>
+            </div>
+
+<pre><code><span class="kw">class</span> <span class="type">Student</span> {
+
+<span class="kw">private</span>:
+    string name;
+    <span class="type">int</span> age;
+
+<span class="kw">public</span>:
+
+    <span class="type">Student</span>()
+        : name(<span class="str">"Unknown"</span>), age(<span class="num">0</span>) {
+    }
+};</code></pre>
+
+        </div>
+
+        <p>
+            Now every default-created Student begins with:
+        </p>
+
+        <ul>
+            <li>Name = Unknown</li>
+            <li>Age = 0</li>
+        </ul>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     6 PARAMETERIZED
+===================================================== -->
+
+<section class="section reveal" id="parameterized">
+
+    <div class="section-header">
+
+        <div class="section-number">05 • Constructor Type</div>
+
+        <h2>Parameterized Constructor</h2>
+
+        <p class="section-sub">
+            Initialize objects using values supplied during creation.
+        </p>
+
+    </div>
+
+    <div class="grid-2">
+
+        <div class="card">
+
+            <h3>Concept</h3>
+
+            <p>
+                A parameterized constructor accepts one or more arguments.
+                This allows every object to start with different data.
+            </p>
+
+            <div class="code-box">
+
+                <div class="code-head">
+                    <span class="code-title">parameterized.cpp</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre><code><span class="kw">class</span> <span class="type">Student</span> {
+
+<span class="kw">public</span>:
+
+    <span class="type">Student</span>(string n, <span class="type">int</span> a) {
+        name = n;
+        age = a;
+    }
+
+<span class="kw">private</span>:
+    string name;
+    <span class="type">int</span> age;
+};</code></pre>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Creating Objects</h3>
+
+            <div class="code-box">
+
+                <div class="code-head">
+                    <span class="code-title">main.cpp</span>
+                    <button class="copy-btn">Copy</button>
+                </div>
+
+<pre><code><span class="type">Student</span> s1(<span class="str">"Pradeep"</span>, <span class="num">19</span>);
+<span class="type">Student</span> s2(<span class="str">"Rahul"</span>, <span class="num">20</span>);</code></pre>
+
+            </div>
+
+            <p>
+                The two objects receive different initial values.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     7 INITIALIZER LIST
+===================================================== -->
+
+<section class="section reveal" id="initializer">
+
+    <div class="section-header">
+
+        <div class="section-number">06 • Best Practice</div>
+
+        <h2>Constructor Initializer List</h2>
+
+        <p class="section-sub">
+            The professional way to initialize data members.
+        </p>
+
+    </div>
+
+    <div class="card">
+
+        <h3>Why use an initializer list?</h3>
+
+        <p>
+            An initializer list initializes members before the constructor
+            body executes.
+        </p>
+
+        <div class="code-box">
+
+            <div class="code-head">
+                <span class="code-title">recommended.cpp</span>
+                <button class="copy-btn">Copy</button>
+            </div>
+
+<pre><code><span class="kw">class</span> <span class="type">Student</span> {
+
+    string name;
+    <span class="type">int</span> age;
+
+<span class="kw">public</span>:
+
+    <span class="type">Student</span>(string n, <span class="type">int</span> a)
+        : name(n), age(a) {
+    }
+};</code></pre>
+
+        </div>
+
+        <div class="grid-3">
+
+            <div class="card">
+                <h3>⚡ Efficient</h3>
+                <p>
+                    Members are initialized directly instead of being
+                    initialized first and assigned later.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>🔒 Required</h3>
+                <p>
+                    Needed for const members and reference members.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>🎯 Clear</h3>
+                <p>
+                    Makes initialization intent explicit and readable.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     8 CONST REFERENCE
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="grid-2">
+
+        <div class="card">
+
+            <h3>const Members</h3>
+
+            <p>
+                A const data member must be initialized during object
+                construction.
+            </p>
+
+            <div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">Account</span> {
+
+    <span class="kw">const</span> <span class="type">int</span> id;
+
+<span class="kw">public</span>:
+
+    <span class="type">Account</span>(<span class="type">int</span> value)
+        : id(value) {
+    }
+};</code></pre>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Reference Members</h3>
+
+            <p>
+                Reference members must also be initialized in the
+                initializer list.
+            </p>
+
+            <div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">Wrapper</span> {
+
+    <span class="type">int</span>&amp; ref;
+
+<span class="kw">public</span>:
+
+    <span class="type">Wrapper</span>(<span class="type">int</span>&amp; x)
+        : ref(x) {
+    }
+};</code></pre>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     9 DEFAULT ARGUMENT
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-number">07 • Flexible Initialization</div>
+
+        <h2>Constructor with Default Arguments</h2>
+
+    </div>
+
+    <div class="card">
+
+        <p>
+            Constructor parameters can have default values, allowing
+            the constructor to be called with fewer arguments.
+        </p>
+
+        <div class="code-box">
+
+            <div class="code-head">
+                <span class="code-title">default_arguments.cpp</span>
+                <button class="copy-btn">Copy</button>
+            </div>
+
+<pre><code><span class="kw">class</span> <span class="type">Box</span> {
+
+    <span class="type">int</span> length;
+    <span class="type">int</span> width;
+
+<span class="kw">public</span>:
+
+    <span class="type">Box</span>(<span class="type">int</span> l = <span class="num">10</span>, <span class="type">int</span> w = <span class="num">5</span>)
+        : length(l), width(w) {
+    }
+};
+
+<span class="type">Box</span> a;
+<span class="type">Box</span> b(<span class="num">20</span>);
+<span class="type">Box</span> c(<span class="num">20</span>, <span class="num">30</span>);</code></pre>
+
+        </div>
+
+        <div class="info warning">
+
+            <div class="info-icon">⚠️</div>
+
+            <div>
+                Be careful when combining default arguments with overloaded
+                constructors. Some calls can become ambiguous.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     10 OVERLOADING
+===================================================== -->
+
+<section class="section reveal" id="overloading">
+
+    <div class="section-header">
+
+        <div class="section-number">08 • Polymorphism</div>
+
+        <h2>Constructor Overloading</h2>
+
+        <p class="section-sub">
+            Multiple constructors with different parameter lists.
+        </p>
+
+    </div>
+
+    <div class="card">
+
+        <div class="code-box">
+
+            <div class="code-head">
+                <span class="code-title">constructor_overloading.cpp</span>
+                <button class="copy-btn">Copy</button>
+            </div>
+
+<pre><code><span class="kw">class</span> <span class="type">Rectangle</span> {
+
+<span class="kw">public</span>:
+
+    <span class="type">Rectangle</span>() {
+        cout &lt;&lt; <span class="str">"Default\n"</span>;
+    }
+
+    <span class="type">Rectangle</span>(<span class="type">int</span> side) {
+        cout &lt;&lt; <span class="str">"Square\n"</span>;
+    }
+
+    <span class="type">Rectangle</span>(<span class="type">int</span> length, <span class="type">int</span> width) {
+        cout &lt;&lt; <span class="str">"Rectangle\n"</span>;
+    }
+};</code></pre>
+
+        </div>
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Object</th>
+                        <th>Arguments</th>
+                        <th>Constructor Selected</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td><code>Rectangle r1;</code></td>
+                        <td>0</td>
+                        <td>Default</td>
+                    </tr>
+
+                    <tr>
+                        <td><code>Rectangle r2(10);</code></td>
+                        <td>1</td>
+                        <td>One-parameter</td>
+                    </tr>
+
+                    <tr>
+                        <td><code>Rectangle r3(10,20);</code></td>
+                        <td>2</td>
+                        <td>Two-parameter</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     11 THIS
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-number">09 • Object Context</div>
+
+        <h2>The <code>this</code> Pointer in Constructors</h2>
+
+    </div>
+
+    <div class="card">
+
+        <p>
+            Inside a non-static member function, including a constructor,
+            <code>this</code> refers to the current object.
+        </p>
+
+        <div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">Student</span> {
+
+    string name;
+    <span class="type">int</span> age;
+
+<span class="kw">public</span>:
+
+    <span class="type">Student</span>(string name, <span class="type">int</span> age) {
+
+        <span class="kw">this</span>-&gt;name = name;
+        <span class="kw">this</span>-&gt;age = age;
+    }
+};</code></pre>
+
+        </div>
+
+        <div class="info">
+
+            <div class="info-icon">🎯</div>
+
+            <div>
+                <strong>Why this-&gt;?</strong>
+                The parameter and data member have the same names.
+                <code>this-&gt;name</code> clearly refers to the current object's
+                member.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     12 COPY CONSTRUCTOR
+===================================================== -->
+
+<section class="section reveal" id="copy">
+
+    <div class="section-header">
+
+        <div class="section-number">10 • Copy Semantics</div>
+
+        <h2>Copy Constructor</h2>
+
+        <p class="section-sub">
+            Create a new object using an existing object.
+        </p>
+
+    </div>
+
+    <div class="card">
+
+        <h3>Definition</h3>
+
+        <p>
+            A copy constructor initializes a new object from another object
+            of the same class.
+        </p>
+
+        <div class="code-box">
+
+            <div class="code-head">
+                <span class="code-title">copy_constructor.cpp</span>
+                <button class="copy-btn">Copy</button>
+            </div>
+
+<pre><code><span class="kw">class</span> <span class="type">Student</span> {
+
+    string name;
+    <span class="type">int</span> age;
+
+<span class="kw">public</span>:
+
+    <span class="type">Student</span>(string n, <span class="type">int</span> a)
+        : name(n), age(a) {
+    }
+
+    <span class="type">Student</span>(<span class="kw">const</span> <span class="type">Student</span>&amp; other)
+        : name(other.name), age(other.age) {
+    }
+};
+
+<span class="type">Student</span> s1(<span class="str">"Pradeep"</span>, <span class="num">19</span>);
+
+<span class="type">Student</span> s2 = s1;</code></pre>
+
+        </div>
+
+        <div class="info success">
+
+            <div class="info-icon">💡</div>
+
+            <div>
+                <strong>Common form:</strong>
+                <code>ClassName(const ClassName&amp; other)</code>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     COPY VS ASSIGNMENT
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-number">11 • Critical Interview Concept</div>
+
+        <h2>Copy Constructor vs Copy Assignment</h2>
+
+    </div>
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Copy Constructor</th>
+                    <th>Copy Assignment</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>Purpose</td>
+                    <td>Initializes a new object</td>
+                    <td>Assigns to existing object</td>
+                </tr>
+
+                <tr>
+                    <td>Example</td>
+                    <td><code>Student b = a;</code></td>
+                    <td><code>b = a;</code></td>
+                </tr>
+
+                <tr>
+                    <td>Object already exists?</td>
+                    <td>No</td>
+                    <td>Yes</td>
+                </tr>
+
+                <tr>
+                    <td>Typical function</td>
+                    <td><code>T(const T&amp;)</code></td>
+                    <td><code>T&amp; operator=(const T&amp;)</code></td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     COPY ANIMATION
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="card">
+
+        <h3>Copy Constructor Visualization</h3>
+
+        <div class="constructor-visual">
+
+            <div class="visual-stage">
+
+                <div class="visual-box active">
+                    <div class="emoji">📦</div>
+                    <strong>Object A</strong>
+                    <small>Existing</small>
+                </div>
+
+                <div class="arrow">→</div>
+
+                <div class="visual-box" id="copyBox">
+                    <div class="emoji">🆕</div>
+                    <strong>Object B</strong>
+                    <small>New Object</small>
+                </div>
+
+            </div>
+
+            <div class="object-state">
+                Copy constructor reads Object A and initializes Object B.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     DEEP SHALLOW
+===================================================== -->
+
+<section class="section reveal" id="deepcopy">
+
+    <div class="section-header">
+
+        <div class="section-number">12 • Resource Management</div>
+
+        <h2>Shallow Copy vs Deep Copy</h2>
+
+    </div>
+
+    <div class="grid-2">
+
+        <div class="card">
+
+            <h3>🔗 Shallow Copy</h3>
+
+            <p>
+                A shallow copy duplicates member values as they are.
+                For an owning raw pointer, this can result in two objects
+                referring to the same dynamically allocated resource.
+            </p>
+
+            <div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">Data</span> {
+<span class="kw">public</span>:
+    <span class="type">int</span>* value;
+};</code></pre>
+
+            </div>
+
+            <div class="info danger">
+
+                <div class="info-icon">⚠️</div>
+
+                <div>
+                    If both objects think they own the same raw pointer,
+                    resource-management bugs such as double deletion can occur.
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <h3>🧬 Deep Copy</h3>
+
+            <p>
+                A deep copy creates a separate resource and copies the
+                underlying value.
+            </p>
+
+            <div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">Data</span> {
+
+    <span class="type">int</span>* value;
+
+<span class="kw">public</span>:
+
+    <span class="type">Data</span>(<span class="type">int</span> v)
+        : value(<span class="kw">new</span> <span class="type">int</span>(v)) {
+    }
+
+    <span class="type">Data</span>(<span class="kw">const</span> <span class="type">Data</span>&amp; other)
+        : value(<span class="kw">new</span> <span class="type">int</span>(*other.value)) {
+    }
+};</code></pre>
+
+            </div>
+
+            <p>
+                In modern C++, prefer RAII types such as
+                <code>std::string</code>, <code>std::vector</code> and smart
+                pointers whenever possible instead of managing raw
+                ownership manually.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     MOVE CONSTRUCTOR
+===================================================== -->
+
+<section class="section reveal" id="move">
+
+    <div class="section-header">
+
+        <div class="section-number">13 • Modern C++</div>
+
+        <h2>Move Constructor</h2>
+
+        <p class="section-sub">
+            Transfer resources instead of unnecessarily copying them.
+        </p>
+
+    </div>
+
+    <div class="card">
+
+        <p>
+            A move constructor typically has the form
+            <code>T(T&amp;&amp;)</code>. It initializes a new object by
+            transferring resources from an rvalue object.
+        </p>
+
+        <div class="code-box">
+
+            <div class="code-head">
+                <span class="code-title">move_constructor.cpp</span>
+                <button class="copy-btn">Copy</button>
+            </div>
+
+<pre><code><span class="kw">class</span> <span class="type">Buffer</span> {
+
+    <span class="type">int</span>* data;
+
+<span class="kw">public</span>:
+
+    <span class="type">Buffer</span>(<span class="type">int</span> value)
+        : data(<span class="kw">new</span> <span class="type">int</span>(value)) {
+    }
+
+    <span class="type">Buffer</span>(<span class="type">Buffer</span>&amp;&amp; other) <span class="kw">noexcept</span>
+        : data(other.data) {
+
+        other.data = <span class="kw">nullptr</span>;
+    }
+
+    ~<span class="type">Buffer</span>() {
+        <span class="kw">delete</span> data;
+    }
+};</code></pre>
+
+        </div>
+
+        <div class="info success">
+
+            <div class="info-icon">⚡</div>
+
+            <div>
+                <strong>Key idea:</strong>
+                Copy = duplicate resource.
+                Move = transfer resource ownership.
+            </div>
+
+        </div>
+
+        <p>
+            After moving, the source object remains valid, but its exact
+            state is generally not something your program should assume
+            unless the type documents it.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     DELEGATING
+===================================================== -->
+
+<section class="section reveal" id="advanced">
+
+    <div class="section-header">
+
+        <div class="section-number">14 • Advanced Constructors</div>
+
+        <h2>Delegating Constructors</h2>
+
+    </div>
+
+    <div class="card">
+
+        <p>
+            A delegating constructor calls another constructor of the same
+            class from its initializer list.
+        </p>
+
+        <div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">Box</span> {
+
+    <span class="type">int</span> length;
+    <span class="type">int</span> width;
+
+<span class="kw">public</span>:
+
+    <span class="type">Box</span>()
+        : <span class="type">Box</span>(<span class="num">10</span>, <span class="num">10</span>) {
+    }
+
+    <span class="type">Box</span>(<span class="type">int</span> l, <span class="type">int</span> w)
+        : length(l), width(w) {
+    }
+};</code></pre>
+
+        </div>
+
+        <div class="info">
+
+            <div class="info-icon">🎯</div>
+
+            <div>
+                This reduces duplicated initialization logic and gives
+                multiple constructors a single main initialization path.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     EXPLICIT
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="grid-2">
+
+        <div class="card">
+
+            <h3><code>explicit</code> Constructor</h3>
+
+            <p>
+                A single-argument constructor can otherwise participate in
+                implicit conversions. <code>explicit</code> prevents such
+                unintended conversions.
+            </p>
+
+            <div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">Number</span> {
+
+<span class="kw">public</span>:
+
+    <span class="kw">explicit</span> <span class="type">Number</span>(<span class="type">int</span> value) {
+    }
+};
+
+<span class="type">Number</span> n1(<span class="num">10</span>);
+
+<span class="comment">// Prevents unintended implicit conversion:</span>
+<span class="comment">// Number n2 = 10;</span></code></pre>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <h3><code>= default</code> and <code>= delete</code></h3>
+
+            <div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">Demo</span> {
+
+<span class="kw">public</span>:
+
+    <span class="type">Demo</span>() = <span class="kw">default</span>;
+
+    <span class="type">Demo</span>(<span class="type">int</span>) = <span class="kw">delete</span>;
+};</code></pre>
+
+            </div>
+
+            <p>
+                <code>= default</code> requests the compiler-generated
+                implementation where appropriate.
+            </p>
+
+            <p>
+                <code>= delete</code> explicitly disables a constructor.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     STATIC
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-number">15 • Static Data</div>
+
+        <h2>Static Members and Constructors</h2>
+
+    </div>
+
+    <div class="card">
+
+        <p>
+            Static data belongs to the class rather than to individual
+            objects. A constructor can update a static counter when an
+            object is created.
+        </p>
+
+        <div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">Student</span> {
+
+<span class="kw">public</span>:
+
+    <span class="kw">inline static</span> <span class="type">int</span> count = <span class="num">0</span>;
+
+    <span class="type">Student</span>() {
+        ++count;
+    }
+};
+
+<span class="type">Student</span> a;
+<span class="type">Student</span> b;
+
+cout &lt;&lt; <span class="type">Student</span>::count;</code></pre>
+
+        </div>
+
+        <div class="info">
+
+            <div class="info-icon">📌</div>
+
+            <div>
+                The static member is shared. It is not separately initialized
+                as part of every object's member initialization.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     INHERITANCE
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-number">16 • Inheritance Preview</div>
+
+        <h2>Constructors with Inheritance</h2>
+
+    </div>
+
+    <div class="card">
+
+        <p>
+            When a derived object is created, its base-class part must be
+            constructed before the derived-class part.
+        </p>
+
+        <div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">Animal</span> {
+
+<span class="kw">public</span>:
+
+    <span class="type">Animal</span>() {
+        cout &lt;&lt; <span class="str">"Animal constructor\n"</span>;
+    }
+};
+
+<span class="kw">class</span> <span class="type">Dog</span> : <span class="kw">public</span> <span class="type">Animal</span> {
+
+<span class="kw">public</span>:
+
+    <span class="type">Dog</span>() {
+        cout &lt;&lt; <span class="str">"Dog constructor\n"</span>;
+    }
+};</code></pre>
+
+        </div>
+
+        <div class="order-flow">
+
+            <div class="order-item">Base Constructor</div>
+            <div class="order-item">Derived Constructor</div>
+
+        </div>
+
+        <p>
+            Later, in the inheritance lesson, you will learn the complete
+            order including virtual bases, direct bases and members.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CONSTRUCTION ORDER
+===================================================== -->
+
+<section class="section reveal" id="order">
+
+    <div class="section-header">
+
+        <div class="section-number">17 • Critical Concept</div>
+
+        <h2>Constructor Execution Order</h2>
+
+        <p class="section-sub">
+            The order is determined by the class structure, not by the
+            order written in the initializer list.
+        </p>
+
+    </div>
+
+    <div class="card">
+
+        <div class="order-flow">
+
+            <div class="order-item">Virtual Bases*</div>
+            <div class="order-item">Direct Bases</div>
+            <div class="order-item">Members</div>
+            <div class="order-item">Constructor Body</div>
+
+        </div>
+
+        <p>
+            For the beginner-level rule:
+            <strong>base class → data members → constructor body.</strong>
+        </p>
+
+        <div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">Demo</span> {
+
+    <span class="type">int</span> first;
+    <span class="type">int</span> second;
+
+<span class="kw">public</span>:
+
+    <span class="type">Demo</span>()
+        : second(<span class="num">2</span>), first(<span class="num">1</span>) {
+
+        cout &lt;&lt; <span class="str">"Body\n"</span>;
+    }
+};</code></pre>
+
+        </div>
+
+        <div class="info warning">
+
+            <div class="info-icon">⚠️</div>
+
+            <div>
+                Even though <code>second</code> appears first in the initializer
+                list, <code>first</code> is initialized first because members
+                are initialized in their declaration order.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ORDER TIMELINE
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="card">
+
+        <h3>Constructor Timeline</h3>
+
+        <div class="timeline">
+
+            <div class="timeline-item">
+
+                <div class="timeline-dot"></div>
+
+                <h4>1. Storage/Object Begins</h4>
+
+                <p>
+                    The object's initialization process starts.
+                </p>
+
+            </div>
+
+            <div class="timeline-item">
+
+                <div class="timeline-dot"></div>
+
+                <h4>2. Base Classes</h4>
+
+                <p>
+                    Base-class subobjects are constructed first.
+                </p>
+
+            </div>
+
+            <div class="timeline-item">
+
+                <div class="timeline-dot"></div>
+
+                <h4>3. Data Members</h4>
+
+                <p>
+                    Members initialize in declaration order.
+                </p>
+
+            </div>
+
+            <div class="timeline-item">
+
+                <div class="timeline-dot"></div>
+
+                <h4>4. Constructor Body</h4>
+
+                <p>
+                    Finally, the constructor body executes.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     OBJECT LIFETIME
+===================================================== -->
+
+<section class="section reveal" id="lifetime">
+
+    <div class="section-header">
+
+        <div class="section-number">18 • Object Lifetime</div>
+
+        <h2>Constructor and Destructor Relationship</h2>
+
+    </div>
+
+    <div class="card">
+
+        <p>
+            A constructor initializes an object. A destructor performs
+            cleanup when the object's lifetime ends.
+        </p>
+
+        <div class="code-box">
+
+<pre><code><span class="kw">class</span> <span class="type">Demo</span> {
+
+<span class="kw">public</span>:
+
+    <span class="type">Demo</span>() {
+        cout &lt;&lt; <span class="str">"Constructor\n"</span>;
+    }
+
+    ~<span class="type">Demo</span>() {
+        cout &lt;&lt; <span class="str">"Destructor\n"</span>;
+    }
+};</code></pre>
+
+        </div>
+
+        <div class="order-flow">
+
+            <div class="order-item">Construction</div>
+            <div class="order-item">Object Lifetime</div>
+            <div class="order-item">Destruction</div>
+
+        </div>
+
+        <div class="info">
+
+            <div class="info-icon">🔄</div>
+
+            <div>
+                Destruction generally happens in the reverse order of
+                construction. For derived objects, the derived part is
+                destroyed before its base-class part.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     INTERACTIVE LAB
+===================================================== -->
+
+<section class="section reveal" id="lab">
+
+    <div class="section-header">
+
+        <div class="section-number">19 • Interactive Lab</div>
+
+        <h2>Constructor Lab</h2>
+
+        <p class="section-sub">
+            Simulate different constructor types directly in your browser.
+        </p>
+
+    </div>
+
+    <div class="lab">
+
+        <div class="lab-controls">
+
+            <button class="lab-btn active" onclick="runConstructor('default',this)">
+                Default
+            </button>
+
+            <button class="lab-btn" onclick="runConstructor('parameterized',this)">
+                Parameterized
+            </button>
+
+            <button class="lab-btn" onclick="runConstructor('copy',this)">
+                Copy
+            </button>
+
+            <button class="lab-btn" onclick="runConstructor('move',this)">
+                Move
+            </button>
+
+            <button class="lab-btn" onclick="runConstructor('delegate',this)">
+                Delegating
+            </button>
+
+        </div>
+
+        <div class="lab-output" id="labOutput">
+Constructor Lab Ready...
+
+Choose a constructor type above.
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     FLOWCHART
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-number">20 • Flowchart</div>
+
+        <h2>Object Creation Flow</h2>
+
+    </div>
+
+    <div class="card">
+
+        <div class="order-flow">
+
+            <div class="order-item">Declare Object</div>
+            <div class="order-item">Select Constructor</div>
+            <div class="order-item">Initialize Bases</div>
+            <div class="order-item">Initialize Members</div>
+            <div class="order-item">Execute Body</div>
+            <div class="order-item">Object Ready</div>
+
+        </div>
+
+        <div class="info success">
+
+            <div class="info-icon">🎯</div>
+
+            <div>
+                <strong>Remember:</strong>
+                Constructor selection is based on the arguments supplied
+                and the available constructors.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     COMMON MISTAKES
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-number">21 • Debugging</div>
+
+        <h2>Common Constructor Mistakes</h2>
+
+    </div>
+
+    <div class="grid-2">
+
+        <div class="card">
+
+            <h3>❌ Giving a Return Type</h3>
+
+            <div class="code-box">
+
+<pre><code><span class="comment">// Wrong</span>
+
+<span class="type">void</span> <span class="type">Student</span>() {
+}</code></pre>
+
+            </div>
+
+            <p>
+                A constructor has no return type.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>❌ Wrong Initializer Order</h3>
+
+            <p>
+                Writing members in a different initializer-list order does
+                not change their actual initialization order.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>❌ Forgetting const/reference Initialization</h3>
+
+            <p>
+                Const and reference members must be initialized properly,
+                normally through the initializer list.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>❌ Confusing Copy and Assignment</h3>
+
+            <p>
+                <code>Student b = a;</code> initializes a new object,
+                whereas <code>b = a;</code> assigns to an existing object.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>❌ Dangerous Raw Pointer Copy</h3>
+
+            <p>
+                Blindly copying an owning raw pointer can make multiple
+                objects refer to the same resource.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>❌ Constructor Ambiguity</h3>
+
+            <p>
+                Default arguments and overloaded constructors can sometimes
+                create multiple equally valid matches.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ACCORDION EXAM
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-number">22 • Exam Preparation</div>
+
+        <h2>5 & 10 Mark Answers</h2>
+
+    </div>
+
+    <div class="accordion">
+
+        <div class="acc-item">
+
+            <button class="acc-head">
+                <span>What is a constructor? Explain its characteristics.</span>
+                <span>+</span>
+            </button>
+
+            <div class="acc-body">
+
+                <div class="acc-body-inner">
+
+                    A constructor is a special member function that is
+                    automatically involved in object initialization.
+
+                    <br><br>
+
+                    <strong>Characteristics:</strong>
+
+                    <ul>
+                        <li>Same name as the class.</li>
+                        <li>No return type.</li>
+                        <li>Called during object initialization.</li>
+                        <li>Can be overloaded.</li>
+                        <li>Can use initializer lists.</li>
+                        <li>Cannot be virtual.</li>
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="acc-item">
+
+            <button class="acc-head">
+                <span>Explain constructor overloading.</span>
+                <span>+</span>
+            </button>
+
+            <div class="acc-body">
+
+                <div class="acc-body-inner">
+
+                    Constructor overloading means defining multiple
+                    constructors in the same class with different parameter
+                    lists.
+
+                    <br><br>
+
+                    Example:
+
+                    <br><br>
+
+                    <code>Student()</code><br>
+                    <code>Student(string name)</code><br>
+                    <code>Student(string name, int age)</code>
+
+                    <br><br>
+
+                    The appropriate constructor is selected based on the
+                    arguments used during object initialization.
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="acc-item">
+
+            <button class="acc-head">
+                <span>Explain copy constructor with example.</span>
+                <span>+</span>
+            </button>
+
+            <div class="acc-body">
+
+                <div class="acc-body-inner">
+
+                    A copy constructor initializes a new object from an
+                    existing object of the same class.
+
+                    <br><br>
+
+                    Common form:
+
+                    <br><br>
+
+                    <code>ClassName(const ClassName&amp; other);</code>
+
+                    <br><br>
+
+                    Example:
+
+                    <br><br>
+
+                    <code>Student s2 = s1;</code>
+
+                    <br><br>
+
+                    Here <code>s2</code> is a newly initialized object and
+                    <code>s1</code> is the source object.
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     INTERVIEW
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-number">23 • Interview Mastery</div>
+
+        <h2>Constructor Interview Questions</h2>
+
+    </div>
+
+    <div class="accordion">
+
+        <div class="acc-item">
+
+            <button class="acc-head">
+                <span>Can a constructor have a return type?</span>
+                <span>+</span>
+            </button>
+
+            <div class="acc-body">
+                <div class="acc-body-inner">
+                    No. A constructor has no return type, including
+                    <code>void</code>.
+                </div>
+            </div>
+
+        </div>
+
+        <div class="acc-item">
+
+            <button class="acc-head">
+                <span>Can constructors be overloaded?</span>
+                <span>+</span>
+            </button>
+
+            <div class="acc-body">
+                <div class="acc-body-inner">
+                    Yes. Constructors can be overloaded using different
+                    parameter lists.
+                </div>
+            </div>
+
+        </div>
+
+        <div class="acc-item">
+
+            <button class="acc-head">
+                <span>Can constructors be virtual?</span>
+                <span>+</span>
+            </button>
+
+            <div class="acc-body">
+                <div class="acc-body-inner">
+                    No. Constructors cannot be virtual.
+                </div>
+            </div>
+
+        </div>
+
+        <div class="acc-item">
+
+            <button class="acc-head">
+                <span>What is a copy constructor?</span>
+                <span>+</span>
+            </button>
+
+            <div class="acc-body">
+                <div class="acc-body-inner">
+                    It initializes a new object from an existing object of
+                    the same type.
+                </div>
+            </div>
+
+        </div>
+
+        <div class="acc-item">
+
+            <button class="acc-head">
+                <span>Why is initializer-list order important?</span>
+                <span>+</span>
+            </button>
+
+            <div class="acc-body">
+                <div class="acc-body-inner">
+                    Members are initialized in declaration order regardless
+                    of the order written in the initializer list.
+                </div>
+            </div>
+
+        </div>
+
+        <div class="acc-item">
+
+            <button class="acc-head">
+                <span>What is the difference between copy and move?</span>
+                <span>+</span>
+            </button>
+
+            <div class="acc-body">
+                <div class="acc-body-inner">
+                    Copy generally duplicates the resource/value. Move
+                    transfers resources from an eligible source object,
+                    avoiding unnecessary duplication when supported.
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     QUIZ
+===================================================== -->
+
+<section class="section reveal" id="quiz">
+
+    <div class="section-header">
+
+        <div class="section-number">24 • Knowledge Check</div>
+
+        <h2>Constructor Quiz</h2>
+
+    </div>
+
+    <div class="quiz" id="quizBox">
+
+        <div class="question">
+
+            <h4>1. Which statement about constructors is correct?</h4>
+
+            <div class="options">
+
+                <div class="option" data-correct="true">
+                    A. They have no return type
+                </div>
+
+                <div class="option">
+                    B. They must return void
+                </div>
+
+                <div class="option">
+                    C. They must return int
+                </div>
+
+                <div class="option">
+                    D. They return the object
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="question">
+
+            <h4>2. What does a copy constructor initialize?</h4>
+
+            <div class="options">
+
+                <div class="option">
+                    A. An existing object
+                </div>
+
+                <div class="option" data-correct="true">
+                    B. A new object from another object
+                </div>
+
+                <div class="option">
+                    C. Only static members
+                </div>
+
+                <div class="option">
+                    D. Only local variables
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="question">
+
+            <h4>3. Which member is initialized first?</h4>
+
+            <div class="options">
+
+                <div class="option">
+                    A. The member appearing first in the initializer list
+                </div>
+
+                <div class="option" data-correct="true">
+                    B. The member declared first in the class
+                </div>
+
+                <div class="option">
+                    C. The last member
+                </div>
+
+                <div class="option">
+                    D. Randomly selected
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="question">
+
+            <h4>4. Which constructor prevents certain implicit conversions?</h4>
+
+            <div class="options">
+
+                <div class="option">
+                    A. virtual
+                </div>
+
+                <div class="option" data-correct="true">
+                    B. explicit
+                </div>
+
+                <div class="option">
+                    C. static
+                </div>
+
+                <div class="option">
+                    D. friend
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="question">
+
+            <h4>5. What does a move constructor usually accept?</h4>
+
+            <div class="options">
+
+                <div class="option">
+                    A. T*
+                </div>
+
+                <div class="option">
+                    B. const T*
+                </div>
+
+                <div class="option" data-correct="true">
+                    C. T&amp;&amp;
+                </div>
+
+                <div class="option">
+                    D. T
+                </div>
+
+            </div>
+
+        </div>
+
+        <button class="lab-btn" onclick="checkQuiz()">
+            Check Answers
+        </button>
+
+        <div class="quiz-result" id="quizResult"></div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CODING CHALLENGES
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-number">25 • Practice</div>
+
+        <h2>Coding Challenges</h2>
+
+    </div>
+
+    <div class="grid-3">
+
+        <div class="card">
+
+            <h3>Challenge 01</h3>
+
+            <p>
+                Create a Student class with a default constructor that
+                initializes name and age.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Challenge 02</h3>
+
+            <p>
+                Create a Rectangle class using overloaded constructors
+                for square and rectangle objects.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Challenge 03</h3>
+
+            <p>
+                Create a class with a copy constructor and demonstrate
+                the difference between initialization and assignment.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Challenge 04</h3>
+
+            <p>
+                Create a class containing a const data member and initialize
+                it using an initializer list.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Challenge 05</h3>
+
+            <p>
+                Create a class with delegating constructors.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Challenge 06</h3>
+
+            <p>
+                Demonstrate construction order using inheritance.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     MINI PROJECT
+===================================================== -->
+
+<section class="section reveal" id="project">
+
+    <div class="section-header">
+
+        <div class="section-number">26 • Mini Project</div>
+
+        <h2>Student Profile System</h2>
+
+    </div>
+
+    <div class="project">
+
+        <h3>🎓 Build a Constructor-Based Student System</h3>
+
+        <p>
+            Create a small C++ program that demonstrates different
+            constructor concepts in one practical application.
+        </p>
+
+        <div class="project-points">
+
+            <div class="project-point">
+                <strong>1.</strong> Default constructor
+            </div>
+
+            <div class="project-point">
+                <strong>2.</strong> Parameterized constructor
+            </div>
+
+            <div class="project-point">
+                <strong>3.</strong> Constructor overloading
+            </div>
+
+            <div class="project-point">
+                <strong>4.</strong> Copy constructor
+            </div>
+
+            <div class="project-point">
+                <strong>5.</strong> Initializer list
+            </div>
+
+            <div class="project-point">
+                <strong>6.</strong> Static student counter
+            </div>
+
+        </div>
+
+        <div class="code-box">
+
+            <div class="code-head">
+                <span class="code-title">mini_project.cpp</span>
+                <button class="copy-btn">Copy</button>
+            </div>
+
+<pre><code><span class="kw">#include</span> &lt;iostream&gt;
+<span class="kw">using namespace</span> std;
+
+<span class="kw">class</span> <span class="type">Student</span> {
+
+    string name;
+    <span class="type">int</span> age;
+
+<span class="kw">public</span>:
+
+    <span class="kw">inline static</span> <span class="type">int</span> count = <span class="num">0</span>;
+
+    <span class="comment">// Default constructor</span>
+    <span class="type">Student</span>()
+        : name(<span class="str">"Unknown"</span>), age(<span class="num">0</span>) {
+        ++count;
+    }
+
+    <span class="comment">// Parameterized constructor</span>
+    <span class="type">Student</span>(string n, <span class="type">int</span> a)
+        : name(n), age(a) {
+        ++count;
+    }
+
+    <span class="comment">// Copy constructor</span>
+    <span class="type">Student</span>(<span class="kw">const</span> <span class="type">Student</span>&amp; other)
+        : name(other.name), age(other.age) {
+        ++count;
+    }
+
+    <span class="type">void</span> <span class="fn">display</span>() <span class="kw">const</span> {
+        cout &lt;&lt; <span class="str">"Name: "</span> &lt;&lt; name &lt;&lt; '\n';
+        cout &lt;&lt; <span class="str">"Age : "</span> &lt;&lt; age &lt;&lt; '\n';
+    }
+};
+
+<span class="type">int</span> main() {
+
+    <span class="type">Student</span> s1;
+
+    <span class="type">Student</span> s2(<span class="str">"Pradeep"</span>, <span class="num">19</span>);
+
+    <span class="type">Student</span> s3 = s2;
+
+    s1.display();
+    s2.display();
+    s3.display();
+
+    cout &lt;&lt; <span class="str">"Objects created: "</span>
+         &lt;&lt; <span class="type">Student</span>::count;
+
+    <span class="kw">return</span> <span class="num">0</span>;
+}</code></pre>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     RAPID REVISION
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="section-header">
+
+        <div class="section-number">27 • Rapid Revision</div>
+
+        <h2>Constructor Cheat Sheet</h2>
+
+    </div>
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Concept</th>
+                    <th>Meaning</th>
+                    <th>Typical Syntax</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>Default</td>
+                    <td>Callable with no arguments</td>
+                    <td><code>T();</code></td>
+                </tr>
+
+                <tr>
+                    <td>Parameterized</td>
+                    <td>Accepts initialization values</td>
+                    <td><code>T(int x);</code></td>
+                </tr>
+
+                <tr>
+                    <td>Overloaded</td>
+                    <td>Multiple parameter lists</td>
+                    <td><code>T(); T(int);</code></td>
+                </tr>
+
+                <tr>
+                    <td>Copy</td>
+                    <td>Initializes from same type</td>
+                    <td><code>T(const T&amp;);</code></td>
+                </tr>
+
+                <tr>
+                    <td>Move</td>
+                    <td>Transfers resources</td>
+                    <td><code>T(T&amp;&amp;);</code></td>
+                </tr>
+
+                <tr>
+                    <td>Delegating</td>
+                    <td>Calls another constructor</td>
+                    <td><code>T() : T(10) {}</code></td>
+                </tr>
+
+                <tr>
+                    <td>Explicit</td>
+                    <td>Restricts implicit conversions</td>
+                    <td><code>explicit T(int);</code></td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CHECKLIST
+===================================================== -->
+
+<section class="section reveal" id="checklist">
+
+    <div class="section-header">
+
+        <div class="section-number">28 • Completion</div>
+
+        <h2>Lesson Completion Checklist</h2>
+
+        <p class="section-sub">
+            Mark each skill when you can explain it without notes.
+        </p>
+
+    </div>
+
+    <div class="checklist">
+
+        <div class="check-item">
+            <input type="checkbox" id="c1">
+            <label for="c1">I understand what a constructor is.</label>
+        </div>
+
+        <div class="check-item">
+            <input type="checkbox" id="c2">
+            <label for="c2">I know constructor rules.</label>
+        </div>
+
+        <div class="check-item">
+            <input type="checkbox" id="c3">
+            <label for="c3">I can write a default constructor.</label>
+        </div>
+
+        <div class="check-item">
+            <input type="checkbox" id="c4">
+            <label for="c4">I can write a parameterized constructor.</label>
+        </div>
+
+        <div class="check-item">
+            <input type="checkbox" id="c5">
+            <label for="c5">I understand constructor overloading.</label>
+        </div>
+
+        <div class="check-item">
+            <input type="checkbox" id="c6">
+            <label for="c6">I understand initializer lists.</label>
+        </div>
+
+        <div class="check-item">
+            <input type="checkbox" id="c7">
+            <label for="c7">I understand copy constructors.</label>
+        </div>
+
+        <div class="check-item">
+            <input type="checkbox" id="c8">
+            <label for="c8">I know copy constructor vs assignment.</label>
+        </div>
+
+        <div class="check-item">
+            <input type="checkbox" id="c9">
+            <label for="c9">I understand shallow vs deep copy.</label>
+        </div>
+
+        <div class="check-item">
+            <input type="checkbox" id="c10">
+            <label for="c10">I understand move constructors.</label>
+        </div>
+
+        <div class="check-item">
+            <input type="checkbox" id="c11">
+            <label for="c11">I understand constructor execution order.</label>
+        </div>
+
+        <div class="check-item">
+            <input type="checkbox" id="c12">
+            <label for="c12">I can answer constructor interview questions.</label>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     FINAL SUMMARY
+===================================================== -->
+
+<section class="section reveal">
+
+    <div class="card">
+
+        <h2>🚀 You Finished Constructor Mastery</h2>
+
+        <p>
+            You now understand how C++ initializes objects, how constructors
+            can be overloaded, how objects are copied and moved, why
+            initializer lists matter, and how construction order affects
+            real programs.
+        </p>
+
+        <div class="info success">
+
+            <div class="info-icon">🎯</div>
+
+            <div>
+                <strong>Next Step:</strong>
+                Continue to the next C++ OOP concept:
+                <strong>Inheritance</strong>.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer class="footer">
+
+    <p>
+        <strong>ZENSUS</strong> • Learn. Build. Become Future Ready.
+    </p>
+
+    <p>
+        C++ Mastery • Lesson 12
+    </p>
+
+</footer>
+
+
+</div>
+</main>
+
+
+<script>
+
+/* =========================================================
+   ZENSUS LESSON 12 JAVASCRIPT
+========================================================= */
+
+/* ================= MOBILE MENU ================= */
+
+const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.getElementById("sidebar");
+
+if(menuBtn){
+    menuBtn.addEventListener("click", () => {
+        sidebar.classList.toggle("open");
+    });
+}
+
+
+/* Close sidebar after clicking navigation on mobile */
+
+document.querySelectorAll(".nav a").forEach(link => {
+
+    link.addEventListener("click", () => {
+
+        if(window.innerWidth <= 760){
+            sidebar.classList.remove("open");
+        }
+
+    });
+
+});
+
+
+/* ================= SCROLL PROGRESS ================= */
+
+window.addEventListener("scroll", () => {
+
+    const scrollTop = window.scrollY;
+
+    const documentHeight =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+
+    const progress =
+        documentHeight > 0
+        ? (scrollTop / documentHeight) * 100
+        : 0;
+
+    document.getElementById("progressBar").style.width =
+        progress + "%";
+
+});
+
+
+/* ================= REVEAL ANIMATION ================= */
+
+const revealObserver =
+    new IntersectionObserver((entries) => {
+
+        entries.forEach(entry => {
+
+            if(entry.isIntersecting){
+
+                entry.target.classList.add("show");
+
+                revealObserver.unobserve(entry.target);
+
+            }
+
+        });
+
+    }, {
+        threshold:.08
+    });
+
+
+document.querySelectorAll(".reveal").forEach(el => {
+
+    revealObserver.observe(el);
+
+});
+
+
+/* ================= ACTIVE NAV ================= */
+
+const sections =
+    document.querySelectorAll("section[id]");
+
+const navLinks =
+    document.querySelectorAll(".nav a");
+
+window.addEventListener("scroll", () => {
+
+    let current = "";
+
+    sections.forEach(section => {
+
+        const top = section.offsetTop - 150;
+
+        if(window.scrollY >= top){
+            current = section.id;
+        }
+
+    });
+
+    navLinks.forEach(link => {
+
+        link.classList.remove("active");
+
+        if(link.getAttribute("href") === "#" + current){
+            link.classList.add("active");
+        }
+
+    });
+
+});
+
+
+/* ================= COPY CODE ================= */
+
+document.querySelectorAll(".copy-btn").forEach(button => {
+
+    button.addEventListener("click", async () => {
+
+        const codeBox = button.closest(".code-box");
+
+        const code = codeBox.querySelector("code").innerText;
+
+        try{
+
+            await navigator.clipboard.writeText(code);
+
+            const original = button.innerText;
+
+            button.innerText = "Copied ✓";
+
+            setTimeout(() => {
+                button.innerText = original;
+            },1500);
+
+        }catch(error){
+
+            button.innerText = "Copy failed";
+
+            setTimeout(() => {
+                button.innerText = "Copy";
+            },1500);
+
+        }
+
+    });
+
+});
+
+
+/* ================= CONSTRUCTOR ANIMATION ================= */
+
+const v1 = document.getElementById("v1");
+const v2 = document.getElementById("v2");
+const v3 = document.getElementById("v3");
+const visualText = document.getElementById("visualText");
+
+const constructorSteps = [
+
+    {
+        box:v1,
+        text:"Step 1 → C++ reads the class definition."
+    },
+
+    {
+        box:v2,
+        text:"Step 2 → The matching constructor is selected."
+    },
+
+    {
+        box:v3,
+        text:"Step 3 → Members are initialized and the object becomes ready."
+    }
+
+];
+
+let constructorIndex = 0;
+
+function animateConstructor(){
+
+    [v1,v2,v3].forEach(box => {
+
+        if(box) box.classList.remove("active");
+
+    });
+
+    const step =
+        constructorSteps[constructorIndex];
+
+    if(step && step.box){
+        step.box.classList.add("active");
+    }
+
+    if(step && visualText){
+        visualText.textContent = step.text;
+    }
+
+    constructorIndex =
+        (constructorIndex + 1) %
+        constructorSteps.length;
+
+}
+
+setInterval(animateConstructor,1800);
+
+animateConstructor();
+
+
+/* ================= ACCORDIONS ================= */
+
+document.querySelectorAll(".acc-head").forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        const item = button.parentElement;
+
+        const body = item.querySelector(".acc-body");
+
+        const isOpen = item.classList.contains("open");
+
+
+        document.querySelectorAll(".acc-item").forEach(other => {
+
+            other.classList.remove("open");
+
+            const otherBody =
+                other.querySelector(".acc-body");
+
+            if(otherBody){
+                otherBody.style.maxHeight = null;
+            }
+
+        });
+
+
+        if(!isOpen){
+
+            item.classList.add("open");
+
+            body.style.maxHeight =
+                body.scrollHeight + "px";
+
+        }
+
+    });
+
+});
+
+
+/* ================= CONSTRUCTOR LAB ================= */
+
+function runConstructor(type, button){
+
+    document.querySelectorAll(".lab-btn")
+        .forEach(btn => btn.classList.remove("active"));
+
+    button.classList.add("active");
+
+    const output =
+        document.getElementById("labOutput");
+
+    let text = "";
+
+    if(type === "default"){
+
+        text =
+`Creating Student object...
+
+→ No arguments supplied
+→ Default constructor selected
+→ Members initialized
+→ Object ready
+
+Output:
+Default constructor called`;
+
+    }
+
+    else if(type === "parameterized"){
+
+        text =
+`Creating Student object...
+
+Student s1("Pradeep", 19);
+
+→ Arguments detected
+→ Parameterized constructor selected
+→ name = "Pradeep"
+→ age = 19
+
+Object initialized successfully.`;
+
+    }
+
+    else if(type === "copy"){
+
+        text =
+`Student s1("Pradeep", 19);
+Student s2 = s1;
+
+→ New object detected
+→ Existing object used as source
+→ Copy constructor selected
+→ s2 receives copied state
+
+Result:
+s1 → Pradeep, 19
+s2 → Pradeep, 19`;
+
+    }
+
+    else if(type === "move"){
+
+        text =
+`Buffer a(...);
+Buffer b(std::move(a));
+
+→ Source is an rvalue
+→ Move constructor selected
+→ Resource transferred
+→ Source remains valid but its state should not be assumed
+
+Copying avoided when move semantics apply.`;
+
+    }
+
+    else if(type === "delegate"){
+
+        text =
+`Box b;
+
+→ Box() selected
+→ Box() delegates to Box(10, 10)
+→ Main initialization logic executes
+→ Object ready
+
+Delegating constructors reduce duplicated initialization code.`;
+
+    }
+
+    output.textContent = text;
+
+}
+
+
+/* ================= QUIZ ================= */
+
+document.querySelectorAll(".option").forEach(option => {
+
+    option.addEventListener("click", () => {
+
+        const question =
+            option.closest(".question");
+
+        question.querySelectorAll(".option")
+            .forEach(o => {
+
+                o.classList.remove("correct");
+                o.classList.remove("wrong");
+
+            });
+
+        if(option.dataset.correct === "true"){
+
+            option.classList.add("correct");
+
+        }else{
+
+            option.classList.add("wrong");
+
+            const correct =
+                question.querySelector(
+                    '[data-correct="true"]'
+                );
+
+            if(correct){
+                correct.classList.add("correct");
+            }
+
+        }
+
+    });
+
+});
+
+
+function checkQuiz(){
+
+    let score = 0;
+
+    const questions =
+        document.querySelectorAll(".question");
+
+    questions.forEach(question => {
+
+        const selected =
+            question.querySelector(".option.correct");
+
+        const correct =
+            question.querySelector(
+                '[data-correct="true"]'
+            );
+
+        if(selected === correct){
+            score++;
+        }
+
+    });
+
+    const result =
+        document.getElementById("quizResult");
+
+    result.style.display = "block";
+
+    if(score === questions.length){
+
+        result.style.background = "#f0fdf4";
+        result.style.color = "#166534";
+
+        result.textContent =
+            `🎉 Perfect! ${score}/${questions.length} — Constructor Mastery achieved!`;
+
+    }
+
+    else if(score >= 3){
+
+        result.style.background = "#eff6ff";
+        result.style.color = "#1d4ed8";
+
+        result.textContent =
+            `👍 Good job! ${score}/${questions.length}. Review the missed concepts once.`;
+
+    }
+
+    else{
+
+        result.style.background = "#fff7ed";
+        result.style.color = "#9a3412";
+
+        result.textContent =
+            `📚 ${score}/${questions.length}. Revisit the constructor sections and try again.`;
+
+    }
+
+}
+
+
+/* ================= LOCAL STORAGE CHECKLIST ================= */
+
+const checklist =
+    document.querySelectorAll(
+        '.check-item input[type="checkbox"]'
+    );
+
+
+checklist.forEach((checkbox,index) => {
+
+    const key =
+        "zensus_lesson12_check_" + index;
+
+    checkbox.checked =
+        localStorage.getItem(key) === "true";
+
+
+    checkbox.addEventListener("change", () => {
+
+        localStorage.setItem(
+            key,
+            checkbox.checked
+        );
+
+    });
+
+});
+
+
+/* ================= INITIAL STATE ================= */
+
+document.querySelectorAll(".reveal").forEach(el => {
+
+    const rect = el.getBoundingClientRect();
+
+    if(rect.top < window.innerHeight){
+
+        el.classList.add("show");
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 45 — Final Project: Full-Stack React Application | ZENSUSNET</title>
+<style>
+  :root{
+    --bg: #0C0E13;
+    --panel: #12151C;
+    --panel-2: #171B24;
+    --border: #262B38;
+    --text: #E7E9EE;
+    --text-dim: #9AA1B2;
+    --text-faint: #666D80;
+    --accent: #7C93FF;
+    --accent-soft: #7C93FF22;
+    --accent-dim: #5C6FCC;
+    --code-bg: #0A0C11;
+    --code-text: #C9D1D9;
+    --ok: #5FD9A4;
+    --ok-soft: #5FD9A422;
+    --warn: #E8B86D;
+    --warn-soft: #E8B86D22;
+    --radius: 10px;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+    --sans: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0; background: var(--bg); color: var(--text);
+    font-family: var(--sans); line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .shell{ display:flex; min-height:100vh; }
+  .rail{
+    width: 250px; flex-shrink:0; background: var(--panel);
+    border-right: 1px solid var(--border);
+    position: sticky; top:0; height:100vh; overflow-y:auto;
+    padding: 22px 16px 40px;
+  }
+  .rail-brand{ font-size:12.5px; color: var(--text-faint); margin-bottom:2px; }
+  .rail-title{ font-size:15.5px; font-weight:700; margin: 0 0 20px; }
+  .rail nav a{
+    display:block; color: var(--text-dim); text-decoration:none; font-size:13.5px;
+    padding:7px 10px; border-radius:7px; margin-bottom:2px;
+  }
+  .rail nav a:hover{ background: var(--panel-2); color: var(--text); }
+  .rail nav a.active{ background: var(--accent-soft); color: var(--accent); font-weight:600; }
+
+  .main{ flex:1; min-width:0; padding: 40px 48px 100px; max-width: 900px; }
+  @media (max-width: 900px){ .rail{ display:none; } .main{ padding: 28px 20px 80px; } }
+
+  .lesson-eyebrow{ color: var(--accent); font-size:13px; font-weight:600; margin-bottom:10px; }
+  h1.lesson-title{ font-size: 29px; line-height:1.25; margin: 0 0 12px; letter-spacing:-.01em; }
+  .lesson-sub{ color: var(--text-dim); font-size: 15px; max-width: 66ch; margin: 0 0 8px; }
+  .lesson-meta{ display:flex; gap:18px; flex-wrap:wrap; color: var(--text-faint); font-size:12.5px; margin: 16px 0 34px; }
+  .lesson-meta span strong{ color: var(--text-dim); font-weight:600; }
+
+  .section{ margin-bottom: 46px; scroll-margin-top: 24px; }
+  .section-head{ display:flex; align-items:baseline; gap:10px; margin-bottom:14px; }
+  .section-head .n{ color: var(--text-faint); font-family: var(--mono); font-size:13px; }
+  .section-head h2{ font-size:18px; margin:0; }
+  .section p.lead{ color: var(--text-dim); font-size:14.5px; margin: -6px 0 16px; max-width: 68ch; }
+
+  /* project track cards */
+  .track-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap:12px; }
+  .track{ border:1px solid var(--border); background: var(--panel); border-radius: var(--radius); padding:16px; }
+  .track h3{ margin:0 0 6px; font-size:15px; }
+  .track p{ margin:0 0 10px; color: var(--text-dim); font-size:13px; }
+  .track .tags{ display:flex; gap:6px; flex-wrap:wrap; }
+  .tag{ font-size:10.5px; font-family: var(--mono); color: var(--accent); background: var(--accent-soft); padding:2px 7px; border-radius:5px; }
+
+  /* checklist */
+  .checklist{ list-style:none; padding:0; margin:0; border:1px solid var(--border); border-radius: var(--radius); background: var(--panel); overflow:hidden; }
+  .checklist li{ display:flex; gap:12px; align-items:flex-start; padding:12px 16px; font-size:14px; color: var(--text-dim); }
+  .checklist li + li{ border-top:1px solid var(--border); }
+  .checklist li .box{ width:16px; height:16px; border:1.5px solid var(--text-faint); border-radius:4px; margin-top:2px; flex-shrink:0; cursor:pointer; }
+  .checklist li.checked .box{ background: var(--ok); border-color: var(--ok); position:relative; }
+  .checklist li.checked{ color: var(--text); }
+  .checklist li strong{ color: var(--text); }
+
+  /* tech stack table */
+  .stack-table{ width:100%; border-collapse:collapse; border:1px solid var(--border); border-radius: var(--radius); overflow:hidden; }
+  .stack-table th, .stack-table td{ text-align:left; padding:10px 14px; font-size:13.5px; border-bottom:1px solid var(--border); }
+  .stack-table th{ background: var(--panel-2); color: var(--text-faint); font-weight:600; font-size:12px; text-transform: none; }
+  .stack-table td{ background: var(--panel); color: var(--text-dim); }
+  .stack-table td.role{ color: var(--text); font-weight:600; }
+  .stack-table tr:last-child td{ border-bottom:none; }
+
+  /* code */
+  pre.code{
+    background: var(--code-bg); border:1px solid var(--border); border-radius:8px;
+    padding: 13px 14px; overflow-x:auto; margin: 10px 0 4px; position:relative;
+  }
+  pre.code code{ font-family: var(--mono); font-size: 12.6px; color: var(--code-text); white-space:pre; }
+  .code-copy{
+    position:absolute; top:8px; right:8px; background: var(--panel-2); border:1px solid var(--border);
+    color: var(--text-faint); font-size:11px; padding:3px 8px; border-radius:6px; cursor:pointer; font-family: var(--sans);
+  }
+  .code-copy:hover{ color: var(--text); }
+  .code-label{ font-family: var(--mono); font-size:11.5px; color: var(--text-faint); margin: 0 0 4px; }
+
+  /* milestones */
+  .milestones{ border:1px solid var(--border); border-radius: var(--radius); overflow:hidden; background: var(--panel); }
+  .milestone + .milestone{ border-top:1px solid var(--border); }
+  .mbtn{
+    width:100%; text-align:left; background:none; border:none; color: var(--text);
+    padding: 14px 16px; font-size: 14.5px; cursor:pointer; display:flex; align-items:center; gap:12px; font-family: var(--sans);
+  }
+  .mbtn:hover{ background: var(--panel-2); }
+  .mbtn .midx{
+    width:24px; height:24px; border-radius:50%; background: var(--panel-2); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; font-family: var(--mono); font-size:11px; color: var(--text-dim); flex-shrink:0;
+  }
+  .mbtn .mtitle{ flex:1; }
+  .mbtn .mtime{ color: var(--text-faint); font-size:12px; flex-shrink:0; }
+  .mbtn .chev{ color: var(--text-faint); transition: transform .15s; flex-shrink:0; }
+  .milestone.open .mbtn .chev{ transform: rotate(90deg); color: var(--accent); }
+  .milestone.open .mbtn .mtitle{ color: var(--accent); }
+  .mbody{ display:none; padding: 2px 16px 18px 52px; color: var(--text-dim); font-size:14px; }
+  .milestone.open .mbody{ display:block; }
+  .mbody p{ margin:0 0 10px; }
+  .mbody ul{ margin:0; padding-left:18px; }
+  .mbody li{ margin-bottom:5px; }
+
+  /* rubric */
+  .rubric-table{ width:100%; border-collapse:collapse; border:1px solid var(--border); border-radius: var(--radius); overflow:hidden; }
+  .rubric-table th, .rubric-table td{ padding:10px 14px; font-size:13.5px; border-bottom:1px solid var(--border); text-align:left; vertical-align:top; }
+  .rubric-table th{ background: var(--panel-2); color: var(--text-faint); font-weight:600; font-size:12px; }
+  .rubric-table td{ background: var(--panel); color: var(--text-dim); }
+  .rubric-table td.crit{ color: var(--text); font-weight:600; width:28%; }
+  .rubric-table td.wt{ color: var(--accent); font-family: var(--mono); width:70px; }
+  .rubric-table tr:last-child td{ border-bottom:none; }
+
+  .lesson-footer{
+    margin-top: 50px; padding-top:20px; border-top:1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:center; color: var(--text-faint); font-size:13px;
+  }
+  ::selection{ background: var(--accent-soft); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <aside class="rail">
+    <div class="rail-brand">ZENSUSNET · Lesson 45</div>
+    <div class="rail-title">Final Project</div>
+    <nav id="rail-nav"></nav>
+  </aside>
+
+  <main class="main">
+    <div class="lesson-eyebrow">React · Capstone Project</div>
+    <h1 class="lesson-title">Final Project — Full-Stack React Application</h1>
+    <p class="lesson-sub">Everything from Lessons 1–44 — components, hooks, routing, context, forms, API integration, and auth — comes together into one real, deployable app you can put on your resume and defend in an interview.</p>
+    <div class="lesson-meta">
+      <span>Estimated time: <strong>2–3 weeks</strong></span>
+      <span>Format: <strong>Solo build</strong></span>
+      <span>Prerequisite: <strong>Lessons 1–44 complete</strong></span>
+    </div>
+
+    <div id="sections"></div>
+
+    <div class="lesson-footer">
+      <span>Lesson 45 — Capstone</span>
+      <span>End of React module</span>
+    </div>
+  </main>
+</div>
+
+<script>
+/* ===================== DATA ===================== */
+
+const TRACKS = [
+  {name:'TaskFlow', desc:'A task and project manager — boards, tasks, due dates, and status.', tags:['CRUD-heavy','good for beginners']},
+  {name:'DevBlog', desc:'A blogging platform — write, edit, and publish posts with comments.', tags:['content-heavy','rich forms']},
+  {name:'ShopLite', desc:'A mini e-commerce storefront — product catalog, cart, checkout flow.', tags:['state-heavy','most ambitious']},
+];
+
+const CORE_REQUIREMENTS = [
+  'User authentication — register, login, logout, with protected routes for anything requiring a logged-in user',
+  'One primary resource with full CRUD — create, read, update, and delete, backed by real API calls',
+  'React Router with at least one nested route (shared layout via &lt;Outlet /&gt;) and a working 404 page',
+  'Global state via the Context API or Redux Toolkit — no prop drilling more than one level deep',
+  'A custom data-fetching hook (your own useFetch/useApi) with loading, error, and data states handled in the UI',
+  'Client-side form validation with inline error messages — no silent failures on bad input',
+  'A list view with correct, stable keys, plus search/filter and pagination',
+  'Responsive layout that holds up from phone width to desktop',
+  'Deployed and reachable at a public URL, with a README explaining setup, architecture, and trade-offs',
+];
+
+const STACK = [
+  {role:'Frontend', pick:'React (Vite)', notes:'Vite over Create React App — faster dev server, this is what you\'ll meet on real teams.'},
+  {role:'Routing', pick:'React Router v6', notes:'Nested routes + a catch-all 404 route, as covered in Lesson 44.'},
+  {role:'Global state', pick:'Context API or Redux Toolkit', notes:'Context is enough for one resource; reach for RTK if state gets genuinely complex.'},
+  {role:'Styling', pick:'Plain CSS / CSS Modules', notes:'A UI library is fine too — the grading rubric cares about structure, not the CSS approach.'},
+  {role:'Backend (core track)', pick:'json-server', notes:'A real REST API over HTTP with almost no backend code — lets you focus this project on the React side.'},
+  {role:'Backend (stretch track)', pick:'Django REST Framework or Node/Express', notes:'Swap json-server for a real backend you wrote yourself for full "full-stack" credit — see Milestone 5.'},
+  {role:'Deployment', pick:'Vercel/Netlify (frontend) + Render/Railway (backend)', notes:'All have generous free tiers that are enough for this project.'},
+];
+
+const MILESTONES = [
+  {
+    title:'Setup, planning & auth', time:'Days 1–3',
+    body:`<p>Pick your track, scaffold the project, and get authentication working end-to-end before building any feature screens.</p>
+    <ul>
+      <li>Scaffold with Vite, set up your folder structure (see Architecture below)</li>
+      <li>Stand up json-server (or your chosen backend) with a users resource</li>
+      <li>Build register and login forms with validation</li>
+      <li>Create <code>AuthContext</code> to hold the current user and auth status app-wide</li>
+      <li>Store the auth token and attach it to authenticated requests</li>
+      <li>Build <code>ProtectedRoute</code> and confirm logged-out users get redirected</li>
+    </ul>`
+  },
+  {
+    title:'Routing & layout', time:'Days 4–5',
+    body:`<p>Get the app's skeleton and navigation fully wired before filling in feature content.</p>
+    <ul>
+      <li>Set up <code>App.jsx</code> with your top-level routes</li>
+      <li>Build a shared layout (nav bar, sidebar) rendered via a parent route + <code>&lt;Outlet /&gt;</code></li>
+      <li>Add your 404 route and confirm it catches unmatched paths</li>
+      <li>Wire up navigation links and active-link styling</li>
+    </ul>`
+  },
+  {
+    title:'Core CRUD feature', time:'Days 6–10',
+    body:`<p>This is the heart of the project — one resource (tasks, posts, or products) with the full create/read/update/delete lifecycle.</p>
+    <ul>
+      <li>Build your <code>useApi</code>/<code>useFetch</code> custom hook, reused across every request</li>
+      <li>List view: fetch and render with correct keys, loading and empty states</li>
+      <li>Create and edit forms, both validated, both hitting the real API</li>
+      <li>Delete with a confirmation step</li>
+      <li>Add search/filter and pagination to the list view</li>
+    </ul>`
+  },
+  {
+    title:'State, polish & responsiveness', time:'Days 11–13',
+    body:`<p>Tighten what you've built — this is where the project stops looking like a tutorial and starts looking like a product.</p>
+    <ul>
+      <li>Move any state that's leaking through props into Context (or RTK if you chose it)</li>
+      <li>Memoize anything expensive with <code>useMemo</code>/<code>useCallback</code>/<code>React.memo</code> — and be ready to explain <em>why</em> each one is there</li>
+      <li>Handle every loading and error state visibly — no blank screens or silent console errors</li>
+      <li>Test at phone, tablet, and desktop widths</li>
+    </ul>`
+  },
+  {
+    title:'Deploy & document', time:'Days 14–15+',
+    body:`<p>Ship it somewhere real, and write it up so it reads well on a resume and holds up in an interview.</p>
+    <ul>
+      <li>Deploy the frontend (Vercel/Netlify) and backend (Render/Railway) or swap json-server for a real backend for stretch credit</li>
+      <li>Set environment variables for the API base URL — no hardcoded localhost</li>
+      <li>Write a README: what it does, the stack, how to run it locally, and one honest trade-off you made</li>
+      <li>Do a full click-through as a first-time user and fix whatever breaks</li>
+    </ul>`
+  },
+];
+
+const RUBRIC = [
+  {crit:'Authentication & protected routes', wt:'20%', desc:'Register/login/logout all work; protected pages correctly redirect logged-out users.'},
+  {crit:'CRUD completeness', wt:'20%', desc:'Create, read, update, and delete all function against a real API, with correct optimistic/refetch behavior.'},
+  {crit:'Routing & structure', wt:'15%', desc:'Nested routes with a shared layout, working 404, clean and sensible URL structure.'},
+  {crit:'State management', wt:'15%', desc:'No unnecessary prop drilling; Context or Redux used where it actually earns its place.'},
+  {crit:'Code quality', wt:'15%', desc:'Sensible component boundaries, custom hooks reused instead of duplicated, readable naming.'},
+  {crit:'UX & responsiveness', wt:'10%', desc:'Loading/error/empty states everywhere they\'re needed; usable from phone to desktop.'},
+  {crit:'Deployment & README', wt:'5%', desc:'Live URL works end-to-end; README is clear enough that a stranger could run it locally.'},
+];
+
+const ARCHITECTURE = {lang:'text', lines:[
+  "my-app/",
+  "├─ src/",
+  "│  ├─ api/",
+  "│  │  └─ client.js         # fetch/axios wrapper, base URL + auth header",
+  "│  ├─ context/",
+  "│  │  └─ AuthContext.jsx",
+  "│  ├─ hooks/",
+  "│  │  ├─ useApi.js",
+  "│  │  └─ useDebouncedValue.js",
+  "│  ├─ components/",
+  "│  │  ├─ layout/           # NavBar, Sidebar, AppLayout",
+  "│  │  ├─ auth/              # LoginForm, RegisterForm, ProtectedRoute",
+  "│  │  └─ tasks/             # TaskList, TaskForm, TaskCard  (swap per track)",
+  "│  ├─ pages/",
+  "│  │  ├─ LoginPage.jsx",
+  "│  │  ├─ DashboardPage.jsx",
+  "│  │  └─ NotFoundPage.jsx",
+  "│  ├─ App.jsx               # routes live here",
+  "│  └─ main.jsx",
+  "├─ .env                     # VITE_API_BASE_URL=...",
+  "└─ package.json",
+]};
+
+const CODE = {
+  authContext: {label:'context/AuthContext.jsx', lang:'jsx', lines:[
+    "const AuthContext = createContext(null);",
+    "",
+    "export function AuthProvider({ children }) {",
+    "  const [user, setUser] = useState(null);",
+    "  const [loading, setLoading] = useState(true);",
+    "",
+    "  useEffect(() => {",
+    "    const token = localStorage.getItem('token');",
+    "    if (token) fetchCurrentUser(token).then(setUser).finally(() => setLoading(false));",
+    "    else setLoading(false);",
+    "  }, []);",
+    "",
+    "  const login = async (email, password) => {",
+    "    const { token, user } = await api.post('/auth/login', { email, password });",
+    "    localStorage.setItem('token', token);",
+    "    setUser(user);",
+    "  };",
+    "",
+    "  const logout = () => {",
+    "    localStorage.removeItem('token');",
+    "    setUser(null);",
+    "  };",
+    "",
+    "  return (",
+    "    <AuthContext.Provider value={{ user, loading, login, logout }}>",
+    "      {children}",
+    "    </AuthContext.Provider>",
+    "  );",
+    "}",
+    "",
+    "export const useAuth = () => useContext(AuthContext);",
+  ]},
+  protectedRoute: {label:'components/auth/ProtectedRoute.jsx', lang:'jsx', lines:[
+    "function ProtectedRoute({ children }) {",
+    "  const { user, loading } = useAuth();",
+    "  if (loading) return <p>Loading…</p>;",
+    "  if (!user) return <Navigate to='/login' replace />;",
+    "  return children;",
+    "}",
+  ]},
+  apiClient: {label:'api/client.js', lang:'jsx', lines:[
+    "const BASE_URL = import.meta.env.VITE_API_BASE_URL;",
+    "",
+    "async function request(path, options = {}) {",
+    "  const token = localStorage.getItem('token');",
+    "  const res = await fetch(`${BASE_URL}${path}`, {",
+    "    ...options,",
+    "    headers: {",
+    "      'Content-Type': 'application/json',",
+    "      ...(token && { Authorization: `Bearer ${token}` }),",
+    "      ...options.headers,",
+    "    },",
+    "  });",
+    "  if (!res.ok) throw new Error(`Request failed: ${res.status}`);",
+    "  return res.json();",
+    "}",
+    "",
+    "export const api = {",
+    "  get: (path) => request(path),",
+    "  post: (path, body) => request(path, { method: 'POST', body: JSON.stringify(body) }),",
+    "  put: (path, body) => request(path, { method: 'PUT', body: JSON.stringify(body) }),",
+    "  delete: (path) => request(path, { method: 'DELETE' }),",
+    "};",
+  ]},
+  useApi: {label:'hooks/useApi.js', lang:'jsx', lines:[
+    "function useApi(path) {",
+    "  const [state, setState] = useState({ data: null, loading: true, error: null });",
+    "",
+    "  const refetch = useCallback(() => {",
+    "    let cancelled = false;",
+    "    setState(s => ({ ...s, loading: true }));",
+    "    api.get(path)",
+    "      .then(data => !cancelled && setState({ data, loading: false, error: null }))",
+    "      .catch(error => !cancelled && setState({ data: null, loading: false, error }));",
+    "    return () => { cancelled = true; };",
+    "  }, [path]);",
+    "",
+    "  useEffect(() => refetch(), [refetch]);",
+    "",
+    "  return { ...state, refetch };",
+    "}",
+  ]},
+  appRoutes: {label:'App.jsx', lang:'jsx', lines:[
+    "function App() {",
+    "  return (",
+    "    <AuthProvider>",
+    "      <BrowserRouter>",
+    "        <Routes>",
+    "          <Route path='/login' element={<LoginPage />} />",
+    "          <Route path='/' element={",
+    "            <ProtectedRoute><AppLayout /></ProtectedRoute>",
+    "          }>",
+    "            <Route index element={<DashboardPage />} />",
+    "            <Route path='tasks/:id' element={<TaskDetailPage />} />",
+    "          </Route>",
+    "          <Route path='*' element={<NotFoundPage />} />",
+    "        </Routes>",
+    "      </BrowserRouter>",
+    "    </AuthProvider>",
+    "  );",
+    "}",
+  ]},
+};
+
+/* ===================== RENDER HELPERS ===================== */
+function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function codeBlock(key){
+  const c = CODE[key];
+  const src = c.lines.join('\n');
+  return `<div class="code-label">${c.label}</div><pre class="code"><button class="code-copy" onclick="copyCode(this)">Copy</button><code>${escapeHtml(src)}</code></pre>`;
+}
+function copyCode(btn){
+  const code = btn.nextElementSibling.innerText;
+  navigator.clipboard.writeText(code).then(() => {
+    const original = btn.textContent;
+    btn.textContent = 'Copied';
+    setTimeout(() => btn.textContent = original, 1200);
+  });
+}
+
+/* ===================== SECTION BUILDERS ===================== */
+function buildOverview(){
+  return `<p class="lead">Choose one project track. All three exercise the same skills — pick whichever you'd actually enjoy showing off in an interview.</p>
+  <div class="track-grid">
+    ${TRACKS.map(t => `<div class="track">
+      <h3>${t.name}</h3>
+      <p>${t.desc}</p>
+      <div class="tags">${t.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function buildRequirements(){
+  return `<p class="lead">Every track must satisfy all nine — this is what gets graded, regardless of which app you build.</p>
+  <ul class="checklist" id="req-list">
+    ${CORE_REQUIREMENTS.map((r,i) => `<li onclick="this.classList.toggle('checked')"><span class="box"></span><span>${r}</span></li>`).join('')}
+  </ul>`;
+}
+
+function buildStack(){
+  return `<table class="stack-table">
+    <tr><th>Layer</th><th>Recommended</th><th>Why</th></tr>
+    ${STACK.map(s => `<tr><td class="role">${s.role}</td><td>${s.pick}</td><td>${s.notes}</td></tr>`).join('')}
+  </table>`;
+}
+
+function buildArchitecture(){
+  const src = ARCHITECTURE.lines.join('\n');
+  return `<p class="lead">A suggested starting structure — adjust resource names to match your chosen track.</p>
+  <pre class="code"><button class="code-copy" onclick="copyCode(this)">Copy</button><code>${escapeHtml(src)}</code></pre>`;
+}
+
+function buildMilestones(){
+  return `<p class="lead">Work through these in order — each one assumes the previous is done. Click to expand.</p>
+  <div class="milestones">
+    ${MILESTONES.map((m,i) => `<div class="milestone">
+      <button class="mbtn" onclick="this.parentElement.classList.toggle('open')">
+        <span class="midx">${i+1}</span>
+        <span class="mtitle">${m.title}</span>
+        <span class="mtime">${m.time}</span>
+        <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 6 6 6-6 6"/></svg>
+      </button>
+      <div class="mbody">${m.body}</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function buildStarterKit(){
+  return `<p class="lead">A working skeleton for the auth + data-fetching plumbing every track needs — build your feature components on top of this.</p>
+  ${['authContext','protectedRoute','apiClient','useApi','appRoutes'].map(codeBlock).join('')}`;
+}
+
+function buildRubric(){
+  return `<table class="rubric-table">
+    <tr><th>Criteria</th><th>Weight</th><th>What "done" looks like</th></tr>
+    ${RUBRIC.map(r => `<tr><td class="crit">${r.crit}</td><td class="wt">${r.wt}</td><td>${r.desc}</td></tr>`).join('')}
+  </table>`;
+}
+
+const SECTIONS = [
+  {id:'tracks', title:'Choose your project', build: buildOverview},
+  {id:'requirements', title:'Core requirements', build: buildRequirements},
+  {id:'stack', title:'Recommended stack', build: buildStack},
+  {id:'architecture', title:'Architecture', build: buildArchitecture},
+  {id:'milestones', title:'Milestones', build: buildMilestones},
+  {id:'starter-kit', title:'Starter code kit', build: buildStarterKit},
+  {id:'rubric', title:'Evaluation rubric', build: buildRubric},
+];
+
+function render(){
+  const nav = document.getElementById('rail-nav');
+  nav.innerHTML = SECTIONS.map((s,i) => `<a href="#${s.id}" data-target="${s.id}">${i+1}. ${s.title}</a>`).join('');
+
+  const root = document.getElementById('sections');
+  root.innerHTML = SECTIONS.map((s,i) => `<section class="section" id="${s.id}">
+    <div class="section-head"><span class="n">${String(i+1).padStart(2,'0')}</span><h2>${s.title}</h2></div>
+    ${s.build()}
+  </section>`).join('');
+}
+
+function setupRailActive(){
+  const links = document.querySelectorAll('#rail-nav a');
+  const sections = document.querySelectorAll('.section');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        links.forEach(l => l.classList.toggle('active', l.dataset.target === e.target.id));
+      }
+    });
+  }, { rootMargin: '-10% 0px -70% 0px' });
+  sections.forEach(s => obs.observe(s));
+}
+
+render();
+setupRailActive();
+</script>
+</body>
+</html>

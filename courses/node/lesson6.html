@@ -1,0 +1,3292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS — Node.js Lesson 06 | File System & Path Module</title>
+
+<style>
+/* =========================================================
+   ZENSUS NODE.JS — LESSON 06
+   PROFESSIONAL WHITE + BLUE THEME
+   ========================================================= */
+
+:root{
+    --primary:#1769e0;
+    --primary-dark:#0d47a1;
+    --primary-light:#eaf3ff;
+    --blue-soft:#f4f8ff;
+    --blue-border:#cfe0f7;
+
+    --white:#ffffff;
+    --surface:#f7faff;
+    --surface-2:#eef4fb;
+
+    --text:#172033;
+    --text-light:#526174;
+    --muted:#7b8798;
+
+    --success:#16845b;
+    --success-bg:#eaf8f2;
+
+    --warning:#b7791f;
+    --warning-bg:#fff7e5;
+
+    --danger:#c0392b;
+    --danger-bg:#fff0ee;
+
+    --code-bg:#0f172a;
+    --code-text:#e7eefc;
+
+    --shadow:0 8px 30px rgba(20,55,100,.08);
+    --shadow-hover:0 14px 40px rgba(23,105,224,.14);
+
+    --radius:14px;
+    --sidebar:270px;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Segoe UI,Arial,sans-serif;
+    background:var(--surface);
+    color:var(--text);
+    line-height:1.7;
+}
+
+/* =========================================================
+   TOP NAV
+   ========================================================= */
+
+.topbar{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    height:68px;
+    background:rgba(255,255,255,.96);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--blue-border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 28px;
+    z-index:1000;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.logo{
+    width:40px;
+    height:40px;
+    border-radius:10px;
+    background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:800;
+    font-size:18px;
+    box-shadow:0 5px 15px rgba(23,105,224,.25);
+}
+
+.brand-text{
+    font-weight:800;
+    letter-spacing:1px;
+    font-size:17px;
+}
+
+.lesson-label{
+    font-size:12px;
+    color:var(--muted);
+    margin-left:4px;
+}
+
+.top-actions{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+
+.progress-mini{
+    width:150px;
+    height:7px;
+    background:#e5edf8;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.progress-mini span{
+    display:block;
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,var(--primary),#4b91f1);
+    transition:.4s;
+}
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar{
+    position:fixed;
+    top:68px;
+    left:0;
+    bottom:0;
+    width:var(--sidebar);
+    background:white;
+    border-right:1px solid var(--blue-border);
+    overflow-y:auto;
+    padding:25px 18px;
+    z-index:900;
+}
+
+.sidebar-title{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1.4px;
+    color:var(--muted);
+    margin:0 10px 12px;
+    font-weight:700;
+}
+
+.toc a{
+    display:block;
+    padding:9px 12px;
+    margin:3px 0;
+    border-radius:8px;
+    color:var(--text-light);
+    text-decoration:none;
+    font-size:13px;
+    transition:.2s;
+}
+
+.toc a:hover{
+    background:var(--primary-light);
+    color:var(--primary);
+}
+
+.toc a.active{
+    background:var(--primary-light);
+    color:var(--primary);
+    font-weight:700;
+    border-left:3px solid var(--primary);
+}
+
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+.main{
+    margin-left:var(--sidebar);
+    padding-top:68px;
+}
+
+.container{
+    max-width:1100px;
+    margin:auto;
+    padding:50px 42px 100px;
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero{
+    background:
+        radial-gradient(circle at 85% 20%,rgba(59,130,246,.15),transparent 28%),
+        linear-gradient(135deg,#ffffff,#eef5ff);
+    border:1px solid var(--blue-border);
+    border-radius:22px;
+    padding:55px;
+    position:relative;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+    margin-bottom:42px;
+}
+
+.hero::after{
+    content:"";
+    position:absolute;
+    width:260px;
+    height:260px;
+    right:-90px;
+    bottom:-110px;
+    border-radius:50%;
+    border:30px solid rgba(23,105,224,.05);
+}
+
+.lesson-number{
+    color:var(--primary);
+    font-size:13px;
+    font-weight:800;
+    letter-spacing:2px;
+    margin-bottom:8px;
+}
+
+.hero h1{
+    font-family:Georgia,serif;
+    font-size:46px;
+    line-height:1.15;
+    margin-bottom:18px;
+    color:#10264d;
+}
+
+.hero h1 span{
+    color:var(--primary);
+}
+
+.hero p{
+    max-width:780px;
+    color:var(--text-light);
+    font-size:17px;
+}
+
+.hero-tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    margin-top:25px;
+}
+
+.tag{
+    background:white;
+    border:1px solid var(--blue-border);
+    color:var(--primary-dark);
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:700;
+}
+
+/* =========================================================
+   SECTIONS
+   ========================================================= */
+
+section{
+    scroll-margin-top:90px;
+    margin-bottom:55px;
+}
+
+.section-heading{
+    margin-bottom:22px;
+}
+
+.section-number{
+    color:var(--primary);
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+}
+
+.section-heading h2{
+    font-family:Georgia,serif;
+    font-size:31px;
+    color:#12294f;
+    margin-top:3px;
+}
+
+.section-heading p{
+    color:var(--text-light);
+    margin-top:7px;
+}
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+.card{
+    background:white;
+    border:1px solid var(--blue-border);
+    border-radius:var(--radius);
+    padding:26px;
+    box-shadow:var(--shadow);
+    margin-bottom:20px;
+    transition:.25s;
+}
+
+.card:hover{
+    transform:translateY(-2px);
+    box-shadow:var(--shadow-hover);
+}
+
+.card h3{
+    color:#163663;
+    margin-bottom:10px;
+}
+
+.card p{
+    color:var(--text-light);
+}
+
+.grid-2{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+}
+
+.grid-3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+/* =========================================================
+   OBJECTIVES
+   ========================================================= */
+
+.objective{
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+}
+
+.objective-icon{
+    width:34px;
+    height:34px;
+    border-radius:9px;
+    background:var(--primary-light);
+    color:var(--primary);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:800;
+    flex-shrink:0;
+}
+
+/* =========================================================
+   CODE
+   ========================================================= */
+
+.code-box{
+    background:var(--code-bg);
+    border-radius:12px;
+    overflow:hidden;
+    margin:18px 0;
+    box-shadow:0 8px 22px rgba(15,23,42,.14);
+}
+
+.code-header{
+    background:#17233a;
+    color:#b9c9e4;
+    padding:10px 15px;
+    font-size:12px;
+    display:flex;
+    justify-content:space-between;
+    border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.copy-btn{
+    border:0;
+    background:#263a5b;
+    color:white;
+    padding:4px 10px;
+    border-radius:5px;
+    cursor:pointer;
+    font-size:11px;
+}
+
+pre{
+    padding:20px;
+    overflow-x:auto;
+    color:var(--code-text);
+    font-family:Consolas,monospace;
+    font-size:13px;
+    line-height:1.75;
+}
+
+.keyword{color:#7db4ff;}
+.string{color:#a8df9e;}
+.comment{color:#7f91ab;}
+.function{color:#f4c77c;}
+
+/* =========================================================
+   INFO BOXES
+   ========================================================= */
+
+.info{
+    border-left:4px solid var(--primary);
+    background:var(--primary-light);
+    padding:17px 20px;
+    border-radius:0 10px 10px 0;
+    margin:18px 0;
+}
+
+.success{
+    border-left-color:var(--success);
+    background:var(--success-bg);
+}
+
+.warning{
+    border-left-color:var(--warning);
+    background:var(--warning-bg);
+}
+
+.danger{
+    border-left-color:var(--danger);
+    background:var(--danger-bg);
+}
+
+/* =========================================================
+   FLOW VISUALIZER
+   ========================================================= */
+
+.flow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:12px;
+    padding:30px 10px;
+}
+
+.flow-box{
+    min-width:150px;
+    padding:20px 16px;
+    background:white;
+    border:2px solid var(--blue-border);
+    border-radius:12px;
+    text-align:center;
+    position:relative;
+    box-shadow:var(--shadow);
+}
+
+.flow-box strong{
+    display:block;
+    color:var(--primary-dark);
+}
+
+.flow-box small{
+    color:var(--muted);
+}
+
+.arrow{
+    color:var(--primary);
+    font-size:25px;
+    font-weight:bold;
+}
+
+.flow-dot{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:var(--primary);
+    position:absolute;
+    top:10px;
+    left:10px;
+    animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+    0%,100%{transform:scale(1);opacity:.5;}
+    50%{transform:scale(1.6);opacity:1;}
+}
+
+/* =========================================================
+   FILE SYSTEM VISUAL
+   ========================================================= */
+
+.file-tree{
+    background:#0f172a;
+    color:#dce8fb;
+    border-radius:14px;
+    padding:25px;
+    font-family:Consolas,monospace;
+    box-shadow:var(--shadow);
+}
+
+.tree-line{
+    padding:7px 0;
+    opacity:0;
+    transform:translateX(-15px);
+    animation:treeIn .5s forwards;
+}
+
+.tree-line:nth-child(1){animation-delay:.1s}
+.tree-line:nth-child(2){animation-delay:.25s}
+.tree-line:nth-child(3){animation-delay:.4s}
+.tree-line:nth-child(4){animation-delay:.55s}
+.tree-line:nth-child(5){animation-delay:.7s}
+.tree-line:nth-child(6){animation-delay:.85s}
+
+@keyframes treeIn{
+    to{
+        opacity:1;
+        transform:translateX(0);
+    }
+}
+
+.folder{
+    color:#7db4ff;
+}
+
+.file{
+    color:#cdd8e9;
+}
+
+.file-icon{
+    color:#f4c77c;
+}
+
+/* =========================================================
+   INTERACTIVE FILE SYSTEM
+   ========================================================= */
+
+.fs-demo{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.terminal{
+    background:#0b1220;
+    color:#dce8fb;
+    border-radius:12px;
+    padding:20px;
+    min-height:250px;
+    font-family:Consolas,monospace;
+}
+
+.terminal-title{
+    color:#7db4ff;
+    margin-bottom:15px;
+}
+
+.terminal-line{
+    margin:8px 0;
+}
+
+.prompt{
+    color:#7bd88f;
+}
+
+.fs-output{
+    color:#a9c6ec;
+}
+
+.demo-controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    margin-top:15px;
+}
+
+.demo-controls button{
+    border:1px solid #bdd3f2;
+    background:white;
+    color:var(--primary-dark);
+    padding:9px 13px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.demo-controls button:hover{
+    background:var(--primary-light);
+}
+
+/* =========================================================
+   METHOD CARDS
+   ========================================================= */
+
+.method{
+    border:1px solid var(--blue-border);
+    border-radius:11px;
+    overflow:hidden;
+    background:white;
+}
+
+.method-head{
+    padding:14px 17px;
+    background:#f3f7fd;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.method-name{
+    font-family:Consolas,monospace;
+    color:var(--primary-dark);
+    font-weight:700;
+}
+
+.method-type{
+    font-size:11px;
+    padding:3px 8px;
+    border-radius:12px;
+    background:var(--primary-light);
+    color:var(--primary);
+}
+
+.method-body{
+    padding:16px;
+    color:var(--text-light);
+    font-size:14px;
+}
+
+/* =========================================================
+   PATH VISUALIZER
+   ========================================================= */
+
+.path-builder{
+    background:white;
+    border:1px solid var(--blue-border);
+    border-radius:14px;
+    padding:25px;
+}
+
+.path-inputs{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+}
+
+.path-inputs input{
+    width:100%;
+    padding:11px;
+    border:1px solid #cbd8e8;
+    border-radius:8px;
+    outline:none;
+    font-family:Consolas,monospace;
+}
+
+.path-inputs input:focus{
+    border-color:var(--primary);
+    box-shadow:0 0 0 3px rgba(23,105,224,.1);
+}
+
+.path-result{
+    margin-top:20px;
+    background:#0f172a;
+    color:#dce8fb;
+    padding:18px;
+    border-radius:10px;
+    font-family:Consolas,monospace;
+    min-height:55px;
+}
+
+/* =========================================================
+   COMPARISON
+   ========================================================= */
+
+.compare{
+    width:100%;
+    border-collapse:collapse;
+    overflow:hidden;
+    border-radius:10px;
+    box-shadow:var(--shadow);
+}
+
+.compare th{
+    background:#12366b;
+    color:white;
+    text-align:left;
+    padding:14px;
+}
+
+.compare td{
+    padding:13px 14px;
+    border-bottom:1px solid #e2eaf4;
+    color:var(--text-light);
+    background:white;
+}
+
+.compare tr:hover td{
+    background:#f6f9fd;
+}
+
+/* =========================================================
+   ACCORDION
+   ========================================================= */
+
+.accordion{
+    border:1px solid var(--blue-border);
+    border-radius:10px;
+    overflow:hidden;
+    margin-bottom:10px;
+    background:white;
+}
+
+.question{
+    padding:16px 18px;
+    cursor:pointer;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-weight:700;
+    color:#17345e;
+}
+
+.question:hover{
+    background:var(--primary-light);
+}
+
+.answer{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .3s ease;
+    padding:0 18px;
+    color:var(--text-light);
+}
+
+.accordion.open .answer{
+    max-height:400px;
+    padding:0 18px 18px;
+}
+
+.plus{
+    color:var(--primary);
+    font-size:20px;
+}
+
+/* =========================================================
+   QUIZ
+   ========================================================= */
+
+.quiz-option{
+    border:1px solid #d2deed;
+    border-radius:9px;
+    padding:12px 14px;
+    margin:8px 0;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.quiz-option:hover{
+    background:var(--primary-light);
+    border-color:#a9c8ef;
+}
+
+.quiz-option.correct{
+    background:var(--success-bg);
+    border-color:#8ad1b2;
+}
+
+.quiz-option.wrong{
+    background:var(--danger-bg);
+    border-color:#e5aaa2;
+}
+
+.quiz-feedback{
+    margin-top:12px;
+    font-weight:700;
+}
+
+/* =========================================================
+   CHALLENGE
+   ========================================================= */
+
+.challenge{
+    background:linear-gradient(135deg,#0d2b55,#174b91);
+    color:white;
+    border-radius:16px;
+    padding:30px;
+    box-shadow:0 12px 30px rgba(13,71,161,.2);
+}
+
+.challenge h3{
+    color:white;
+}
+
+.challenge p{
+    color:#dbe9ff;
+}
+
+.reveal{
+    border:1px solid rgba(255,255,255,.3);
+    background:rgba(255,255,255,.08);
+    color:white;
+    padding:10px 15px;
+    border-radius:7px;
+    cursor:pointer;
+    margin-top:15px;
+}
+
+.solution{
+    display:none;
+    margin-top:18px;
+    background:#0b1220;
+    border-radius:10px;
+}
+
+/* =========================================================
+   CHECKLIST
+   ========================================================= */
+
+.checklist{
+    display:grid;
+    gap:10px;
+}
+
+.check{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    padding:11px 13px;
+    background:white;
+    border:1px solid var(--blue-border);
+    border-radius:9px;
+}
+
+.check input{
+    accent-color:var(--primary);
+}
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+.lesson-nav{
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    margin-top:70px;
+    padding-top:30px;
+    border-top:1px solid var(--blue-border);
+}
+
+.nav-btn{
+    text-decoration:none;
+    padding:13px 20px;
+    border:1px solid var(--blue-border);
+    background:white;
+    color:var(--primary-dark);
+    border-radius:9px;
+    font-weight:700;
+    transition:.2s;
+}
+
+.nav-btn:hover{
+    background:var(--primary);
+    color:white;
+    border-color:var(--primary);
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+footer{
+    background:#0c1c34;
+    color:#b9c8dc;
+    text-align:center;
+    padding:35px 20px;
+    font-size:13px;
+}
+
+footer strong{
+    color:white;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(max-width:900px){
+
+    :root{
+        --sidebar:0px;
+    }
+
+    .sidebar{
+        display:none;
+    }
+
+    .container{
+        padding:35px 20px 70px;
+    }
+
+    .hero{
+        padding:35px 25px;
+    }
+
+    .hero h1{
+        font-size:36px;
+    }
+
+    .grid-2,
+    .grid-3,
+    .fs-demo{
+        grid-template-columns:1fr;
+    }
+
+    .path-inputs{
+        grid-template-columns:1fr;
+    }
+
+    .topbar{
+        padding:0 15px;
+    }
+
+    .lesson-label{
+        display:none;
+    }
+}
+
+@media(max-width:600px){
+
+    .progress-mini{
+        display:none;
+    }
+
+    .hero h1{
+        font-size:30px;
+    }
+
+    .section-heading h2{
+        font-size:26px;
+    }
+
+    .flow{
+        flex-direction:column;
+    }
+
+    .arrow{
+        transform:rotate(90deg);
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =====================================================
+     TOP BAR
+     ===================================================== -->
+
+<header class="topbar">
+
+    <div class="brand">
+
+        <div class="logo">Z</div>
+
+        <div>
+            <div class="brand-text">ZENSUS</div>
+            <div class="lesson-label">NODE.JS LEARNING PATH</div>
+        </div>
+
+    </div>
+
+    <div class="top-actions">
+
+        <span style="font-size:12px;color:#718096;">
+            LESSON 06
+        </span>
+
+        <div class="progress-mini">
+            <span id="progressBar"></span>
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- =====================================================
+     SIDEBAR
+     ===================================================== -->
+
+<aside class="sidebar">
+
+    <div class="sidebar-title">
+        Lesson 06 Contents
+    </div>
+
+    <nav class="toc">
+
+        <a href="#intro">Introduction</a>
+        <a href="#objectives">Learning Objectives</a>
+        <a href="#filesystem">File System Module</a>
+        <a href="#files">Files & Directories</a>
+        <a href="#read">Reading Files</a>
+        <a href="#write">Writing Files</a>
+        <a href="#append">Appending Files</a>
+        <a href="#delete">Deleting Files</a>
+        <a href="#directories">Directories</a>
+        <a href="#asyncfs">Synchronous vs Async</a>
+        <a href="#path">Path Module</a>
+        <a href="#pathmethods">Path Methods</a>
+        <a href="#visual">Visual Lab</a>
+        <a href="#comparison">FS vs Path</a>
+        <a href="#project">Mini Project</a>
+        <a href="#errors">Error Handling</a>
+        <a href="#interview">Interview Questions</a>
+        <a href="#quiz">Quiz</a>
+        <a href="#challenge">Challenge</a>
+
+    </nav>
+
+</aside>
+
+
+<!-- =====================================================
+     MAIN
+     ===================================================== -->
+
+<main class="main">
+
+<div class="container">
+
+
+<!-- =====================================================
+     HERO
+     ===================================================== -->
+
+<section class="hero" id="intro">
+
+    <div class="lesson-number">
+        NODE.JS · LESSON 06
+    </div>
+
+    <h1>
+        File System
+        <span>&</span>
+        Path Module
+    </h1>
+
+    <p>
+        Learn how Node.js interacts with files, folders and
+        filesystem paths. Understand reading, writing, updating,
+        deleting and managing files programmatically using
+        the built-in <strong>fs</strong> and <strong>path</strong>
+        modules.
+    </p>
+
+    <div class="hero-tags">
+        <span class="tag">fs Module</span>
+        <span class="tag">path Module</span>
+        <span class="tag">File Operations</span>
+        <span class="tag">Directories</span>
+        <span class="tag">Async I/O</span>
+        <span class="tag">Error Handling</span>
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     LEARNING OBJECTIVES
+     ===================================================== -->
+
+<section id="objectives">
+
+    <div class="section-heading">
+        <div class="section-number">01 · Foundation</div>
+        <h2>Learning Objectives</h2>
+        <p>By the end of this lesson, you should be able to work with files and paths confidently in Node.js.</p>
+    </div>
+
+    <div class="grid-2">
+
+        <div class="card objective">
+            <div class="objective-icon">01</div>
+            <div>
+                <h3>Understand fs</h3>
+                <p>Learn how Node.js provides filesystem operations through the built-in fs module.</p>
+            </div>
+        </div>
+
+        <div class="card objective">
+            <div class="objective-icon">02</div>
+            <div>
+                <h3>Read & Write</h3>
+                <p>Read existing files and create or replace file content programmatically.</p>
+            </div>
+        </div>
+
+        <div class="card objective">
+            <div class="objective-icon">03</div>
+            <div>
+                <h3>Manage Directories</h3>
+                <p>Create, inspect and remove directories using Node.js.</p>
+            </div>
+        </div>
+
+        <div class="card objective">
+            <div class="objective-icon">04</div>
+            <div>
+                <h3>Master path</h3>
+                <p>Build reliable filesystem paths using platform-independent path utilities.</p>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     WHAT IS FILE SYSTEM
+     ===================================================== -->
+
+<section id="filesystem">
+
+    <div class="section-heading">
+        <div class="section-number">02 · Core Concept</div>
+        <h2>What is the File System?</h2>
+    </div>
+
+    <div class="card">
+
+        <p>
+            A <strong>file system</strong> is the mechanism used by an
+            operating system to organize and store data in files and
+            directories.
+        </p>
+
+        <br>
+
+        <p>
+            Node.js provides the built-in <strong>fs</strong> module
+            to allow JavaScript programs to interact with that
+            filesystem.
+        </p>
+
+        <div class="info">
+            <strong>Important:</strong>
+            The <code>fs</code> module is built into Node.js.
+            You do not need to install it using npm.
+        </div>
+
+    </div>
+
+    <div class="flow">
+
+        <div class="flow-box">
+            <div class="flow-dot"></div>
+            <strong>Node.js App</strong>
+            <small>JavaScript code</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            <strong>fs Module</strong>
+            <small>Filesystem API</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            <strong>Operating System</strong>
+            <small>File system</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            <strong>File / Folder</strong>
+            <small>Stored data</small>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     IMPORT FS
+     ===================================================== -->
+
+<section>
+
+    <div class="section-heading">
+        <div class="section-number">03 · Getting Started</div>
+        <h2>Importing the fs Module</h2>
+    </div>
+
+    <div class="card">
+
+        <p>
+            Node.js provides two common module-system styles.
+            In CommonJS applications, use <code>require()</code>.
+        </p>
+
+        <div class="code-box">
+
+            <div class="code-header">
+                CommonJS
+                <button class="copy-btn" onclick="copyCode(this)">
+                    Copy
+                </button>
+            </div>
+
+<pre>const fs = require('fs');</pre>
+
+        </div>
+
+        <p>
+            You can also access the promise-based API:
+        </p>
+
+        <div class="code-box">
+
+            <div class="code-header">
+                Promise API
+                <button class="copy-btn" onclick="copyCode(this)">
+                    Copy
+                </button>
+            </div>
+
+<pre>const fs = require('fs').promises;</pre>
+
+        </div>
+
+        <div class="info">
+            For modern asynchronous code using
+            <code>async/await</code>, the promise API is often
+            convenient.
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     FILES
+     ===================================================== -->
+
+<section id="files">
+
+    <div class="section-heading">
+        <div class="section-number">04 · Files</div>
+        <h2>Understanding Files and Directories</h2>
+    </div>
+
+    <div class="card">
+
+        <p>
+            A directory can contain files and other directories.
+            Node.js can inspect and manipulate these filesystem
+            resources.
+        </p>
+
+        <div class="file-tree">
+
+            <div class="tree-line folder">📁 project/</div>
+
+            <div class="tree-line folder">
+                &nbsp;&nbsp;📁 data/
+            </div>
+
+            <div class="tree-line file">
+                &nbsp;&nbsp;&nbsp;&nbsp;📄 users.json
+            </div>
+
+            <div class="tree-line file">
+                &nbsp;&nbsp;&nbsp;&nbsp;📄 products.json
+            </div>
+
+            <div class="tree-line folder">
+                &nbsp;&nbsp;📁 src/
+            </div>
+
+            <div class="tree-line file">
+                &nbsp;&nbsp;&nbsp;&nbsp;📄 server.js
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     READ FILE
+     ===================================================== -->
+
+<section id="read">
+
+    <div class="section-heading">
+        <div class="section-number">05 · Read</div>
+        <h2>Reading a File</h2>
+        <p>One of the most common filesystem operations is reading data from a file.</p>
+    </div>
+
+    <div class="card">
+
+        <h3>readFile()</h3>
+
+        <p>
+            The asynchronous <code>readFile()</code> method reads
+            the contents of a file without blocking the JavaScript
+            thread while the filesystem operation is in progress.
+        </p>
+
+        <div class="code-box">
+
+            <div class="code-header">
+                read-file.js
+                <button class="copy-btn" onclick="copyCode(this)">
+                    Copy
+                </button>
+            </div>
+
+<pre>const fs = require('fs');
+
+fs.readFile('message.txt', 'utf8', (err, data) => {
+
+    if (err) {
+        console.error(err);
+        return;
+    }
+
+    console.log(data);
+});</pre>
+
+        </div>
+
+        <div class="info">
+
+            <strong>Why 'utf8'?</strong>
+
+            <br>
+
+            Without an encoding such as <code>utf8</code>,
+            Node.js returns a <code>Buffer</code>.
+            Specifying <code>utf8</code> gives you a string.
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>readFileSync()</h3>
+
+        <p>
+            The synchronous version waits until the operation
+            finishes before continuing.
+        </p>
+
+        <div class="code-box">
+
+<pre>const fs = require('fs');
+
+const data = fs.readFileSync('message.txt', 'utf8');
+
+console.log(data);</pre>
+
+        </div>
+
+        <div class="warning">
+            Synchronous filesystem operations can block the event
+            loop. They may be acceptable for startup scripts or
+            simple command-line tools, but should be used carefully
+            in request-handling server code.
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     WRITE FILE
+     ===================================================== -->
+
+<section id="write">
+
+    <div class="section-heading">
+        <div class="section-number">06 · Write</div>
+        <h2>Writing to a File</h2>
+    </div>
+
+    <div class="card">
+
+        <h3>writeFile()</h3>
+
+        <p>
+            <code>writeFile()</code> creates a file if it does not
+            exist. If the file already exists, its contents are
+            replaced by default.
+        </p>
+
+        <div class="code-box">
+
+<pre>const fs = require('fs');
+
+const content = 'Welcome to ZENSUS Node.js';
+
+fs.writeFile('welcome.txt', content, (err) => {
+
+    if (err) {
+        console.error(err);
+        return;
+    }
+
+    console.log('File written successfully');
+});</pre>
+
+        </div>
+
+        <div class="danger">
+
+            <strong>Remember:</strong>
+
+            <br>
+
+            <code>writeFile()</code> normally replaces existing
+            file contents. If you want to add content without
+            replacing it, use <code>appendFile()</code>.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     APPEND
+     ===================================================== -->
+
+<section id="append">
+
+    <div class="section-heading">
+        <div class="section-number">07 · Update</div>
+        <h2>Appending Data</h2>
+    </div>
+
+    <div class="card">
+
+        <p>
+            <code>appendFile()</code> adds data to the end of an
+            existing file.
+        </p>
+
+        <div class="code-box">
+
+<pre>const fs = require('fs');
+
+fs.appendFile(
+    'logs.txt',
+    'New request received\n',
+    (err) => {
+
+        if (err) {
+            console.error(err);
+            return;
+        }
+
+        console.log('Log added');
+    }
+);</pre>
+
+        </div>
+
+        <div class="success">
+            <strong>Common use:</strong>
+            Logging application events, requests, errors and
+            activity history.
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     DELETE
+     ===================================================== -->
+
+<section id="delete">
+
+    <div class="section-heading">
+        <div class="section-number">08 · Delete</div>
+        <h2>Deleting Files</h2>
+    </div>
+
+    <div class="card">
+
+        <p>
+            Node.js provides <code>unlink()</code> for deleting a
+            file asynchronously.
+        </p>
+
+        <div class="code-box">
+
+<pre>const fs = require('fs');
+
+fs.unlink('old-data.txt', (err) => {
+
+    if (err) {
+        console.error(err);
+        return;
+    }
+
+    console.log('File deleted');
+});</pre>
+
+        </div>
+
+        <div class="warning">
+            Always verify the path before deleting files.
+            Filesystem operations can be destructive.
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     DIRECTORIES
+     ===================================================== -->
+
+<section id="directories">
+
+    <div class="section-heading">
+        <div class="section-number">09 · Directories</div>
+        <h2>Working with Directories</h2>
+    </div>
+
+    <div class="grid-2">
+
+        <div class="method">
+
+            <div class="method-head">
+                <span class="method-name">mkdir()</span>
+                <span class="method-type">CREATE</span>
+            </div>
+
+            <div class="method-body">
+                Creates a directory.
+            </div>
+
+        </div>
+
+        <div class="method">
+
+            <div class="method-head">
+                <span class="method-name">readdir()</span>
+                <span class="method-type">READ</span>
+            </div>
+
+            <div class="method-body">
+                Reads the contents of a directory.
+            </div>
+
+        </div>
+
+        <div class="method">
+
+            <div class="method-head">
+                <span class="method-name">rmdir()</span>
+                <span class="method-type">REMOVE</span>
+            </div>
+
+            <div class="method-body">
+                Removes a directory.
+            </div>
+
+        </div>
+
+        <div class="method">
+
+            <div class="method-head">
+                <span class="method-name">stat()</span>
+                <span class="method-type">INFO</span>
+            </div>
+
+            <div class="method-body">
+                Retrieves information about a file or directory.
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Create a Directory</h3>
+
+        <div class="code-box">
+
+<pre>const fs = require('fs');
+
+fs.mkdir('uploads', (err) => {
+
+    if (err) {
+        console.error(err);
+        return;
+    }
+
+    console.log('Directory created');
+});</pre>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Create Nested Directories</h3>
+
+        <p>
+            The <code>recursive</code> option allows Node.js to
+            create missing parent directories.
+        </p>
+
+        <div class="code-box">
+
+<pre>fs.mkdir('data/users/profiles', {
+    recursive: true
+}, (err) => {
+
+    if (err) {
+        console.error(err);
+        return;
+    }
+
+    console.log('Directories ready');
+});</pre>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Read Directory Contents</h3>
+
+        <div class="code-box">
+
+<pre>fs.readdir('data', (err, files) => {
+
+    if (err) {
+        console.error(err);
+        return;
+    }
+
+    console.log(files);
+});</pre>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ASYNC VS SYNC
+     ===================================================== -->
+
+<section id="asyncfs">
+
+    <div class="section-heading">
+        <div class="section-number">10 · Performance</div>
+        <h2>Asynchronous vs Synchronous File Operations</h2>
+    </div>
+
+    <table class="compare">
+
+        <tr>
+            <th>Feature</th>
+            <th>Asynchronous</th>
+            <th>Synchronous</th>
+        </tr>
+
+        <tr>
+            <td>Blocks JS execution?</td>
+            <td>No, while waiting for the operation</td>
+            <td>Yes</td>
+        </tr>
+
+        <tr>
+            <td>Typical API</td>
+            <td>readFile()</td>
+            <td>readFileSync()</td>
+        </tr>
+
+        <tr>
+            <td>Callback / Promise</td>
+            <td>Yes</td>
+            <td>No callback required</td>
+        </tr>
+
+        <tr>
+            <td>Server request handling</td>
+            <td>Usually preferred</td>
+            <td>Use carefully</td>
+        </tr>
+
+    </table>
+
+    <div class="flow">
+
+        <div class="flow-box">
+            <strong>JavaScript</strong>
+            <small>Starts read</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            <strong>File System</strong>
+            <small>Performs I/O</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            <strong>Node.js</strong>
+            <small>Continues other work</small>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="flow-box">
+            <strong>Callback</strong>
+            <small>Receives result</small>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     PATH MODULE
+     ===================================================== -->
+
+<section id="path">
+
+    <div class="section-heading">
+        <div class="section-number">11 · Path Module</div>
+        <h2>What is the Path Module?</h2>
+    </div>
+
+    <div class="card">
+
+        <p>
+            The built-in <code>path</code> module provides utilities
+            for working with filesystem paths.
+        </p>
+
+        <br>
+
+        <p>
+            Instead of manually concatenating strings such as
+            <code>folder + '/' + file</code>, the path module
+            provides safer and platform-aware methods.
+        </p>
+
+        <div class="code-box">
+
+<pre>const path = require('path');
+
+const filePath = path.join(
+    'data',
+    'users',
+    'profile.json'
+);
+
+console.log(filePath);</pre>
+
+        </div>
+
+        <div class="info">
+            The exact path separator can differ between operating
+            systems. Using path utilities helps your application
+            construct paths correctly for the current platform.
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     PATH METHODS
+     ===================================================== -->
+
+<section id="pathmethods">
+
+    <div class="section-heading">
+        <div class="section-number">12 · Essential APIs</div>
+        <h2>Important Path Methods</h2>
+    </div>
+
+
+    <div class="grid-2">
+
+        <div class="method">
+
+            <div class="method-head">
+                <span class="method-name">path.join()</span>
+                <span class="method-type">BUILD</span>
+            </div>
+
+            <div class="method-body">
+                Joins path segments using the platform's separator
+                and normalizes the resulting path.
+            </div>
+
+        </div>
+
+
+        <div class="method">
+
+            <div class="method-head">
+                <span class="method-name">path.resolve()</span>
+                <span class="method-type">ABSOLUTE</span>
+            </div>
+
+            <div class="method-body">
+                Resolves path segments into an absolute path.
+            </div>
+
+        </div>
+
+
+        <div class="method">
+
+            <div class="method-head">
+                <span class="method-name">path.basename()</span>
+                <span class="method-type">FILE</span>
+            </div>
+
+            <div class="method-body">
+                Returns the last portion of a path.
+            </div>
+
+        </div>
+
+
+        <div class="method">
+
+            <div class="method-head">
+                <span class="method-name">path.dirname()</span>
+                <span class="method-type">PARENT</span>
+            </div>
+
+            <div class="method-body">
+                Returns the directory portion of a path.
+            </div>
+
+        </div>
+
+
+        <div class="method">
+
+            <div class="method-head">
+                <span class="method-name">path.extname()</span>
+                <span class="method-type">EXTENSION</span>
+            </div>
+
+            <div class="method-body">
+                Returns the extension of the final path component.
+            </div>
+
+        </div>
+
+
+        <div class="method">
+
+            <div class="method-head">
+                <span class="method-name">path.parse()</span>
+                <span class="method-type">ANALYZE</span>
+            </div>
+
+            <div class="method-body">
+                Breaks a path into root, directory, basename,
+                extension and name.
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>path.join()</h3>
+
+        <div class="code-box">
+
+<pre>const path = require('path');
+
+const result = path.join(
+    'projects',
+    'node',
+    'data.txt'
+);
+
+console.log(result);</pre>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>path.basename()</h3>
+
+        <div class="code-box">
+
+<pre>const path = require('path');
+
+const result = path.basename(
+    '/projects/node/data.txt'
+);
+
+console.log(result);
+
+// data.txt</pre>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>path.dirname()</h3>
+
+        <div class="code-box">
+
+<pre>const path = require('path');
+
+const result = path.dirname(
+    '/projects/node/data.txt'
+);
+
+console.log(result);
+
+// /projects/node</pre>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>path.extname()</h3>
+
+        <div class="code-box">
+
+<pre>const path = require('path');
+
+console.log(
+    path.extname('report.pdf')
+);
+
+// .pdf</pre>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>path.parse()</h3>
+
+        <div class="code-box">
+
+<pre>const path = require('path');
+
+const result = path.parse(
+    '/projects/node/report.pdf'
+);
+
+console.log(result);</pre>
+
+        </div>
+
+        <p>
+            The returned object contains properties such as
+            <code>root</code>, <code>dir</code>,
+            <code>base</code>, <code>ext</code> and
+            <code>name</code>.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     PATH JOIN VS RESOLVE
+     ===================================================== -->
+
+<section>
+
+    <div class="section-heading">
+        <div class="section-number">13 · Important Difference</div>
+        <h2>path.join() vs path.resolve()</h2>
+    </div>
+
+    <table class="compare">
+
+        <tr>
+            <th>Concept</th>
+            <th>path.join()</th>
+            <th>path.resolve()</th>
+        </tr>
+
+        <tr>
+            <td>Purpose</td>
+            <td>Combines path segments</td>
+            <td>Creates an absolute path</td>
+        </tr>
+
+        <tr>
+            <td>Result</td>
+            <td>Normalized path</td>
+            <td>Absolute normalized path</td>
+        </tr>
+
+        <tr>
+            <td>Common use</td>
+            <td>Building file paths</td>
+            <td>Getting absolute locations</td>
+        </tr>
+
+    </table>
+
+    <div class="code-box">
+
+<pre>const path = require('path');
+
+console.log(
+    path.join('data', 'users', 'file.txt')
+);
+
+console.log(
+    path.resolve('data', 'users', 'file.txt')
+);</pre>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     __dirname
+     ===================================================== -->
+
+<section>
+
+    <div class="section-heading">
+        <div class="section-number">14 · Real-World Node.js</div>
+        <h2>Understanding __dirname</h2>
+    </div>
+
+    <div class="card">
+
+        <p>
+            In a CommonJS module, <code>__dirname</code> contains
+            the absolute path of the directory containing the
+            current JavaScript file.
+        </p>
+
+        <div class="code-box">
+
+<pre>const path = require('path');
+
+const filePath = path.join(
+    __dirname,
+    'data',
+    'users.json'
+);
+
+console.log(filePath);</pre>
+
+        </div>
+
+        <div class="success">
+            This pattern is useful when your application needs to
+            refer to files relative to the current source file
+            rather than depending on the directory from which
+            the Node process was launched.
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     VISUAL LAB
+     ===================================================== -->
+
+<section id="visual">
+
+    <div class="section-heading">
+        <div class="section-number">15 · Interactive Lab</div>
+        <h2>Filesystem Visual Lab</h2>
+        <p>Explore how common filesystem operations conceptually change a project.</p>
+    </div>
+
+
+    <div class="fs-demo">
+
+        <div class="terminal">
+
+            <div class="terminal-title">
+                ZENSUS TERMINAL
+            </div>
+
+            <div class="terminal-line">
+                <span class="prompt">node&gt;</span>
+                fs operation ready
+            </div>
+
+            <div id="terminalOutput" class="fs-output">
+                Choose an operation below...
+            </div>
+
+            <div class="demo-controls">
+
+                <button onclick="fsDemo('read')">
+                    Read File
+                </button>
+
+                <button onclick="fsDemo('write')">
+                    Write File
+                </button>
+
+                <button onclick="fsDemo('append')">
+                    Append
+                </button>
+
+                <button onclick="fsDemo('delete')">
+                    Delete
+                </button>
+
+                <button onclick="fsDemo('directory')">
+                    Create Folder
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="file-tree" id="visualTree">
+
+            <div class="tree-line folder">
+                📁 project/
+            </div>
+
+            <div class="tree-line folder">
+                ├── 📁 data/
+            </div>
+
+            <div class="tree-line file">
+                │   └── 📄 users.json
+            </div>
+
+            <div class="tree-line file">
+                ├── 📄 server.js
+            </div>
+
+            <div class="tree-line file">
+                └── 📄 package.json
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     PATH BUILDER
+     ===================================================== -->
+
+<section>
+
+    <div class="section-heading">
+        <div class="section-number">16 · Path Laboratory</div>
+        <h2>Build a Path</h2>
+        <p>Experiment with path.join() using separate path segments.</p>
+    </div>
+
+    <div class="path-builder">
+
+        <div class="path-inputs">
+
+            <input id="part1" value="project">
+
+            <input id="part2" value="data">
+
+            <input id="part3" value="users.json">
+
+        </div>
+
+        <button
+            onclick="buildPath()"
+            style="
+            margin-top:15px;
+            background:#1769e0;
+            color:white;
+            border:0;
+            padding:11px 18px;
+            border-radius:8px;
+            cursor:pointer;
+            font-weight:700;
+            "
+        >
+            Join Path
+        </button>
+
+        <div class="path-result" id="pathResult">
+            project/data/users.json
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     FS VS PATH
+     ===================================================== -->
+
+<section id="comparison">
+
+    <div class="section-heading">
+        <div class="section-number">17 · Comparison</div>
+        <h2>fs Module vs path Module</h2>
+    </div>
+
+    <table class="compare">
+
+        <tr>
+            <th>Module</th>
+            <th>Main Responsibility</th>
+            <th>Examples</th>
+        </tr>
+
+        <tr>
+            <td><strong>fs</strong></td>
+            <td>Interact with files and directories</td>
+            <td>readFile, writeFile, mkdir, unlink</td>
+        </tr>
+
+        <tr>
+            <td><strong>path</strong></td>
+            <td>Construct and analyze filesystem paths</td>
+            <td>join, resolve, basename, dirname</td>
+        </tr>
+
+        <tr>
+            <td><strong>Relationship</strong></td>
+            <td>Often used together</td>
+            <td>path.join() + fs.readFile()</td>
+        </tr>
+
+    </table>
+
+</section>
+
+
+<!-- =====================================================
+     MINI PROJECT
+     ===================================================== -->
+
+<section id="project">
+
+    <div class="section-heading">
+        <div class="section-number">18 · Practical Project</div>
+        <h2>Mini Project — File Notes Manager</h2>
+        <p>Combine fs and path to build a simple notes storage system.</p>
+    </div>
+
+    <div class="card">
+
+        <h3>Project Structure</h3>
+
+        <div class="file-tree">
+
+            <div class="tree-line folder">📁 notes-app/</div>
+
+            <div class="tree-line file">
+                ├── 📄 app.js
+            </div>
+
+            <div class="tree-line folder">
+                └── 📁 notes/
+            </div>
+
+            <div class="tree-line file">
+                &nbsp;&nbsp;&nbsp;&nbsp;└── 📄 notes.txt
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Implementation</h3>
+
+        <div class="code-box">
+
+<pre>const fs = require('fs');
+const path = require('path');
+
+const notesDirectory = path.join(
+    __dirname,
+    'notes'
+);
+
+const notesFile = path.join(
+    notesDirectory,
+    'notes.txt'
+);
+
+if (!fs.existsSync(notesDirectory)) {
+    fs.mkdirSync(notesDirectory);
+}
+
+fs.appendFile(
+    notesFile,
+    'Learn Node.js File System\n',
+    (err) => {
+
+        if (err) {
+            console.error(err);
+            return;
+        }
+
+        console.log('Note saved successfully');
+    }
+);</pre>
+
+        </div>
+
+    </div>
+
+    <div class="info">
+
+        <strong>What happened?</strong>
+
+        <br>
+
+        1. Imported <code>fs</code> and <code>path</code>.
+
+        <br>
+
+        2. Built the directory path.
+
+        <br>
+
+        3. Built the notes file path.
+
+        <br>
+
+        4. Checked whether the directory exists.
+
+        <br>
+
+        5. Created it when necessary.
+
+        <br>
+
+        6. Appended the note to the file.
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ERROR HANDLING
+     ===================================================== -->
+
+<section id="errors">
+
+    <div class="section-heading">
+        <div class="section-number">19 · Reliability</div>
+        <h2>Error Handling in File Operations</h2>
+    </div>
+
+    <div class="card">
+
+        <p>
+            Filesystem operations can fail for many reasons:
+        </p>
+
+        <ul style="margin:15px 0 0 22px;color:#526174;">
+
+            <li>File does not exist</li>
+            <li>Incorrect path</li>
+            <li>Permission denied</li>
+            <li>Directory does not exist</li>
+            <li>Invalid operation</li>
+            <li>File is unavailable</li>
+
+        </ul>
+
+        <div class="code-box">
+
+<pre>fs.readFile('data.txt', 'utf8', (err, data) => {
+
+    if (err) {
+
+        console.error(
+            'Unable to read file:',
+            err.message
+        );
+
+        return;
+    }
+
+    console.log(data);
+});</pre>
+
+        </div>
+
+        <div class="warning">
+            Never assume that a file operation will always succeed.
+            Production applications should handle filesystem errors
+            deliberately.
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     MODERN PROMISE API
+     ===================================================== -->
+
+<section>
+
+    <div class="section-heading">
+        <div class="section-number">20 · Modern Node.js</div>
+        <h2>fs/promises with async/await</h2>
+    </div>
+
+    <div class="card">
+
+        <p>
+            Node.js provides a promise-based filesystem API that
+            works naturally with <code>async/await</code>.
+        </p>
+
+        <div class="code-box">
+
+<pre>const fs = require('fs/promises');
+
+async function readData() {
+
+    try {
+
+        const data = await fs.readFile(
+            'message.txt',
+            'utf8'
+        );
+
+        console.log(data);
+
+    } catch (error) {
+
+        console.error(
+            'Read failed:',
+            error.message
+        );
+    }
+}
+
+readData();</pre>
+
+        </div>
+
+        <div class="success">
+            This style avoids deeply nested callbacks and makes
+            asynchronous filesystem code easier to read.
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     INTERVIEW
+     ===================================================== -->
+
+<section id="interview">
+
+    <div class="section-heading">
+        <div class="section-number">21 · Interview Preparation</div>
+        <h2>Professional Interview Questions</h2>
+    </div>
+
+
+    <div class="accordion">
+
+        <div class="question" onclick="toggleAccordion(this)">
+            What is the fs module?
+            <span class="plus">+</span>
+        </div>
+
+        <div class="answer">
+            The fs module is a built-in Node.js module that provides
+            APIs for interacting with files and directories.
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <div class="question" onclick="toggleAccordion(this)">
+            What is the difference between readFile() and readFileSync()?
+            <span class="plus">+</span>
+        </div>
+
+        <div class="answer">
+            readFile() is asynchronous and allows Node.js to continue
+            processing other JavaScript work while the filesystem
+            operation is pending. readFileSync() blocks execution
+            until the operation completes.
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <div class="question" onclick="toggleAccordion(this)">
+            What does writeFile() do?
+            <span class="plus">+</span>
+        </div>
+
+        <div class="answer">
+            writeFile() writes data to a file. It creates the file
+            if needed and normally replaces its existing contents.
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <div class="question" onclick="toggleAccordion(this)">
+            What is the path module used for?
+            <span class="plus">+</span>
+        </div>
+
+        <div class="answer">
+            The path module provides utilities for constructing,
+            resolving and analyzing filesystem paths.
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <div class="question" onclick="toggleAccordion(this)">
+            What is path.join()?
+            <span class="plus">+</span>
+        </div>
+
+        <div class="answer">
+            path.join() combines multiple path segments into one
+            normalized path using the platform's path separator.
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <div class="question" onclick="toggleAccordion(this)">
+            What is path.resolve()?
+            <span class="plus">+</span>
+        </div>
+
+        <div class="answer">
+            path.resolve() processes path segments from right to left
+            until it constructs an absolute path.
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <div class="question" onclick="toggleAccordion(this)">
+            What does path.extname() return?
+            <span class="plus">+</span>
+        </div>
+
+        <div class="answer">
+            It returns the extension of the last portion of a path,
+            such as ".js" or ".json".
+        </div>
+
+    </div>
+
+
+    <div class="accordion">
+
+        <div class="question" onclick="toggleAccordion(this)">
+            Why are fs and path commonly used together?
+            <span class="plus">+</span>
+        </div>
+
+        <div class="answer">
+            path helps construct the correct filesystem location,
+            while fs performs operations such as reading or writing
+            at that location.
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     QUIZ
+     ===================================================== -->
+
+<section id="quiz">
+
+    <div class="section-heading">
+        <div class="section-number">22 · Knowledge Check</div>
+        <h2>Quick Quiz</h2>
+    </div>
+
+    <div class="card">
+
+        <h3>Which module is used to construct filesystem paths?</h3>
+
+        <div
+            class="quiz-option"
+            onclick="answerQuiz(this,false)"
+        >
+            fs
+        </div>
+
+        <div
+            class="quiz-option"
+            onclick="answerQuiz(this,true)"
+        >
+            path
+        </div>
+
+        <div
+            class="quiz-option"
+            onclick="answerQuiz(this,false)"
+        >
+            http
+        </div>
+
+        <div
+            class="quiz-option"
+            onclick="answerQuiz(this,false)"
+        >
+            events
+        </div>
+
+        <div id="quizFeedback" class="quiz-feedback"></div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Which method appends content to a file?</h3>
+
+        <div
+            class="quiz-option"
+            onclick="answerQuiz2(this,false)"
+        >
+            writeFile()
+        </div>
+
+        <div
+            class="quiz-option"
+            onclick="answerQuiz2(this,true)"
+        >
+            appendFile()
+        </div>
+
+        <div
+            class="quiz-option"
+            onclick="answerQuiz2(this,false)"
+        >
+            readFile()
+        </div>
+
+        <div
+            class="quiz-option"
+            onclick="answerQuiz2(this,false)"
+        >
+            unlink()
+        </div>
+
+        <div id="quizFeedback2" class="quiz-feedback"></div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CHALLENGE
+     ===================================================== -->
+
+<section id="challenge">
+
+    <div class="section-heading">
+        <div class="section-number">23 · Coding Challenge</div>
+        <h2>Professional Practice Challenge</h2>
+    </div>
+
+    <div class="challenge">
+
+        <h3>Build a File Logger</h3>
+
+        <p>
+            Create a Node.js program that appends the following
+            message to <code>app.log</code>:
+        </p>
+
+        <br>
+
+        <strong>
+            Application started successfully
+        </strong>
+
+        <p style="margin-top:12px;">
+            Use the asynchronous filesystem API and properly
+            handle errors.
+        </p>
+
+        <button
+            class="reveal"
+            onclick="toggleSolution()"
+        >
+            Reveal Solution
+        </button>
+
+        <div class="solution" id="solution">
+
+<div class="code-box">
+
+<pre>const fs = require('fs');
+
+fs.appendFile(
+    'app.log',
+    'Application started successfully\n',
+    (err) => {
+
+        if (err) {
+            console.error(err);
+            return;
+        }
+
+        console.log('Log saved');
+    }
+);</pre>
+
+</div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     LESSON CHECKLIST
+     ===================================================== -->
+
+<section>
+
+    <div class="section-heading">
+        <div class="section-number">24 · Completion</div>
+        <h2>Lesson 06 Checklist</h2>
+    </div>
+
+    <div class="checklist">
+
+        <label class="check">
+            <input type="checkbox" onchange="saveProgress()">
+            I understand the fs module
+        </label>
+
+        <label class="check">
+            <input type="checkbox" onchange="saveProgress()">
+            I can read files
+        </label>
+
+        <label class="check">
+            <input type="checkbox" onchange="saveProgress()">
+            I can write and append files
+        </label>
+
+        <label class="check">
+            <input type="checkbox" onchange="saveProgress()">
+            I can create and inspect directories
+        </label>
+
+        <label class="check">
+            <input type="checkbox" onchange="saveProgress()">
+            I understand asynchronous filesystem operations
+        </label>
+
+        <label class="check">
+            <input type="checkbox" onchange="saveProgress()">
+            I understand the path module
+        </label>
+
+        <label class="check">
+            <input type="checkbox" onchange="saveProgress()">
+            I can use path.join() and path.resolve()
+        </label>
+
+        <label class="check">
+            <input type="checkbox" onchange="saveProgress()">
+            I completed the coding challenge
+        </label>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     NAVIGATION
+     ===================================================== -->
+
+<div class="lesson-nav">
+
+    <a class="nav-btn" href="lesson5.html">
+        ← Lesson 05
+    </a>
+
+    <a class="nav-btn" href="lesson7.html">
+        Lesson 07 →
+    </a>
+
+</div>
+
+
+</div>
+
+
+<!-- =====================================================
+     FOOTER
+     ===================================================== -->
+
+<footer>
+
+    <strong>ZENSUS</strong>
+
+    <br>
+
+    Node.js Professional Learning Path
+
+    <br>
+
+    <span>
+        Lesson 06 · File System & Path Module
+    </span>
+
+</footer>
+
+</main>
+
+
+<!-- =====================================================
+     JAVASCRIPT
+     ===================================================== -->
+
+<script>
+
+/* =========================================================
+   COPY CODE
+   ========================================================= */
+
+function copyCode(button){
+
+    const codeBox = button.closest('.code-box');
+
+    const code = codeBox.querySelector('pre').innerText;
+
+    navigator.clipboard.writeText(code);
+
+    const original = button.innerText;
+
+    button.innerText = 'Copied';
+
+    setTimeout(() => {
+
+        button.innerText = original;
+
+    },1200);
+}
+
+
+/* =========================================================
+   ACCORDION
+   ========================================================= */
+
+function toggleAccordion(question){
+
+    const accordion = question.parentElement;
+
+    accordion.classList.toggle('open');
+
+    const plus = question.querySelector('.plus');
+
+    if(accordion.classList.contains('open')){
+        plus.innerText = '−';
+    }else{
+        plus.innerText = '+';
+    }
+
+}
+
+
+/* =========================================================
+   FILESYSTEM VISUAL DEMO
+   ========================================================= */
+
+function fsDemo(operation){
+
+    const output =
+        document.getElementById('terminalOutput');
+
+    const tree =
+        document.getElementById('visualTree');
+
+    if(operation === 'read'){
+
+        output.innerHTML =
+        '<span class="prompt">node&gt;</span> fs.readFile()<br>' +
+        'Reading data/users.json...<br>' +
+        '<strong style="color:#7bd88f;">✓ File contents received</strong>';
+
+    }
+
+    if(operation === 'write'){
+
+        output.innerHTML =
+        '<span class="prompt">node&gt;</span> fs.writeFile()<br>' +
+        'Writing data/report.txt...<br>' +
+        '<strong style="color:#7bd88f;">✓ File created / replaced</strong>';
+
+        tree.innerHTML +=
+        '<div class="tree-line file">└── 📄 report.txt</div>';
+
+    }
+
+    if(operation === 'append'){
+
+        output.innerHTML =
+        '<span class="prompt">node&gt;</span> fs.appendFile()<br>' +
+        'Adding log entry...<br>' +
+        '<strong style="color:#7bd88f;">✓ Content appended</strong>';
+
+    }
+
+    if(operation === 'delete'){
+
+        output.innerHTML =
+        '<span class="prompt">node&gt;</span> fs.unlink()<br>' +
+        'Removing old-data.txt...<br>' +
+        '<strong style="color:#7bd88f;">✓ File deleted</strong>';
+
+    }
+
+    if(operation === 'directory'){
+
+        output.innerHTML =
+        '<span class="prompt">node&gt;</span> fs.mkdir()<br>' +
+        'Creating uploads/...<br>' +
+        '<strong style="color:#7bd88f;">✓ Directory created</strong>';
+
+        tree.innerHTML +=
+        '<div class="tree-line folder">└── 📁 uploads/</div>';
+
+    }
+
+}
+
+
+/* =========================================================
+   PATH BUILDER
+   ========================================================= */
+
+function buildPath(){
+
+    const first =
+        document.getElementById('part1').value;
+
+    const second =
+        document.getElementById('part2').value;
+
+    const third =
+        document.getElementById('part3').value;
+
+    const result =
+        [first,second,third]
+        .filter(Boolean)
+        .join('/');
+
+    document.getElementById('pathResult').innerText =
+        result;
+
+}
+
+
+/* =========================================================
+   QUIZ
+   ========================================================= */
+
+function answerQuiz(element,correct){
+
+    const options =
+        element.parentElement
+        .querySelectorAll('.quiz-option');
+
+    options.forEach(option => {
+        option.style.pointerEvents='none';
+    });
+
+    if(correct){
+
+        element.classList.add('correct');
+
+        document.getElementById(
+            'quizFeedback'
+        ).innerText =
+        '✓ Correct — path is the built-in module for filesystem path utilities.';
+
+        document.getElementById(
+            'quizFeedback'
+        ).style.color =
+        '#16845b';
+
+    }else{
+
+        element.classList.add('wrong');
+
+        document.getElementById(
+            'quizFeedback'
+        ).innerText =
+        '✕ Incorrect. Review the path module section.';
+
+        document.getElementById(
+            'quizFeedback'
+        ).style.color =
+        '#c0392b';
+
+    }
+
+}
+
+
+function answerQuiz2(element,correct){
+
+    const options =
+        element.parentElement
+        .querySelectorAll('.quiz-option');
+
+    options.forEach(option => {
+        option.style.pointerEvents='none';
+    });
+
+    if(correct){
+
+        element.classList.add('correct');
+
+        document.getElementById(
+            'quizFeedback2'
+        ).innerText =
+        '✓ Correct — appendFile() adds content to the end of a file.';
+
+        document.getElementById(
+            'quizFeedback2'
+        ).style.color =
+        '#16845b';
+
+    }else{
+
+        element.classList.add('wrong');
+
+        document.getElementById(
+            'quizFeedback2'
+        ).innerText =
+        '✕ Incorrect. Review appendFile().';
+
+        document.getElementById(
+            'quizFeedback2'
+        ).style.color =
+        '#c0392b';
+
+    }
+
+}
+
+
+/* =========================================================
+   SOLUTION
+   ========================================================= */
+
+function toggleSolution(){
+
+    const solution =
+        document.getElementById('solution');
+
+    if(solution.style.display === 'block'){
+
+        solution.style.display='none';
+
+    }else{
+
+        solution.style.display='block';
+
+    }
+
+}
+
+
+/* =========================================================
+   PROGRESS
+   ========================================================= */
+
+function saveProgress(){
+
+    const checks =
+        document.querySelectorAll(
+            '.check input'
+        );
+
+    let completed = 0;
+
+    checks.forEach(check => {
+
+        if(check.checked){
+            completed++;
+        }
+
+    });
+
+    const percentage =
+        Math.round(
+            (completed / checks.length) * 100
+        );
+
+    document.getElementById(
+        'progressBar'
+    ).style.width =
+        percentage + '%';
+
+    localStorage.setItem(
+        'zensus_lesson6_progress',
+        percentage
+    );
+
+}
+
+
+/* =========================================================
+   RESTORE PROGRESS
+   ========================================================= */
+
+window.addEventListener('load',() => {
+
+    const saved =
+        localStorage.getItem(
+            'zensus_lesson6_progress'
+        );
+
+    if(saved){
+
+        document.getElementById(
+            'progressBar'
+        ).style.width =
+            saved + '%';
+
+    }
+
+});
+
+
+/* =========================================================
+   ACTIVE TOC
+   ========================================================= */
+
+const sections =
+    document.querySelectorAll('section');
+
+const links =
+    document.querySelectorAll('.toc a');
+
+window.addEventListener('scroll',() => {
+
+    let current = '';
+
+    sections.forEach(section => {
+
+        const top =
+            section.offsetTop - 130;
+
+        if(window.scrollY >= top){
+
+            current = section.id;
+
+        }
+
+    });
+
+    links.forEach(link => {
+
+        link.classList.remove('active');
+
+        if(
+            link.getAttribute('href') ===
+            '#' + current
+        ){
+
+            link.classList.add('active');
+
+        }
+
+    });
+
+});
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,3159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ZENSUS | REST API Lesson 01</title>
+
+    <style>
+        :root {
+            --blue: #2563eb;
+            --blue-dark: #1d4ed8;
+            --blue-light: #eff6ff;
+            --blue-soft: #dbeafe;
+            --blue-border: #bfdbfe;
+
+            --text: #10213f;
+            --text-light: #5f6f86;
+            --muted: #8b9ab0;
+
+            --bg: #f7faff;
+            --white: #ffffff;
+            --border: #dce6f2;
+
+            --green: #16a34a;
+            --green-light: #f0fdf4;
+
+            --orange: #ea580c;
+            --orange-light: #fff7ed;
+
+            --red: #dc2626;
+            --red-light: #fef2f2;
+
+            --shadow: 0 10px 30px rgba(37, 99, 235, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family:
+                Inter,
+                ui-sans-serif,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        /* =====================================================
+           SIDEBAR
+        ===================================================== */
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 275px;
+            height: 100vh;
+
+            background: var(--white);
+            border-right: 1px solid var(--border);
+
+            padding: 28px 18px;
+
+            overflow-y: auto;
+
+            z-index: 1000;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            padding: 0 12px 25px;
+
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand-logo {
+            width: 44px;
+            height: 44px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 12px;
+
+            background: var(--blue);
+            color: white;
+
+            font-size: 17px;
+            font-weight: 800;
+
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);
+        }
+
+        .brand h2 {
+            font-size: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .brand p {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .lesson-label {
+            margin: 24px 12px 10px;
+
+            font-size: 11px;
+            font-weight: 800;
+
+            color: var(--blue);
+
+            letter-spacing: 1.3px;
+        }
+
+        .nav {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: var(--text-light);
+
+            padding: 10px 12px;
+
+            border-radius: 9px;
+
+            font-size: 13px;
+            font-weight: 600;
+
+            transition: 0.2s ease;
+        }
+
+        .nav a:hover {
+            background: var(--blue-light);
+            color: var(--blue);
+        }
+
+        .nav a.active {
+            background: var(--blue-light);
+            color: var(--blue);
+
+            border-left: 3px solid var(--blue);
+
+            padding-left: 9px;
+        }
+
+        /* =====================================================
+           MAIN
+        ===================================================== */
+
+        .main {
+            margin-left: 275px;
+            min-height: 100vh;
+        }
+
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 275px;
+            right: 0;
+
+            height: 4px;
+
+            background: #e8eef7;
+
+            z-index: 1200;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+
+            background: linear-gradient(
+                90deg,
+                var(--blue),
+                #60a5fa
+            );
+
+            transition: width 0.15s ease;
+        }
+
+        .topbar {
+            padding: 25px 50px 10px;
+
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .search-box {
+            position: relative;
+            width: 320px;
+        }
+
+        .search-box input {
+            width: 100%;
+
+            padding: 12px 16px 12px 42px;
+
+            border: 1px solid var(--border);
+            border-radius: 12px;
+
+            outline: none;
+
+            background: white;
+
+            font-size: 14px;
+
+            transition: 0.2s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 4px var(--blue-light);
+        }
+
+        .search-icon {
+            position: absolute;
+
+            left: 15px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            color: var(--muted);
+        }
+
+        .content {
+            max-width: 1120px;
+            margin: auto;
+
+            padding: 20px 50px 80px;
+        }
+
+        /* =====================================================
+           HERO
+        ===================================================== */
+
+        .hero {
+            position: relative;
+
+            overflow: hidden;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ffffff,
+                    #eff6ff
+                );
+
+            border: 1px solid var(--blue-border);
+
+            border-radius: 24px;
+
+            padding: 48px;
+
+            box-shadow: var(--shadow);
+
+            margin-bottom: 35px;
+        }
+
+        .hero::after {
+            content: "";
+
+            position: absolute;
+
+            width: 260px;
+            height: 260px;
+
+            border-radius: 50%;
+
+            background: rgba(37, 99, 235, 0.06);
+
+            right: -90px;
+            top: -90px;
+
+            animation: float 5s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(15px);
+            }
+        }
+
+        .badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+
+            margin-bottom: 18px;
+        }
+
+        .badge {
+            padding: 6px 11px;
+
+            border-radius: 20px;
+
+            background: white;
+
+            border: 1px solid var(--blue-border);
+
+            color: var(--blue);
+
+            font-size: 11px;
+            font-weight: 800;
+
+            letter-spacing: 0.5px;
+        }
+
+        .hero h1 {
+            position: relative;
+            z-index: 2;
+
+            font-size: clamp(30px, 4vw, 48px);
+
+            line-height: 1.15;
+
+            margin-bottom: 18px;
+        }
+
+        .hero h1 span {
+            color: var(--blue);
+        }
+
+        .hero p {
+            position: relative;
+            z-index: 2;
+
+            max-width: 760px;
+
+            color: var(--text-light);
+
+            font-size: 16px;
+        }
+
+        /* =====================================================
+           SECTIONS
+        ===================================================== */
+
+        section {
+            margin-bottom: 45px;
+
+            scroll-margin-top: 30px;
+        }
+
+        .section-header {
+            margin-bottom: 22px;
+        }
+
+        .section-number {
+            color: var(--blue);
+
+            font-size: 12px;
+            font-weight: 800;
+
+            letter-spacing: 1.5px;
+
+            margin-bottom: 5px;
+        }
+
+        .section-header h2 {
+            font-size: 28px;
+
+            line-height: 1.3;
+        }
+
+        .section-header p {
+            color: var(--text-light);
+
+            margin-top: 8px;
+
+            max-width: 800px;
+        }
+
+        /* =====================================================
+           CARDS
+        ===================================================== */
+
+        .grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+
+            gap: 18px;
+        }
+
+        .card {
+            background: white;
+
+            border: 1px solid var(--border);
+
+            border-radius: 16px;
+
+            padding: 24px;
+
+            box-shadow: var(--shadow);
+
+            transition:
+                transform 0.25s ease,
+                box-shadow 0.25s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+
+            box-shadow:
+                0 16px 35px
+                rgba(37, 99, 235, 0.12);
+        }
+
+        .card-icon {
+            width: 46px;
+            height: 46px;
+
+            border-radius: 12px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: var(--blue-light);
+
+            color: var(--blue);
+
+            font-weight: 900;
+
+            margin-bottom: 14px;
+        }
+
+        .card h3 {
+            font-size: 18px;
+
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            color: var(--text-light);
+
+            font-size: 14px;
+        }
+
+        /* =====================================================
+           API FLOW
+        ===================================================== */
+
+        .api-flow {
+            background: white;
+
+            border: 1px solid var(--border);
+
+            border-radius: 20px;
+
+            padding: 30px;
+
+            box-shadow: var(--shadow);
+
+            overflow: hidden;
+        }
+
+        .flow-title {
+            text-align: center;
+
+            margin-bottom: 28px;
+
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .flow {
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            gap: 12px;
+
+            flex-wrap: wrap;
+        }
+
+        .flow-box {
+            min-width: 145px;
+
+            padding: 20px 15px;
+
+            text-align: center;
+
+            border-radius: 14px;
+
+            background: var(--blue-light);
+
+            border: 1px solid var(--blue-border);
+
+            color: var(--blue);
+
+            font-weight: 800;
+
+            animation: pulseBox 3s infinite;
+        }
+
+        .flow-box.server {
+            background: #f8fafc;
+
+            color: var(--text);
+
+            border-color: var(--border);
+        }
+
+        .flow-box.database {
+            background: var(--green-light);
+
+            color: var(--green);
+
+            border-color: #bbf7d0;
+        }
+
+        .flow-arrow {
+            color: var(--blue);
+
+            font-size: 25px;
+            font-weight: 900;
+
+            animation: arrowMove 1.5s infinite;
+        }
+
+        @keyframes arrowMove {
+
+            0% {
+                transform: translateX(0);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: translateX(6px);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateX(0);
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes pulseBox {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 rgba(37, 99, 235, 0);
+            }
+
+            50% {
+                box-shadow:
+                    0 0 0 6px
+                    rgba(37, 99, 235, 0.05);
+            }
+        }
+
+        /* =====================================================
+           REQUEST RESPONSE
+        ===================================================== */
+
+        .communication {
+            display: grid;
+
+            grid-template-columns:
+                1fr 70px 1fr;
+
+            align-items: center;
+
+            gap: 15px;
+        }
+
+        .communication-card {
+            background: white;
+
+            border: 1px solid var(--border);
+
+            border-radius: 16px;
+
+            padding: 24px;
+
+            box-shadow: var(--shadow);
+        }
+
+        .communication-card.request {
+            border-top: 4px solid var(--blue);
+        }
+
+        .communication-card.response {
+            border-top: 4px solid var(--green);
+        }
+
+        .communication-card h3 {
+            margin-bottom: 12px;
+        }
+
+        .communication-card p {
+            color: var(--text-light);
+
+            font-size: 14px;
+        }
+
+        .exchange-arrow {
+            text-align: center;
+
+            font-size: 28px;
+
+            color: var(--blue);
+
+            animation: bounce 1.5s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            50% {
+                transform: translateX(8px);
+            }
+        }
+
+        /* =====================================================
+           CODE
+        ===================================================== */
+
+        .code-box {
+            position: relative;
+
+            background: #0f172a;
+
+            border-radius: 14px;
+
+            margin-top: 18px;
+
+            overflow: hidden;
+
+            box-shadow:
+                0 12px 30px
+                rgba(15, 23, 42, 0.15);
+        }
+
+        .code-header {
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 10px 15px;
+
+            background: #172033;
+
+            color: #94a3b8;
+
+            font-size: 12px;
+        }
+
+        .copy-btn {
+            border: 1px solid #334155;
+
+            background: #1e293b;
+
+            color: #e2e8f0;
+
+            padding: 6px 10px;
+
+            border-radius: 7px;
+
+            cursor: pointer;
+
+            font-size: 11px;
+
+            transition: 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #334155;
+        }
+
+        pre {
+            margin: 0;
+
+            padding: 20px;
+
+            overflow-x: auto;
+
+            color: #e2e8f0;
+
+            font-family:
+                Consolas,
+                Monaco,
+                monospace;
+
+            font-size: 13px;
+
+            line-height: 1.7;
+        }
+
+        /* =====================================================
+           JSON VISUAL
+        ===================================================== */
+
+        .json-card {
+            background: #0f172a;
+
+            border-radius: 16px;
+
+            overflow: hidden;
+
+            box-shadow: var(--shadow);
+        }
+
+        .json-title {
+            padding: 12px 18px;
+
+            background: #172033;
+
+            color: #94a3b8;
+
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .json-card pre {
+            color: #bfdbfe;
+        }
+
+        /* =====================================================
+           HTTP METHODS
+        ===================================================== */
+
+        .method-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 14px;
+        }
+
+        .method {
+            padding: 20px;
+
+            background: white;
+
+            border: 1px solid var(--border);
+
+            border-radius: 14px;
+
+            text-align: center;
+
+            box-shadow: var(--shadow);
+        }
+
+        .method strong {
+            display: block;
+
+            font-size: 18px;
+
+            color: var(--blue);
+
+            margin-bottom: 7px;
+        }
+
+        .method span {
+            color: var(--text-light);
+
+            font-size: 13px;
+        }
+
+        /* =====================================================
+           ENDPOINT
+        ===================================================== */
+
+        .endpoint {
+            display: flex;
+
+            align-items: center;
+
+            gap: 0;
+
+            background: white;
+
+            border: 1px solid var(--border);
+
+            border-radius: 14px;
+
+            overflow: hidden;
+
+            box-shadow: var(--shadow);
+
+            margin-top: 18px;
+        }
+
+        .endpoint-method {
+            padding: 16px 20px;
+
+            background: var(--blue);
+
+            color: white;
+
+            font-weight: 900;
+
+            font-size: 13px;
+        }
+
+        .endpoint-url {
+            padding: 16px 20px;
+
+            font-family: monospace;
+
+            color: var(--text);
+
+            font-size: 14px;
+        }
+
+        /* =====================================================
+           PRINCIPLES
+        ===================================================== */
+
+        .principle-list {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 15px;
+        }
+
+        .principle {
+            background: white;
+
+            border: 1px solid var(--border);
+
+            border-radius: 14px;
+
+            padding: 20px;
+        }
+
+        .principle-number {
+            color: var(--blue);
+
+            font-weight: 900;
+
+            margin-bottom: 6px;
+        }
+
+        .principle h3 {
+            font-size: 16px;
+
+            margin-bottom: 6px;
+        }
+
+        .principle p {
+            color: var(--text-light);
+
+            font-size: 13px;
+        }
+
+        /* =====================================================
+           COMPARISON
+        ===================================================== */
+
+        .comparison {
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap: 18px;
+        }
+
+        .comparison-card {
+            padding: 24px;
+
+            background: white;
+
+            border: 1px solid var(--border);
+
+            border-radius: 16px;
+
+            box-shadow: var(--shadow);
+        }
+
+        .comparison-card.api {
+            border-top: 4px solid var(--blue);
+        }
+
+        .comparison-card.website {
+            border-top: 4px solid var(--orange);
+        }
+
+        .comparison-card h3 {
+            margin-bottom: 12px;
+        }
+
+        .comparison-card ul {
+            padding-left: 20px;
+
+            color: var(--text-light);
+
+            font-size: 14px;
+        }
+
+        /* =====================================================
+           NOTE
+        ===================================================== */
+
+        .note {
+            margin-top: 18px;
+
+            padding: 18px 20px;
+
+            border-radius: 12px;
+
+            background: var(--blue-light);
+
+            border-left: 4px solid var(--blue);
+
+            color: #1e40af;
+
+            font-size: 14px;
+        }
+
+        .note strong {
+            color: var(--blue-dark);
+        }
+
+        /* =====================================================
+           QUIZ
+        ===================================================== */
+
+        .quiz {
+            background: white;
+
+            border: 1px solid var(--border);
+
+            border-radius: 18px;
+
+            padding: 28px;
+
+            box-shadow: var(--shadow);
+        }
+
+        .question {
+            margin-bottom: 25px;
+        }
+
+        .question:last-child {
+            margin-bottom: 0;
+        }
+
+        .question h3 {
+            font-size: 16px;
+
+            margin-bottom: 14px;
+        }
+
+        .option {
+            display: block;
+
+            width: 100%;
+
+            text-align: left;
+
+            border: 1px solid var(--border);
+
+            background: #fbfdff;
+
+            color: var(--text);
+
+            padding: 12px 15px;
+
+            margin-bottom: 8px;
+
+            border-radius: 9px;
+
+            cursor: pointer;
+
+            font-size: 14px;
+
+            transition: 0.2s;
+        }
+
+        .option:hover {
+            border-color: var(--blue);
+
+            background: var(--blue-light);
+        }
+
+        .option.correct {
+            border-color: var(--green);
+
+            background: var(--green-light);
+
+            color: var(--green);
+        }
+
+        .option.wrong {
+            border-color: var(--red);
+
+            background: var(--red-light);
+
+            color: var(--red);
+        }
+
+        .quiz-result {
+            margin-top: 8px;
+
+            font-size: 13px;
+
+            font-weight: 700;
+        }
+
+        /* =====================================================
+           TAKEAWAY
+        ===================================================== */
+
+        .takeaway {
+            background:
+                linear-gradient(
+                    135deg,
+                    #eff6ff,
+                    #ffffff
+                );
+
+            border: 1px solid var(--blue-border);
+
+            border-radius: 20px;
+
+            padding: 30px;
+
+            box-shadow: var(--shadow);
+        }
+
+        .takeaway h2 {
+            margin-bottom: 12px;
+        }
+
+        .takeaway ul {
+            padding-left: 22px;
+
+            color: var(--text-light);
+        }
+
+        /* =====================================================
+           REVEAL
+        ===================================================== */
+
+        .reveal {
+            opacity: 0;
+
+            transform: translateY(25px);
+
+            transition:
+                opacity 0.7s ease,
+                transform 0.7s ease;
+        }
+
+        .reveal.show {
+            opacity: 1;
+
+            transform: translateY(0);
+        }
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 950px) {
+
+            .sidebar {
+                position: relative;
+
+                width: 100%;
+
+                height: auto;
+
+                border-right: none;
+
+                border-bottom: 1px solid var(--border);
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .progress-container {
+                left: 0;
+            }
+
+            .topbar {
+                padding: 20px;
+            }
+
+            .content {
+                padding: 15px 20px 60px;
+            }
+
+            .grid,
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+
+            .principle-list {
+                grid-template-columns: 1fr;
+            }
+
+            .method-grid {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+            .communication {
+                grid-template-columns: 1fr;
+            }
+
+            .exchange-arrow {
+                transform: rotate(90deg);
+            }
+
+            .search-box {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 600px) {
+
+            .hero {
+                padding: 30px 22px;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .method-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .flow {
+                flex-direction: column;
+            }
+
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+
+            .endpoint {
+                flex-direction: column;
+
+                align-items: stretch;
+            }
+
+            .endpoint-method {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                API
+            </div>
+
+            <div>
+                <h2>ZENSUS</h2>
+                <p>LEARNING SYSTEM</p>
+            </div>
+
+        </div>
+
+        <div class="lesson-label">
+            REST API · LESSON 01 / 15
+        </div>
+
+        <nav class="nav">
+
+            <a href="#overview" class="active">
+                Overview
+            </a>
+
+            <a href="#what-api">
+                What is an API?
+            </a>
+
+            <a href="#why-api">
+                Why APIs?
+            </a>
+
+            <a href="#rest">
+                What is REST?
+            </a>
+
+            <a href="#communication">
+                Application Communication
+            </a>
+
+            <a href="#client-server">
+                Client & Server
+            </a>
+
+            <a href="#request-response">
+                Request & Response
+            </a>
+
+            <a href="#json">
+                JSON
+            </a>
+
+            <a href="#endpoint">
+                API Endpoints
+            </a>
+
+            <a href="#methods">
+                HTTP Methods
+            </a>
+
+            <a href="#architecture">
+                REST Architecture
+            </a>
+
+            <a href="#example">
+                Real Example
+            </a>
+
+            <a href="#quiz">
+                Quiz
+            </a>
+
+            <a href="#takeaway">
+                Takeaway
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main class="main">
+
+        <div class="progress-container">
+            <div
+                class="progress-bar"
+                id="progressBar">
+            </div>
+        </div>
+
+
+        <!-- SEARCH -->
+
+        <div class="topbar">
+
+            <div class="search-box">
+
+                <span class="search-icon">
+                    🔍
+                </span>
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search this lesson..."
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="content">
+
+
+            <!-- =================================================
+                 HERO
+            ================================================== -->
+
+            <section
+                id="overview"
+                class="hero reveal"
+            >
+
+                <div class="badges">
+
+                    <span class="badge">
+                        LESSON 01
+                    </span>
+
+                    <span class="badge">
+                        REST API
+                    </span>
+
+                    <span class="badge">
+                        BEGINNER
+                    </span>
+
+                    <span class="badge">
+                        APPLICATION COMMUNICATION
+                    </span>
+
+                </div>
+
+                <h1>
+                    Introduction to
+                    <span>REST APIs</span>
+                </h1>
+
+                <p>
+                    Learn how applications communicate with each
+                    other using APIs, HTTP requests, responses,
+                    JSON, endpoints, and REST principles.
+                    This lesson builds the foundation for the
+                    complete REST API course.
+                </p>
+
+            </section>
+
+
+            <!-- =================================================
+                 WHAT IS API
+            ================================================== -->
+
+            <section
+                id="what-api"
+                class="reveal"
+            >
+
+                <div class="section-header">
+
+                    <div class="section-number">
+                        01 · FOUNDATION
+                    </div>
+
+                    <h2>
+                        What is an API?
+                    </h2>
+
+                    <p>
+                        API stands for
+                        <strong>Application Programming Interface</strong>.
+                        It provides a way for one software application
+                        to communicate with another software application.
+                    </p>
+
+                </div>
+
+
+                <div class="grid">
+
+                    <div class="card">
+
+                        <div class="card-icon">
+                            A
+                        </div>
+
+                        <h3>
+                            Application
+                        </h3>
+
+                        <p>
+                            A program such as a website, mobile app,
+                            desktop application, or backend service.
+                        </p>
+
+                    </div>
+
+
+                    <div class="card">
+
+                        <div class="card-icon">
+                            I
+                        </div>
+
+                        <h3>
+                            Interface
+                        </h3>
+
+                        <p>
+                            A defined way that allows software systems
+                            to interact with each other.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="note">
+
+                    <strong>Simple definition:</strong>
+
+                    An API is a bridge that allows different
+                    software applications to exchange data
+                    and functionality.
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 WHY API
+            ================================================== -->
+
+            <section
+                id="why-api"
+                class="reveal"
+            >
+
+                <div class="section-header">
+
+                    <div class="section-number">
+                        02 · WHY APIs?
+                    </div>
+
+                    <h2>
+                        Why Do Applications Need APIs?
+                    </h2>
+
+                    <p>
+                        Modern applications rarely work completely
+                        alone. They often need data or services from
+                        other applications.
+                    </p>
+
+                </div>
+
+
+                <div class="grid">
+
+                    <div class="card">
+
+                        <div class="card-icon">
+                            ☁
+                        </div>
+
+                        <h3>
+                            Access Data
+                        </h3>
+
+                        <p>
+                            A frontend can request information
+                            from a backend server.
+                        </p>
+
+                    </div>
+
+
+                    <div class="card">
+
+                        <div class="card-icon">
+                            🔗
+                        </div>
+
+                        <h3>
+                            Connect Applications
+                        </h3>
+
+                        <p>
+                            Web applications, mobile applications,
+                            and other services can communicate.
+                        </p>
+
+                    </div>
+
+
+                    <div class="card">
+
+                        <div class="card-icon">
+                            ⚙
+                        </div>
+
+                        <h3>
+                            Reuse Services
+                        </h3>
+
+                        <p>
+                            One backend service can provide data
+                            to multiple applications.
+                        </p>
+
+                    </div>
+
+
+                    <div class="card">
+
+                        <div class="card-icon">
+                            🚀
+                        </div>
+
+                        <h3>
+                            Build Modern Systems
+                        </h3>
+
+                        <p>
+                            APIs are used in e-commerce, banking,
+                            social media, AI applications, and more.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 REST
+            ================================================== -->
+
+            <section
+                id="rest"
+                class="reveal"
+            >
+
+                <div class="section-header">
+
+                    <div class="section-number">
+                        03 · REST
+                    </div>
+
+                    <h2>
+                        What is a REST API?
+                    </h2>
+
+                    <p>
+                        REST stands for
+                        <strong>Representational State Transfer</strong>.
+                        It is an architectural style for designing
+                        web APIs.
+                    </p>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>
+                        REST API in simple words
+                    </h3>
+
+                    <p>
+                        A REST API allows applications to communicate
+                        over the web using standard HTTP methods and
+                        resources.
+                    </p>
+
+                    <div class="note">
+
+                        <strong>Remember:</strong>
+
+                        REST is not a programming language.
+                        REST is an architectural style used to
+                        design APIs.
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 COMMUNICATION FLOW
+            ================================================== -->
+
+            <section
+                id="communication"
+                class="reveal"
+            >
+
+                <div class="section-header">
+
+                    <div class="section-number">
+                        04 · COMMUNICATION
+                    </div>
+
+                    <h2>
+                        How Applications Communicate
+                    </h2>
+
+                    <p>
+                        A REST API acts as the communication layer
+                        between applications and backend services.
+                    </p>
+
+                </div>
+
+
+                <div class="api-flow">
+
+                    <div class="flow-title">
+                        Application → REST API → Database
+                    </div>
+
+                    <div class="flow">
+
+                        <div class="flow-box">
+                            💻
+                            <br>
+                            Client
+                        </div>
+
+                        <div class="flow-arrow">
+                            →
+                        </div>
+
+                        <div class="flow-box server">
+                            🔌
+                            <br>
+                            REST API
+                        </div>
+
+                        <div class="flow-arrow">
+                            →
+                        </div>
+
+                        <div class="flow-box database">
+                            🗄
+                            <br>
+                            Database
+                        </div>
+
+                        <div class="flow-arrow">
+                            ←
+                        </div>
+
+                        <div class="flow-box">
+                            📱
+                            <br>
+                            Response
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 CLIENT SERVER
+            ================================================== -->
+
+            <section
+                id="client-server"
+                class="reveal"
+            >
+
+                <div class="section-header">
+
+                    <div class="section-number">
+                        05 · CLIENT & SERVER
+                    </div>
+
+                    <h2>
+                        Client and Server
+                    </h2>
+
+                </div>
+
+
+                <div class="comparison">
+
+                    <div class="comparison-card api">
+
+                        <h3>
+                            💻 Client
+                        </h3>
+
+                        <ul>
+
+                            <li>
+                                Sends requests
+                            </li>
+
+                            <li>
+                                Requests data or actions
+                            </li>
+
+                            <li>
+                                Displays the response
+                            </li>
+
+                            <li>
+                                Examples: React app, mobile app
+                            </li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="comparison-card website">
+
+                        <h3>
+                            🖥 Server
+                        </h3>
+
+                        <ul>
+
+                            <li>
+                                Receives requests
+                            </li>
+
+                            <li>
+                                Processes application logic
+                            </li>
+
+                            <li>
+                                Communicates with database
+                            </li>
+
+                            <li>
+                                Sends a response
+                            </li>
+
+                        </ul>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 REQUEST RESPONSE
+            ================================================== -->
+
+            <section
+                id="request-response"
+                class="reveal"
+            >
+
+                <div class="section-header">
+
+                    <div class="section-number">
+                        06 · REQUEST & RESPONSE
+                    </div>
+
+                    <h2>
+                        Request and Response
+                    </h2>
+
+                    <p>
+                        REST API communication is based on a
+                        request-response model.
+                    </p>
+
+                </div>
+
+
+                <div class="communication">
+
+                    <div class="communication-card request">
+
+                        <h3>
+                            📤 Request
+                        </h3>
+
+                        <p>
+                            The client sends a request to the
+                            server asking for data or asking
+                            the server to perform an operation.
+                        </p>
+
+                    </div>
+
+
+                    <div class="exchange-arrow">
+                        →
+                    </div>
+
+
+                    <div class="communication-card response">
+
+                        <h3>
+                            📥 Response
+                        </h3>
+
+                        <p>
+                            The server processes the request
+                            and sends data or a result back
+                            to the client.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="code-box">
+
+                    <div class="code-header">
+
+                        <span>
+                            Example HTTP Request
+                        </span>
+
+                        <button
+                            class="copy-btn"
+                            onclick="copyCode(this)"
+                        >
+                            Copy
+                        </button>
+
+                    </div>
+
+<pre>GET /api/students/101/ HTTP/1.1
+Host: example.com</pre>
+
+                </div>
+
+
+                <div class="code-box">
+
+                    <div class="code-header">
+
+                        <span>
+                            Example Response
+                        </span>
+
+                        <button
+                            class="copy-btn"
+                            onclick="copyCode(this)"
+                        >
+                            Copy
+                        </button>
+
+                    </div>
+
+<pre>HTTP/1.1 200 OK
+
+{
+    "id": 101,
+    "name": "Pradeep",
+    "course": "REST API"
+}</pre>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 JSON
+            ================================================== -->
+
+            <section
+                id="json"
+                class="reveal"
+            >
+
+                <div class="section-header">
+
+                    <div class="section-number">
+                        07 · DATA EXCHANGE
+                    </div>
+
+                    <h2>
+                        JSON and Data Exchange
+                    </h2>
+
+                    <p>
+                        REST APIs commonly use JSON to exchange
+                        structured data between applications.
+                    </p>
+
+                </div>
+
+
+                <div class="json-card">
+
+                    <div class="json-title">
+                        student.json
+                    </div>
+
+<pre>{
+    "id": 101,
+    "name": "Pradeep",
+    "age": 21,
+    "course": "Computer Science",
+    "active": true
+}</pre>
+
+                </div>
+
+
+                <div class="note">
+
+                    <strong>Why JSON?</strong>
+
+                    JSON is lightweight, easy for humans to read,
+                    and easy for programming languages to process.
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 ENDPOINT
+            ================================================== -->
+
+            <section
+                id="endpoint"
+                class="reveal"
+            >
+
+                <div class="section-header">
+
+                    <div class="section-number">
+                        08 · ENDPOINTS
+                    </div>
+
+                    <h2>
+                        API Endpoints
+                    </h2>
+
+                    <p>
+                        An endpoint is a specific URL through which
+                        a client can access an API resource.
+                    </p>
+
+                </div>
+
+
+                <div class="endpoint">
+
+                    <div class="endpoint-method">
+                        GET
+                    </div>
+
+                    <div class="endpoint-url">
+                        https://example.com/api/students/
+                    </div>
+
+                </div>
+
+
+                <div class="endpoint">
+
+                    <div class="endpoint-method">
+                        GET
+                    </div>
+
+                    <div class="endpoint-url">
+                        https://example.com/api/students/101/
+                    </div>
+
+                </div>
+
+
+                <div class="note">
+
+                    <strong>Think of an endpoint as an address.</strong>
+
+                    The client uses that address to communicate
+                    with a particular API resource.
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 METHODS
+            ================================================== -->
+
+            <section
+                id="methods"
+                class="reveal"
+            >
+
+                <div class="section-header">
+
+                    <div class="section-number">
+                        09 · HTTP METHODS
+                    </div>
+
+                    <h2>
+                        Common HTTP Methods
+                    </h2>
+
+                    <p>
+                        HTTP methods describe the operation that
+                        the client wants the server to perform.
+                    </p>
+
+                </div>
+
+
+                <div class="method-grid">
+
+                    <div class="method">
+
+                        <strong>
+                            GET
+                        </strong>
+
+                        <span>
+                            Retrieve data
+                        </span>
+
+                    </div>
+
+
+                    <div class="method">
+
+                        <strong>
+                            POST
+                        </strong>
+
+                        <span>
+                            Create data
+                        </span>
+
+                    </div>
+
+
+                    <div class="method">
+
+                        <strong>
+                            PUT / PATCH
+                        </strong>
+
+                        <span>
+                            Update data
+                        </span>
+
+                    </div>
+
+
+                    <div class="method">
+
+                        <strong>
+                            DELETE
+                        </strong>
+
+                        <span>
+                            Remove data
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="note">
+
+                    These methods will be studied in detail
+                    in the upcoming REST API lessons.
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 ARCHITECTURE
+            ================================================== -->
+
+            <section
+                id="architecture"
+                class="reveal"
+            >
+
+                <div class="section-header">
+
+                    <div class="section-number">
+                        10 · ARCHITECTURE
+                    </div>
+
+                    <h2>
+                        REST Architecture Principles
+                    </h2>
+
+                </div>
+
+
+                <div class="principle-list">
+
+                    <div class="principle">
+
+                        <div class="principle-number">
+                            01
+                        </div>
+
+                        <h3>
+                            Client-Server
+                        </h3>
+
+                        <p>
+                            Client and server have separate
+                            responsibilities.
+                        </p>
+
+                    </div>
+
+
+                    <div class="principle">
+
+                        <div class="principle-number">
+                            02
+                        </div>
+
+                        <h3>
+                            Stateless
+                        </h3>
+
+                        <p>
+                            Each request should contain the
+                            information needed to process it.
+                        </p>
+
+                    </div>
+
+
+                    <div class="principle">
+
+                        <div class="principle-number">
+                            03
+                        </div>
+
+                        <h3>
+                            Uniform Interface
+                        </h3>
+
+                        <p>
+                            APIs use consistent ways to access
+                            and manipulate resources.
+                        </p>
+
+                    </div>
+
+
+                    <div class="principle">
+
+                        <div class="principle-number">
+                            04
+                        </div>
+
+                        <h3>
+                            Resources
+                        </h3>
+
+                        <p>
+                            Data is represented as resources
+                            such as users, products, or students.
+                        </p>
+
+                    </div>
+
+
+                    <div class="principle">
+
+                        <div class="principle-number">
+                            05
+                        </div>
+
+                        <h3>
+                            Cacheable
+                        </h3>
+
+                        <p>
+                            Responses can be cached when appropriate
+                            to improve performance.
+                        </p>
+
+                    </div>
+
+
+                    <div class="principle">
+
+                        <div class="principle-number">
+                            06
+                        </div>
+
+                        <h3>
+                            Layered System
+                        </h3>
+
+                        <p>
+                            A client does not need to know every
+                            internal server component.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 REAL EXAMPLE
+            ================================================== -->
+
+            <section
+                id="example"
+                class="reveal"
+            >
+
+                <div class="section-header">
+
+                    <div class="section-number">
+                        11 · REAL WORLD
+                    </div>
+
+                    <h2>
+                        Real-World Example
+                    </h2>
+
+                    <p>
+                        Imagine a weather application.
+                    </p>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>
+                        🌦 Weather Application
+                    </h3>
+
+                    <p>
+                        A mobile weather application does not
+                        necessarily need to store weather data
+                        itself. It can request the information
+                        from a weather API.
+                    </p>
+
+
+                    <div class="code-box">
+
+                        <div class="code-header">
+
+                            <span>
+                                Request
+                            </span>
+
+                            <button
+                                class="copy-btn"
+                                onclick="copyCode(this)"
+                            >
+                                Copy
+                            </button>
+
+                        </div>
+
+<pre>GET /api/weather/hyderabad/</pre>
+
+                    </div>
+
+
+                    <div class="json-card"
+                         style="margin-top:18px;">
+
+                        <div class="json-title">
+                            API Response
+                        </div>
+
+<pre>{
+    "city": "Hyderabad",
+    "temperature": 29,
+    "condition": "Cloudy"
+}</pre>
+
+                    </div>
+
+                </div>
+
+
+                <div class="api-flow"
+                     style="margin-top:20px;">
+
+                    <div class="flow">
+
+                        <div class="flow-box">
+                            📱
+                            <br>
+                            Weather App
+                        </div>
+
+                        <div class="flow-arrow">
+                            →
+                        </div>
+
+                        <div class="flow-box server">
+                            🌐
+                            <br>
+                            Weather API
+                        </div>
+
+                        <div class="flow-arrow">
+                            →
+                        </div>
+
+                        <div class="flow-box database">
+                            ☁
+                            <br>
+                            Weather Data
+                        </div>
+
+                        <div class="flow-arrow">
+                            →
+                        </div>
+
+                        <div class="flow-box">
+                            🌡
+                            <br>
+                            29°C
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 APPLICATION CONNECTION
+            ================================================== -->
+
+            <section
+                class="reveal"
+            >
+
+                <div class="section-header">
+
+                    <div class="section-number">
+                        12 · BIG PICTURE
+                    </div>
+
+                    <h2>
+                        REST APIs Connect Different Applications
+                    </h2>
+
+                </div>
+
+
+                <div class="api-flow">
+
+                    <div class="flow">
+
+                        <div class="flow-box">
+                            💻
+                            <br>
+                            Web App
+                        </div>
+
+                        <div class="flow-box">
+                            📱
+                            <br>
+                            Mobile App
+                        </div>
+
+                        <div class="flow-box">
+                            🖥
+                            <br>
+                            Desktop App
+                        </div>
+
+                    </div>
+
+
+                    <div style="
+                        text-align:center;
+                        font-size:28px;
+                        color:#2563eb;
+                        margin:20px;
+                    ">
+                        ↓
+                    </div>
+
+
+                    <div class="flow">
+
+                        <div class="flow-box server">
+                            🔌
+                            <br>
+                            REST API
+                        </div>
+
+                    </div>
+
+
+                    <div style="
+                        text-align:center;
+                        font-size:28px;
+                        color:#2563eb;
+                        margin:20px;
+                    ">
+                        ↓
+                    </div>
+
+
+                    <div class="flow">
+
+                        <div class="flow-box database">
+                            🗄
+                            <br>
+                            Database
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 QUIZ
+            ================================================== -->
+
+            <section
+                id="quiz"
+                class="reveal"
+            >
+
+                <div class="section-header">
+
+                    <div class="section-number">
+                        13 · KNOWLEDGE CHECK
+                    </div>
+
+                    <h2>
+                        Quick Quiz
+                    </h2>
+
+                    <p>
+                        Test your understanding before moving
+                        to Lesson 02.
+                    </p>
+
+                </div>
+
+
+                <div class="quiz">
+
+
+                    <!-- QUESTION 1 -->
+
+                    <div class="question">
+
+                        <h3>
+                            1. What does API stand for?
+                        </h3>
+
+                        <button
+                            class="option"
+                            data-correct="false"
+                            onclick="checkAnswer(this)"
+                        >
+                            Application Programming Internet
+                        </button>
+
+                        <button
+                            class="option"
+                            data-correct="true"
+                            onclick="checkAnswer(this)"
+                        >
+                            Application Programming Interface
+                        </button>
+
+                        <button
+                            class="option"
+                            data-correct="false"
+                            onclick="checkAnswer(this)"
+                        >
+                            Application Process Integration
+                        </button>
+
+                        <div class="quiz-result"></div>
+
+                    </div>
+
+
+                    <!-- QUESTION 2 -->
+
+                    <div class="question">
+
+                        <h3>
+                            2. What is commonly used to exchange
+                            data in REST APIs?
+                        </h3>
+
+                        <button
+                            class="option"
+                            data-correct="true"
+                            onclick="checkAnswer(this)"
+                        >
+                            JSON
+                        </button>
+
+                        <button
+                            class="option"
+                            data-correct="false"
+                            onclick="checkAnswer(this)"
+                        >
+                            CSS
+                        </button>
+
+                        <button
+                            class="option"
+                            data-correct="false"
+                            onclick="checkAnswer(this)"
+                        >
+                            HTML only
+                        </button>
+
+                        <div class="quiz-result"></div>
+
+                    </div>
+
+
+                    <!-- QUESTION 3 -->
+
+                    <div class="question">
+
+                        <h3>
+                            3. Which HTTP method is normally
+                            used to retrieve data?
+                        </h3>
+
+                        <button
+                            class="option"
+                            data-correct="true"
+                            onclick="checkAnswer(this)"
+                        >
+                            GET
+                        </button>
+
+                        <button
+                            class="option"
+                            data-correct="false"
+                            onclick="checkAnswer(this)"
+                        >
+                            DELETE
+                        </button>
+
+                        <button
+                            class="option"
+                            data-correct="false"
+                            onclick="checkAnswer(this)"
+                        >
+                            POST
+                        </button>
+
+                        <div class="quiz-result"></div>
+
+                    </div>
+
+
+                    <!-- QUESTION 4 -->
+
+                    <div class="question">
+
+                        <h3>
+                            4. What is an API endpoint?
+                        </h3>
+
+                        <button
+                            class="option"
+                            data-correct="false"
+                            onclick="checkAnswer(this)"
+                        >
+                            A database table
+                        </button>
+
+                        <button
+                            class="option"
+                            data-correct="true"
+                            onclick="checkAnswer(this)"
+                        >
+                            A URL used to access an API resource
+                        </button>
+
+                        <button
+                            class="option"
+                            data-correct="false"
+                            onclick="checkAnswer(this)"
+                        >
+                            A CSS selector
+                        </button>
+
+                        <div class="quiz-result"></div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 TAKEAWAY
+            ================================================== -->
+
+            <section
+                id="takeaway"
+                class="reveal"
+            >
+
+                <div class="takeaway">
+
+                    <h2>
+                        🎯 Lesson 01 Takeaway
+                    </h2>
+
+                    <ul>
+
+                        <li>
+                            An API allows applications to communicate.
+                        </li>
+
+                        <li>
+                            REST is an architectural style for designing
+                            web APIs.
+                        </li>
+
+                        <li>
+                            Clients send requests to servers.
+                        </li>
+
+                        <li>
+                            Servers process requests and return responses.
+                        </li>
+
+                        <li>
+                            JSON is commonly used for data exchange.
+                        </li>
+
+                        <li>
+                            API endpoints identify resources.
+                        </li>
+
+                        <li>
+                            GET, POST, PUT, PATCH and DELETE are important
+                            HTTP methods.
+                        </li>
+
+                        <li>
+                            REST APIs allow web, mobile and other
+                            applications to communicate with backend systems.
+                        </li>
+
+                    </ul>
+
+                    <div class="note">
+
+                        <strong>
+                            Next lesson:
+                        </strong>
+
+                        How Applications Communicate →
+                        HTTP, clients, servers, requests,
+                        responses and the complete communication flow.
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+
+    <script>
+
+        /* =====================================================
+           PROGRESS BAR
+        ===================================================== */
+
+        window.addEventListener(
+            "scroll",
+            function () {
+
+                const scrollTop =
+                    document.documentElement.scrollTop ||
+                    document.body.scrollTop;
+
+                const documentHeight =
+                    document.documentElement.scrollHeight -
+                    document.documentElement.clientHeight;
+
+                let percentage = 0;
+
+                if (documentHeight > 0) {
+
+                    percentage =
+                        (scrollTop / documentHeight) * 100;
+
+                }
+
+                const progressBar =
+                    document.getElementById(
+                        "progressBar"
+                    );
+
+                if (progressBar) {
+
+                    progressBar.style.width =
+                        percentage + "%";
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           COPY CODE
+        ===================================================== */
+
+        function copyCode(button) {
+
+            const codeBox =
+                button.parentElement.parentElement;
+
+            const code =
+                codeBox.querySelector("pre").innerText;
+
+
+            if (
+                navigator.clipboard &&
+                window.isSecureContext
+            ) {
+
+                navigator.clipboard
+                    .writeText(code)
+                    .then(function () {
+
+                        showCopied(button);
+
+                    })
+                    .catch(function () {
+
+                        fallbackCopy(
+                            code,
+                            button
+                        );
+
+                    });
+
+            } else {
+
+                fallbackCopy(
+                    code,
+                    button
+                );
+
+            }
+
+        }
+
+
+        function fallbackCopy(
+            text,
+            button
+        ) {
+
+            const textarea =
+                document.createElement(
+                    "textarea"
+                );
+
+            textarea.value = text;
+
+            textarea.style.position =
+                "fixed";
+
+            textarea.style.left =
+                "-9999px";
+
+            document.body.appendChild(
+                textarea
+            );
+
+            textarea.focus();
+
+            textarea.select();
+
+            try {
+
+                document.execCommand(
+                    "copy"
+                );
+
+                showCopied(button);
+
+            } catch (error) {
+
+                button.innerText =
+                    "Copy failed";
+
+            }
+
+            document.body.removeChild(
+                textarea
+            );
+
+        }
+
+
+        function showCopied(button) {
+
+            const oldText =
+                button.innerText;
+
+            button.innerText =
+                "Copied!";
+
+            setTimeout(
+                function () {
+
+                    button.innerText =
+                        oldText;
+
+                },
+                1200
+            );
+
+        }
+
+
+        /* =====================================================
+           SEARCH
+        ===================================================== */
+
+        const searchInput =
+            document.getElementById(
+                "searchInput"
+            );
+
+
+        if (searchInput) {
+
+            searchInput.addEventListener(
+                "input",
+                function () {
+
+                    const query =
+                        searchInput.value
+                            .toLowerCase()
+                            .trim();
+
+                    const sections =
+                        document.querySelectorAll(
+                            "section"
+                        );
+
+
+                    sections.forEach(
+                        function (section) {
+
+                            const text =
+                                section.innerText
+                                    .toLowerCase();
+
+
+                            if (query === "") {
+
+                                section.style.display =
+                                    "";
+
+                            } else if (
+                                text.includes(query)
+                            ) {
+
+                                section.style.display =
+                                    "";
+
+                            } else {
+
+                                section.style.display =
+                                    "none";
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           QUIZ
+        ===================================================== */
+
+        function checkAnswer(option) {
+
+            const quiz =
+                option.parentElement;
+
+            const options =
+                quiz.querySelectorAll(
+                    ".option"
+                );
+
+            const result =
+                quiz.querySelector(
+                    ".quiz-result"
+                );
+
+
+            options.forEach(
+                function (item) {
+
+                    item.style.pointerEvents =
+                        "none";
+
+                }
+            );
+
+
+            const correct =
+                option.getAttribute(
+                    "data-correct"
+                ) === "true";
+
+
+            if (correct) {
+
+                option.classList.add(
+                    "correct"
+                );
+
+                result.innerText =
+                    "✓ Correct! Excellent.";
+
+                result.style.color =
+                    "#16a34a";
+
+            } else {
+
+                option.classList.add(
+                    "wrong"
+                );
+
+                result.innerText =
+                    "✗ Incorrect. Review this topic.";
+
+                result.style.color =
+                    "#dc2626";
+
+            }
+
+        }
+
+
+        /* =====================================================
+           SCROLL REVEAL
+        ===================================================== */
+
+        const revealElements =
+            document.querySelectorAll(
+                ".reveal"
+            );
+
+
+        const revealObserver =
+            new IntersectionObserver(
+                function (
+                    entries
+                ) {
+
+                    entries.forEach(
+                        function (entry) {
+
+                            if (
+                                entry.isIntersecting
+                            ) {
+
+                                entry.target.classList.add(
+                                    "show"
+                                );
+
+                            }
+
+                        }
+                    );
+
+                },
+                {
+                    threshold: 0.08
+                }
+            );
+
+
+        revealElements.forEach(
+            function (element) {
+
+                revealObserver.observe(
+                    element
+                );
+
+            }
+        );
+
+
+        /* =====================================================
+           ACTIVE SIDEBAR NAV
+        ===================================================== */
+
+        const sections =
+            document.querySelectorAll(
+                "section[id]"
+            );
+
+        const navLinks =
+            document.querySelectorAll(
+                ".nav a"
+            );
+
+
+        const sectionObserver =
+            new IntersectionObserver(
+                function (
+                    entries
+                ) {
+
+                    entries.forEach(
+                        function (entry) {
+
+                            if (
+                                entry.isIntersecting
+                            ) {
+
+                                navLinks.forEach(
+                                    function (link) {
+
+                                        link.classList.remove(
+                                            "active"
+                                        );
+
+                                    }
+                                );
+
+
+                                const activeLink =
+                                    document.querySelector(
+                                        `.nav a[href="#${entry.target.id}"]`
+                                    );
+
+
+                                if (activeLink) {
+
+                                    activeLink.classList.add(
+                                        "active"
+                                    );
+
+                                }
+
+                            }
+
+                        }
+                    );
+
+                },
+                {
+                    rootMargin:
+                        "-25% 0px -65% 0px"
+                }
+            );
+
+
+        sections.forEach(
+            function (section) {
+
+                sectionObserver.observe(
+                    section
+                );
+
+            }
+        );
+
+
+        /* =====================================================
+           INITIAL REVEAL
+        ===================================================== */
+
+        setTimeout(
+            function () {
+
+                document
+                    .querySelectorAll(
+                        ".hero"
+                    )
+                    .forEach(
+                        function (element) {
+
+                            element.classList.add(
+                                "show"
+                            );
+
+                        }
+                    );
+
+            },
+            100
+        );
+
+    </script>
+
+</body>
+</html>

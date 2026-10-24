@@ -1,0 +1,3918 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS React — Lesson 13: APIs & Data Fetching</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+    --bg:#f7f8fc;
+    --surface:#ffffff;
+    --soft:#f1f3f8;
+    --text:#172033;
+    --muted:#667085;
+    --primary:#635bff;
+    --primary-dark:#5148df;
+    --border:#e1e5ed;
+    --green:#16a34a;
+    --red:#dc2626;
+    --orange:#ea580c;
+    --blue:#2563eb;
+    --dark:#10131c;
+    --dark2:#191e2b;
+    --dark3:#2c3445;
+    --shadow:0 12px 35px rgba(30,40,70,.08);
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+.topbar{
+    height:68px;
+
+    position:sticky;
+    top:0;
+    z-index:100;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:0 30px;
+
+    background:rgba(255,255,255,.96);
+    backdrop-filter:blur(14px);
+
+    border-bottom:1px solid var(--border);
+}
+
+.logo{
+    font-size:23px;
+    font-weight:900;
+    letter-spacing:-1px;
+}
+
+.logo span{
+    color:var(--primary);
+}
+
+.badge-top{
+    padding:7px 14px;
+
+    border-radius:30px;
+
+    background:#eeecff;
+    color:var(--primary);
+
+    font-size:12px;
+    font-weight:850;
+}
+
+.layout{
+    max-width:1500px;
+    margin:auto;
+
+    display:grid;
+    grid-template-columns:270px minmax(0,1fr);
+}
+
+.sidebar{
+    position:sticky;
+    top:68px;
+
+    height:calc(100vh - 68px);
+
+    overflow-y:auto;
+
+    padding:27px 17px;
+
+    background:#fff;
+
+    border-right:1px solid var(--border);
+}
+
+.sidebar-title{
+    margin-bottom:14px;
+
+    color:#8a93a5;
+
+    font-size:11px;
+    font-weight:850;
+
+    letter-spacing:1.4px;
+
+    text-transform:uppercase;
+}
+
+.sidebar a{
+    display:block;
+
+    padding:9px 12px;
+
+    margin:3px 0;
+
+    border-radius:9px;
+
+    color:#596579;
+
+    text-decoration:none;
+
+    font-size:13.5px;
+
+    transition:.2s;
+}
+
+.sidebar a:hover{
+    color:var(--primary);
+    background:#f2f0ff;
+}
+
+.sidebar a.active{
+    color:var(--primary);
+    background:#eeecff;
+    font-weight:750;
+}
+
+main{
+    max-width:1040px;
+
+    width:100%;
+
+    margin:auto;
+
+    padding:55px 50px 100px;
+}
+
+.hero{
+    position:relative;
+
+    overflow:hidden;
+
+    padding:58px;
+
+    margin-bottom:60px;
+
+    border-radius:27px;
+
+    color:white;
+
+    background:
+        linear-gradient(
+            135deg,
+            #111522,
+            #302957
+        );
+
+    box-shadow:
+        0 25px 70px rgba(35,30,80,.18);
+}
+
+.hero::before{
+    content:"";
+
+    position:absolute;
+
+    width:390px;
+    height:390px;
+
+    right:-170px;
+    top:-190px;
+
+    border-radius:50%;
+
+    background:#635bff;
+
+    opacity:.23;
+
+    animation:orb 7s ease-in-out infinite;
+}
+
+.hero::after{
+    content:"";
+
+    position:absolute;
+
+    width:250px;
+    height:250px;
+
+    left:-120px;
+    bottom:-180px;
+
+    border-radius:50%;
+
+    background:#a78bfa;
+
+    opacity:.14;
+
+    animation:orb 8s ease-in-out infinite reverse;
+}
+
+.hero-content{
+    position:relative;
+    z-index:2;
+}
+
+.eyebrow{
+    margin-bottom:14px;
+
+    color:#bcb7ff;
+
+    font-size:11px;
+    font-weight:850;
+
+    letter-spacing:2px;
+
+    text-transform:uppercase;
+}
+
+.hero h1{
+    margin-bottom:20px;
+
+    font-size:clamp(38px,5vw,60px);
+
+    line-height:1.04;
+
+    letter-spacing:-2.5px;
+}
+
+.hero h1 span{
+    color:#aaa3ff;
+}
+
+.hero p{
+    max-width:820px;
+
+    color:#d9dbe7;
+
+    font-size:17px;
+}
+
+@keyframes orb{
+
+    0%,100%{
+        transform:translate(0,0);
+    }
+
+    50%{
+        transform:translate(16px,13px);
+    }
+
+}
+
+.section{
+    margin-bottom:75px;
+
+    scroll-margin-top:90px;
+}
+
+.section h2{
+    margin-bottom:15px;
+
+    font-size:32px;
+
+    line-height:1.2;
+
+    letter-spacing:-1.2px;
+}
+
+.section h3{
+    margin:29px 0 10px;
+
+    font-size:21px;
+}
+
+.section p{
+    margin:10px 0;
+
+    color:var(--muted);
+}
+
+ul{
+    margin:15px 0 15px 22px;
+
+    color:var(--muted);
+}
+
+li{
+    margin:5px 0;
+}
+
+code{
+    padding:2px 6px;
+
+    border-radius:5px;
+
+    background:#eff1f5;
+
+    color:#b42318;
+
+    font-family:Consolas,monospace;
+}
+
+pre{
+    margin:19px 0;
+
+    padding:24px;
+
+    overflow:auto;
+
+    border-radius:15px;
+
+    background:var(--dark);
+
+    color:#e7e9ef;
+
+    font-family:Consolas,"Courier New",monospace;
+
+    font-size:14px;
+
+    line-height:1.7;
+
+    box-shadow:0 14px 35px rgba(0,0,0,.12);
+}
+
+.info,
+.highlight,
+.success,
+.warning,
+.danger{
+    margin:22px 0;
+
+    padding:18px 20px;
+
+    border-radius:11px;
+}
+
+.info{
+    background:#fafbfc;
+    border:1px solid var(--border);
+}
+
+.highlight{
+    background:#f1efff;
+    border-left:4px solid var(--primary);
+}
+
+.success{
+    background:#ecfdf3;
+    border-left:4px solid var(--green);
+}
+
+.warning{
+    background:#fff7ed;
+    border-left:4px solid var(--orange);
+}
+
+.danger{
+    background:#fff5f5;
+    border-left:4px solid var(--red);
+}
+
+
+/* =========================
+   API FLOW
+========================= */
+
+.visual{
+    margin:28px 0;
+
+    padding:30px;
+
+    overflow:hidden;
+
+    border-radius:20px;
+
+    background:var(--dark);
+
+    color:white;
+}
+
+.visual-title{
+    margin-bottom:23px;
+
+    color:#929bad;
+
+    font-size:11px;
+    font-weight:850;
+
+    letter-spacing:1.5px;
+
+    text-transform:uppercase;
+}
+
+.flow{
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    flex-wrap:wrap;
+
+    gap:12px;
+}
+
+.flow-node{
+    min-width:125px;
+
+    padding:16px;
+
+    text-align:center;
+
+    border:1px solid #343c50;
+
+    border-radius:13px;
+
+    background:var(--dark2);
+
+    transition:.3s;
+}
+
+.flow-node.active{
+    animation:pulse 1.8s infinite;
+}
+
+.flow-node small{
+    display:block;
+
+    margin-top:4px;
+
+    color:#8993a9;
+
+    font-size:11px;
+}
+
+.flow-arrow{
+    color:#aaa3ff;
+
+    font-size:25px;
+
+    font-weight:800;
+}
+
+@keyframes pulse{
+
+    0%,100%{
+        transform:translateY(0);
+
+        box-shadow:
+            0 0 0 rgba(99,91,255,0);
+    }
+
+    50%{
+        transform:translateY(-5px);
+
+        box-shadow:
+            0 0 30px rgba(99,91,255,.38);
+    }
+
+}
+
+
+/* =========================
+   METHOD CARDS
+========================= */
+
+.method-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(5,1fr);
+
+    gap:12px;
+
+    margin:27px 0;
+}
+
+.method-card{
+    padding:19px 13px;
+
+    text-align:center;
+
+    border-radius:15px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+
+    transition:.25s;
+}
+
+.method-card:hover{
+    transform:translateY(-4px);
+}
+
+.method{
+    display:inline-block;
+
+    margin-bottom:8px;
+
+    padding:5px 10px;
+
+    border-radius:7px;
+
+    background:#eeecff;
+
+    color:var(--primary);
+
+    font-family:Consolas,monospace;
+
+    font-weight:900;
+}
+
+.method-card p{
+    font-size:12.5px;
+}
+
+
+/* =========================
+   STATUS CARDS
+========================= */
+
+.status-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:17px;
+
+    margin:25px 0;
+}
+
+.status-card{
+    padding:23px;
+
+    border-radius:16px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+
+    transition:.25s;
+}
+
+.status-card:hover{
+    transform:translateY(-4px);
+}
+
+.status-icon{
+    margin-bottom:9px;
+
+    font-size:27px;
+}
+
+.status-card h3{
+    margin:0 0 6px;
+}
+
+
+/* =========================
+   API DEMO
+========================= */
+
+.playground{
+    margin:28px 0;
+
+    padding:27px;
+
+    border-radius:19px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+}
+
+.demo-controls{
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:10px;
+
+    margin:18px 0;
+}
+
+.btn{
+    padding:10px 17px;
+
+    border:1px solid var(--border);
+
+    border-radius:9px;
+
+    background:#fafbfc;
+
+    cursor:pointer;
+
+    font-weight:750;
+
+    transition:.2s;
+}
+
+.btn:hover{
+    border-color:var(--primary);
+
+    background:#f3f1ff;
+}
+
+.btn.primary{
+    color:white;
+
+    background:var(--primary);
+
+    border-color:var(--primary);
+}
+
+.btn.success{
+    color:#166534;
+
+    background:#ecfdf3;
+
+    border-color:#86efac;
+}
+
+.btn.danger{
+    color:var(--red);
+
+    background:#fff5f5;
+
+    border-color:#fecaca;
+}
+
+.api-screen{
+    min-height:230px;
+
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    flex-direction:column;
+
+    padding:25px;
+
+    border-radius:15px;
+
+    background:var(--soft);
+
+    border:2px dashed var(--border);
+
+    text-align:center;
+
+    transition:.4s;
+}
+
+.api-screen.loading{
+    background:#f5f3ff;
+
+    border-color:#c4b5fd;
+}
+
+.api-screen.success-state{
+    background:#ecfdf3;
+
+    border-color:#86efac;
+}
+
+.api-screen.error-state{
+    background:#fff5f5;
+
+    border-color:#fca5a5;
+}
+
+.api-icon{
+    margin-bottom:10px;
+
+    font-size:42px;
+}
+
+.api-status{
+    margin-top:8px;
+
+    color:var(--muted);
+
+    font-family:Consolas,monospace;
+
+    font-size:13px;
+}
+
+.spinner{
+    width:30px;
+    height:30px;
+
+    margin-bottom:12px;
+
+    border:4px solid #ddd;
+
+    border-top-color:var(--primary);
+
+    border-radius:50%;
+
+    animation:spin .8s linear infinite;
+}
+
+@keyframes spin{
+
+    to{
+        transform:rotate(360deg);
+    }
+
+}
+
+
+/* =========================
+   JSON VISUAL
+========================= */
+
+.json-box{
+    display:grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:18px;
+
+    margin:27px 0;
+}
+
+.json-card{
+    padding:20px;
+
+    border-radius:16px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+}
+
+.json-card h3{
+    margin:0 0 8px;
+}
+
+.json-arrow{
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:28px;
+
+    color:var(--primary);
+}
+
+
+/* =========================
+   REQUEST BUILDER
+========================= */
+
+.request-builder{
+    padding:25px;
+
+    border-radius:17px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+}
+
+.request-row{
+    display:grid;
+
+    grid-template-columns:130px 1fr;
+
+    gap:10px;
+
+    margin:10px 0;
+}
+
+.request-label{
+    display:flex;
+
+    align-items:center;
+
+    padding:10px;
+
+    border-radius:8px;
+
+    background:#f1f3f7;
+
+    font-family:Consolas,monospace;
+
+    font-weight:800;
+}
+
+.request-value{
+    padding:10px 12px;
+
+    border-radius:8px;
+
+    background:#fafbfc;
+
+    border:1px solid var(--border);
+
+    font-family:Consolas,monospace;
+
+    font-size:13px;
+
+    word-break:break-all;
+}
+
+
+/* =========================
+   SECURITY
+========================= */
+
+.security-grid{
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:18px;
+
+    margin-top:25px;
+}
+
+.security-card{
+    padding:23px;
+
+    border-radius:16px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+}
+
+.security-card h3{
+    margin:0 0 9px;
+}
+
+
+/* =========================
+   QUIZ
+========================= */
+
+.quiz{
+    margin:18px 0;
+
+    padding:25px;
+
+    border-radius:17px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+}
+
+.question{
+    margin-bottom:14px;
+
+    font-weight:800;
+}
+
+.option{
+    width:100%;
+
+    display:block;
+
+    margin:7px 0;
+
+    padding:11px 14px;
+
+    text-align:left;
+
+    border:1px solid var(--border);
+
+    border-radius:9px;
+
+    background:#fafbfc;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.option:hover{
+    border-color:var(--primary);
+
+    background:#f4f2ff;
+}
+
+.option.correct{
+    color:#166534;
+
+    background:#ecfdf3;
+
+    border-color:#86efac;
+}
+
+.option.wrong{
+    color:#991b1b;
+
+    background:#fef2f2;
+
+    border-color:#fca5a5;
+}
+
+.quiz-result{
+    margin-top:10px;
+
+    font-weight:750;
+}
+
+
+/* =========================
+   MISTAKES
+========================= */
+
+.mistakes{
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:18px;
+}
+
+.mistake{
+    padding:22px;
+
+    border-radius:15px;
+
+    background:white;
+
+    border:1px solid var(--border);
+}
+
+.mistake h3{
+    margin:0 0 9px;
+
+    color:var(--red);
+
+    font-size:17px;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+.footer{
+    padding-top:30px;
+
+    border-top:1px solid var(--border);
+
+    color:#7b8497;
+
+    text-align:center;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:950px){
+
+    .layout{
+        grid-template-columns:1fr;
+    }
+
+    .sidebar{
+        display:none;
+    }
+
+    main{
+        padding:35px 20px 80px;
+    }
+
+    .method-grid{
+        grid-template-columns:
+            repeat(3,1fr);
+    }
+
+    .status-grid,
+    .json-box,
+    .security-grid,
+    .mistakes{
+        grid-template-columns:1fr;
+    }
+
+}
+
+@media(max-width:600px){
+
+    .topbar{
+        padding:0 16px;
+    }
+
+    .badge-top{
+        display:none;
+    }
+
+    .hero{
+        padding:37px 25px;
+    }
+
+    .section h2{
+        font-size:27px;
+    }
+
+    .method-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .request-row{
+        grid-template-columns:1fr;
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<header class="topbar">
+
+<div class="logo">
+ZEN<span>SUS</span>
+</div>
+
+<div class="badge-top">
+REACT • LESSON 13
+</div>
+
+</header>
+
+
+<div class="layout">
+
+
+<aside class="sidebar">
+
+<div class="sidebar-title">
+APIs & Data Fetching
+</div>
+
+<a href="#api" class="active">What is an API?</a>
+
+<a href="#rest">REST APIs</a>
+
+<a href="#methods">HTTP Methods</a>
+
+<a href="#get">GET</a>
+
+<a href="#post">POST</a>
+
+<a href="#put">PUT</a>
+
+<a href="#patch">PATCH</a>
+
+<a href="#delete">DELETE</a>
+
+<a href="#fetch">fetch()</a>
+
+<a href="#requests">API Requests</a>
+
+<a href="#async">Async/Await</a>
+
+<a href="#json">JSON</a>
+
+<a href="#states">Loading / Error / Success</a>
+
+<a href="#rendering">API Data Rendering</a>
+
+<a href="#query">Query Parameters</a>
+
+<a href="#headers">Request Headers</a>
+
+<a href="#postrequest">POST Requests</a>
+
+<a href="#auth">Authentication</a>
+
+<a href="#env">Environment Variables</a>
+
+<a href="#security">API Security</a>
+
+<a href="#quiz">Quick Quiz</a>
+
+</aside>
+
+
+<main>
+
+
+<!-- HERO -->
+
+<section class="hero">
+
+<div class="hero-content">
+
+<div class="eyebrow">
+ZENSUS React Course • Lesson 13
+</div>
+
+<h1>
+APIs <span>& Data Fetching</span>
+</h1>
+
+<p>
+Learn how React applications communicate with backend servers,
+request data, send data, handle asynchronous operations, manage
+loading/error/success states, and securely work with APIs.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- API -->
+
+<section class="section" id="api">
+
+<h2>01. What is an API?</h2>
+
+<p>
+API stands for <strong>Application Programming Interface</strong>.
+It provides a defined way for one software system to communicate
+with another.
+</p>
+
+<p>
+In a web application, the frontend commonly communicates with a
+backend through HTTP requests.
+</p>
+
+
+<div class="visual">
+
+<div class="visual-title">
+REAL-WORLD API FLOW
+</div>
+
+<div class="flow">
+
+<div class="flow-node active">
+React UI
+<small>User interaction</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+HTTP Request
+<small>GET / POST...</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+Backend API
+<small>Server</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Database
+<small>Data</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+JSON Response
+<small>Data returned</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+React UI
+<small>Render</small>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="highlight">
+
+<strong>Simple mental model:</strong>
+
+<p>
+React does not directly "talk to the database" in a normal architecture.
+React talks to an API. The backend decides how to access and protect
+the database.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- REST -->
+
+<section class="section" id="rest">
+
+<h2>02. REST APIs</h2>
+
+<p>
+REST stands for <strong>Representational State Transfer</strong>.
+A REST-style API commonly represents resources through URLs and uses
+HTTP methods to describe operations on those resources.
+</p>
+
+<h3>Example Resource</h3>
+
+<pre>
+/api/students
+</pre>
+
+<p>
+A particular student could be represented as:
+</p>
+
+<pre>
+/api/students/42
+</pre>
+
+
+<div class="visual">
+
+<div class="visual-title">
+RESOURCE-BASED API
+</div>
+
+<div class="flow">
+
+<div class="flow-node">
+/students
+<small>collection</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+GET
+<small>read students</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+POST
+<small>create student</small>
+</div>
+
+</div>
+
+<br>
+
+<div class="flow">
+
+<div class="flow-node">
+/students/42
+<small>single resource</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+GET
+<small>read</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+PATCH
+<small>modify</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+DELETE
+<small>remove</small>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- METHODS -->
+
+<section class="section" id="methods">
+
+<h2>03. HTTP Methods</h2>
+
+<p>
+HTTP methods describe what the client wants to do with a resource.
+</p>
+
+
+<div class="method-grid">
+
+<div class="method-card">
+
+<div class="method">GET</div>
+
+<p>
+Retrieve data
+</p>
+
+</div>
+
+
+<div class="method-card">
+
+<div class="method">POST</div>
+
+<p>
+Create/send data
+</p>
+
+</div>
+
+
+<div class="method-card">
+
+<div class="method">PUT</div>
+
+<p>
+Replace a resource
+</p>
+
+</div>
+
+
+<div class="method-card">
+
+<div class="method">PATCH</div>
+
+<p>
+Partially modify
+</p>
+
+</div>
+
+
+<div class="method-card">
+
+<div class="method">DELETE</div>
+
+<p>
+Delete a resource
+</p>
+
+</div>
+
+</div>
+
+
+<table style="
+width:100%;
+border-collapse:collapse;
+background:white;
+border:1px solid var(--border);
+border-radius:15px;
+overflow:hidden;
+">
+
+<tr>
+
+<th style="padding:14px;background:#f1f3f7;text-align:left;">
+Method
+</th>
+
+<th style="padding:14px;background:#f1f3f7;text-align:left;">
+Purpose
+</th>
+
+<th style="padding:14px;background:#f1f3f7;text-align:left;">
+Example
+</th>
+
+</tr>
+
+<tr>
+
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+GET
+</td>
+
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+Read
+</td>
+
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+GET /students
+</td>
+
+</tr>
+
+<tr>
+
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+POST
+</td>
+
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+Create
+</td>
+
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+POST /students
+</td>
+
+</tr>
+
+<tr>
+
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+PUT
+</td>
+
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+Replace
+</td>
+
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+PUT /students/42
+</td>
+
+</tr>
+
+<tr>
+
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+PATCH
+</td>
+
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+Partial update
+</td>
+
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+PATCH /students/42
+</td>
+
+</tr>
+
+<tr>
+
+<td style="padding:13px;">
+DELETE
+</td>
+
+<td style="padding:13px;">
+Delete
+</td>
+
+<td style="padding:13px;">
+DELETE /students/42
+</td>
+
+</tr>
+
+</table>
+
+</section>
+
+
+<!-- GET -->
+
+<section class="section" id="get">
+
+<h2>04. GET Request</h2>
+
+<p>
+GET is commonly used to retrieve data.
+</p>
+
+<pre>
+fetch("https://api.example.com/students");
+</pre>
+
+
+<h3>GET with React</h3>
+
+<pre>
+import { useEffect, useState } from "react";
+
+function Students(){
+
+    const [students, setStudents] =
+        useState([]);
+
+    useEffect(() => {
+
+        fetch("/api/students")
+            .then(response => response.json())
+            .then(data => {
+                setStudents(data);
+            });
+
+    }, []);
+
+    return (
+        &lt;div&gt;
+            {students.map(student => (
+                &lt;p key={student.id}&gt;
+                    {student.name}
+                &lt;/p&gt;
+            ))}
+        &lt;/div&gt;
+    );
+}
+</pre>
+
+<p>
+The previous lesson introduced <code>useEffect()</code>. Here it becomes
+practical: the Effect can synchronize the component with remote data.
+</p>
+
+</section>
+
+
+<!-- POST -->
+
+<section class="section" id="post">
+
+<h2>05. POST Request</h2>
+
+<p>
+POST is commonly used to send data to a server to create a new resource.
+</p>
+
+<pre>
+fetch("/api/students", {
+
+    method: "POST",
+
+    headers: {
+        "Content-Type":
+            "application/json"
+    },
+
+    body: JSON.stringify({
+        name: "Pradeep",
+        course: "CSE"
+    })
+
+});
+</pre>
+
+
+<div class="info">
+
+<strong>Important:</strong>
+
+<p>
+JavaScript objects are not automatically transmitted as JSON.
+Use <code>JSON.stringify()</code> when sending a JSON request body,
+and use <code>response.json()</code> to parse a JSON response.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- PUT -->
+
+<section class="section" id="put">
+
+<h2>06. PUT Request</h2>
+
+<p>
+PUT is commonly used when the client intends to replace the
+representation of a resource.
+</p>
+
+<pre>
+fetch("/api/students/42", {
+
+    method: "PUT",
+
+    headers: {
+        "Content-Type":
+            "application/json"
+    },
+
+    body: JSON.stringify({
+
+        name: "Pradeep",
+        course: "CSE",
+        year: 3
+
+    })
+
+});
+</pre>
+
+
+<div class="warning">
+
+<strong>PUT vs PATCH:</strong>
+
+<p>
+Exact server semantics depend on the API design, but PUT is commonly
+used for a complete replacement while PATCH is used for a partial
+modification.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- PATCH -->
+
+<section class="section" id="patch">
+
+<h2>07. PATCH Request</h2>
+
+<p>
+PATCH is commonly used when only part of a resource needs to change.
+</p>
+
+<pre>
+fetch("/api/students/42", {
+
+    method: "PATCH",
+
+    headers: {
+        "Content-Type":
+            "application/json"
+    },
+
+    body: JSON.stringify({
+
+        year: 3
+
+    })
+
+});
+</pre>
+
+<p>
+Only the specified field is being requested for modification.
+The exact behavior is determined by the backend API.
+</p>
+
+</section>
+
+
+<!-- DELETE -->
+
+<section class="section" id="delete">
+
+<h2>08. DELETE Request</h2>
+
+<p>
+DELETE is used to request removal of a resource.
+</p>
+
+<pre>
+fetch("/api/students/42", {
+
+    method: "DELETE"
+
+});
+</pre>
+
+
+<div class="visual">
+
+<div class="visual-title">
+CRUD CONNECTION
+</div>
+
+<div class="flow">
+
+<div class="flow-node">
+Create
+<small>POST</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Read
+<small>GET</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Update
+<small>PUT / PATCH</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+Delete
+<small>DELETE</small>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- FETCH -->
+
+<section class="section" id="fetch">
+
+<h2>09. <code>fetch()</code></h2>
+
+<p>
+The browser provides the Fetch API for making HTTP requests.
+</p>
+
+<pre>
+const response =
+    await fetch("/api/students");
+
+const data =
+    await response.json();
+</pre>
+
+
+<h3>Very Important: HTTP Errors</h3>
+
+<p>
+A common beginner mistake is assuming that <code>fetch()</code> rejects
+for every HTTP error. By default, a response such as 404 or 500 still
+produces a Response object. Your code should check
+<code>response.ok</code>.
+</p>
+
+<pre>
+const response =
+    await fetch("/api/students");
+
+if(!response.ok){
+
+    throw new Error(
+        `HTTP error: ${response.status}`
+    );
+
+}
+
+const data =
+    await response.json();
+</pre>
+
+
+<div class="success">
+
+<strong>Professional pattern:</strong>
+
+<p>
+Request → check <code>response.ok</code> → parse response → update state.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- REQUESTS -->
+
+<section class="section" id="requests">
+
+<h2>10. API Requests</h2>
+
+<p>
+A complete API request has several important pieces.
+</p>
+
+
+<div class="request-builder">
+
+<div class="request-row">
+
+<div class="request-label">
+METHOD
+</div>
+
+<div class="request-value">
+GET
+</div>
+
+</div>
+
+
+<div class="request-row">
+
+<div class="request-label">
+URL
+</div>
+
+<div class="request-value">
+https://api.example.com/students
+</div>
+
+</div>
+
+
+<div class="request-row">
+
+<div class="request-label">
+HEADERS
+</div>
+
+<div class="request-value">
+Authorization / Content-Type
+</div>
+
+</div>
+
+
+<div class="request-row">
+
+<div class="request-label">
+BODY
+</div>
+
+<div class="request-value">
+Used when sending data, depending on the method/API
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ASYNC -->
+
+<section class="section" id="async">
+
+<h2>11. Async / Await</h2>
+
+<p>
+Network requests take time. JavaScript uses asynchronous APIs so the
+browser can continue handling other work while the request is pending.
+</p>
+
+<pre>
+async function loadStudents(){
+
+    const response =
+        await fetch("/api/students");
+
+    if(!response.ok){
+
+        throw new Error(
+            "Request failed"
+        );
+
+    }
+
+    const data =
+        await response.json();
+
+    return data;
+}
+</pre>
+
+
+<h3>Try / Catch / Finally</h3>
+
+<pre>
+async function loadStudents(){
+
+    try{
+
+        const response =
+            await fetch("/api/students");
+
+        if(!response.ok){
+            throw new Error(
+                "Failed to load students"
+            );
+        }
+
+        const data =
+            await response.json();
+
+        return data;
+
+    }catch(error){
+
+        console.error(error);
+
+    }finally{
+
+        console.log("Request finished");
+
+    }
+
+}
+</pre>
+
+
+<div class="highlight">
+
+<strong>Async mental model:</strong>
+
+<p>
+Start request → Wait → Receive response → Validate → Parse JSON →
+Update React state.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- JSON -->
+
+<section class="section" id="json">
+
+<h2>12. JSON</h2>
+
+<p>
+JSON stands for <strong>JavaScript Object Notation</strong>. It is a
+common format for exchanging structured data between frontend and
+backend systems.
+</p>
+
+
+<div class="json-box">
+
+<div class="json-card">
+
+<h3>JavaScript Object</h3>
+
+<pre>
+const student = {
+    id: 101,
+    name: "Pradeep",
+    course: "CSE"
+};
+</pre>
+
+</div>
+
+
+<div class="json-card">
+
+<h3>JSON</h3>
+
+<pre>
+{
+  "id": 101,
+  "name": "Pradeep",
+  "course": "CSE"
+}
+</pre>
+
+</div>
+
+</div>
+
+
+<h3>Object → JSON</h3>
+
+<pre>
+const json =
+    JSON.stringify(student);
+</pre>
+
+
+<h3>JSON → JavaScript</h3>
+
+<pre>
+const object =
+    JSON.parse(json);
+</pre>
+
+
+<h3>Fetch Shortcut</h3>
+
+<pre>
+const data =
+    await response.json();
+</pre>
+
+</section>
+
+
+<!-- STATES -->
+
+<section class="section" id="states">
+
+<h2>13. Loading, Error & Success States</h2>
+
+<p>
+A professional data-fetching UI should not display only the final data.
+Users need feedback while the request is happening and when something
+goes wrong.
+</p>
+
+
+<div class="status-grid">
+
+<div class="status-card">
+
+<div class="status-icon">
+⏳
+</div>
+
+<h3>Loading</h3>
+
+<p>
+The request is currently in progress.
+</p>
+
+</div>
+
+
+<div class="status-card">
+
+<div class="status-icon">
+❌
+</div>
+
+<h3>Error</h3>
+
+<p>
+The request failed or the response was not usable.
+</p>
+
+</div>
+
+
+<div class="status-card">
+
+<div class="status-icon">
+✓
+</div>
+
+<h3>Success</h3>
+
+<p>
+The request completed and usable data is available.
+</p>
+
+</div>
+
+</div>
+
+
+<h3>React State Model</h3>
+
+<pre>
+const [data, setData] =
+    useState([]);
+
+const [loading, setLoading] =
+    useState(true);
+
+const [error, setError] =
+    useState(null);
+</pre>
+
+
+<h3>Complete Example</h3>
+
+<pre>
+useEffect(() => {
+
+    async function loadData(){
+
+        try{
+
+            setLoading(true);
+            setError(null);
+
+            const response =
+                await fetch("/api/students");
+
+            if(!response.ok){
+                throw new Error(
+                    "Failed to fetch data"
+                );
+            }
+
+            const result =
+                await response.json();
+
+            setData(result);
+
+        }catch(error){
+
+            setError(error.message);
+
+        }finally{
+
+            setLoading(false);
+
+        }
+
+    }
+
+    loadData();
+
+}, []);
+</pre>
+
+
+<div class="playground">
+
+<h3 style="margin-top:0;">
+API State Simulator
+</h3>
+
+<p>
+See how a React application can transition between request states.
+</p>
+
+<div class="demo-controls">
+
+<button
+class="btn primary"
+onclick="showLoading()"
+>
+Loading
+</button>
+
+<button
+class="btn success"
+onclick="showSuccess()"
+>
+Success
+</button>
+
+<button
+class="btn danger"
+onclick="showError()"
+>
+Error
+</button>
+
+</div>
+
+<div
+class="api-screen"
+id="apiScreen"
+>
+
+<div class="api-icon">
+🌐
+</div>
+
+<strong id="apiTitle">
+Waiting for request
+</strong>
+
+<div
+class="api-status"
+id="apiStatus"
+>
+Choose a state above
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- RENDER -->
+
+<section class="section" id="rendering">
+
+<h2>14. API Data Rendering</h2>
+
+<p>
+After receiving data, React can store it in state and render it using
+normal JSX and array methods.
+</p>
+
+<pre>
+function StudentList(){
+
+    const [students, setStudents] =
+        useState([]);
+
+    // Fetch students...
+
+    return (
+
+        &lt;section&gt;
+
+            &lt;h2&gt;
+                Students
+            &lt;/h2&gt;
+
+            {students.map(student => (
+
+                &lt;article key={student.id}&gt;
+
+                    &lt;h3&gt;
+                        {student.name}
+                    &lt;/h3&gt;
+
+                    &lt;p&gt;
+                        {student.course}
+                    &lt;/p&gt;
+
+                &lt;/article&gt;
+
+            ))}
+
+        &lt;/section&gt;
+
+    );
+}
+</pre>
+
+
+<div class="highlight">
+
+<strong>Lesson connection:</strong>
+
+<p>
+Lesson 9 taught lists and keys. Lesson 13 now applies those concepts to
+real API data.
+</p>
+
+<p>
+<strong>API data → state → map() → JSX → UI</strong>
+</p>
+
+</div>
+
+</section>
+
+
+<!-- QUERY -->
+
+<section class="section" id="query">
+
+<h2>15. Query Parameters</h2>
+
+<p>
+Query parameters allow clients to provide additional information in a
+URL.
+</p>
+
+<pre>
+/api/students?course=CSE&amp;year=3
+</pre>
+
+
+<h3>Using URLSearchParams</h3>
+
+<pre>
+const params =
+    new URLSearchParams({
+
+        course: "CSE",
+        year: "3"
+
+    });
+
+const response =
+    await fetch(
+        `/api/students?${params}`
+    );
+</pre>
+
+
+<div class="visual">
+
+<div class="visual-title">
+QUERY PARAMETER FLOW
+</div>
+
+<div class="flow">
+
+<div class="flow-node">
+React
+<small>filters</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+URL
+<small>?course=CSE</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Backend
+<small>reads params</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+Filtered Data
+<small>JSON</small>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- HEADERS -->
+
+<section class="section" id="headers">
+
+<h2>16. Request Headers</h2>
+
+<p>
+HTTP headers carry additional information about a request or response.
+</p>
+
+<h3>Content-Type</h3>
+
+<pre>
+headers: {
+
+    "Content-Type":
+        "application/json"
+
+}
+</pre>
+
+
+<h3>Authorization</h3>
+
+<pre>
+headers: {
+
+    "Authorization":
+        `Bearer ${token}`
+
+}
+</pre>
+
+
+<div class="warning">
+
+<strong>Remember:</strong>
+
+<p>
+A header does not automatically make an API secure. The server must
+validate credentials, permissions, tokens, input, and other security
+requirements.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- POST REQUEST -->
+
+<section class="section" id="postrequest">
+
+<h2>17. POST Requests in React</h2>
+
+<p>
+POST requests are commonly triggered by user actions such as submitting
+a form.
+</p>
+
+
+<pre>
+async function createStudent(student){
+
+    const response =
+        await fetch("/api/students", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
+
+            body:
+                JSON.stringify(student)
+
+        });
+
+    if(!response.ok){
+
+        throw new Error(
+            "Failed to create student"
+        );
+
+    }
+
+    return response.json();
+}
+</pre>
+
+
+<h3>Using It from a Form</h3>
+
+<pre>
+async function handleSubmit(event){
+
+    event.preventDefault();
+
+    try{
+
+        const created =
+            await createStudent({
+                name,
+                course
+            });
+
+        console.log(
+            "Created:",
+            created
+        );
+
+    }catch(error){
+
+        console.error(error);
+
+    }
+
+}
+</pre>
+
+
+<div class="success">
+
+<strong>Professional architecture:</strong>
+
+<p>
+Form → validate → event handler → API request → response → update state →
+UI feedback.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- AUTH -->
+
+<section class="section" id="auth">
+
+<h2>18. API Authentication Basics</h2>
+
+<p>
+Authentication answers:
+<strong>"Who are you?"</strong>
+</p>
+
+<p>
+Authorization answers:
+<strong>"What are you allowed to do?"</strong>
+</p>
+
+
+<div class="security-grid">
+
+<div class="security-card">
+
+<h3>Authentication</h3>
+
+<p>
+Verifies the identity of a user or client.
+</p>
+
+<p>
+Examples include login credentials, sessions, access tokens and
+identity-provider systems.
+</p>
+
+</div>
+
+
+<div class="security-card">
+
+<h3>Authorization</h3>
+
+<p>
+Determines whether an authenticated user has permission to perform
+an action.
+</p>
+
+<p>
+Example: a normal student should not automatically have admin
+permissions.
+</p>
+
+</div>
+
+</div>
+
+
+<h3>Bearer Token Example</h3>
+
+<pre>
+const response =
+    await fetch("/api/profile", {
+
+        headers: {
+
+            Authorization:
+                `Bearer ${token}`
+
+        }
+
+    });
+</pre>
+
+
+<div class="warning">
+
+<strong>Important:</strong>
+
+<p>
+Authentication is primarily enforced by the backend. Hiding a button
+in React does not prevent a malicious client from sending a request
+directly to the API.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- ENV -->
+
+<section class="section" id="env">
+
+<h2>19. Environment Variables</h2>
+
+<p>
+Environment variables can be used to configure applications differently
+across development, testing and production.
+</p>
+
+
+<h3>Example</h3>
+
+<pre>
+const API_URL =
+    import.meta.env.VITE_API_URL;
+</pre>
+
+
+<h3>Example Environment File</h3>
+
+<pre>
+VITE_API_URL=https://api.example.com
+</pre>
+
+
+<div class="danger">
+
+<strong>CRITICAL SECURITY RULE</strong>
+
+<p>
+Frontend environment variables are not automatically secret.
+If a value is bundled into a browser application, users can generally
+inspect it.
+</p>
+
+<p>
+Therefore, never put private database passwords, private API secrets,
+server master keys, or other credentials that must remain confidential
+into frontend code.
+</p>
+
+</div>
+
+
+<div class="visual">
+
+<div class="visual-title">
+SAFE ARCHITECTURE
+</div>
+
+<div class="flow">
+
+<div class="flow-node">
+React
+<small>public client</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+Backend
+<small>private logic</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+Secret
+<small>server-side only</small>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- SECURITY -->
+
+<section class="section" id="security">
+
+<h2>20. API Security Basics</h2>
+
+<p>
+Frontend developers must understand the security boundary between
+browser code and server code.
+</p>
+
+
+<div class="security-grid">
+
+
+<div class="security-card">
+
+<h3>🔐 HTTPS</h3>
+
+<p>
+Use HTTPS in production so network communication is encrypted in
+transit.
+</p>
+
+</div>
+
+
+<div class="security-card">
+
+<h3>🛡️ Server Validation</h3>
+
+<p>
+Never trust data simply because it came from your React application.
+Validate it on the server.
+</p>
+
+</div>
+
+
+<div class="security-card">
+
+<h3>🔑 Protect Secrets</h3>
+
+<p>
+Keep private API keys and credentials on trusted server infrastructure.
+</p>
+
+</div>
+
+
+<div class="security-card">
+
+<h3>👤 Authorization</h3>
+
+<p>
+Check permissions on the backend for every protected operation.
+</p>
+
+</div>
+
+
+<div class="security-card">
+
+<h3>📦 Validate Responses</h3>
+
+<p>
+Do not blindly assume an API always returns the expected structure.
+</p>
+
+</div>
+
+
+<div class="security-card">
+
+<h3>🚦 Rate Limiting</h3>
+
+<p>
+Backend services can limit excessive requests to reduce abuse and
+protect resources.
+</p>
+
+</div>
+
+</div>
+
+
+<h3>What NOT to Do</h3>
+
+<pre>
+// ❌ Do NOT expose private secrets
+
+const SECRET_KEY =
+    "my-super-private-server-key";
+</pre>
+
+
+<h3>Better Architecture</h3>
+
+<pre>
+// React
+
+fetch("/api/ai", {
+    method: "POST",
+
+    body: JSON.stringify({
+        prompt
+    })
+});
+</pre>
+
+<p>
+The backend can then communicate with the protected third-party
+service using its private credentials.
+</p>
+
+
+<div class="highlight">
+
+<strong>Golden rule:</strong>
+
+<p>
+Anything shipped to the browser should be considered observable by
+the user. Frontend code is not a secure place for secrets.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- COMPLETE -->
+
+<section class="section">
+
+<h2>21. Complete React Data-Fetching Pattern</h2>
+
+<p>
+Here is a reusable foundation for many React applications.
+</p>
+
+<pre>
+import {
+    useEffect,
+    useState
+} from "react";
+
+function Students(){
+
+    const [students, setStudents] =
+        useState([]);
+
+    const [loading, setLoading] =
+        useState(true);
+
+    const [error, setError] =
+        useState(null);
+
+
+    useEffect(() => {
+
+        async function loadStudents(){
+
+            try{
+
+                setLoading(true);
+                setError(null);
+
+                const response =
+                    await fetch(
+                        "/api/students"
+                    );
+
+                if(!response.ok){
+
+                    throw new Error(
+                        `HTTP ${response.status}`
+                    );
+
+                }
+
+                const data =
+                    await response.json();
+
+                setStudents(data);
+
+            }catch(error){
+
+                setError(
+                    error.message
+                );
+
+            }finally{
+
+                setLoading(false);
+
+            }
+
+        }
+
+        loadStudents();
+
+    }, []);
+
+
+    if(loading){
+
+        return &lt;p&gt;
+            Loading students...
+        &lt;/p&gt;;
+
+    }
+
+
+    if(error){
+
+        return &lt;p&gt;
+            Error: {error}
+        &lt;/p&gt;;
+
+    }
+
+
+    return (
+
+        &lt;div&gt;
+
+            &lt;h2&gt;
+                Students
+            &lt;/h2&gt;
+
+            {students.map(student => (
+
+                &lt;article
+                    key={student.id}
+                &gt;
+
+                    &lt;h3&gt;
+                        {student.name}
+                    &lt;/h3&gt;
+
+                    &lt;p&gt;
+                        {student.course}
+                    &lt;/p&gt;
+
+                &lt;/article&gt;
+
+            ))}
+
+        &lt;/div&gt;
+
+    );
+}
+</pre>
+
+
+<div class="visual">
+
+<div class="visual-title">
+THE ZENSUS DATA-FETCHING PIPELINE
+</div>
+
+<div class="flow">
+
+<div class="flow-node">
+Component
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+useEffect
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+fetch()
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+HTTP
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+JSON
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+State
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+React UI
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- COMMON MISTAKES -->
+
+<section class="section">
+
+<h2>22. Common API Mistakes</h2>
+
+<div class="mistakes">
+
+
+<div class="mistake">
+
+<h3>❌ Forgetting response.ok</h3>
+
+<p>
+A 404 or 500 response does not automatically make fetch reject.
+Check the response status.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<h3>❌ Forgetting response.json()</h3>
+
+<p>
+The Response object is not the parsed data. Parse the response body
+when it contains JSON.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<h3>❌ No loading state</h3>
+
+<p>
+Users need feedback while network operations are pending.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<h3>❌ No error state</h3>
+
+<p>
+Networks fail. Servers fail. APIs change. Your UI must handle failure.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<h3>❌ Hardcoding secrets</h3>
+
+<p>
+Never assume a frontend variable is secret just because it came from
+an environment file.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<h3>❌ Fetching on every render</h3>
+
+<p>
+Incorrect Effect dependencies can create repeated requests or loops.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<h3>❌ Ignoring stale requests</h3>
+
+<p>
+When parameters change quickly, consider cancellation and race
+conditions so older responses do not incorrectly overwrite newer data.
+</p>
+
+</div>
+
+
+<div class="mistake">
+
+<h3>❌ Trusting frontend validation</h3>
+
+<p>
+Client validation improves user experience but server-side validation
+is still required.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- CHEAT SHEET -->
+
+<section class="section">
+
+<h2>23. API Cheat Sheet</h2>
+
+<table style="
+width:100%;
+border-collapse:collapse;
+background:white;
+border:1px solid var(--border);
+border-radius:15px;
+overflow:hidden;
+">
+
+<tr>
+
+<th style="padding:14px;background:#f1f3f7;text-align:left;">
+Concept
+</th>
+
+<th style="padding:14px;background:#f1f3f7;text-align:left;">
+Remember
+</th>
+
+</tr>
+
+<tr>
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+API
+</td>
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+Communication interface between software systems.
+</td>
+</tr>
+
+<tr>
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+GET
+</td>
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+Retrieve data.
+</td>
+</tr>
+
+<tr>
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+POST
+</td>
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+Create/send data.
+</td>
+</tr>
+
+<tr>
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+PUT
+</td>
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+Commonly replace a resource.
+</td>
+</tr>
+
+<tr>
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+PATCH
+</td>
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+Commonly partially modify a resource.
+</td>
+</tr>
+
+<tr>
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+DELETE
+</td>
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+Delete a resource.
+</td>
+</tr>
+
+<tr>
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+fetch()
+</td>
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+Browser API for HTTP requests.
+</td>
+</tr>
+
+<tr>
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+async/await
+</td>
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+Readable syntax for asynchronous operations.
+</td>
+</tr>
+
+<tr>
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+JSON
+</td>
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+Common structured data format.
+</td>
+</tr>
+
+<tr>
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+response.ok
+</td>
+<td style="padding:13px;border-bottom:1px solid var(--border);">
+Check whether the HTTP response is successful.
+</td>
+</tr>
+
+<tr>
+<td style="padding:13px;">
+Security
+</td>
+<td style="padding:13px;">
+Never put private secrets in browser code.
+</td>
+</tr>
+
+</table>
+
+</section>
+
+
+<!-- MASTER -->
+
+<section class="section">
+
+<h2>24. Master Mental Model</h2>
+
+<div class="visual">
+
+<div class="visual-title">
+FROM USER ACTION TO SERVER DATA
+</div>
+
+<div class="flow">
+
+<div class="flow-node">
+User
+<small>click / submit</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Event Handler
+<small>start request</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+fetch()
+<small>HTTP</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Server
+<small>process</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+JSON
+<small>response</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+State
+<small>setState</small>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node active">
+UI
+<small>render</small>
+</div>
+
+</div>
+
+<br>
+
+<div class="flow">
+
+<div class="flow-node">
+Loading
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-node">
+Success
+</div>
+
+<div class="flow-arrow">or</div>
+
+<div class="flow-node">
+Error
+</div>
+
+</div>
+
+</div>
+
+
+<div class="success">
+
+<strong>After Lesson 13, you should be able to:</strong>
+
+<ul>
+
+<li>Explain what an API is.</li>
+
+<li>Understand REST-style APIs.</li>
+
+<li>Explain GET, POST, PUT, PATCH and DELETE.</li>
+
+<li>Use <code>fetch()</code>.</li>
+
+<li>Write asynchronous API code with async/await.</li>
+
+<li>Understand JSON conversion.</li>
+
+<li>Build loading, error and success states.</li>
+
+<li>Render API data using React state and lists.</li>
+
+<li>Use query parameters.</li>
+
+<li>Send request headers.</li>
+
+<li>Make POST requests.</li>
+
+<li>Understand authentication and authorization basics.</li>
+
+<li>Understand frontend environment variables.</li>
+
+<li>Protect server-side secrets.</li>
+
+<li>Recognize common API security mistakes.</li>
+
+</ul>
+
+</div>
+
+</section>
+
+
+<!-- QUIZ -->
+
+<section class="section" id="quiz">
+
+<h2>25. Quick Quiz</h2>
+
+<p>
+Test your API and data-fetching knowledge.
+</p>
+
+
+<div class="quiz">
+
+<div class="question">
+1. What does API stand for?
+</div>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+A. Application Programming Internet
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,true)">
+B. Application Programming Interface
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+C. Application Process Integration
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+D. Advanced Programming Interface
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+2. Which HTTP method is commonly used to retrieve data?
+</div>
+
+<button class="option"
+onclick="quizAnswer(this,true)">
+A. GET
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+B. POST
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+C. DELETE
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+D. PATCH
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+3. Which method is commonly used to create a resource?
+</div>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+A. GET
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,true)">
+B. POST
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+C. DELETE
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+D. OPTIONS
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+4. What does response.json() do?
+</div>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+A. Sends a request
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,true)">
+B. Parses a JSON response body
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+C. Deletes JSON
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+D. Starts React
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+5. Does fetch() automatically reject for HTTP 404 or 500?
+</div>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+A. Yes, always
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,true)">
+B. No, check response.ok/status
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+C. Only in React
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+D. Only for POST
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+6. Which state is useful while an API request is running?
+</div>
+
+<button class="option"
+onclick="quizAnswer(this,true)">
+A. Loading
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+B. Deleted
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+C. Mounted
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+D. Compiled
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+7. What is PATCH commonly used for?
+</div>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+A. Reading all data
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,true)">
+B. Partially modifying a resource
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+C. Creating CSS
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+D. Loading React
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+8. What should happen to private API secrets?
+</div>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+A. Put them in React source code
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+B. Put them in public frontend environment variables
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,true)">
+C. Keep them on trusted server-side infrastructure
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+D. Put them in localStorage
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+9. What is a query parameter?
+</div>
+
+<button class="option"
+onclick="quizAnswer(this,true)">
+A. Additional information supplied in a URL query string
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+B. A React component
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+C. A CSS property
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+D. A database password
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<div class="question">
+10. What is the typical React data-fetching flow?
+</div>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+A. Database → CSS → HTML
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,true)">
+B. Request → Response → State → UI
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+C. CSS → API → Browser
+</button>
+
+<button class="option"
+onclick="quizAnswer(this,false)">
+D. JSX → Database directly
+</button>
+
+<div class="quiz-result"></div>
+
+</div>
+
+</section>
+
+
+<div class="footer">
+
+<strong>ZENSUS React Course</strong>
+
+<br>
+
+Learn • Build • Practice • Master
+
+</div>
+
+
+</main>
+
+</div>
+
+
+<script>
+
+
+/* =========================
+   API STATE SIMULATOR
+========================= */
+
+const apiScreen =
+    document.getElementById(
+        "apiScreen"
+    );
+
+const apiTitle =
+    document.getElementById(
+        "apiTitle"
+    );
+
+const apiStatus =
+    document.getElementById(
+        "apiStatus"
+    );
+
+
+function showLoading(){
+
+    apiScreen.className =
+        "api-screen loading";
+
+    apiTitle.innerHTML =
+        '<div class="spinner"></div>' +
+        'Loading data...';
+
+    apiStatus.textContent =
+        "fetch() → request pending";
+
+}
+
+
+function showSuccess(){
+
+    apiScreen.className =
+        "api-screen success-state";
+
+    apiTitle.textContent =
+        "✓ Data received";
+
+    apiStatus.textContent =
+        "HTTP 200 → JSON → setState() → render UI";
+
+}
+
+
+function showError(){
+
+    apiScreen.className =
+        "api-screen error-state";
+
+    apiTitle.textContent =
+        "✕ Request failed";
+
+    apiStatus.textContent =
+        "Network / HTTP error → setError() → error UI";
+
+}
+
+
+/* =========================
+   QUIZ
+========================= */
+
+function quizAnswer(
+    button,
+    correct
+){
+
+    const quiz =
+        button.closest(
+            ".quiz"
+        );
+
+    const options =
+        quiz.querySelectorAll(
+            ".option"
+        );
+
+    const result =
+        quiz.querySelector(
+            ".quiz-result"
+        );
+
+    options.forEach(
+        option => {
+
+            option.disabled = true;
+
+        }
+    );
+
+
+    if(correct){
+
+        button.classList.add(
+            "correct"
+        );
+
+        result.textContent =
+            "✓ Correct! Excellent.";
+
+        result.style.color =
+            "#16a34a";
+
+    }else{
+
+        button.classList.add(
+            "wrong"
+        );
+
+        result.textContent =
+            "✗ Not quite. Review this concept.";
+
+        result.style.color =
+            "#dc2626";
+
+
+        options.forEach(
+            option => {
+
+                const action =
+                    option.getAttribute(
+                        "onclick"
+                    );
+
+                if(
+                    action &&
+                    action.includes(
+                        "true"
+                    )
+                ){
+
+                    option.classList.add(
+                        "correct"
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+}
+
+
+/* =========================
+   SIDEBAR ACTIVE STATE
+========================= */
+
+const sections =
+    document.querySelectorAll(
+        ".section"
+    );
+
+const links =
+    document.querySelectorAll(
+        ".sidebar a"
+    );
+
+window.addEventListener(
+    "scroll",
+    () => {
+
+        let current = "";
+
+        sections.forEach(
+            section => {
+
+                const top =
+                    section.offsetTop -
+                    130;
+
+                if(
+                    window.scrollY >=
+                    top
+                ){
+
+                    current =
+                        section.getAttribute(
+                            "id"
+                        );
+
+                }
+
+            }
+        );
+
+
+        links.forEach(
+            link => {
+
+                link.classList.remove(
+                    "active"
+                );
+
+                if(
+                    link.getAttribute(
+                        "href"
+                    ) ===
+                    "#" + current
+                ){
+
+                    link.classList.add(
+                        "active"
+                    );
+
+                }
+
+            }
+        );
+
+    }
+);
+
+</script>
+
+</body>
+</html>
+```

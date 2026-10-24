@@ -1,0 +1,3659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS | REST API Lesson 14</title>
+
+<style>
+:root{
+    --blue:#2563eb;
+    --blue-dark:#1d4ed8;
+    --blue-light:#eff6ff;
+    --blue-soft:#dbeafe;
+    --blue-border:#bfdbfe;
+    --text:#10213f;
+    --text-light:#5f6f86;
+    --muted:#8b9ab0;
+    --bg:#f7faff;
+    --white:#ffffff;
+    --border:#dce6f2;
+    --green:#16a34a;
+    --green-light:#f0fdf4;
+    --orange:#ea580c;
+    --orange-light:#fff7ed;
+    --red:#dc2626;
+    --red-light:#fef2f2;
+    --purple:#7c3aed;
+    --purple-light:#f5f3ff;
+    --shadow:0 12px 35px rgba(37,99,235,.08);
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    width:270px;
+    height:100vh;
+    background:#fff;
+    border-right:1px solid var(--border);
+    padding:25px 18px;
+    overflow-y:auto;
+    z-index:1000;
+}
+
+.logo{
+    font-size:25px;
+    font-weight:900;
+    color:var(--blue);
+    letter-spacing:1px;
+    padding:0 12px;
+}
+
+.lesson-label{
+    font-size:11px;
+    font-weight:800;
+    color:var(--muted);
+    letter-spacing:1.5px;
+    padding:8px 12px 15px;
+}
+
+.nav a{
+    display:block;
+    text-decoration:none;
+    color:var(--text-light);
+    font-size:14px;
+    padding:10px 13px;
+    margin:3px 0;
+    border-radius:9px;
+    transition:.25s;
+}
+
+.nav a:hover,
+.nav a.active{
+    background:var(--blue-light);
+    color:var(--blue);
+    font-weight:700;
+}
+
+/* MAIN */
+
+.main{
+    margin-left:270px;
+    padding:35px 45px 90px;
+    max-width:1450px;
+}
+
+.progress-container{
+    position:fixed;
+    top:0;
+    left:270px;
+    right:0;
+    height:4px;
+    background:#eaf0f8;
+    z-index:2000;
+}
+
+.progress-bar{
+    width:0%;
+    height:100%;
+    background:var(--blue);
+}
+
+/* HERO */
+
+.hero{
+    background:linear-gradient(135deg,#ffffff,#eff6ff);
+    border:1px solid var(--blue-border);
+    border-radius:24px;
+    padding:45px;
+    box-shadow:var(--shadow);
+    margin-bottom:30px;
+}
+
+.badges{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    margin-bottom:18px;
+}
+
+.badge{
+    padding:6px 11px;
+    border-radius:20px;
+    background:var(--blue-light);
+    color:var(--blue);
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.5px;
+}
+
+.hero h1{
+    font-size:42px;
+    line-height:1.15;
+    margin-bottom:15px;
+}
+
+.hero p{
+    max-width:1000px;
+    color:var(--text-light);
+    font-size:17px;
+}
+
+/* SEARCH */
+
+.search-box{
+    margin:25px 0;
+}
+
+.search-box input{
+    width:100%;
+    padding:15px 18px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    font-size:15px;
+    outline:none;
+    background:#fff;
+}
+
+.search-box input:focus{
+    border-color:var(--blue);
+    box-shadow:0 0 0 3px var(--blue-soft);
+}
+
+/* SECTIONS */
+
+section{
+    margin:35px 0;
+    scroll-margin-top:25px;
+}
+
+.section-card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:30px;
+    box-shadow:var(--shadow);
+}
+
+.section-title{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:18px;
+}
+
+.section-number{
+    width:40px;
+    height:40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--blue);
+    color:#fff;
+    border-radius:10px;
+    font-weight:800;
+    flex-shrink:0;
+}
+
+h2{
+    font-size:27px;
+}
+
+h3{
+    margin:20px 0 8px;
+}
+
+h4{
+    margin:12px 0 6px;
+}
+
+p{
+    color:var(--text-light);
+}
+
+ul,
+ol{
+    margin:15px 0 15px 22px;
+}
+
+li{
+    margin:7px 0;
+    color:var(--text-light);
+}
+
+strong{
+    color:var(--text);
+}
+
+/* GRID */
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+    gap:18px;
+    margin-top:22px;
+}
+
+.info-card{
+    border:1px solid var(--border);
+    border-radius:15px;
+    padding:20px;
+    background:#fff;
+    transition:.25s;
+}
+
+.info-card:hover{
+    transform:translateY(-4px);
+    border-color:var(--blue-border);
+    box-shadow:0 10px 25px rgba(37,99,235,.08);
+}
+
+.info-icon{
+    font-size:30px;
+    margin-bottom:8px;
+}
+
+.info-card h3{
+    margin-top:0;
+}
+
+.info-card p{
+    font-size:14px;
+}
+
+/* FLOW */
+
+.flow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin:30px 0;
+}
+
+.flow-box{
+    min-width:125px;
+    padding:17px;
+    text-align:center;
+    border:1px solid var(--blue-border);
+    background:var(--blue-light);
+    border-radius:14px;
+    font-weight:800;
+    color:var(--blue-dark);
+    animation:floatBox 2.5s ease-in-out infinite;
+}
+
+.flow-box:nth-child(2){animation-delay:.15s;}
+.flow-box:nth-child(3){animation-delay:.3s;}
+.flow-box:nth-child(4){animation-delay:.45s;}
+.flow-box:nth-child(5){animation-delay:.6s;}
+
+@keyframes floatBox{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-6px);}
+}
+
+.arrow{
+    font-size:23px;
+    color:var(--blue);
+    font-weight:900;
+}
+
+/* CODE */
+
+.code-box{
+    background:#0f172a;
+    color:#e2e8f0;
+    border-radius:14px;
+    overflow:hidden;
+    margin:20px 0;
+}
+
+.code-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 15px;
+    background:#1e293b;
+    color:#cbd5e1;
+    font-size:12px;
+    font-weight:700;
+}
+
+.copy-btn{
+    border:0;
+    background:#334155;
+    color:#fff;
+    padding:6px 10px;
+    border-radius:7px;
+    cursor:pointer;
+}
+
+.copy-btn:hover{
+    background:var(--blue);
+}
+
+pre{
+    padding:20px;
+    overflow-x:auto;
+    font-size:14px;
+    line-height:1.7;
+}
+
+/* NOTES */
+
+.note{
+    padding:18px;
+    border-radius:13px;
+    background:var(--blue-light);
+    border-left:5px solid var(--blue);
+    margin:20px 0;
+}
+
+.success{
+    padding:18px;
+    border-radius:13px;
+    background:var(--green-light);
+    border-left:5px solid var(--green);
+    margin:20px 0;
+}
+
+.warning{
+    padding:18px;
+    border-radius:13px;
+    background:var(--orange-light);
+    border-left:5px solid var(--orange);
+    margin:20px 0;
+}
+
+.danger{
+    padding:18px;
+    border-radius:13px;
+    background:var(--red-light);
+    border-left:5px solid var(--red);
+    margin:20px 0;
+}
+
+/* TABLE */
+
+.table-wrap{
+    overflow-x:auto;
+    margin-top:20px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:700px;
+}
+
+th,
+td{
+    padding:13px 15px;
+    border-bottom:1px solid var(--border);
+    text-align:left;
+}
+
+th{
+    background:var(--blue-light);
+    color:var(--blue-dark);
+    font-size:14px;
+}
+
+td{
+    color:var(--text-light);
+    font-size:14px;
+}
+
+/* POSTMAN MOCKUP */
+
+.postman{
+    border:1px solid var(--border);
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+    margin:25px 0;
+    background:#fff;
+}
+
+.postman-top{
+    background:#172033;
+    color:#fff;
+    padding:14px 18px;
+    font-weight:800;
+}
+
+.postman-body{
+    display:grid;
+    grid-template-columns:210px 1fr;
+    min-height:330px;
+}
+
+.postman-sidebar{
+    background:#f5f7fb;
+    border-right:1px solid var(--border);
+    padding:18px;
+}
+
+.collection{
+    font-weight:800;
+    color:var(--text);
+    margin-bottom:15px;
+}
+
+.request-item{
+    padding:10px;
+    border-radius:8px;
+    margin:5px 0;
+    font-size:13px;
+    color:var(--text-light);
+}
+
+.request-item.selected{
+    background:var(--blue-light);
+    color:var(--blue);
+    font-weight:800;
+}
+
+.postman-content{
+    padding:25px;
+}
+
+.method{
+    display:inline-block;
+    padding:7px 11px;
+    border-radius:7px;
+    background:var(--green-light);
+    color:var(--green);
+    font-weight:900;
+    font-size:12px;
+}
+
+.url-bar{
+    display:inline-block;
+    background:#f8fafc;
+    border:1px solid var(--border);
+    padding:9px 13px;
+    border-radius:8px;
+    margin-left:8px;
+    color:var(--text-light);
+    font-family:monospace;
+    font-size:13px;
+}
+
+/* INTERACTIVE */
+
+.interactive{
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:25px;
+    background:#fff;
+}
+
+.controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:18px 0;
+}
+
+.btn{
+    border:1px solid var(--blue-border);
+    background:var(--blue-light);
+    color:var(--blue-dark);
+    padding:11px 17px;
+    border-radius:9px;
+    cursor:pointer;
+    font-weight:800;
+}
+
+.btn:hover{
+    background:var(--blue);
+    color:#fff;
+}
+
+.result{
+    background:#0f172a;
+    color:#dbeafe;
+    border-radius:13px;
+    padding:20px;
+    min-height:250px;
+    white-space:pre-wrap;
+    font-family:monospace;
+    overflow:auto;
+}
+
+/* TEST PANEL */
+
+.test-panel{
+    border:1px solid var(--border);
+    border-radius:15px;
+    overflow:hidden;
+    margin-top:20px;
+}
+
+.test-header{
+    background:var(--blue-light);
+    color:var(--blue-dark);
+    padding:13px 17px;
+    font-weight:800;
+}
+
+.test-body{
+    padding:20px;
+}
+
+.test-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:11px 0;
+    border-bottom:1px solid var(--border);
+}
+
+.test-row:last-child{
+    border-bottom:none;
+}
+
+.pass{
+    color:var(--green);
+    font-weight:900;
+}
+
+/* QUIZ */
+
+.quiz{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:25px;
+    margin-top:20px;
+}
+
+.option{
+    border:1px solid var(--border);
+    padding:13px 16px;
+    border-radius:10px;
+    margin:9px 0;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.option:hover{
+    background:var(--blue-light);
+    border-color:var(--blue-border);
+}
+
+.option.correct{
+    background:var(--green-light);
+    border-color:var(--green);
+}
+
+.option.wrong{
+    background:var(--red-light);
+    border-color:var(--red);
+}
+
+.quiz-result{
+    margin-top:14px;
+    font-weight:800;
+}
+
+/* TAKEAWAY */
+
+.takeaway{
+    background:linear-gradient(135deg,#eff6ff,#ffffff);
+    border:1px solid var(--blue-border);
+    border-radius:20px;
+    padding:30px;
+}
+
+/* REVEAL */
+
+.reveal{
+    opacity:0;
+    transform:translateY(20px);
+    transition:.7s ease;
+}
+
+.reveal.show{
+    opacity:1;
+    transform:translateY(0);
+}
+
+/* RESPONSIVE */
+
+@media(max-width:900px){
+
+    .sidebar{
+        position:relative;
+        width:100%;
+        height:auto;
+        border-right:none;
+        border-bottom:1px solid var(--border);
+    }
+
+    .main{
+        margin-left:0;
+        padding:25px 18px 60px;
+    }
+
+    .progress-container{
+        left:0;
+    }
+
+    .hero{
+        padding:28px;
+    }
+
+    .hero h1{
+        font-size:32px;
+    }
+
+    .postman-body{
+        grid-template-columns:1fr;
+    }
+
+    .postman-sidebar{
+        border-right:none;
+        border-bottom:1px solid var(--border);
+    }
+}
+
+@media(max-width:600px){
+
+    .flow-box{
+        min-width:105px;
+    }
+
+    .url-bar{
+        display:block;
+        margin:10px 0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+</div>
+
+
+<!-- SIDEBAR -->
+
+<aside class="sidebar">
+
+    <div class="logo">ZENSUS</div>
+
+    <div class="lesson-label">
+        REST API • LESSON 14 / 15
+    </div>
+
+    <nav class="nav">
+
+        <a href="#overview">Overview</a>
+
+        <a href="#postman">What is Postman?</a>
+
+        <a href="#why">Why Test APIs?</a>
+
+        <a href="#interface">Postman Interface</a>
+
+        <a href="#request">Creating Requests</a>
+
+        <a href="#methods">HTTP Methods</a>
+
+        <a href="#params">Query Parameters</a>
+
+        <a href="#headers">Headers</a>
+
+        <a href="#body">Request Body</a>
+
+        <a href="#response">API Response</a>
+
+        <a href="#auth">Authentication</a>
+
+        <a href="#variables">Variables</a>
+
+        <a href="#environments">Environments</a>
+
+        <a href="#collections">Collections</a>
+
+        <a href="#tests">Writing Tests</a>
+
+        <a href="#workflow">Complete Workflow</a>
+
+        <a href="#troubleshooting">Troubleshooting</a>
+
+        <a href="#interactive">API Tester</a>
+
+        <a href="#practice">Practice</a>
+
+        <a href="#quiz">Quiz</a>
+
+        <a href="#takeaway">Takeaway</a>
+
+    </nav>
+
+</aside>
+
+
+<main class="main">
+
+
+<!-- HERO -->
+
+<section id="overview" class="hero reveal">
+
+    <div class="badges">
+
+        <span class="badge">LESSON 14 OF 15</span>
+        <span class="badge">REST API</span>
+        <span class="badge">POSTMAN</span>
+        <span class="badge">API TESTING</span>
+        <span class="badge">HTTP</span>
+        <span class="badge">INTERMEDIATE</span>
+
+    </div>
+
+    <h1>Testing REST APIs with Postman</h1>
+
+    <p>
+        Learn how to test REST APIs without building a frontend first.
+        You will learn requests, HTTP methods, parameters, headers,
+        JSON bodies, authentication, environments, collections,
+        automated tests, debugging and a complete Student API workflow.
+    </p>
+
+</section>
+
+
+<!-- SEARCH -->
+
+<div class="search-box">
+
+    <input
+        type="text"
+        id="searchInput"
+        placeholder="Search this lesson..."
+    >
+
+</div>
+
+
+<!-- 01 -->
+
+<section id="postman" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+<div class="section-number">01</div>
+
+<h2>What is Postman?</h2>
+
+</div>
+
+<p>
+<strong>Postman</strong> is a tool used to build, send, inspect and
+test HTTP requests to APIs.
+</p>
+
+<p>
+It allows developers to communicate directly with an API without
+first creating a frontend application.
+</p>
+
+<div class="flow">
+
+<div class="flow-box">
+Developer
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Postman
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+REST API
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Backend
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Database
+</div>
+
+</div>
+
+<div class="note">
+
+<strong>Simple definition:</strong>
+
+Postman is an API testing and development tool that lets you send
+HTTP requests and inspect API responses.
+
+</div>
+
+<h3>Example</h3>
+
+<p>
+Suppose your API provides:
+</p>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>API Endpoint</span>
+</div>
+
+<pre>GET http://localhost:8000/api/students/</pre>
+
+</div>
+
+<p>
+You can enter this endpoint into Postman and send the request.
+You can then inspect the returned status code, headers and JSON body.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- 02 -->
+
+<section id="why" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+<div class="section-number">02</div>
+
+<h2>Why Test REST APIs?</h2>
+
+</div>
+
+<p>
+API testing helps verify that the backend behaves correctly before
+the frontend depends on it.
+</p>
+
+<div class="grid">
+
+<div class="info-card">
+
+<div class="info-icon">🔍</div>
+
+<h3>Inspect</h3>
+
+<p>
+View exactly what the API sends and receives.
+</p>
+
+</div>
+
+<div class="info-card">
+
+<div class="info-icon">🧪</div>
+
+<h3>Test</h3>
+
+<p>
+Verify different success and error scenarios.
+</p>
+
+</div>
+
+<div class="info-card">
+
+<div class="info-icon">⚡</div>
+
+<h3>Debug</h3>
+
+<p>
+Find incorrect URLs, headers, bodies and authentication.
+</p>
+
+</div>
+
+<div class="info-card">
+
+<div class="info-icon">🔐</div>
+
+<h3>Security</h3>
+
+<p>
+Test authentication and authorization behavior.
+</p>
+
+</div>
+
+</div>
+
+<h3>Frontend vs Postman</h3>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Frontend</th>
+<th>Postman</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td>User interface</td>
+<td>API testing interface</td>
+</tr>
+
+<tr>
+<td>Uses JavaScript/fetch</td>
+<td>Builds HTTP requests</td>
+</tr>
+
+<tr>
+<td>Designed for end users</td>
+<td>Designed for developers/testers</td>
+</tr>
+
+<tr>
+<td>Displays processed data</td>
+<td>Shows raw API response</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 03 -->
+
+<section id="interface" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+<div class="section-number">03</div>
+
+<h2>Understanding the Postman Interface</h2>
+
+</div>
+
+<div class="postman">
+
+<div class="postman-top">
+POSTMAN — Student Management API
+</div>
+
+<div class="postman-body">
+
+<div class="postman-sidebar">
+
+<div class="collection">
+Student API
+</div>
+
+<div class="request-item selected">
+GET Students
+</div>
+
+<div class="request-item">
+GET Student
+</div>
+
+<div class="request-item">
+POST Student
+</div>
+
+<div class="request-item">
+PUT Student
+</div>
+
+<div class="request-item">
+DELETE Student
+</div>
+
+</div>
+
+<div class="postman-content">
+
+<div>
+
+<span class="method">
+GET
+</span>
+
+<span class="url-bar">
+http://localhost:8000/api/students/
+</span>
+
+</div>
+
+<br>
+
+<p>
+Params &nbsp; Headers &nbsp; Body &nbsp; Tests
+</p>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>Response</span>
+</div>
+
+<pre>200 OK
+
+{
+    "students": [
+        {
+            "id": 101,
+            "name": "Pradeep"
+        }
+    ]
+}</pre>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<h3>Important Areas</h3>
+
+<ul>
+
+<li>HTTP method selector</li>
+
+<li>Request URL</li>
+
+<li>Params</li>
+
+<li>Authorization</li>
+
+<li>Headers</li>
+
+<li>Body</li>
+
+<li>Pre-request scripts</li>
+
+<li>Tests</li>
+
+<li>Response status</li>
+
+<li>Response headers</li>
+
+<li>Response body</li>
+
+</ul>
+
+</div>
+
+</section>
+
+
+<!-- 04 -->
+
+<section id="request" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+<div class="section-number">04</div>
+
+<h2>Creating Your First API Request</h2>
+
+</div>
+
+<h3>Step 1 — Choose the Method</h3>
+
+<p>
+For retrieving students, choose <strong>GET</strong>.
+</p>
+
+<h3>Step 2 — Enter the URL</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>URL</span>
+</div>
+
+<pre>http://localhost:8000/api/students/</pre>
+
+</div>
+
+<h3>Step 3 — Click Send</h3>
+
+<p>
+Postman sends the HTTP request to the server.
+</p>
+
+<h3>Step 4 — Inspect the Response</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>Response</span>
+</div>
+
+<pre>HTTP/1.1 200 OK
+
+Content-Type: application/json
+
+{
+    "students": [
+        {
+            "id": 101,
+            "name": "Pradeep",
+            "course": "REST API"
+        }
+    ]
+}</pre>
+
+</div>
+
+<div class="success">
+
+If you receive a successful response, your API endpoint is reachable
+and responding to the request.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 05 -->
+
+<section id="methods" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+<div class="section-number">05</div>
+
+<h2>Testing Different HTTP Methods</h2>
+
+</div>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Method</th>
+<th>Purpose</th>
+<th>Example</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td>GET</td>
+<td>Read data</td>
+<td>/students/</td>
+</tr>
+
+<tr>
+<td>POST</td>
+<td>Create data</td>
+<td>/students/</td>
+</tr>
+
+<tr>
+<td>PUT</td>
+<td>Replace/update resource</td>
+<td>/students/101/</td>
+</tr>
+
+<tr>
+<td>PATCH</td>
+<td>Partially update resource</td>
+<td>/students/101/</td>
+</tr>
+
+<tr>
+<td>DELETE</td>
+<td>Delete resource</td>
+<td>/students/101/</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<h3>GET Example</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>GET</span>
+</div>
+
+<pre>GET http://localhost:8000/api/students/</pre>
+
+</div>
+
+<h3>POST Example</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>POST</span>
+</div>
+
+<pre>POST http://localhost:8000/api/students/</pre>
+
+</div>
+
+<h3>DELETE Example</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>DELETE</span>
+</div>
+
+<pre>DELETE http://localhost:8000/api/students/101/</pre>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 06 -->
+
+<section id="params" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+<div class="section-number">06</div>
+
+<h2>Query Parameters</h2>
+
+</div>
+
+<p>
+Query parameters allow a client to provide optional information
+after the question mark in a URL.
+</p>
+
+<h3>Example</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>URL</span>
+</div>
+
+<pre>GET /students/?course=python</pre>
+
+</div>
+
+<p>
+The parameter is:
+</p>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>Query Parameter</span>
+</div>
+
+<pre>course = python</pre>
+
+</div>
+
+<h3>Multiple Parameters</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>URL</span>
+</div>
+
+<pre>GET /students/?course=python&page=2&limit=10</pre>
+
+</div>
+
+<h3>Postman Params Tab</h3>
+
+<p>
+Instead of manually typing the query string, you can add key-value
+pairs in the <strong>Params</strong> section.
+</p>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Key</th>
+<th>Value</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td>course</td>
+<td>python</td>
+</tr>
+
+<tr>
+<td>page</td>
+<td>2</td>
+</tr>
+
+<tr>
+<td>limit</td>
+<td>10</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 07 -->
+
+<section id="headers" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+<div class="section-number">07</div>
+
+<h2>Request Headers</h2>
+
+</div>
+
+<p>
+Headers provide metadata about an HTTP request.
+</p>
+
+<h3>Content-Type</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>Header</span>
+</div>
+
+<pre>Content-Type: application/json</pre>
+
+</div>
+
+<h3>Authorization</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>Header</span>
+</div>
+
+<pre>Authorization: Bearer YOUR_ACCESS_TOKEN</pre>
+
+</div>
+
+<h3>Accept</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>Header</span>
+</div>
+
+<pre>Accept: application/json</pre>
+
+</div>
+
+<div class="note">
+
+Postman makes it easy to inspect and modify request headers before
+sending a request.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 08 -->
+
+<section id="body" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+<div class="section-number">08</div>
+
+<h2>Sending a JSON Request Body</h2>
+
+</div>
+
+<p>
+POST, PUT and PATCH requests often contain data in the request body.
+</p>
+
+<h3>Example JSON</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>JSON</span>
+</div>
+
+<pre>{
+    "name": "Pradeep",
+    "email": "pradeep@example.com",
+    "age": 21,
+    "course": "REST API"
+}</pre>
+
+</div>
+
+<h3>Postman Configuration</h3>
+
+<ol>
+
+<li>Select <strong>Body</strong>.</li>
+
+<li>Select <strong>raw</strong>.</li>
+
+<li>Choose <strong>JSON</strong> as the format.</li>
+
+<li>Enter the JSON data.</li>
+
+<li>Click <strong>Send</strong>.</li>
+
+</ol>
+
+<h3>Expected Request</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>HTTP</span>
+</div>
+
+<pre>POST /api/students/
+
+Content-Type: application/json
+
+{
+    "name": "Pradeep",
+    "email": "pradeep@example.com",
+    "age": 21,
+    "course": "REST API"
+}</pre>
+
+</div>
+
+<div class="warning">
+
+The JSON must be valid. Missing quotes, commas or braces can cause
+the server to reject the request.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 09 -->
+
+<section id="response" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+<div class="section-number">09</div>
+
+<h2>Understanding the API Response</h2>
+
+</div>
+
+<p>
+After clicking Send, Postman displays the server response.
+</p>
+
+<div class="grid">
+
+<div class="info-card">
+
+<div class="info-icon">200</div>
+
+<h3>Status Code</h3>
+
+<p>
+Indicates what happened with the request.
+</p>
+
+</div>
+
+<div class="info-card">
+
+<div class="info-icon">JSON</div>
+
+<h3>Body</h3>
+
+<p>
+Contains returned data or error details.
+</p>
+
+</div>
+
+<div class="info-card">
+
+<div class="info-icon">HTTP</div>
+
+<h3>Headers</h3>
+
+<p>
+Contain response metadata.
+</p>
+
+</div>
+
+<div class="info-card">
+
+<div class="info-icon">Time</div>
+
+<h3>Response Time</h3>
+
+<p>
+Shows how long the server took to respond.
+</p>
+
+</div>
+
+</div>
+
+<h3>Successful Response</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>200 OK</span>
+</div>
+
+<pre>{
+    "id": 101,
+    "name": "Pradeep",
+    "course": "REST API"
+}</pre>
+
+</div>
+
+<h3>Error Response</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>404 Not Found</span>
+</div>
+
+<pre>{
+    "error": "Student not found",
+    "code": "STUDENT_NOT_FOUND"
+}</pre>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 10 -->
+
+<section id="auth" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+<div class="section-number">10</div>
+
+<h2>Testing Authentication</h2>
+
+</div>
+
+<p>
+Many APIs protect endpoints using authentication.
+Postman provides an <strong>Authorization</strong> section for
+configuring supported authentication mechanisms.
+</p>
+
+<h3>Bearer Token Example</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>Authorization Header</span>
+</div>
+
+<pre>Authorization: Bearer eyJhbGciOiJIUzI1Ni...</pre>
+
+</div>
+
+<h3>Request Flow</h3>
+
+<div class="flow">
+
+<div class="flow-box">
+Login
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Receive Token
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Postman
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Protected API
+</div>
+
+</div>
+
+<h3>Common Authentication Results</h3>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Status</th>
+<th>Meaning</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td>200</td>
+<td>Request accepted</td>
+</tr>
+
+<tr>
+<td>401</td>
+<td>Authentication missing or invalid</td>
+</tr>
+
+<tr>
+<td>403</td>
+<td>Authenticated but not permitted</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<div class="danger">
+
+Never share real production access tokens or credentials in screenshots,
+public collections or source repositories.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 11 -->
+
+<section id="variables" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+<div class="section-number">11</div>
+
+<h2>Postman Variables</h2>
+
+</div>
+
+<p>
+Variables prevent you from repeatedly typing values such as API
+base URLs, IDs and tokens.
+</p>
+
+<h3>Without Variables</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>Repeated URL</span>
+</div>
+
+<pre>http://localhost:8000/api/students/
+
+http://localhost:8000/api/students/101/
+
+http://localhost:8000/api/students/102/</pre>
+
+</div>
+
+<h3>With Variables</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>Variable Usage</span>
+</div>
+
+<pre>{{baseUrl}}/api/students/
+
+{{baseUrl}}/api/students/{{studentId}}/</pre>
+
+</div>
+
+<h3>Example Variables</h3>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Variable</th>
+<th>Example Value</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td>baseUrl</td>
+<td>http://localhost:8000</td>
+</tr>
+
+<tr>
+<td>studentId</td>
+<td>101</td>
+</tr>
+
+<tr>
+<td>accessToken</td>
+<td>your-token-value</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<div class="success">
+
+Variables make API collections easier to reuse across different
+servers and environments.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 12 -->
+
+<section id="environments" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+<div class="section-number">12</div>
+
+<h2>Environments</h2>
+
+</div>
+
+<p>
+Applications commonly have multiple environments such as development,
+testing and production.
+</p>
+
+<div class="flow">
+
+<div class="flow-box">
+Development
+<br>
+localhost
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Testing
+<br>
+test server
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Production
+<br>
+live API
+</div>
+
+</div>
+
+<h3>Example</h3>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Environment</th>
+<th>baseUrl</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td>Development</td>
+<td>http://localhost:8000</td>
+</tr>
+
+<tr>
+<td>Testing</td>
+<td>https://test-api.example.com</td>
+</tr>
+
+<tr>
+<td>Production</td>
+<td>https://api.example.com</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<p>
+Then your request can remain:
+</p>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>Reusable Request</span>
+</div>
+
+<pre>{{baseUrl}}/api/students/</pre>
+
+</div>
+
+<div class="note">
+
+This prevents you from editing every request whenever the API server
+changes.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 13 -->
+
+<section id="collections" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+<div class="section-number">13</div>
+
+<h2>Collections</h2>
+
+</div>
+
+<p>
+A Postman collection groups related API requests together.
+</p>
+
+<h3>Student Management Collection</h3>
+
+<div class="postman">
+
+<div class="postman-top">
+Collection: Student Management API
+</div>
+
+<div class="postman-body">
+
+<div class="postman-sidebar">
+
+<div class="collection">
+Students
+</div>
+
+<div class="request-item selected">
+GET All Students
+</div>
+
+<div class="request-item">
+GET Student by ID
+</div>
+
+<div class="request-item">
+POST Create Student
+</div>
+
+<div class="request-item">
+PUT Update Student
+</div>
+
+<div class="request-item">
+PATCH Student
+</div>
+
+<div class="request-item">
+DELETE Student
+</div>
+
+</div>
+
+<div class="postman-content">
+
+<h3 style="margin-top:0;">
+API Collection
+</h3>
+
+<p>
+All student-related requests are organized in one place.
+</p>
+
+<div class="success">
+
+This makes repeated testing much easier than manually creating
+every request again.
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<h3>Benefits</h3>
+
+<ul>
+
+<li>Organize related requests.</li>
+
+<li>Reuse variables.</li>
+
+<li>Store API tests.</li>
+
+<li>Share API workflows with a team.</li>
+
+<li>Run multiple requests as a collection.</li>
+
+</ul>
+
+</div>
+
+</section>
+
+
+<!-- 14 -->
+
+<section id="tests" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+<div class="section-number">14</div>
+
+<h2>Writing Tests in Postman</h2>
+
+</div>
+
+<p>
+Postman can run JavaScript-based tests against API responses.
+</p>
+
+<h3>Example: Check Status Code</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>Postman Test</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>pm.test(
+    "Status code is 200",
+    function () {
+
+        pm.response.to.have
+            .status(200);
+
+    }
+);</pre>
+
+</div>
+
+<h3>Example: Check Response Property</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>Postman Test</span>
+</div>
+
+<pre>pm.test(
+    "Response contains student",
+    function () {
+
+        const data =
+            pm.response.json();
+
+        pm.expect(data).to.have
+            .property("students");
+
+    }
+);</pre>
+
+</div>
+
+<h3>What Can Be Tested?</h3>
+
+<div class="grid">
+
+<div class="info-card">
+
+<div class="info-icon">✓</div>
+
+<h3>Status</h3>
+
+<p>
+Verify 200, 201, 204 and other expected responses.
+</p>
+
+</div>
+
+<div class="info-card">
+
+<div class="info-icon">{ }</div>
+
+<h3>JSON</h3>
+
+<p>
+Check that expected properties exist.
+</p>
+
+</div>
+
+<div class="info-card">
+
+<div class="info-icon">⏱</div>
+
+<h3>Performance</h3>
+
+<p>
+Check response time against a chosen threshold.
+</p>
+
+</div>
+
+<div class="info-card">
+
+<div class="info-icon">🔐</div>
+
+<h3>Auth</h3>
+
+<p>
+Verify protected endpoints behave correctly.
+</p>
+
+</div>
+
+</div>
+
+<h3>Example Test Result</h3>
+
+<div class="test-panel">
+
+<div class="test-header">
+API Test Results
+</div>
+
+<div class="test-body">
+
+<div class="test-row">
+
+<span>Status code is 200</span>
+
+<span class="pass">PASS</span>
+
+</div>
+
+<div class="test-row">
+
+<span>Response contains students</span>
+
+<span class="pass">PASS</span>
+
+</div>
+
+<div class="test-row">
+
+<span>Response is JSON</span>
+
+<span class="pass">PASS</span>
+
+</div>
+
+<div class="test-row">
+
+<span>Response time acceptable</span>
+
+<span class="pass">PASS</span>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 15 -->
+
+<section id="workflow" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+<div class="section-number">15</div>
+
+<h2>Complete Student API Testing Workflow</h2>
+
+</div>
+
+<p>
+Let's build a complete testing sequence for a Student Management API.
+</p>
+
+<h3>Step 1 — Test GET</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>GET</span>
+</div>
+
+<pre>GET {{baseUrl}}/api/students/</pre>
+
+</div>
+
+Expected:
+<strong>200 OK</strong>
+
+<h3>Step 2 — Test POST</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>POST</span>
+</div>
+
+<pre>POST {{baseUrl}}/api/students/
+
+{
+    "name": "Pradeep",
+    "email": "pradeep@example.com",
+    "age": 21,
+    "course": "REST API"
+}</pre>
+
+</div>
+
+Expected:
+<strong>201 Created</strong>
+
+<h3>Step 3 — Test GET by ID</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>GET</span>
+</div>
+
+<pre>GET {{baseUrl}}/api/students/101/</pre>
+
+</div>
+
+Expected:
+<strong>200 OK</strong>
+
+<h3>Step 4 — Test PUT</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>PUT</span>
+</div>
+
+<pre>PUT {{baseUrl}}/api/students/101/
+
+{
+    "name": "Pradeep",
+    "email": "new@example.com",
+    "age": 22,
+    "course": "Advanced REST API"
+}</pre>
+
+</div>
+
+Expected:
+<strong>200 OK</strong>
+
+<h3>Step 5 — Test DELETE</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>DELETE</span>
+</div>
+
+<pre>DELETE {{baseUrl}}/api/students/101/</pre>
+
+</div>
+
+Expected:
+<strong>204 No Content</strong>
+
+<h3>Step 6 — Verify Deletion</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>GET</span>
+</div>
+
+<pre>GET {{baseUrl}}/api/students/101/</pre>
+
+</div>
+
+Expected:
+<strong>404 Not Found</strong>
+
+<div class="flow">
+
+<div class="flow-box">
+GET
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+POST
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+GET ID
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+PUT
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+DELETE
+</div>
+
+</div>
+
+<div class="success">
+
+This sequence tests the complete lifecycle of a resource:
+<strong>Create → Read → Update → Delete</strong>.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 16 -->
+
+<section id="troubleshooting" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+<div class="section-number">16</div>
+
+<h2>Common Postman Errors & Troubleshooting</h2>
+
+</div>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Error</th>
+<th>Possible Cause</th>
+<th>What to Check</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td>404 Not Found</td>
+<td>Incorrect endpoint</td>
+<td>URL and route</td>
+</tr>
+
+<tr>
+<td>400 Bad Request</td>
+<td>Invalid input</td>
+<td>JSON/body/parameters</td>
+</tr>
+
+<tr>
+<td>401 Unauthorized</td>
+<td>Missing/invalid authentication</td>
+<td>Token or credentials</td>
+</tr>
+
+<tr>
+<td>403 Forbidden</td>
+<td>Insufficient permission</td>
+<td>User role/permissions</td>
+</tr>
+
+<tr>
+<td>405 Method Not Allowed</td>
+<td>Wrong HTTP method</td>
+<td>GET/POST/PUT/etc.</td>
+</tr>
+
+<tr>
+<td>422 Unprocessable Content</td>
+<td>Validation problem</td>
+<td>Request fields</td>
+</tr>
+
+<tr>
+<td>500 Server Error</td>
+<td>Backend exception</td>
+<td>Server logs</td>
+</tr>
+
+<tr>
+<td>Connection refused</td>
+<td>Server not running</td>
+<td>Start backend</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<h3>Debugging Checklist</h3>
+
+<ol>
+
+<li>Check whether the backend server is running.</li>
+
+<li>Check the API base URL.</li>
+
+<li>Check the endpoint path.</li>
+
+<li>Check the HTTP method.</li>
+
+<li>Check query parameters.</li>
+
+<li>Check request headers.</li>
+
+<li>Check authentication.</li>
+
+<li>Check JSON syntax.</li>
+
+<li>Check required fields.</li>
+
+<li>Check backend logs.</li>
+
+</ol>
+
+<div class="warning">
+
+Do not immediately assume the API is broken. First inspect the
+request URL, method, headers, body and response status.
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 17 -->
+
+<section id="interactive" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+<div class="section-number">17</div>
+
+<h2>Interactive API Tester</h2>
+
+</div>
+
+<p>
+Choose an operation to simulate what you would inspect in Postman.
+</p>
+
+<div class="interactive">
+
+<div class="controls">
+
+<button class="btn"
+onclick="simulatePostman('GET')">
+GET
+</button>
+
+<button class="btn"
+onclick="simulatePostman('POST')">
+POST
+</button>
+
+<button class="btn"
+onclick="simulatePostman('PUT')">
+PUT
+</button>
+
+<button class="btn"
+onclick="simulatePostman('DELETE')">
+DELETE
+</button>
+
+<button class="btn"
+onclick="simulatePostman('AUTH')">
+AUTH
+</button>
+
+<button class="btn"
+onclick="simulatePostman('ERROR')">
+ERROR
+</button>
+
+</div>
+
+<div class="result" id="apiResult">
+Select a request to inspect...
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 18 -->
+
+<section id="practice" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+<div class="section-number">18</div>
+
+<h2>Practice Challenge</h2>
+
+</div>
+
+<h3>Test a Student Management REST API</h3>
+
+<p>
+Assume your backend provides:
+</p>
+
+<div class="code-box">
+
+<div class="code-header">
+<span>API Base URL</span>
+</div>
+
+<pre>http://localhost:8000/api</pre>
+
+</div>
+
+<h3>Your Tasks</h3>
+
+<ol>
+
+<li>
+Create a Postman collection named
+<strong>Student Management API</strong>.
+</li>
+
+<li>
+Create a <strong>GET /students/</strong> request.
+</li>
+
+<li>
+Create a <strong>GET /students/101/</strong> request.
+</li>
+
+<li>
+Create a <strong>POST /students/</strong> request with JSON.
+</li>
+
+<li>
+Create a <strong>PUT /students/101/</strong> request.
+</li>
+
+<li>
+Create a <strong>PATCH /students/101/</strong> request.
+</li>
+
+<li>
+Create a <strong>DELETE /students/101/</strong> request.
+</li>
+
+<li>
+Add a test that checks for the expected status code.
+</li>
+
+<li>
+Create a variable called <strong>baseUrl</strong>.
+</li>
+
+<li>
+Test what happens when the student ID does not exist.
+</li>
+
+</ol>
+
+<h3>Challenge JSON</h3>
+
+<div class="code-box">
+
+<div class="code-header">
+
+<span>POST Body</span>
+
+<button class="copy-btn" onclick="copyCode(this)">
+Copy
+</button>
+
+</div>
+
+<pre>{
+    "name": "Ananya",
+    "email": "ananya@example.com",
+    "age": 20,
+    "course": "Python"
+}</pre>
+
+</div>
+
+<h3>Expected Testing Sequence</h3>
+
+<div class="flow">
+
+<div class="flow-box">
+Create
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Read
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Update
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Delete
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Verify
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 19 -->
+
+<section id="quiz" class="reveal">
+
+<div class="section-card">
+
+<div class="section-title">
+
+<div class="section-number">19</div>
+
+<h2>Quick Knowledge Check</h2>
+
+</div>
+
+
+<div class="quiz">
+
+<h3>
+What is Postman mainly used for?
+</h3>
+
+<div class="option"
+data-correct="true"
+onclick="checkAnswer(this)">
+A. Building and testing API requests
+</div>
+
+<div class="option"
+data-correct="false"
+onclick="checkAnswer(this)">
+B. Designing database tables only
+</div>
+
+<div class="option"
+data-correct="false"
+onclick="checkAnswer(this)">
+C. Editing images
+</div>
+
+<div class="option"
+data-correct="false"
+onclick="checkAnswer(this)">
+D. Compiling Python programs
+</div>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<h3>
+Which HTTP method is normally used to retrieve data?
+</h3>
+
+<div class="option"
+data-correct="true"
+onclick="checkAnswer(this)">
+A. GET
+</div>
+
+<div class="option"
+data-correct="false"
+onclick="checkAnswer(this)">
+B. POST
+</div>
+
+<div class="option"
+data-correct="false"
+onclick="checkAnswer(this)">
+C. DELETE
+</div>
+
+<div class="option"
+data-correct="false"
+onclick="checkAnswer(this)">
+D. PATCH
+</div>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<h3>
+Where would you normally put JSON data for a POST request in Postman?
+</h3>
+
+<div class="option"
+data-correct="false"
+onclick="checkAnswer(this)">
+A. Params only
+</div>
+
+<div class="option"
+data-correct="true"
+onclick="checkAnswer(this)">
+B. Body → raw → JSON
+</div>
+
+<div class="option"
+data-correct="false"
+onclick="checkAnswer(this)">
+C. Collection name
+</div>
+
+<div class="option"
+data-correct="false"
+onclick="checkAnswer(this)">
+D. Response status
+</div>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<h3>
+What does a 401 response usually indicate?
+</h3>
+
+<div class="option"
+data-correct="false"
+onclick="checkAnswer(this)">
+A. Successful creation
+</div>
+
+<div class="option"
+data-correct="true"
+onclick="checkAnswer(this)">
+B. Authentication is missing or invalid
+</div>
+
+<div class="option"
+data-correct="false"
+onclick="checkAnswer(this)">
+C. Resource was deleted successfully
+</div>
+
+<div class="option"
+data-correct="false"
+onclick="checkAnswer(this)">
+D. Server returned normal data
+</div>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<h3>
+What is the purpose of a Postman collection?
+</h3>
+
+<div class="option"
+data-correct="true"
+onclick="checkAnswer(this)">
+A. Group related API requests
+</div>
+
+<div class="option"
+data-correct="false"
+onclick="checkAnswer(this)">
+B. Store database passwords publicly
+</div>
+
+<div class="option"
+data-correct="false"
+onclick="checkAnswer(this)">
+C. Replace the backend
+</div>
+
+<div class="option"
+data-correct="false"
+onclick="checkAnswer(this)">
+D. Create HTML pages
+</div>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<h3>
+Which feature helps reuse values such as a base API URL?
+</h3>
+
+<div class="option"
+data-correct="false"
+onclick="checkAnswer(this)">
+A. Response body
+</div>
+
+<div class="option"
+data-correct="true"
+onclick="checkAnswer(this)">
+B. Variables
+</div>
+
+<div class="option"
+data-correct="false"
+onclick="checkAnswer(this)">
+C. Status codes
+</div>
+
+<div class="option"
+data-correct="false"
+onclick="checkAnswer(this)">
+D. HTTP method
+</div>
+
+<div class="quiz-result"></div>
+
+</div>
+
+
+<div class="quiz">
+
+<h3>
+Which status code would commonly indicate successful resource creation?
+</h3>
+
+<div class="option"
+data-correct="false"
+onclick="checkAnswer(this)">
+A. 404
+</div>
+
+<div class="option"
+data-correct="true"
+onclick="checkAnswer(this)">
+B. 201
+</div>
+
+<div class="option"
+data-correct="false"
+onclick="checkAnswer(this)">
+C. 500
+</div>
+
+<div class="option"
+data-correct="false"
+onclick="checkAnswer(this)">
+D. 401
+</div>
+
+<div class="quiz-result"></div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 20 -->
+
+<section id="takeaway" class="reveal">
+
+<div class="takeaway">
+
+<div class="section-title">
+
+<div class="section-number">20</div>
+
+<h2>Lesson Takeaway</h2>
+
+</div>
+
+<ul>
+
+<li>
+<strong>Postman</strong> allows developers to test REST APIs directly.
+</li>
+
+<li>
+You can test <strong>GET, POST, PUT, PATCH and DELETE</strong>
+requests.
+</li>
+
+<li>
+Request URLs can contain <strong>path parameters and query parameters</strong>.
+</li>
+
+<li>
+Headers can contain information such as
+<strong>Content-Type</strong> and <strong>Authorization</strong>.
+</li>
+
+<li>
+POST, PUT and PATCH requests can send JSON data in the request body.
+</li>
+
+<li>
+Postman displays the response status, headers, body and other
+response information.
+</li>
+
+<li>
+Authentication can be tested by sending the appropriate credentials
+or access tokens.
+</li>
+
+<li>
+Variables allow requests to be reused across different environments.
+</li>
+
+<li>
+Collections organize related API requests.
+</li>
+
+<li>
+Postman tests can automatically verify response behavior.
+</li>
+
+<li>
+API errors should be analyzed using the status code, response body,
+request configuration and server logs.
+</li>
+
+</ul>
+
+<div class="success">
+
+<strong>Lesson 14 complete.</strong>
+
+<br><br>
+
+You can now use Postman to create, send, inspect and test REST API
+requests.
+
+<br><br>
+
+<strong>Next → Lesson 15: Complete Application-to-Application API Project</strong>
+
+</div>
+
+</div>
+
+</section>
+
+
+</main>
+
+
+<script>
+
+/* PROGRESS BAR */
+
+window.addEventListener("scroll",function(){
+
+    const scrollTop =
+        document.documentElement.scrollTop ||
+        document.body.scrollTop;
+
+    const documentHeight =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+
+    let percentage = 0;
+
+    if(documentHeight > 0){
+
+        percentage =
+            (scrollTop / documentHeight) * 100;
+
+    }
+
+    document.getElementById("progressBar")
+        .style.width =
+        percentage + "%";
+
+});
+
+
+/* COPY CODE */
+
+function copyCode(button){
+
+    const codeBox =
+        button.parentElement.parentElement;
+
+    const pre =
+        codeBox.querySelector("pre");
+
+    if(!pre){
+        return;
+    }
+
+    const code =
+        pre.innerText;
+
+    if(navigator.clipboard){
+
+        navigator.clipboard.writeText(code)
+            .then(function(){
+
+                showCopied(button);
+
+            })
+            .catch(function(){
+
+                fallbackCopy(code,button);
+
+            });
+
+    }else{
+
+        fallbackCopy(code,button);
+
+    }
+
+}
+
+
+function fallbackCopy(text,button){
+
+    const textarea =
+        document.createElement("textarea");
+
+    textarea.value = text;
+
+    document.body.appendChild(textarea);
+
+    textarea.select();
+
+    document.execCommand("copy");
+
+    document.body.removeChild(textarea);
+
+    showCopied(button);
+
+}
+
+
+function showCopied(button){
+
+    const oldText =
+        button.innerText;
+
+    button.innerText =
+        "Copied!";
+
+    setTimeout(function(){
+
+        button.innerText =
+            oldText;
+
+    },1200);
+
+}
+
+
+/* SEARCH */
+
+const searchInput =
+    document.getElementById("searchInput");
+
+searchInput.addEventListener("input",function(){
+
+    const query =
+        searchInput.value
+        .toLowerCase()
+        .trim();
+
+    const sections =
+        document.querySelectorAll("section");
+
+    sections.forEach(function(section){
+
+        const text =
+            section.innerText.toLowerCase();
+
+        if(query === ""){
+
+            section.style.display = "";
+
+        }
+        else if(text.includes(query)){
+
+            section.style.display = "";
+
+        }
+        else{
+
+            section.style.display = "none";
+
+        }
+
+    });
+
+});
+
+
+/* POSTMAN SIMULATOR */
+
+function simulatePostman(type){
+
+    const result =
+        document.getElementById("apiResult");
+
+    let text = "";
+
+    if(type === "GET"){
+
+        text =
+`POSTMAN REQUEST
+
+GET {{baseUrl}}/api/students/
+
+        ↓
+
+REQUEST SENT
+
+        ↓
+
+SERVER RESPONSE
+
+Status: 200 OK
+
+{
+    "students": [
+        {
+            "id": 101,
+            "name": "Pradeep",
+            "course": "REST API"
+        },
+        {
+            "id": 102,
+            "name": "Ananya",
+            "course": "Python"
+        }
+    ]
+}
+
+✓ Request successful
+✓ JSON received
+✓ Student list available`;
+
+    }
+
+    else if(type === "POST"){
+
+        text =
+`POSTMAN REQUEST
+
+POST {{baseUrl}}/api/students/
+
+Headers:
+Content-Type: application/json
+
+Body:
+
+{
+    "name": "Pradeep",
+    "email": "pradeep@example.com",
+    "age": 21,
+    "course": "REST API"
+}
+
+        ↓
+
+SERVER
+
+Validating request...
+
+✓ Valid JSON
+✓ Required fields present
+
+        ↓
+
+RESPONSE
+
+201 Created
+
+{
+    "id": 103,
+    "name": "Pradeep",
+    "message":
+        "Student created successfully"
+}
+
+✓ Test passed`;
+
+    }
+
+    else if(type === "PUT"){
+
+        text =
+`POSTMAN REQUEST
+
+PUT {{baseUrl}}/api/students/101/
+
+Body:
+
+{
+    "name": "Pradeep",
+    "email": "updated@example.com",
+    "age": 22,
+    "course": "Advanced REST API"
+}
+
+        ↓
+
+SERVER
+
+Updating Student 101...
+
+        ↓
+
+RESPONSE
+
+200 OK
+
+{
+    "id": 101,
+    "name": "Pradeep",
+    "age": 22
+}
+
+✓ Update successful`;
+
+    }
+
+    else if(type === "DELETE"){
+
+        text =
+`POSTMAN REQUEST
+
+DELETE {{baseUrl}}/api/students/101/
+
+        ↓
+
+SERVER
+
+Searching Student 101...
+
+✓ Student found
+
+Deleting...
+
+        ↓
+
+RESPONSE
+
+204 No Content
+
+✓ Delete successful
+
+Next verification:
+
+GET /students/101/
+
+Expected:
+
+404 Not Found`;
+
+    }
+
+    else if(type === "AUTH"){
+
+        text =
+`POSTMAN REQUEST
+
+GET {{baseUrl}}/api/profile/
+
+Authorization:
+
+Bearer {{accessToken}}
+
+        ↓
+
+SERVER
+
+Checking token...
+
+✓ Token present
+✓ Token valid
+✓ Permission granted
+
+        ↓
+
+RESPONSE
+
+200 OK
+
+{
+    "id": 101,
+    "name": "Pradeep",
+    "role": "student"
+}
+
+✓ Protected endpoint accessed`;
+
+    }
+
+    else if(type === "ERROR"){
+
+        text =
+`POSTMAN REQUEST
+
+GET {{baseUrl}}/api/students/999/
+
+        ↓
+
+SERVER
+
+Searching Student 999...
+
+✗ Resource not found
+
+        ↓
+
+RESPONSE
+
+404 Not Found
+
+{
+    "error":
+        "Student not found",
+    "code":
+        "STUDENT_NOT_FOUND"
+}
+
+DEBUG CHECKLIST:
+
+1. Is the URL correct?
+2. Does Student 999 exist?
+3. Is the endpoint correct?
+4. Is the HTTP method correct?
+
+✓ Postman makes the error visible
+  before connecting a frontend.`;
+
+    }
+
+    result.innerText =
+        text;
+
+}
+
+
+/* QUIZ */
+
+function checkAnswer(option){
+
+    const quiz =
+        option.parentElement;
+
+    const options =
+        quiz.querySelectorAll(".option");
+
+    const result =
+        quiz.querySelector(".quiz-result");
+
+    options.forEach(function(item){
+
+        item.style.pointerEvents =
+            "none";
+
+    });
+
+    const correct =
+        option.getAttribute(
+            "data-correct"
+        ) === "true";
+
+    if(correct){
+
+        option.classList.add("correct");
+
+        result.innerText =
+            "✓ Correct! Excellent.";
+
+        result.style.color =
+            "#16a34a";
+
+    }
+    else{
+
+        option.classList.add("wrong");
+
+        result.innerText =
+            "✗ Incorrect. Review this concept.";
+
+        result.style.color =
+            "#dc2626";
+
+    }
+
+}
+
+
+/* SCROLL REVEAL */
+
+const revealElements =
+    document.querySelectorAll(".reveal");
+
+const observer =
+    new IntersectionObserver(
+        function(entries){
+
+            entries.forEach(function(entry){
+
+                if(entry.isIntersecting){
+
+                    entry.target.classList.add("show");
+
+                }
+
+            });
+
+        },
+        {
+            threshold:.08
+        }
+    );
+
+
+revealElements.forEach(function(element){
+
+    observer.observe(element);
+
+});
+
+
+/* ACTIVE SIDEBAR */
+
+const navLinks =
+    document.querySelectorAll(".nav a");
+
+const sections =
+    document.querySelectorAll("section[id]");
+
+const navObserver =
+    new IntersectionObserver(
+        function(entries){
+
+            entries.forEach(function(entry){
+
+                if(entry.isIntersecting){
+
+                    navLinks.forEach(function(link){
+
+                        link.classList.remove("active");
+
+                        if(
+                            link.getAttribute("href") ===
+                            "#" + entry.target.id
+                        ){
+
+                            link.classList.add("active");
+
+                        }
+
+                    });
+
+                }
+
+            });
+
+        },
+        {
+            rootMargin:"-20% 0px -65% 0px"
+        }
+    );
+
+
+sections.forEach(function(section){
+
+    navObserver.observe(section);
+
+});
+
+</script>
+
+</body>
+</html>

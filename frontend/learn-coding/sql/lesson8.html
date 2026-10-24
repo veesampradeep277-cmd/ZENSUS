@@ -1,0 +1,4871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS | SQL Lesson 08 - GROUP BY</title>
+
+<style>
+/* =========================================================
+   ZENSUS SQL LESSON 08 — GROUP BY
+   Standalone HTML + CSS + JavaScript
+   ========================================================= */
+
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --secondary: #7c3aed;
+    --success: #059669;
+    --warning: #d97706;
+    --danger: #dc2626;
+
+    --bg: #f5f7fb;
+    --surface: #ffffff;
+    --surface-soft: #f8fafc;
+
+    --text: #111827;
+    --text-soft: #475569;
+    --muted: #64748b;
+
+    --border: #e2e8f0;
+    --code-bg: #0b1220;
+    --code-text: #e2e8f0;
+
+    --shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
+    --radius: 18px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+}
+
+/* =========================================================
+   SCROLL PROGRESS
+   ========================================================= */
+
+.progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 4px;
+    background: linear-gradient(
+        90deg,
+        var(--primary),
+        var(--secondary)
+    );
+    z-index: 9999;
+}
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+
+    width: 265px;
+    height: 100vh;
+
+    background: #ffffff;
+    border-right: 1px solid var(--border);
+
+    padding: 24px 16px;
+
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    padding: 8px 12px 25px;
+}
+
+.brand-logo {
+    width: 42px;
+    height: 42px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 12px;
+
+    background: linear-gradient(
+        135deg,
+        var(--primary),
+        var(--secondary)
+    );
+
+    color: white;
+    font-weight: 800;
+    font-size: 19px;
+}
+
+.brand-text {
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.brand-text span {
+    color: var(--primary);
+}
+
+.lesson-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+
+    color: var(--muted);
+
+    padding: 0 12px;
+    margin-bottom: 8px;
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nav a {
+    text-decoration: none;
+    color: var(--text-soft);
+
+    padding: 10px 12px;
+
+    border-radius: 10px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    transition: 0.2s;
+}
+
+.nav a:hover,
+.nav a.active {
+    background: #eff6ff;
+    color: var(--primary);
+}
+
+.sidebar-footer {
+    margin-top: 25px;
+    padding: 15px 12px;
+
+    background: var(--surface-soft);
+    border: 1px solid var(--border);
+
+    border-radius: 13px;
+}
+
+.sidebar-footer small {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.sidebar-footer strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 13px;
+}
+
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+.main {
+    margin-left: 265px;
+    min-height: 100vh;
+}
+
+/* =========================================================
+   MOBILE HEADER
+   ========================================================= */
+
+.mobile-header {
+    display: none;
+
+    position: sticky;
+    top: 0;
+
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(12px);
+
+    border-bottom: 1px solid var(--border);
+
+    padding: 14px 18px;
+
+    z-index: 900;
+}
+
+.menu-btn {
+    border: none;
+    background: #eff6ff;
+    color: var(--primary);
+
+    width: 40px;
+    height: 40px;
+
+    border-radius: 10px;
+
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero {
+    position: relative;
+
+    padding: 70px 7% 65px;
+
+    background:
+        radial-gradient(
+            circle at 85% 20%,
+            rgba(37,99,235,0.09),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 70% 90%,
+            rgba(124,58,237,0.07),
+            transparent 30%
+        ),
+        #ffffff;
+
+    border-bottom: 1px solid var(--border);
+
+    overflow: hidden;
+}
+
+.breadcrumb {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 18px;
+}
+
+.breadcrumb span {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.hero-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 45px;
+    align-items: center;
+}
+
+.hero h1 {
+    font-size: clamp(38px, 5vw, 66px);
+    line-height: 1.05;
+
+    letter-spacing: -2.5px;
+
+    margin-bottom: 22px;
+}
+
+.gradient-text {
+    background: linear-gradient(
+        90deg,
+        var(--primary),
+        var(--secondary)
+    );
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    color: transparent;
+}
+
+.hero p {
+    max-width: 700px;
+
+    font-size: 18px;
+    color: var(--text-soft);
+
+    margin-bottom: 25px;
+}
+
+.hero-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.tag {
+    padding: 7px 12px;
+
+    background: #f1f5f9;
+    border: 1px solid var(--border);
+
+    border-radius: 999px;
+
+    color: var(--text-soft);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* =========================================================
+   HERO CODE
+   ========================================================= */
+
+.hero-code {
+    background: var(--code-bg);
+    color: var(--code-text);
+
+    border-radius: 18px;
+
+    padding: 25px;
+
+    box-shadow: 0 20px 50px rgba(15,23,42,0.18);
+
+    border: 1px solid #1e293b;
+}
+
+.terminal-bar {
+    display: flex;
+    gap: 7px;
+    margin-bottom: 20px;
+}
+
+.terminal-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #64748b;
+}
+
+.hero-code pre,
+.hero-code code {
+    color: var(--code-text);
+    font-family:
+        "Cascadia Code",
+        "Fira Code",
+        Consolas,
+        monospace;
+
+    font-size: 13px;
+    line-height: 1.8;
+
+    white-space: pre-wrap;
+}
+
+.sql-keyword {
+    color: #60a5fa;
+}
+
+.sql-function {
+    color: #c084fc;
+}
+
+.sql-string {
+    color: #86efac;
+}
+
+.sql-comment {
+    color: #94a3b8;
+}
+
+/* =========================================================
+   CONTENT
+   ========================================================= */
+
+.content {
+    width: min(1180px, 92%);
+    margin: auto;
+
+    padding: 55px 0 100px;
+}
+
+.section {
+    margin-bottom: 75px;
+    scroll-margin-top: 30px;
+}
+
+.section-heading {
+    margin-bottom: 28px;
+}
+
+.eyebrow {
+    color: var(--primary);
+
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    margin-bottom: 7px;
+}
+
+.section h2 {
+    font-size: clamp(27px, 4vw, 38px);
+    letter-spacing: -1px;
+    line-height: 1.2;
+
+    margin-bottom: 12px;
+}
+
+.section-heading p {
+    color: var(--text-soft);
+    max-width: 820px;
+}
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.card {
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius);
+
+    padding: 24px;
+
+    box-shadow: var(--shadow);
+}
+
+.card-icon {
+    width: 43px;
+    height: 43px;
+
+    display: grid;
+    place-items: center;
+
+    background: #eff6ff;
+    color: var(--primary);
+
+    border-radius: 12px;
+
+    font-size: 19px;
+
+    margin-bottom: 15px;
+}
+
+.card h3 {
+    font-size: 17px;
+    margin-bottom: 8px;
+}
+
+.card p {
+    color: var(--text-soft);
+    font-size: 14px;
+}
+
+/* =========================================================
+   OBJECTIVES
+   ========================================================= */
+
+.objectives {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 18px;
+}
+
+.objective {
+    display: flex;
+    gap: 14px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+    border-radius: 15px;
+
+    padding: 17px;
+}
+
+.check {
+    min-width: 30px;
+    height: 30px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 50%;
+
+    background: #ecfdf5;
+    color: var(--success);
+
+    font-weight: 900;
+}
+
+.objective strong {
+    display: block;
+    margin-bottom: 2px;
+}
+
+.objective span {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+/* =========================================================
+   CONCEPT BOX
+   ========================================================= */
+
+.concept-box {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-left: 5px solid var(--primary);
+
+    border-radius: 15px;
+
+    padding: 22px;
+
+    margin: 20px 0;
+}
+
+.concept-box strong {
+    color: var(--primary);
+}
+
+.concept-box p {
+    color: var(--text-soft);
+}
+
+/* =========================================================
+   CODE BOX
+   ========================================================= */
+
+.code-box {
+    margin: 20px 0;
+
+    background: var(--code-bg);
+    color: var(--code-text);
+
+    border-radius: 15px;
+
+    overflow: hidden;
+
+    border: 1px solid #1e293b;
+}
+
+.code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 10px 16px;
+
+    background: #111827;
+
+    border-bottom: 1px solid #1e293b;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+.copy-btn {
+    border: 1px solid #334155;
+
+    background: #1e293b;
+    color: #cbd5e1;
+
+    border-radius: 7px;
+
+    padding: 5px 9px;
+
+    cursor: pointer;
+
+    font-size: 11px;
+}
+
+.copy-btn:hover {
+    background: #334155;
+}
+
+.code-box pre,
+.code-box code {
+    color: var(--code-text);
+
+    font-family:
+        "Cascadia Code",
+        "Fira Code",
+        Consolas,
+        monospace;
+
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.code-box pre {
+    padding: 20px;
+
+    overflow-x: auto;
+}
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.table-wrapper {
+    overflow-x: auto;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 15px;
+
+    margin: 22px 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+
+    min-width: 600px;
+}
+
+th {
+    background: #f8fafc;
+
+    color: #334155;
+
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+th,
+td {
+    padding: 13px 15px;
+
+    border-bottom: 1px solid var(--border);
+
+    text-align: left;
+}
+
+td {
+    color: var(--text-soft);
+    font-size: 14px;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+/* =========================================================
+   FLOWCHART
+   ========================================================= */
+
+.flowchart {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 12px;
+
+    flex-wrap: wrap;
+
+    margin: 30px 0;
+}
+
+.flow-node {
+    padding: 15px 19px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 13px;
+
+    box-shadow: var(--shadow);
+
+    text-align: center;
+
+    min-width: 130px;
+
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.flow-node small {
+    display: block;
+
+    color: var(--muted);
+
+    font-weight: 500;
+
+    margin-top: 2px;
+}
+
+.flow-arrow {
+    color: var(--primary);
+
+    font-size: 22px;
+
+    font-weight: 900;
+}
+
+/* =========================================================
+   GROUPING VISUAL
+   ========================================================= */
+
+.group-animation {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 18px;
+
+    padding: 25px;
+
+    box-shadow: var(--shadow);
+}
+
+.group-stage {
+    display: grid;
+
+    grid-template-columns: 1fr auto 1fr;
+
+    align-items: center;
+
+    gap: 20px;
+}
+
+.stage-title {
+    font-size: 12px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+
+    color: var(--muted);
+
+    margin-bottom: 12px;
+
+    font-weight: 800;
+}
+
+.student-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+.student-row {
+    padding: 10px 13px;
+
+    background: #f8fafc;
+
+    border: 1px solid var(--border);
+
+    border-radius: 9px;
+
+    font-size: 13px;
+
+    display: flex;
+    justify-content: space-between;
+
+    transition: 0.35s;
+}
+
+.student-row.highlight {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+.group-box {
+    border: 1px solid #bfdbfe;
+
+    background: #eff6ff;
+
+    border-radius: 13px;
+
+    padding: 13px;
+
+    margin-bottom: 9px;
+}
+
+.group-box strong {
+    color: var(--primary);
+
+    display: block;
+
+    margin-bottom: 3px;
+}
+
+.group-members {
+    font-size: 12px;
+
+    color: var(--text-soft);
+}
+
+.animate-btn {
+    display: block;
+
+    margin: 22px auto 0;
+
+    border: none;
+
+    background: var(--primary);
+
+    color: white;
+
+    padding: 11px 19px;
+
+    border-radius: 10px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.animate-btn:hover {
+    background: var(--primary-dark);
+}
+
+/* =========================================================
+   COMPARISON
+   ========================================================= */
+
+.compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 20px;
+}
+
+.compare-card {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 16px;
+
+    padding: 23px;
+}
+
+.compare-card.good {
+    border-top: 4px solid var(--success);
+}
+
+.compare-card.bad {
+    border-top: 4px solid var(--danger);
+}
+
+.compare-card h3 {
+    margin-bottom: 13px;
+}
+
+.compare-card ul {
+    padding-left: 20px;
+
+    color: var(--text-soft);
+}
+
+.compare-card li {
+    margin-bottom: 7px;
+}
+
+/* =========================================================
+   INFO GRID
+   ========================================================= */
+
+.info-grid {
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 20px;
+}
+
+.info-card {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 16px;
+
+    padding: 23px;
+}
+
+.info-card h3 {
+    margin-bottom: 10px;
+}
+
+.info-card p,
+.info-card li {
+    color: var(--text-soft);
+
+    font-size: 14px;
+}
+
+.info-card ul {
+    padding-left: 20px;
+}
+
+/* =========================================================
+   CALLOUT
+   ========================================================= */
+
+.callout {
+    display: flex;
+
+    gap: 14px;
+
+    background: #eff6ff;
+
+    border: 1px solid #bfdbfe;
+
+    border-radius: 15px;
+
+    padding: 18px;
+
+    margin: 20px 0;
+}
+
+.callout-icon {
+    font-size: 21px;
+}
+
+.callout strong {
+    color: #1d4ed8;
+}
+
+.callout p {
+    color: #334155;
+
+    font-size: 14px;
+}
+
+/* =========================================================
+   SIMULATOR
+   ========================================================= */
+
+.lab {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 20px;
+
+    box-shadow: var(--shadow);
+
+    overflow: hidden;
+}
+
+.lab-header {
+    padding: 20px 23px;
+
+    border-bottom: 1px solid var(--border);
+
+    background: #f8fafc;
+}
+
+.lab-header h3 {
+    margin-bottom: 4px;
+}
+
+.lab-header p {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.lab-body {
+    padding: 23px;
+}
+
+.controls {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 13px;
+
+    margin-bottom: 20px;
+}
+
+.control-group label {
+    display: block;
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    color: var(--muted);
+
+    margin-bottom: 6px;
+}
+
+select {
+    width: 100%;
+
+    padding: 11px 12px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 9px;
+
+    background: white;
+
+    color: var(--text);
+
+    outline: none;
+}
+
+select:focus {
+    border-color: var(--primary);
+
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+
+.run-btn {
+    border: none;
+
+    background: var(--primary);
+
+    color: white;
+
+    padding: 11px 18px;
+
+    border-radius: 9px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    margin-bottom: 20px;
+}
+
+.run-btn:hover {
+    background: var(--primary-dark);
+}
+
+.query-output {
+    background: var(--code-bg);
+
+    color: var(--code-text);
+
+    border-radius: 11px;
+
+    padding: 16px;
+
+    margin-bottom: 20px;
+
+    font-family: Consolas, monospace;
+
+    font-size: 13px;
+
+    overflow-x: auto;
+}
+
+/* =========================================================
+   AGGREGATION DEMO
+   ========================================================= */
+
+.aggregation-demo {
+    display: grid;
+
+    grid-template-columns: repeat(5, 1fr);
+
+    gap: 12px;
+
+    margin-top: 20px;
+}
+
+.metric {
+    background: #f8fafc;
+
+    border: 1px solid var(--border);
+
+    border-radius: 13px;
+
+    padding: 16px;
+
+    text-align: center;
+}
+
+.metric-value {
+    font-size: 25px;
+
+    font-weight: 800;
+
+    color: var(--primary);
+}
+
+.metric-label {
+    font-size: 11px;
+
+    color: var(--muted);
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.5px;
+}
+
+/* =========================================================
+   QUIZ
+   ========================================================= */
+
+.quiz {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 18px;
+
+    padding: 25px;
+
+    box-shadow: var(--shadow);
+}
+
+.question {
+    padding: 20px 0;
+
+    border-bottom: 1px solid var(--border);
+}
+
+.question:last-child {
+    border-bottom: none;
+}
+
+.question h3 {
+    font-size: 15px;
+
+    margin-bottom: 12px;
+}
+
+.options {
+    display: grid;
+
+    gap: 8px;
+}
+
+.option {
+    display: block;
+
+    padding: 10px 12px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    color: var(--text-soft);
+
+    font-size: 13px;
+}
+
+.option:hover {
+    background: #f8fafc;
+}
+
+.option input {
+    margin-right: 8px;
+}
+
+.quiz-btn {
+    margin-top: 20px;
+
+    border: none;
+
+    background: var(--secondary);
+
+    color: white;
+
+    padding: 11px 18px;
+
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    font-weight: 700;
+}
+
+.quiz-result {
+    margin-top: 18px;
+
+    padding: 15px;
+
+    border-radius: 10px;
+
+    display: none;
+
+    background: #f0fdf4;
+
+    border: 1px solid #bbf7d0;
+
+    color: #166534;
+
+    font-weight: 700;
+}
+
+/* =========================================================
+   INTERVIEW
+   ========================================================= */
+
+.interview {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+details {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 12px;
+
+    padding: 15px 18px;
+}
+
+summary {
+    cursor: pointer;
+
+    font-weight: 700;
+
+    color: var(--text);
+}
+
+details p {
+    margin-top: 12px;
+
+    color: var(--text-soft);
+
+    font-size: 14px;
+}
+
+/* =========================================================
+   CHECKLIST
+   ========================================================= */
+
+.checklist {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+}
+
+.check-item {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 11px;
+
+    padding: 13px;
+
+    color: var(--text-soft);
+
+    font-size: 13px;
+}
+
+.check-item input {
+    margin-right: 8px;
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.lesson-footer {
+    text-align: center;
+
+    padding: 50px 20px;
+
+    border-top: 1px solid var(--border);
+
+    background: white;
+}
+
+.lesson-footer h2 {
+    margin-bottom: 8px;
+}
+
+.lesson-footer p {
+    color: var(--muted);
+}
+
+.next-btn {
+    display: inline-block;
+
+    margin-top: 20px;
+
+    padding: 12px 20px;
+
+    background: var(--primary);
+
+    color: white;
+
+    text-decoration: none;
+
+    border-radius: 10px;
+
+    font-weight: 700;
+}
+
+/* =========================================================
+   REVEAL ANIMATION
+   IMPORTANT: CONTENT REMAINS VISIBLE EVEN IF JS FAILS
+   ========================================================= */
+
+.reveal {
+    opacity: 1;
+    transform: none;
+}
+
+.reveal.animate {
+    animation: revealUp 0.65s ease both;
+}
+
+@keyframes revealUp {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1000px) {
+
+    .hero-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .aggregation-demo {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 760px) {
+
+    .sidebar {
+        transform: translateX(-100%);
+        transition: 0.3s;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .mobile-header {
+        display: flex;
+
+        align-items: center;
+
+        gap: 12px;
+    }
+
+    .main {
+        margin-left: 0;
+    }
+
+    .hero {
+        padding: 45px 6% 45px;
+    }
+
+    .content {
+        width: 90%;
+        padding-top: 40px;
+    }
+
+    .card-grid,
+    .objectives,
+    .compare,
+    .info-grid,
+    .checklist {
+        grid-template-columns: 1fr;
+    }
+
+    .controls {
+        grid-template-columns: 1fr;
+    }
+
+    .group-stage {
+        grid-template-columns: 1fr;
+    }
+
+    .flow-arrow {
+        transform: rotate(90deg);
+    }
+
+    .aggregation-demo {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .hero h1 {
+        font-size: 39px;
+    }
+
+    .hero p {
+        font-size: 15px;
+    }
+
+    .aggregation-demo {
+        grid-template-columns: 1fr;
+    }
+
+    .section {
+        margin-bottom: 55px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- =======================================================
+     MOBILE HEADER
+     ======================================================= -->
+
+<div class="mobile-header">
+    <button class="menu-btn" id="menuBtn">☰</button>
+
+    <strong>ZENSUS SQL</strong>
+</div>
+
+<!-- =======================================================
+     SIDEBAR
+     ======================================================= -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+        <div class="brand-logo">Z</div>
+
+        <div class="brand-text">
+            ZEN<span>SUS</span>
+        </div>
+    </div>
+
+    <div class="lesson-label">
+        SQL Mastery
+    </div>
+
+    <nav class="nav">
+
+        <a href="#overview" class="active">
+            Overview
+        </a>
+
+        <a href="#mental-model">
+            Mental Model
+        </a>
+
+        <a href="#syntax">
+            Syntax
+        </a>
+
+        <a href="#aggregates">
+            Aggregate Functions
+        </a>
+
+        <a href="#where">
+            GROUP BY + WHERE
+        </a>
+
+        <a href="#having">
+            GROUP BY + HAVING
+        </a>
+
+        <a href="#multiple">
+            Multiple Columns
+        </a>
+
+        <a href="#advanced">
+            Advanced GROUP BY
+        </a>
+
+        <a href="#lab">
+            Interactive Lab
+        </a>
+
+        <a href="#mistakes">
+            Common Mistakes
+        </a>
+
+        <a href="#exam">
+            Exam Preparation
+        </a>
+
+        <a href="#interview">
+            Interview Questions
+        </a>
+
+        <a href="#quiz">
+            Quiz
+        </a>
+
+        <a href="#checklist">
+            Checklist
+        </a>
+
+    </nav>
+
+    <div class="sidebar-footer">
+        <small>Current lesson</small>
+        <strong>SQL • Lesson 08</strong>
+    </div>
+
+</aside>
+
+<!-- =======================================================
+     MAIN
+     ======================================================= -->
+
+<main class="main">
+
+<!-- =======================================================
+     HERO
+     ======================================================= -->
+
+<section class="hero" id="overview">
+
+    <div class="breadcrumb">
+        ZENSUS / SQL / <span>Lesson 08</span>
+    </div>
+
+    <div class="hero-grid">
+
+        <div>
+
+            <div class="eyebrow">
+                SQL Mastery • Lesson 08
+            </div>
+
+            <h1>
+                Master
+                <span class="gradient-text">
+                    GROUP BY
+                </span>
+            </h1>
+
+            <p>
+                Learn how SQL transforms thousands of individual rows
+                into meaningful groups and calculates summaries using
+                COUNT, SUM, AVG, MIN and MAX.
+            </p>
+
+            <div class="hero-tags">
+                <span class="tag">Grouping</span>
+                <span class="tag">Aggregations</span>
+                <span class="tag">WHERE</span>
+                <span class="tag">HAVING</span>
+                <span class="tag">Real-world SQL</span>
+                <span class="tag">Interview Ready</span>
+            </div>
+
+        </div>
+
+        <div class="hero-code">
+
+            <div class="terminal-bar">
+                <span class="terminal-dot"></span>
+                <span class="terminal-dot"></span>
+                <span class="terminal-dot"></span>
+            </div>
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    department,
+    <span class="sql-function">COUNT</span>(*) <span class="sql-keyword">AS</span> total_students,
+    <span class="sql-function">AVG</span>(marks) <span class="sql-keyword">AS</span> avg_marks
+
+<span class="sql-keyword">FROM</span> students
+
+<span class="sql-keyword">GROUP BY</span> department;</code></pre>
+
+        </div>
+
+    </div>
+
+</section>
+
+<div class="content">
+
+<!-- =======================================================
+     OBJECTIVES
+     ======================================================= -->
+
+<section class="section reveal">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Learning Objectives
+        </div>
+
+        <h2>What you will master</h2>
+
+        <p>
+            By the end of this lesson, you should be able to group,
+            summarize and analyze relational data confidently.
+        </p>
+
+    </div>
+
+    <div class="objectives">
+
+        <div class="objective">
+            <div class="check">✓</div>
+            <div>
+                <strong>Understand GROUP BY</strong>
+                <span>Learn why rows need to be grouped.</span>
+            </div>
+        </div>
+
+        <div class="objective">
+            <div class="check">✓</div>
+            <div>
+                <strong>Use Aggregate Functions</strong>
+                <span>COUNT, SUM, AVG, MIN and MAX.</span>
+            </div>
+        </div>
+
+        <div class="objective">
+            <div class="check">✓</div>
+            <div>
+                <strong>Combine WHERE</strong>
+                <span>Filter rows before grouping.</span>
+            </div>
+        </div>
+
+        <div class="objective">
+            <div class="check">✓</div>
+            <div>
+                <strong>Master HAVING</strong>
+                <span>Filter groups after aggregation.</span>
+            </div>
+        </div>
+
+        <div class="objective">
+            <div class="check">✓</div>
+            <div>
+                <strong>Multiple Grouping Columns</strong>
+                <span>Build hierarchical groups.</span>
+            </div>
+        </div>
+
+        <div class="objective">
+            <div class="check">✓</div>
+            <div>
+                <strong>Write Interview Queries</strong>
+                <span>Solve real-world SQL problems.</span>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     WHY GROUP BY
+     ======================================================= -->
+
+<section class="section reveal" id="mental-model">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Core Concept
+        </div>
+
+        <h2>Why do we need GROUP BY?</h2>
+
+        <p>
+            A normal SELECT works with individual rows.
+            GROUP BY allows SQL to treat multiple rows as one logical group.
+        </p>
+
+    </div>
+
+    <div class="concept-box">
+
+        <strong>Think of GROUP BY like sorting students into classrooms.</strong>
+
+        <p>
+            Suppose a college has 1,000 students from CSE, ECE, EEE
+            and Mechanical. Instead of analyzing every student separately,
+            we can group them by department and calculate statistics
+            for each department.
+        </p>
+
+    </div>
+
+    <div class="flowchart">
+
+        <div class="flow-node">
+            1,000 Rows
+            <small>Raw Data</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+            GROUP BY
+            <small>Department</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+            4 Groups
+            <small>CSE / ECE / EEE / MECH</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+            Aggregate
+            <small>COUNT / AVG / SUM</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+            Summary
+            <small>One row per group</small>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     VISUAL GROUPING
+     ======================================================= -->
+
+<section class="section reveal">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Visual Learning
+        </div>
+
+        <h2>See GROUP BY in action</h2>
+
+        <p>
+            SQL takes individual records and combines records having
+            the same grouping value.
+        </p>
+
+    </div>
+
+    <div class="group-animation">
+
+        <div class="group-stage">
+
+            <div>
+
+                <div class="stage-title">
+                    Individual Rows
+                </div>
+
+                <div class="student-list" id="studentRows">
+
+                    <div class="student-row">
+                        <span>Pradeep</span>
+                        <strong>CSE</strong>
+                    </div>
+
+                    <div class="student-row">
+                        <span>Rahul</span>
+                        <strong>ECE</strong>
+                    </div>
+
+                    <div class="student-row">
+                        <span>Arjun</span>
+                        <strong>CSE</strong>
+                    </div>
+
+                    <div class="student-row">
+                        <span>Priya</span>
+                        <strong>EEE</strong>
+                    </div>
+
+                    <div class="student-row">
+                        <span>Sai</span>
+                        <strong>ECE</strong>
+                    </div>
+
+                    <div class="student-row">
+                        <span>Divya</span>
+                        <strong>CSE</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="flow-arrow">
+                →
+            </div>
+
+            <div>
+
+                <div class="stage-title">
+                    Groups
+                </div>
+
+                <div class="group-box">
+                    <strong>CSE</strong>
+                    <span class="group-members">
+                        Pradeep · Arjun · Divya
+                    </span>
+                </div>
+
+                <div class="group-box">
+                    <strong>ECE</strong>
+                    <span class="group-members">
+                        Rahul · Sai
+                    </span>
+                </div>
+
+                <div class="group-box">
+                    <strong>EEE</strong>
+                    <span class="group-members">
+                        Priya
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <button
+            class="animate-btn"
+            onclick="animateGrouping()">
+            ▶ Animate Grouping
+        </button>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     BASIC SYNTAX
+     ======================================================= -->
+
+<section class="section reveal" id="syntax">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Syntax
+        </div>
+
+        <h2>The basic GROUP BY syntax</h2>
+
+    </div>
+
+    <div class="code-box">
+
+        <div class="code-header">
+            <span>Basic SQL</span>
+            <button class="copy-btn"
+                onclick="copyCode(this)">
+                Copy
+            </button>
+        </div>
+
+<pre><code>SELECT column_name,
+       AGGREGATE_FUNCTION(column_name)
+FROM table_name
+GROUP BY column_name;</code></pre>
+
+    </div>
+
+    <div class="concept-box">
+
+        <strong>Important rule:</strong>
+
+        <p>
+            When using GROUP BY, every selected column that is not
+            inside an aggregate function generally needs to appear
+            in the GROUP BY clause. Exact rules can vary for some
+            database systems, but this is the safest rule to learn.
+        </p>
+
+    </div>
+
+    <div class="code-box">
+
+        <div class="code-header">
+            <span>Example</span>
+            <button class="copy-btn"
+                onclick="copyCode(this)">
+                Copy
+            </button>
+        </div>
+
+<pre><code>SELECT department,
+       COUNT(*) AS total_students
+FROM students
+GROUP BY department;</code></pre>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     SAMPLE DATA
+     ======================================================= -->
+
+<section class="section reveal">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Dataset
+        </div>
+
+        <h2>Our students table</h2>
+
+        <p>
+            We will use this dataset throughout the lesson.
+        </p>
+
+    </div>
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Age</th>
+                    <th>Marks</th>
+                    <th>City</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>101</td>
+                    <td>Pradeep</td>
+                    <td>CSE</td>
+                    <td>19</td>
+                    <td>91</td>
+                    <td>Guntur</td>
+                </tr>
+
+                <tr>
+                    <td>102</td>
+                    <td>Rahul</td>
+                    <td>ECE</td>
+                    <td>20</td>
+                    <td>82</td>
+                    <td>Vijayawada</td>
+                </tr>
+
+                <tr>
+                    <td>103</td>
+                    <td>Arjun</td>
+                    <td>CSE</td>
+                    <td>19</td>
+                    <td>87</td>
+                    <td>Guntur</td>
+                </tr>
+
+                <tr>
+                    <td>104</td>
+                    <td>Priya</td>
+                    <td>EEE</td>
+                    <td>20</td>
+                    <td>76</td>
+                    <td>Tenali</td>
+                </tr>
+
+                <tr>
+                    <td>105</td>
+                    <td>Sai</td>
+                    <td>ECE</td>
+                    <td>19</td>
+                    <td>89</td>
+                    <td>Guntur</td>
+                </tr>
+
+                <tr>
+                    <td>106</td>
+                    <td>Divya</td>
+                    <td>CSE</td>
+                    <td>20</td>
+                    <td>94</td>
+                    <td>Vijayawada</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     AGGREGATE FUNCTIONS
+     ======================================================= -->
+
+<section class="section reveal" id="aggregates">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Core Tools
+        </div>
+
+        <h2>GROUP BY + Aggregate Functions</h2>
+
+        <p>
+            GROUP BY becomes especially powerful when combined with
+            aggregate functions.
+        </p>
+
+    </div>
+
+    <div class="card-grid">
+
+        <div class="card">
+
+            <div class="card-icon">
+                #
+            </div>
+
+            <h3>COUNT()</h3>
+
+            <p>
+                Counts rows or non-NULL values depending on the
+                expression.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-icon">
+                Σ
+            </div>
+
+            <h3>SUM()</h3>
+
+            <p>
+                Calculates the total of numeric values.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-icon">
+                μ
+            </div>
+
+            <h3>AVG()</h3>
+
+            <p>
+                Calculates the average of numeric values.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-icon">
+                ↓
+            </div>
+
+            <h3>MIN()</h3>
+
+            <p>
+                Finds the smallest value in each group.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-icon">
+                ↑
+            </div>
+
+            <h3>MAX()</h3>
+
+            <p>
+                Finds the largest value in each group.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-icon">
+                ◎
+            </div>
+
+            <h3>COUNT(DISTINCT)</h3>
+
+            <p>
+                Counts unique non-NULL values.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="code-box">
+
+        <div class="code-header">
+            <span>All major aggregates</span>
+            <button class="copy-btn"
+                onclick="copyCode(this)">
+                Copy
+            </button>
+        </div>
+
+<pre><code>SELECT department,
+
+       COUNT(*) AS total_students,
+
+       SUM(marks) AS total_marks,
+
+       AVG(marks) AS average_marks,
+
+       MIN(marks) AS lowest_marks,
+
+       MAX(marks) AS highest_marks
+
+FROM students
+
+GROUP BY department;</code></pre>
+
+    </div>
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Department</th>
+                    <th>COUNT</th>
+                    <th>SUM</th>
+                    <th>AVG</th>
+                    <th>MIN</th>
+                    <th>MAX</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>CSE</td>
+                    <td>3</td>
+                    <td>272</td>
+                    <td>90.67</td>
+                    <td>87</td>
+                    <td>94</td>
+                </tr>
+
+                <tr>
+                    <td>ECE</td>
+                    <td>2</td>
+                    <td>171</td>
+                    <td>85.50</td>
+                    <td>82</td>
+                    <td>89</td>
+                </tr>
+
+                <tr>
+                    <td>EEE</td>
+                    <td>1</td>
+                    <td>76</td>
+                    <td>76.00</td>
+                    <td>76</td>
+                    <td>76</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     COUNT IMPORTANT
+     ======================================================= -->
+
+<section class="section reveal">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Important Detail
+        </div>
+
+        <h2>COUNT(*) vs COUNT(column)</h2>
+
+    </div>
+
+    <div class="compare">
+
+        <div class="compare-card good">
+
+            <h3>COUNT(*)</h3>
+
+            <p>
+                Counts rows, including rows where individual columns
+                contain NULL.
+            </p>
+
+            <div class="code-box">
+
+<pre><code>SELECT department,
+       COUNT(*) AS total
+FROM students
+GROUP BY department;</code></pre>
+
+            </div>
+
+        </div>
+
+        <div class="compare-card">
+
+            <h3>COUNT(column)</h3>
+
+            <p>
+                Counts non-NULL values in that particular column.
+            </p>
+
+            <div class="code-box">
+
+<pre><code>SELECT department,
+       COUNT(phone) AS phones
+FROM students
+GROUP BY department;</code></pre>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     WHERE
+     ======================================================= -->
+
+<section class="section reveal" id="where">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Filtering Before Grouping
+        </div>
+
+        <h2>GROUP BY with WHERE</h2>
+
+        <p>
+            WHERE filters individual rows before GROUP BY creates groups.
+        </p>
+
+    </div>
+
+    <div class="flowchart">
+
+        <div class="flow-node">
+            FROM
+            <small>Get rows</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+            WHERE
+            <small>Filter rows</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+            GROUP BY
+            <small>Create groups</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+            Aggregate
+            <small>Calculate</small>
+        </div>
+
+    </div>
+
+    <div class="code-box">
+
+        <div class="code-header">
+            <span>Example</span>
+            <button class="copy-btn"
+                onclick="copyCode(this)">
+                Copy
+            </button>
+        </div>
+
+<pre><code>SELECT department,
+       AVG(marks) AS average_marks
+FROM students
+WHERE marks >= 80
+GROUP BY department;</code></pre>
+
+    </div>
+
+    <div class="callout">
+
+        <div class="callout-icon">💡</div>
+
+        <div>
+
+            <strong>Remember:</strong>
+
+            <p>
+                WHERE asks: "Which rows should participate?"
+                GROUP BY asks: "How should those remaining rows be grouped?"
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     HAVING
+     ======================================================= -->
+
+<section class="section reveal" id="having">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Group Filtering
+        </div>
+
+        <h2>GROUP BY with HAVING</h2>
+
+        <p>
+            HAVING filters groups after aggregation has taken place.
+        </p>
+
+    </div>
+
+    <div class="compare">
+
+        <div class="compare-card good">
+
+            <h3>WHERE</h3>
+
+            <ul>
+                <li>Filters individual rows.</li>
+                <li>Usually comes before GROUP BY.</li>
+                <li>Cannot directly filter an aggregate result at the same query level.</li>
+            </ul>
+
+        </div>
+
+        <div class="compare-card good">
+
+            <h3>HAVING</h3>
+
+            <ul>
+                <li>Filters groups.</li>
+                <li>Comes after GROUP BY.</li>
+                <li>Works naturally with aggregate expressions.</li>
+            </ul>
+
+        </div>
+
+    </div>
+
+    <div class="code-box">
+
+        <div class="code-header">
+            <span>HAVING example</span>
+            <button class="copy-btn"
+                onclick="copyCode(this)">
+                Copy
+            </button>
+        </div>
+
+<pre><code>SELECT department,
+       AVG(marks) AS average_marks
+FROM students
+GROUP BY department
+HAVING AVG(marks) >= 85;</code></pre>
+
+    </div>
+
+    <div class="concept-box">
+
+        <strong>Think of it this way:</strong>
+
+        <p>
+            WHERE filters students.
+            HAVING filters departments.
+        </p>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     MULTIPLE COLUMNS
+     ======================================================= -->
+
+<section class="section reveal" id="multiple">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Advanced Grouping
+        </div>
+
+        <h2>GROUP BY multiple columns</h2>
+
+        <p>
+            You can group by more than one column. SQL creates a group
+            for each unique combination of those column values.
+        </p>
+
+    </div>
+
+    <div class="code-box">
+
+<pre><code>SELECT department,
+       city,
+       COUNT(*) AS total_students
+
+FROM students
+
+GROUP BY department, city;</code></pre>
+
+    </div>
+
+    <div class="concept-box">
+
+        <strong>Example:</strong>
+
+        <p>
+            GROUP BY department, city does NOT mean "first make department
+            groups and then separately make city groups."
+            It creates groups based on the combination:
+            <strong>(department, city)</strong>.
+        </p>
+
+    </div>
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Department</th>
+                    <th>City</th>
+                    <th>Students</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>CSE</td>
+                    <td>Guntur</td>
+                    <td>2</td>
+                </tr>
+
+                <tr>
+                    <td>CSE</td>
+                    <td>Vijayawada</td>
+                    <td>1</td>
+                </tr>
+
+                <tr>
+                    <td>ECE</td>
+                    <td>Guntur</td>
+                    <td>1</td>
+                </tr>
+
+                <tr>
+                    <td>ECE</td>
+                    <td>Vijayawada</td>
+                    <td>1</td>
+                </tr>
+
+                <tr>
+                    <td>EEE</td>
+                    <td>Tenali</td>
+                    <td>1</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     ORDER BY
+     ======================================================= -->
+
+<section class="section reveal">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Sorting Group Results
+        </div>
+
+        <h2>GROUP BY + ORDER BY</h2>
+
+        <p>
+            After calculating group summaries, ORDER BY can sort the
+            resulting groups.
+        </p>
+
+    </div>
+
+    <div class="code-box">
+
+<pre><code>SELECT department,
+       AVG(marks) AS average_marks
+
+FROM students
+
+GROUP BY department
+
+ORDER BY average_marks DESC;</code></pre>
+
+    </div>
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Department</th>
+                    <th>Average Marks</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>CSE</td>
+                    <td>90.67</td>
+                </tr>
+
+                <tr>
+                    <td>ECE</td>
+                    <td>85.50</td>
+                </tr>
+
+                <tr>
+                    <td>EEE</td>
+                    <td>76.00</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     CASE
+     ======================================================= -->
+
+<section class="section reveal" id="advanced">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Advanced SQL
+        </div>
+
+        <h2>Conditional aggregation with CASE</h2>
+
+        <p>
+            GROUP BY can be combined with CASE to calculate
+            multiple conditional statistics.
+        </p>
+
+    </div>
+
+    <div class="code-box">
+
+<pre><code>SELECT department,
+
+       COUNT(*) AS total_students,
+
+       SUM(
+           CASE
+               WHEN marks >= 80 THEN 1
+               ELSE 0
+           END
+       ) AS high_scorers
+
+FROM students
+
+GROUP BY department;</code></pre>
+
+    </div>
+
+    <div class="concept-box">
+
+        <strong>Real-world use:</strong>
+
+        <p>
+            This technique is commonly used in dashboards and reports
+            to calculate categories such as passed students, failed
+            students, active users, completed orders and high-value
+            customers.
+        </p>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     GROUP BY EXPRESSION
+     ======================================================= -->
+
+<section class="section reveal">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Expressions
+        </div>
+
+        <h2>GROUP BY expressions</h2>
+
+        <p>
+            You can group using expressions or database-supported
+            functions.
+        </p>
+
+    </div>
+
+    <div class="code-box">
+
+<pre><code>SELECT
+    CASE
+        WHEN marks >= 90 THEN 'Excellent'
+        WHEN marks >= 75 THEN 'Good'
+        ELSE 'Needs Improvement'
+    END AS performance,
+
+    COUNT(*) AS students
+
+FROM students
+
+GROUP BY
+    CASE
+        WHEN marks >= 90 THEN 'Excellent'
+        WHEN marks >= 75 THEN 'Good'
+        ELSE 'Needs Improvement'
+    END;</code></pre>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     NULL
+     ======================================================= -->
+
+<section class="section reveal">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            NULL Handling
+        </div>
+
+        <h2>How does GROUP BY handle NULL?</h2>
+
+    </div>
+
+    <div class="concept-box">
+
+        <strong>Important:</strong>
+
+        <p>
+            GROUP BY generally places rows having NULL in the grouping
+            column into the same group. NULL represents missing or
+            unknown data; it is not the same as an empty string or zero.
+        </p>
+
+    </div>
+
+    <div class="code-box">
+
+<pre><code>SELECT city,
+       COUNT(*) AS total_students
+
+FROM students
+
+GROUP BY city;</code></pre>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     DISTINCT
+     ======================================================= -->
+
+<section class="section reveal">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            DISTINCT + GROUPING
+        </div>
+
+        <h2>GROUP BY and DISTINCT</h2>
+
+    </div>
+
+    <div class="compare">
+
+        <div class="compare-card">
+
+            <h3>DISTINCT</h3>
+
+            <p>
+                Removes duplicate combinations from the selected result.
+            </p>
+
+<pre><code>SELECT DISTINCT department
+FROM students;</code></pre>
+
+        </div>
+
+        <div class="compare-card">
+
+            <h3>GROUP BY</h3>
+
+            <p>
+                Creates groups, usually so that aggregate calculations
+                can be performed per group.
+            </p>
+
+<pre><code>SELECT department,
+       COUNT(*)
+FROM students
+GROUP BY department;</code></pre>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     JOINS
+     ======================================================= -->
+
+<section class="section reveal">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Real-World SQL
+        </div>
+
+        <h2>GROUP BY with JOIN</h2>
+
+        <p>
+            GROUP BY is extremely common when analyzing related tables.
+        </p>
+
+    </div>
+
+    <div class="code-box">
+
+<pre><code>SELECT
+    d.department_name,
+    COUNT(s.student_id) AS total_students
+
+FROM students s
+
+JOIN departments d
+    ON s.department_id = d.department_id
+
+GROUP BY d.department_name;</code></pre>
+
+    </div>
+
+    <div class="callout">
+
+        <div class="callout-icon">🚀</div>
+
+        <div>
+
+            <strong>Interview pattern:</strong>
+
+            <p>
+                JOIN + GROUP BY + COUNT/SUM/AVG + HAVING + ORDER BY
+                is one of the most important SQL combinations for
+                data-analysis and backend interviews.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     LOGICAL ORDER
+     ======================================================= -->
+
+<section class="section reveal">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Query Execution
+        </div>
+
+        <h2>Logical order of a grouped query</h2>
+
+        <p>
+            This is the conceptual SQL processing order. The database
+            optimizer may physically execute operations differently.
+        </p>
+
+    </div>
+
+    <div class="flowchart">
+
+        <div class="flow-node">
+            FROM
+            <small>Choose source</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+            WHERE
+            <small>Filter rows</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+            GROUP BY
+            <small>Create groups</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+            HAVING
+            <small>Filter groups</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+            SELECT
+            <small>Build output</small>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+            ORDER BY
+            <small>Sort output</small>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     ADVANCED GROUPING CONCEPTS
+     ======================================================= -->
+
+<section class="section reveal">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Advanced Concepts
+        </div>
+
+        <h2>Beyond basic GROUP BY</h2>
+
+    </div>
+
+    <div class="info-grid">
+
+        <div class="info-card">
+
+            <h3>ROLLUP</h3>
+
+            <p>
+                Some databases support ROLLUP to generate hierarchical
+                subtotals and grand totals.
+            </p>
+
+<pre><code>GROUP BY ROLLUP(department, city)</code></pre>
+
+        </div>
+
+        <div class="info-card">
+
+            <h3>CUBE</h3>
+
+            <p>
+                Some database systems support CUBE for multiple
+                combinations of grouping dimensions.
+            </p>
+
+<pre><code>GROUP BY CUBE(department, city)</code></pre>
+
+        </div>
+
+        <div class="info-card">
+
+            <h3>GROUPING SETS</h3>
+
+            <p>
+                Allows explicitly specifying multiple grouping levels
+                in a single query in systems that support it.
+            </p>
+
+<pre><code>GROUP BY GROUPING SETS(
+    (department),
+    (city),
+    ()
+)</code></pre>
+
+        </div>
+
+        <div class="info-card">
+
+            <h3>Window Functions</h3>
+
+            <p>
+                Window functions calculate values across related rows
+                without collapsing them into one row per group.
+            </p>
+
+<pre><code>AVG(marks)
+OVER(PARTITION BY department)</code></pre>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     GROUP BY VS WINDOW FUNCTION
+     ======================================================= -->
+
+<section class="section reveal">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Important Difference
+        </div>
+
+        <h2>GROUP BY vs Window Functions</h2>
+
+    </div>
+
+    <div class="compare">
+
+        <div class="compare-card good">
+
+            <h3>GROUP BY</h3>
+
+            <ul>
+                <li>Collapses rows into groups.</li>
+                <li>Usually returns one row per group.</li>
+                <li>Perfect for summaries and reports.</li>
+            </ul>
+
+        </div>
+
+        <div class="compare-card">
+
+            <h3>Window Function</h3>
+
+            <ul>
+                <li>Does not collapse the original rows.</li>
+                <li>Calculates across related rows.</li>
+                <li>Useful for rankings, running totals and comparisons.</li>
+            </ul>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     PERFORMANCE
+     ======================================================= -->
+
+<section class="section reveal">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Performance
+        </div>
+
+        <h2>GROUP BY and database performance</h2>
+
+    </div>
+
+    <div class="card-grid">
+
+        <div class="card">
+
+            <div class="card-icon">1</div>
+
+            <h3>Filter Early</h3>
+
+            <p>
+                Use WHERE to remove unnecessary rows before grouping
+                whenever possible.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-icon">2</div>
+
+            <h3>Use Appropriate Indexes</h3>
+
+            <p>
+                Indexes can help some filtering, grouping and ordering
+                workloads, depending on the query and database.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-icon">3</div>
+
+            <h3>Avoid Unnecessary Work</h3>
+
+            <p>
+                Don't group or calculate columns that your application
+                does not need.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     INTERACTIVE LAB
+     ======================================================= -->
+
+<section class="section reveal" id="lab">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Interactive Lab
+        </div>
+
+        <h2>GROUP BY Simulator</h2>
+
+        <p>
+            Experiment with grouping and aggregation. This is a browser
+            simulation using JavaScript data — it is not a real SQL engine.
+        </p>
+
+    </div>
+
+    <div class="lab">
+
+        <div class="lab-header">
+
+            <h3>Student Analytics Lab</h3>
+
+            <p>
+                Choose a grouping column and aggregate function.
+            </p>
+
+        </div>
+
+        <div class="lab-body">
+
+            <div class="controls">
+
+                <div class="control-group">
+
+                    <label>
+                        GROUP BY
+                    </label>
+
+                    <select id="groupField">
+
+                        <option value="department">
+                            Department
+                        </option>
+
+                        <option value="city">
+                            City
+                        </option>
+
+                        <option value="age">
+                            Age
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="control-group">
+
+                    <label>
+                        AGGREGATE
+                    </label>
+
+                    <select id="aggregateField">
+
+                        <option value="count">
+                            COUNT(*)
+                        </option>
+
+                        <option value="avg">
+                            AVG(Marks)
+                        </option>
+
+                        <option value="sum">
+                            SUM(Marks)
+                        </option>
+
+                        <option value="min">
+                            MIN(Marks)
+                        </option>
+
+                        <option value="max">
+                            MAX(Marks)
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="control-group">
+
+                    <label>
+                        SORT
+                    </label>
+
+                    <select id="sortDirection">
+
+                        <option value="asc">
+                            ASC
+                        </option>
+
+                        <option value="desc">
+                            DESC
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <button
+                class="run-btn"
+                onclick="runGroupQuery()">
+                ▶ Run Query
+            </button>
+
+            <div
+                class="query-output"
+                id="queryOutput">
+SELECT department, COUNT(*) AS result
+FROM students
+GROUP BY department
+ORDER BY department ASC;
+            </div>
+
+            <div
+                class="table-wrapper"
+                id="labResult">
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     REAL WORLD PATTERNS
+     ======================================================= -->
+
+<section class="section reveal">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Real-World Query Patterns
+        </div>
+
+        <h2>GROUP BY patterns you should know</h2>
+
+    </div>
+
+    <div class="code-box">
+
+        <div class="code-header">
+            <span>1. Count employees per department</span>
+        </div>
+
+<pre><code>SELECT department,
+       COUNT(*) AS employee_count
+FROM employees
+GROUP BY department;</code></pre>
+
+    </div>
+
+    <div class="code-box">
+
+        <div class="code-header">
+            <span>2. Total sales per product</span>
+        </div>
+
+<pre><code>SELECT product_id,
+       SUM(quantity * price) AS total_sales
+FROM orders
+GROUP BY product_id;</code></pre>
+
+    </div>
+
+    <div class="code-box">
+
+        <div class="code-header">
+            <span>3. Average salary by department</span>
+        </div>
+
+<pre><code>SELECT department,
+       AVG(salary) AS average_salary
+FROM employees
+GROUP BY department;</code></pre>
+
+    </div>
+
+    <div class="code-box">
+
+        <div class="code-header">
+            <span>4. Departments with more than 10 employees</span>
+        </div>
+
+<pre><code>SELECT department,
+       COUNT(*) AS employee_count
+FROM employees
+GROUP BY department
+HAVING COUNT(*) > 10;</code></pre>
+
+    </div>
+
+    <div class="code-box">
+
+        <div class="code-header">
+            <span>5. Highest average salary first</span>
+        </div>
+
+<pre><code>SELECT department,
+       AVG(salary) AS average_salary
+FROM employees
+GROUP BY department
+ORDER BY average_salary DESC;</code></pre>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     COMMON MISTAKES
+     ======================================================= -->
+
+<section class="section reveal" id="mistakes">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Avoid These
+        </div>
+
+        <h2>Common GROUP BY mistakes</h2>
+
+    </div>
+
+    <div class="info-grid">
+
+        <div class="info-card">
+
+            <h3>❌ Forgetting GROUP BY</h3>
+
+            <p>
+                Selecting a non-aggregated grouping column alongside
+                an aggregate generally requires GROUP BY.
+            </p>
+
+        </div>
+
+        <div class="info-card">
+
+            <h3>❌ Confusing WHERE and HAVING</h3>
+
+            <p>
+                WHERE filters rows. HAVING filters groups.
+            </p>
+
+        </div>
+
+        <div class="info-card">
+
+            <h3>❌ Grouping the wrong columns</h3>
+
+            <p>
+                Adding extra columns to GROUP BY can create smaller
+                groups than intended.
+            </p>
+
+        </div>
+
+        <div class="info-card">
+
+            <h3>❌ Ignoring NULL</h3>
+
+            <p>
+                COUNT(column) ignores NULL values, while COUNT(*)
+                counts rows.
+            </p>
+
+        </div>
+
+        <div class="info-card">
+
+            <h3>❌ Expecting original rows</h3>
+
+            <p>
+                GROUP BY normally collapses rows into one output row
+                per group.
+            </p>
+
+        </div>
+
+        <div class="info-card">
+
+            <h3>❌ Forgetting ORDER BY</h3>
+
+            <p>
+                GROUP BY does not guarantee a particular output order.
+                Use ORDER BY when ordering matters.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     EXAM PREPARATION
+     ======================================================= -->
+
+<section class="section reveal" id="exam">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Exam Preparation
+        </div>
+
+        <h2>5-Mark Answer — GROUP BY</h2>
+
+    </div>
+
+    <div class="concept-box">
+
+        <strong>Definition:</strong>
+
+        <p>
+            GROUP BY is an SQL clause used to divide rows into groups
+            based on one or more columns. It is commonly used with
+            aggregate functions such as COUNT(), SUM(), AVG(), MIN()
+            and MAX() to produce summary information for each group.
+        </p>
+
+    </div>
+
+    <div class="code-box">
+
+<pre><code>SELECT department,
+       COUNT(*) AS total_students,
+       AVG(marks) AS average_marks
+FROM students
+GROUP BY department;</code></pre>
+
+    </div>
+
+    <p>
+        The query groups students according to department and calculates
+        the number of students and average marks for every department.
+    </p>
+
+</section>
+
+<section class="section reveal">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Long Answer
+        </div>
+
+        <h2>10-Mark Answer Structure</h2>
+
+    </div>
+
+    <div class="info-grid">
+
+        <div class="info-card">
+            <h3>1. Definition</h3>
+            <p>Explain the purpose of GROUP BY.</p>
+        </div>
+
+        <div class="info-card">
+            <h3>2. Syntax</h3>
+            <p>Write the standard GROUP BY syntax.</p>
+        </div>
+
+        <div class="info-card">
+            <h3>3. Aggregate Functions</h3>
+            <p>Explain COUNT, SUM, AVG, MIN and MAX.</p>
+        </div>
+
+        <div class="info-card">
+            <h3>4. WHERE</h3>
+            <p>Explain filtering before grouping.</p>
+        </div>
+
+        <div class="info-card">
+            <h3>5. HAVING</h3>
+            <p>Explain filtering after grouping.</p>
+        </div>
+
+        <div class="info-card">
+            <h3>6. Examples</h3>
+            <p>Give practical student or employee examples.</p>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     INTERVIEW QUESTIONS
+     ======================================================= -->
+
+<section class="section reveal" id="interview">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Interview Preparation
+        </div>
+
+        <h2>GROUP BY Interview Questions</h2>
+
+    </div>
+
+    <div class="interview">
+
+        <details>
+            <summary>
+                1. What is GROUP BY?
+            </summary>
+
+            <p>
+                GROUP BY divides rows into groups based on one or more
+                columns, usually so aggregate calculations can be
+                performed for each group.
+            </p>
+        </details>
+
+        <details>
+            <summary>
+                2. Can GROUP BY be used without aggregate functions?
+            </summary>
+
+            <p>
+                Yes. A GROUP BY query can be used to produce unique
+                combinations of grouping columns, although DISTINCT is
+                often clearer when no aggregation is required.
+            </p>
+        </details>
+
+        <details>
+            <summary>
+                3. What is the difference between WHERE and HAVING?
+            </summary>
+
+            <p>
+                WHERE filters individual rows before grouping.
+                HAVING filters groups after grouping and aggregation.
+            </p>
+        </details>
+
+        <details>
+            <summary>
+                4. Can we use multiple columns in GROUP BY?
+            </summary>
+
+            <p>
+                Yes. GROUP BY department, city creates groups based on
+                unique department-city combinations.
+            </p>
+        </details>
+
+        <details>
+            <summary>
+                5. What does COUNT(*) count?
+            </summary>
+
+            <p>
+                COUNT(*) counts rows. It does not ignore a row merely
+                because some of its columns contain NULL.
+            </p>
+        </details>
+
+        <details>
+            <summary>
+                6. What does COUNT(column) do?
+            </summary>
+
+            <p>
+                COUNT(column) counts non-NULL values in that column.
+            </p>
+        </details>
+
+        <details>
+            <summary>
+                7. Can GROUP BY be combined with ORDER BY?
+            </summary>
+
+            <p>
+                Yes. ORDER BY can sort the grouped result, for example
+                by an aggregate such as AVG(salary) DESC.
+            </p>
+        </details>
+
+        <details>
+            <summary>
+                8. Why can't we normally use aggregate conditions in WHERE?
+            </summary>
+
+            <p>
+                WHERE operates before grouping and aggregation at the
+                logical query level. HAVING is designed to filter
+                aggregated groups.
+            </p>
+        </details>
+
+        <details>
+            <summary>
+                9. What happens to NULL grouping values?
+            </summary>
+
+            <p>
+                Rows with NULL in the grouping column are generally
+                placed into the same NULL group.
+            </p>
+        </details>
+
+        <details>
+            <summary>
+                10. GROUP BY vs window functions?
+            </summary>
+
+            <p>
+                GROUP BY generally collapses rows into groups, whereas
+                window functions calculate across related rows while
+                preserving the individual rows.
+            </p>
+        </details>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     QUIZ
+     ======================================================= -->
+
+<section class="section reveal" id="quiz">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Knowledge Check
+        </div>
+
+        <h2>GROUP BY Quiz</h2>
+
+        <p>
+            Test whether you really understand grouping.
+        </p>
+
+    </div>
+
+    <div class="quiz">
+
+        <div class="question">
+
+            <h3>
+                1. Which clause creates groups?
+            </h3>
+
+            <div class="options">
+
+                <label class="option">
+                    <input
+                        type="radio"
+                        name="q1"
+                        value="a">
+                    WHERE
+                </label>
+
+                <label class="option">
+                    <input
+                        type="radio"
+                        name="q1"
+                        value="b">
+                    GROUP BY
+                </label>
+
+                <label class="option">
+                    <input
+                        type="radio"
+                        name="q1"
+                        value="c">
+                    ORDER BY
+                </label>
+
+                <label class="option">
+                    <input
+                        type="radio"
+                        name="q1"
+                        value="d">
+                    LIMIT
+                </label>
+
+            </div>
+
+        </div>
+
+        <div class="question">
+
+            <h3>
+                2. Which clause filters groups?
+            </h3>
+
+            <div class="options">
+
+                <label class="option">
+                    <input
+                        type="radio"
+                        name="q2"
+                        value="a">
+                    WHERE
+                </label>
+
+                <label class="option">
+                    <input
+                        type="radio"
+                        name="q2"
+                        value="b">
+                    SELECT
+                </label>
+
+                <label class="option">
+                    <input
+                        type="radio"
+                        name="q2"
+                        value="c">
+                    HAVING
+                </label>
+
+                <label class="option">
+                    <input
+                        type="radio"
+                        name="q2"
+                        value="d">
+                    FROM
+                </label>
+
+            </div>
+
+        </div>
+
+        <div class="question">
+
+            <h3>
+                3. What does COUNT(*) count?
+            </h3>
+
+            <div class="options">
+
+                <label class="option">
+                    <input
+                        type="radio"
+                        name="q3"
+                        value="a">
+                    Only non-NULL values
+                </label>
+
+                <label class="option">
+                    <input
+                        type="radio"
+                        name="q3"
+                        value="b">
+                    Rows
+                </label>
+
+                <label class="option">
+                    <input
+                        type="radio"
+                        name="q3"
+                        value="c">
+                    Only unique rows
+                </label>
+
+                <label class="option">
+                    <input
+                        type="radio"
+                        name="q3"
+                        value="d">
+                    Columns
+                </label>
+
+            </div>
+
+        </div>
+
+        <div class="question">
+
+            <h3>
+                4. Which function calculates the average?
+            </h3>
+
+            <div class="options">
+
+                <label class="option">
+                    <input
+                        type="radio"
+                        name="q4"
+                        value="a">
+                    SUM()
+                </label>
+
+                <label class="option">
+                    <input
+                        type="radio"
+                        name="q4"
+                        value="b">
+                    COUNT()
+                </label>
+
+                <label class="option">
+                    <input
+                        type="radio"
+                        name="q4"
+                        value="c">
+                    AVG()
+                </label>
+
+                <label class="option">
+                    <input
+                        type="radio"
+                        name="q4"
+                        value="d">
+                    MAX()
+                </label>
+
+            </div>
+
+        </div>
+
+        <div class="question">
+
+            <h3>
+                5. Which query correctly finds departments with more
+                than 5 students?
+            </h3>
+
+            <div class="options">
+
+                <label class="option">
+                    <input
+                        type="radio"
+                        name="q5"
+                        value="a">
+                    SELECT department FROM students
+                    WHERE COUNT(*) &gt; 5
+                    GROUP BY department;
+                </label>
+
+                <label class="option">
+                    <input
+                        type="radio"
+                        name="q5"
+                        value="b">
+                    SELECT department FROM students
+                    GROUP BY department
+                    HAVING COUNT(*) &gt; 5;
+                </label>
+
+                <label class="option">
+                    <input
+                        type="radio"
+                        name="q5"
+                        value="c">
+                    SELECT department FROM students
+                    ORDER BY COUNT(*) &gt; 5;
+                </label>
+
+                <label class="option">
+                    <input
+                        type="radio"
+                        name="q5"
+                        value="d">
+                    SELECT department FROM students
+                    WHERE department &gt; 5;
+                </label>
+
+            </div>
+
+        </div>
+
+        <button
+            class="quiz-btn"
+            onclick="checkQuiz()">
+            Check My Score
+        </button>
+
+        <div
+            class="quiz-result"
+            id="quizResult">
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     PRACTICE
+     ======================================================= -->
+
+<section class="section reveal">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Practice
+        </div>
+
+        <h2>Challenge yourself</h2>
+
+    </div>
+
+    <div class="card-grid">
+
+        <div class="card">
+
+            <div class="card-icon">01</div>
+
+            <h3>Beginner</h3>
+
+            <p>
+                Find the number of students in each department.
+            </p>
+
+<pre><code>SELECT department,
+       COUNT(*)
+FROM students
+GROUP BY department;</code></pre>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-icon">02</div>
+
+            <h3>Intermediate</h3>
+
+            <p>
+                Find the average marks for each department and show
+                only departments whose average is above 80.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-icon">03</div>
+
+            <h3>Advanced</h3>
+
+            <p>
+                Find the department with the highest average marks.
+                Combine GROUP BY, AVG and ORDER BY.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     MINI PROJECT
+     ======================================================= -->
+
+<section class="section reveal">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Mini Project
+        </div>
+
+        <h2>Student Analytics Dashboard</h2>
+
+        <p>
+            Build SQL queries that generate useful college analytics.
+        </p>
+
+    </div>
+
+    <div class="info-grid">
+
+        <div class="info-card">
+
+            <h3>Requirement 01</h3>
+
+            <p>
+                Number of students per department.
+            </p>
+
+        </div>
+
+        <div class="info-card">
+
+            <h3>Requirement 02</h3>
+
+            <p>
+                Average marks per department.
+            </p>
+
+        </div>
+
+        <div class="info-card">
+
+            <h3>Requirement 03</h3>
+
+            <p>
+                Highest and lowest marks per department.
+            </p>
+
+        </div>
+
+        <div class="info-card">
+
+            <h3>Requirement 04</h3>
+
+            <p>
+                Departments containing more than 10 students.
+            </p>
+
+        </div>
+
+        <div class="info-card">
+
+            <h3>Requirement 05</h3>
+
+            <p>
+                Department-city combinations.
+            </p>
+
+        </div>
+
+        <div class="info-card">
+
+            <h3>Requirement 06</h3>
+
+            <p>
+                Sort departments by average marks from highest to lowest.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     RAPID REVISION
+     ======================================================= -->
+
+<section class="section reveal">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Rapid Revision
+        </div>
+
+        <h2>GROUP BY in 60 seconds</h2>
+
+    </div>
+
+    <div class="concept-box">
+
+        <p>
+            <strong>GROUP BY</strong> creates groups of rows sharing
+            the same values.
+        </p>
+
+        <br>
+
+        <p>
+            <strong>COUNT()</strong> → number of rows/non-NULL values
+        </p>
+
+        <p>
+            <strong>SUM()</strong> → total
+        </p>
+
+        <p>
+            <strong>AVG()</strong> → average
+        </p>
+
+        <p>
+            <strong>MIN()</strong> → smallest
+        </p>
+
+        <p>
+            <strong>MAX()</strong> → largest
+        </p>
+
+        <br>
+
+        <p>
+            <strong>WHERE</strong> → filters rows before grouping
+        </p>
+
+        <p>
+            <strong>HAVING</strong> → filters groups after grouping
+        </p>
+
+        <p>
+            <strong>ORDER BY</strong> → sorts the final result
+        </p>
+
+    </div>
+
+    <div class="code-box">
+
+<pre><code>SELECT department,
+       COUNT(*) AS total,
+       AVG(marks) AS average_marks
+
+FROM students
+
+WHERE marks >= 60
+
+GROUP BY department
+
+HAVING COUNT(*) >= 2
+
+ORDER BY average_marks DESC;</code></pre>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+     CHECKLIST
+     ======================================================= -->
+
+<section class="section reveal" id="checklist">
+
+    <div class="section-heading">
+
+        <div class="eyebrow">
+            Completion
+        </div>
+
+        <h2>Lesson 08 Checklist</h2>
+
+        <p>
+            Tick each skill after you understand it.
+        </p>
+
+    </div>
+
+    <div class="checklist">
+
+        <label class="check-item">
+            <input type="checkbox" class="lesson-check">
+            I understand GROUP BY.
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" class="lesson-check">
+            I know COUNT().
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" class="lesson-check">
+            I know SUM().
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" class="lesson-check">
+            I know AVG().
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" class="lesson-check">
+            I know MIN() and MAX().
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" class="lesson-check">
+            I understand WHERE + GROUP BY.
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" class="lesson-check">
+            I understand HAVING.
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" class="lesson-check">
+            I can group by multiple columns.
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" class="lesson-check">
+            I understand COUNT(*) vs COUNT(column).
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" class="lesson-check">
+            I can combine GROUP BY + ORDER BY.
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" class="lesson-check">
+            I understand NULL grouping.
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" class="lesson-check">
+            I can solve GROUP BY interview problems.
+        </label>
+
+    </div>
+
+</section>
+
+</div>
+
+<!-- =======================================================
+     FOOTER
+     ======================================================= -->
+
+<footer class="lesson-footer">
+
+    <h2>
+        GROUP BY mastered? 🚀
+    </h2>
+
+    <p>
+        You can now transform raw rows into meaningful SQL analytics.
+    </p>
+
+    <a
+        href="#overview"
+        class="next-btn">
+        Back to Top ↑
+    </a>
+
+</footer>
+
+</main>
+
+<!-- =======================================================
+     JAVASCRIPT
+     ======================================================= -->
+
+<script>
+
+/* =========================================================
+   MOBILE SIDEBAR
+   ========================================================= */
+
+const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.getElementById("sidebar");
+
+if (menuBtn) {
+
+    menuBtn.addEventListener("click", () => {
+
+        sidebar.classList.toggle("open");
+
+    });
+
+}
+
+document.querySelectorAll(".nav a").forEach(link => {
+
+    link.addEventListener("click", () => {
+
+        if (window.innerWidth <= 760) {
+
+            sidebar.classList.remove("open");
+
+        }
+
+    });
+
+});
+
+/* =========================================================
+   SCROLL PROGRESS
+   ========================================================= */
+
+window.addEventListener("scroll", () => {
+
+    const scrollTop =
+        document.documentElement.scrollTop ||
+        document.body.scrollTop;
+
+    const height =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+
+    const percentage =
+        height > 0
+            ? (scrollTop / height) * 100
+            : 0;
+
+    document.getElementById("progressBar")
+        .style.width = percentage + "%";
+
+});
+
+/* =========================================================
+   SAFE REVEAL ANIMATION
+   ========================================================= */
+
+const revealElements =
+    document.querySelectorAll(".reveal");
+
+const revealObserver =
+    new IntersectionObserver(
+        entries => {
+
+            entries.forEach(entry => {
+
+                if (entry.isIntersecting) {
+
+                    entry.target.classList.add("animate");
+
+                    revealObserver.unobserve(
+                        entry.target
+                    );
+
+                }
+
+            });
+
+        },
+        {
+            threshold: 0.08
+        }
+    );
+
+revealElements.forEach(element => {
+
+    revealObserver.observe(element);
+
+});
+
+/* =========================================================
+   COPY CODE
+   ========================================================= */
+
+function copyCode(button) {
+
+    const box = button.closest(".code-box");
+
+    const code = box.querySelector("pre").innerText;
+
+    navigator.clipboard.writeText(code)
+        .then(() => {
+
+            const oldText = button.innerText;
+
+            button.innerText = "Copied!";
+
+            setTimeout(() => {
+
+                button.innerText = oldText;
+
+            }, 1200);
+
+        })
+        .catch(() => {
+
+            button.innerText = "Select & Copy";
+
+        });
+
+}
+
+/* =========================================================
+   GROUPING ANIMATION
+   ========================================================= */
+
+function animateGrouping() {
+
+    const rows =
+        document.querySelectorAll(".student-row");
+
+    rows.forEach((row, index) => {
+
+        row.classList.remove("highlight");
+
+        setTimeout(() => {
+
+            row.classList.add("highlight");
+
+        }, index * 250);
+
+    });
+
+}
+
+/* =========================================================
+   SQL SIMULATOR DATA
+   ========================================================= */
+
+const students = [
+
+    {
+        id: 101,
+        name: "Pradeep",
+        department: "CSE",
+        age: 19,
+        marks: 91,
+        city: "Guntur"
+    },
+
+    {
+        id: 102,
+        name: "Rahul",
+        department: "ECE",
+        age: 20,
+        marks: 82,
+        city: "Vijayawada"
+    },
+
+    {
+        id: 103,
+        name: "Arjun",
+        department: "CSE",
+        age: 19,
+        marks: 87,
+        city: "Guntur"
+    },
+
+    {
+        id: 104,
+        name: "Priya",
+        department: "EEE",
+        age: 20,
+        marks: 76,
+        city: "Tenali"
+    },
+
+    {
+        id: 105,
+        name: "Sai",
+        department: "ECE",
+        age: 19,
+        marks: 89,
+        city: "Guntur"
+    },
+
+    {
+        id: 106,
+        name: "Divya",
+        department: "CSE",
+        age: 20,
+        marks: 94,
+        city: "Vijayawada"
+    }
+
+];
+
+/* =========================================================
+   GROUP BY SIMULATOR
+   ========================================================= */
+
+function runGroupQuery() {
+
+    const groupField =
+        document.getElementById("groupField").value;
+
+    const aggregate =
+        document.getElementById("aggregateField").value;
+
+    const direction =
+        document.getElementById("sortDirection").value;
+
+    const groups = {};
+
+    students.forEach(student => {
+
+        const key = student[groupField];
+
+        if (!groups[key]) {
+
+            groups[key] = [];
+
+        }
+
+        groups[key].push(student);
+
+    });
+
+    const results = [];
+
+    Object.keys(groups).forEach(key => {
+
+        const rows = groups[key];
+
+        let value;
+
+        if (aggregate === "count") {
+
+            value = rows.length;
+
+        }
+
+        else if (aggregate === "avg") {
+
+            value =
+                rows.reduce(
+                    (sum, row) => sum + row.marks,
+                    0
+                ) / rows.length;
+
+            value = Number(value.toFixed(2));
+
+        }
+
+        else if (aggregate === "sum") {
+
+            value =
+                rows.reduce(
+                    (sum, row) => sum + row.marks,
+                    0
+                );
+
+        }
+
+        else if (aggregate === "min") {
+
+            value =
+                Math.min(
+                    ...rows.map(row => row.marks)
+                );
+
+        }
+
+        else if (aggregate === "max") {
+
+            value =
+                Math.max(
+                    ...rows.map(row => row.marks)
+                );
+
+        }
+
+        results.push({
+            key: key,
+            value: value
+        });
+
+    });
+
+    results.sort((a, b) => {
+
+        if (
+            typeof a.value === "number" &&
+            typeof b.value === "number"
+        ) {
+
+            return direction === "asc"
+                ? a.value - b.value
+                : b.value - a.value;
+
+        }
+
+        return direction === "asc"
+            ? String(a.key).localeCompare(String(b.key))
+            : String(b.key).localeCompare(String(a.key));
+
+    });
+
+    let groupLabel = groupField;
+
+    let aggregateSQL = "COUNT(*)";
+
+    let alias = "result";
+
+    if (aggregate === "avg") {
+
+        aggregateSQL = "AVG(marks)";
+        alias = "average_marks";
+
+    }
+
+    if (aggregate === "sum") {
+
+        aggregateSQL = "SUM(marks)";
+        alias = "total_marks";
+
+    }
+
+    if (aggregate === "min") {
+
+        aggregateSQL = "MIN(marks)";
+        alias = "minimum_marks";
+
+    }
+
+    if (aggregate === "max") {
+
+        aggregateSQL = "MAX(marks)";
+        alias = "maximum_marks";
+
+    }
+
+    const query =
+`SELECT ${groupLabel},
+       ${aggregateSQL} AS ${alias}
+FROM students
+GROUP BY ${groupLabel}
+ORDER BY ${alias} ${direction.toUpperCase()};`;
+
+    document.getElementById("queryOutput")
+        .innerText = query;
+
+    let html = `
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        ${groupLabel}
+                    </th>
+
+                    <th>
+                        ${alias}
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+    `;
+
+    results.forEach(result => {
+
+        html += `
+
+            <tr>
+
+                <td>
+                    ${result.key}
+                </td>
+
+                <td>
+                    ${result.value}
+                </td>
+
+            </tr>
+
+        `;
+
+    });
+
+    html += `
+
+            </tbody>
+
+        </table>
+
+    `;
+
+    document.getElementById("labResult")
+        .innerHTML = html;
+
+}
+
+/* =========================================================
+   QUIZ
+   ========================================================= */
+
+function checkQuiz() {
+
+    const answers = {
+
+        q1: "b",
+        q2: "c",
+        q3: "b",
+        q4: "c",
+        q5: "b"
+
+    };
+
+    let score = 0;
+
+    Object.keys(answers).forEach(question => {
+
+        const selected =
+            document.querySelector(
+                `input[name="${question}"]:checked`
+            );
+
+        if (
+            selected &&
+            selected.value === answers[question]
+        ) {
+
+            score++;
+
+        }
+
+    });
+
+    const result =
+        document.getElementById("quizResult");
+
+    result.style.display = "block";
+
+    if (score === 5) {
+
+        result.innerHTML =
+            "🎉 Perfect! 5/5 — GROUP BY mastered.";
+
+    }
+
+    else if (score >= 3) {
+
+        result.innerHTML =
+            `🔥 Good job! You scored ${score}/5. Review the missed concepts and try again.`;
+
+    }
+
+    else {
+
+        result.innerHTML =
+            `📚 You scored ${score}/5. Revisit GROUP BY, WHERE, HAVING and aggregate functions.`;
+
+    }
+
+}
+
+/* =========================================================
+   LOCAL STORAGE CHECKLIST
+   ========================================================= */
+
+const checklist =
+    document.querySelectorAll(".lesson-check");
+
+checklist.forEach((checkbox, index) => {
+
+    const key =
+        `zensus-sql-lesson8-check-${index}`;
+
+    checkbox.checked =
+        localStorage.getItem(key) === "true";
+
+    checkbox.addEventListener("change", () => {
+
+        localStorage.setItem(
+            key,
+            checkbox.checked
+        );
+
+    });
+
+});
+
+/* =========================================================
+   ACTIVE SIDEBAR LINK
+   ========================================================= */
+
+const sections =
+    document.querySelectorAll(
+        ".section[id], .hero[id]"
+    );
+
+const navLinks =
+    document.querySelectorAll(".nav a");
+
+window.addEventListener("scroll", () => {
+
+    let current = "";
+
+    sections.forEach(section => {
+
+        const top =
+            section.getBoundingClientRect().top;
+
+        if (top <= 130) {
+
+            current = section.id;
+
+        }
+
+    });
+
+    navLinks.forEach(link => {
+
+        link.classList.remove("active");
+
+        if (
+            link.getAttribute("href") ===
+            "#" + current
+        ) {
+
+            link.classList.add("active");
+
+        }
+
+    });
+
+});
+
+/* =========================================================
+   INITIAL SIMULATOR
+   ========================================================= */
+
+runGroupQuery();
+
+</script>
+
+</body>
+</html>

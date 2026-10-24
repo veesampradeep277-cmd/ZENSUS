@@ -1,0 +1,4736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ZENSUS | SQL Lesson 12 - Constraints</title>
+
+    <style>
+        /* =========================================================
+           ZENSUS SQL LESSON 12 — CONSTRAINTS
+           Standalone CSS
+           ========================================================= */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            background: #f7f9fc;
+            color: #172033;
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --secondary: #7c3aed;
+            --blue: #2563eb;
+            --green: #059669;
+            --orange: #ea580c;
+            --red: #dc2626;
+            --text: #172033;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --card: #ffffff;
+            --soft: #eef2ff;
+            --code: #0f172a;
+            --sidebar: 260px;
+        }
+
+        /* =========================
+           PROGRESS BAR
+           ========================= */
+
+        #progressBar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(90deg, #4f46e5, #7c3aed);
+            z-index: 9999;
+        }
+
+        /* =========================
+           SIDEBAR
+           ========================= */
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar);
+            height: 100vh;
+            background: #ffffff;
+            border-right: 1px solid var(--border);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .brand {
+            padding: 24px 22px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand-logo {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            color: var(--primary);
+        }
+
+        .brand-subtitle {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 3px;
+        }
+
+        .course-info {
+            padding: 18px;
+            margin: 16px;
+            background: #f8faff;
+            border: 1px solid #e0e7ff;
+            border-radius: 14px;
+        }
+
+        .course-info small {
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .course-info strong {
+            display: block;
+            margin: 4px 0;
+            font-size: 14px;
+        }
+
+        .nav-title {
+            padding: 8px 20px;
+            color: #94a3b8;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            padding: 0 12px 30px;
+        }
+
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            margin: 3px 0;
+            color: #475569;
+            text-decoration: none;
+            border-radius: 9px;
+            font-size: 13px;
+            transition: .25s;
+        }
+
+        .nav-links a:hover {
+            background: #f1f5ff;
+            color: var(--primary);
+            transform: translateX(2px);
+        }
+
+        .nav-links a.active {
+            background: #eef2ff;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .lesson-number {
+            width: 25px;
+            height: 25px;
+            display: grid;
+            place-items: center;
+            border-radius: 7px;
+            background: #f1f5f9;
+            color: #64748b;
+            font-size: 10px;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .active .lesson-number {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        /* =========================
+           MAIN
+           ========================= */
+
+        .main {
+            margin-left: var(--sidebar);
+            min-height: 100vh;
+        }
+
+        .topbar {
+            height: 65px;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 34px;
+            background: rgba(255,255,255,.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .breadcrumb {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .breadcrumb span {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .progress-pill {
+            padding: 7px 12px;
+            border-radius: 20px;
+            background: #eef2ff;
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .content {
+            max-width: 1180px;
+            margin: auto;
+            padding: 40px 35px 80px;
+        }
+
+        /* =========================
+           HERO
+           ========================= */
+
+        .hero {
+            position: relative;
+            padding: 52px;
+            border-radius: 26px;
+            background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+            border: 1px solid #dfe5ff;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            width: 320px;
+            height: 320px;
+            right: -130px;
+            top: -130px;
+            border-radius: 50%;
+            background: rgba(79,70,229,.08);
+        }
+
+        .lesson-tag {
+            display: inline-flex;
+            padding: 7px 13px;
+            border-radius: 20px;
+            background: #fff;
+            color: var(--primary);
+            border: 1px solid #dbe2ff;
+            font-size: 11px;
+            font-weight: 800;
+            margin-bottom: 18px;
+        }
+
+        .hero h1 {
+            max-width: 850px;
+            font-size: clamp(34px, 5vw, 55px);
+            line-height: 1.08;
+            letter-spacing: -1.5px;
+            margin-bottom: 18px;
+        }
+
+        .hero h1 span {
+            color: var(--primary);
+        }
+
+        .hero p {
+            max-width: 780px;
+            color: #526078;
+            font-size: 17px;
+        }
+
+        .hero-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 28px;
+        }
+
+        .hero-stat {
+            padding: 9px 13px;
+            background: #fff;
+            border: 1px solid #e1e7f5;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* =========================
+           SECTIONS
+           ========================= */
+
+        section {
+            margin-top: 30px;
+            scroll-margin-top: 85px;
+        }
+
+        .section-card {
+            padding: 30px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(15,23,42,.035);
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: flex-start;
+            gap: 13px;
+            margin-bottom: 22px;
+        }
+
+        .section-icon {
+            width: 42px;
+            min-width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            background: #eef2ff;
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        h2 {
+            font-size: 27px;
+            line-height: 1.25;
+            margin-bottom: 5px;
+        }
+
+        h3 {
+            font-size: 19px;
+            margin: 22px 0 10px;
+        }
+
+        h4 {
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+
+        .section-subtitle {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        p {
+            margin-bottom: 12px;
+        }
+
+        ul,
+        ol {
+            padding-left: 22px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        /* =========================
+           OBJECTIVES
+           ========================= */
+
+        .objective-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+
+        .objective {
+            padding: 18px;
+            background: #fafbff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+        }
+
+        .objective strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .objective span {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        /* =========================
+           CODE
+           ========================= */
+
+        .code-wrapper {
+            margin: 18px 0;
+            overflow: hidden;
+            border: 1px solid #1e293b;
+            border-radius: 14px;
+            background: var(--code);
+        }
+
+        .code-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9px 14px;
+            background: #111c31;
+            border-bottom: 1px solid #263247;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .copy-btn {
+            padding: 5px 9px;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            background: #1e293b;
+            color: #cbd5e1;
+            cursor: pointer;
+            font-size: 10px;
+        }
+
+        .copy-btn:hover {
+            background: #334155;
+        }
+
+        pre {
+            margin: 0;
+            padding: 20px;
+            overflow-x: auto;
+            color: #e2e8f0;
+            font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        code {
+            font-family: inherit;
+        }
+
+        .inline-code {
+            padding: 2px 6px;
+            border-radius: 5px;
+            background: #eef2ff;
+            color: #4338ca;
+            font-family: Consolas, monospace;
+            font-size: .9em;
+        }
+
+        /* =========================
+           INFO BOX
+           ========================= */
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2,1fr);
+            gap: 15px;
+            margin-top: 18px;
+        }
+
+        .info-box {
+            padding: 18px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: #fafafa;
+        }
+
+        .info-box.tip {
+            border-left: 4px solid var(--green);
+        }
+
+        .info-box.info {
+            border-left: 4px solid var(--blue);
+        }
+
+        .info-box.warning {
+            border-left: 4px solid var(--orange);
+        }
+
+        .info-box.danger {
+            border-left: 4px solid var(--red);
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .info-box p {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        /* =========================
+           FLOWCHART
+           ========================= */
+
+        .flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 25px 0;
+        }
+
+        .flow-box {
+            min-width: 145px;
+            padding: 15px 20px;
+            text-align: center;
+            border: 2px solid #c7d2fe;
+            border-radius: 13px;
+            background: #fff;
+            color: var(--primary-dark);
+            font-weight: 800;
+            animation: floatBox 3s ease-in-out infinite;
+        }
+
+        .flow-box:nth-child(3) {
+            animation-delay: .5s;
+        }
+
+        .flow-box:nth-child(5) {
+            animation-delay: 1s;
+        }
+
+        .flow-arrow {
+            color: var(--primary);
+            font-size: 23px;
+            font-weight: 900;
+        }
+
+        @keyframes floatBox {
+            0%,100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* =========================
+           CONSTRAINT ANIMATION
+           ========================= */
+
+        .constraint-animation {
+            padding: 25px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+        }
+
+        .database-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .table-visual {
+            width: 300px;
+            padding: 18px;
+            border: 2px solid #c7d2fe;
+            border-radius: 15px;
+            background: white;
+        }
+
+        .table-title {
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        .column-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 9px;
+            margin: 5px 0;
+            background: #f8fafc;
+            border-radius: 7px;
+            font-size: 12px;
+        }
+
+        .key {
+            color: var(--primary);
+            font-weight: 900;
+        }
+
+        .constraint-badge {
+            padding: 4px 7px;
+            border-radius: 5px;
+            background: #eef2ff;
+            color: var(--primary);
+            font-size: 9px;
+            font-weight: 900;
+        }
+
+        .relation-arrow {
+            font-size: 30px;
+            color: var(--primary);
+            animation: pulseArrow 1.4s infinite;
+        }
+
+        @keyframes pulseArrow {
+            0%,100% {
+                opacity: .4;
+                transform: translateX(0);
+            }
+
+            50% {
+                opacity: 1;
+                transform: translateX(7px);
+            }
+        }
+
+        /* =========================
+           CONSTRAINT CARDS
+           ========================= */
+
+        .constraint-grid {
+            display: grid;
+            grid-template-columns: repeat(2,1fr);
+            gap: 15px;
+        }
+
+        .constraint-card {
+            position: relative;
+            padding: 22px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: #fff;
+            overflow: hidden;
+            transition: .25s;
+        }
+
+        .constraint-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(15,23,42,.06);
+        }
+
+        .constraint-number {
+            position: absolute;
+            top: 14px;
+            right: 15px;
+            color: #cbd5e1;
+            font-size: 26px;
+            font-weight: 900;
+        }
+
+        .constraint-card h3 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        /* =========================
+           COMPARISON
+           ========================= */
+
+        .comparison {
+            display: grid;
+            grid-template-columns: repeat(2,1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .compare-card {
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+        }
+
+        .compare-card h4 {
+            color: var(--primary);
+        }
+
+        /* =========================
+           TAGS
+           ========================= */
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            margin: 15px 0;
+        }
+
+        .tag {
+            padding: 5px 9px;
+            border-radius: 7px;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* =========================
+           TABLE
+           ========================= */
+
+        .table-wrap {
+            overflow-x: auto;
+            margin: 18px 0;
+        }
+
+        table {
+            width: 100%;
+            min-width: 560px;
+            border-collapse: collapse;
+        }
+
+        th {
+            padding: 12px;
+            text-align: left;
+            background: #f1f5f9;
+            color: #334155;
+            font-size: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 11px 12px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover td {
+            background: #fafbff;
+        }
+
+        /* =========================
+           LAB
+           ========================= */
+
+        .lab {
+            padding: 25px;
+            border-radius: 20px;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        .lab h3 {
+            color: white;
+        }
+
+        .lab p {
+            color: #94a3b8;
+        }
+
+        .lab-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+            margin: 18px 0;
+        }
+
+        .lab-btn {
+            padding: 9px 12px;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            background: #1e293b;
+            color: #cbd5e1;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 700;
+            transition: .2s;
+        }
+
+        .lab-btn:hover,
+        .lab-btn.active {
+            background: #4f46e5;
+            border-color: #6366f1;
+            color: #fff;
+        }
+
+        .lab-query {
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            background: #020617;
+        }
+
+        .lab-query pre {
+            padding: 0;
+            color: #dbeafe;
+            font-size: 12px;
+        }
+
+        .lab-result {
+            margin-top: 18px;
+            overflow: hidden;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            background: #111827;
+        }
+
+        .lab-result-title {
+            padding: 10px 14px;
+            background: #1e293b;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .lab-result table {
+            min-width: 100%;
+        }
+
+        .lab-result th {
+            background: #1e293b;
+            color: #cbd5e1;
+            border-color: #334155;
+        }
+
+        .lab-result td {
+            color: #cbd5e1;
+            border-color: #334155;
+        }
+
+        /* =========================
+           QUIZ
+           ========================= */
+
+        .quiz-question {
+            padding: 20px;
+            margin: 15px 0;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            background: #fff;
+        }
+
+        .quiz-question p {
+            font-weight: 800;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 8px;
+        }
+
+        .quiz-option {
+            padding: 10px 13px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: #f8fafc;
+            cursor: pointer;
+            font-size: 13px;
+            transition: .2s;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--primary);
+            background: #eef2ff;
+        }
+
+        .quiz-option.correct {
+            border-color: #22c55e;
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .quiz-option.wrong {
+            border-color: #ef4444;
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .quiz-result {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            background: #eef2ff;
+            color: var(--primary-dark);
+            font-weight: 800;
+        }
+
+        /* =========================
+           CHECKLIST
+           ========================= */
+
+        .checklist {
+            display: grid;
+            gap: 9px;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .check-item input {
+            width: 17px;
+            height: 17px;
+            accent-color: var(--primary);
+        }
+
+        .check-item.done span {
+            color: #94a3b8;
+            text-decoration: line-through;
+        }
+
+        /* =========================
+           BUTTON
+           ========================= */
+
+        .primary-btn {
+            padding: 11px 17px;
+            border: none;
+            border-radius: 9px;
+            background: var(--primary);
+            color: #fff;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .primary-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* =========================
+           REVEAL
+           ========================= */
+
+        .reveal {
+            opacity: 1;
+            transform: none;
+        }
+
+        .reveal.animate {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity .6s ease, transform .6s ease;
+        }
+
+        .reveal.animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* =========================
+           MOBILE
+           ========================= */
+
+        .mobile-menu {
+            display: none;
+            width: 38px;
+            height: 38px;
+            border: none;
+            border-radius: 9px;
+            background: #eef2ff;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        @media(max-width:900px) {
+
+            :root {
+                --sidebar: 0px;
+            }
+
+            .sidebar {
+                width: 270px;
+                transform: translateX(-100%);
+                transition: .3s;
+                box-shadow: 10px 0 30px rgba(0,0,0,.12);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .mobile-menu {
+                display: block;
+            }
+
+            .topbar {
+                padding: 0 18px;
+            }
+
+            .content {
+                padding: 25px 18px 60px;
+            }
+
+            .hero {
+                padding: 30px 23px;
+            }
+
+            .objective-grid,
+            .constraint-grid,
+            .info-grid,
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media(max-width:550px) {
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .section-card {
+                padding: 21px;
+            }
+
+            .database-visual {
+                flex-direction: column;
+            }
+
+            .relation-arrow {
+                transform: rotate(90deg);
+            }
+
+            .hero-stats {
+                flex-direction: column;
+            }
+
+            .progress-pill {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="progressBar"></div>
+
+<!-- =========================================================
+     SIDEBAR
+     ========================================================= -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+        <div class="brand-logo">ZENSUS</div>
+        <div class="brand-subtitle">Learn • Build • Prepare</div>
+    </div>
+
+    <div class="course-info">
+        <small>COURSE</small>
+        <strong>SQL Mastery</strong>
+        <small>Lesson 12 of the learning path</small>
+    </div>
+
+    <div class="nav-title">
+        SQL Lessons
+    </div>
+
+    <nav class="nav-links">
+
+        <a href="#">
+            <span class="lesson-number">01</span>
+            Introduction to SQL
+        </a>
+
+        <a href="#">
+            <span class="lesson-number">02</span>
+            Database Fundamentals
+        </a>
+
+        <a href="#">
+            <span class="lesson-number">03</span>
+            CREATE
+        </a>
+
+        <a href="#">
+            <span class="lesson-number">04</span>
+            INSERT
+        </a>
+
+        <a href="#">
+            <span class="lesson-number">05</span>
+            SELECT
+        </a>
+
+        <a href="#">
+            <span class="lesson-number">06</span>
+            WHERE
+        </a>
+
+        <a href="#">
+            <span class="lesson-number">07</span>
+            ORDER BY
+        </a>
+
+        <a href="#">
+            <span class="lesson-number">08</span>
+            GROUP BY
+        </a>
+
+        <a href="#">
+            <span class="lesson-number">09</span>
+            Aggregate Functions
+        </a>
+
+        <a href="#">
+            <span class="lesson-number">10</span>
+            JOINS
+        </a>
+
+        <a href="#">
+            <span class="lesson-number">11</span>
+            Subqueries
+        </a>
+
+        <a href="#constraints" class="active">
+            <span class="lesson-number">12</span>
+            Constraints
+        </a>
+
+    </nav>
+
+</aside>
+
+
+<!-- =========================================================
+     MAIN
+     ========================================================= -->
+
+<main class="main" id="top">
+
+    <header class="topbar">
+
+        <div style="display:flex;align-items:center;gap:12px;">
+
+            <button class="mobile-menu" onclick="toggleSidebar()">
+                ☰
+            </button>
+
+            <div class="breadcrumb">
+                SQL / Lesson 12 /
+                <span>Constraints</span>
+            </div>
+
+        </div>
+
+        <div class="progress-pill">
+            SQL • 12 / 12
+        </div>
+
+    </header>
+
+
+    <div class="content">
+
+
+        <!-- =====================================================
+             HERO
+             ===================================================== -->
+
+        <section class="hero reveal" id="constraints">
+
+            <div class="lesson-tag">
+                SQL • LESSON 12
+            </div>
+
+            <h1>
+                SQL Constraints —
+                <span>Protect Your Data.</span>
+            </h1>
+
+            <p>
+                Learn how SQL constraints enforce rules on database data.
+                Master NOT NULL, UNIQUE, PRIMARY KEY, FOREIGN KEY, CHECK,
+                DEFAULT, composite keys, referential actions and ALTER TABLE
+                from beginner fundamentals to interview level.
+            </p>
+
+            <div class="hero-stats">
+
+                <div class="hero-stat">🛡️ Data Integrity</div>
+                <div class="hero-stat">🔑 Keys</div>
+                <div class="hero-stat">🔗 Relationships</div>
+                <div class="hero-stat">⚡ Interactive Lab</div>
+                <div class="hero-stat">🎯 Interview Ready</div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             OBJECTIVES
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🎯</div>
+
+                <div>
+                    <h2>Learning Objectives</h2>
+
+                    <div class="section-subtitle">
+                        By the end of this lesson, you should be able to:
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="objective-grid">
+
+                <div class="objective">
+                    <strong>01 · Understand</strong>
+                    <span>Explain why constraints are important.</span>
+                </div>
+
+                <div class="objective">
+                    <strong>02 · Master</strong>
+                    <span>Use NOT NULL, UNIQUE and DEFAULT.</span>
+                </div>
+
+                <div class="objective">
+                    <strong>03 · Design</strong>
+                    <span>Create primary and composite keys.</span>
+                </div>
+
+                <div class="objective">
+                    <strong>04 · Connect</strong>
+                    <span>Use foreign keys to maintain relationships.</span>
+                </div>
+
+                <div class="objective">
+                    <strong>05 · Validate</strong>
+                    <span>Use CHECK constraints for business rules.</span>
+                </div>
+
+                <div class="objective">
+                    <strong>06 · Modify</strong>
+                    <span>Add, drop and manage constraints using ALTER TABLE.</span>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             WHAT ARE CONSTRAINTS
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🛡️</div>
+
+                <div>
+                    <h2>What Are SQL Constraints?</h2>
+
+                    <div class="section-subtitle">
+                        Rules that control what data is allowed in a table.
+                    </div>
+                </div>
+
+            </div>
+
+            <p>
+                A <strong>constraint</strong> is a rule enforced by the
+                database to maintain the correctness, consistency and
+                integrity of data.
+            </p>
+
+            <p>
+                Instead of trusting every application to validate every input,
+                we can place important rules directly in the database.
+            </p>
+
+            <div class="flow">
+
+                <div class="flow-box">
+                    User Input
+                </div>
+
+                <div class="flow-arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+                    Constraint
+                </div>
+
+                <div class="flow-arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+                    Valid?
+                </div>
+
+                <div class="flow-arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+                    Store / Reject
+                </div>
+
+            </div>
+
+            <div class="info-box tip">
+
+                <strong>💡 Core Idea</strong>
+
+                <p>
+                    Constraints act like a safety layer around your database.
+                    They prevent invalid data from entering or violating
+                    important relationships.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             VISUAL
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🎨</div>
+
+                <div>
+                    <h2>Visualizing Constraints</h2>
+
+                    <div class="section-subtitle">
+                        See how constraints protect a relational database.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="constraint-animation">
+
+                <div class="database-visual">
+
+                    <div class="table-visual">
+
+                        <div class="table-title">
+                            students
+                        </div>
+
+                        <div class="column-row">
+                            <span class="key">student_id</span>
+                            <span class="constraint-badge">
+                                PRIMARY KEY
+                            </span>
+                        </div>
+
+                        <div class="column-row">
+                            <span>name</span>
+                            <span class="constraint-badge">
+                                NOT NULL
+                            </span>
+                        </div>
+
+                        <div class="column-row">
+                            <span>email</span>
+                            <span class="constraint-badge">
+                                UNIQUE
+                            </span>
+                        </div>
+
+                        <div class="column-row">
+                            <span>age</span>
+                            <span class="constraint-badge">
+                                CHECK
+                            </span>
+                        </div>
+
+                        <div class="column-row">
+                            <span>dept_id</span>
+                            <span class="constraint-badge">
+                                FOREIGN KEY
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <div class="relation-arrow">
+                        →
+                    </div>
+
+                    <div class="table-visual">
+
+                        <div class="table-title">
+                            departments
+                        </div>
+
+                        <div class="column-row">
+                            <span class="key">dept_id</span>
+                            <span class="constraint-badge">
+                                PRIMARY KEY
+                            </span>
+                        </div>
+
+                        <div class="column-row">
+                            <span>dept_name</span>
+                            <span class="constraint-badge">
+                                UNIQUE
+                            </span>
+                        </div>
+
+                        <div class="column-row">
+                            <span>location</span>
+                            <span class="constraint-badge">
+                                NOT NULL
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             TYPES
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🧩</div>
+
+                <div>
+                    <h2>Types of SQL Constraints</h2>
+
+                    <div class="section-subtitle">
+                        The major constraints you must know.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="constraint-grid">
+
+                <div class="constraint-card">
+
+                    <div class="constraint-number">
+                        01
+                    </div>
+
+                    <h3>NOT NULL</h3>
+
+                    <p>
+                        Prevents a column from storing NULL values.
+                    </p>
+
+                    <span class="tag">
+                        Required value
+                    </span>
+
+                </div>
+
+
+                <div class="constraint-card">
+
+                    <div class="constraint-number">
+                        02
+                    </div>
+
+                    <h3>UNIQUE</h3>
+
+                    <p>
+                        Prevents duplicate values within the constrained
+                        column or column combination.
+                    </p>
+
+                    <span class="tag">
+                        No duplicates
+                    </span>
+
+                </div>
+
+
+                <div class="constraint-card">
+
+                    <div class="constraint-number">
+                        03
+                    </div>
+
+                    <h3>PRIMARY KEY</h3>
+
+                    <p>
+                        Uniquely identifies each row in a table.
+                    </p>
+
+                    <span class="tag">
+                        Identity
+                    </span>
+
+                </div>
+
+
+                <div class="constraint-card">
+
+                    <div class="constraint-number">
+                        04
+                    </div>
+
+                    <h3>FOREIGN KEY</h3>
+
+                    <p>
+                        Maintains a relationship between tables by referencing
+                        a candidate key, commonly a primary key.
+                    </p>
+
+                    <span class="tag">
+                        Relationship
+                    </span>
+
+                </div>
+
+
+                <div class="constraint-card">
+
+                    <div class="constraint-number">
+                        05
+                    </div>
+
+                    <h3>CHECK</h3>
+
+                    <p>
+                        Requires a row value to satisfy a specified condition.
+                    </p>
+
+                    <span class="tag">
+                        Validation
+                    </span>
+
+                </div>
+
+
+                <div class="constraint-card">
+
+                    <div class="constraint-number">
+                        06
+                    </div>
+
+                    <h3>DEFAULT</h3>
+
+                    <p>
+                        Supplies a value when an INSERT does not provide
+                        one for the column.
+                    </p>
+
+                    <span class="tag">
+                        Automatic value
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             NOT NULL
+             ===================================================== -->
+
+        <section class="section-card reveal" id="notnull">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🚫</div>
+
+                <div>
+                    <h2>1. NOT NULL Constraint</h2>
+
+                    <div class="section-subtitle">
+                        Make sure a value is provided.
+                    </div>
+                </div>
+
+            </div>
+
+            <p>
+                The <span class="inline-code">NOT NULL</span> constraint
+                prevents a column from containing NULL.
+            </p>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>CREATE TABLE</span>
+
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                </div>
+
+<pre><code>CREATE TABLE students (
+    student_id INT,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(150)
+);</code></pre>
+
+            </div>
+
+            <p>
+                Here, <span class="inline-code">name</span> must have a
+                non-NULL value when a row is inserted.
+            </p>
+
+            <div class="info-box danger">
+
+                <strong>❌ This can fail</strong>
+
+<pre style="
+    padding:10px 0 0;
+    background:transparent;
+    color:#475569;
+"><code>INSERT INTO students (student_id, name)
+VALUES (101, NULL);</code></pre>
+
+            </div>
+
+            <div class="info-box info">
+
+                <strong>NULL ≠ Empty String</strong>
+
+                <p>
+                    NULL means "unknown / missing / not provided" in SQL.
+                    An empty string such as <span class="inline-code">''</span>
+                    is a value and is not automatically the same as NULL.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             UNIQUE
+             ===================================================== -->
+
+        <section class="section-card reveal" id="unique">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🔐</div>
+
+                <div>
+                    <h2>2. UNIQUE Constraint</h2>
+
+                    <div class="section-subtitle">
+                        Prevent duplicate values.
+                    </div>
+                </div>
+
+            </div>
+
+            <p>
+                A <span class="inline-code">UNIQUE</span> constraint ensures
+                that duplicate non-NULL values are not stored in the constrained
+                key.
+            </p>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>UNIQUE COLUMN</span>
+
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                </div>
+
+<pre><code>CREATE TABLE students (
+    student_id INT,
+    email VARCHAR(150) UNIQUE
+);</code></pre>
+
+            </div>
+
+            <p>
+                Two students should not have the same email address.
+            </p>
+
+            <h3>Named UNIQUE Constraint</h3>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>NAMED CONSTRAINT</span>
+
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                </div>
+
+<pre><code>CREATE TABLE students (
+    student_id INT,
+    email VARCHAR(150),
+
+    CONSTRAINT uq_student_email
+        UNIQUE (email)
+);</code></pre>
+
+            </div>
+
+            <div class="info-box tip">
+
+                <strong>⭐ Professional Practice</strong>
+
+                <p>
+                    Naming important constraints makes schema maintenance,
+                    migrations and error diagnosis easier.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             PRIMARY KEY
+             ===================================================== -->
+
+        <section class="section-card reveal" id="primary">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🔑</div>
+
+                <div>
+                    <h2>3. PRIMARY KEY</h2>
+
+                    <div class="section-subtitle">
+                        The identity of a row.
+                    </div>
+                </div>
+
+            </div>
+
+            <p>
+                A primary key uniquely identifies each row in a table.
+            </p>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>PRIMARY KEY</span>
+
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                </div>
+
+<pre><code>CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(150)
+);</code></pre>
+
+            </div>
+
+            <h3>Primary Key Properties</h3>
+
+            <ul>
+                <li>Uniquely identifies rows.</li>
+                <li>Cannot contain NULL.</li>
+                <li>A table has one primary key constraint.</li>
+                <li>The key can contain one or multiple columns.</li>
+                <li>A primary key can be referenced by foreign keys.</li>
+            </ul>
+
+            <div class="comparison">
+
+                <div class="compare-card">
+
+                    <h4>Primary Key</h4>
+
+                    <ul>
+                        <li>Identifies the row.</li>
+                        <li>Unique.</li>
+                        <li>Not NULL.</li>
+                        <li>One primary-key constraint per table.</li>
+                    </ul>
+
+                </div>
+
+                <div class="compare-card">
+
+                    <h4>UNIQUE</h4>
+
+                    <ul>
+                        <li>Enforces uniqueness.</li>
+                        <li>NULL behavior is DBMS-dependent.</li>
+                        <li>Multiple UNIQUE constraints can exist.</li>
+                        <li>Does not mean "row identity" by itself.</li>
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             COMPOSITE PRIMARY KEY
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🧱</div>
+
+                <div>
+                    <h2>Composite Primary Key</h2>
+
+                    <div class="section-subtitle">
+                        A primary key made from multiple columns.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <p>
+                Sometimes one column is not enough to uniquely identify a row.
+                Multiple columns can be combined.
+            </p>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>COMPOSITE KEY</span>
+
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                </div>
+
+<pre><code>CREATE TABLE enrollments (
+    student_id INT,
+    course_id INT,
+    enrolled_on DATE,
+
+    PRIMARY KEY (student_id, course_id)
+);</code></pre>
+
+            </div>
+
+            <p>
+                A student can enroll in many courses, and a course can have
+                many students. The combination of
+                <span class="inline-code">student_id</span> and
+                <span class="inline-code">course_id</span> identifies an
+                enrollment.
+            </p>
+
+            <div class="info-box tip">
+
+                <strong>Example</strong>
+
+                <p>
+                    (101, 501) and (101, 502) are different enrollments,
+                    but (101, 501) cannot be inserted twice.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             FOREIGN KEY
+             ===================================================== -->
+
+        <section class="section-card reveal" id="foreign">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🔗</div>
+
+                <div>
+                    <h2>4. FOREIGN KEY</h2>
+
+                    <div class="section-subtitle">
+                        Connect related tables and protect referential integrity.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <p>
+                A foreign key creates a relationship between a child table
+                and a referenced key in another table.
+            </p>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>FOREIGN KEY</span>
+
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                </div>
+
+<pre><code>CREATE TABLE departments (
+    department_id INT PRIMARY KEY,
+    department_name VARCHAR(100)
+);
+
+CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    department_id INT,
+
+    FOREIGN KEY (department_id)
+        REFERENCES departments(department_id)
+);</code></pre>
+
+            </div>
+
+            <div class="flow">
+
+                <div class="flow-box">
+                    departments
+                    <br>
+                    <small>Parent</small>
+                </div>
+
+                <div class="flow-arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+                    department_id
+                    <br>
+                    <small>Referenced Key</small>
+                </div>
+
+                <div class="flow-arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+                    students
+                    <br>
+                    <small>Child</small>
+                </div>
+
+            </div>
+
+            <h3>Referential Integrity</h3>
+
+            <p>
+                A foreign key prevents a child row from referring to a
+                nonexistent referenced key, subject to the specific NULL
+                and referential-action rules of the database.
+            </p>
+
+            <div class="info-box danger">
+
+                <strong>❌ Invalid relationship</strong>
+
+<pre style="
+    padding:10px 0 0;
+    background:transparent;
+    color:#475569;
+"><code>INSERT INTO students
+(student_id, name, department_id)
+VALUES
+(101, 'Pradeep', 999);</code></pre>
+
+                <p>
+                    If department 999 does not exist in the referenced table,
+                    the insert can be rejected by the foreign key.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             CHECK
+             ===================================================== -->
+
+        <section class="section-card reveal" id="check">
+
+            <div class="section-heading">
+
+                <div class="section-icon">✓</div>
+
+                <div>
+                    <h2>5. CHECK Constraint</h2>
+
+                    <div class="section-subtitle">
+                        Enforce business rules at the database level.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <p>
+                A <span class="inline-code">CHECK</span> constraint requires
+                a row to satisfy a specified condition.
+            </p>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>CHECK</span>
+
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                </div>
+
+<pre><code>CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    age INT CHECK (age >= 17),
+    marks DECIMAL(5,2) CHECK (marks BETWEEN 0 AND 100)
+);</code></pre>
+
+            </div>
+
+            <h3>More Examples</h3>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>BUSINESS RULES</span>
+                </div>
+
+<pre><code>salary DECIMAL(10,2)
+    CHECK (salary > 0)
+
+quantity INT
+    CHECK (quantity >= 0)
+
+status VARCHAR(20)
+    CHECK (status IN ('ACTIVE', 'INACTIVE'))
+
+discount DECIMAL(5,2)
+    CHECK (discount BETWEEN 0 AND 100)</code></pre>
+
+            </div>
+
+            <div class="info-box info">
+
+                <strong>Important</strong>
+
+                <p>
+                    CHECK support and enforcement details can vary among
+                    database systems and versions. For production schemas,
+                    verify the behavior of your target DBMS.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             DEFAULT
+             ===================================================== -->
+
+        <section class="section-card reveal" id="default">
+
+            <div class="section-heading">
+
+                <div class="section-icon">⚙️</div>
+
+                <div>
+                    <h2>6. DEFAULT Constraint</h2>
+
+                    <div class="section-subtitle">
+                        Automatically supply a value when one is omitted.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>DEFAULT</span>
+
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                </div>
+
+<pre><code>CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    city VARCHAR(50) DEFAULT 'Guntur',
+    status VARCHAR(20) DEFAULT 'ACTIVE'
+);</code></pre>
+
+            </div>
+
+            <p>
+                If an INSERT does not supply a value for
+                <span class="inline-code">city</span> or
+                <span class="inline-code">status</span>, the database can
+                use the defined defaults.
+            </p>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>INSERT</span>
+                </div>
+
+<pre><code>INSERT INTO students (student_id, name)
+VALUES (101, 'Pradeep');</code></pre>
+
+            </div>
+
+            <p>
+                Conceptually, the row receives the default city and status.
+            </p>
+
+        </section>
+
+
+        <!-- =====================================================
+             COMBINING CONSTRAINTS
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🏗️</div>
+
+                <div>
+                    <h2>Combining Multiple Constraints</h2>
+
+                    <div class="section-subtitle">
+                        Real database columns often have more than one rule.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>PROFESSIONAL TABLE DESIGN</span>
+
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                </div>
+
+<pre><code>CREATE TABLE students (
+    student_id INT
+        CONSTRAINT pk_students
+        PRIMARY KEY,
+
+    name VARCHAR(100)
+        CONSTRAINT nn_student_name
+        NOT NULL,
+
+    email VARCHAR(150)
+        CONSTRAINT uq_student_email
+        UNIQUE,
+
+    age INT
+        CONSTRAINT chk_student_age
+        CHECK (age >= 17),
+
+    city VARCHAR(50)
+        DEFAULT 'Guntur',
+
+    department_id INT,
+
+    CONSTRAINT fk_student_department
+        FOREIGN KEY (department_id)
+        REFERENCES departments(department_id)
+);</code></pre>
+
+            </div>
+
+            <div class="tags">
+
+                <span class="tag">PRIMARY KEY</span>
+                <span class="tag">NOT NULL</span>
+                <span class="tag">UNIQUE</span>
+                <span class="tag">CHECK</span>
+                <span class="tag">DEFAULT</span>
+                <span class="tag">FOREIGN KEY</span>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             NAMED CONSTRAINTS
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🏷️</div>
+
+                <div>
+                    <h2>Named Constraints</h2>
+
+                    <div class="section-subtitle">
+                        Give constraints meaningful names.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>NAMED CONSTRAINTS</span>
+
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                </div>
+
+<pre><code>CREATE TABLE employees (
+
+    employee_id INT,
+
+    email VARCHAR(150),
+
+    salary DECIMAL(10,2),
+
+    department_id INT,
+
+    CONSTRAINT pk_employee
+        PRIMARY KEY (employee_id),
+
+    CONSTRAINT uq_employee_email
+        UNIQUE (email),
+
+    CONSTRAINT chk_employee_salary
+        CHECK (salary > 0),
+
+    CONSTRAINT fk_employee_department
+        FOREIGN KEY (department_id)
+        REFERENCES departments(department_id)
+
+);</code></pre>
+
+            </div>
+
+            <h3>Naming Convention</h3>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Constraint</th>
+                            <th>Example Name</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Primary Key</td>
+                            <td>pk_students</td>
+                        </tr>
+
+                        <tr>
+                            <td>Foreign Key</td>
+                            <td>fk_student_department</td>
+                        </tr>
+
+                        <tr>
+                            <td>Unique</td>
+                            <td>uq_student_email</td>
+                        </tr>
+
+                        <tr>
+                            <td>Check</td>
+                            <td>chk_student_age</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             ALTER TABLE
+             ===================================================== -->
+
+        <section class="section-card reveal" id="alter">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🔧</div>
+
+                <div>
+                    <h2>Adding Constraints with ALTER TABLE</h2>
+
+                    <div class="section-subtitle">
+                        Modify an existing table.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <h3>Add UNIQUE</h3>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>ALTER TABLE</span>
+                </div>
+
+<pre><code>ALTER TABLE students
+ADD CONSTRAINT uq_student_email
+UNIQUE (email);</code></pre>
+
+            </div>
+
+            <h3>Add FOREIGN KEY</h3>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>FOREIGN KEY</span>
+                </div>
+
+<pre><code>ALTER TABLE students
+ADD CONSTRAINT fk_student_department
+FOREIGN KEY (department_id)
+REFERENCES departments(department_id);</code></pre>
+
+            </div>
+
+            <h3>Add CHECK</h3>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>CHECK</span>
+                </div>
+
+<pre><code>ALTER TABLE students
+ADD CONSTRAINT chk_student_marks
+CHECK (marks BETWEEN 0 AND 100);</code></pre>
+
+            </div>
+
+            <div class="info-box warning">
+
+                <strong>⚠️ Existing Data Matters</strong>
+
+                <p>
+                    Adding a constraint can fail if existing rows violate
+                    the new rule. Always inspect and clean existing data
+                    before applying restrictive constraints.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             DROP
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🗑️</div>
+
+                <div>
+                    <h2>Dropping Constraints</h2>
+
+                    <div class="section-subtitle">
+                        Remove a named constraint when necessary.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>DROP CONSTRAINT</span>
+                </div>
+
+<pre><code>ALTER TABLE students
+DROP CONSTRAINT uq_student_email;</code></pre>
+
+            </div>
+
+            <div class="info-box warning">
+
+                <strong>DBMS Difference</strong>
+
+                <p>
+                    Exact ALTER TABLE syntax differs across MySQL, PostgreSQL,
+                    SQL Server, Oracle and other systems. Always check the
+                    syntax for your target DBMS.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             FOREIGN KEY ACTIONS
+             ===================================================== -->
+
+        <section class="section-card reveal" id="actions">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🔗</div>
+
+                <div>
+                    <h2>Foreign Key Referential Actions</h2>
+
+                    <div class="section-subtitle">
+                        What happens when parent rows are updated or deleted?
+                    </div>
+
+                </div>
+
+            </div>
+
+            <p>
+                Foreign keys can specify actions for changes to referenced rows.
+            </p>
+
+            <div class="comparison">
+
+                <div class="compare-card">
+
+                    <h4>CASCADE</h4>
+
+                    <p>
+                        Propagate the parent UPDATE or DELETE to matching
+                        child rows.
+                    </p>
+
+                </div>
+
+                <div class="compare-card">
+
+                    <h4>SET NULL</h4>
+
+                    <p>
+                        Set the foreign-key value to NULL when the parent
+                        changes, where the column allows NULL.
+                    </p>
+
+                </div>
+
+                <div class="compare-card">
+
+                    <h4>SET DEFAULT</h4>
+
+                    <p>
+                        Set the child value to its default where supported
+                        and applicable by the DBMS.
+                    </p>
+
+                </div>
+
+                <div class="compare-card">
+
+                    <h4>RESTRICT / NO ACTION</h4>
+
+                    <p>
+                        Prevent or defer the parent change when dependent
+                        rows would violate referential integrity, depending
+                        on DBMS behavior.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>REFERENTIAL ACTION</span>
+
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                </div>
+
+<pre><code>CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    department_id INT,
+
+    CONSTRAINT fk_student_department
+        FOREIGN KEY (department_id)
+        REFERENCES departments(department_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);</code></pre>
+
+            </div>
+
+            <div class="info-box danger">
+
+                <strong>⚠️ Use CASCADE Carefully</strong>
+
+                <p>
+                    Cascading deletes can remove many dependent rows.
+                    Use them only when that behavior matches the business
+                    relationship.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             CONSTRAINT COMPARISON
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">📊</div>
+
+                <div>
+                    <h2>Constraint Comparison</h2>
+
+                    <div class="section-subtitle">
+                        Quickly identify what each constraint does.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Constraint</th>
+                            <th>Main Purpose</th>
+                            <th>NULL?</th>
+                            <th>Duplicates?</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>NOT NULL</td>
+                            <td>Require a value</td>
+                            <td>No</td>
+                            <td>Allowed</td>
+                        </tr>
+
+                        <tr>
+                            <td>UNIQUE</td>
+                            <td>Prevent duplicate constrained values</td>
+                            <td>DBMS-dependent behavior</td>
+                            <td>No duplicate non-NULL values</td>
+                        </tr>
+
+                        <tr>
+                            <td>PRIMARY KEY</td>
+                            <td>Identify each row</td>
+                            <td>No</td>
+                            <td>No</td>
+                        </tr>
+
+                        <tr>
+                            <td>FOREIGN KEY</td>
+                            <td>Maintain relationships</td>
+                            <td>Usually possible unless NOT NULL is also specified</td>
+                            <td>Usually allowed</td>
+                        </tr>
+
+                        <tr>
+                            <td>CHECK</td>
+                            <td>Enforce condition</td>
+                            <td>Depends on expression and NULL semantics</td>
+                            <td>Allowed</td>
+                        </tr>
+
+                        <tr>
+                            <td>DEFAULT</td>
+                            <td>Supply omitted value</td>
+                            <td>Depends on definition</td>
+                            <td>Allowed</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             UNIQUE VS PRIMARY
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">⚖️</div>
+
+                <div>
+                    <h2>PRIMARY KEY vs UNIQUE</h2>
+
+                    <div class="section-subtitle">
+                        One of the most common interview questions.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="comparison">
+
+                <div class="compare-card">
+
+                    <h4>PRIMARY KEY</h4>
+
+                    <ul>
+                        <li>Represents the table's chosen row identifier.</li>
+                        <li>Cannot contain NULL.</li>
+                        <li>One primary-key constraint per table.</li>
+                        <li>Can consist of multiple columns.</li>
+                        <li>Can be referenced by foreign keys.</li>
+                    </ul>
+
+                </div>
+
+                <div class="compare-card">
+
+                    <h4>UNIQUE</h4>
+
+                    <ul>
+                        <li>Enforces uniqueness.</li>
+                        <li>NULL handling varies by DBMS.</li>
+                        <li>Multiple UNIQUE constraints can exist.</li>
+                        <li>Can be composite.</li>
+                        <li>Can provide a candidate key for references.</li>
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             PRIMARY VS FOREIGN
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🔑</div>
+
+                <div>
+                    <h2>PRIMARY KEY vs FOREIGN KEY</h2>
+
+                    <div class="section-subtitle">
+                        Understand the parent-child relationship.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="flow">
+
+                <div class="flow-box">
+                    Parent Table
+                    <br>
+                    <small>PRIMARY KEY</small>
+                </div>
+
+                <div class="flow-arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+                    Referenced Value
+                </div>
+
+                <div class="flow-arrow">
+                    →
+                </div>
+
+                <div class="flow-box">
+                    Child Table
+                    <br>
+                    <small>FOREIGN KEY</small>
+                </div>
+
+            </div>
+
+            <div class="info-grid">
+
+                <div class="info-box info">
+
+                    <strong>PRIMARY KEY</strong>
+
+                    <p>
+                        Identifies a row in its own table.
+                    </p>
+
+                </div>
+
+                <div class="info-box info">
+
+                    <strong>FOREIGN KEY</strong>
+
+                    <p>
+                        Stores a value used to reference a key in another
+                        table.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             MULTIPLE CONSTRAINT EXAMPLE
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🏢</div>
+
+                <div>
+                    <h2>Real-World Example — College Database</h2>
+
+                    <div class="section-subtitle">
+                        See how constraints work together.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="code-wrapper">
+
+                <div class="code-header">
+                    <span>COLLEGE DATABASE</span>
+
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                </div>
+
+<pre><code>CREATE TABLE departments (
+    department_id INT PRIMARY KEY,
+    department_name VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+
+    name VARCHAR(100)
+        NOT NULL,
+
+    email VARCHAR(150)
+        UNIQUE,
+
+    age INT
+        CHECK (age >= 17),
+
+    city VARCHAR(50)
+        DEFAULT 'Guntur',
+
+    department_id INT,
+
+    CONSTRAINT fk_student_department
+        FOREIGN KEY (department_id)
+        REFERENCES departments(department_id)
+);</code></pre>
+
+            </div>
+
+            <h3>What does each rule do?</h3>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Column</th>
+                            <th>Constraint</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>student_id</td>
+                            <td>PRIMARY KEY</td>
+                            <td>Unique student identity</td>
+                        </tr>
+
+                        <tr>
+                            <td>name</td>
+                            <td>NOT NULL</td>
+                            <td>Name must be supplied</td>
+                        </tr>
+
+                        <tr>
+                            <td>email</td>
+                            <td>UNIQUE</td>
+                            <td>Avoid duplicate email values</td>
+                        </tr>
+
+                        <tr>
+                            <td>age</td>
+                            <td>CHECK</td>
+                            <td>Age must satisfy the rule</td>
+                        </tr>
+
+                        <tr>
+                            <td>city</td>
+                            <td>DEFAULT</td>
+                            <td>Use Guntur when omitted</td>
+                        </tr>
+
+                        <tr>
+                            <td>department_id</td>
+                            <td>FOREIGN KEY</td>
+                            <td>Connect student to department</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             INTERACTIVE LAB
+             ===================================================== -->
+
+        <section class="section-card reveal" id="lab">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🧪</div>
+
+                <div>
+                    <h2>Interactive Constraint Lab</h2>
+
+                    <div class="section-subtitle">
+                        Test common constraint scenarios.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="lab">
+
+                <h3>Choose a Constraint</h3>
+
+                <p>
+                    This is a browser-based simulation for learning.
+                    It does not execute SQL against a real database.
+                </p>
+
+                <div class="lab-controls">
+
+                    <button class="lab-btn active"
+                            onclick="runConstraint('notnull',this)">
+                        NOT NULL
+                    </button>
+
+                    <button class="lab-btn"
+                            onclick="runConstraint('unique',this)">
+                        UNIQUE
+                    </button>
+
+                    <button class="lab-btn"
+                            onclick="runConstraint('primary',this)">
+                        PRIMARY KEY
+                    </button>
+
+                    <button class="lab-btn"
+                            onclick="runConstraint('foreign',this)">
+                        FOREIGN KEY
+                    </button>
+
+                    <button class="lab-btn"
+                            onclick="runConstraint('check',this)">
+                        CHECK
+                    </button>
+
+                    <button class="lab-btn"
+                            onclick="runConstraint('default',this)">
+                        DEFAULT
+                    </button>
+
+                </div>
+
+                <div class="lab-query">
+
+                    <div style="
+                        font-size:10px;
+                        color:#64748b;
+                        font-weight:800;
+                        margin-bottom:7px;
+                        text-transform:uppercase;
+                    ">
+                        SQL Scenario
+                    </div>
+
+                    <pre id="constraintSQL"></pre>
+
+                </div>
+
+                <div class="lab-result">
+
+                    <div class="lab-result-title">
+                        RESULT
+                    </div>
+
+                    <div id="constraintResult"
+                         style="padding:18px;color:#cbd5e1;">
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             COMMON MISTAKES
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🚧</div>
+
+                <div>
+                    <h2>Common Mistakes</h2>
+
+                    <div class="section-subtitle">
+                        Mistakes frequently seen in exams and real projects.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="info-grid">
+
+                <div class="info-box danger">
+                    <strong>❌ Duplicate Primary Key</strong>
+                    <p>
+                        Two rows cannot share the same primary-key value.
+                    </p>
+                </div>
+
+                <div class="info-box danger">
+                    <strong>❌ NULL Primary Key</strong>
+                    <p>
+                        A primary key cannot be NULL.
+                    </p>
+                </div>
+
+                <div class="info-box danger">
+                    <strong>❌ Invalid Foreign Key</strong>
+                    <p>
+                        A child row cannot reference a nonexistent parent
+                        key under normal referential-integrity rules.
+                    </p>
+                </div>
+
+                <div class="info-box warning">
+                    <strong>⚠️ Confusing NULL and empty string</strong>
+                    <p>
+                        They are not generally the same thing.
+                    </p>
+                </div>
+
+                <div class="info-box warning">
+                    <strong>⚠️ Assuming UNIQUE NULL behavior</strong>
+                    <p>
+                        NULL handling for UNIQUE constraints differs among
+                        database systems.
+                    </p>
+                </div>
+
+                <div class="info-box warning">
+                    <strong>⚠️ Unsafe CASCADE</strong>
+                    <p>
+                        Cascading DELETE can remove many dependent rows.
+                    </p>
+                </div>
+
+                <div class="info-box info">
+                    <strong>ℹ️ Adding constraints blindly</strong>
+                    <p>
+                        Existing data may violate the new rule.
+                    </p>
+                </div>
+
+                <div class="info-box info">
+                    <strong>ℹ️ Ignoring DBMS differences</strong>
+                    <p>
+                        ALTER TABLE and constraint syntax can differ by DBMS.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             EXAM 5 MARK
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">📝</div>
+
+                <div>
+                    <h2>Exam Preparation — 5 Marks</h2>
+
+                    <div class="section-subtitle">
+                        Ready-to-write answer.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <h3>Define SQL Constraints</h3>
+
+            <p>
+                SQL constraints are rules applied to table columns to maintain
+                data integrity, consistency and validity. They restrict
+                invalid data from being inserted or updated.
+            </p>
+
+            <h3>Types of Constraints</h3>
+
+            <ol>
+
+                <li>
+                    <strong>NOT NULL:</strong>
+                    Prevents NULL values.
+                </li>
+
+                <li>
+                    <strong>UNIQUE:</strong>
+                    Prevents duplicate constrained values.
+                </li>
+
+                <li>
+                    <strong>PRIMARY KEY:</strong>
+                    Uniquely identifies each row.
+                </li>
+
+                <li>
+                    <strong>FOREIGN KEY:</strong>
+                    Maintains relationships between tables.
+                </li>
+
+                <li>
+                    <strong>CHECK:</strong>
+                    Enforces a condition.
+                </li>
+
+                <li>
+                    <strong>DEFAULT:</strong>
+                    Supplies a value when one is omitted.
+                </li>
+
+            </ol>
+
+        </section>
+
+
+        <!-- =====================================================
+             EXAM 10 MARK
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🏆</div>
+
+                <div>
+                    <h2>Exam Preparation — 10 Marks</h2>
+
+                    <div class="section-subtitle">
+                        Professional long-answer structure.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <h3>SQL Constraints</h3>
+
+            <p>
+                Constraints are rules enforced by a relational database to
+                preserve data integrity and prevent invalid information from
+                being stored. They are an important part of database design.
+            </p>
+
+            <h3>1. NOT NULL</h3>
+
+            <p>
+                Ensures that a column must contain a non-NULL value.
+            </p>
+
+            <h3>2. UNIQUE</h3>
+
+            <p>
+                Ensures uniqueness for the constrained key.
+            </p>
+
+            <h3>3. PRIMARY KEY</h3>
+
+            <p>
+                Uniquely identifies every row and cannot contain NULL.
+            </p>
+
+            <h3>4. FOREIGN KEY</h3>
+
+            <p>
+                Maintains referential integrity between related tables.
+            </p>
+
+            <h3>5. CHECK</h3>
+
+            <p>
+                Enforces a specified logical condition on row values.
+            </p>
+
+            <h3>6. DEFAULT</h3>
+
+            <p>
+                Provides a value when an INSERT omits a column value.
+            </p>
+
+            <h3>Advantages</h3>
+
+            <ul>
+                <li>Improves data integrity.</li>
+                <li>Prevents invalid data.</li>
+                <li>Maintains relationships.</li>
+                <li>Reduces duplicate data.</li>
+                <li>Centralizes important data rules.</li>
+                <li>Protects data even when multiple applications access the database.</li>
+            </ul>
+
+        </section>
+
+
+        <!-- =====================================================
+             INTERVIEW
+             ===================================================== -->
+
+        <section class="section-card reveal" id="interview">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🎤</div>
+
+                <div>
+                    <h2>Interview Questions</h2>
+
+                    <div class="section-subtitle">
+                        Questions you should answer confidently.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <h3>1. What is a constraint?</h3>
+
+            <p>
+                A rule enforced by the database to maintain data integrity.
+            </p>
+
+            <h3>2. What is a primary key?</h3>
+
+            <p>
+                A key chosen to uniquely identify rows in a table.
+            </p>
+
+            <h3>3. Can a primary key contain NULL?</h3>
+
+            <p>
+                No.
+            </p>
+
+            <h3>4. Can a table have multiple primary keys?</h3>
+
+            <p>
+                A table has one primary-key constraint, although that key
+                can contain multiple columns.
+            </p>
+
+            <h3>5. Can a table have multiple UNIQUE constraints?</h3>
+
+            <p>
+                Yes.
+            </p>
+
+            <h3>6. What is a foreign key?</h3>
+
+            <p>
+                A column or set of columns that references a key in another
+                table to enforce referential integrity.
+            </p>
+
+            <h3>7. Primary key vs foreign key?</h3>
+
+            <p>
+                The primary key identifies rows in its own table. The foreign
+                key references a key in another table.
+            </p>
+
+            <h3>8. What is a composite key?</h3>
+
+            <p>
+                A key consisting of multiple columns.
+            </p>
+
+            <h3>9. What is CHECK?</h3>
+
+            <p>
+                CHECK enforces a condition on row values.
+            </p>
+
+            <h3>10. What is DEFAULT?</h3>
+
+            <p>
+                DEFAULT supplies a value when an INSERT does not provide one
+                for the column.
+            </p>
+
+            <h3>11. What happens if a foreign key references a nonexistent value?</h3>
+
+            <p>
+                Normally the database rejects the operation because it would
+                violate referential integrity, unless the relationship and
+                operation allow NULL or another valid referenced state.
+            </p>
+
+            <h3>12. What is ON DELETE CASCADE?</h3>
+
+            <p>
+                It causes matching dependent rows to be deleted when the
+                referenced parent row is deleted.
+            </p>
+
+        </section>
+
+
+        <!-- =====================================================
+             QUIZ
+             ===================================================== -->
+
+        <section class="section-card reveal" id="quiz">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🧠</div>
+
+                <div>
+                    <h2>Constraint Quiz</h2>
+
+                    <div class="section-subtitle">
+                        Test your understanding.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Q1 -->
+
+            <div class="quiz-question">
+
+                <p>
+                    1. Which constraint prevents NULL values?
+                </p>
+
+                <div class="quiz-options">
+
+                    <div class="quiz-option" data-correct="true">
+                        NOT NULL
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        UNIQUE
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        CHECK
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        DEFAULT
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Q2 -->
+
+            <div class="quiz-question">
+
+                <p>
+                    2. Which constraint identifies each row?
+                </p>
+
+                <div class="quiz-options">
+
+                    <div class="quiz-option" data-correct="false">
+                        FOREIGN KEY
+                    </div>
+
+                    <div class="quiz-option" data-correct="true">
+                        PRIMARY KEY
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        DEFAULT
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        CHECK
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Q3 -->
+
+            <div class="quiz-question">
+
+                <p>
+                    3. Which constraint connects related tables?
+                </p>
+
+                <div class="quiz-options">
+
+                    <div class="quiz-option" data-correct="false">
+                        CHECK
+                    </div>
+
+                    <div class="quiz-option" data-correct="true">
+                        FOREIGN KEY
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        DEFAULT
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        NOT NULL
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Q4 -->
+
+            <div class="quiz-question">
+
+                <p>
+                    4. Which constraint is used to enforce a condition?
+                </p>
+
+                <div class="quiz-options">
+
+                    <div class="quiz-option" data-correct="true">
+                        CHECK
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        UNIQUE
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        PRIMARY KEY
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        FOREIGN KEY
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Q5 -->
+
+            <div class="quiz-question">
+
+                <p>
+                    5. Which constraint supplies a value when it is omitted?
+                </p>
+
+                <div class="quiz-options">
+
+                    <div class="quiz-option" data-correct="false">
+                        CHECK
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        UNIQUE
+                    </div>
+
+                    <div class="quiz-option" data-correct="true">
+                        DEFAULT
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        PRIMARY KEY
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Q6 -->
+
+            <div class="quiz-question">
+
+                <p>
+                    6. Can a composite primary key contain multiple columns?
+                </p>
+
+                <div class="quiz-options">
+
+                    <div class="quiz-option" data-correct="true">
+                        Yes
+                    </div>
+
+                    <div class="quiz-option" data-correct="false">
+                        No
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <button class="primary-btn"
+                    onclick="calculateQuiz()">
+                Check Score
+            </button>
+
+            <div class="quiz-result"
+                 id="quizResult">
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             PRACTICE
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">💻</div>
+
+                <div>
+                    <h2>Practice Problems</h2>
+
+                    <div class="section-subtitle">
+                        Solve these using CREATE TABLE and ALTER TABLE.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <ol>
+
+                <li>
+                    Create a students table with a PRIMARY KEY.
+                </li>
+
+                <li>
+                    Make student name NOT NULL.
+                </li>
+
+                <li>
+                    Make email UNIQUE.
+                </li>
+
+                <li>
+                    Add a CHECK constraint that marks must be between 0 and 100.
+                </li>
+
+                <li>
+                    Add a DEFAULT status of ACTIVE.
+                </li>
+
+                <li>
+                    Create departments and connect students using a FOREIGN KEY.
+                </li>
+
+                <li>
+                    Create an enrollments table with a composite primary key.
+                </li>
+
+                <li>
+                    Add a named UNIQUE constraint using ALTER TABLE.
+                </li>
+
+                <li>
+                    Add a CHECK constraint to an existing table.
+                </li>
+
+                <li>
+                    Create a foreign key with ON DELETE CASCADE.
+                </li>
+
+            </ol>
+
+        </section>
+
+
+        <!-- =====================================================
+             MINI PROJECT
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🚀</div>
+
+                <div>
+                    <h2>Mini Project — College Database Integrity System</h2>
+
+                    <div class="section-subtitle">
+                        Build a production-style schema using constraints.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <p>
+                Design a college database containing:
+            </p>
+
+            <ul>
+
+                <li>Students</li>
+                <li>Departments</li>
+                <li>Courses</li>
+                <li>Faculty</li>
+                <li>Enrollments</li>
+                <li>Examinations</li>
+                <li>Results</li>
+
+            </ul>
+
+            <h3>Required Constraints</h3>
+
+            <ul>
+
+                <li>
+                    Every student must have a unique student ID.
+                </li>
+
+                <li>
+                    Student email must be unique.
+                </li>
+
+                <li>
+                    Student name cannot be NULL.
+                </li>
+
+                <li>
+                    Marks must remain between 0 and 100.
+                </li>
+
+                <li>
+                    Department must reference an existing department.
+                </li>
+
+                <li>
+                    Enrollment must prevent duplicate student-course pairs.
+                </li>
+
+                <li>
+                    Student status should have a sensible DEFAULT.
+                </li>
+
+                <li>
+                    Use named constraints.
+                </li>
+
+            </ul>
+
+            <div class="info-box tip">
+
+                <strong>⭐ ZENSUS Project Upgrade</strong>
+
+                <p>
+                    Make this project part of your SQL portfolio. Show the
+                    schema diagram, CREATE TABLE statements, constraints,
+                    sample data and intentionally invalid INSERT statements
+                    that demonstrate how the database protects the data.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             DESIGN PRINCIPLES
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">🏛️</div>
+
+                <div>
+                    <h2>Professional Database Design Principles</h2>
+
+                    <div class="section-subtitle">
+                        Constraints are part of schema design, not decoration.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="info-grid">
+
+                <div class="info-box tip">
+
+                    <strong>1. Protect important data</strong>
+
+                    <p>
+                        Put critical integrity rules in the database.
+                    </p>
+
+                </div>
+
+                <div class="info-box tip">
+
+                    <strong>2. Use meaningful names</strong>
+
+                    <p>
+                        Named constraints are easier to maintain.
+                    </p>
+
+                </div>
+
+                <div class="info-box info">
+
+                    <strong>3. Choose keys carefully</strong>
+
+                    <p>
+                        Select stable, appropriate identifiers.
+                    </p>
+
+                </div>
+
+                <div class="info-box info">
+
+                    <strong>4. Model relationships explicitly</strong>
+
+                    <p>
+                        Use foreign keys where referential integrity is required.
+                    </p>
+
+                </div>
+
+                <div class="info-box warning">
+
+                    <strong>5. Validate existing data</strong>
+
+                    <p>
+                        Check old rows before adding restrictive constraints.
+                    </p>
+
+                </div>
+
+                <div class="info-box warning">
+
+                    <strong>6. Test destructive actions</strong>
+
+                    <p>
+                        Especially when using CASCADE.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             CHECKLIST
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">☑️</div>
+
+                <div>
+                    <h2>Lesson Completion Checklist</h2>
+
+                    <div class="section-subtitle">
+                        Your progress is saved in this browser.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="checklist">
+
+                <label class="check-item">
+
+                    <input type="checkbox"
+                           data-check="1">
+
+                    <span>
+                        I understand what SQL constraints are.
+                    </span>
+
+                </label>
+
+
+                <label class="check-item">
+
+                    <input type="checkbox"
+                           data-check="2">
+
+                    <span>
+                        I understand NOT NULL.
+                    </span>
+
+                </label>
+
+
+                <label class="check-item">
+
+                    <input type="checkbox"
+                           data-check="3">
+
+                    <span>
+                        I understand UNIQUE.
+                    </span>
+
+                </label>
+
+
+                <label class="check-item">
+
+                    <input type="checkbox"
+                           data-check="4">
+
+                    <span>
+                        I understand PRIMARY KEY.
+                    </span>
+
+                </label>
+
+
+                <label class="check-item">
+
+                    <input type="checkbox"
+                           data-check="5">
+
+                    <span>
+                        I can create a composite key.
+                    </span>
+
+                </label>
+
+
+                <label class="check-item">
+
+                    <input type="checkbox"
+                           data-check="6">
+
+                    <span>
+                        I understand FOREIGN KEY.
+                    </span>
+
+                </label>
+
+
+                <label class="check-item">
+
+                    <input type="checkbox"
+                           data-check="7">
+
+                    <span>
+                        I understand CHECK.
+                    </span>
+
+                </label>
+
+
+                <label class="check-item">
+
+                    <input type="checkbox"
+                           data-check="8">
+
+                    <span>
+                        I understand DEFAULT.
+                    </span>
+
+                </label>
+
+
+                <label class="check-item">
+
+                    <input type="checkbox"
+                           data-check="9">
+
+                    <span>
+                        I can add constraints using ALTER TABLE.
+                    </span>
+
+                </label>
+
+
+                <label class="check-item">
+
+                    <input type="checkbox"
+                           data-check="10">
+
+                    <span>
+                        I understand ON DELETE and ON UPDATE actions.
+                    </span>
+
+                </label>
+
+
+                <label class="check-item">
+
+                    <input type="checkbox"
+                           data-check="11">
+
+                    <span>
+                        I completed the practice problems.
+                    </span>
+
+                </label>
+
+
+                <label class="check-item">
+
+                    <input type="checkbox"
+                           data-check="12">
+
+                    <span>
+                        I completed the mini project.
+                    </span>
+
+                </label>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             RAPID REVISION
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div class="section-heading">
+
+                <div class="section-icon">⚡</div>
+
+                <div>
+                    <h2>Rapid Revision</h2>
+
+                    <div class="section-subtitle">
+                        Memorize the role of every major constraint.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Constraint</th>
+                            <th>Remember It As</th>
+                            <th>Example</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>NOT NULL</td>
+                            <td>Value required</td>
+                            <td>name NOT NULL</td>
+                        </tr>
+
+                        <tr>
+                            <td>UNIQUE</td>
+                            <td>No duplicate constrained values</td>
+                            <td>email UNIQUE</td>
+                        </tr>
+
+                        <tr>
+                            <td>PRIMARY KEY</td>
+                            <td>Row identity</td>
+                            <td>student_id PRIMARY KEY</td>
+                        </tr>
+
+                        <tr>
+                            <td>FOREIGN KEY</td>
+                            <td>Table relationship</td>
+                            <td>department_id REFERENCES departments</td>
+                        </tr>
+
+                        <tr>
+                            <td>CHECK</td>
+                            <td>Business rule</td>
+                            <td>marks BETWEEN 0 AND 100</td>
+                        </tr>
+
+                        <tr>
+                            <td>DEFAULT</td>
+                            <td>Automatic value</td>
+                            <td>status DEFAULT 'ACTIVE'</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             FINAL
+             ===================================================== -->
+
+        <section class="section-card reveal">
+
+            <div style="
+                text-align:center;
+                padding:25px 10px;
+            ">
+
+                <div style="
+                    font-size:42px;
+                    margin-bottom:12px;
+                ">
+                    🛡️
+                </div>
+
+                <h2>
+                    You now understand SQL Constraints.
+                </h2>
+
+                <p style="
+                    max-width:730px;
+                    margin:10px auto 20px;
+                    color:#64748b;
+                ">
+                    A strong SQL developer does not only know how to retrieve
+                    data. They know how to design a database that prevents
+                    incorrect data from being stored in the first place.
+                </p>
+
+                <div class="tags"
+                     style="justify-content:center;">
+
+                    <span class="tag">NOT NULL</span>
+                    <span class="tag">UNIQUE</span>
+                    <span class="tag">PRIMARY KEY</span>
+                    <span class="tag">FOREIGN KEY</span>
+                    <span class="tag">CHECK</span>
+                    <span class="tag">DEFAULT</span>
+                    <span class="tag">Composite Keys</span>
+                    <span class="tag">Referential Integrity</span>
+                    <span class="tag">ALTER TABLE</span>
+
+                </div>
+
+                <p style="
+                    margin-top:25px;
+                    font-size:13px;
+                    font-weight:800;
+                    color:#4f46e5;
+                ">
+                    SQL Fundamentals Complete 🎉
+                </p>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</main>
+
+
+<script>
+    /* =========================================================
+       ZENSUS SQL LESSON 12 — JAVASCRIPT
+       ========================================================= */
+
+
+    /* =========================
+       MOBILE SIDEBAR
+       ========================= */
+
+    function toggleSidebar() {
+
+        document
+            .getElementById("sidebar")
+            .classList
+            .toggle("open");
+
+    }
+
+
+    /* =========================
+       SCROLL PROGRESS
+       ========================= */
+
+    window.addEventListener("scroll", function () {
+
+        const scrollTop = window.scrollY;
+
+        const totalHeight =
+            document.documentElement.scrollHeight -
+            document.documentElement.clientHeight;
+
+        const percentage =
+            (scrollTop / totalHeight) * 100;
+
+        document
+            .getElementById("progressBar")
+            .style
+            .width = percentage + "%";
+
+    });
+
+
+    /* =========================
+       COPY CODE
+       ========================= */
+
+    function copyCode(button) {
+
+        const wrapper =
+            button.closest(".code-wrapper");
+
+        const code =
+            wrapper.querySelector("pre").innerText;
+
+        navigator.clipboard
+            .writeText(code)
+            .then(function () {
+
+                const oldText =
+                    button.innerText;
+
+                button.innerText =
+                    "Copied!";
+
+                setTimeout(function () {
+
+                    button.innerText =
+                        oldText;
+
+                }, 1200);
+
+            })
+            .catch(function () {
+
+                button.innerText =
+                    "Copy failed";
+
+                setTimeout(function () {
+
+                    button.innerText =
+                        "Copy";
+
+                }, 1200);
+
+            });
+
+    }
+
+
+    /* =========================
+       REVEAL ANIMATION
+       ========================= */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            const elements =
+                document.querySelectorAll(
+                    ".reveal"
+                );
+
+            elements.forEach(function (el) {
+
+                el.classList.add(
+                    "animate"
+                );
+
+            });
+
+            const observer =
+                new IntersectionObserver(
+                    function (entries) {
+
+                        entries.forEach(
+                            function (entry) {
+
+                                if (
+                                    entry.isIntersecting
+                                ) {
+
+                                    entry.target
+                                        .classList
+                                        .add("visible");
+
+                                }
+
+                            }
+                        );
+
+                    },
+                    {
+                        threshold: 0.08
+                    }
+                );
+
+            elements.forEach(
+                function (el) {
+
+                    observer.observe(el);
+
+                }
+            );
+
+        }
+    );
+
+
+    /* =========================================================
+       CONSTRAINT LAB
+       ========================================================= */
+
+    function runConstraint(type, button) {
+
+        document
+            .querySelectorAll(".lab-btn")
+            .forEach(function (btn) {
+
+                btn.classList.remove(
+                    "active"
+                );
+
+            });
+
+        button.classList.add("active");
+
+
+        const sqlBox =
+            document.getElementById(
+                "constraintSQL"
+            );
+
+        const resultBox =
+            document.getElementById(
+                "constraintResult"
+            );
+
+
+        let sql = "";
+        let result = "";
+
+
+        /* =========================
+           NOT NULL
+           ========================= */
+
+        if (type === "notnull") {
+
+            sql = `
+CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
+
+INSERT INTO students
+(student_id, name)
+VALUES
+(101, NULL);`;
+
+            result = `
+                <strong style="color:#f87171;">
+                    ❌ INSERT REJECTED
+                </strong>
+                <br><br>
+                The column <b>name</b> is NOT NULL,
+                so NULL is not allowed.
+            `;
+
+        }
+
+
+        /* =========================
+           UNIQUE
+           ========================= */
+
+        if (type === "unique") {
+
+            sql = `
+CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    email VARCHAR(150) UNIQUE
+);
+
+INSERT INTO students
+VALUES (101, 'student@example.com');
+
+INSERT INTO students
+VALUES (102, 'student@example.com');`;
+
+            result = `
+                <strong style="color:#f87171;">
+                    ❌ SECOND INSERT REJECTED
+                </strong>
+                <br><br>
+                The email value duplicates an existing
+                non-NULL value protected by UNIQUE.
+            `;
+
+        }
+
+
+        /* =========================
+           PRIMARY KEY
+           ========================= */
+
+        if (type === "primary") {
+
+            sql = `
+CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(100)
+);
+
+INSERT INTO students
+VALUES (101, 'Aarav');
+
+INSERT INTO students
+VALUES (101, 'Priya');`;
+
+            result = `
+                <strong style="color:#f87171;">
+                    ❌ SECOND INSERT REJECTED
+                </strong>
+                <br><br>
+                Student ID 101 already identifies a row.
+            `;
+
+        }
+
+
+        /* =========================
+           FOREIGN KEY
+           ========================= */
+
+        if (type === "foreign") {
+
+            sql = `
+CREATE TABLE departments (
+    department_id INT PRIMARY KEY
+);
+
+CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    department_id INT,
+
+    FOREIGN KEY (department_id)
+    REFERENCES departments(department_id)
+);
+
+INSERT INTO students
+VALUES (101, 999);`;
+
+            result = `
+                <strong style="color:#f87171;">
+                    ❌ INSERT REJECTED
+                </strong>
+                <br><br>
+                Department 999 does not exist in the
+                referenced departments table.
+            `;
+
+        }
+
+
+        /* =========================
+           CHECK
+           ========================= */
+
+        if (type === "check") {
+
+            sql = `
+CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    marks INT CHECK (marks BETWEEN 0 AND 100)
+);
+
+INSERT INTO students
+VALUES (101, 145);`;
+
+            result = `
+                <strong style="color:#f87171;">
+                    ❌ INSERT REJECTED
+                </strong>
+                <br><br>
+                Marks 145 violates the CHECK condition:
+                <b>marks BETWEEN 0 AND 100</b>.
+            `;
+
+        }
+
+
+        /* =========================
+           DEFAULT
+           ========================= */
+
+        if (type === "default") {
+
+            sql = `
+CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    status VARCHAR(20)
+        DEFAULT 'ACTIVE'
+);
+
+INSERT INTO students
+(student_id, name)
+VALUES
+(101, 'Aarav');`;
+
+            result = `
+                <strong style="color:#4ade80;">
+                    ✓ INSERT ACCEPTED
+                </strong>
+                <br><br>
+                Because status was omitted, the database
+                can use the DEFAULT value:
+                <b>ACTIVE</b>.
+            `;
+
+        }
+
+
+        sqlBox.textContent =
+            sql.trim();
+
+        resultBox.innerHTML =
+            result;
+
+    }
+
+
+    /* Initial lab */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            const firstButton =
+                document.querySelector(
+                    ".lab-btn"
+                );
+
+            runConstraint(
+                "notnull",
+                firstButton
+            );
+
+        }
+    );
+
+
+    /* =========================================================
+       QUIZ
+       ========================================================= */
+
+    document
+        .querySelectorAll(".quiz-option")
+        .forEach(function (option) {
+
+            option.addEventListener(
+                "click",
+                function () {
+
+                    const parent =
+                        this.closest(
+                            ".quiz-options"
+                        );
+
+                    parent
+                        .querySelectorAll(
+                            ".quiz-option"
+                        )
+                        .forEach(
+                            function (item) {
+
+                                item.classList.remove(
+                                    "correct",
+                                    "wrong"
+                                );
+
+                            }
+                        );
+
+                    if (
+                        this.dataset.correct ===
+                        "true"
+                    ) {
+
+                        this.classList.add(
+                            "correct"
+                        );
+
+                    } else {
+
+                        this.classList.add(
+                            "wrong"
+                        );
+
+                    }
+
+                }
+            );
+
+        });
+
+
+    function calculateQuiz() {
+
+        const questions =
+            document.querySelectorAll(
+                ".quiz-question"
+            );
+
+        let score = 0;
+
+        questions.forEach(
+            function (question) {
+
+                const correct =
+                    question.querySelector(
+                        ".quiz-option.correct"
+                    );
+
+                if (correct) {
+                    score++;
+                }
+
+            }
+        );
+
+        const result =
+            document.getElementById(
+                "quizResult"
+            );
+
+        result.style.display =
+            "block";
+
+        result.innerHTML =
+            "Your Score: " +
+            score +
+            " / " +
+            questions.length +
+            (
+                score === questions.length
+                ? " 🎉 Perfect!"
+                : " — Review the concepts and try again."
+            );
+
+    }
+
+
+    /* =========================================================
+       CHECKLIST LOCAL STORAGE
+       ========================================================= */
+
+    document
+        .querySelectorAll(
+            ".check-item input"
+        )
+        .forEach(function (input) {
+
+            const key =
+                "zensus-sql-lesson12-" +
+                input.dataset.check;
+
+            const saved =
+                localStorage.getItem(key);
+
+            if (saved === "true") {
+
+                input.checked = true;
+
+                input
+                    .closest(".check-item")
+                    .classList
+                    .add("done");
+
+            }
+
+            input.addEventListener(
+                "change",
+                function () {
+
+                    localStorage.setItem(
+                        key,
+                        this.checked
+                    );
+
+                    this
+                        .closest(".check-item")
+                        .classList
+                        .toggle(
+                            "done",
+                            this.checked
+                        );
+
+                }
+            );
+
+        });
+
+
+    /* =========================================================
+       ACTIVE NAV
+       ========================================================= */
+
+    const sections =
+        document.querySelectorAll(
+            "section[id]"
+        );
+
+    window.addEventListener(
+        "scroll",
+        function () {
+
+            let current = "";
+
+            sections.forEach(
+                function (section) {
+
+                    const top =
+                        section.offsetTop - 120;
+
+                    if (
+                        window.scrollY >= top
+                    ) {
+
+                        current =
+                            section.id;
+
+                    }
+
+                }
+            );
+
+            document
+                .querySelectorAll(
+                    ".nav-links a"
+                )
+                .forEach(
+                    function (link) {
+
+                        link.classList.remove(
+                            "active"
+                        );
+
+                        if (
+                            link.getAttribute(
+                                "href"
+                            ) === "#" + current
+                        ) {
+
+                            link.classList.add(
+                                "active"
+                            );
+
+                        }
+
+                    }
+                );
+
+        }
+    );
+
+</script>
+
+</body>
+</html>

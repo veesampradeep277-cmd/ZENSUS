@@ -1,0 +1,2180 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENSUS React — Lesson 21: Context API</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root{
+    --bg:#f5f7fb;
+    --card:#ffffff;
+    --text:#172033;
+    --muted:#667085;
+    --border:#e4e7ec;
+    --primary:#4f46e5;
+    --primary-light:#eef2ff;
+    --secondary:#7c3aed;
+    --dark:#101828;
+    --green:#059669;
+    --green-light:#ecfdf3;
+    --orange:#d97706;
+    --orange-light:#fffaeb;
+    --red:#dc2626;
+    --red-light:#fff1f2;
+    --blue:#2563eb;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+/* TOPBAR */
+
+.topbar{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    height:68px;
+    background:#fff;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 28px;
+    z-index:1000;
+}
+
+.logo{
+    font-size:23px;
+    font-weight:850;
+    color:var(--primary);
+    letter-spacing:-.6px;
+}
+
+.lesson-badge{
+    background:var(--primary-light);
+    color:var(--primary);
+    padding:7px 14px;
+    border-radius:20px;
+    font-size:13px;
+    font-weight:750;
+}
+
+/* LAYOUT */
+
+.layout{
+    display:flex;
+    padding-top:68px;
+}
+
+.sidebar{
+    position:fixed;
+    left:0;
+    top:68px;
+    width:270px;
+    height:calc(100vh - 68px);
+    background:#fff;
+    border-right:1px solid var(--border);
+    padding:22px 15px;
+    overflow-y:auto;
+}
+
+.sidebar h3{
+    color:#98a2b3;
+    font-size:11px;
+    letter-spacing:1.4px;
+    text-transform:uppercase;
+    margin:8px 12px 13px;
+}
+
+.sidebar a{
+    display:block;
+    text-decoration:none;
+    color:#475467;
+    padding:9px 12px;
+    border-radius:8px;
+    margin:3px 0;
+    font-size:14px;
+    transition:.2s;
+}
+
+.sidebar a:hover{
+    background:#f2f4f7;
+    color:var(--primary);
+}
+
+.sidebar a.active{
+    background:var(--primary-light);
+    color:var(--primary);
+    font-weight:750;
+}
+
+/* MAIN */
+
+.main{
+    margin-left:270px;
+    width:calc(100% - 270px);
+    padding:35px;
+}
+
+/* HERO */
+
+.hero{
+    position:relative;
+    overflow:hidden;
+    background:linear-gradient(135deg,#111827,#1e1b4b);
+    color:#fff;
+    padding:58px;
+    border-radius:20px;
+    margin-bottom:30px;
+}
+
+.hero:before,
+.hero:after{
+    content:"";
+    position:absolute;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:50%;
+}
+
+.hero:before{
+    width:350px;
+    height:350px;
+    right:-120px;
+    top:-150px;
+}
+
+.hero:after{
+    width:180px;
+    height:180px;
+    right:80px;
+    bottom:-100px;
+}
+
+.eyebrow{
+    color:#a5b4fc;
+    text-transform:uppercase;
+    font-weight:750;
+    font-size:12px;
+    letter-spacing:1.5px;
+}
+
+.hero h1{
+    font-size:45px;
+    line-height:1.1;
+    margin:12px 0 16px;
+    letter-spacing:-1px;
+}
+
+.hero p{
+    max-width:850px;
+    color:#cbd5e1;
+    font-size:17px;
+}
+
+/* SECTIONS */
+
+.section{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:17px;
+    padding:32px;
+    margin-bottom:25px;
+}
+
+.section h2{
+    font-size:27px;
+    margin-bottom:12px;
+    letter-spacing:-.4px;
+}
+
+.section h3{
+    font-size:20px;
+    margin:25px 0 10px;
+}
+
+.section p{
+    color:#475467;
+    margin:10px 0;
+}
+
+.section ul{
+    margin:15px 0 15px 22px;
+    color:#475467;
+}
+
+.section li{
+    margin:6px 0;
+}
+
+/* INFO */
+
+.info{
+    background:#f5f7ff;
+    border-left:4px solid var(--primary);
+    padding:18px 20px;
+    border-radius:9px;
+    margin:20px 0;
+}
+
+.success{
+    background:var(--green-light);
+    border-left-color:var(--green);
+}
+
+.warning{
+    background:var(--orange-light);
+    border-left-color:var(--orange);
+}
+
+.danger{
+    background:var(--red-light);
+    border-left-color:var(--red);
+}
+
+/* CODE */
+
+pre{
+    background:#0b1220;
+    color:#e5e7eb;
+    padding:23px;
+    border-radius:12px;
+    overflow-x:auto;
+    margin:18px 0;
+    font-family:Consolas,monospace;
+    font-size:14px;
+    line-height:1.7;
+}
+
+code{
+    background:#eef2f6;
+    color:#be185d;
+    padding:2px 6px;
+    border-radius:5px;
+    font-family:Consolas,monospace;
+}
+
+/* FLOW */
+
+.flow{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+    margin:28px 0;
+}
+
+.node{
+    min-width:135px;
+    padding:15px 19px;
+    border:2px solid #c7d2fe;
+    border-radius:12px;
+    background:#fff;
+    text-align:center;
+    font-weight:750;
+}
+
+.node.provider{
+    border-color:#6366f1;
+    background:#eef2ff;
+}
+
+.node.consumer{
+    border-color:#8b5cf6;
+    background:#f5f3ff;
+}
+
+.node.value{
+    border-color:#059669;
+    background:#ecfdf3;
+}
+
+.node.middle{
+    border-color:#94a3b8;
+    background:#f8fafc;
+}
+
+.arrow{
+    font-size:25px;
+    color:var(--primary);
+    animation:arrowMove 1.3s infinite;
+}
+
+@keyframes arrowMove{
+    0%,100%{
+        transform:translateX(0);
+        opacity:.55;
+    }
+    50%{
+        transform:translateX(6px);
+        opacity:1;
+    }
+}
+
+/* TREE */
+
+.tree{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    margin:30px 0;
+}
+
+.tree-node{
+    background:#eef2ff;
+    border:2px solid #818cf8;
+    border-radius:12px;
+    padding:14px 22px;
+    font-weight:750;
+    text-align:center;
+}
+
+.tree-line{
+    width:2px;
+    height:27px;
+    background:#a5b4fc;
+}
+
+.tree-row{
+    display:flex;
+    gap:28px;
+    justify-content:center;
+    flex-wrap:wrap;
+}
+
+/* CARDS */
+
+.card-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(205px,1fr));
+    gap:17px;
+    margin:22px 0;
+}
+
+.mini-card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:13px;
+    padding:20px;
+    transition:.2s;
+}
+
+.mini-card:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 25px rgba(16,24,40,.06);
+}
+
+.mini-card h4{
+    margin-bottom:7px;
+}
+
+.mini-card p{
+    font-size:14px;
+}
+
+/* TABLE */
+
+.compare{
+    width:100%;
+    border-collapse:collapse;
+    margin:20px 0;
+}
+
+.compare th,
+.compare td{
+    border:1px solid var(--border);
+    padding:13px;
+    text-align:left;
+    font-size:14px;
+}
+
+.compare th{
+    background:#f8fafc;
+}
+
+/* DEMO */
+
+.demo{
+    border:1px solid var(--border);
+    background:#f8fafc;
+    border-radius:14px;
+    padding:24px;
+    margin:20px 0;
+}
+
+.demo h4{
+    margin-bottom:10px;
+}
+
+.demo button,
+button{
+    border:0;
+    background:var(--primary);
+    color:#fff;
+    border-radius:8px;
+    padding:10px 16px;
+    font-weight:700;
+    cursor:pointer;
+    margin:4px;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+.output{
+    background:#111827;
+    color:#d1fae5;
+    font-family:Consolas,monospace;
+    padding:15px;
+    border-radius:9px;
+    margin-top:14px;
+    min-height:46px;
+}
+
+.theme-demo{
+    padding:28px;
+    border-radius:14px;
+    text-align:center;
+    transition:.3s;
+    margin-top:15px;
+}
+
+.theme-light{
+    background:#fff;
+    color:#172033;
+    border:1px solid var(--border);
+}
+
+.theme-dark{
+    background:#111827;
+    color:#fff;
+    border:1px solid #334155;
+}
+
+/* BADGE */
+
+.badge{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:15px;
+    background:var(--primary-light);
+    color:var(--primary);
+    font-size:12px;
+    font-weight:750;
+}
+
+/* MISTAKES */
+
+.mistake{
+    background:#fffafa;
+    border:1px solid #fecaca;
+    border-radius:12px;
+    padding:20px;
+    margin:15px 0;
+}
+
+.mistake strong{
+    color:var(--red);
+}
+
+/* QUIZ */
+
+.quiz-question{
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:20px;
+    margin:15px 0;
+}
+
+.quiz-question button{
+    width:100%;
+    display:block;
+    text-align:left;
+    background:#fff;
+    color:var(--text);
+    border:1px solid var(--border);
+    margin:7px 0;
+}
+
+.quiz-question button.correct{
+    background:#ecfdf3;
+    border-color:#10b981;
+}
+
+.quiz-question button.wrong{
+    background:#fff1f2;
+    border-color:#ef4444;
+}
+
+.answer{
+    display:none;
+    background:#f8fafc;
+    border-radius:8px;
+    padding:12px;
+    margin-top:10px;
+}
+
+/* CHEAT */
+
+.cheat{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    gap:15px;
+}
+
+.cheat-card{
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:18px;
+    background:#fff;
+}
+
+.cheat-card h4{
+    margin-bottom:7px;
+}
+
+footer{
+    text-align:center;
+    padding:30px;
+    color:#98a2b3;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:900px){
+
+    .sidebar{
+        display:none;
+    }
+
+    .main{
+        margin-left:0;
+        width:100%;
+        padding:18px;
+    }
+
+    .hero{
+        padding:36px 25px;
+    }
+
+    .hero h1{
+        font-size:33px;
+    }
+
+    .topbar{
+        padding:0 18px;
+    }
+
+}
+</style>
+
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="logo">ZENSUS</div>
+    <div class="lesson-badge">React • Lesson 21</div>
+</header>
+
+<div class="layout">
+
+<aside class="sidebar">
+
+<h3>Lesson 21</h3>
+
+<a href="#intro" class="active">Introduction</a> <a href="#why">Why Context?</a> <a href="#drilling">Prop Drilling</a> <a href="#create">createContext()</a> <a href="#provider">Provider</a> <a href="#usecontext">useContext()</a> <a href="#global">Global Data</a> <a href="#theme">Theme Context</a> <a href="#auth">Authentication</a> <a href="#language">Language Context</a> <a href="#rerender">Re-rendering</a> <a href="#best">Best Practices</a> <a href="#limitations">Limitations</a> <a href="#mistakes">Mistakes</a> <a href="#cheat">Cheat Sheet</a> <a href="#quiz">Quick Quiz</a>
+
+</aside>
+
+<main class="main">
+
+<section class="hero" id="intro">
+
+<div class="eyebrow">ZENSUS React Mastery • Lesson 21</div>
+
+<h1>Context API</h1>
+
+<p>
+Learn how React Context allows values to be shared across a component tree
+without manually passing props through every intermediate component.
+Understand Providers, createContext(), useContext(), re-rendering,
+global-style data, and production-level best practices.
+</p>
+
+</section>
+
+<section class="section">
+
+<h2>🧠 What Problem Does Context Solve?</h2>
+
+<p>
+Imagine a React application with a value that many components need:
+a theme, authenticated user, language, or application configuration.
+</p>
+
+<p>
+Without Context, you may need to pass that value through several components
+even when intermediate components do not actually use it.
+</p>
+
+<div class="flow">
+
+<div class="node value">Theme</div>
+<div class="arrow">↓</div>
+<div class="node provider">App</div>
+<div class="arrow">↓</div>
+<div class="node middle">Layout</div>
+<div class="arrow">↓</div>
+<div class="node middle">Dashboard</div>
+<div class="arrow">↓</div>
+<div class="node consumer">Button</div>
+
+</div>
+
+<div class="info success">
+
+<b>Context idea:</b>
+
+A component can provide a value to a part of the component tree,
+and descendant components can read that value without receiving it
+through every intermediate component as a prop.
+
+</div>
+
+</section>
+
+<section class="section" id="why">
+
+<h2>1. Why Context?</h2>
+
+<p>
+Props are excellent for explicit parent-to-child communication.
+However, passing the same value through many layers can become repetitive.
+</p>
+
+<div class="card-grid">
+
+<div class="mini-card">
+<span class="badge">Theme</span>
+<h4>Dark / Light Mode</h4>
+<p>Many UI components may need the current theme.</p>
+</div>
+
+<div class="mini-card">
+<span class="badge">Auth</span>
+<h4>Current User</h4>
+<p>Navigation, profile, dashboard, and protected UI may need user information.</p>
+</div>
+
+<div class="mini-card">
+<span class="badge">Language</span>
+<h4>Locale</h4>
+<p>Different parts of the application may need the selected language.</p>
+</div>
+
+<div class="mini-card">
+<span class="badge">Settings</span>
+<h4>Application Configuration</h4>
+<p>Shared configuration can be exposed to descendants.</p>
+</div>
+
+</div>
+
+<div class="info warning">
+
+Context is primarily a mechanism for making values available to descendants.
+It is not automatically a complete replacement for every state-management
+solution.
+
+</div>
+
+</section>
+
+<section class="section" id="drilling">
+
+<h2>2. Prop Drilling</h2>
+
+<p>
+<b>Prop drilling</b> happens when a value is passed through intermediate
+components solely so that a deeply nested component can receive it.
+</p>
+
+<div class="tree">
+
+<div class="tree-node">App — user</div>
+
+<div class="tree-line"></div>
+
+<div class="tree-node">Layout — passes user</div>
+
+<div class="tree-line"></div>
+
+<div class="tree-node">Dashboard — passes user</div>
+
+<div class="tree-line"></div>
+
+<div class="tree-node">Profile — finally uses user</div>
+
+</div>
+
+<h3>Without Context</h3>
+
+<pre>
+function App() {
+
+  const user = {
+    name: "Pradeep"
+  };
+
+  return &lt;Layout user={user} /&gt;;
+}
+
+function Layout({ user }) {
+  return &lt;Dashboard user={user} /&gt;;
+}
+
+function Dashboard({ user }) {
+  return &lt;Profile user={user} /&gt;;
+}
+
+function Profile({ user }) {
+  return &lt;h2&gt;Hello {user.name}&lt;/h2&gt;;
+}
+</pre>
+
+<p>
+Layout and Dashboard may not actually need the user data. They are only
+forwarding it.
+</p>
+
+<div class="info">
+<b>Important distinction:</b> Prop drilling is not inherently wrong.
+For a shallow tree, explicit props can be clearer than Context.
+</div>
+
+</section>
+
+<section class="section" id="create">
+
+<h2>3. createContext()</h2>
+
+<p>
+React provides <code>createContext()</code> to create a Context object.
+</p>
+
+<pre>
+import { createContext } from "react";
+
+const ThemeContext = createContext("light");
+</pre>
+
+<p>
+The argument passed to <code>createContext()</code> is the default value.
+It is used when a component reads the context without a matching provider
+above it.
+</p>
+
+<div class="info warning">
+
+The default value is not a substitute for a Provider's value.
+When a matching Provider exists above the consumer, the consumer reads
+the Provider's current value.
+
+</div>
+
+<h3>Modern React Pattern</h3>
+
+<pre>
+const ThemeContext = createContext("light");
+</pre>
+
+<p>
+The Context object can then be used with a Provider and
+<code>useContext()</code>.
+</p>
+
+</section>
+
+<section class="section" id="provider">
+
+<h2>4. Provider</h2>
+
+<p>
+A Provider makes a context value available to components below it in the
+component tree.
+</p>
+
+<div class="flow">
+
+<div class="node provider">Provider</div>
+<div class="arrow">→</div>
+<div class="node value">Context Value</div>
+<div class="arrow">→</div>
+<div class="node consumer">Descendants</div>
+
+</div>
+
+<h3>Provider Example</h3>
+
+<pre>
+const ThemeContext = createContext("light");
+
+function App() {
+
+  return (
+    &lt;ThemeContext.Provider value="dark"&gt;
+      &lt;Dashboard /&gt;
+    &lt;/ThemeContext.Provider&gt;
+  );
+}
+</pre>
+
+<p>
+Every descendant under this Provider can read the current context value.
+</p>
+
+<h3>Provider Scope</h3>
+
+<p>
+Context is scoped to the provider's position in the component tree.
+It is not automatically available to unrelated parts of the application.
+</p>
+
+<div class="info">
+Think of a Provider as a <b>value boundary</b> around part of your component tree.
+</div>
+
+</section>
+
+<section class="section" id="usecontext">
+
+<h2>5. useContext()</h2>
+
+<p>
+<code>useContext()</code> allows a function component to read the nearest
+matching context value above it.
+</p>
+
+<pre>
+import { useContext } from "react";
+
+function Profile() {
+
+  const theme = useContext(ThemeContext);
+
+  return (
+    &lt;h2&gt;Current theme: {theme}&lt;/h2&gt;
+  );
+}
+</pre>
+
+<h3>Complete Flow</h3>
+
+<div class="flow">
+
+<div class="node provider">createContext()</div>
+<div class="arrow">→</div>
+<div class="node provider">Provider</div>
+<div class="arrow">→</div>
+<div class="node value">value</div>
+<div class="arrow">→</div>
+<div class="node consumer">useContext()</div>
+
+</div>
+
+<div class="info success">
+
+<b>Core formula:</b>
+
+<br><br>
+
+createContext → Provider → value → useContext → component receives value
+
+</div>
+
+</section>
+
+<section class="section">
+
+<h2>6. Nearest Provider Wins</h2>
+
+<p>
+A component reads the value from the nearest matching Provider above it.
+This makes nested Providers useful when a specific subtree needs a different
+value.
+</p>
+
+<div class="tree">
+
+<div class="tree-node">Theme Provider — light</div>
+
+<div class="tree-line"></div>
+
+<div class="tree-node">App</div>
+
+<div class="tree-line"></div>
+
+<div class="tree-node">Dark Theme Provider — dark</div>
+
+<div class="tree-line"></div>
+
+<div class="tree-node">Dashboard</div>
+
+</div>
+
+<p>
+The Dashboard reads the nearest Provider's value rather than the outer
+Provider's value.
+</p>
+
+<pre>
+&lt;ThemeContext.Provider value="light"&gt;
+
+  &lt;Home /&gt;
+
+  &lt;ThemeContext.Provider value="dark"&gt;
+    &lt;Dashboard /&gt;
+  &lt;/ThemeContext.Provider&gt;
+
+&lt;/ThemeContext.Provider&gt;
+</pre>
+
+</section>
+
+<section class="section" id="global">
+
+<h2>7. Context and “Global” Data</h2>
+
+<p>
+Context is often described as a way to share “global” data.
+A more precise mental model is:
+</p>
+
+<div class="info success">
+
+<b>
+Context makes a value available to descendants within a particular
+Provider boundary.
+</b>
+
+</div>
+
+<p>
+This distinction matters because Context does not magically make a value
+available everywhere.
+</p>
+
+<table class="compare">
+
+<tr>
+<th>Concept</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>Local State</td>
+<td>State owned by a particular component.</td>
+</tr>
+
+<tr>
+<td>Props</td>
+<td>Explicit data passed between components.</td>
+</tr>
+
+<tr>
+<td>Context</td>
+<td>Value made available to descendants through a Provider.</td>
+</tr>
+
+<tr>
+<td>Global State</td>
+<td>A broader architectural concept; Context can participate in such a design but is not synonymous with it.</td>
+</tr>
+
+</table>
+
+</section>
+
+<section class="section" id="theme">
+
+<h2>8. Theme Context</h2>
+
+<p>
+A theme is one of the classic Context examples because many components
+may need to know whether the application is using light or dark mode.
+</p>
+
+<h3>Step 1 — Create Context</h3>
+
+<pre>
+import { createContext } from "react";
+
+const ThemeContext = createContext("light");
+</pre>
+
+<h3>Step 2 — Provide the Value</h3>
+
+<pre>
+function App() {
+
+  const [theme, setTheme] = useState("light");
+
+  return (
+    &lt;ThemeContext.Provider value={theme}&gt;
+      &lt;Dashboard /&gt;
+    &lt;/ThemeContext.Provider&gt;
+  );
+}
+</pre>
+
+<h3>Step 3 — Consume the Value</h3>
+
+<pre>
+function Dashboard() {
+
+  const theme = useContext(ThemeContext);
+
+  return (
+    &lt;div&gt;
+      Current theme: {theme}
+    &lt;/div&gt;
+  );
+}
+</pre>
+
+<h3>Interactive Theme Visualizer</h3>
+
+<div class="demo">
+
+<button onclick="setThemeDemo('light')">
+Light Theme
+</button>
+
+<button onclick="setThemeDemo('dark')">
+Dark Theme
+</button>
+
+<div id="themeBox" class="theme-demo theme-light">
+
+<h3 id="themeTitle">Light Theme</h3>
+
+<p id="themeText">
+A component can read the current theme from Context.
+</p>
+
+</div>
+
+<div class="output" id="themeOutput">
+Context value: "light"
+</div>
+
+</div>
+
+</section>
+
+<section class="section" id="auth">
+
+<h2>9. Authentication Context</h2>
+
+<p>
+Authentication information is another common Context use case.
+Multiple components may need access to the current user or authentication
+status.
+</p>
+
+<pre>
+const AuthContext = createContext(null);
+
+function App() {
+
+  const [user, setUser] = useState(null);
+
+  return (
+    &lt;AuthContext.Provider value={{ user, setUser }}&gt;
+      &lt;Application /&gt;
+    &lt;/AuthContext.Provider&gt;
+  );
+}
+</pre>
+
+<h3>Reading Authentication State</h3>
+
+<pre>
+function Navbar() {
+
+  const { user } = useContext(AuthContext);
+
+  return (
+    &lt;nav&gt;
+      {user
+        ? `Welcome ${user.name}`
+        : "Please log in"}
+    &lt;/nav&gt;
+  );
+}
+</pre>
+
+<div class="info warning">
+
+For real authentication systems, Context is only one part of the architecture.
+It does not itself provide secure authentication, token storage, authorization,
+or backend security.
+
+</div>
+
+<h3>Typical Architecture</h3>
+
+<div class="flow">
+
+<div class="node provider">AuthProvider</div>
+<div class="arrow">→</div>
+<div class="node">Navbar</div>
+<div class="arrow">→</div>
+<div class="node">Dashboard</div>
+<div class="arrow">→</div>
+<div class="node">Profile</div>
+
+</div>
+
+</section>
+
+<section class="section" id="language">
+
+<h2>10. Language Context</h2>
+
+<p>
+Applications supporting multiple languages can store the current language
+or translation configuration in Context.
+</p>
+
+<pre>
+const LanguageContext = createContext("en");
+
+function App() {
+
+  const [language, setLanguage] = useState("en");
+
+  return (
+    &lt;LanguageContext.Provider value={language}&gt;
+      &lt;Application /&gt;
+    &lt;/LanguageContext.Provider&gt;
+  );
+}
+</pre>
+
+<p>
+A deeply nested component can then read the current language without receiving
+a language prop through every intermediate component.
+</p>
+
+<pre>
+function Header() {
+
+  const language = useContext(LanguageContext);
+
+  return (
+    &lt;header&gt;
+      Language: {language}
+    &lt;/header&gt;
+  );
+}
+</pre>
+
+<div class="card-grid">
+
+<div class="mini-card">
+<h4>English</h4>
+<p>en</p>
+</div>
+
+<div class="mini-card">
+<h4>Telugu</h4>
+<p>te</p>
+</div>
+
+<div class="mini-card">
+<h4>Hindi</h4>
+<p>hi</p>
+</div>
+
+<div class="mini-card">
+<h4>Spanish</h4>
+<p>es</p>
+</div>
+
+</div>
+
+</section>
+
+<section class="section">
+
+<h2>11. Context Can Hold Objects</h2>
+
+<p>
+A context value can contain multiple related values.
+</p>
+
+<pre>
+const AuthContext = createContext(null);
+
+function App() {
+
+  const [user, setUser] = useState(null);
+
+  const authValue = {
+    user,
+    setUser
+  };
+
+  return (
+    &lt;AuthContext.Provider value={authValue}&gt;
+      &lt;AppRoutes /&gt;
+    &lt;/AuthContext.Provider&gt;
+  );
+}
+</pre>
+
+<p>
+Consumers can destructure the values they need.
+</p>
+
+<pre>
+const { user, setUser } = useContext(AuthContext);
+</pre>
+
+<div class="info">
+A Context value can contain data, functions, derived information, or other
+values appropriate for the shared contract.
+</div>
+
+</section>
+
+<section class="section" id="rerender">
+
+<h2>12. Context Re-rendering</h2>
+
+<p>
+Context is not simply a storage box. When the value supplied by a Provider
+changes, components reading that Context are notified and may re-render.
+</p>
+
+<div class="flow">
+
+<div class="node provider">Provider Value</div>
+<div class="arrow">→</div>
+<div class="node value">Value Changes</div>
+<div class="arrow">→</div>
+<div class="node consumer">Context Consumers</div>
+<div class="arrow">→</div>
+<div class="node">Re-render</div>
+
+</div>
+
+<h3>Important Example</h3>
+
+<pre>
+const UserContext = createContext(null);
+
+function App() {
+
+  const [user, setUser] = useState(null);
+
+  return (
+    &lt;UserContext.Provider value={user}&gt;
+      &lt;Dashboard /&gt;
+    &lt;/UserContext.Provider&gt;
+  );
+}
+</pre>
+
+<p>
+When <code>user</code> changes, components consuming that Context can receive
+the new value and re-render.
+</p>
+
+<h3>Object Identity Matters</h3>
+
+<p>
+If you create a new object as the Provider value on every render, the value's
+reference can change even when its contents appear unchanged.
+</p>
+
+<pre>
+&lt;AuthContext.Provider
+  value={{ user, login, logout }}
+&gt;
+</AuthContext.Provider>
+</pre>
+
+<p>
+For performance-sensitive cases, developers may stabilize the value when
+appropriate, often with <code>useMemo()</code> and stable callback references.
+</p>
+
+<div class="info warning">
+
+Do not add memoization automatically. First understand the update behavior
+and use optimization when there is a meaningful reason.
+
+</div>
+
+</section>
+
+<section class="section">
+
+<h2>13. Context Does Not Stop Normal React Rendering</h2>
+
+<p>
+Context does not turn the component tree into a completely independent
+collection of components.
+React's normal rendering rules still apply.
+</p>
+
+<p>
+A context consumer can re-render because its Context value changed.
+A component can also re-render because of its own state, parent rendering,
+or other prop changes.
+</p>
+
+<div class="card-grid">
+
+<div class="mini-card">
+<h4>State Update</h4>
+<p>Can cause a component to render again.</p>
+</div>
+
+<div class="mini-card">
+<h4>Prop Change</h4>
+<p>Can cause receiving components to render.</p>
+</div>
+
+<div class="mini-card">
+<h4>Context Change</h4>
+<p>Notifies components reading that context.</p>
+</div>
+
+<div class="mini-card">
+<h4>Parent Render</h4>
+<p>Can participate in descendant rendering depending on the component structure and memoization.</p>
+</div>
+
+</div>
+
+</section>
+
+<section class="section" id="best">
+
+<h2>14. Context Best Practices</h2>
+
+<div class="card-grid">
+
+<div class="mini-card">
+<h4>1. Keep Context Focused</h4>
+<p>Create contexts around coherent concerns such as theme or authentication.</p>
+</div>
+
+<div class="mini-card">
+<h4>2. Keep State Local</h4>
+<p>Do not put every piece of state into Context.</p>
+</div>
+
+<div class="mini-card">
+<h4>3. Use Custom Hooks</h4>
+<p>Wrap useContext() to provide a cleaner API.</p>
+</div>
+
+<div class="mini-card">
+<h4>4. Define Clear Contracts</h4>
+<p>Know what values and functions the Context exposes.</p>
+</div>
+
+<div class="mini-card">
+<h4>5. Watch Provider Values</h4>
+<p>Understand how value identity affects updates.</p>
+</div>
+
+<div class="mini-card">
+<h4>6. Avoid Unnecessary Providers</h4>
+<p>Provider placement should have a clear purpose.</p>
+</div>
+
+</div>
+
+<h3>Custom Hook Pattern</h3>
+
+<pre>
+const AuthContext = createContext(null);
+
+function useAuth() {
+  return useContext(AuthContext);
+}
+
+function Profile() {
+
+  const { user } = useAuth();
+
+  return &lt;h2&gt;{user?.name}&lt;/h2&gt;;
+}
+</pre>
+
+<div class="info success">
+
+Custom hooks can hide Context implementation details and give components
+a meaningful API such as <code>useAuth()</code>, <code>useTheme()</code>,
+or <code>useLanguage()</code>.
+
+</div>
+
+</section>
+
+<section class="section">
+
+<h2>15. Provider Component Pattern</h2>
+
+<p>
+As an application grows, putting all Context logic directly inside App()
+can become difficult to maintain. A dedicated Provider component can
+encapsulate the state and Context value.
+</p>
+
+<pre>
+const ThemeContext = createContext(null);
+
+function ThemeProvider({ children }) {
+
+  const [theme, setTheme] = useState("light");
+
+  function toggleTheme() {
+    setTheme(current =>
+      current === "light" ? "dark" : "light"
+    );
+  }
+
+  return (
+    &lt;ThemeContext.Provider
+      value={{ theme, toggleTheme }}
+    &gt;
+      {children}
+    &lt;/ThemeContext.Provider&gt;
+  );
+}
+</pre>
+
+<h3>Application Structure</h3>
+
+<pre>
+function App() {
+
+  return (
+    &lt;ThemeProvider&gt;
+      &lt;Application /&gt;
+    &lt;/ThemeProvider&gt;
+  );
+}
+</pre>
+
+<div class="flow">
+
+<div class="node provider">ThemeProvider</div>
+<div class="arrow">→</div>
+<div class="node">Application</div>
+<div class="arrow">→</div>
+<div class="node consumer">useTheme()</div>
+
+</div>
+
+</section>
+
+<section class="section" id="limitations">
+
+<h2>16. Context Limitations</h2>
+
+<table class="compare">
+
+<tr>
+<th>Limitation</th>
+<th>Explanation</th>
+</tr>
+
+<tr>
+<td>Can hide dependencies</td>
+<td>A component may depend on Context without receiving the dependency explicitly through props.</td>
+</tr>
+
+<tr>
+<td>Can cause consumer updates</td>
+<td>Consumers respond when the relevant Context value changes.</td>
+</tr>
+
+<tr>
+<td>Not ideal for every state</td>
+<td>Local component state is often simpler for local concerns.</td>
+</tr>
+
+<tr>
+<td>Provider structure can grow</td>
+<td>Many unrelated Providers can make application composition harder to understand.</td>
+</tr>
+
+<tr>
+<td>Not automatically server state management</td>
+<td>Remote API caching, synchronization, and server-state concerns may need specialized solutions.</td>
+</tr>
+
+</table>
+
+<div class="info warning">
+
+Context solves a <b>communication and dependency distribution problem</b>.
+It should not automatically become the answer to every state-management problem.
+
+</div>
+
+</section>
+
+<section class="section">
+
+<h2>17. Props vs Context</h2>
+
+<table class="compare">
+
+<tr>
+<th>Props</th>
+<th>Context</th>
+</tr>
+
+<tr>
+<td>Explicit data dependency</td>
+<td>Implicit dependency through a Provider</td>
+</tr>
+
+<tr>
+<td>Excellent for direct parent → child communication</td>
+<td>Useful for values needed by many descendants</td>
+</tr>
+
+<tr>
+<td>Easy to trace locally</td>
+<td>Can reduce repetitive prop passing</td>
+</tr>
+
+<tr>
+<td>Can become verbose through deep trees</td>
+<td>Can hide where a value comes from</td>
+</tr>
+
+<tr>
+<td>Good default for local relationships</td>
+<td>Useful when a value crosses many component boundaries</td>
+</tr>
+
+</table>
+
+<div class="info success">
+
+<b>Rule of thumb:</b>
+
+If a value naturally belongs to a direct parent-child relationship,
+start with props.
+
+If many descendants need the same value and passing it through intermediate
+components becomes cumbersome, Context may be appropriate.
+
+</div>
+
+</section>
+
+<section class="section" id="mistakes">
+
+<h2>18. Common Context Mistakes</h2>
+
+<div class="mistake">
+
+<strong>❌ Mistake 1 — Using Context for Everything</strong>
+
+<p>
+Putting every state variable into Context can make the application's
+data dependencies harder to understand.
+</p>
+
+</div>
+
+<div class="mistake">
+
+<strong>❌ Mistake 2 — Forgetting the Provider</strong>
+
+<pre>
+const theme = useContext(ThemeContext);
+</pre>
+
+<p>
+If the component is not beneath the intended Provider, it receives the
+Context's default value.
+</p>
+
+</div>
+
+<div class="mistake">
+
+<strong>❌ Mistake 3 — Assuming Context Is Automatically Global</strong>
+
+<p>
+Context values are available according to the Provider boundaries in the
+component tree.
+</p>
+
+</div>
+
+<div class="mistake">
+
+<strong>❌ Mistake 4 — Creating Unstable Provider Values Without Reason</strong>
+
+<pre>
+value={{ user, login }}
+</pre>
+
+<p>
+An object expression creates a new object reference when its containing
+component renders. Understand whether that identity change matters before
+adding or avoiding optimization.
+</p>
+
+</div>
+
+<div class="mistake">
+
+<strong>❌ Mistake 5 — Putting Side Effects Into Context Values</strong>
+
+<p>
+Context is for distributing values and capabilities. Effects such as
+network synchronization should remain in appropriate effect or service
+logic rather than being hidden inside a context value.
+</p>
+
+</div>
+
+<div class="mistake">
+
+<strong>❌ Mistake 6 — Confusing Context With Authentication Security</strong>
+
+<p>
+Context can distribute authentication-related UI state, but backend
+authorization and security must be enforced by the server.
+</p>
+
+</div>
+
+<div class="mistake">
+
+<strong>❌ Mistake 7 — Ignoring Provider Scope</strong>
+
+<p>
+A consumer only reads from Providers that are above it in the component tree.
+</p>
+
+</div>
+
+</section>
+
+<section class="section">
+
+<h2>19. Production Architecture Example</h2>
+
+<pre>
+function App() {
+
+  return (
+    &lt;AuthProvider&gt;
+
+      &lt;ThemeProvider&gt;
+
+        &lt;LanguageProvider&gt;
+
+          &lt;Router /&gt;
+
+        &lt;/LanguageProvider&gt;
+
+      &lt;/ThemeProvider&gt;
+
+    &lt;/AuthProvider&gt;
+  );
+}
+</pre>
+
+<p>
+Different providers can represent different concerns.
+The exact provider structure should be based on the application's needs.
+</p>
+
+<div class="flow">
+
+<div class="node provider">AuthProvider</div>
+<div class="arrow">→</div>
+<div class="node provider">ThemeProvider</div>
+<div class="arrow">→</div>
+<div class="node provider">LanguageProvider</div>
+<div class="arrow">→</div>
+<div class="node">App</div>
+
+</div>
+
+<div class="info">
+This is an architectural pattern, not a requirement that every React
+application must have all three providers.
+</div>
+
+</section>
+
+<section class="section">
+
+<h2>20. Context Mental Model</h2>
+
+<div class="flow">
+
+<div class="node provider">Create Context</div>
+<div class="arrow">→</div>
+<div class="node provider">Provider</div>
+<div class="arrow">→</div>
+<div class="node value">Provide Value</div>
+<div class="arrow">→</div>
+<div class="node consumer">useContext</div>
+<div class="arrow">→</div>
+<div class="node">Consume</div>
+
+</div>
+
+<div class="info success">
+
+<h3>Remember:</h3>
+
+<p>
+<b>
+Context doesn't make components magically communicate with each other.
+It creates a shared value channel through a Provider boundary.
+</b>
+</p>
+
+</div>
+
+</section>
+
+<section class="section" id="cheat">
+
+<h2>21. ZENSUS Context API Cheat Sheet</h2>
+
+<div class="cheat">
+
+<div class="cheat-card">
+<h4>Create Context</h4>
+<code>createContext()</code>
+</div>
+
+<div class="cheat-card">
+<h4>Provide Value</h4>
+<code>&lt;Context.Provider&gt;</code>
+</div>
+
+<div class="cheat-card">
+<h4>Read Value</h4>
+<code>useContext(Context)</code>
+</div>
+
+<div class="cheat-card">
+<h4>Prop Drilling</h4>
+<p>Passing data through components that don't need it.</p>
+</div>
+
+<div class="cheat-card">
+<h4>Theme</h4>
+<p>Common Context use case.</p>
+</div>
+
+<div class="cheat-card">
+<h4>Authentication</h4>
+<p>Share current-user/auth UI state.</p>
+</div>
+
+<div class="cheat-card">
+<h4>Language</h4>
+<p>Share locale information.</p>
+</div>
+
+<div class="cheat-card">
+<h4>Best Practice</h4>
+<p>Keep Context focused and state local where possible.</p>
+</div>
+
+</div>
+
+</section>
+
+<section class="section">
+
+<h2>22. Master Architecture</h2>
+
+<div class="tree">
+
+<div class="tree-node">Provider</div>
+
+<div class="tree-line"></div>
+
+<div class="tree-row">
+
+<div class="tree-node">Component A</div>
+<div class="tree-node">Component B</div>
+<div class="tree-node">Component C</div>
+
+</div>
+
+<div class="tree-line"></div>
+
+<div class="tree-row">
+
+<div class="tree-node">Deep Consumer</div>
+<div class="tree-node">Another Consumer</div>
+
+</div>
+
+</div>
+
+<div class="info success">
+
+<b>
+Context = Create a value channel → Provider supplies the value →
+descendants read it with useContext() → Provider value changes can
+notify consumers.
+</b>
+
+</div>
+
+</section>
+
+<section class="section" id="quiz">
+
+<h2>23. Quick Quiz</h2>
+
+<div class="quiz-question">
+
+<p><b>1. What problem is Context commonly used to reduce?</b></p>
+
+<button onclick="answer(this,true,1)">
+Passing the same value through many intermediate components
+</button>
+
+<button onclick="answer(this,false,1)">
+All JavaScript execution
+</button>
+
+<button onclick="answer(this,false,1)">
+All React rendering
+</button>
+
+<button onclick="answer(this,false,1)">
+Every type of database operation
+</button>
+
+<div class="answer" id="ans1">
+Context can reduce repetitive prop passing through intermediate components.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<p><b>2. Which React API creates a Context object?</b></p>
+
+<button onclick="answer(this,false,2)">useContext()</button> <button onclick="answer(this,true,2)">createContext()</button> <button onclick="answer(this,false,2)">createProvider()</button> <button onclick="answer(this,false,2)">useProvider()</button>
+
+<div class="answer" id="ans2">
+createContext() creates the Context object that can later be provided and consumed.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<p><b>3. What does a Context Provider do?</b></p>
+
+<button onclick="answer(this,false,3)">
+It automatically renders every React component
+</button>
+
+<button onclick="answer(this,true,3)">
+It makes a context value available to descendants
+</button>
+
+<button onclick="answer(this,false,3)">
+It replaces all component state
+</button>
+
+<button onclick="answer(this,false,3)">
+It directly changes the DOM
+</button>
+
+<div class="answer" id="ans3">
+A Provider establishes the value available to matching descendants.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<p><b>4. Which Hook reads a Context value?</b></p>
+
+<button onclick="answer(this,false,4)">useState()</button> <button onclick="answer(this,false,4)">useEffect()</button> <button onclick="answer(this,true,4)">useContext()</button> <button onclick="answer(this,false,4)">useMemo()</button>
+
+<div class="answer" id="ans4">
+useContext() reads the nearest matching Context value available above the component.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<p><b>5. What happens when a Provider's Context value changes?</b></p>
+
+<button onclick="answer(this,true,5)">
+Components reading that Context can re-render with the new value
+</button>
+
+<button onclick="answer(this,false,5)">
+The entire browser page must always reload
+</button>
+
+<button onclick="answer(this,false,5)">
+All Context values are permanently deleted
+</button>
+
+<button onclick="answer(this,false,5)">
+React stops rendering the application
+</button>
+
+<div class="answer" id="ans5">
+Context consumers can be updated when the value supplied by their Provider changes.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<p><b>6. Which statement about Context is most accurate?</b></p>
+
+<button onclick="answer(this,false,6)">
+Context is automatically available everywhere
+</button>
+
+<button onclick="answer(this,true,6)">
+Context values are available according to Provider boundaries
+</button>
+
+<button onclick="answer(this,false,6)">
+Context removes the need for all props
+</button>
+
+<button onclick="answer(this,false,6)">
+Context is required for every React application
+</button>
+
+<div class="answer" id="ans6">
+A Context value is available to descendants within the relevant Provider boundary.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<p><b>7. Which is usually a reasonable first choice for direct parent-to-child communication?</b></p>
+
+<button onclick="answer(this,true,7)">Props</button> <button onclick="answer(this,false,7)">Context</button> <button onclick="answer(this,false,7)">Direct DOM mutation</button> <button onclick="answer(this,false,7)">Global variables</button>
+
+<div class="answer" id="ans7">
+Props make direct parent-to-child dependencies explicit and are often the simplest choice.
+</div>
+
+</div>
+
+<div class="quiz-question">
+
+<p><b>8. Which is a common Context use case?</b></p>
+
+<button onclick="answer(this,true,8)">Application theme</button> <button onclick="answer(this,false,8)">Changing HTML syntax</button> <button onclick="answer(this,false,8)">Replacing JavaScript functions</button> <button onclick="answer(this,false,8)">Compiling React code</button>
+
+<div class="answer" id="ans8">
+Theme information is commonly shared across many components through Context.
+</div>
+
+</div>
+
+</section>
+
+<section class="section">
+
+<h2>🚀 Lesson 21 Complete</h2>
+
+<div class="card-grid">
+
+<div class="mini-card">
+<h4>Context</h4>
+<p>A value channel through a component tree.</p>
+</div>
+
+<div class="mini-card">
+<h4>createContext()</h4>
+<p>Creates the Context object.</p>
+</div>
+
+<div class="mini-card">
+<h4>Provider</h4>
+<p>Supplies the Context value.</p>
+</div>
+
+<div class="mini-card">
+<h4>useContext()</h4>
+<p>Reads the nearest matching Context value.</p>
+</div>
+
+<div class="mini-card">
+<h4>Prop Drilling</h4>
+<p>Repeatedly forwarding values through intermediate components.</p>
+</div>
+
+<div class="mini-card">
+<h4>Re-rendering</h4>
+<p>Consumers can update when Context values change.</p>
+</div>
+
+</div>
+
+<div class="info success">
+
+<b>Final mental model:</b>
+
+<br><br>
+
+Create Context → Provide Value → Descendants Consume →
+Context Value Changes → Consumers Receive New Value
+
+<br><br>
+
+Use Context when it makes component communication clearer —
+not simply because you can use it.
+
+</div>
+
+</section>
+
+<footer>
+ZENSUS • Learn. Build. Master.
+</footer>
+
+</main>
+</div>
+
+<script>
+
+function setThemeDemo(theme){
+
+    const box = document.getElementById("themeBox");
+    const title = document.getElementById("themeTitle");
+    const text = document.getElementById("themeText");
+    const output = document.getElementById("themeOutput");
+
+    if(theme === "dark"){
+
+        box.className = "theme-demo theme-dark";
+
+        title.textContent = "Dark Theme";
+
+        text.textContent =
+            "The Context value changed from light to dark.";
+
+        output.textContent =
+            'Context value: "dark"';
+
+    }else{
+
+        box.className = "theme-demo theme-light";
+
+        title.textContent = "Light Theme";
+
+        text.textContent =
+            "The component is consuming the light theme value.";
+
+        output.textContent =
+            'Context value: "light"';
+    }
+}
+
+
+function answer(button, correct, id){
+
+    const parent = button.parentElement;
+
+    parent.querySelectorAll("button").forEach(btn=>{
+        btn.disabled = true;
+    });
+
+    if(correct){
+        button.classList.add("correct");
+    }else{
+        button.classList.add("wrong");
+    }
+
+    document.getElementById("ans"+id).style.display = "block";
+}
+
+
+/* ACTIVE SIDEBAR */
+
+const sections = document.querySelectorAll("section[id]");
+const links = document.querySelectorAll(".sidebar a");
+
+window.addEventListener("scroll",()=>{
+
+    let current = "";
+
+    sections.forEach(section=>{
+
+        const position = section.offsetTop - 120;
+
+        if(window.scrollY >= position){
+            current = section.id;
+        }
+
+    });
+
+    links.forEach(link=>{
+
+        link.classList.remove("active");
+
+        if(link.getAttribute("href") === "#" + current){
+            link.classList.add("active");
+        }
+
+    });
+
+});
+
+</script>
+
+</body>
+</html>

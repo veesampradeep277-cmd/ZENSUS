@@ -1,0 +1,4207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ZENSUS | SQL Lesson 10 — JOINS</title>
+
+<style>
+/* =========================================================
+   ZENSUS SQL LESSON 10 — JOINS
+   Standalone CSS
+========================================================= */
+
+:root{
+    --primary:#4f46e5;
+    --primary-dark:#3730a3;
+    --secondary:#7c3aed;
+    --accent:#06b6d4;
+    --success:#16a34a;
+    --warning:#d97706;
+    --danger:#dc2626;
+
+    --bg:#f6f8fc;
+    --surface:#ffffff;
+    --surface-2:#f8fafc;
+    --border:#e2e8f0;
+
+    --text:#0f172a;
+    --muted:#64748b;
+
+    --code:#0b1220;
+    --code-text:#e2e8f0;
+
+    --shadow:0 10px 30px rgba(15,23,42,.07);
+    --shadow-lg:0 20px 50px rgba(15,23,42,.10);
+
+    --radius:18px;
+    --sidebar:270px;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+}
+
+/* =========================
+   SCROLL PROGRESS
+========================= */
+
+#scrollProgress{
+    position:fixed;
+    top:0;
+    left:0;
+    height:4px;
+    width:0%;
+    background:linear-gradient(90deg,var(--primary),var(--secondary),var(--accent));
+    z-index:9999;
+}
+
+/* =========================
+   MOBILE HEADER
+========================= */
+
+.mobile-header{
+    display:none;
+    position:sticky;
+    top:0;
+    z-index:1000;
+    background:rgba(255,255,255,.96);
+    border-bottom:1px solid var(--border);
+    padding:14px 18px;
+    align-items:center;
+    justify-content:space-between;
+    backdrop-filter:blur(12px);
+}
+
+.mobile-brand{
+    font-weight:900;
+    font-size:20px;
+    color:var(--primary);
+}
+
+.menu-btn{
+    border:1px solid var(--border);
+    background:white;
+    border-radius:10px;
+    width:42px;
+    height:42px;
+    cursor:pointer;
+    font-size:20px;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    width:var(--sidebar);
+    background:#ffffff;
+    border-right:1px solid var(--border);
+    padding:24px 16px;
+    overflow-y:auto;
+    z-index:900;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:4px 10px 25px;
+}
+
+.logo-mark{
+    width:38px;
+    height:38px;
+    border-radius:12px;
+    background:linear-gradient(135deg,var(--primary),var(--secondary));
+    color:white;
+    display:grid;
+    place-items:center;
+    font-weight:900;
+}
+
+.logo-text{
+    font-size:23px;
+    font-weight:900;
+    letter-spacing:-1px;
+}
+
+.logo-text span{
+    color:var(--primary);
+}
+
+.course-label{
+    padding:0 10px 12px;
+    color:var(--muted);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1.4px;
+    font-weight:800;
+}
+
+.lesson-nav{
+    list-style:none;
+}
+
+.lesson-nav li{
+    margin:4px 0;
+}
+
+.lesson-nav a{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    padding:10px 12px;
+    border-radius:11px;
+    text-decoration:none;
+    color:#475569;
+    font-size:13px;
+    font-weight:600;
+    transition:.2s ease;
+}
+
+.lesson-nav a:hover{
+    background:#f1f5f9;
+    color:var(--primary);
+}
+
+.lesson-nav a.active{
+    background:#eef2ff;
+    color:var(--primary);
+    font-weight:800;
+}
+
+.lesson-number{
+    min-width:25px;
+    height:25px;
+    border-radius:7px;
+    display:grid;
+    place-items:center;
+    background:#f1f5f9;
+    font-size:10px;
+    font-weight:800;
+}
+
+.lesson-nav a.active .lesson-number{
+    background:var(--primary);
+    color:white;
+}
+
+.sidebar-bottom{
+    margin-top:25px;
+    padding-top:20px;
+    border-top:1px solid var(--border);
+}
+
+.sidebar-bottom a{
+    display:block;
+    padding:9px 12px;
+    color:var(--muted);
+    text-decoration:none;
+    font-size:13px;
+}
+
+/* =========================
+   MAIN
+========================= */
+
+.main{
+    margin-left:var(--sidebar);
+    min-height:100vh;
+}
+
+.container{
+    width:min(1180px,calc(100% - 40px));
+    margin:auto;
+}
+
+/* =========================
+   HERO
+========================= */
+
+.hero{
+    padding:70px 0 35px;
+}
+
+.breadcrumb{
+    color:var(--muted);
+    font-size:13px;
+    margin-bottom:15px;
+}
+
+.breadcrumb span{
+    color:var(--primary);
+    font-weight:800;
+}
+
+.hero-grid{
+    display:grid;
+    grid-template-columns:1.25fr .75fr;
+    gap:35px;
+    align-items:center;
+}
+
+.badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:7px 12px;
+    border-radius:999px;
+    background:#eef2ff;
+    color:var(--primary);
+    font-size:12px;
+    font-weight:800;
+    margin-bottom:17px;
+}
+
+.hero h1{
+    font-size:clamp(42px,6vw,72px);
+    line-height:1;
+    letter-spacing:-3px;
+    margin-bottom:20px;
+}
+
+.hero h1 span{
+    color:var(--primary);
+}
+
+.hero-subtitle{
+    font-size:18px;
+    color:var(--muted);
+    max-width:700px;
+}
+
+.hero-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:25px;
+}
+
+.meta-pill{
+    background:white;
+    border:1px solid var(--border);
+    padding:8px 12px;
+    border-radius:999px;
+    font-size:12px;
+    color:#475569;
+    font-weight:700;
+}
+
+/* =========================
+   HERO CODE
+========================= */
+
+.hero-code{
+    background:var(--code);
+    border-radius:20px;
+    padding:24px;
+    box-shadow:var(--shadow-lg);
+    border:1px solid #1e293b;
+    position:relative;
+    overflow:hidden;
+}
+
+.hero-code::before{
+    content:"";
+    position:absolute;
+    width:180px;
+    height:180px;
+    border-radius:50%;
+    background:rgba(79,70,229,.18);
+    right:-70px;
+    top:-70px;
+}
+
+.code-dots{
+    display:flex;
+    gap:6px;
+    margin-bottom:18px;
+}
+
+.code-dots i{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:#64748b;
+}
+
+.hero-code pre,
+.hero-code code{
+    color:var(--code-text);
+    font-family:
+        "Cascadia Code",
+        "Fira Code",
+        Consolas,
+        monospace;
+    font-size:13px;
+    line-height:1.8;
+    white-space:pre-wrap;
+}
+
+.sql-keyword{
+    color:#a5b4fc;
+}
+
+.sql-string{
+    color:#86efac;
+}
+
+.sql-comment{
+    color:#94a3b8;
+}
+
+/* =========================
+   SECTIONS
+========================= */
+
+section{
+    padding:42px 0;
+}
+
+.section-heading{
+    margin-bottom:22px;
+}
+
+.eyebrow{
+    color:var(--primary);
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+    font-weight:900;
+    margin-bottom:6px;
+}
+
+.section-heading h2{
+    font-size:32px;
+    line-height:1.2;
+    letter-spacing:-1px;
+}
+
+.section-heading p{
+    color:var(--muted);
+    max-width:780px;
+    margin-top:7px;
+}
+
+/* =========================
+   CARDS
+========================= */
+
+.card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:25px;
+    box-shadow:var(--shadow);
+}
+
+.grid-2{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+}
+
+.grid-3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.grid-4{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+}
+
+.info-card{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:20px;
+}
+
+.info-card h3{
+    font-size:17px;
+    margin-bottom:8px;
+}
+
+.info-card p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+.icon-box{
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    background:#eef2ff;
+    color:var(--primary);
+    display:grid;
+    place-items:center;
+    font-weight:900;
+    margin-bottom:13px;
+}
+
+/* =========================
+   LEARNING OBJECTIVES
+========================= */
+
+.objective-list{
+    list-style:none;
+    display:grid;
+    gap:10px;
+}
+
+.objective-list li{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+}
+
+.check{
+    width:22px;
+    height:22px;
+    border-radius:7px;
+    background:#dcfce7;
+    color:#15803d;
+    display:grid;
+    place-items:center;
+    font-size:12px;
+    font-weight:900;
+    flex-shrink:0;
+}
+
+/* =========================
+   TABLES
+========================= */
+
+.table-wrap{
+    overflow-x:auto;
+    border:1px solid var(--border);
+    border-radius:14px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:500px;
+    background:white;
+}
+
+th{
+    background:#f8fafc;
+    color:#334155;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.7px;
+    text-align:left;
+}
+
+th,td{
+    padding:12px 15px;
+    border-bottom:1px solid var(--border);
+    font-size:14px;
+}
+
+tr:last-child td{
+    border-bottom:0;
+}
+
+td{
+    color:#475569;
+}
+
+/* =========================
+   CODE BLOCKS
+========================= */
+
+.code-box{
+    background:var(--code);
+    border-radius:16px;
+    padding:20px;
+    margin:15px 0;
+    overflow-x:auto;
+    border:1px solid #1e293b;
+}
+
+.code-box pre,
+.code-box code{
+    color:var(--code-text);
+    font-family:
+        "Cascadia Code",
+        "Fira Code",
+        Consolas,
+        monospace;
+    font-size:13px;
+    line-height:1.75;
+    white-space:pre;
+}
+
+.copy-btn{
+    float:right;
+    border:1px solid #334155;
+    background:#1e293b;
+    color:#cbd5e1;
+    border-radius:8px;
+    padding:5px 9px;
+    cursor:pointer;
+    font-size:11px;
+}
+
+/* =========================
+   CALLOUTS
+========================= */
+
+.callout{
+    padding:17px 19px;
+    border-radius:14px;
+    margin:18px 0;
+    border-left:4px solid var(--primary);
+    background:#eef2ff;
+}
+
+.callout strong{
+    display:block;
+    margin-bottom:3px;
+}
+
+.callout p{
+    color:#475569;
+    font-size:14px;
+}
+
+.callout.warning{
+    background:#fff7ed;
+    border-color:var(--warning);
+}
+
+.callout.success{
+    background:#f0fdf4;
+    border-color:var(--success);
+}
+
+.callout.danger{
+    background:#fef2f2;
+    border-color:var(--danger);
+}
+
+/* =========================
+   JOIN FLOW
+========================= */
+
+.flow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:25px 0;
+}
+
+.flow-node{
+    padding:14px 18px;
+    background:white;
+    border:1px solid var(--border);
+    border-radius:13px;
+    font-weight:800;
+    font-size:13px;
+    box-shadow:var(--shadow);
+}
+
+.flow-node.primary{
+    background:#eef2ff;
+    border-color:#c7d2fe;
+    color:var(--primary);
+}
+
+.flow-arrow{
+    color:var(--primary);
+    font-size:20px;
+    font-weight:900;
+}
+
+/* =========================
+   JOIN VISUALIZATION
+========================= */
+
+.join-visual{
+    display:grid;
+    grid-template-columns:1fr 100px 1fr;
+    gap:15px;
+    align-items:center;
+    margin-top:25px;
+}
+
+.visual-table{
+    border:1px solid var(--border);
+    border-radius:15px;
+    overflow:hidden;
+    background:white;
+}
+
+.visual-title{
+    background:#f8fafc;
+    padding:12px 15px;
+    font-size:13px;
+    font-weight:900;
+}
+
+.visual-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    padding:10px 13px;
+    border-top:1px solid var(--border);
+    font-size:13px;
+    transition:.35s;
+}
+
+.visual-row.match{
+    background:#f0fdf4;
+}
+
+.visual-row.no-match{
+    background:#fff7ed;
+}
+
+.join-symbol{
+    width:75px;
+    height:75px;
+    border-radius:50%;
+    background:#eef2ff;
+    color:var(--primary);
+    display:grid;
+    place-items:center;
+    margin:auto;
+    font-size:25px;
+    font-weight:900;
+    border:2px dashed #a5b4fc;
+}
+
+/* =========================
+   JOIN TYPES
+========================= */
+
+.join-type-card{
+    position:relative;
+    overflow:hidden;
+}
+
+.join-type-card .type-number{
+    position:absolute;
+    top:15px;
+    right:15px;
+    color:#cbd5e1;
+    font-weight:900;
+    font-size:30px;
+}
+
+.join-type-card h3{
+    margin-bottom:8px;
+}
+
+.join-type-card p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+.join-badge{
+    display:inline-block;
+    margin-top:13px;
+    padding:5px 9px;
+    border-radius:7px;
+    background:#f1f5f9;
+    color:#475569;
+    font-size:11px;
+    font-weight:800;
+}
+
+/* =========================
+   INTERACTIVE LAB
+========================= */
+
+.lab{
+    background:#0f172a;
+    border-radius:22px;
+    padding:25px;
+    color:white;
+    box-shadow:var(--shadow-lg);
+}
+
+.lab-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:20px;
+    margin-bottom:20px;
+}
+
+.lab-header h3{
+    font-size:22px;
+}
+
+.lab-header p{
+    color:#94a3b8;
+    font-size:13px;
+}
+
+.control-group{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.control-btn{
+    border:1px solid #334155;
+    background:#1e293b;
+    color:#cbd5e1;
+    border-radius:9px;
+    padding:9px 13px;
+    cursor:pointer;
+    font-weight:700;
+    font-size:12px;
+}
+
+.control-btn:hover,
+.control-btn.active{
+    background:#4f46e5;
+    border-color:#6366f1;
+    color:white;
+}
+
+.lab-output{
+    background:#020617;
+    border:1px solid #1e293b;
+    border-radius:15px;
+    padding:18px;
+}
+
+.lab-query{
+    color:#a5b4fc;
+    font-family:Consolas,monospace;
+    font-size:13px;
+    margin-bottom:15px;
+    white-space:pre-wrap;
+}
+
+.lab-table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.lab-table th{
+    background:#111827;
+    color:#94a3b8;
+}
+
+.lab-table th,
+.lab-table td{
+    border-bottom:1px solid #1e293b;
+    color:#cbd5e1;
+}
+
+.lab-table tr:last-child td{
+    border-bottom:0;
+}
+
+/* =========================
+   QUIZ
+========================= */
+
+.quiz-card{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:20px;
+}
+
+.question{
+    font-weight:800;
+    margin-bottom:12px;
+}
+
+.option{
+    display:block;
+    padding:10px 12px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    margin:8px 0;
+    cursor:pointer;
+    font-size:14px;
+    transition:.2s;
+}
+
+.option:hover{
+    border-color:#a5b4fc;
+    background:#f8faff;
+}
+
+.option input{
+    margin-right:8px;
+}
+
+.quiz-result{
+    margin-top:18px;
+    font-weight:800;
+    color:var(--primary);
+}
+
+/* =========================
+   MISTAKES
+========================= */
+
+.mistake{
+    display:flex;
+    gap:13px;
+    padding:16px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:white;
+}
+
+.mistake-number{
+    width:31px;
+    height:31px;
+    border-radius:9px;
+    background:#fee2e2;
+    color:#b91c1c;
+    display:grid;
+    place-items:center;
+    font-weight:900;
+    flex-shrink:0;
+}
+
+.mistake h4{
+    margin-bottom:3px;
+}
+
+.mistake p{
+    color:var(--muted);
+    font-size:13px;
+}
+
+/* =========================
+   CHECKLIST
+========================= */
+
+.checklist{
+    display:grid;
+    gap:10px;
+}
+
+.check-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:13px 15px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:white;
+    cursor:pointer;
+}
+
+.check-item input{
+    width:17px;
+    height:17px;
+    accent-color:var(--primary);
+}
+
+.check-item.done span{
+    text-decoration:line-through;
+    color:#94a3b8;
+}
+
+/* =========================
+   INTERVIEW
+========================= */
+
+details{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:13px;
+    margin:10px 0;
+    padding:15px 17px;
+}
+
+summary{
+    cursor:pointer;
+    font-weight:800;
+}
+
+details p{
+    color:var(--muted);
+    font-size:14px;
+    margin-top:10px;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+footer{
+    margin-top:40px;
+    background:#0f172a;
+    color:#cbd5e1;
+    padding:45px 0;
+}
+
+.footer-inner{
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
+    flex-wrap:wrap;
+}
+
+.footer-brand{
+    font-size:23px;
+    color:white;
+    font-weight:900;
+}
+
+.footer-brand span{
+    color:#818cf8;
+}
+
+footer p{
+    color:#94a3b8;
+    font-size:13px;
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+
+.reveal{
+    opacity:1;
+    transform:none;
+}
+
+.reveal.animate{
+    animation:fadeUp .55s ease both;
+}
+
+@keyframes fadeUp{
+    from{
+        opacity:.15;
+        transform:translateY(14px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+.pulse{
+    animation:pulseJoin 1.8s infinite;
+}
+
+@keyframes pulseJoin{
+    0%,100%{
+        transform:scale(1);
+    }
+    50%{
+        transform:scale(1.06);
+    }
+}
+
+.row-animate{
+    animation:rowMove .7s ease;
+}
+
+@keyframes rowMove{
+    0%{
+        opacity:.2;
+        transform:translateX(-15px);
+    }
+    100%{
+        opacity:1;
+        transform:translateX(0);
+    }
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:1050px){
+    .hero-grid{
+        grid-template-columns:1fr;
+    }
+
+    .grid-4{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:850px){
+    .sidebar{
+        transform:translateX(-100%);
+        transition:.25s ease;
+    }
+
+    .sidebar.open{
+        transform:translateX(0);
+    }
+
+    .mobile-header{
+        display:flex;
+    }
+
+    .main{
+        margin-left:0;
+    }
+
+    .join-visual{
+        grid-template-columns:1fr;
+    }
+
+    .join-symbol{
+        transform:rotate(90deg);
+    }
+}
+
+@media(max-width:700px){
+    .container{
+        width:min(100% - 26px,1180px);
+    }
+
+    .hero{
+        padding-top:35px;
+    }
+
+    .hero h1{
+        letter-spacing:-2px;
+    }
+
+    .grid-2,
+    .grid-3{
+        grid-template-columns:1fr;
+    }
+
+    .grid-4{
+        grid-template-columns:1fr;
+    }
+
+    section{
+        padding:30px 0;
+    }
+
+    .card{
+        padding:19px;
+    }
+
+    .lab{
+        padding:18px;
+    }
+
+    .flow{
+        flex-direction:column;
+    }
+
+    .flow-arrow{
+        transform:rotate(90deg);
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="scrollProgress"></div>
+
+<!-- =========================
+     MOBILE HEADER
+========================= -->
+
+<header class="mobile-header">
+    <div class="mobile-brand">ZENSUS</div>
+    <button class="menu-btn" id="menuBtn">☰</button>
+</header>
+
+<!-- =========================
+     SIDEBAR
+========================= -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="logo">
+        <div class="logo-mark">Z</div>
+        <div class="logo-text">ZEN<span>SUS</span></div>
+    </div>
+
+    <div class="course-label">SQL Mastery</div>
+
+    <ul class="lesson-nav">
+
+        <li>
+            <a href="lesson1.html">
+                <span class="lesson-number">01</span>
+                Introduction to SQL
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson2.html">
+                <span class="lesson-number">02</span>
+                Database Fundamentals
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson3.html">
+                <span class="lesson-number">03</span>
+                CREATE
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson4.html">
+                <span class="lesson-number">04</span>
+                INSERT
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson5.html">
+                <span class="lesson-number">05</span>
+                SELECT
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson6.html">
+                <span class="lesson-number">06</span>
+                WHERE
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson7.html">
+                <span class="lesson-number">07</span>
+                ORDER BY
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson8.html">
+                <span class="lesson-number">08</span>
+                GROUP BY
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson9.html">
+                <span class="lesson-number">09</span>
+                Aggregate Functions
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson10.html" class="active">
+                <span class="lesson-number">10</span>
+                JOINS
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson11.html">
+                <span class="lesson-number">11</span>
+                Subqueries
+            </a>
+        </li>
+
+        <li>
+            <a href="lesson12.html">
+                <span class="lesson-number">12</span>
+                Constraints
+            </a>
+        </li>
+
+    </ul>
+
+    <div class="sidebar-bottom">
+        <a href="#quiz">🧠 Quiz</a>
+        <a href="#interview">🎯 Interview Prep</a>
+        <a href="#checklist">✅ Checklist</a>
+    </div>
+
+</aside>
+
+<!-- =========================
+     MAIN
+========================= -->
+
+<main class="main">
+
+<div class="container">
+
+<!-- =========================
+     HERO
+========================= -->
+
+<section class="hero reveal">
+
+    <div class="breadcrumb">
+        SQL Mastery &nbsp;›&nbsp; Lesson 10 &nbsp;›&nbsp;
+        <span>JOINS</span>
+    </div>
+
+    <div class="hero-grid">
+
+        <div>
+
+            <div class="badge">
+                SQL • LESSON 10
+            </div>
+
+            <h1>
+                Master <span>JOINS</span>
+            </h1>
+
+            <p class="hero-subtitle">
+                Learn how SQL combines rows from multiple tables using
+                relationships, keys and matching conditions — from beginner
+                fundamentals to advanced interview-level queries.
+            </p>
+
+            <div class="hero-meta">
+                <span class="meta-pill">Beginner → Advanced</span>
+                <span class="meta-pill">7 Join Concepts</span>
+                <span class="meta-pill">Interactive Lab</span>
+                <span class="meta-pill">Interview Ready</span>
+            </div>
+
+        </div>
+
+        <div class="hero-code">
+
+            <div class="code-dots">
+                <i></i>
+                <i></i>
+                <i></i>
+            </div>
+
+<pre><code><span class="sql-keyword">SELECT</span>
+    s.name,
+    d.department_name
+<span class="sql-keyword">FROM</span> students s
+
+<span class="sql-keyword">INNER JOIN</span> departments d
+    <span class="sql-keyword">ON</span> s.department_id = d.department_id;
+
+<span class="sql-comment">-- Combine related tables</span></code></pre>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     OBJECTIVES
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">01 • Learning Goals</div>
+        <h2>What you will master</h2>
+        <p>
+            By the end of this lesson, you should be able to combine,
+            analyze and troubleshoot data stored across multiple tables.
+        </p>
+    </div>
+
+    <div class="card">
+
+        <ul class="objective-list">
+
+            <li>
+                <span class="check">✓</span>
+                Understand why relational databases split data into multiple tables.
+            </li>
+
+            <li>
+                <span class="check">✓</span>
+                Understand primary keys and foreign keys in joins.
+            </li>
+
+            <li>
+                <span class="check">✓</span>
+                Write INNER, LEFT, RIGHT and FULL OUTER JOIN queries.
+            </li>
+
+            <li>
+                <span class="check">✓</span>
+                Understand CROSS JOIN and SELF JOIN.
+            </li>
+
+            <li>
+                <span class="check">✓</span>
+                Combine three or more tables safely.
+            </li>
+
+            <li>
+                <span class="check">✓</span>
+                Understand ON vs WHERE.
+            </li>
+
+            <li>
+                <span class="check">✓</span>
+                Handle NULL values and unmatched records.
+            </li>
+
+            <li>
+                <span class="check">✓</span>
+                Avoid duplicate rows and accidental Cartesian products.
+            </li>
+
+            <li>
+                <span class="check">✓</span>
+                Build real-world multi-table SQL queries.
+            </li>
+
+        </ul>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     WHY JOINS?
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">02 • Foundation</div>
+        <h2>Why do we need JOINs?</h2>
+        <p>
+            Real databases rarely store everything inside one giant table.
+            Related information is normally separated into multiple tables.
+        </p>
+    </div>
+
+    <div class="grid-3">
+
+        <div class="info-card">
+            <div class="icon-box">👨‍🎓</div>
+            <h3>Students</h3>
+            <p>
+                Stores student information such as student ID, name and
+                department ID.
+            </p>
+        </div>
+
+        <div class="info-card">
+            <div class="icon-box">🏢</div>
+            <h3>Departments</h3>
+            <p>
+                Stores department information such as department ID and
+                department name.
+            </p>
+        </div>
+
+        <div class="info-card">
+            <div class="icon-box">📚</div>
+            <h3>Courses</h3>
+            <p>
+                Stores courses independently while relationships connect
+                students and courses.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="callout">
+
+        <strong>Core idea</strong>
+
+        <p>
+            A JOIN allows SQL to retrieve related information from multiple
+            tables by comparing values between columns.
+        </p>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     RELATIONSHIP
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">03 • Relationships</div>
+        <h2>Primary Key + Foreign Key</h2>
+        <p>
+            Most relational joins are based on a relationship between keys.
+        </p>
+    </div>
+
+    <div class="grid-2">
+
+        <div class="card">
+
+            <h3>Students</h3>
+
+            <div class="table-wrap" style="margin-top:15px">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>student_id</th>
+                            <th>name</th>
+                            <th>department_id</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>101</td>
+                            <td>Ravi</td>
+                            <td>10</td>
+                        </tr>
+
+                        <tr>
+                            <td>102</td>
+                            <td>Anu</td>
+                            <td>20</td>
+                        </tr>
+
+                        <tr>
+                            <td>103</td>
+                            <td>Rahul</td>
+                            <td>10</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="callout success">
+
+                <strong>Foreign Key</strong>
+
+                <p>
+                    students.department_id references the department table.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Departments</h3>
+
+            <div class="table-wrap" style="margin-top:15px">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>department_id</th>
+                            <th>department_name</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>10</td>
+                            <td>CSE</td>
+                        </tr>
+
+                        <tr>
+                            <td>20</td>
+                            <td>ECE</td>
+                        </tr>
+
+                        <tr>
+                            <td>30</td>
+                            <td>EEE</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="callout">
+
+                <strong>Primary Key</strong>
+
+                <p>
+                    departments.department_id uniquely identifies each department.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     BASIC SYNTAX
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">04 • Syntax</div>
+        <h2>Basic JOIN syntax</h2>
+    </div>
+
+    <div class="code-box">
+
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+
+<pre><code>SELECT columns
+FROM table1
+JOIN table2
+    ON table1.common_column = table2.common_column;</code></pre>
+
+    </div>
+
+    <div class="grid-2">
+
+        <div class="card">
+
+            <h3>FROM</h3>
+
+            <p>
+                Specifies the starting table for the query.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>JOIN</h3>
+
+            <p>
+                Specifies the table that should be combined with the current result.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>ON</h3>
+
+            <p>
+                Defines the matching condition between the tables.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>SELECT</h3>
+
+            <p>
+                Determines which columns should appear in the final result.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     FLOWCHART
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">05 • Query Flow</div>
+        <h2>How a JOIN works</h2>
+    </div>
+
+    <div class="flow">
+
+        <div class="flow-node primary">
+            SQL Query
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+            FROM Table
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+            JOIN Table
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+            ON Condition
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+            Matching Logic
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node primary">
+            Result
+        </div>
+
+    </div>
+
+    <div class="callout">
+
+        <strong>Important</strong>
+
+        <p>
+            JOIN does not simply place two tables side by side.
+            SQL determines which rows should be related according to
+            the JOIN condition and the type of JOIN.
+        </p>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     INNER JOIN
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">06 • Join Type #1</div>
+        <h2>INNER JOIN</h2>
+        <p>
+            Returns only rows that have matching values in both tables.
+        </p>
+    </div>
+
+    <div class="card">
+
+        <div class="code-box">
+
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+
+<pre><code>SELECT
+    s.name,
+    d.department_name
+FROM students s
+INNER JOIN departments d
+    ON s.department_id = d.department_id;</code></pre>
+
+        </div>
+
+        <div class="callout success">
+
+            <strong>Result</strong>
+
+            <p>
+                Only students whose department_id matches a department_id
+                in the departments table are returned.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="join-visual">
+
+        <div class="visual-table">
+
+            <div class="visual-title">Students</div>
+
+            <div class="visual-row match">
+                <span>Ravi</span>
+                <span>10</span>
+            </div>
+
+            <div class="visual-row match">
+                <span>Anu</span>
+                <span>20</span>
+            </div>
+
+            <div class="visual-row no-match">
+                <span>Kiran</span>
+                <span>40</span>
+            </div>
+
+        </div>
+
+        <div class="join-symbol pulse">∩</div>
+
+        <div class="visual-table">
+
+            <div class="visual-title">Departments</div>
+
+            <div class="visual-row match">
+                <span>10</span>
+                <span>CSE</span>
+            </div>
+
+            <div class="visual-row match">
+                <span>20</span>
+                <span>ECE</span>
+            </div>
+
+            <div class="visual-row no-match">
+                <span>30</span>
+                <span>EEE</span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="callout">
+
+        <strong>Think: intersection</strong>
+
+        <p>
+            INNER JOIN behaves conceptually like finding the overlapping
+            matching rows between the two tables.
+        </p>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     LEFT JOIN
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">07 • Join Type #2</div>
+        <h2>LEFT JOIN / LEFT OUTER JOIN</h2>
+
+        <p>
+            Returns every row from the left table and matching rows from
+            the right table.
+        </p>
+
+    </div>
+
+    <div class="code-box">
+
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+
+<pre><code>SELECT
+    s.name,
+    d.department_name
+FROM students s
+LEFT JOIN departments d
+    ON s.department_id = d.department_id;</code></pre>
+
+    </div>
+
+    <div class="callout warning">
+
+        <strong>What happens when there is no match?</strong>
+
+        <p>
+            The left-table row remains in the result, while columns from
+            the right table become NULL.
+        </p>
+
+    </div>
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Department ID</th>
+                    <th>Department</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>Ravi</td>
+                    <td>10</td>
+                    <td>CSE</td>
+                </tr>
+
+                <tr>
+                    <td>Anu</td>
+                    <td>20</td>
+                    <td>ECE</td>
+                </tr>
+
+                <tr>
+                    <td>Kiran</td>
+                    <td>40</td>
+                    <td>NULL</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     RIGHT JOIN
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">08 • Join Type #3</div>
+        <h2>RIGHT JOIN / RIGHT OUTER JOIN</h2>
+
+        <p>
+            Returns every row from the right table and matching rows from
+            the left table.
+        </p>
+
+    </div>
+
+    <div class="code-box">
+
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+
+<pre><code>SELECT
+    s.name,
+    d.department_name
+FROM students s
+RIGHT JOIN departments d
+    ON s.department_id = d.department_id;</code></pre>
+
+    </div>
+
+    <div class="callout">
+
+        <strong>Easy way to remember</strong>
+
+        <p>
+            LEFT JOIN → keep everything from the left table.<br>
+            RIGHT JOIN → keep everything from the right table.
+        </p>
+
+    </div>
+
+    <div class="callout warning">
+
+        <strong>Practical tip</strong>
+
+        <p>
+            Many developers prefer LEFT JOIN because you can often rewrite
+            a RIGHT JOIN by swapping the table order, making queries easier
+            to read consistently.
+        </p>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     FULL OUTER
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">09 • Join Type #4</div>
+        <h2>FULL OUTER JOIN</h2>
+
+        <p>
+            Returns matching rows plus unmatched rows from both tables.
+        </p>
+
+    </div>
+
+    <div class="code-box">
+
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+
+<pre><code>SELECT
+    s.name,
+    d.department_name
+FROM students s
+FULL OUTER JOIN departments d
+    ON s.department_id = d.department_id;</code></pre>
+
+    </div>
+
+    <div class="grid-3">
+
+        <div class="info-card">
+            <div class="icon-box">←</div>
+            <h3>Left-only rows</h3>
+            <p>
+                Students with no matching department can still appear.
+            </p>
+        </div>
+
+        <div class="info-card">
+            <div class="icon-box">↔</div>
+            <h3>Matching rows</h3>
+            <p>
+                Rows whose join keys match appear together.
+            </p>
+        </div>
+
+        <div class="info-card">
+            <div class="icon-box">→</div>
+            <h3>Right-only rows</h3>
+            <p>
+                Departments with no matching student can still appear.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="callout warning">
+
+        <strong>Database compatibility</strong>
+
+        <p>
+            FULL OUTER JOIN is not supported directly by every database
+            system. Some systems require alternative techniques such as
+            combining LEFT JOIN and RIGHT JOIN with UNION.
+        </p>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     CROSS JOIN
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">10 • Join Type #5</div>
+        <h2>CROSS JOIN</h2>
+
+        <p>
+            Produces every possible combination of rows from two tables.
+        </p>
+
+    </div>
+
+    <div class="code-box">
+
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+
+<pre><code>SELECT
+    s.name,
+    c.course_name
+FROM students s
+CROSS JOIN courses c;</code></pre>
+
+    </div>
+
+    <div class="callout danger">
+
+        <strong>Cartesian Product</strong>
+
+        <p>
+            If table A contains 100 rows and table B contains 50 rows,
+            a CROSS JOIN can produce 100 × 50 = 5,000 combinations.
+        </p>
+
+    </div>
+
+    <div class="card">
+
+        <h3>Example</h3>
+
+        <div class="table-wrap" style="margin-top:15px">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Students</th>
+                        <th>Courses</th>
+                        <th>Combinations</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>3</td>
+                        <td>2</td>
+                        <td>6</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     SELF JOIN
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">11 • Join Type #6</div>
+        <h2>SELF JOIN</h2>
+
+        <p>
+            A table can be joined with itself when rows in the same table
+            have relationships with other rows.
+        </p>
+
+    </div>
+
+    <div class="code-box">
+
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+
+<pre><code>SELECT
+    e.employee_name AS employee,
+    m.employee_name AS manager
+FROM employees e
+LEFT JOIN employees m
+    ON e.manager_id = m.employee_id;</code></pre>
+
+    </div>
+
+    <div class="callout success">
+
+        <strong>Real-world examples</strong>
+
+        <p>
+            Employee → Manager, Category → Parent Category,
+            Person → Parent, Employee → Mentor.
+        </p>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     JOIN TYPE COMPARISON
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">12 • Comparison</div>
+        <h2>All major JOIN types at a glance</h2>
+    </div>
+
+    <div class="grid-3">
+
+        <div class="info-card join-type-card">
+            <div class="type-number">01</div>
+            <h3>INNER JOIN</h3>
+            <p>Only matching rows from both tables.</p>
+            <span class="join-badge">MATCH ONLY</span>
+        </div>
+
+        <div class="info-card join-type-card">
+            <div class="type-number">02</div>
+            <h3>LEFT JOIN</h3>
+            <p>All left rows + matching right rows.</p>
+            <span class="join-badge">KEEP LEFT</span>
+        </div>
+
+        <div class="info-card join-type-card">
+            <div class="type-number">03</div>
+            <h3>RIGHT JOIN</h3>
+            <p>All right rows + matching left rows.</p>
+            <span class="join-badge">KEEP RIGHT</span>
+        </div>
+
+        <div class="info-card join-type-card">
+            <div class="type-number">04</div>
+            <h3>FULL OUTER JOIN</h3>
+            <p>All rows from both tables.</p>
+            <span class="join-badge">KEEP BOTH</span>
+        </div>
+
+        <div class="info-card join-type-card">
+            <div class="type-number">05</div>
+            <h3>CROSS JOIN</h3>
+            <p>Every combination of rows.</p>
+            <span class="join-badge">CARTESIAN</span>
+        </div>
+
+        <div class="info-card join-type-card">
+            <div class="type-number">06</div>
+            <h3>SELF JOIN</h3>
+            <p>A table joined to itself.</p>
+            <span class="join-badge">SAME TABLE</span>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     TABLE ALIASES
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">13 • Professional SQL</div>
+        <h2>Table aliases</h2>
+        <p>
+            Aliases make multi-table queries shorter and easier to read.
+        </p>
+    </div>
+
+    <div class="code-box">
+
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+
+<pre><code>SELECT
+    s.name,
+    d.department_name
+FROM students AS s
+JOIN departments AS d
+    ON s.department_id = d.department_id;</code></pre>
+
+    </div>
+
+    <div class="callout">
+
+        <strong>Why aliases matter</strong>
+
+        <p>
+            When multiple tables contain columns with the same name,
+            table aliases remove ambiguity.
+        </p>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     ON VS WHERE
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">14 • Critical Concept</div>
+        <h2>ON vs WHERE</h2>
+        <p>
+            One of the most important concepts for writing correct JOIN queries.
+        </p>
+    </div>
+
+    <div class="grid-2">
+
+        <div class="card">
+
+            <h3>ON</h3>
+
+            <p>
+                Defines how rows from the tables are matched.
+            </p>
+
+            <div class="code-box">
+
+<pre><code>JOIN departments d
+ON s.department_id = d.department_id</code></pre>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <h3>WHERE</h3>
+
+            <p>
+                Filters the resulting rows according to a condition.
+            </p>
+
+            <div class="code-box">
+
+<pre><code>WHERE s.marks &gt; 80</code></pre>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="callout danger">
+
+        <strong>LEFT JOIN trap</strong>
+
+        <p>
+            Moving a condition from ON to WHERE can change a LEFT JOIN
+            into behavior that resembles an INNER JOIN by filtering out
+            rows containing NULLs from the right side.
+        </p>
+
+    </div>
+
+    <div class="code-box">
+
+<pre><code><span class="sql-comment">-- Keeps students even when their department is missing</span>
+
+SELECT s.name, d.department_name
+FROM students s
+LEFT JOIN departments d
+    ON s.department_id = d.department_id
+    AND d.department_name = 'CSE';</code></pre>
+
+    </div>
+
+    <div class="code-box">
+
+<pre><code><span class="sql-comment">-- WHERE removes rows where d.department_name is NULL</span>
+
+SELECT s.name, d.department_name
+FROM students s
+LEFT JOIN departments d
+    ON s.department_id = d.department_id
+WHERE d.department_name = 'CSE';</code></pre>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     MULTIPLE JOINS
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">15 • Advanced</div>
+        <h2>Joining three or more tables</h2>
+
+        <p>
+            Real applications commonly combine several related tables.
+        </p>
+
+    </div>
+
+    <div class="code-box">
+
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+
+<pre><code>SELECT
+    s.name,
+    d.department_name,
+    c.course_name
+FROM students s
+
+JOIN departments d
+    ON s.department_id = d.department_id
+
+JOIN courses c
+    ON s.course_id = c.course_id;</code></pre>
+
+    </div>
+
+    <div class="flow">
+
+        <div class="flow-node">Students</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node primary">Departments</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Courses</div>
+
+    </div>
+
+    <div class="callout">
+
+        <strong>Professional habit</strong>
+
+        <p>
+            Give every table a clear alias and qualify important columns.
+            This prevents ambiguous-column errors and makes complex queries
+            easier to maintain.
+        </p>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     DUPLICATES
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">16 • Critical Debugging</div>
+        <h2>Why can JOIN create duplicate rows?</h2>
+    </div>
+
+    <div class="card">
+
+        <p>
+            A JOIN does not guarantee one output row for every row in the
+            first table. If one row matches multiple rows in the second
+            table, multiple result rows can be produced.
+        </p>
+
+    </div>
+
+    <div class="code-box">
+
+<pre><code>SELECT
+    d.department_name,
+    s.name
+FROM departments d
+JOIN students s
+    ON d.department_id = s.department_id;</code></pre>
+
+    </div>
+
+    <div class="callout warning">
+
+        <strong>One-to-many relationship</strong>
+
+        <p>
+            One department may contain many students. Therefore, the
+            department information can appear repeatedly — once for each
+            matching student.
+        </p>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     MANY TO MANY
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">17 • Database Design</div>
+        <h2>Many-to-many relationships</h2>
+
+        <p>
+            A many-to-many relationship is commonly implemented using a
+            junction/bridge table.
+        </p>
+
+    </div>
+
+    <div class="grid-3">
+
+        <div class="info-card">
+            <h3>Students</h3>
+            <p>
+                student_id, name
+            </p>
+        </div>
+
+        <div class="info-card">
+            <h3>Enrollments</h3>
+            <p>
+                student_id, course_id
+            </p>
+        </div>
+
+        <div class="info-card">
+            <h3>Courses</h3>
+            <p>
+                course_id, course_name
+            </p>
+        </div>
+
+    </div>
+
+    <div class="code-box">
+
+<pre><code>SELECT
+    s.name,
+    c.course_name
+FROM students s
+JOIN enrollments e
+    ON s.student_id = e.student_id
+JOIN courses c
+    ON e.course_id = c.course_id;</code></pre>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     NULL
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">18 • NULL Handling</div>
+        <h2>JOINs and NULL values</h2>
+    </div>
+
+    <div class="callout">
+
+        <strong>Remember</strong>
+
+        <p>
+            NULL does not mean zero, empty string or false.
+            It represents missing/unknown information.
+        </p>
+
+    </div>
+
+    <div class="code-box">
+
+<pre><code>SELECT
+    s.name,
+    d.department_name
+FROM students s
+LEFT JOIN departments d
+    ON s.department_id = d.department_id
+WHERE d.department_id IS NULL;</code></pre>
+
+    </div>
+
+    <p>
+        This is a useful pattern for finding students who do not have
+        a matching department.
+    </p>
+
+</section>
+
+<!-- =========================
+     FIND UNMATCHED
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">19 • Practical Pattern</div>
+        <h2>Find records without a match</h2>
+    </div>
+
+    <div class="code-box">
+
+<pre><code>SELECT s.*
+FROM students s
+LEFT JOIN departments d
+    ON s.department_id = d.department_id
+WHERE d.department_id IS NULL;</code></pre>
+
+    </div>
+
+    <div class="callout success">
+
+        <strong>Interview pattern</strong>
+
+        <p>
+            LEFT JOIN + WHERE right_table.key IS NULL is a common way
+            to identify records in the left table that have no matching
+            record in the right table.
+        </p>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     JOIN + AGGREGATE
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">20 • Advanced SQL</div>
+        <h2>JOIN + GROUP BY + Aggregate</h2>
+    </div>
+
+    <div class="code-box">
+
+<pre><code>SELECT
+    d.department_name,
+    COUNT(s.student_id) AS student_count
+FROM departments d
+LEFT JOIN students s
+    ON d.department_id = s.department_id
+GROUP BY d.department_id, d.department_name
+ORDER BY student_count DESC;</code></pre>
+
+    </div>
+
+    <div class="callout">
+
+        <strong>What does this query do?</strong>
+
+        <p>
+            It counts students in each department while still showing
+            departments that currently have zero students.
+        </p>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     JOIN + ORDER BY
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">21 • Combining Concepts</div>
+        <h2>JOIN + ORDER BY</h2>
+    </div>
+
+    <div class="code-box">
+
+<pre><code>SELECT
+    s.name,
+    s.marks,
+    d.department_name
+FROM students s
+JOIN departments d
+    ON s.department_id = d.department_id
+ORDER BY s.marks DESC;</code></pre>
+
+    </div>
+
+    <p>
+        The JOIN combines the information first conceptually, while
+        ORDER BY determines the requested result ordering.
+    </p>
+
+</section>
+
+<!-- =========================
+     JOIN + CASE
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">22 • Advanced Pattern</div>
+        <h2>JOIN with CASE</h2>
+    </div>
+
+    <div class="code-box">
+
+<pre><code>SELECT
+    s.name,
+    d.department_name,
+    CASE
+        WHEN s.marks &gt;= 90 THEN 'Excellent'
+        WHEN s.marks &gt;= 75 THEN 'Good'
+        ELSE 'Needs Improvement'
+    END AS performance
+FROM students s
+JOIN departments d
+    ON s.department_id = d.department_id;</code></pre>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     INTERACTIVE LAB
+========================= -->
+
+<section id="lab" class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">23 • Interactive Lab</div>
+        <h2>JOIN Explorer</h2>
+        <p>
+            Experiment with different JOIN types and watch how the result changes.
+        </p>
+    </div>
+
+    <div class="lab">
+
+        <div class="lab-header">
+
+            <div>
+                <h3>SQL JOIN Simulator</h3>
+                <p>
+                    Browser simulation using a small in-memory dataset.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="control-group">
+
+            <button
+                class="control-btn active"
+                data-join="INNER"
+                onclick="runJoin('INNER',this)">
+                INNER JOIN
+            </button>
+
+            <button
+                class="control-btn"
+                data-join="LEFT"
+                onclick="runJoin('LEFT',this)">
+                LEFT JOIN
+            </button>
+
+            <button
+                class="control-btn"
+                data-join="RIGHT"
+                onclick="runJoin('RIGHT',this)">
+                RIGHT JOIN
+            </button>
+
+            <button
+                class="control-btn"
+                data-join="FULL"
+                onclick="runJoin('FULL',this)">
+                FULL JOIN
+            </button>
+
+        </div>
+
+        <div class="lab-output">
+
+            <div class="lab-query" id="labQuery"></div>
+
+            <div style="overflow-x:auto">
+
+                <table class="lab-table">
+
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Department ID</th>
+                            <th>Department</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="labBody"></tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     REAL WORLD EXAMPLES
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">24 • Real World</div>
+        <h2>JOINs in real applications</h2>
+    </div>
+
+    <div class="grid-3">
+
+        <div class="info-card">
+            <div class="icon-box">🛒</div>
+            <h3>E-Commerce</h3>
+            <p>
+                customers → orders → order_items → products
+            </p>
+        </div>
+
+        <div class="info-card">
+            <div class="icon-box">🏥</div>
+            <h3>Hospital</h3>
+            <p>
+                patients → appointments → doctors
+            </p>
+        </div>
+
+        <div class="info-card">
+            <div class="icon-box">🎓</div>
+            <h3>Education</h3>
+            <p>
+                students → enrollments → courses
+            </p>
+        </div>
+
+        <div class="info-card">
+            <div class="icon-box">🏦</div>
+            <h3>Banking</h3>
+            <p>
+                customers → accounts → transactions
+            </p>
+        </div>
+
+        <div class="info-card">
+            <div class="icon-box">🚕</div>
+            <h3>Transport</h3>
+            <p>
+                passengers → bookings → drivers
+            </p>
+        </div>
+
+        <div class="info-card">
+            <div class="icon-box">💼</div>
+            <h3>Company</h3>
+            <p>
+                employees → departments → managers
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     COMMON MISTAKES
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">25 • Debugging</div>
+        <h2>Common JOIN mistakes</h2>
+    </div>
+
+    <div class="grid-2">
+
+        <div class="mistake">
+            <div class="mistake-number">1</div>
+            <div>
+                <h4>Missing ON condition</h4>
+                <p>
+                    Can create a huge Cartesian product or incorrect result.
+                </p>
+            </div>
+        </div>
+
+        <div class="mistake">
+            <div class="mistake-number">2</div>
+            <div>
+                <h4>Joining the wrong columns</h4>
+                <p>
+                    Always verify the relationship between the keys.
+                </p>
+            </div>
+        </div>
+
+        <div class="mistake">
+            <div class="mistake-number">3</div>
+            <div>
+                <h4>Using INNER JOIN when LEFT JOIN is required</h4>
+                <p>
+                    INNER JOIN removes unmatched left-side rows.
+                </p>
+            </div>
+        </div>
+
+        <div class="mistake">
+            <div class="mistake-number">4</div>
+            <div>
+                <h4>Filtering a LEFT JOIN incorrectly</h4>
+                <p>
+                    A WHERE condition on the right table can remove NULL rows.
+                </p>
+            </div>
+        </div>
+
+        <div class="mistake">
+            <div class="mistake-number">5</div>
+            <div>
+                <h4>Ignoring duplicate rows</h4>
+                <p>
+                    One-to-many relationships naturally produce multiple rows.
+                </p>
+            </div>
+        </div>
+
+        <div class="mistake">
+            <div class="mistake-number">6</div>
+            <div>
+                <h4>Not using aliases</h4>
+                <p>
+                    Large JOIN queries become difficult to read and debug.
+                </p>
+            </div>
+        </div>
+
+        <div class="mistake">
+            <div class="mistake-number">7</div>
+            <div>
+                <h4>Accidental CROSS JOIN</h4>
+                <p>
+                    Missing relationship conditions can multiply row counts.
+                </p>
+            </div>
+        </div>
+
+        <div class="mistake">
+            <div class="mistake-number">8</div>
+            <div>
+                <h4>Assuming every database supports every JOIN syntax</h4>
+                <p>
+                    RIGHT/FULL OUTER JOIN support and syntax can vary by DBMS.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     PERFORMANCE
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">26 • Performance</div>
+        <h2>JOIN performance fundamentals</h2>
+    </div>
+
+    <div class="grid-3">
+
+        <div class="info-card">
+            <div class="icon-box">⚡</div>
+            <h3>Index join keys</h3>
+            <p>
+                Appropriate indexes can make joins substantially faster,
+                especially on large tables.
+            </p>
+        </div>
+
+        <div class="info-card">
+            <div class="icon-box">🎯</div>
+            <h3>Filter intelligently</h3>
+            <p>
+                Reduce unnecessary rows before expensive operations when
+                the query and optimizer benefit from it.
+            </p>
+        </div>
+
+        <div class="info-card">
+            <div class="icon-box">📊</div>
+            <h3>Inspect the plan</h3>
+            <p>
+                Use your database's EXPLAIN/EXPLAIN PLAN tools to understand
+                how the optimizer executes the query.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="callout warning">
+
+        <strong>Important</strong>
+
+        <p>
+            Do not assume an index automatically makes every JOIN fast.
+            Database engines consider table sizes, statistics, indexes,
+            selectivity and available execution strategies.
+        </p>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     LOGICAL QUERY ORDER
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">27 • Mental Model</div>
+        <h2>Logical query processing order</h2>
+
+        <p>
+            SQL is written in one order but is conceptually processed in another.
+        </p>
+
+    </div>
+
+    <div class="flow">
+
+        <div class="flow-node primary">FROM</div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">JOIN / ON</div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">WHERE</div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">GROUP BY</div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">HAVING</div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">SELECT</div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">DISTINCT</div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">ORDER BY</div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node primary">LIMIT</div>
+
+    </div>
+
+    <div class="callout">
+
+        <strong>Important distinction</strong>
+
+        <p>
+            This is a logical/conceptual processing model, not a promise
+            about the database engine's physical execution order.
+            The optimizer may choose a different physical plan.
+        </p>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     EXAM 5 MARK
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">28 • Exam Preparation</div>
+        <h2>5-Mark Answer — SQL JOIN</h2>
+    </div>
+
+    <div class="card">
+
+        <h3>Define SQL JOIN and explain its types.</h3>
+
+        <p style="margin-top:12px;color:#475569">
+
+            A SQL JOIN is used to combine related rows from two or more
+            tables based on a related column or condition. JOINs are
+            essential in relational databases because information is
+            commonly distributed across normalized tables.
+
+        </p>
+
+        <p style="margin-top:12px;color:#475569">
+
+            The major JOIN types are INNER JOIN, LEFT JOIN, RIGHT JOIN,
+            FULL OUTER JOIN, CROSS JOIN and SELF JOIN.
+
+        </p>
+
+        <p style="margin-top:12px;color:#475569">
+
+            INNER JOIN returns matching rows. LEFT JOIN returns all rows
+            from the left table and matching rows from the right table.
+            RIGHT JOIN does the opposite. FULL OUTER JOIN returns rows
+            from both sides, including unmatched rows. CROSS JOIN returns
+            every possible combination, while SELF JOIN joins a table
+            with itself.
+
+        </p>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     EXAM 10 MARK
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">29 • Long Answer</div>
+        <h2>10-Mark Answer Structure</h2>
+    </div>
+
+    <div class="card">
+
+        <ol style="padding-left:22px;color:#475569">
+
+            <li>Definition of JOIN</li>
+            <li>Need for JOINs in relational databases</li>
+            <li>Primary key and foreign key relationship</li>
+            <li>Basic JOIN syntax</li>
+            <li>INNER JOIN with example</li>
+            <li>LEFT JOIN with example</li>
+            <li>RIGHT JOIN with example</li>
+            <li>FULL OUTER JOIN with example</li>
+            <li>CROSS JOIN with example</li>
+            <li>SELF JOIN with example</li>
+            <li>ON versus WHERE</li>
+            <li>Advantages and practical applications</li>
+
+        </ol>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     INTERVIEW QUESTIONS
+========================= -->
+
+<section id="interview" class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">30 • Interview Preparation</div>
+        <h2>JOIN interview questions</h2>
+    </div>
+
+    <details>
+        <summary>1. What is a JOIN?</summary>
+        <p>
+            A JOIN combines rows from multiple tables according to a
+            matching condition.
+        </p>
+    </details>
+
+    <details>
+        <summary>2. INNER JOIN vs LEFT JOIN?</summary>
+        <p>
+            INNER JOIN returns only matching rows. LEFT JOIN keeps every
+            row from the left table and adds matching right-side data.
+        </p>
+    </details>
+
+    <details>
+        <summary>3. What happens when LEFT JOIN has no match?</summary>
+        <p>
+            The left-side row remains, while selected columns from the
+            right table are NULL.
+        </p>
+    </details>
+
+    <details>
+        <summary>4. What is a SELF JOIN?</summary>
+        <p>
+            A SELF JOIN joins a table to itself, typically using different
+            aliases for the two logical copies of the table.
+        </p>
+    </details>
+
+    <details>
+        <summary>5. What is a CROSS JOIN?</summary>
+        <p>
+            CROSS JOIN returns the Cartesian product — every row from the
+            first table combined with every row from the second table.
+        </p>
+    </details>
+
+    <details>
+        <summary>6. Why are aliases useful?</summary>
+        <p>
+            They shorten queries and remove ambiguity when several tables
+            contain columns with the same names.
+        </p>
+    </details>
+
+    <details>
+        <summary>7. Can JOIN be used with GROUP BY?</summary>
+        <p>
+            Yes. A JOIN can combine related tables and GROUP BY can then
+            aggregate the resulting rows.
+        </p>
+    </details>
+
+    <details>
+        <summary>8. Can a query have multiple JOINs?</summary>
+        <p>
+            Yes. A query can join three, four or many related tables,
+            provided the relationships and conditions are correctly defined.
+        </p>
+    </details>
+
+    <details>
+        <summary>9. Why can a JOIN produce duplicate rows?</summary>
+        <p>
+            If a row on one side matches multiple rows on the other side,
+            SQL returns a row for each matching combination.
+        </p>
+    </details>
+
+    <details>
+        <summary>10. What is the difference between ON and WHERE?</summary>
+        <p>
+            ON defines how tables are matched. WHERE filters rows from
+            the resulting query. With outer joins, moving conditions
+            between them can change the result.
+        </p>
+    </details>
+
+</section>
+
+<!-- =========================
+     QUIZ
+========================= -->
+
+<section id="quiz" class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">31 • Knowledge Check</div>
+        <h2>SQL JOIN Quiz</h2>
+    </div>
+
+    <div class="quiz-card">
+
+        <div class="question">
+            1. Which JOIN returns only matching rows?
+        </div>
+
+        <label class="option">
+            <input type="radio" name="q1" value="wrong">
+            LEFT JOIN
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q1" value="correct">
+            INNER JOIN
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q1" value="wrong">
+            CROSS JOIN
+        </label>
+
+    </div>
+
+    <div class="quiz-card" style="margin-top:15px">
+
+        <div class="question">
+            2. Which JOIN keeps every row from the left table?
+        </div>
+
+        <label class="option">
+            <input type="radio" name="q2" value="correct">
+            LEFT JOIN
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q2" value="wrong">
+            INNER JOIN
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q2" value="wrong">
+            CROSS JOIN
+        </label>
+
+    </div>
+
+    <div class="quiz-card" style="margin-top:15px">
+
+        <div class="question">
+            3. Which JOIN can produce every possible combination?
+        </div>
+
+        <label class="option">
+            <input type="radio" name="q3" value="wrong">
+            INNER JOIN
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q3" value="correct">
+            CROSS JOIN
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q3" value="wrong">
+            LEFT JOIN
+        </label>
+
+    </div>
+
+    <div class="quiz-card" style="margin-top:15px">
+
+        <div class="question">
+            4. Which clause normally defines how two tables are matched?
+        </div>
+
+        <label class="option">
+            <input type="radio" name="q4" value="correct">
+            ON
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q4" value="wrong">
+            ORDER BY
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q4" value="wrong">
+            SELECT
+        </label>
+
+    </div>
+
+    <div class="quiz-card" style="margin-top:15px">
+
+        <div class="question">
+            5. What does SELF JOIN mean?
+        </div>
+
+        <label class="option">
+            <input type="radio" name="q5" value="wrong">
+            Joining two databases
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q5" value="correct">
+            Joining a table with itself
+        </label>
+
+        <label class="option">
+            <input type="radio" name="q5" value="wrong">
+            Joining only primary keys
+        </label>
+
+    </div>
+
+    <button
+        onclick="checkQuiz()"
+        style="
+            margin-top:18px;
+            border:0;
+            background:#4f46e5;
+            color:white;
+            padding:12px 18px;
+            border-radius:10px;
+            cursor:pointer;
+            font-weight:800;
+        ">
+        Check Answers
+    </button>
+
+    <div class="quiz-result" id="quizResult"></div>
+
+</section>
+
+<!-- =========================
+     PRACTICE
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">32 • Practice</div>
+        <h2>Hands-on challenges</h2>
+    </div>
+
+    <div class="grid-2">
+
+        <div class="card">
+            <h3>Challenge 1</h3>
+            <p>
+                Display every student with their department name.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Challenge 2</h3>
+            <p>
+                Display all departments, including departments that have
+                no students.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Challenge 3</h3>
+            <p>
+                Find students whose department does not exist.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Challenge 4</h3>
+            <p>
+                Count students in every department.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Challenge 5</h3>
+            <p>
+                Display employees together with their managers using SELF JOIN.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Challenge 6</h3>
+            <p>
+                Display every student and every course combination using
+                CROSS JOIN.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     MINI PROJECT
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">33 • Mini Project</div>
+        <h2>Student Academic Dashboard</h2>
+        <p>
+            Build a multi-table query system using JOINs.
+        </p>
+    </div>
+
+    <div class="card">
+
+        <h3>Database design</h3>
+
+        <div class="flow">
+
+            <div class="flow-node">Students</div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-node primary">Enrollments</div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-node">Courses</div>
+
+            <div class="flow-arrow">→</div>
+
+            <div class="flow-node">Departments</div>
+
+        </div>
+
+        <h3 style="margin-top:20px">
+            Required features
+        </h3>
+
+        <ul style="padding-left:22px;color:#475569;margin-top:10px">
+
+            <li>Show each student with department.</li>
+
+            <li>Show courses taken by each student.</li>
+
+            <li>Count students in each department.</li>
+
+            <li>Find students without enrollments.</li>
+
+            <li>Find courses without students.</li>
+
+            <li>Sort students by marks.</li>
+
+            <li>Display manager information using SELF JOIN.</li>
+
+        </ul>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     RAPID REVISION
+========================= -->
+
+<section class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">34 • Rapid Revision</div>
+        <h2>JOIN cheat sheet</h2>
+    </div>
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>JOIN</th>
+                    <th>Remember</th>
+                    <th>Main use</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>INNER JOIN</td>
+                    <td>Matching rows</td>
+                    <td>Only related records</td>
+                </tr>
+
+                <tr>
+                    <td>LEFT JOIN</td>
+                    <td>Keep left</td>
+                    <td>Find missing related data</td>
+                </tr>
+
+                <tr>
+                    <td>RIGHT JOIN</td>
+                    <td>Keep right</td>
+                    <td>Right-side preservation</td>
+                </tr>
+
+                <tr>
+                    <td>FULL OUTER JOIN</td>
+                    <td>Keep both</td>
+                    <td>Matched + unmatched</td>
+                </tr>
+
+                <tr>
+                    <td>CROSS JOIN</td>
+                    <td>Every combination</td>
+                    <td>Cartesian product</td>
+                </tr>
+
+                <tr>
+                    <td>SELF JOIN</td>
+                    <td>Same table</td>
+                    <td>Hierarchies / relationships</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     CHECKLIST
+========================= -->
+
+<section id="checklist" class="reveal">
+
+    <div class="section-heading">
+        <div class="eyebrow">35 • Completion</div>
+        <h2>Lesson 10 Checklist</h2>
+        <p>
+            Your progress is saved locally in this browser.
+        </p>
+    </div>
+
+    <div class="checklist">
+
+        <label class="check-item">
+            <input type="checkbox" data-check="join1">
+            <span>I understand why JOINs are required.</span>
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="join2">
+            <span>I understand primary keys and foreign keys.</span>
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="join3">
+            <span>I can write INNER JOIN.</span>
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="join4">
+            <span>I can write LEFT JOIN.</span>
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="join5">
+            <span>I understand RIGHT and FULL OUTER JOIN.</span>
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="join6">
+            <span>I understand CROSS JOIN.</span>
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="join7">
+            <span>I can use SELF JOIN.</span>
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="join8">
+            <span>I understand ON vs WHERE.</span>
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="join9">
+            <span>I can join three or more tables.</span>
+        </label>
+
+        <label class="check-item">
+            <input type="checkbox" data-check="join10">
+            <span>I completed the JOIN challenges.</span>
+        </label>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     NEXT LESSON
+========================= -->
+
+<section class="reveal">
+
+    <div class="card"
+         style="
+            background:linear-gradient(135deg,#eef2ff,#faf5ff);
+            border-color:#c7d2fe;
+         ">
+
+        <div class="eyebrow">NEXT UP</div>
+
+        <h2 style="margin-top:5px">
+            Lesson 11 — Subqueries
+        </h2>
+
+        <p style="color:#64748b;margin-top:8px">
+            After mastering JOINs, learn how queries can be nested inside
+            other queries to solve more advanced SQL problems.
+        </p>
+
+    </div>
+
+</section>
+
+</div>
+
+<!-- =========================
+     FOOTER
+========================= -->
+
+<footer>
+
+    <div class="container footer-inner">
+
+        <div>
+            <div class="footer-brand">
+                ZEN<span>SUS</span>
+            </div>
+
+            <p>
+                Direction before destination.
+            </p>
+        </div>
+
+        <div>
+            <p>
+                SQL Mastery • Lesson 10
+            </p>
+
+            <p>
+                JOINs • Relationships • Query Design
+            </p>
+        </div>
+
+    </div>
+
+</footer>
+
+</main>
+
+<script>
+/* =========================================================
+   ZENSUS SQL LESSON 10 — JAVASCRIPT
+========================================================= */
+
+/* =========================
+   MOBILE SIDEBAR
+========================= */
+
+const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.getElementById("sidebar");
+
+menuBtn.addEventListener("click", function(){
+
+    sidebar.classList.toggle("open");
+
+});
+
+/* Close sidebar when a link is clicked */
+
+document.querySelectorAll(".lesson-nav a").forEach(function(link){
+
+    link.addEventListener("click",function(){
+
+        sidebar.classList.remove("open");
+
+    });
+
+});
+
+/* =========================
+   SCROLL PROGRESS
+========================= */
+
+window.addEventListener("scroll",function(){
+
+    const scrollTop =
+        document.documentElement.scrollTop ||
+        document.body.scrollTop;
+
+    const scrollHeight =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+
+    const progress =
+        scrollHeight > 0
+        ? (scrollTop / scrollHeight) * 100
+        : 0;
+
+    document.getElementById("scrollProgress").style.width =
+        progress + "%";
+
+});
+
+/* =========================
+   REVEAL ANIMATION
+========================= */
+
+const revealElements =
+    document.querySelectorAll(".reveal");
+
+const revealObserver =
+    new IntersectionObserver(
+        function(entries){
+
+            entries.forEach(function(entry){
+
+                if(entry.isIntersecting){
+
+                    entry.target.classList.add("animate");
+
+                }
+
+            });
+
+        },
+        {
+            threshold:.08
+        }
+    );
+
+revealElements.forEach(function(el){
+
+    revealObserver.observe(el);
+
+});
+
+/* =========================
+   COPY CODE
+========================= */
+
+function copyCode(button){
+
+    const codeBox = button.parentElement;
+    const code = codeBox.querySelector("code").innerText;
+
+    navigator.clipboard.writeText(code)
+        .then(function(){
+
+            button.innerText = "Copied!";
+
+            setTimeout(function(){
+
+                button.innerText = "Copy";
+
+            },1500);
+
+        })
+        .catch(function(){
+
+            button.innerText = "Select";
+
+        });
+
+}
+
+/* =========================
+   JOIN LAB DATA
+========================= */
+
+const students = [
+
+    {
+        name:"Ravi",
+        department_id:10
+    },
+
+    {
+        name:"Anu",
+        department_id:20
+    },
+
+    {
+        name:"Kiran",
+        department_id:40
+    },
+
+    {
+        name:"Meena",
+        department_id:10
+    }
+
+];
+
+const departments = [
+
+    {
+        department_id:10,
+        department_name:"CSE"
+    },
+
+    {
+        department_id:20,
+        department_name:"ECE"
+    },
+
+    {
+        department_id:30,
+        department_name:"EEE"
+    }
+
+];
+
+/* =========================
+   RUN JOIN
+========================= */
+
+function runJoin(type,button){
+
+    document
+        .querySelectorAll(".control-btn")
+        .forEach(function(btn){
+
+            btn.classList.remove("active");
+
+        });
+
+    button.classList.add("active");
+
+    let result = [];
+
+    if(type === "INNER"){
+
+        students.forEach(function(student){
+
+            const dept =
+                departments.find(function(d){
+
+                    return d.department_id === student.department_id;
+
+                });
+
+            if(dept){
+
+                result.push({
+
+                    name:student.name,
+
+                    department_id:student.department_id,
+
+                    department_name:dept.department_name
+
+                });
+
+            }
+
+        });
+
+    }
+
+    if(type === "LEFT"){
+
+        students.forEach(function(student){
+
+            const dept =
+                departments.find(function(d){
+
+                    return d.department_id === student.department_id;
+
+                });
+
+            result.push({
+
+                name:student.name,
+
+                department_id:student.department_id,
+
+                department_name:
+                    dept ? dept.department_name : "NULL"
+
+            });
+
+        });
+
+    }
+
+    if(type === "RIGHT"){
+
+        departments.forEach(function(dept){
+
+            const matches =
+                students.filter(function(student){
+
+                    return student.department_id === dept.department_id;
+
+                });
+
+            if(matches.length === 0){
+
+                result.push({
+
+                    name:"NULL",
+
+                    department_id:dept.department_id,
+
+                    department_name:dept.department_name
+
+                });
+
+            }else{
+
+                matches.forEach(function(student){
+
+                    result.push({
+
+                        name:student.name,
+
+                        department_id:dept.department_id,
+
+                        department_name:dept.department_name
+
+                    });
+
+                });
+
+            }
+
+        });
+
+    }
+
+    if(type === "FULL"){
+
+        const usedDepartments = new Set();
+
+        students.forEach(function(student){
+
+            const dept =
+                departments.find(function(d){
+
+                    return d.department_id === student.department_id;
+
+                });
+
+            if(dept){
+
+                usedDepartments.add(dept.department_id);
+
+            }
+
+            result.push({
+
+                name:student.name,
+
+                department_id:student.department_id,
+
+                department_name:
+                    dept ? dept.department_name : "NULL"
+
+            });
+
+        });
+
+        departments.forEach(function(dept){
+
+            if(!usedDepartments.has(dept.department_id)){
+
+                result.push({
+
+                    name:"NULL",
+
+                    department_id:dept.department_id,
+
+                    department_name:dept.department_name
+
+                });
+
+            }
+
+        });
+
+    }
+
+    renderLab(result,type);
+
+}
+
+/* =========================
+   RENDER LAB
+========================= */
+
+function renderLab(rows,type){
+
+    const body =
+        document.getElementById("labBody");
+
+    const query =
+        document.getElementById("labQuery");
+
+    const queries = {
+
+        INNER:
+`SELECT s.name, s.department_id, d.department_name
+FROM students s
+INNER JOIN departments d
+    ON s.department_id = d.department_id;`,
+
+        LEFT:
+`SELECT s.name, s.department_id, d.department_name
+FROM students s
+LEFT JOIN departments d
+    ON s.department_id = d.department_id;`,
+
+        RIGHT:
+`SELECT s.name, s.department_id, d.department_name
+FROM students s
+RIGHT JOIN departments d
+    ON s.department_id = d.department_id;`,
+
+        FULL:
+`SELECT s.name, s.department_id, d.department_name
+FROM students s
+FULL OUTER JOIN departments d
+    ON s.department_id = d.department_id;`
+
+    };
+
+    query.innerText = queries[type];
+
+    body.innerHTML = "";
+
+    rows.forEach(function(row){
+
+        const tr =
+            document.createElement("tr");
+
+        tr.classList.add("row-animate");
+
+        tr.innerHTML = `
+            <td>${row.name}</td>
+            <td>${row.department_id}</td>
+            <td>${row.department_name}</td>
+        `;
+
+        body.appendChild(tr);
+
+    });
+
+}
+
+/* Initialize */
+
+const firstJoinButton =
+    document.querySelector('[data-join="INNER"]');
+
+runJoin("INNER",firstJoinButton);
+
+/* =========================
+   QUIZ
+========================= */
+
+function checkQuiz(){
+
+    const questions = ["q1","q2","q3","q4","q5"];
+
+    let score = 0;
+
+    questions.forEach(function(question){
+
+        const selected =
+            document.querySelector(
+                'input[name="' + question + '"]:checked'
+            );
+
+        if(selected && selected.value === "correct"){
+
+            score++;
+
+        }
+
+    });
+
+    const result =
+        document.getElementById("quizResult");
+
+    let message = "";
+
+    if(score === 5){
+
+        message =
+            "🔥 Perfect! 5/5 — You have mastered the JOIN fundamentals.";
+
+    }else if(score >= 3){
+
+        message =
+            "👏 Good job! " + score +
+            "/5 — Review the JOIN types once more.";
+
+    }else{
+
+        message =
+            "📚 Score: " + score +
+            "/5 — Revisit the JOIN sections and try again.";
+
+    }
+
+    result.innerText = message;
+
+}
+
+/* =========================
+   CHECKLIST LOCAL STORAGE
+========================= */
+
+const checkboxes =
+    document.querySelectorAll(
+        '.check-item input[type="checkbox"]'
+    );
+
+checkboxes.forEach(function(box){
+
+    const key = "zensus_" + box.dataset.check;
+
+    const saved =
+        localStorage.getItem(key);
+
+    if(saved === "true"){
+
+        box.checked = true;
+
+        box.parentElement.classList.add("done");
+
+    }
+
+    box.addEventListener("change",function(){
+
+        localStorage.setItem(
+            key,
+            box.checked
+        );
+
+        box.parentElement.classList.toggle(
+            "done",
+            box.checked
+        );
+
+    });
+
+});
+
+/* =========================
+   ACTIVE NAV ON SCROLL
+========================= */
+
+const currentLesson =
+    document.querySelector(
+        '.lesson-nav a[href="lesson10.html"]'
+    );
+
+if(currentLesson){
+
+    currentLesson.classList.add("active");
+
+}
+
+/* =========================
+   KEYBOARD ACCESSIBILITY
+========================= */
+
+document.addEventListener("keydown",function(event){
+
+    if(event.key === "Escape"){
+
+        sidebar.classList.remove("open");
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>
